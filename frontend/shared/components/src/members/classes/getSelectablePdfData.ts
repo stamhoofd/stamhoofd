@@ -1,20 +1,8 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AccessRight, FinancialSupportSettings, Gender, Group, GroupType, Organization, Parent, ParentTypeHelper, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, getGenderName, Group, GroupType, Organization, Parent, ParentTypeHelper, Platform, PlatformMember, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
-
-// todo: make reusable?
-function formatGender(gender: Gender) {
-    switch (gender) {
-        case Gender.Male:
-            return $t(`f972abd4-de1e-484b-b7da-ad4c75d37808`);
-        case Gender.Female:
-            return $t(`e21f499d-1078-4044-be5d-6693d2636699`);
-        default:
-            return $t(`60f13ba4-c6c9-4388-9add-43a996bf6bee`);
-    }
-}
 
 function returnNullIfNoAccessRightFactory(auth: ContextPermissions) {
     return <T extends SelectableColumn>(column: T, requiresAccessRights: AccessRight[]): T | null => {
@@ -85,7 +73,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             enabled: false,
             name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
-                formatGender(object.details.gender),
+                getGenderName(object.details.gender),
         }),
         new SelectablePdfData<PlatformMember>({
             id: 'phone',

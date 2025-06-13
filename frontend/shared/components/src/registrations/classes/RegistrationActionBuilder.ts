@@ -619,7 +619,6 @@ export class RegistrationActionBuilder {
             platform: this.platform,
             organizations: this.organizations,
             groups: this.groups,
-            context: this.context,
             present: this.present,
         });
     }

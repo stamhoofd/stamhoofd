@@ -21,7 +21,6 @@ import DeleteView from '../../views/DeleteView.vue';
 import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFamilyManager';
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
-import { getSelectablePdfDocument } from './getPdfDocuments';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
@@ -624,7 +623,6 @@ export class MemberActionBuilder {
             platform: this.platform,
             organizations: this.organizations,
             groups: this.groups,
-            context: this.context,
             present: this.present,
         });
     }
@@ -807,25 +805,16 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
     });
 }
 
-export async function presentExportMembersToPdf({ members, platform, organizations, groups, present, context }: { members: PlatformMember[]; platform: Platform; organizations: Organization[]; groups: Group[]; present: ReturnType<typeof usePresent>; context: SessionContext }) {
-    const selectableDocument = getSelectablePdfDocument({ platform, organization: organizations.length === 1 ? organizations[0] : null, groups, auth: context.auth });
-
-    const group = groups.length === 1 ? groups[0] : undefined;
-
-    let documentTitle = $t('Samenvatting');
-
-    if (group) {
-        documentTitle += ' ' + group.settings.name;
-    }
-
+export async function presentExportMembersToPdf({ members, platform, organizations, groups, present }: { members: PlatformMember[]; platform: Platform; organizations: Organization[]; groups: Group[]; present: ReturnType<typeof usePresent> }) {
     await present({
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(MembersPdfExportView, {
-                    selectableDocument,
+                    platform,
+                    organization: organizations.length === 1 ? organizations[0] : null,
+                    groups,
                     configurationId: 'members',
                     items: members,
-                    documentTitle,
                 }),
             }),
         ],

@@ -1,4 +1,4 @@
-import { PdfDocumentFilter, PdfItemFilter } from '@stamhoofd/structures';
+import { SelectablePdfDataFilter, SelectablePdfSheetFilter } from '@stamhoofd/structures';
 import { SelectablePdfData } from './SelectablePdfData';
 
 export class SelectablePdfSheet<T> {
@@ -6,7 +6,6 @@ export class SelectablePdfSheet<T> {
     readonly name: string;
     readonly description: string;
     readonly items: SelectablePdfData<T>[] = [];
-    private withCategoryRow: boolean = true;
 
     constructor(data: {
         id: string;
@@ -16,36 +15,24 @@ export class SelectablePdfSheet<T> {
         columnCount?: number;
     }) {
         Object.assign(this, data);
-
-        if (!this.items.find(c => c.category)) {
-            this.withCategoryRow = false;
-        }
     }
 
-    from(filter: PdfDocumentFilter): void {
+    from(filter: SelectablePdfSheetFilter): void {
         this.disableAll();
-        this.withCategoryRow = false;
 
-        for (const { id, category } of filter.items) {
+        for (const { id } of filter.items) {
             const item = this.items.find(i => i.id === id);
             if (item) {
                 item.enabled = true;
             }
-
-            if (category !== undefined && category !== null) {
-                this.withCategoryRow = true;
-            }
         }
     }
 
-    getFilter(): PdfDocumentFilter {
-        return PdfDocumentFilter.create({
+    getFilter(): SelectablePdfSheetFilter {
+        return SelectablePdfSheetFilter.create({
             id: this.id,
-            name: this.name,
-            items: this.items.filter(c => c.enabled).map(c => (PdfItemFilter.create({
+            items: this.items.filter(c => c.enabled).map(c => (SelectablePdfDataFilter.create({
                 id: c.id,
-                name: c.name,
-                category: this.withCategoryRow ? (c.category ?? '') : null,
             }))),
         });
     }

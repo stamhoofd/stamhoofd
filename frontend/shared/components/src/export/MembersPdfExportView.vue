@@ -4,7 +4,7 @@
             {{ $t('Exporteren naar PDF') }}
         </h1>
 
-        <ScrollableSegmentedControl v-if="selectableDocument.size> 1" v-model="visibleDocument" :items="selectableDocument.sheets">
+        <ScrollableSegmentedControl v-model="visibleDocument" :items="selectableDocument.sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
@@ -24,27 +24,62 @@
 
 <script lang="ts" setup>
 import { Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { ErrorBox, ScrollableSegmentedControl, useErrors } from '@stamhoofd/components';
+import { ErrorBox, ScrollableSegmentedControl, useAuth, useErrors } from '@stamhoofd/components';
 import { Storage } from '@stamhoofd/networking';
-import { PdfDocumentsFilter, PlatformMember, Version } from '@stamhoofd/structures';
+import { Group, Organization, Platform, PlatformMember, SelectablePdfDocumentFilter, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
+import { getAllSelectablePdfDataForMemberDetails, getAllSelectablePdfDataForSummary } from '../members/classes/getSelectablePdfData';
 import DataSelector from './DataSelector.vue';
 import { MembersPdfDocument } from './members/MembersPdfDocument';
 import { SelectablePdfDocument } from './SelectablePdfDocument';
+import { SelectablePdfSheet } from './SelectablePdfSheet';
 
 const props = defineProps<{
-    documentTitle: string;
-    selectableDocument: SelectablePdfDocument<PlatformMember>;
+    platform: Platform;
+    organization: Organization | null;
+    groups: Group[];
     configurationId: string; // How to store the filters for easy reuse
     items: PlatformMember[];
 }>();
 
 const exporting = ref(false);
 const errors = useErrors();
+const auth = useAuth();
 
 const STORAGE_FILTER_KEY = 'pdf-filter-' + props.configurationId;
 
-const visibleDocument = ref(props.selectableDocument.sheets[0]);
+const memberDetailsSheet = new SelectablePdfSheet({
+    id: 'member-details',
+    name: $t('Kenmerken per lid'),
+    description: $t('Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid.'),
+    items: getAllSelectablePdfDataForMemberDetails({
+        platform: props.platform,
+        organization: props.organization,
+        groups: props.groups,
+        auth,
+    }),
+});
+
+const membersSummarySheet = new SelectablePdfSheet({
+    id: 'member-summary',
+    name: $t('Leden oplijsten per categorie'),
+    description: $t('Je kan ook leden oplijsten per categorie, eventueel met extra opmerkingen erbij (bv. bij aanvinkvakjes met opmerkingen).'),
+    items: getAllSelectablePdfDataForSummary({
+        platform: props.platform,
+        organization: props.organization,
+        groups: props.groups,
+        auth,
+    }),
+});
+
+const selectableDocument = new SelectablePdfDocument({
+    sheets: [
+        memberDetailsSheet,
+        membersSummarySheet,
+    ],
+});
+
+const visibleDocument = ref(selectableDocument.sheets[0]);
 
 onMounted(async () => {
     // Load from storage
@@ -53,12 +88,12 @@ onMounted(async () => {
 
         if (savedFilter) {
             const decodedJson = JSON.parse(savedFilter);
-            const decoder = new VersionBoxDecoder(PdfDocumentsFilter as Decoder<PdfDocumentsFilter>);
+            const decoder = new VersionBoxDecoder(SelectablePdfDocumentFilter as Decoder<SelectablePdfDocumentFilter>);
             const filter = decoder.decode(new ObjectData(decodedJson, { version: 0 }));
 
             if (filter) {
                 console.log('Loaded filter', filter);
-                props.selectableDocument.from(filter.data);
+                selectableDocument.from(filter.data);
             }
         }
     }
@@ -68,7 +103,7 @@ onMounted(async () => {
 });
 
 async function saveFilter() {
-    const filter = props.selectableDocument.getFilter();
+    const filter = selectableDocument.getFilter();
     const encoded = new VersionBox(filter).encode({ version: Version });
 
     try {
@@ -99,22 +134,18 @@ async function startExport() {
 }
 
 async function doExport() {
-    // todo: refactor
-    // todo: maybe make generic?
-    const memberDetailsDocument = props.selectableDocument.sheets[0];
-    if (!memberDetailsDocument) {
-        return;
-    }
+    const group = props.groups.length === 1 ? props.groups[0] : undefined;
 
-    const membersSummaryDocument = props.selectableDocument.sheets[1];
-    if (!membersSummaryDocument) {
-        return;
+    let documentTitle = $t('Samenvatting');
+
+    if (group) {
+        documentTitle += ' ' + group.settings.name;
     }
 
     const document = new MembersPdfDocument(props.items,
-        memberDetailsDocument,
-        membersSummaryDocument,
-        props.documentTitle);
+        memberDetailsSheet,
+        membersSummarySheet,
+        documentTitle);
 
     try {
         await document.download();

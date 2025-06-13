@@ -1,4 +1,4 @@
-import { PdfDocumentsFilter } from '@stamhoofd/structures';
+import { SelectablePdfDocumentFilter } from '@stamhoofd/structures';
 import { SelectablePdfSheet } from './SelectablePdfSheet';
 
 export class SelectablePdfDocument<T> {
@@ -16,22 +16,22 @@ export class SelectablePdfDocument<T> {
         this.sheets.forEach(d => d.disableAll());
     }
 
-    from(filter: PdfDocumentsFilter): void {
+    from(filter: SelectablePdfDocumentFilter): void {
         this.disableAll();
 
-        for (const documentFilter of filter.documents) {
-            const document = this.sheets.find(document => document.id === documentFilter.id);
-            if (!document) {
+        for (const sheetsFilter of filter.sheets) {
+            const sheet = this.sheets.find(document => document.id === sheetsFilter.id);
+            if (!sheet) {
                 continue;
             }
 
-            document.from(documentFilter);
+            sheet.from(sheetsFilter);
         }
     }
 
-    getFilter(): PdfDocumentsFilter {
-        return PdfDocumentsFilter.create({
-            documents: this.sheets.flatMap((document) => {
+    getFilter(): SelectablePdfDocumentFilter {
+        return SelectablePdfDocumentFilter.create({
+            sheets: this.sheets.flatMap((document) => {
                 if (!document.enabled) {
                     return [];
                 }
