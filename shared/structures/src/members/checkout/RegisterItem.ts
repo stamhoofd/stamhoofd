@@ -839,6 +839,13 @@ export class RegisterItem implements ObjectWithRecords {
             }
             return this.group.settings.startDate;
         }
+
+        // If the group is 'active', we'll use the current date, otherwise we always take the start date of the group
+        if (this.group.settings.endDate < new Date()) {
+            // Group is not active anymore, so we use the start date
+            return this.group.settings.startDate;
+        }
+
         let startDate = Formatter.luxon(new Date());
         startDate = startDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
         return new Date(Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()));
