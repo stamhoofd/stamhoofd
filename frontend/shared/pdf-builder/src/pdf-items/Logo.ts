@@ -7,27 +7,24 @@ import { PdfItem } from '../PdfItem';
 export class Logo implements PdfItem {
     constructor(private readonly options: {
         src: PDFKit.Mixins.ImageSrc;
-        /**
-         * The width of the logo
-         */
-        width: number;
+        imageOptions: PDFKit.Mixins.ImageOption & { width: number };
     }) {
     }
 
     draw(docWrapper: PdfDocWrapper): void {
         const doc = docWrapper.doc;
-        const { src, width } = this.options;
+        const { src, imageOptions } = this.options;
         const margins = docWrapper.safeMargins;
 
-        doc.image(src, doc.page.width - margins.right - width, margins.top, { width });
+        doc.image(src, doc.page.width - margins.right - this.options.imageOptions.width, margins.top, imageOptions);
     }
 
-    getWidth(_docWrapper: PdfDocWrapper): number {
-        return this.options.width;
+    getWidth(_docWrapper: PdfDocWrapper): number | undefined {
+        return this.options.imageOptions.width;
     }
 
     getHeight(_docWrapper: PdfDocWrapper): number {
         // todo?
-        return 0;
+        return this.options.imageOptions.height ?? 0;
     }
 }
