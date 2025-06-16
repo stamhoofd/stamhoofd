@@ -541,16 +541,16 @@ export function useAuditLogUIFilterBuilders() {
 //
 function getCartFilterBuilder(webshop: Webshop) {
     return new GroupUIFilterBuilder({
-        name: $t(`Winkelmandje`),
-        description: $t('Filter op bestellingen die minstens één artikel in het winkelmandje hebben die aan deze voorwaarden voldoet'),
+        name: $t(`ab3e4560-a403-4a20-8dab-c76eb74794cc`),
+        description: $t('bca39843-792e-4e94-b1e9-a9fcf2908d05'),
         builders: [
             new NumberFilterBuilder({
-                name: $t(`Aantal stuks`),
+                name: $t(`f2931d71-6e65-4b80-8c44-ac1cc328c2bd`),
                 type: NumberFilterFormat.Number,
                 key: 'amount',
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`Artikel`),
+                name: $t(`bc0d5675-c4e8-48d8-ba51-557e7a95690f`),
                 options: webshop.products.map((product) => {
                     return new MultipleChoiceUIFilterOption(product.name, product.id);
                 }),
@@ -563,7 +563,7 @@ function getCartFilterBuilder(webshop: Webshop) {
                 },
             }),
             ...webshop.products.filter(product => product.prices.length > 1).map(product => new MultipleChoiceFilterBuilder({
-                name: product.name + ' (' + $t('tarieven') + ')',
+                name: product.name + ' (' + $t('db51d1ac-29aa-46f6-a77e-29a4f66ca74b') + ')',
                 options: product.prices.map((price) => {
                     return new MultipleChoiceUIFilterOption(price.name, price.id);
                 }),
@@ -595,7 +595,7 @@ export function useCheckoutInMemoryFilterBuilders() {
         if (webshop.meta.checkoutMethods.length > 1) {
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t(`Afhaal/leveringsmethode`),
+                    name: $t(`d241c647-1fd2-4ce4-8356-3891abca19e9`),
                     options: webshop.meta.checkoutMethods.map((method) => {
                         return new MultipleChoiceUIFilterOption(method.typeName + ': ' + method.name, method.id);
                     }),

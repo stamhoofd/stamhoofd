@@ -36,7 +36,7 @@
             <div class="container">
                 <h1 class="style-navigation-title with-icons">
                     {{ title }}
-                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('Geen internetverbinding. Klik om te herladen.')" type="button" class="button icon earth-off red" @click="refreshOnline" />
+                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('02e77c23-5f98-44fb-86f5-ff9d511af299')" type="button" class="button icon earth-off red" @click="refreshOnline" />
                     <span v-if="titleSuffix" class="title-suffix">
                         {{ titleSuffix }}
                     </span>
@@ -114,10 +114,10 @@
             </p>
 
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0 && tableObjectFetcher.objectFetcher.isOffline" class="error-box icon earth-off with-button">
-                {{ $t('Geen internetverbinding') }}
+                {{ $t('5b6de81b-821a-43be-b8dc-be19fc4701f8') }}
 
                 <button class="button text" type="button" @click="refreshOnline">
-                    {{ $t('Opnieuw proberen') }}
+                    {{ $t('891b75ee-e85e-4f9b-9a03-39082d248b87') }}
                 </button>
             </p>
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0" class="info-box">

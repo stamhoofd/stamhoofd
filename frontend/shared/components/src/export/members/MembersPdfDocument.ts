@@ -31,7 +31,7 @@ export class MembersPdfDocument {
                 },
             }),
             // description
-            new DefaultText($t('Bewaar dit document op een veilige plaats en vernietig het na gebruik.'), {
+            new DefaultText($t('5b0672f0-f376-4306-9161-b2b840b723c2'), {
                 spacing: {
                     bottom: mmToPoints(8),
                 },

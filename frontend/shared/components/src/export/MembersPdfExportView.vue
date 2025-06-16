@@ -1,14 +1,14 @@
 <template>
     <SaveView :loading="exporting" save-icon="download" @save="startExport">
         <h1>
-            {{ $t('Exporteren naar PDF') }}
+            {{ $t('9a647173-e10c-43b2-95c3-df882abb0c64') }}
         </h1>
 
         <ScrollableSegmentedControl v-model="visibleDocument" :items="sheets">
             <template #item="{item}">
                 <span>{{ item.name }}</span>
 
-                <span v-if="item.enabledCount === 0" class="icon disabled small" :v-tooltip="$t('Dit document kan niet worden geëxporteerd')" />
+                <span v-if="item.enabledCount === 0" class="icon disabled small" :v-tooltip="$t('a34d3022-7f12-4524-b68f-b484dc9201ae')" />
             </template>
         </ScrollableSegmentedControl>
 
@@ -50,8 +50,8 @@ const STORAGE_FILTER_KEY = 'pdf-filter-' + props.configurationId;
 
 const memberDetailsSheet = new SelectablePdfSheet({
     id: 'member-details',
-    name: $t('Kenmerken per lid'),
-    description: $t('Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid.'),
+    name: $t('afea127c-30ec-4df7-8842-90aca44f9fbf'),
+    description: $t('f287ceb4-a4d4-4c1a-8cfb-eecc8801b7aa'),
     items: getAllSelectablePdfDataForMemberDetails({
         platform: props.platform,
         organization: props.organization,
@@ -62,8 +62,8 @@ const memberDetailsSheet = new SelectablePdfSheet({
 
 const membersSummarySheet = new SelectablePdfSheet({
     id: 'member-summary',
-    name: $t('Leden oplijsten per categorie'),
-    description: $t('Je kan ook leden oplijsten per categorie, eventueel met extra opmerkingen erbij (bv. bij aanvinkvakjes met opmerkingen).'),
+    name: $t('8cb4ddeb-fddc-42d7-9947-e9689ff2e8a3'),
+    description: $t('332e65fb-28b4-4bde-a391-a7b1d3492fe2'),
     items: getAllSelectablePdfDataForSummary({
         platform: props.platform,
         organization: props.organization,
@@ -135,7 +135,7 @@ async function startExport() {
 async function doExport() {
     const group = props.groups.length === 1 ? props.groups[0] : undefined;
 
-    let documentTitle = $t('Samenvatting');
+    let documentTitle = $t('31fdca2d-cec9-4771-b57d-51ba6829f595');
 
     if (group) {
         documentTitle += ' ' + group.settings.name;

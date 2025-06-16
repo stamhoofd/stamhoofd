@@ -578,7 +578,7 @@ export class MemberActionBuilder {
 
     private getExportToExcelAction() {
         return new AsyncTableAction({
-            name: $t('Excel...'),
+            name: $t('b9f2cf39-1f26-4b7c-b949-0474fa9f2f01'),
             priority: 0,
             groupIndex: 0,
             handler: async (selection: TableActionSelection<PlatformMember>) => {
@@ -605,11 +605,11 @@ export class MemberActionBuilder {
 
     private getExportToPdfAction() {
         return new InMemoryTableAction({
-            name: $t('PDF...'),
+            name: $t('3bfdcad4-7201-4b4e-9244-5ec22c6e4ce9'),
             priority: 0,
             groupIndex: 0,
             fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
-                return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
+                return $t('03903ede-4f60-4358-8709-bfc814ee5b17', { count: Formatter.float(count), limit: Formatter.float(limit) });
             } },
             handler: async (members: PlatformMember[]) => {
                 await this.exportToPdf(members);

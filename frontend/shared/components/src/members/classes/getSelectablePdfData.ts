@@ -38,7 +38,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         // todo: only if platform?
         new SelectablePdfData<PlatformMember>({
             id: 'memberNumber',
-            name: $t('Lidnummer'),
+            name: $t('4fdfb042-ccbb-465e-b56c-e1686473e4cc'),
             description: $t(`f4b7e513-6e08-4b46-a3ae-3e4a974f1a3e`),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.memberNumber,
@@ -475,7 +475,7 @@ export function getAllSelectablePdfDataForSummary({ platform, organization, auth
         }), [AccessRight.MemberReadFinancialData]),
         new SelectablePdfData<PlatformMember>({
             id: 'dataPermissions',
-            name: $t('Geen toestemming verzamelen gevoelige gegevens'),
+            name: $t('74956434-5a54-4a93-82df-08533d1a6963'),
             enabled: false,
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.dataPermissions?.value ? null : '',
         }),
@@ -515,7 +515,7 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
                 return [
                     new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.checked`,
-                        name: `${baseName}: ${$t('aangevinkt')}`,
+                        name: `${baseName}: ${$t('e81e0ffa-8ed9-4382-bc07-479728006648')}`,
                         enabled: !preferInverted && !!record.warning,
                         category,
                         getValue: ({ patchedMember: object }: PlatformMember) => {
@@ -527,7 +527,7 @@ function getSelectabelPdfDataFromRecordCatagoryForSummary({ recordCategory, cate
                         },
                     }), new SelectablePdfData<PlatformMember>({
                         id: `${baseId}.notChecked`,
-                        name: `${baseName}: ${$t('niet aangevinkt')}`,
+                        name: `${baseName}: ${$t('8abc595b-a705-499b-b4a2-17cb3cf99e47')}`,
                         enabled: preferInverted && !!record.warning,
                         category,
                         getValue: ({ patchedMember: object }: PlatformMember) => {
