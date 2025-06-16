@@ -63,7 +63,7 @@ const props = withDefaults(defineProps<{
     time?: { hours: number; minutes: number; seconds: number; millisecond?: number } | null;
 }>(), {
     required: true,
-    placeholder: $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`),
+    placeholder: () => $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`),
     min: () => new Date(1900, 0, 1, 0, 0, 0, 0),
     max: () => new Date(2100, 0, 1, 0, 0, 0, 0),
     time: null,

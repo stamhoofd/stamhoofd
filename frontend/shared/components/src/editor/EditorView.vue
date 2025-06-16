@@ -169,9 +169,9 @@ const props = withDefaults(
         loading: false,
         disabled: false,
         title: '',
-        saveText: $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
+        saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
         saveIcon: null,
-        cancelText: $t(`4e1dc79e-b09c-41ec-aa8d-a2d052761bfe`),
+        cancelText: () => $t(`4e1dc79e-b09c-41ec-aa8d-a2d052761bfe`),
         replacements: () => [],
     },
 );
