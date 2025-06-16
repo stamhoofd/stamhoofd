@@ -191,10 +191,6 @@
     "original": "Eenheidsnummer",
     "translation": "Numéro d'unité"
   },
-  "2e5e052c-98b7-4375-b771-05a8913c145b": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements sont effectués. Les paramètres de paiement de cette unité sont alors utilisés et toutes les inscriptions sont enregistrées dans la comptabilité de cette unité.\\n\\nEn outre, l’organisateur définit également les paramètres qui influent sur la collecte de données et d’autres aspects plus subtils."
-  },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de eenheid of persoon die instaat voor de opvang.",
     "translation": "Coordonnées de l'unité ou de la personne responsable de l'accueil."

@@ -21,7 +21,7 @@
         </div>
 
         <hr>
-        <h2>Toepassingsregels</h2>
+        <h2>{{ $t('f9015fbd-7b3f-450b-b54a-25f017bb8d86') }}</h2>
 
         <STInputBox :title="$t('59a2cb2c-8935-42df-afab-6c5995e2cea3')" class="max">
             <STList>

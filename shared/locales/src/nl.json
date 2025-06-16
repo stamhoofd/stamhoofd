@@ -5012,7 +5012,7 @@
   "2b00749a-bd88-4140-a074-79bf08d359fe": "Opgelet, als je een korting wijzigt of toevoegt heeft dit ook gevolgen voor bestaande inschrijvingen die deze korting al hadden gekregen / niet hadden gekregen. Test je kortingen goed uit en lees de beschrijvingen hieronder grondig.",
   "c1ed9e16-70d4-4337-a4e1-ecf31ec00bed": "Geef de bundelkorting een duidelijke en korte naam. Deze naam zal zichtbaar zijn voor leden.",
   "59a2cb2c-8935-42df-afab-6c5995e2cea3": "Geldt de korting ook voor gezinsleden?",
-  "1337c2d7-aec6-4ca9-be43-b211421b772a": "Nee, alleen per invividueel lid",
+  "1337c2d7-aec6-4ca9-be43-b211421b772a": "Nee, alleen per individueel lid",
   "09389428-111c-453b-8ed9-884e4b26fcb3": "Korting geldt alleen bij meerdere inschrijvingen van hetzelfde lid.",
   "cafe0f16-604c-436e-b12e-ef6b0e9d2387": "Bijvoorbeeld: een lid krijgt korting als het zich inschrijft voor meerdere activiteiten of inschrijvingsgroepen.",
   "7bf36754-abf8-40f0-a7f0-70439bbbecac": "Ja, ook voor gezinsleden",
@@ -5125,5 +5125,8 @@
   "e4603a61-7e45-4ca4-99b2-4e4208f127d1": "Als je ook de oudergegevens inschakelt, wordt zowel het rijksregisternummer van het lid als dat van de ouders gevraagd (minstens één ouder).",
   "02e77c23-5f98-44fb-86f5-ff9d511af299": "Geen internetverbinding. Klik om te herladen.",
   "5b6de81b-821a-43be-b8dc-be19fc4701f8": "Geen internetverbinding",
-  "891b75ee-e85e-4f9b-9a03-39082d248b87": "Opnieuw proberen"
+  "891b75ee-e85e-4f9b-9a03-39082d248b87": "Opnieuw proberen",
+  "f9015fbd-7b3f-450b-b54a-25f017bb8d86": "Toepassingsregels",
+  "36817a3d-6e32-40ae-bec5-a3b912f1b65c": "Alles selecteren",
+  "2a50d0e8-bdb9-4016-84be-b0de6e26ca14": "Exporteren naar"
 }

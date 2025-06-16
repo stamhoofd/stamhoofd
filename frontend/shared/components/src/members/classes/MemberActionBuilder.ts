@@ -565,7 +565,7 @@ export class MemberActionBuilder {
 
     private getExportAction() {
         return new MenuTableAction({
-            name: 'Exporteren naar',
+            name: $t('2a50d0e8-bdb9-4016-84be-b0de6e26ca14'),
             icon: 'download',
             priority: 8,
             groupIndex: 3,

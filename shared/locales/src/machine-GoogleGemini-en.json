@@ -15,6 +15,10 @@
     "original": "Ouders",
     "translation": "Parents"
   },
+  "004bab40-945f-4f6d-8316-b0a8f2748f7a": {
+    "original": "Manueel inschrijvingen bijhouden of leden online laten inschrijven.",
+    "translation": "Manually keep track of registrations or allow members to register online."
+  },
   "005c5e2d-8185-46e7-b1a0-4e4eaaf60d41": {
     "original": "het privacybeleid",
     "translation": "the privacy policy"
@@ -199,9 +203,17 @@
     "original": "Oeps, er zijn nog geen inschrijvingsgroepen gemaakt. Ga naar de instellingen en configureer jouw inschrijvingsgroepen.",
     "translation": "Oops, no registration groups have been created yet. Go to the settings and configure your registration groups."
   },
+  "02a33069-e9a3-4477-a55b-e05a627976f1": {
+    "original": "Korting geldt ook als gezinsleden zich inschrijven.",
+    "translation": "Discount also applies if family members register."
+  },
   "02b47907-73e2-4cb2-b398-784f6cbce23a": {
     "original": "Uitbetalingsmededeling",
     "translation": "Payout notification"
+  },
+  "02e77c23-5f98-44fb-86f5-ff9d511af299": {
+    "original": "Geen internetverbinding. Klik om te herladen.",
+    "translation": "No internet connection. Click to reload."
   },
   "02ed38bf-5516-4e5a-b28c-6e73d7cf1009": {
     "original": "Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
@@ -286,6 +298,10 @@
   "0388e538-52e1-421e-baac-6d788adf44d3": {
     "original": "Ben je zeker dat je dit lokaaltype wilt verwijderen?",
     "translation": "Are you sure you want to delete this premise type?"
+  },
+  "03903ede-4f60-4358-8709-bfc814ee5b17": {
+    "original": "Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.",
+    "translation": "You can export a maximum of {limit} members to pdf. {count} members have been selected."
   },
   "039c2f51-c533-4262-91d6-24e4a503b003": {
     "original": "Niet vergrendeld",
@@ -711,6 +727,10 @@
     "original": "Geen toegangsrechten",
     "translation": "No access rights"
   },
+  "09087d69-6c29-447e-8d6c-0b1aac491afc": {
+    "original": "Je kan hiervan afwijken door dit aan te passen bij de instellingen van de leeftijdsgroep of activiteit.",
+    "translation": "You can deviate from this by adjusting this in the settings of the age group or activity."
+  },
   "090e5afe-2d7a-4948-9f3b-56a3fb4919aa": {
     "original": "Verplicht ingeschakeld voor alle leden (behalve wachtlijsten en activiteiten)",
     "translation": "Mandatory enabled for all members (except waiting lists and activities)"
@@ -734,6 +754,10 @@
   "092e12ff-7c47-490a-908f-59a7eb28eaa0": {
     "original": "Leveringsoptie bewerken",
     "translation": "Edit delivery option"
+  },
+  "09389428-111c-453b-8ed9-884e4b26fcb3": {
+    "original": "Korting geldt alleen bij meerdere inschrijvingen van hetzelfde lid.",
+    "translation": "Discount only applies to multiple registrations from the same member."
   },
   "0950002e-2bd7-4451-90f3-34288c48e33b": {
     "original": "Uitnodiging beheerder: bestaande gebruiker",
@@ -783,6 +807,10 @@
     "original": "Extra persoonsgegevens",
     "translation": "Extra personal data"
   },
+  "0a0f4ac1-1b0e-48f0-9f21-d1c77ec3f008": {
+    "original": "Naamloos",
+    "translation": "Untitled"
+  },
   "0a37de09-120b-4bea-8d13-6d7ed6823884": {
     "original": "Adres",
     "translation": "Address"
@@ -826,6 +854,10 @@
   "0ab71307-8f4f-4701-b120-b552a1b6bdd0": {
     "original": "Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.",
     "translation": "Oops, the billing data you tried to select seems to no longer exist. Please reload the page and try again."
+  },
+  "0acc0348-ae29-444b-a93f-5d513247eff6": {
+    "original": "Slechts deel betalen",
+    "translation": "Only partial payment"
   },
   "0ad0ab12-37bf-425e-871c-b91161ee45f8": {
     "original": "Je moet minstens het e-mailadres van een lid of de gegevens van ouders verzamelen. Je kan niet beide uitschakelen.",
@@ -1059,6 +1091,10 @@
     "original": "kredietkaart betaling",
     "translation": "credit card payment"
   },
+  "0e21480d-5597-4337-bcee-5f4eba73fb7e": {
+    "original": "onbekend",
+    "translation": "unknown"
+  },
   "0e276c36-671b-442a-89a0-ad87f5a947f3": {
     "original": "Probeer als eerste nieuwe functies uit die in ontwikkeling zijn.",
     "translation": "Be the first to try out new features under development."
@@ -1130,6 +1166,10 @@
   "0f2e6f48-02a5-47af-8148-2f37af5ba91a": {
     "original": "Handige links",
     "translation": "Useful links"
+  },
+  "0f3a6e76-b5f2-4f92-b4e4-d709dffc1bde": {
+    "original": "bv. Kampkorting broers en zussen",
+    "translation": "e.g. Camp discount siblings"
   },
   "0f3bcf65-6d8d-4ba3-81ff-6b85885eb88f": {
     "original": "Iedereen op wachtlijst",
@@ -1443,9 +1483,17 @@
     "original": "Actie uitvoeren...",
     "translation": "Performing action..."
   },
+  "1337c2d7-aec6-4ca9-be43-b211421b772a": {
+    "original": "Nee, alleen per individueel lid",
+    "translation": "No, only per individual member"
+  },
   "133c6530-b963-48d4-b1a9-fd7a8d286772": {
     "original": "Tekst onder de titel. Leg hier uit wat voor financiële ondersteuning je geeft en wie er gebruik van kan maken. Leg uit dat ze discreet kunnen aanvinken dat ze gebruik willen maken van de ondersteuning.",
     "translation": "Text under the title. Explain here what kind of financial support you give and who can use it. Explain that they can discreetly tick that they want to use the support."
+  },
+  "1363a154-392e-41a2-b18f-938fb72c3ef3": {
+    "original": "Enkel voor tarieven:",
+    "translation": "Only for tariffs:"
   },
   "1363c0ee-0f4b-43f8-a9ee-a2a6091e5d96": {
     "original": "E-mailadressen",
@@ -1899,6 +1947,10 @@
     "original": "Ga naar de volgende",
     "translation": "Go to next"
   },
+  "187d5767-969d-407a-a988-c3a9a831a0a8": {
+    "original": "Je kan een sms naar maximaal {limit} leden sturen. Er zijn {count} leden geselecteerd.",
+    "translation": "You can send an SMS to a maximum of {limit} members. {count} members have been selected."
+  },
   "188bf8f2-69ca-4e29-8f1f-c67a39507a15": {
     "original": "Deze bestellingen werden nog niet betaald",
     "translation": "These orders have not yet been paid"
@@ -2075,6 +2127,10 @@
     "original": "Jouw webshop is bereikbaar via",
     "translation": "Your webshop is accessible via"
   },
+  "1adf61de-d2d5-45bd-a322-304107173992": {
+    "original": "Wijzig bundelkortingen",
+    "translation": "Change bundle discounts"
+  },
   "1ae8cbc7-9ef5-43db-b9a3-0117dfa43be1": {
     "original": "Ja",
     "translation": "Yes"
@@ -2223,6 +2279,10 @@
     "original": "Limieten",
     "translation": "Limits"
   },
+  "1d864313-d956-41b6-b95b-77227297fb0e": {
+    "original": "Hoeveel terugbetalen?",
+    "translation": "How much to refund?"
+  },
   "1d8b2fd0-3e5c-4364-9476-b7b40ca39c50": {
     "original": "Terugbetaalmethode",
     "translation": "Refund method"
@@ -2266,6 +2326,10 @@
   "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
     "original": "Vragenlijst van Stamhoofd",
     "translation": "Questionnaire of Stamhoofd"
+  },
+  "1e050d5b-9e14-41ea-9334-9b11a10eedde": {
+    "original": "Korting niet gevonden",
+    "translation": "Discount not found"
   },
   "1e1637ef-4133-4f30-973d-bd913387961e": {
     "original": "Voltooid",
@@ -2347,9 +2411,17 @@
     "original": "Bestaande leden kunnen meteen inschrijven (tot het maximum). De rest en nieuwe leden kunnen inschrijven op de wachtlijst.",
     "translation": "Existing members can register immediately (up to the maximum). The rest and new members can register on the waiting list."
   },
+  "1eb85876-5ca5-4388-9a1a-bfece589bdcf": {
+    "original": "Hieronder vindt je een overzicht van alle activiteiten en inschrijvingsgroepen waarvoor deze bundelkorting is ingesteld. Je kan dit aanpassen bij de instellingen van de leeftijdsgroep of activiteit.",
+    "translation": "Below you will find an overview of all activities and registration groups for which this bundle discount has been configured. You can adjust this in the settings of the age group or activity."
+  },
   "1ec72626-a767-4f6d-b864-64443633ec98": {
     "original": "Je hebt nog geen kortingscodes aangemaakt voor deze webshop",
     "translation": "You have not yet created any discount codes for this webshop"
+  },
+  "1ece4680-9858-4f37-b6b1-7a3b872d3cd6": {
+    "original": "Onzichtbaar voor leden",
+    "translation": "Invisible to members"
   },
   "1ee738ae-a91d-474e-a495-996bf431126a": {
     "original": "Bevestig dat alle functies zijn toegekend",
@@ -2366,6 +2438,10 @@
   "1f618c07-ec09-4465-b7af-59e30b0c7585": {
     "original": "Tijdzone",
     "translation": "Time zone"
+  },
+  "1f64237b-84c4-43e7-b752-2875fd1eb075": {
+    "original": "Je kan de organisator niet wijzigen als er al inschrijvingen gekoppeld zijn aan deze activiteit. Verwijder dan eerst de inschrijvingen.",
+    "translation": "You cannot change the organiser if there are already registrations connected to this activity. First delete the registrations."
   },
   "1f8620fa-e8a5-4665-99c8-c1907a5b5768": {
     "original": "Niet verzekerd",
@@ -2398,6 +2474,10 @@
   "1ff9f2e7-bf47-4206-bc03-ec43cfc33b65": {
     "original": "Wil je inloggen in het feedback systeem?",
     "translation": "Do you want to log in to the feedback system?"
+  },
+  "200b5e3d-93d1-4c1c-80be-6eb0f2f75793": {
+    "original": "Korting voor hetzelfde lid dat inschrijven voor meerdere inschrijvingsgroepen/activiteiten met deze korting.",
+    "translation": "Discount for the same member registering for multiple registration groups/activities with this discount."
   },
   "200c66f5-c733-4a45-a70c-46f7b74d0798": {
     "original": "Andere opmerking",
@@ -2518,6 +2598,10 @@
   "21a07c40-5565-4ad3-bf7a-ca3237c6bcb0": {
     "original": "Lid inschrijven",
     "translation": "Register member"
+  },
+  "21ae7df0-9833-46e7-9735-ffabf99f8cdd": {
+    "original": "Geannuleerd",
+    "translation": "Cancelled"
   },
   "21b27a40-29f9-4cd7-ab26-76778466a6f1": {
     "original": "Tabel met openstaande bedragen",
@@ -2675,6 +2759,10 @@
     "original": "Er is een fout opgetreden bij het ophalen van de betaalaccounts",
     "translation": "An error occurred while retrieving the payment accounts"
   },
+  "239382e0-0906-4e0f-ba1a-c58574b92e78": {
+    "original": "Code injection",
+    "translation": "Code injection"
+  },
   "239f3ae0-a3c7-4c39-98d8-f2de79539f21": {
     "original": "Bestellen kan vanaf",
     "translation": "Ordering is possible from"
@@ -2698,6 +2786,10 @@
   "241a2f9f-52ab-4e02-a09b-a31ff9ab6cd9": {
     "original": "Voorbeeld item 2",
     "translation": "Example item 2"
+  },
+  "2428a4da-4d23-4ff3-9194-9dbe17134dcc": {
+    "original": "Unieke identificatie van de inschrijving",
+    "translation": "Unique identification of the registration"
   },
   "2437b288-7696-4af3-a688-895b6039eb37": {
     "original": "is verwijderd",
@@ -2755,9 +2847,17 @@
     "original": "Tetanusvaccinatie",
     "translation": "Tetanus vaccination"
   },
+  "24d2a5c1-fcc6-4209-9bd1-12f4e60f6ddc": {
+    "original": "Inschrijvingen verzamelen",
+    "translation": "Collect registrations"
+  },
   "2506b55d-cd6e-42e5-a69d-f0d838bfaad2": {
     "original": "Suggestie",
     "translation": "Suggestion"
+  },
+  "2509e2f2-111f-4eb5-8612-487dd62950a2": {
+    "original": "Bijvoorbeeld: een broer of zus krijgt korting als een ander gezinslid al is ingeschreven.",
+    "translation": "For example: a brother or sister receives a discount if another family member is already registered."
   },
   "2529c09e-f582-486a-b3eb-a8b96d8efa26": {
     "original": "Je hebt geen toegangsrechten de naam van deze vergrendelde categorie te wijzigen.",
@@ -2871,9 +2971,17 @@
     "original": "Momenteel heb je ook bestellingen geselecteerd die geannuleerd zijn. Als je die mee exporteert komen die bestellingen ook in de totalen van de Excel, dat wil je meestal niet.",
     "translation": "Currently you have also selected orders that have been cancelled. If you export them, these orders will also be included in the totals of the Excel, which you usually don't want."
   },
+  "2655c006-55af-47e6-959c-16acdb1917dc": {
+    "original": "Het werkjaar dat je wilt instellen is nog niet gestart",
+    "translation": "The work year you want to configure has not yet started"
+  },
   "2662a425-f996-479b-a1fc-8498f068ea97": {
     "original": "Deze activiteit is enkel zichtbaar voor leden van de organisator.",
     "translation": "This activity is only visible to members of the organiser."
+  },
+  "26667b28-4e39-4218-9f9b-131bf3bae6ab": {
+    "original": "Inschrijvingen activeren",
+    "translation": "Activate registrations"
   },
   "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
     "original": "Zoek een groep waar je {firstName} wilt inschrijven",
@@ -2930,6 +3038,10 @@
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
     "translation": "and not selected for"
+  },
+  "271299b8-7b44-40b8-a4ce-e345abf164cb": {
+    "original": "Van welke groep is deze activiteit?",
+    "translation": "Which group does this activity belong to?"
   },
   "2712befc-5cc5-4013-b8df-ec0861a82c36": {
     "original": "Kies minstens één standaard leeftijdsgroep",
@@ -3087,6 +3199,10 @@
     "original": "Maak een account aan op dit e-mailadres om een wachtwoord in te stellen voor je inlogt.",
     "translation": "Create an account at this email address to set a password before logging in."
   },
+  "28d8fecc-3639-467b-90d5-1ac8e82240df": {
+    "original": "Acties",
+    "translation": "Actions"
+  },
   "28e59971-5697-4463-9dea-91d49a7673e6": {
     "original": "Een leveringsadres is noodzakelijk, herlaad de pagina opnieuw en vul een leveringsadres in.",
     "translation": "A delivery address is required; please reload the page and enter a delivery address."
@@ -3223,6 +3339,10 @@
     "original": "Plaatsen",
     "translation": "Places"
   },
+  "2a44031f-dfa5-45df-824e-ba107d311c13": {
+    "original": "Vul de andere gegevens aan",
+    "translation": "Fill in the other data"
+  },
   "2a4bf4a3-151a-494a-85d8-2d8006fcaef9": {
     "original": "Ticket bekijken",
     "translation": "View ticket"
@@ -3242,6 +3362,10 @@
   "2a7f1944-1da2-4a55-bb1d-981aeed5d29e": {
     "original": "Verkoop",
     "translation": "Sales"
+  },
+  "2a9075bb-a743-411e-8a3d-94e5e57363f0": {
+    "original": "Doorgaan",
+    "translation": "Continue"
   },
   "2a9646b3-81b0-48b0-af74-06bbc4fd6fae": {
     "original": "Gegevens bewerken",
@@ -3283,6 +3407,10 @@
     "original": ". Kies een ander tijdstip indien mogelijk.",
     "translation": ". Please choose another time if possible."
   },
+  "2b00749a-bd88-4140-a074-79bf08d359fe": {
+    "original": "Opgelet, als je een korting wijzigt of toevoegt heeft dit ook gevolgen voor bestaande inschrijvingen die deze korting al hadden gekregen / niet hadden gekregen. Test je kortingen goed uit en lees de beschrijvingen hieronder grondig.",
+    "translation": "Note: if you change or add a discount, this will also affect existing registrations that have already received/not received this discount. Test your discounts thoroughly and read the descriptions below carefully."
+  },
   "2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9": {
     "original": "de verwerkersovereenkomst",
     "translation": "the processor agreement"
@@ -3318,6 +3446,10 @@
   "2bc71d9a-c8d0-4f55-bf68-5dbb896d1f5b": {
     "original": "E-mail",
     "translation": "Email"
+  },
+  "2bd72941-dfeb-48a8-872a-16ef0aff1dc6": {
+    "original": "Enkel op tarief {priceName}",
+    "translation": "Only on tariff {priceName}"
   },
   "2be85b13-52d6-4322-adcc-b491b5749422": {
     "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze vereniging wilt verwijderen?",
@@ -3508,8 +3640,8 @@
     "translation": "Dear {name},"
   },
   "2e5e052c-98b7-4375-b771-05a8913c145b": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\\n\\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "For national activities, you must choose which group will handle all payments. The payment settings of that group will then be used and all registrations will be entered in the accounting of that group.\n\nIn addition, the organiser also determines settings that affect data collection and other more subtle matters."
+    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "For national activities, you must choose which group handles all payments. The payment settings of that group will then be used, and all registrations will be recorded in that group's accounting.\n\nIn addition, the organiser also determines settings that influence data collection and other more subtle matters."
   },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de vereniging of persoon die instaat voor de opvang.",
@@ -3819,6 +3951,10 @@
     "original": "Omlaag verplaatsen",
     "translation": "Move down"
   },
+  "31fdca2d-cec9-4771-b57d-51ba6829f595": {
+    "original": "Samenvatting",
+    "translation": "Summary"
+  },
   "321a898b-ec70-44e3-a511-f2353061cd66": {
     "original": "Op onze website",
     "translation": "On our website"
@@ -3883,9 +4019,17 @@
     "original": "Functies bewerken",
     "translation": "Edit roles"
   },
+  "331da9e3-2c97-4c70-a3d5-aa0ddb9625ad": {
+    "original": "Tabel inschrijvingen",
+    "translation": "Registrations table"
+  },
   "3321ecb9-7600-498f-8ab9-b1625197804a": {
     "original": "Je moet inloggen met hetzelfde e-mailadres als het account dat je probeert te koppelen",
     "translation": "You must log in with the same email address as the account you are trying to link"
+  },
+  "332e65fb-28b4-4bde-a391-a7b1d3492fe2": {
+    "original": "Je kan ook leden oplijsten per categorie, eventueel met extra opmerkingen erbij (bv. bij aanvinkvakjes met opmerkingen).",
+    "translation": "You can also list members per category, optionally with extra comments (e.g. with checkboxes with comments)."
   },
   "3337b645-929a-4c29-ba80-1898dead623d": {
     "original": "Titel",
@@ -3974,6 +4118,10 @@
   "347113ec-87a8-4dd9-88ea-c151e3f066f0": {
     "original": "tot",
     "translation": "until"
+  },
+  "347463a0-1e9a-40fe-996c-d77ba13bc05b": {
+    "original": "Dit werkjaar bestaat niet of is niet gekoppeld aan jouw organisatie.",
+    "translation": "This work year does not exist or is not linked to your organisation."
   },
   "34760087-cbb3-416b-b4ef-212f15fc07a8": {
     "original": "Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (",
@@ -4203,6 +4351,10 @@
     "original": "Alles",
     "translation": "All"
   },
+  "374ffe63-707c-4e33-958b-30c91db2a527": {
+    "original": "Korting geldt alleen bij meerdere inschrijvingen voor dezelfde activiteit.",
+    "translation": "Discount only applies to multiple registrations for the same activity."
+  },
   "3754b38e-3938-4589-801a-450ba0844990": {
     "original": "Instellingen per werkjaar",
     "translation": "Settings per work year"
@@ -4383,6 +4535,10 @@
     "original": "Er is iets misgegaan bij het aanmaken van het lidnummer.",
     "translation": "Something went wrong creating the member number."
   },
+  "3a50492b-087a-4a83-a386-4d30fabbc3c2": {
+    "original": "Reeds aangerekend",
+    "translation": "Already charged"
+  },
   "3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322": {
     "original": "Ticketdatum",
     "translation": "Ticket date"
@@ -4467,6 +4623,10 @@
     "original": "Straat en nummer",
     "translation": "Street and number"
   },
+  "3bfdcad4-7201-4b4e-9244-5ec22c6e4ce9": {
+    "original": "PDF...",
+    "translation": "PDF..."
+  },
   "3c20da07-3302-420e-867d-627ae4707e23": {
     "original": "Deze straat bestaat niet, kijk je deze even na op fouten? Formuleer de naam zonder afkortingen.",
     "translation": "This street does not exist, please check it for errors? Formulate the name without abbreviations."
@@ -4511,6 +4671,10 @@
     "original": "We wachten op de betaalbevestiging van de bank. Verlaat deze pagina niet. Dit duurt hooguit 5 minuten.",
     "translation": "We are waiting for the payment confirmation from the bank. Do not leave this page. This will take a maximum of 5 minutes."
   },
+  "3ca1233b-86ba-4291-b0a2-68b0d96031dd": {
+    "original": "Met bundelkortingen kan je korting geven op de tweede, derde, vierde... inschrijving. Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen (of tarieven daarvan) waarop die korting geldt.",
+    "translation": "With bundle discounts you can give a discount on the second, third, fourth... registration. You create a bundle discount and then link it to one or more activities or registration groups (or their tariffs) to which that discount applies."
+  },
   "3cbc8829-a005-42be-9d10-d6a6efba1de1": {
     "original": "Onbepaald",
     "translation": "Indeterminate"
@@ -4526,6 +4690,10 @@
   "3cda0fb7-c901-439d-af68-6478d70157be": {
     "original": "Wie wil je inschrijven?",
     "translation": "Who do you want to register?"
+  },
+  "3ce43f2c-d59c-4cb7-8957-3508770fd5a8": {
+    "original": "Ja, over alle gekoppelde activiteiten en inschrijvingsgroepen",
+    "translation": "Yes, across all linked activities and registration groups"
   },
   "3cf6b16f-f5b7-4291-8446-627210a64900": {
     "original": "Totaal:",
@@ -4711,6 +4879,10 @@
     "original": "Ben je zeker dat je deze facturatiegegevens wilt verwijderen?",
     "translation": "Are you sure you want to delete this billing data?"
   },
+  "3fa34288-9872-4c2b-af11-2d112b905eef": {
+    "original": "Geen paniek, je inschrijvingen gaan nog niet meteen online staan. Je kan inschrijvinen later terug uitschakelen via de algemene instellingen van de activiteit.",
+    "translation": "Don't panic, your registrations won't go online immediately. You can disable registrations later via the general settings of the activity."
+  },
   "3fb0eda2-63e8-422c-a19f-b36c36bea5eb": {
     "original": "Doorverwijzen naar",
     "translation": "Forwarding to"
@@ -4762,6 +4934,10 @@
   "408b5a17-3902-4483-b9cb-38d581ad3b97": {
     "original": "Vierkant",
     "translation": "Square"
+  },
+  "40939025-cebb-4afb-90e9-847233cb256f": {
+    "original": "Korting",
+    "translation": "Discount"
   },
   "4097461e-1c92-471f-a537-ae3c6e22d365": {
     "original": "Cultuur",
@@ -4883,6 +5059,10 @@
     "original": "Log dan hier in",
     "translation": "Then log in here"
   },
+  "4251f966-99ca-4ad8-ba39-9848aa67ecea": {
+    "original": "Filter op de leden die bij de inschrijving horen",
+    "translation": "Filter on the members who belong to the registration"
+  },
   "426b8e47-ea7c-4658-a13a-eed7ac0eafc1": {
     "original": "Bepaal wie leden en instellingen van deze groep kan bekijken of wijzigen",
     "translation": "Determine who can view or change members and settings of this group"
@@ -4966,6 +5146,10 @@
   "439560b9-68f9-437f-9297-bcb2a64fa972": {
     "original": "activiteiten beheren",
     "translation": "manage activities"
+  },
+  "43c1d02d-ca64-4809-95d6-50491c712cbb": {
+    "original": "Korting als meerdere gezinsleden inschrijven voor dezelfde inschrijvingsgroep/activiteit.",
+    "translation": "Discount if multiple family members register for the same registration group/activity."
   },
   "43cc054d-cf2f-432b-9259-e7764dc929e3": {
     "original": "Dit werkjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode",
@@ -5075,6 +5259,10 @@
     "original": "Periode",
     "translation": "Period"
   },
+  "44ff6618-ecbf-408b-9cc1-b1479e8ba8a2": {
+    "original": "Het werkjaar dat je wilt instellen is al afgelopen",
+    "translation": "The work year you want to configure has already ended"
+  },
   "45193033-dfd3-4dff-a7a6-cf4bd0883b5e": {
     "original": "Maak het mogelijk dat leden een (optionele) vrije bijdrage doen bij het inschrijven",
     "translation": "Make it possible for members to make an (optional) free contribution when registering"
@@ -5146,6 +5334,10 @@
   "45edb9d6-53a5-430e-94a4-fe8d95e05502": {
     "original": "Nieuw lid inschrijven",
     "translation": "Register new member"
+  },
+  "45eedf49-0f0a-442c-a0bd-7881c2682698": {
+    "original": "Je hebt geen toegang tot leden uit {groupName}",
+    "translation": "You do not have access to members from {groupName}"
   },
   "45f0eefc-1ede-4a64-a811-da151361aec8": {
     "original": "Ken automatisch rechten toe aan leden die een bepaalde ingebouwde functie hebben.",
@@ -5238,6 +5430,10 @@
   "47199bdb-258f-480a-b124-a418cce2dfcf": {
     "original": "({age} jaar)",
     "translation": "({age} years)"
+  },
+  "472a987d-498d-46b0-b925-3963f729492b": {
+    "original": "Bundelkorting",
+    "translation": "Bundle discount"
   },
   "472aad06-aa6e-41d9-8cc9-9cd6bc655a70": {
     "original": "Kan in enkele minuten worden geraden door een computer",
@@ -5607,6 +5803,10 @@
     "original": "Keuze 1",
     "translation": "Option 1"
   },
+  "4b9e6ec2-a698-43b7-aa6e-be4b05dfd34e": {
+    "original": "Je kan enkel code injecteren als je een eigen domeinnaam voor je webshop hebt ingesteld.",
+    "translation": "You can only inject code if you have configured a custom domain for your webshop."
+  },
   "4bb7718d-8198-41c6-b480-d71cd2eeae8b": {
     "original": "Er werden mogelijks automatische e-mails uitgestuurd als die ingesteld stonden.",
     "translation": "Automatic emails may have been sent if they were set up."
@@ -5618,6 +5818,10 @@
   "4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656": {
     "original": "Verwijder vertaling",
     "translation": "Delete translation"
+  },
+  "4bd1a990-6f9b-4949-90be-3f0898c4e298": {
+    "original": "Onzichtbaar",
+    "translation": "Invisible"
   },
   "4be45e47-0ee2-43cd-b719-8a60513f0965": {
     "original": "Dit is een standaardinstelling. Een lokale groep kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting groepen.",
@@ -5710,6 +5914,10 @@
   "4d4c0732-2875-4de8-afae-d8b2687ff279": {
     "original": "Proefperiode",
     "translation": "Trial period"
+  },
+  "4d5cd18a-ad96-4b2b-aa91-80af307cb8cd": {
+    "original": "Naam van de korting geassocieerd aan dit item",
+    "translation": "Name of the discount associated with this item"
   },
   "4d5e0d3f-688a-4c8b-bad7-818d976166bf": {
     "original": "Overal wijzigen",
@@ -5811,6 +6019,10 @@
     "original": "Halal dieet",
     "translation": "Halal diet"
   },
+  "4eda3d41-73fe-4063-8036-ccbd7290deaf": {
+    "original": "{5%} korting op de {2}e inschrijving",
+    "translation": "{5%} discount on the {2}nd registration"
+  },
   "4edf400a-ac16-4442-8561-e66ed2f785b5": {
     "original": "/ stuk",
     "translation": "/ item"
@@ -5867,6 +6079,10 @@
     "original": "Deze wachtlijst wordt gebruikt door {groupNames}",
     "translation": "This waiting list is used by {groupNames}"
   },
+  "4f68e4bc-4432-4655-b20e-84e6550eda48": {
+    "original": "ja",
+    "translation": "yes"
+  },
   "4f7b348e-413a-48c3-9fc8-314831d7518d": {
     "original": "Kortingscode toegepast",
     "translation": "Discount code applied"
@@ -5914,6 +6130,10 @@
   "4fd81137-ac48-4bec-b6f1-4fc1b55b7b5d": {
     "original": "Ander land",
     "translation": "Other country"
+  },
+  "4fdfb042-ccbb-465e-b56c-e1686473e4cc": {
+    "original": "Lidnummer",
+    "translation": "Member number"
   },
   "4fdfb0bb-c68b-4966-bfe0-a08bbd13da6b": {
     "original": "Alle nieuwe leden op wachtlijst",
@@ -6186,6 +6406,10 @@
   "532568c8-345e-4675-ba5e-60014bbcf9ae": {
     "original": "Telefoonnummer ouder",
     "translation": "Parent phone number"
+  },
+  "534fe662-2b92-479c-bb69-2155478673ed": {
+    "original": "Andere kortingsbedragen instellen voor deze specifieke inschrijvingen",
+    "translation": "Configure different discount amounts for these specific registrations"
   },
   "53575cae-ac22-4ac5-96d5-b67464992e4f": {
     "original": "Volzet",
@@ -6467,6 +6691,10 @@
     "original": "Herinnering verlopen proefperiode pakket ledenadministratie",
     "translation": "Reminder expired trial period member administration package"
   },
+  "57109b34-1238-4e62-84a0-14a81d7c2bfa": {
+    "original": "Niet ingeschreven",
+    "translation": "Not registered"
+  },
   "571437e8-8eee-4cdb-bbf8-39a6144bff8c": {
     "original": "Tekst",
     "translation": "Text"
@@ -6659,6 +6887,10 @@
     "original": "stuk",
     "translation": "item"
   },
+  "59a2cb2c-8935-42df-afab-6c5995e2cea3": {
+    "original": "Geldt de korting ook voor gezinsleden?",
+    "translation": "Does the discount also apply to family members?"
+  },
   "59b78a8b-79f0-4648-a868-72f4be8bbc25": {
     "original": "De e-mail met een link om je wachtwoord opnieuw in te stellen als je die bent vergeten",
     "translation": "The email with a link to reset your password if you have forgotten it"
@@ -6731,6 +6963,10 @@
     "original": "Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders.",
     "translation": "Use this code to give an account access to this member if their email address is not yet in the system. This is also always at the bottom of all emails to members/parents."
   },
+  "5b0672f0-f376-4306-9161-b2b840b723c2": {
+    "original": "Bewaar dit document op een veilige plaats en vernietig het na gebruik.",
+    "translation": "Keep this document in a safe place and destroy it after use."
+  },
   "5b0b7566-408d-43d5-863b-cd4d5c36f945": {
     "original": "Overschrijvingen beheren",
     "translation": "Manage bank transfers"
@@ -6750,6 +6986,10 @@
   "5b5ec7ff-d48f-4943-80c3-f3d0e4b32989": {
     "original": "Het totaalbedrag moet 0 euro zijn",
     "translation": "The total amount must be 0 euro"
+  },
+  "5b6de81b-821a-43be-b8dc-be19fc4701f8": {
+    "original": "Geen internetverbinding",
+    "translation": "No internet connection"
   },
   "5b822590-b76a-43d4-a2c9-78825f98c4e7": {
     "original": "Vak I niet van toepassing",
@@ -7087,6 +7327,10 @@
     "original": "Dit rijksregisternummer werd al ingevuld bij {firstName}. Vul a.u.b. het juiste rijksregisternummer in, dit kan invloed hebben op uw belastingaangifte.",
     "translation": "This national registration number has already been filled in for {firstName}. Please enter the correct national registration number; this may affect your tax return."
   },
+  "5efbaed8-004e-40b9-a822-bdb31e35fbb7": {
+    "original": "Je hebt geen toegangsrechten om alle leden te bekijken",
+    "translation": "You do not have the access rights to view all members"
+  },
   "5f0e24bb-10db-428b-a480-6f73d959cafa": {
     "original": "De link naar de website van deze vereniging.",
     "translation": "The link to the website of this association."
@@ -7351,6 +7595,10 @@
     "original": "Standaard sjabloon wordt gebruikt",
     "translation": "Default template is used"
   },
+  "62397a8b-fcf1-404e-afef-d6cc49c577d6": {
+    "original": "Aangepaste kortingen",
+    "translation": "Custom discounts"
+  },
   "62536e62-9d62-429f-97d4-2605e738fc92": {
     "original": "Alle leiding en leden verliezen hun functies en moet je opnieuw instellen",
     "translation": "All leaders and members will lose their roles and you will have to set them up again"
@@ -7394,6 +7642,10 @@
   "62d2a48e-46eb-4b9a-8546-66ec8c482cc9": {
     "original": "Laat bestellers een keuze maken uit een lijst met opties, al dan niet met een meerprijs. Bv. \"Kies je extra's\" met daarin bijvoorbeeld \"Kaas op je spaghetti\"",
     "translation": "Let customers choose from a list of options, with or without an extra charge. E.g. \"Choose your extras\" with, for example, \"Cheese on your spaghetti\""
+  },
+  "62db60da-ef20-4b61-8b69-4541deb5e8db": {
+    "original": "Alle leden",
+    "translation": "All members"
   },
   "62f644a2-98ba-4a8d-b7fd-22b2d0bb4d45": {
     "original": "Waarschuwing enkel tonen vanaf een minimum bedrag",
@@ -7827,6 +8079,10 @@
     "original": "meer informatie na over hoe je een vragenlijst kan instellen.",
     "translation": "more information on how to set up a questionnaire."
   },
+  "69783c9e-0199-4e1b-be23-35625515167d": {
+    "original": "Vanaf {index}e inschrijving",
+    "translation": "From {index}th registration"
+  },
   "697d96d8-17dc-4e98-8571-87153985f3a1": {
     "original": "Externe beheerdersrollen",
     "translation": "External administrator roles"
@@ -7870,6 +8126,10 @@
   "6a1afe5c-dd96-4b0f-ad6f-f0598b366d54": {
     "original": "Vrije bijdrage",
     "translation": "Free contribution"
+  },
+  "6a21c1ba-b3fb-4a6f-983f-7f407a2a3f66": {
+    "original": "Mag de korting gelden over verschillende activiteiten heen?",
+    "translation": "Can the discount apply across different activities?"
   },
   "6a297067-37ee-43f3-bffc-07968cf321c2": {
     "original": "Vergrendel inschrijvingen",
@@ -7959,6 +8219,10 @@
     "original": "Je kan online betalingen niet wijzigen",
     "translation": "You cannot change online payments"
   },
+  "6b029bcd-5605-42c5-a5db-38f40ab70214": {
+    "original": "Geen inschrijvingen",
+    "translation": "No registrations"
+  },
   "6b0bca07-3cba-45cf-bc94-e3217e59a69f": {
     "original": "Klik om te kopiëren",
     "translation": "Click to copy"
@@ -7986,6 +8250,10 @@
   "6b58e96c-fbd3-4998-909d-ed25cc758818": {
     "original": "Vraag bewerken",
     "translation": "Edit question"
+  },
+  "6b6d6629-eefa-4d53-b669-7a7c0e7d7e12": {
+    "original": "Geen leden",
+    "translation": "No members"
   },
   "6b7035db-1427-49ac-8a60-973b72355a8d": {
     "original": "Sluit dit alleen als je zeker bent dat je niet hebt betaald! Anders moet je gewoon even wachten.",
@@ -8058,6 +8326,10 @@
   "6c729f25-24a1-4795-9558-dcc478fdb44d": {
     "original": "Buitenlandse instellingen",
     "translation": "Foreign institutions"
+  },
+  "6c7534a5-53c7-4343-b9e0-5277fe640496": {
+    "original": "Bijhorend lid",
+    "translation": "Associated member"
   },
   "6c80efa8-5658-4728-ba95-d0536fdd25bd": {
     "original": "Keuze",
@@ -8595,6 +8867,10 @@
     "original": "Kies voor welke groepen deze activiteit zichtbaar is.",
     "translation": "Choose which groups this activity is visible for."
   },
+  "733d4169-a86f-425e-bb4b-15ce3af5aa60": {
+    "original": "Kijk de gegevens nog even na",
+    "translation": "Check the data again"
+  },
   "73430be0-1a07-4730-9e2e-72528992767d": {
     "original": "Je kan niet meer inschrijven voor {group} omdat {member} al ingeschreven is voor een groep die je niet kan combineren.",
     "translation": "You can no longer register for {group} because {member} is already registered for a group that you cannot combine."
@@ -8614,6 +8890,10 @@
   "735ec53c-5b23-469a-9365-d1216e1c739b": {
     "original": "Geen verenigingen gevonden. Probeer te zoeken op postcode of naam.",
     "translation": "No associations found. Try searching by postcode or name."
+  },
+  "737f9ff3-8eca-40f5-8f03-d303d53de5d1": {
+    "original": "Je hebt geen toegangsrechten om deze leden te bekijken",
+    "translation": "You do not have the access rights to view these members"
   },
   "738eb984-4a2e-455d-b6d5-5204173039dc": {
     "original": "Ja, ik ben 100% zeker",
@@ -8722,6 +9002,10 @@
   "74941f69-d7cd-4003-bc5a-18d9b22e03ed": {
     "original": "Deze gegevens zijn allemaal standaard beschikbaar.",
     "translation": "This data is all standardly available."
+  },
+  "74956434-5a54-4a93-82df-08533d1a6963": {
+    "original": "Geen toestemming verzamelen gevoelige gegevens",
+    "translation": "Do not collect sensitive data"
   },
   "7495a021-71f6-464f-b742-4e79206f4d7f": {
     "original": "Bekijk inhoud",
@@ -8850,6 +9134,10 @@
   "7664f47d-225d-46f2-83d7-f96447a87ebc": {
     "original": "Gebruik bij voorkeur de wachtwoord-beheerder van jouw browser",
     "translation": "Preferably use your browser's password manager"
+  },
+  "766a39be-a4af-4a04-baf0-1f064d2fed16": {
+    "original": "Ongedaan maken korting",
+    "translation": "Undo discount"
   },
   "76741df9-b885-4143-b2eb-210329e23169": {
     "original": "Met een account kan je één of meerdere leden beheren.",
@@ -9255,6 +9543,10 @@
     "original": "Allergieën",
     "translation": "Allergies"
   },
+  "7bf36754-abf8-40f0-a7f0-70439bbbecac": {
+    "original": "Ja, ook voor gezinsleden",
+    "translation": "Yes, also for family members"
+  },
   "7c114d86-2858-47e2-bd5c-4d59f9fa2c39": {
     "original": "Geen items",
     "translation": "No items"
@@ -9486,6 +9778,10 @@
   "7f88d4cc-ddbb-45fc-aa7e-1c6b31e26f7c": {
     "original": "Deze bestelling werd verwijderd",
     "translation": "This order has been deleted"
+  },
+  "7fb9593e-9937-4c47-ba0f-fb79a5ba3d87": {
+    "original": "Verrekend op",
+    "translation": "Settled on"
   },
   "7fc1d8ac-e765-41e9-a440-c5fddb30c1af": {
     "original": "Je hebt geen openstaande schulden",
@@ -9863,6 +10159,10 @@
     "original": "Ga naar het beheerdersportaal van een groep om leden uit die groep toe te voegen. Dit kan niet via het administratieportaal.",
     "translation": "Go to the administrator portal of a group to add members to that group. This cannot be done via the administration portal."
   },
+  "8545df6d-c416-42dc-88e6-df1eab5c41f9": {
+    "original": "Terug standaard kortingsbedragen gebruiken",
+    "translation": "Use default discount amounts again"
+  },
   "854847f7-2b76-4e2c-9579-012ea3e2272d": {
     "original": "Tijdens de activiteiten maken we soms foto's die we publiceren op de website en sociale media.",
     "translation": "During the activities we sometimes take photos that we publish on the website and social media."
@@ -10007,6 +10307,10 @@
     "original": "Oostenrijk",
     "translation": "Austria"
   },
+  "86fbcc70-2118-4399-9b7c-4461b8d40369": {
+    "original": "Korting voor tweede of derde inschrijvingen.",
+    "translation": "Discount for second or third registrations."
+  },
   "87150a09-54be-4640-9203-74d0399f1e02": {
     "original": "Waarschuwing als ingevuld",
     "translation": "Warning if filled in"
@@ -10083,6 +10387,10 @@
     "original": "Er ging iets mis bij het lezen van de inhoud van dit ticket.",
     "translation": "Something went wrong while reading the contents of this ticket."
   },
+  "8822547e-03a0-4e70-bdce-9661a6c6f613": {
+    "original": "Naam",
+    "translation": "Name"
+  },
   "8827deb6-8c18-4b98-a495-57696801a73e": {
     "original": "Er zijn nog geen bestellingen.",
     "translation": "There are no orders yet."
@@ -10106,6 +10414,10 @@
   "886ea5ba-4715-43a2-88b6-4715df3cfa2c": {
     "original": "plaats",
     "translation": "seat"
+  },
+  "887a8ef4-989d-4dff-a565-d67fdcb95c48": {
+    "original": "Deze code wordt toegevoegd aan de head tag van de webshop.",
+    "translation": "This code is added to the head tag of the webshop."
   },
   "8895f354-658f-48bd-9d5d-2e0203ca2a36": {
     "original": "Inschrijvingsdatum",
@@ -10163,9 +10475,17 @@
     "original": "Als deze korting wordt toegepast op een item in een winkelmandje kan je bij dat item een label tonen (bv. 'BLACK FRIDAY'). Hou dit label kort, bij voorkeur 1 woord.",
     "translation": "If this discount is applied to an item in a shopping basket, you can show a label with that item (e.g. 'BLACK FRIDAY'). Keep this label short, preferably 1 word."
   },
+  "891b75ee-e85e-4f9b-9a03-39082d248b87": {
+    "original": "Opnieuw proberen",
+    "translation": "Try again"
+  },
   "8922afd5-4566-4998-9c6f-d7a6143f29a2": {
     "original": "Locatie",
     "translation": "Location"
+  },
+  "892b70a8-6bba-4c41-9d82-b7db955f3aa2": {
+    "original": "Proefperiode afgelopen op {date}",
+    "translation": "Trial period ended on {date}"
   },
   "892db826-a373-4f7f-96bf-6f1f3fa6eede": {
     "original": "Privacybeleid",
@@ -10274,6 +10594,10 @@
   "8a9a35d5-ff86-48e3-81e1-42cf85708e06": {
     "original": "Het bestand is verlopen",
     "translation": "The file has expired"
+  },
+  "8abc595b-a705-499b-b4a2-17cb3cf99e47": {
+    "original": "niet aangevinkt",
+    "translation": "unchecked"
   },
   "8abddd1b-0359-42fa-ab4d-707f39d84852": {
     "original": "{number}e",
@@ -10462,6 +10786,10 @@
   "8caa99d4-ef69-43e3-a14c-e09e62e629b0": {
     "original": "augustus",
     "translation": "August"
+  },
+  "8cb4ddeb-fddc-42d7-9947-e9689ff2e8a3": {
+    "original": "Leden oplijsten per categorie",
+    "translation": "List members per category"
   },
   "8cba151c-54df-4786-8d37-bf2af2005753": {
     "original": "Ticketverkoop via Stamhoofd",
@@ -11007,6 +11335,10 @@
     "original": "Hoe ken je Stamhoofd?",
     "translation": "How do you know Stamhoofd?"
   },
+  "938926c1-cb27-427d-aabd-638c5ec1d14a": {
+    "original": "Inschrijvingen",
+    "translation": "Registrations"
+  },
   "938b1f40-9563-4a26-8d87-05774839b5a7": {
     "original": "Opmerkingen wijzigen",
     "translation": "Change comments"
@@ -11082,6 +11414,10 @@
   "94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef": {
     "original": "Geen of slechte internetverbinding",
     "translation": "No or poor internet connection"
+  },
+  "94e2d4ff-9b4b-4861-ba42-341ed67b32d8": {
+    "original": "Je hebt geen toegangsrechten om deze inschrijvingen te bekijken",
+    "translation": "You do not have the access rights to view these registrations"
   },
   "94f1f064-808e-4447-9813-d1c2d9a0375a": {
     "original": "Maximum aantal",
@@ -11271,6 +11607,10 @@
     "original": "Aangemaakt op {date}",
     "translation": "Created on {date}"
   },
+  "98237c41-e107-4997-a645-cc4c16bb5b9a": {
+    "original": "Bundelkortingen",
+    "translation": "Bundle discounts"
+  },
   "98469c78-6bd6-4354-b7d2-07e5b48aec12": {
     "original": "Hoog",
     "translation": "High"
@@ -11278,6 +11618,10 @@
   "9860af1d-e902-4f21-b8bb-98e1e401f87f": {
     "original": "Weet je zeker dat je het e-mailadres '{email}' wilt verwijderen?",
     "translation": "Are you sure you want to remove the email address '{email}'?"
+  },
+  "98666406-d3e9-4c35-a1c8-d6dc80949866": {
+    "original": "Activiteiten en inschrijvingsgroepen",
+    "translation": "Activities and registration groups"
   },
   "987c7ee6-8ee2-41d7-823e-db0ff590ea7d": {
     "original": "Zichtbaar in de kalender",
@@ -11403,6 +11747,10 @@
     "original": "Aansluiting of verzekering toevoegen in {period}",
     "translation": "Add affiliation or insurance in {period}"
   },
+  "9a647173-e10c-43b2-95c3-df882abb0c64": {
+    "original": "Exporteren naar PDF",
+    "translation": "Export to PDF"
+  },
   "9a6474d8-0bb5-4760-8dca-e85ba79035ce": {
     "original": "Instellingen",
     "translation": "Settings"
@@ -11410,6 +11758,10 @@
   "9a6904ac-2c29-443a-9e73-7c7588c626be": {
     "original": "Deze bestelling werd geannuleerd",
     "translation": "This order has been cancelled"
+  },
+  "9a7749d3-dac4-4baa-99e7-8048fe9ff743": {
+    "original": "Nieuwe bundelkorting",
+    "translation": "New bundle discount"
   },
   "9a8ee414-0dc9-4625-ab6b-d4ad8129c280": {
     "original": "Zorg ervoor dat bestaande leden voorrang krijgen op inschrijvingen (vooral als je met wachtlijsten werkt).",
@@ -11566,6 +11918,10 @@
   "9c668242-0cd3-4d73-a238-4fea31a417b8": {
     "original": "Verwijder deze keuze",
     "translation": "Delete this choice"
+  },
+  "9c775d8c-1e2c-40c4-9f61-6be6cb6bd5bb": {
+    "original": "Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen in hetzelfde werkjaar.",
+    "translation": "Give a discount for multiple registrations from a member or family, e.g. for siblings registering for a camp, or members taking multiple lessons in the same work year."
   },
   "9c89b752-8949-4fba-86f2-2da04c7a9485": {
     "original": "Je kan een procentuele korting geven op bepaalde artikels, je kan één artikel gratis maken, je kan een korting per stuk geven op de eerste x aantal stuks (of alle stuks) van een artikel...",
@@ -12019,6 +12375,10 @@
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere vereniging instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
     "translation": "You cannot delete the main group. If you still want to do this, you can first set another association as the main group via ')Accounting and affiliations'."
   },
+  "a2066dbc-3040-4c7d-a3f9-1f3580617542": {
+    "original": "Totalen per combinatie",
+    "translation": "Totals per combination"
+  },
   "a209d3fe-7b1c-43c2-b519-45fb66581201": {
     "original": "Bestellen",
     "translation": "Order"
@@ -12079,6 +12439,10 @@
     "original": "Je kan niet inschrijven voor de wachtlijst",
     "translation": "You cannot register for the waiting list"
   },
+  "a34d3022-7f12-4524-b68f-b484dc9201ae": {
+    "original": "Dit document kan niet worden geëxporteerd",
+    "translation": "This document cannot be exported"
+  },
   "a351a6c6-9694-417f-aa91-985470aa0956": {
     "original": "Sommige van jouw Stripe accounts gebruiken dezelfde weergavenaam. Je past deze best aan zodat je later verwarring vermijdt.",
     "translation": "Some of your Stripe accounts use the same display name. You should adjust this to avoid confusion later."
@@ -12094,6 +12458,10 @@
   "a379312a-007d-46a2-9533-33c15c524504": {
     "original": "Voor een API-key die heel intensief gebruik moet maken van de API. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
     "translation": "For an API key that needs to make very intensive use of the API. Risk of overload if the API is not implemented correctly and fires heavy requests in a short time."
+  },
+  "a3795bf6-ed50-4aa6-9caf-33820292c159": {
+    "original": "De periode die je wilt instellen bestaat niet (meer)",
+    "translation": "The period you want to configure does not (longer) exist"
   },
   "a39908e8-62b0-487c-9a03-57dd62326d94": {
     "original": "Geslacht",
@@ -12403,6 +12771,10 @@
     "original": "naam van een vertegenwoordiger",
     "translation": "name of a representative"
   },
+  "a7c16100-f8b3-46a2-94fa-24cc4b693f32": {
+    "original": "Je kan inschrijvingen voor deze activiteit momenteel niet uitschakelen omdat er al inschrijvingen zijn. Verwijder die eerst.",
+    "translation": "You cannot currently disable registrations for this activity because there are already registrations. Remove them first."
+  },
   "a7c42cd2-eeca-4286-9ac9-1a9bc951f86f": {
     "original": "Wachtwoord opnieuw instellen",
     "translation": "Reset password"
@@ -12430,6 +12802,10 @@
   "a7ea9da5-e3d3-4253-b7f5-b90fbdeb83dc": {
     "original": "Enkel aanmaken indien inschrijving betaald is",
     "translation": "Only create if registration is paid"
+  },
+  "a7ec27e7-ec66-41da-ae2d-ea67fe8a088d": {
+    "original": "Bijvoorbeeld: een lid krijgt korting op activiteit B als hetzelf of een familielid voor activiteit A, B, C... is ingeschreven",
+    "translation": "For example: a member receives a discount on activity B if they themselves or a family member are registered for activity A, B, C..."
   },
   "a7ed4fc3-5f80-4621-afcb-89002b686cef": {
     "original": "Als alles wel in orde is, maar er nog iets klein moet worden aangevuld op een later tijdstip.",
@@ -12503,6 +12879,10 @@
     "original": "volgorde gewijzigd",
     "translation": "order changed"
   },
+  "a8fc4892-7a37-4748-9249-3499524ad288": {
+    "original": "Verschuldigd",
+    "translation": "Owed"
+  },
   "a94e08c1-bddf-4f13-af83-8349dc361a47": {
     "original": "Uitnodiging verzonden naar",
     "translation": "Invitation sent to"
@@ -12571,6 +12951,10 @@
     "original": "Ingediend door",
     "translation": "Submitted by"
   },
+  "aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689": {
+    "original": "Annuleringskosten",
+    "translation": "Cancellation costs"
+  },
   "aaaaf4eb-6714-42b8-bd94-aa167246cac6": {
     "original": "Zomerkamp",
     "translation": "Summer camp"
@@ -12603,6 +12987,10 @@
     "original": "Voeg toe",
     "translation": "Add"
   },
+  "ab00e79e-c7cb-4595-9119-4fb5ca366dd1": {
+    "original": "Kies een groep",
+    "translation": "Choose a group"
+  },
   "ab0535e6-bbaa-4961-a34f-aca39ef0d785": {
     "original": "Verschuldigd sinds",
     "translation": "Due since"
@@ -12634,6 +13022,10 @@
   "ab3872b4-6ef5-4584-af47-89e6a17e04b3": {
     "original": "bv. privacyvoorwaarden",
     "translation": "e.g. privacy policy"
+  },
+  "ab3e4560-a403-4a20-8dab-c76eb74794cc": {
+    "original": "Winkelmandje",
+    "translation": "Shopping cart"
   },
   "ab4ad0cf-53df-4f35-96a8-59747075417f": {
     "original": "onbekend aansluitingstype",
@@ -12859,6 +13251,10 @@
     "original": "Gesloten",
     "translation": "Closed"
   },
+  "ae9274f4-87fd-4221-bd81-3ff8b609eb4b": {
+    "original": "Inschrijvingsdatum",
+    "translation": "Registration date"
+  },
   "aeace79f-c772-4944-8d1d-f92eb519267f": {
     "original": "Demovereniging",
     "translation": "Demo association"
@@ -12874,6 +13270,10 @@
   "aed1d5e3-1d42-46d4-a9c1-ac13bdffc2bd": {
     "original": "Deze leeftijdsgroep komt niet in aanmerking voor deze functie",
     "translation": "This age group is not eligible for this role"
+  },
+  "aeed7048-efaa-410d-bec1-796b5fe581a6": {
+    "original": "Hoeveel nu betalen?",
+    "translation": "How much to pay now?"
   },
   "aef8493c-6d75-4270-ba4c-f9f09b65caf7": {
     "original": "Gele achtergrond",
@@ -12946,6 +13346,10 @@
   "afd7843d-f355-445b-a158-ddacf469a5b1": {
     "original": "Groep",
     "translation": "Group"
+  },
+  "afea127c-30ec-4df7-8842-90aca44f9fbf": {
+    "original": "Kenmerken per lid",
+    "translation": "Characteristics per member"
   },
   "aff982ed-0f1a-4838-af79-9e00cd53131b": {
     "original": "Verborgen",
@@ -13126,6 +13530,10 @@
   "b1fdf269-a84e-44e8-9d2d-ef57919e3698": {
     "original": "Weet je zeker dat je het gsm nummer '{phone}' wilt verwijderen?",
     "translation": "Are you sure you want to remove the mobile number '{phone}'?"
+  },
+  "b21855f6-2e9f-4b57-bfe8-05dc38fc330d": {
+    "original": "nee",
+    "translation": "no"
   },
   "b2248880-cba7-4115-912b-9cb981e3c2d1": {
     "original": "Domeinnaam wijzigen",
@@ -13395,6 +13803,10 @@
     "original": "Man",
     "translation": "Male"
   },
+  "b557c22d-d44e-43ad-9f05-de74d956c413": {
+    "original": "Annulatiekost",
+    "translation": "Cancellation fee"
+  },
   "b56351e9-4847-4a0c-9eec-348d75c794c4": {
     "original": "Actief",
     "translation": "Active"
@@ -13498,6 +13910,10 @@
   "b6a7d8fa-58ed-41dd-a2d0-ada96a4e56bb": {
     "original": "Wijzig de instellingen rond financiële ondersteuning",
     "translation": "Change the settings regarding financial support"
+  },
+  "b6bc2fef-71ac-43a1-b430-50945427a9e3": {
+    "original": "De periode die je wilt instellen is reeds afgesloten",
+    "translation": "The period you want to configure has already been closed"
   },
   "b6f89130-e727-4f85-b3a9-18b97c4f6ab6": {
     "original": "Organisatie niet gevonden",
@@ -13703,6 +14119,10 @@
     "original": "jouw tickets",
     "translation": "your tickets"
   },
+  "b9912181-cf0a-4c85-bb9a-fc9ee7fa54f5": {
+    "original": "Er was een internetprobleem bij het uploaden van het bestand. Controleer je internetverbinding en probeer het opnieuw.",
+    "translation": "There was an internet problem uploading the file. Check your internet connection and try again."
+  },
   "b99b7736-bf57-490b-ad09-425f1b89346e": {
     "original": "Tekst en links die onderaan in de footer zichtbaar zijn",
     "translation": "Text and links that are visible at the bottom of the footer"
@@ -13714,6 +14134,10 @@
   "b9a73b33-2a3d-44fa-a326-66cb8b8e1184": {
     "original": "{price} in verwerking",
     "translation": "{price} in process"
+  },
+  "b9b2c925-1396-4536-b883-6f7d82acfcb1": {
+    "original": "Het aantal inschrijvingen voor alle gekoppelde activiteiten wordt samengeteld om de tweede, derde... inschrijving te bepalen",
+    "translation": "The number of registrations for all linked activities is added together to determine the second, third... registration"
   },
   "b9b8f956-8c87-413b-a94d-2f31941e3da1": {
     "original": "Niet alle resultaten zijn geladen. Gebruik dit niet voor te veel leden tegelijk.",
@@ -13738,6 +14162,10 @@
   "b9c92449-16c1-4253-851f-6a8c07110bf5": {
     "original": "Bestelling bevestiging: online betaling",
     "translation": "Order confirmation: online payment"
+  },
+  "b9f2cf39-1f26-4b7c-b949-0474fa9f2f01": {
+    "original": "Excel...",
+    "translation": "Excel..."
   },
   "b9f4f3d8-8f34-4a20-9361-071079b64cf5": {
     "original": "jongens geboren in of voor",
@@ -13814,6 +14242,10 @@
   "bad54c0f-e030-48c4-bd75-42ed4aa9be02": {
     "original": "Maak een keuze",
     "translation": "Make a choice"
+  },
+  "badafccc-80ac-4716-87dc-0385f4741af7": {
+    "original": "Geavanceerd",
+    "translation": "Advanced"
   },
   "baf6fd8e-1937-4c8b-8510-fa811473c157": {
     "original": "Geen lid gevonden, of je hebt geen toegang tot dit lid",
@@ -13895,6 +14327,10 @@
     "original": "Ledenadministratie niet verlengd",
     "translation": "Member administration not renewed"
   },
+  "bc0d5675-c4e8-48d8-ba51-557e7a95690f": {
+    "original": "Artikel",
+    "translation": "Item"
+  },
   "bc166ef0-20df-40b7-abac-b56bb51376bd": {
     "original": "Inverteren van de filter is mislukt",
     "translation": "Inverting the filter failed"
@@ -13947,6 +14383,10 @@
     "original": "Tijdstip start",
     "translation": "Start time"
   },
+  "bca39843-792e-4e94-b1e9-a9fcf2908d05": {
+    "original": "Filter op bestellingen die minstens één artikel in het winkelmandje hebben die aan deze voorwaarden voldoet",
+    "translation": "Filter on orders that have at least one item in the shopping cart that meets these conditions"
+  },
   "bcb4b068-4fcc-4edf-8ac7-7027f03616b3": {
     "original": "Een vaccinatie voor tetanus/klem is 10 jaar werkzaam, daarna is een nieuwe vaccinatie noodzakelijk.",
     "translation": "A tetanus/tetanus vaccination is effective for 10 years; after that, a new vaccination is necessary."
@@ -13992,8 +14432,8 @@
     "translation": "All activity types"
   },
   "bd1d21bd-b58f-4d13-b7c7-510db5702441": {
-    "original": "Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders",
-    "translation": "Name, address, email address and telephone number of one or more (plus) parents"
+    "original": "Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders. Hierdoor kunnen ouders ook het lid beheren. Het rijksregisternummer van de ouders wordt ook verzameld als dat werd ingeschakeld.",
+    "translation": "Name, address, email address and phone number of one or more (plus)parents. This allows parents to also manage the member. The national registration number of the parents is also collected if this has been enabled."
   },
   "bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50": {
     "original": "Onbekend",
@@ -14219,6 +14659,10 @@
     "original": "annuleringskost voor keuzeoptie bij",
     "translation": "cancellation fee for choice option with"
   },
+  "bfbdccd4-c432-4098-8980-a83ac6f6a76c": {
+    "original": "Op {index}e inschrijving",
+    "translation": "On {index}th registration"
+  },
   "bfbfa403-7d12-4cbd-b299-2dd3a8b32ad1": {
     "original": "Jouw zitplaats werd gewijzigd van {from} naar {to}",
     "translation": "Your seat has been changed from {from} to {to}"
@@ -14383,6 +14827,10 @@
     "original": "Het te betalen bedrag van deze bestelling is gewijzigd nadat de bestelling geplaatst werd.",
     "translation": "The amount payable for this order has been changed after the order was placed."
   },
+  "c1ed9e16-70d4-4337-a4e1-ecf31ec00bed": {
+    "original": "Geef de bundelkorting een duidelijke en korte naam. Deze naam zal zichtbaar zijn voor leden.",
+    "translation": "Give the bundle discount a clear and concise name. This name will be visible to members."
+  },
   "c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f": {
     "original": "Wachtlijst van",
     "translation": "Waiting list of"
@@ -14498,6 +14946,10 @@
   "c38e774e-e8ab-4549-b119-4eed380c626c": {
     "original": "Aanmaakdatum",
     "translation": "Creation date"
+  },
+  "c393d4d3-9cc2-4da8-a8ae-569f48412e12": {
+    "original": "Niet bewerkbaar voor leden",
+    "translation": "Not editable for members"
   },
   "c3a8a598-5b30-4d37-bc99-9f3157b36246": {
     "original": "Gegevens lid",
@@ -14691,6 +15143,10 @@
     "original": "Afrekenen",
     "translation": "Checkout"
   },
+  "c6be4ce9-199f-43cc-9c64-1b2ec1c83b80": {
+    "original": "Geef je bundelkorting een naam",
+    "translation": "Give your bundle discount a name"
+  },
   "c6c8e406-3d1f-41c4-b3df-d0b1e8661040": {
     "original": "Vereisten",
     "translation": "Requirements"
@@ -14726,6 +15182,10 @@
   "c73c2d8c-9f00-457b-a6e5-24c45c383228": {
     "original": "Verwijder dit keuzemenu",
     "translation": "Delete this choice menu"
+  },
+  "c74102fe-aa0c-4602-99d3-e6510e19632a": {
+    "original": "Je kan de instellingen voor inschrijvingen (bv. prijs) wijzigen via het overzicht van de activiteit.",
+    "translation": "You can change the settings for registrations (e.g. price) via the activity overview."
   },
   "c742ce2a-17cf-4ae3-bb7d-632eab24da35": {
     "original": "functie van een persoon",
@@ -14806,6 +15266,10 @@
   "c8b8fb4b-3a2b-4de7-85a1-f1b963a739e7": {
     "original": "Omhoog verplaatsen",
     "translation": "Move up"
+  },
+  "c8e499c2-8d90-480c-a15e-d9da5291b40e": {
+    "original": "Je hebt niet voldoende rechten om de custom code aan te passen.",
+    "translation": "You do not have sufficient rights to adjust the custom code."
   },
   "c8f348d5-d497-48dd-b7a2-c9c6d8f99199": {
     "original": "later te betalen",
@@ -14927,6 +15391,10 @@
     "original": "Nonkel",
     "translation": "Uncle"
   },
+  "ca70876e-5a32-40fe-9224-6e61ed055df6": {
+    "original": "Een bundelkorting maak je aan en koppel je vervolgens aan één of meerdere activiteiten of inschrijvingsgroepen waarop die korting geldt. Afhankelijk van de ingestelde toepassingsregels krijgen leden dan korting voor de tweede, derde, vierde... inschrijving bij die ingestelde activiteiten of inschrijvinsgroepen.",
+    "translation": "You create a bundle discount and then link it to one or more activities or registration groups to which that discount applies. Depending on the configured application rules, members will then receive a discount for the second, third, fourth... registration for those configured activities or registration groups."
+  },
   "ca70e639-c7f8-40d7-9054-9c01711d3f5b": {
     "original": "Verwijder deze code",
     "translation": "Delete this code"
@@ -14979,6 +15447,10 @@
     "original": "Kampmeldingen",
     "translation": "Camp notifications"
   },
+  "cafe0f16-604c-436e-b12e-ef6b0e9d2387": {
+    "original": "Bijvoorbeeld: een lid krijgt korting als het zich inschrijft voor meerdere activiteiten of inschrijvingsgroepen.",
+    "translation": "For example: a member receives a discount if they register for multiple activities or registration groups."
+  },
   "cb0fa3c3-98ea-4d10-bf33-0efc813ffe0b": {
     "original": "Inloggen als hoofdbeheerder",
     "translation": "Log in as main administrator"
@@ -15030,6 +15502,10 @@
   "cb85826e-06fc-473c-95c2-ba338fdbab50": {
     "original": "Kies een aansluitingstype",
     "translation": "Choose an affiliation type"
+  },
+  "cb8ccc1d-7ec0-4c9d-bf02-6759109324ce": {
+    "original": "{5%} korting op de {2}e en volgende inschrijvingen",
+    "translation": "{5%} discount on the {2}nd and subsequent registrations"
   },
   "cb9fd3d2-c563-4d46-a26b-4438e5a887ef": {
     "original": "Eén lid is verwijderd",
@@ -15127,6 +15603,10 @@
     "original": "Excel export mislukt",
     "translation": "Excel export failed"
   },
+  "cc658db0-ee90-40fc-8a8c-1074a4f1f2f2": {
+    "original": "Je kan geen wijzigingen meer aanbrengen in werkjaar {2000-2001} omdat deze is afgesloten.",
+    "translation": "You can no longer make changes in work year {2000-2001} because it has been closed."
+  },
   "cc6a87de-8228-4a0b-8d31-b9805556c6b8": {
     "original": "Deze betaling heeft geen facturatiegegevens.",
     "translation": "This payment has no billing data."
@@ -15190,6 +15670,10 @@
   "cd2aed8f-03e2-4a54-8bc3-100e2643c74a": {
     "original": "Bevestig de naam van het lid",
     "translation": "Confirm the member's name"
+  },
+  "cd37a13c-6779-49fa-a97f-1eddb6b61ebb": {
+    "original": "Deze groep is nog niet actief in dit werkjaar, maak dat eerst aan.",
+    "translation": "This group is not yet active in this work year, create it first."
   },
   "cd511a0e-71cc-44bb-8107-7de1a18dab9d": {
     "original": "Een extra rij boven de kolomnamen met de categorie van elke kolom, voor een duidelijkere weergave.",
@@ -15455,6 +15939,10 @@
     "original": "€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)",
     "translation": "£ 79 per year (including ticket sales function) if less than £ 50,000 turnover per year (see website for higher turnover)"
   },
+  "d098add1-c1b8-44d1-bf96-d762db3ea3cc": {
+    "original": "Korting voor gezinsleden die inschrijven voor verschillende inschrijvingsgroepen/activiteiten met deze korting.",
+    "translation": "Discount for family members registering for different registration groups/activities with this discount."
+  },
   "d0990170-4ad6-48d7-a3d6-d4ac7d9f803c": {
     "original": "Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.",
     "translation": "With a shopping basket, visitors can order multiple item combinations at once. If you switch it off, visitors can checkout immediately after selecting an item. For forms where you only expect one completed form (= item), it is often useful to switch it off."
@@ -15571,6 +16059,10 @@
     "original": "API-key {name} is aangepast",
     "translation": "API key {name} has been changed"
   },
+  "d20e1a65-6c0d-4591-9dac-1abc01b9a563": {
+    "original": "Lid definitief verwijderen",
+    "translation": "Permanently delete member"
+  },
   "d220bb47-196f-4ffb-9f0a-367234ced464": {
     "original": "Kies een persoonlijk wachtwoord",
     "translation": "Choose a personal password"
@@ -15594,6 +16086,10 @@
   "d23f91da-079b-40fe-9da1-14b9ac7e65ab": {
     "original": "Deze betalingen werden nog niet betaald",
     "translation": "These payments have not yet been paid"
+  },
+  "d241c647-1fd2-4ce4-8356-3891abca19e9": {
+    "original": "Afhaal/leveringsmethode",
+    "translation": "Collection/delivery method"
   },
   "d24616fc-5633-4d01-90c8-cbe686cfdecc": {
     "original": "Bezig met verbinden met internet...",
@@ -15683,6 +16179,10 @@
     "original": "Hoofdkleur",
     "translation": "Main colour"
   },
+  "d3c259e4-4f8b-4f2f-9051-a943ef41dbd2": {
+    "original": "Geen korting, maar telt mee in aantal",
+    "translation": "No discount, but counts in amount"
+  },
   "d3c56d05-d038-4aad-b796-445ddce980b9": {
     "original": "Overal in het systeem krijg je nu de optie om een 2de prijs in te vullen voor personen met deze financiële ondersteuning. Je kan deze prijs daar een naam geven.",
     "translation": "Everywhere in the system you now get the option to fill in a second price for people with this financial support. You can give this price a name there."
@@ -15758,6 +16258,10 @@
   "d4ac382c-5394-4451-a25b-3b97f6d60168": {
     "original": "Categorie dupliceren",
     "translation": "Duplicate category"
+  },
+  "d4db6f9b-ede7-4c60-b910-5ca947208d91": {
+    "original": "Met aangepaste kortingen:",
+    "translation": "With custom discounts:"
   },
   "d4dbb3ee-ab9d-4231-be12-945b7d156900": {
     "original": "Betalingen",
@@ -15854,6 +16358,10 @@
   "d6386cef-8e84-4107-920a-03db17372613": {
     "original": "Lees onze gids",
     "translation": "Read our guide"
+  },
+  "d64c7018-f8f5-4532-88b4-a1a29490a49c": {
+    "original": "Er zijn geen groepen die aan deze bundelkorting gekoppeld zijn. Je kan activiteiten en groepen koppelen via de instellingen van elke activiteit of groep.",
+    "translation": "There are no groups linked to this bundle discount. You can link activities and groups via the settings of each activity or group."
   },
   "d6572dda-561a-4aeb-9d9b-1fc4f7a3e337": {
     "original": "We konden de record",
@@ -16310,6 +16818,10 @@
   "db4e01e7-911a-4b58-b242-068f887851f7": {
     "original": "Personaliseer het document door het wat aan te passen indien je zelf ervaring hebt met HTML. Test het resultaat wel goed uit.",
     "translation": "Personalise the document by adjusting it if you have experience with HTML. Test the result thoroughly."
+  },
+  "db51d1ac-29aa-46f6-a77e-29a4f66ca74b": {
+    "original": "tarieven",
+    "translation": "tariffs"
   },
   "db59de67-3f9f-4a02-bf65-556bdd2bf817": {
     "original": "Dit document resetten?",
@@ -16783,6 +17295,10 @@
     "original": "Jouw domeinnaam is correct ingesteld voor jouw inschrijvingsportaal (op {registerDomain})",
     "translation": "Your domain name is correctly set up for your registration portal (at {registerDomain})"
   },
+  "e0883f65-bd4d-4faa-aba2-71d96001fe42": {
+    "original": "De totaalprijs is negatief, maak de nodige aanpassingen aan je winkelmandje zodat het totaalbedrag minstens 0 is.",
+    "translation": "The total price is negative, make the necessary adjustments to your shopping cart so that the total amount is at least 0."
+  },
   "e089fe1b-ae31-4244-9d29-37f21655fe52": {
     "original": "Voldoet aan de voorwaarden vermeld in puntje 2 van de document opmerkingen.",
     "translation": "Meets the conditions mentioned in point 2 of the document remarks."
@@ -16818,6 +17334,10 @@
   "e0fff11f-5ddc-4edc-bab9-a1b293d2681f": {
     "original": "Wijzig status",
     "translation": "Change status"
+  },
+  "e0fff936-3f3c-46b8-adcf-c723c33907a2": {
+    "original": "Het werkjaar die je wilt instellen is nog niet gestart",
+    "translation": "The work year you want to configure has not yet started"
   },
   "e11ad49e-d853-464c-a951-d45b9549ec30": {
     "original": "Deze categorie is niet zichtbaar voor gewone leden",
@@ -17003,6 +17523,10 @@
     "original": "geboren in of voor",
     "translation": "born in or before"
   },
+  "e3e20081-5971-478e-a69b-09b61fb858da": {
+    "original": "Standaard korting",
+    "translation": "Default discount"
+  },
   "e3e4ba16-7923-42bc-ae23-cd729ce06869": {
     "original": "Je kan maar één lid hebben met de functie {responsibility} in deze leeftijdsgroep",
     "translation": "You can only have one member with the role {responsibility} in this age group"
@@ -17043,6 +17567,10 @@
     "original": "adres van je vereniging",
     "translation": "address of your association"
   },
+  "e4603a61-7e45-4ca4-99b2-4e4208f127d1": {
+    "original": "Als je ook de oudergegevens inschakelt, wordt zowel het rijksregisternummer van het lid als dat van de ouders gevraagd (minstens één ouder).",
+    "translation": "If you also enable parent data, the national registration number of both the member and the parents will be requested (at least one parent)."
+  },
   "e46ce65d-10a9-4d37-bd26-8979079c46a5": {
     "original": "voorbeeld@email.com",
     "translation": "example@email.com"
@@ -17074,6 +17602,10 @@
   "e4bff2f3-d273-4755-b617-f792a01f8325": {
     "original": "Activiteit bewerken",
     "translation": "Edit activity"
+  },
+  "e4d49374-df2a-4fd7-863e-4a577e285cdc": {
+    "original": "Lokale activiteit",
+    "translation": "Local activity"
   },
   "e4f4c4a8-0185-4f84-b5a4-ae58d2b633e3": {
     "original": "Functies op nationaal niveau",
@@ -17323,6 +17855,10 @@
     "original": "Ben je zeker dat je de huidige inhoud wilt overschrijven?",
     "translation": "Are you sure you want to overwrite the current content?"
   },
+  "e8050ed2-af7e-4ffd-a9c9-e2fda7ef9bf5": {
+    "original": "Inschrijvingen verzamelen voor deze activiteit?",
+    "translation": "Collect registrations for this activity?"
+  },
   "e80f2233-257d-45df-a04e-af7e5f694546": {
     "original": "Lezen",
     "translation": "Read"
@@ -17334,6 +17870,10 @@
   "e81e0bdb-c15f-4b9a-abca-172a8d379993": {
     "original": "Verwijderde functies",
     "translation": "Deleted roles"
+  },
+  "e81e0ffa-8ed9-4382-bc07-479728006648": {
+    "original": "aangevinkt",
+    "translation": "checked"
   },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen werkjaar liggen",
@@ -17523,6 +18063,14 @@
     "original": "Gelieve een naam in te vullen",
     "translation": "Please enter a name"
   },
+  "ea9dfea3-7c81-4b90-9d1a-aee6a9e34aea": {
+    "original": "Nee, alleen binnen dezelfde activiteit of inschrijvingsgroep",
+    "translation": "No, only within the same activity or registration group"
+  },
+  "eab2f8ba-1f62-4328-a0b6-9593d3b6ca15": {
+    "original": "Afwijkend",
+    "translation": "Deviating"
+  },
   "eaccc532-f920-49d6-8eb9-08d43f24b1fd": {
     "original": "We kijken de betaalstatus van jouw overschrijving manueel na. Het kan dus even duren voor je hier ziet staan dat we de betaling hebben ontvangen. Vermeld zeker “{description}” in je overschrijving.",
     "translation": "We will manually check the payment status of your transfer. It may therefore take some time before you see here that we have received the payment. Please be sure to mention “{description}” in your transfer."
@@ -17562,6 +18110,10 @@
   "eb2d2735-3e08-497e-9544-253b300cbe3e": {
     "original": "Website (optioneel)",
     "translation": "Website (optional)"
+  },
+  "eb3037bc-a195-41a8-ad30-947dce3ed73c": {
+    "original": "{name} bestaat al in het systeem en werd hergebruikt in plaats van opnieuw aangemaakt.",
+    "translation": "{name} already exists in the system and has been reused instead of being created again."
   },
   "eb39138f-46b9-4005-b70f-dc1e0f3938f9": {
     "original": "{member} is momenteel niet ingeschreven.",
@@ -17955,6 +18507,10 @@
     "original": "Afbeelding",
     "translation": "Image"
   },
+  "f0815834-0750-41d6-aa93-26203b2aedb6": {
+    "original": "Geavanceerde instellingen voor webshops (code injection)",
+    "translation": "Advanced settings for webshops (code injection)"
+  },
   "f085f874-242d-47cb-a404-96eab69662ec": {
     "original": "Aantal",
     "translation": "Amount"
@@ -18087,6 +18643,10 @@
     "original": "Deze bestelling is mislukt. Probeer je bestelling opnieuw te plaatsen als je dat nog niet had gedaan.",
     "translation": "This order failed. Please try placing your order again if you haven't already done so."
   },
+  "f21f3447-bb11-4474-8597-b9cae359faec": {
+    "original": "Status",
+    "translation": "Status"
+  },
   "f21f351e-d844-440c-9118-7a395459a5f1": {
     "original": "Tekstveld (één lijn)",
     "translation": "Text field (one line)"
@@ -18110,6 +18670,14 @@
   "f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208": {
     "original": "Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Stamhoofd momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.",
     "translation": "Choose below what exactly was reimbursed (enter a negative amount). Please note that Stamhoofd currently does not make automatic reimbursements for online payments. You must therefore manually reimburse or deposit the amount yourself."
+  },
+  "f287ceb4-a4d4-4c1a-8cfb-eecc8801b7aa": {
+    "original": "Selecteer hier alle kenmerken die je in de samenvatting wilt oplijsten, gegroepeerd per lid.",
+    "translation": "Select all the characteristics you want to list in the summary here, grouped by member."
+  },
+  "f2931d71-6e65-4b80-8c44-ac1cc328c2bd": {
+    "original": "Aantal stuks",
+    "translation": "Quantity"
   },
   "f298a54a-ee0f-462c-a80a-8d8c967dfda3": {
     "original": "Er ging iets mis bij het aanmaken van dit account",
@@ -18226,6 +18794,10 @@
   "f3de2983-5c64-4653-b2c5-62c94eb3d04f": {
     "original": "Maken",
     "translation": "Create"
+  },
+  "f3f810dd-cd4b-4766-b19e-ec995c9cca77": {
+    "original": "Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.",
+    "translation": "Create a balance settlement with a total price of 0 euro that combines negative and positive items to simplify the open account."
   },
   "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
     "original": "Het maximum geldt per lokale groep",
@@ -18439,6 +19011,10 @@
     "original": "Gelijk aan...",
     "translation": "Equal to..."
   },
+  "f675d723-b1b9-4abd-9e7c-0459c24e474b": {
+    "original": "Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze groep.",
+    "translation": "This activity is only visible to members who are registered with this group."
+  },
   "f67ccf42-d4a8-4fe6-b7dc-91f43726646e": {
     "original": "Vaste kost",
     "translation": "Fixed cost"
@@ -18479,6 +19055,10 @@
     "original": "Vet gedrukte tekst",
     "translation": "Bold text"
   },
+  "f70ecedf-608c-4330-89e6-8e0a7a5ac264": {
+    "original": "Saldoverrekening",
+    "translation": "Balance settlement"
+  },
   "f726843e-f724-4ea4-b783-bddbf0667148": {
     "original": "Bij meerkeuze is het mogelijk om verschillende opties aan te duiden. In het andere geval moet er exact één keuze gemaakt worden (wil je het optioneel maken, voeg dan een optie 'Geen' toe).",
     "translation": "With multiple choices it is possible to indicate different options. Otherwise, exactly one choice must be made (if you want to make it optional, add an option 'None')."
@@ -18518,6 +19098,10 @@
   "f7821d11-0b71-4503-a8cb-18b2036611f1": {
     "original": "telefoonnummer van je vereniging",
     "translation": "telephone number of your association"
+  },
+  "f79934ca-a26c-4728-9a5f-c9cec74d6b90": {
+    "original": "Ben je zeker dat je deze bundelkorting wilt verwijderen?",
+    "translation": "Are you sure you want to delete this bundle discount?"
   },
   "f7b1a08a-1431-45e3-83c3-8aa8bb1b18e6": {
     "original": "{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel",
@@ -18642,6 +19226,10 @@
   "f8f3a5be-624a-4d39-b401-78ad833b64dd": {
     "original": "Verminder de zichtbaarheid van Stamhoofd",
     "translation": "Reduce the visibility of Stamhoofd"
+  },
+  "f9015fbd-7b3f-450b-b54a-25f017bb8d86": {
+    "original": "Toepassingsregels",
+    "translation": "Application rules"
   },
   "f904f18b-4b7b-461d-9468-44d54443187c": {
     "original": "Jouw wachtwoord moet uit minstens 8 karakters bestaan.",
@@ -19110,6 +19698,10 @@
   "feef080d-4172-4ab0-a69f-d3769f32cfa8": {
     "original": "Keuzemenu bewerken",
     "translation": "Edit selection menu"
+  },
+  "fef46e6b-6dd7-406b-947e-8317a6736d68": {
+    "original": "Bijvoorbeeld: een broer krijgt alleen korting op activiteit A als zijn zus ook op activiteit A is ingeschreven.",
+    "translation": "For example: a brother only receives a discount on activity A if his sister is also registered for activity A."
   },
   "feff031d-9953-443f-ae78-eee68cec0fb7": {
     "original": "Hoofdbeheerders",
