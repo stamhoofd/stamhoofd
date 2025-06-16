@@ -141,10 +141,12 @@ async function doExport() {
         documentTitle += ' ' + group.settings.name;
     }
 
+    const logoImage = props.platform.config.logoDocuments ?? props.platform.config.squareLogo ?? props.platform.config.horizontalLogo;
+
     const document = new MembersPdfDocument(props.items,
         memberDetailsSheet,
         membersSummarySheet,
-        documentTitle);
+        documentTitle, logoImage);
 
     try {
         await document.download();
