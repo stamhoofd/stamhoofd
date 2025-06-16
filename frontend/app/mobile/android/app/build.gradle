@@ -7,7 +7,7 @@ android {
         applicationId "be.fos.keeo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 264
+        versionCode 267
         versionName "2.85.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
