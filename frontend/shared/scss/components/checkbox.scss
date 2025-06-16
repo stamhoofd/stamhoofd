@@ -84,8 +84,8 @@ $checkbox-border-radius: 5px;
             flex-shrink: 0;
             flex-basis: 20px;
             border-radius: $checkbox-border-radius;
-            border: $border-width solid $color-border;
-            box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+            border: 1px solid $color-border-shade;
+            box-shadow: 0px 1px 2px 0px $color-input-shadow;
             background: $color-background;
             box-sizing: border-box;
             transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
@@ -145,7 +145,7 @@ $checkbox-border-radius: 5px;
                 background: $color-background;
                 border-radius: calc((20px - $border-width * 2) / 2);
                 transition: transform 0.2s;
-                transform: scale(1, 1);
+                transform: scale(0.9, 0.9);
             }
         }
     }

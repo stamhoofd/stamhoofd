@@ -11,7 +11,7 @@
     @include style-side-view-shadow();
 }
 .style-input-shadow {
-    box-shadow: 0px 2px 3px $color-box-shadow;
+    box-shadow: 0px 1px 2px 0px $color-input-shadow;
 }
 .style-overlay-shadow {
     box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
@@ -599,12 +599,17 @@
     background: $color-background;
     border-radius: $border-radius;
     transition: border-color 0.2s;
-    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+    @extend .style-input-shadow;
     
     &:focus,
     &:focus-within {
         border-color: $color-primary;
-        box-shadow: 0 0 0 1px $color-primary;
+        outline: 1.1px solid $color-primary;
+        outline-offset: -0.1px;
+
+        &:hover {
+            border: $border-width solid $color-primary;
+        }
     }
 }
 
