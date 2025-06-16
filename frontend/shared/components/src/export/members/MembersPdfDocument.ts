@@ -38,7 +38,7 @@ export class MembersPdfDocument {
         // description
         const documentDescription = new DefaultText($t('Bewaar dit document op een veilige plaats en vernietig het na gebruik.'), {
             spacing: {
-                bottom: mmToPoints(4),
+                bottom: mmToPoints(8),
             },
         });
         items.push(documentDescription);
