@@ -4679,7 +4679,7 @@
   "fa50aa94-4f8a-428a-9b97-8b477176240a": "Alle hieraan verbonden informatie gaat dan ook mogelijks verloren.",
   "9e080d96-2c2b-47e3-b56c-d58d993974c9": "Gender",
   "fae120e5-80b0-4b67-a8b7-638b43362429": "Oudergegevens",
-  "bd1d21bd-b58f-4d13-b7c7-510db5702441": "Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders",
+  "bd1d21bd-b58f-4d13-b7c7-510db5702441": "Naam, adres, e-mailadres en telefoonnummer van één of meerdere (plus)ouders. Hierdoor kunnen ouders ook het lid beheren. Het rijksregisternummer van de ouders wordt ook verzameld als dat werd ingeschakeld.",
   "347b9603-d66d-4587-9935-192eaeb0d3bd": "(van lid zelf)",
   "f06acd8c-4cec-42ff-b4b4-5da57ef7db09": "Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.",
   "30047312-8c15-4988-8095-a0f605874c22": "Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.",

@@ -130,7 +130,11 @@ family.members.push(settings.exampleValue);
 const properties = [
     buildPropertyRefs('gender', $t(`9e080d96-2c2b-47e3-b56c-d58d993974c9`)),
     buildPropertyRefs('birthDay', $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`)),
-    buildPropertyRefs('nationalRegisterNumber', $t(`00881b27-7501-4c56-98de-55618be2bf11`)),
+    buildPropertyRefs(
+        'nationalRegisterNumber', $t(`00881b27-7501-4c56-98de-55618be2bf11`), {
+            description: $t('Als je ook de oudergegevens inschakelt, wordt zowel het rijksregisternummer van het lid als dat van de ouders gevraagd (minstens één ouder).'),
+        },
+    ),
     buildPropertyRefs('parents', $t(`fae120e5-80b0-4b67-a8b7-638b43362429`), {
         description: $t(`bd1d21bd-b58f-4d13-b7c7-510db5702441`),
     }),
