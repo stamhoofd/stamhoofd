@@ -9,6 +9,11 @@ export interface ObjectFetcher<O> {
     fetchCount(data: CountFilteredRequest): Promise<number>;
 
     destroy?(): void;
+
+    /**
+     * Returns true if operating in offline mode. Can be used for UI hints
+     */
+    isOffline?: boolean;
 }
 
 export interface FetchLimitSettings {

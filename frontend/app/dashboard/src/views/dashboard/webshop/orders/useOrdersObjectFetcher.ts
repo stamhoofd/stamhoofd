@@ -3,6 +3,8 @@ import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, 
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { WebshopManager } from '../WebshopManager';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
+import { Request } from '@simonbackx/simple-networking';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -16,8 +18,49 @@ function searchToFilter(search: string | null): StamhoofdFilter | null {
 }
 
 export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
-    return {
+    const objectFetcher = {
+        isOffline: false,
+        internetPromise: null as Promise<void> | null,
+        lastInternetLoad: 0,
         extendSort,
+        async loadFromInternet() {
+            if (this.internetPromise) {
+                return this.internetPromise;
+            }
+
+            this.internetPromise = this.doLoadFromInternet().finally(() => {
+                this.internetPromise = null;
+            });
+
+            return this.internetPromise;
+        },
+        async doLoadFromInternet() {
+            try {
+                // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher)
+                if (!this.isOffline && this.lastInternetLoad > Date.now() - 5_000) {
+                    return;
+                }
+
+                this.isOffline = false;
+                await manager.fetchOrders({
+                    isFetchAll: false,
+                });
+                await manager.fetchTickets({
+                    isFetchAll: false,
+                });
+                this.lastInternetLoad = Date.now();
+            }
+            catch (e) {
+                if (Request.isNetworkError(e)) {
+                    console.warn('Failed to fetch new orders from the network', e);
+                    this.isOffline = true;
+                }
+                else {
+                    throw e;
+                }
+            }
+        },
+
         async fetch(data: LimitedFilteredRequest) {
             const arrayBuffer: PrivateOrderWithTickets[] = [];
 
@@ -30,6 +73,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             if (data.pageFilter) {
                 filters.unshift(data.pageFilter);
+            }
+            else {
+                await this.loadFromInternet();
             }
 
             if (data.sort.length === 0) {
@@ -61,7 +107,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filter,
                 limit: data.limit,
                 sortItem,
-            }).catch(console.error);
+            });
 
             await addTickets(manager, arrayBuffer);
 
@@ -85,6 +131,14 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
+            if (!data.pageFilter && arrayBuffer.length === 0 && this.isOffline) {
+                // First page load failed
+                throw new SimpleError({
+                    code: 'network_error',
+                    message: 'No internet connection',
+                });
+            }
+
             return { results: arrayBuffer, next };
         },
         async fetchCount(data: CountFilteredRequest): Promise<number> {
@@ -99,6 +153,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             const filter = mergeFilters(filters, '$and');
 
+            await this.loadFromInternet();
+
             await manager.streamOrders({
                 callback: () => {
                     count++;
@@ -110,6 +166,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         },
         ...overrides,
     };
+
+    return objectFetcher;
 }
 
 async function addTickets(manager: WebshopManager, arrayBuffer: PrivateOrderWithTickets[]): Promise<void> {

@@ -436,6 +436,10 @@
             color: $color-primary;
         }
 
+        &.red {
+            color: $color-error;
+        }
+
         &:disabled,
         &.disabled {
             color: $color-gray-2;

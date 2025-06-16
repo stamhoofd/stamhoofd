@@ -34,8 +34,9 @@
 
         <main>
             <div class="container">
-                <h1 class="style-navigation-title">
+                <h1 class="style-navigation-title with-icons">
                     {{ title }}
+                    <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('Geen internetverbinding. Klik om te herladen.')" type="button" class="button icon earth-off red" @click="refreshOnline" />
                     <span v-if="titleSuffix" class="title-suffix">
                         {{ titleSuffix }}
                     </span>
@@ -112,6 +113,13 @@
                 </button>
             </p>
 
+            <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0 && tableObjectFetcher.objectFetcher.isOffline" class="error-box icon earth-off with-button">
+                {{ $t('Geen internetverbinding') }}
+
+                <button class="button text" type="button" @click="refreshOnline">
+                    {{ $t('Opnieuw proberen') }}
+                </button>
+            </p>
             <p v-else-if="totalFilteredCount === 0 && totalItemsCount === 0" class="info-box">
                 <slot name="empty" />
             </p>
@@ -620,6 +628,10 @@ const lastRefresh = ref(new Date());
 function refresh() {
     lastRefresh.value = new Date();
     props.tableObjectFetcher.reset(true, true);
+}
+
+function refreshOnline() {
+    refresh();
 }
 
 const lastFilteredCount = ref(null) as Ref<number | null>;

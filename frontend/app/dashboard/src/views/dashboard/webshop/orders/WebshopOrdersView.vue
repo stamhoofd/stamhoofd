@@ -37,29 +37,10 @@ const props = defineProps<{ webshopManager: WebshopManager }>();
 const title = 'Bestellingen';
 const configurationId = 'orders';
 
-useVisibilityChange(() => {
-    fetchTickets();
-    fetchOrders();
-});
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(),
 });
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
-fetchTickets();
-fetchOrders();
-
-function fetchOrders() {
-    props.webshopManager.fetchOrders().then((hasUpdatedOrders) => {
-        if (hasUpdatedOrders) {
-            tableObjectFetcher.reset(true, true);
-        }
-    }).catch(console.error);
-}
-
-function fetchTickets() {
-    props.webshopManager.fetchTickets().catch(console.error);
-}
-
 const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.webshop ?? props.webshopManager.preview);
 
 const organizationManager = useOrganizationManager();
