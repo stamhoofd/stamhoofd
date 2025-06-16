@@ -36,7 +36,7 @@
 
 <script lang="ts" setup>
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { Checkbox, EditRecordCategoriesBox, GroupUIFilterBuilder, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, getCheckoutUIFilterBuilders, useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components';
+import { Checkbox, EditRecordCategoriesBox, GroupUIFilterBuilder, RecordEditorSettings, RecordEditorType, STErrorsDefault, STList, STListItem, SaveView, useCheckoutInMemoryFilterBuilders } from '@stamhoofd/components';
 import { Checkout, PrivateWebshop, RecordCategory, WebshopMetaData } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
