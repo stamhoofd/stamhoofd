@@ -30,7 +30,7 @@
                     <h1>{{ webshop.meta.title || webshop.meta.name }}</h1>
 
                     <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
-                    <div v-if="webshop.meta.description.html" class="description style-wysiwyg" v-html="webshop.meta.description.html" />
+                    <div v-if="webshop.meta.description.html" class="style-wysiwyg gray" v-html="webshop.meta.description.html" />
                     <p v-else-if="webshop.meta.description.text" class="description" v-text="webshop.meta.description.text" />
 
                     <p v-if="showOpenAt" class="info-box">

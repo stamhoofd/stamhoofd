@@ -453,16 +453,30 @@
     }
 }
 
+.font-size-description {
+    font-size: 15px;
+
+    @media (max-width: 400px) {
+        font-size: 14px;
+    }
+}
+
+.font-size-description-large {
+    font-size: 16px;
+
+    @media (max-width: 400px) {
+        font-size: 15px;
+    }
+}
+
 .style-description {
+    @extend .font-size-description;
+
     font-size: 15px;
     line-height: 1.5;
     font-weight: $font-weight-default;
     color: $color-gray-text;
     font-variation-settings: 'opsz' 19;
-
-    @media (max-width: 400px) {
-        font-size: 14px;
-    }
 
     strong {
         @extend .style-strong;
@@ -475,15 +489,11 @@
 }
 
 .style-description-large {
-    font-size: 16px;
+    @extend .font-size-description-large;
     line-height: 1.5;
     font-weight: $font-weight-default;
     color: $color-gray-text;
     font-variation-settings: 'opsz' 19;
-
-    @media (max-width: 400px) {
-        font-size: 15px;
-    }
 }
 
 .style-description, .style-description-large, .style-description-small, .style-title-list {
@@ -1269,6 +1279,12 @@
 }
 
 .style-wysiwyg {
+    @extend .font-size-description;
+
+    &.large {
+        @extend .font-size-description-large;
+    }
+
     strong {
         font-weight: bold;
 
@@ -1290,15 +1306,22 @@
         color: $color-dark;
     }
 
-    &.gray {
-        p:not([class]), p.is-empty {
+    ul, ol {
+        padding-left: 25px;
+        font-size: inherit;
+
+        li {
+            font-size: inherit;
+            margin: 4px 0;
+            font-weight: $font-weight-default;
+            line-height: 1.5;
             color: $color-gray-text;
         }
     }
 
-    &.large {
+    &.gray {
         p:not([class]), p.is-empty {
-           @extend .style-description-large;
+            color: $color-gray-text;
         }
     }
 
@@ -1358,19 +1381,6 @@
                     text-decoration-color: $color-primary;
                 }
             }
-        }
-    }
-
-    ul, ol {
-        padding-left: 25px;
-
-        li {
-            margin: 4px 0;
-            
-            font-size: 16px;
-            font-weight: $font-weight-default;
-            line-height: 1.5;
-            color: $color-gray-text;
         }
     }
 
