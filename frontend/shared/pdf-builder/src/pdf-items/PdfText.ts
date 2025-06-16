@@ -34,11 +34,14 @@ export type PdfTextOptions = {
  * A text
  */
 export class PdfText implements PdfItem {
+    private readonly text: string;
+
     private get marginBottom() {
         return this.options.spacing?.bottom ?? 0;
     }
 
-    constructor(private readonly text: string, private readonly options: PdfTextOptions = {}) {
+    constructor(text: string, private readonly options: PdfTextOptions = {}) {
+        this.text = text.replaceAll(' ', ' ');
     }
 
     private configure(doc: PDFKit.PDFDocument) {
