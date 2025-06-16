@@ -79,7 +79,9 @@ function createMembersDetailHorizontalGridFactory({ members, columns, selectable
  */
 function memberDetailsVerticalStackFactory(member: PlatformMember, columns: SelectablePdfData<PlatformMember>[], name: string, minLabelWidth: number, shouldHideEmptyDetails: boolean): VerticalStack {
     // name of the member
-    const title = new H3(name);
+    const title = new H3(name, {
+        preferredMaxHeight: mmToPoints(100),
+    });
 
     // spacings to reuse
     const spacing4mm = new Spacing(mmToPoints(4));
@@ -112,7 +114,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
             // only if it's a new category
             if (c.category !== currentCategory) {
                 result.push(spacing2mm);
-                const subTitle = new PdfText(c.category, { font: metropolisBold, fontSize: 9, fillColor: colorDark, align: 'left', underline: true });
+                const subTitle = new PdfText(c.category, { font: metropolisBold, fontSize: 9, fillColor: colorDark, align: 'left', underline: true, preferredMaxHeight: mmToPoints(100) });
                 result.push(subTitle);
                 result.push(spacing2mm);
                 currentCategory = c.category;
@@ -134,7 +136,10 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
             },
             value: {
                 text: stringValue,
-                preferredMaxHeight: mmToPoints(60),
+                minWidth: mmToPoints(20),
+                textOptions: {
+                    preferredMaxHeight: mmToPoints(100),
+                },
             },
             gapBetween: mmToPoints(2),
             // lineGap of 1mm (for small spacing between lines of the value and label text)

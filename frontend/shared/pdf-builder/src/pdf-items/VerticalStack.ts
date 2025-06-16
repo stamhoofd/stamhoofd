@@ -12,6 +12,12 @@ export interface VerticalStackOptions {
      * Place on another page if the available height is less than this (unless the total height of the stack is less).
      */
     minAvailableHeight?: number;
+
+    /**
+     * Whether the stack is allowed to be split by a parent pdf item.
+     * The HorizontalGrid for example can decide to split the stack to optimize the height.
+     */
+    isAllowedToSplit?: boolean;
 }
 
 /**
@@ -24,6 +30,10 @@ export class VerticalStack implements PdfItem {
      */
     get size(): number {
         return this.items.length;
+    }
+
+    get isAllowedToSplit() {
+        return !!this.options.isAllowedToSplit;
     }
 
     /**

@@ -100,8 +100,11 @@ function createMembersHorizontalGridFactory({ members, selectableColumn }: Membe
                 },
                 value: {
                     text: value,
+                    minWidth: mmToPoints(20),
                     defaultText: ' ',
-                    preferredMaxHeight: mmToPoints(60),
+                    textOptions: {
+                        preferredMaxHeight: mmToPoints(60),
+                    },
                 },
                 gapBetween: mmToPoints(2),
                 // lineGap of 1mm (for small spacing between lines of the value and label text)
@@ -117,7 +120,7 @@ function createMembersHorizontalGridFactory({ members, selectableColumn }: Membe
 
         const gridColumnGap = mmToPoints(10);
 
-        const stack = new VerticalStack(stackItems);
+        const stack = new VerticalStack(stackItems, { isAllowedToSplit: true });
 
         // create a horizontal grid containing the vertical stacks
         const grid = new HorizontalGrid([stack], {

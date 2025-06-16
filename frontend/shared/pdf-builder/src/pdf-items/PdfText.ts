@@ -6,6 +6,7 @@ export type PdfTextOptions = {
     font?: PdfFont;
     fontSize?: number;
     fillColor?: string;
+
     /**
      * The position of the text,
      * leave undefined to use the current position.
@@ -20,6 +21,13 @@ export type PdfTextOptions = {
          */
         bottom?: number;
     };
+
+    /**
+    * The preferred max height of the text.
+    * The actual height might be smaller or larger.
+    * This is for example used to automatically calculate the width of columns.
+    */
+    preferredMaxHeight?: number;
 } & PDFKit.Mixins.TextOptions;
 
 /**
@@ -69,6 +77,25 @@ export class PdfText implements PdfItem {
         this.configure(doc);
 
         return doc.widthOfString(this.text, this.options);
+    }
+
+    getMinWidth(docWrapper: PdfDocWrapper): number {
+        let preferredMaxHeight = this.options.preferredMaxHeight;
+
+        const valueWidth = this.getWidth(docWrapper);
+
+        if (preferredMaxHeight === undefined || !valueWidth) {
+            return valueWidth;
+        }
+
+        if (preferredMaxHeight < 1) {
+            preferredMaxHeight = 1;
+        }
+
+        const lineHeight = this.getHeight(docWrapper);
+        const preferredMaxLines = Math.floor(preferredMaxHeight / lineHeight);
+
+        return Math.ceil(valueWidth / preferredMaxLines);
     }
 
     getFonts() {

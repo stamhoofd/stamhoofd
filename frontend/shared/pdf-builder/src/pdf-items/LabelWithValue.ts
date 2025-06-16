@@ -8,23 +8,14 @@ import { PdfTextOptions } from './PdfText';
 export interface LabelWithValueOptions {
     label: {
         text: string;
-        /**
-         * min width of the label,
-         * if more space is available the label will expand
-         */
         minWidth: number;
         textOptions?: PdfTextOptions;
     };
     value: {
         text: string;
+        minWidth: number;
         defaultText?: string;
         textOptions?: PdfTextOptions;
-        /**
-         * The preferred max height of the value text.
-         * The actual height might be smaller or larger.
-         * This is for example used to automatically calculate the width of columns.
-         */
-        preferredMaxHeight?: number;
     };
     /**
      * horizontal gap between the label and the value
@@ -107,27 +98,20 @@ export class LabelWithValue implements PdfItem {
         );
     }
 
+    private getValueTextMinWidth(docWrapper: PdfDocWrapper) {
+        if (this.options.value.text.trim().length === 0) {
+            return 1;
+        }
+        return Math.max(this.valueText.getMinWidth(docWrapper), this.options.value.minWidth);
+    }
+
     getWidth(docWrapper: PdfDocWrapper): number {
-        return this.labelText.getWidth(docWrapper) + this.valueText.getWidth(docWrapper) + this.options.gapBetween;
+        const valueWidth = Math.max(this.valueText.getWidth(docWrapper), this.getValueTextMinWidth(docWrapper));
+        return this.labelText.getWidth(docWrapper) + valueWidth + this.options.gapBetween;
     }
 
     getMinWidth(docWrapper: PdfDocWrapper): number {
-        let preferredMaxHeight = this.options.value.preferredMaxHeight;
-
-        let valueWidth = this.valueText.getWidth(docWrapper);
-
-        if (preferredMaxHeight !== undefined) {
-            if (preferredMaxHeight < 1) {
-                preferredMaxHeight = 1;
-            }
-
-            const valueTextLineHeight = this.valueText.getHeight(docWrapper);
-            const preferredMaxLines = Math.floor(preferredMaxHeight / valueTextLineHeight);
-
-            valueWidth = Math.ceil(valueWidth / preferredMaxLines);
-        }
-
-        return this.options.label.minWidth + valueWidth + this.options.gapBetween;
+        return this.options.label.minWidth + this.getValueTextMinWidth(docWrapper) + this.options.gapBetween;
     }
 
     getFonts(): PdfFont[] {
