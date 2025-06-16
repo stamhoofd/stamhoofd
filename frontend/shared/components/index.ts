@@ -28,6 +28,7 @@ export * from './src/fetchers';
 export * from './src/quick-actions';
 export * from './src/setupSteps';
 export * from './src/bundle-discounts';
+export * from './src/export';
 
 // Navigation
 export { default as EditorView } from './src/editor/EditorView.vue';

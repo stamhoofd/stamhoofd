@@ -6,7 +6,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
-import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, usePlatformFamilyManager } from '../../members';
+import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
@@ -89,7 +89,7 @@ export class RegistrationActionBuilder {
             ...this.getMemberActions(options),
             this.getEmailAction(),
             this.getSmsAction(),
-            this.getExportToExcelAction(),
+            this.getExportAction(),
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
             (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
@@ -325,15 +325,40 @@ export class RegistrationActionBuilder {
         });
     }
 
+    private getExportAction() {
+        return new MenuTableAction({
+            name: 'Exporteren naar',
+            icon: 'download',
+            priority: 8,
+            groupIndex: 3,
+            childActions: [
+                this.getExportToExcelAction(),
+                this.getExportToPdfAction(),
+            ],
+        });
+    }
+
     private getExportToExcelAction() {
         return new AsyncTableAction({
-            name: $t(`0302eaa0-ce2a-4ef0-b652-88b26b9c53e9`),
-            icon: 'download',
-            priority: 11,
-            groupIndex: 3,
+            name: $t('Excel...'),
+            priority: 0,
+            groupIndex: 0,
             handler: async (selection: TableActionSelection<PlatformRegistration>) => {
-                // TODO: vervangen door een context menu
                 await this.exportToExcel(selection);
+            },
+        });
+    }
+
+    private getExportToPdfAction() {
+        return new InMemoryTableAction({
+            name: $t('PDF...'),
+            priority: 0,
+            groupIndex: 0,
+            fetchLimitSettings: { limit: 500, createErrorMessage: (count, limit) => {
+                return $t('Je kan maximaal {limit} leden exporteren naar pdf. Er zijn {count} leden geselecteerd.', { count: Formatter.float(count), limit: Formatter.float(limit) });
+            } },
+            handler: async (registrations: PlatformRegistration[]) => {
+                await this.exportToPdf(registrations.map(r => r.member));
             },
         });
     }
@@ -585,6 +610,16 @@ export class RegistrationActionBuilder {
                 }),
             ],
             modalDisplayStyle: 'popup',
+        });
+    }
+
+    private async exportToPdf(members: PlatformMember[]) {
+        await presentExportMembersToPdf({
+            members,
+            platform: this.platform,
+            organizations: this.organizations,
+            groups: this.groups,
+            present: this.present,
         });
     }
 }

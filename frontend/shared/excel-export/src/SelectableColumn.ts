@@ -1,4 +1,6 @@
-export class SelectableColumn {
+import { SelectableData } from '@stamhoofd/components';
+
+export class SelectableColumn implements SelectableData {
     enabled: boolean = true;
     id: string;
 

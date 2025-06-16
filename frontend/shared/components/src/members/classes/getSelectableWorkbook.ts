@@ -13,7 +13,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
 
     const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
 
-    const returnNullIfNoAccessRight = (column: SelectableColumn, requiresAccessRights: AccessRight[]) => {
+    const returnNullIfNoAccessRight = <T extends SelectableColumn>(column: T, requiresAccessRights: AccessRight[]): T | null => {
         if (requiresAccessRights.some(accessRight => !auth.hasAccessRight(accessRight))) {
             return null;
         }
@@ -28,56 +28,46 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
             enabled: false,
         }),
-
         // todo: only if platform?
         new SelectableColumn({
             id: 'memberNumber',
             name: $t(`89eafa94-6447-4608-a71e-84752eab10c8`),
             description: $t(`f4b7e513-6e08-4b46-a3ae-3e4a974f1a3e`),
         }),
-
         new SelectableColumn({
             id: 'firstName',
             name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
         }),
-
         new SelectableColumn({
             id: 'lastName',
             name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
         }),
-
         new SelectableColumn({
             id: 'birthDay',
             name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
         }),
-
         new SelectableColumn({
             id: 'age',
             name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
             enabled: false,
         }),
-
         new SelectableColumn({
             id: 'gender',
             name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
         }),
-
         new SelectableColumn({
             id: 'phone',
             name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
         }),
-
         new SelectableColumn({
             id: 'email',
             name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
         }),
-
         new SelectableColumn({
             id: 'address',
             name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
             description: $t(`01e99208-dce7-4109-8cf2-3cc74c4df45c`),
         }),
-
         new SelectableColumn({
             id: 'securityCode',
             name: $t(`ba5f8036-1788-408a-8c44-1db80a53c087`),
@@ -90,7 +80,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             name: financialSupportTitle,
             enabled: false,
         }), [AccessRight.MemberReadFinancialData]),
-
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'uitpasNumber',
             name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
@@ -101,7 +90,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             name: $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
             enabled: false,
         }),
-
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'nationalRegisterNumber',
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
@@ -169,7 +157,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     category,
                     enabled,
                 }),
-
                 new SelectableColumn({
                     id: getId('email'),
                     name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
@@ -181,6 +168,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
                     category,
                     enabled,
+
                 }),
                 returnNullIfNoAccessRight(new SelectableColumn({
                     id: getId('nationalRegisterNumber'),
@@ -197,7 +185,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
             enabled: false,
         }),
-
         new SelectableColumn({
             id: 'unverifiedEmails',
             name: $t(`7766ee8a-cd92-4d6f-a3fa-f79504fbcdda`),
@@ -229,8 +216,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
     return columns;
 }
 
-// , permissions?: UserPermissions|null
-export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
+export function getSelectableGroupColumns(groups: Group[] = []) {
     const groupColumns: SelectableColumn[] = [];
 
     for (const group of groups) {
@@ -281,12 +267,22 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }
     }
 
+    return groupColumns;
+}
+
+export function getAllSelectableColumns(args: { platform: Platform; organization: Organization | null; groups?: Group[]; auth: ContextPermissions }) {
+    const groupColumns = getSelectableGroupColumns(args.groups ?? []);
+    return getSelectableColumns({ ...args, groupColumns });
+}
+
+// , permissions?: UserPermissions|null
+export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
                 id: 'members',
                 name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
-                columns: getSelectableColumns({ platform, organization, auth, groupColumns }),
+                columns: getAllSelectableColumns({ platform, organization, groups, auth }),
             }),
         ],
     });
