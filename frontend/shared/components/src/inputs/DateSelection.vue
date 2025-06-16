@@ -6,7 +6,7 @@
             </div>
         </div>
         <div v-else class="input selectable" :class="{placeholder: model === null }" @click="focusFirst()" @mousedown.prevent>
-            <span class="placeholder">{{ placeholder }}</span>
+            <span class="placeholder">{{ placeholderDate ? Formatter.date(placeholderDate, true) : placeholder }}</span>
             <div @click.prevent @mouseup.prevent>
                 <input ref="dayInput" v-model="dayText" inputmode="numeric" autocomplete="off" :placeholder="dayPlaceholder" @focus.prevent="onFocus(0)" @blur="onBlur" @click.prevent @mouseup.prevent @mousedown.prevent="onFocus(0)" @input="onTyping">
                 <span>{{ dayText || dayPlaceholder }}</span>
@@ -61,6 +61,7 @@ const model = defineModel<Date | null>({ default: null });
 const props = withDefaults(defineProps<{
     required?: boolean;
     placeholder?: string;
+    placeholderDate?: Date | null;
     min?: Date;
     max?: Date;
     // local time!
@@ -68,6 +69,7 @@ const props = withDefaults(defineProps<{
 }>(), {
     required: true,
     placeholder: () => $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`),
+    placeholderDate: null,
     min: () => new Date(1900, 0, 1, 0, 0, 0, 0),
     max: () => new Date(2100, 0, 1, 0, 0, 0, 0),
     time: null,
@@ -96,9 +98,19 @@ const numberInputs = computed(() => [dayInput.value, monthInput.value, yearInput
 
 const hasFocus = ref(false);
 
-const selectedDay = computed(() => (model.value ? setTime(Formatter.luxon(model.value)) : DateTime.fromObject(defaultLocalTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone)).toJSDate());
+const selectedDay = computed(() => {
+    let d = DateTime.fromObject(defaultLocalTime.value, { zone: Formatter.timezone }).setZone(Formatter.timezone);
+    if (model.value) {
+        d = setTime(Formatter.luxon(model.value));
+    }
+    else if (props.placeholderDate) {
+        d = setTime(Formatter.luxon(props.placeholderDate));
+    }
+    d = limitDateTime(d) ?? d;
+    return d.toJSDate();
+});
 
-const dateText = computed(() => model.value ? Formatter.date(model.value, true) : props.placeholder);
+const dateText = computed(() => model.value ? Formatter.date(model.value, true) : (props.placeholderDate ? Formatter.date(props.placeholderDate, true) : props.placeholder));
 
 const dayConfig: InputConfig = {
     type: 'day',
@@ -471,6 +483,15 @@ function emitDateTime(dateTime: DateTime | null): void {
         return;
     }
 
+    dateTime = limitDateTime(dateTime);
+    if (dateTime === null) {
+        // If the date is not valid, we don't set the model
+        return;
+    }
+    model.value = dateTime.toJSDate();
+}
+
+function limitDateTime(dateTime: DateTime): DateTime | null {
     const original = dateTime;
     const max = DateTime.fromJSDate(props.max).setZone(Formatter.timezone);
     const min = DateTime.fromJSDate(props.min).setZone(Formatter.timezone);
@@ -489,7 +510,7 @@ function emitDateTime(dateTime: DateTime | null): void {
             }
         }
         else {
-            return;
+            return null;
         }
     }
 
@@ -505,7 +526,7 @@ function emitDateTime(dateTime: DateTime | null): void {
             }
         }
         else {
-            return;
+            return null;
         }
     }
 
@@ -523,7 +544,7 @@ function emitDateTime(dateTime: DateTime | null): void {
         }
     }
 
-    model.value = dateTime.toJSDate();
+    return dateTime;
 }
 
 function openContextMenu(autoDismiss = true) {

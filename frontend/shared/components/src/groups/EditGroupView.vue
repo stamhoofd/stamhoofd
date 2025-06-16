@@ -451,7 +451,7 @@
                     </p>
 
                     <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="startDate" :placeholder="formatDate(patchedGroup.settings.startDate, true)" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
+                        <DateSelection v-model="startDate" :placeholderDate="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                     </STInputBox>
                     <p class="style-description-small">
                         {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
