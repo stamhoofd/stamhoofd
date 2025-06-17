@@ -3351,6 +3351,10 @@
     "original": "Geen activiteiten gevonden",
     "translation": "No activities found"
   },
+  "2a50d0e8-bdb9-4016-84be-b0de6e26ca14": {
+    "original": "Exporteren naar",
+    "translation": "Export to"
+  },
   "2a53e6f7-a6eb-4adf-a218-f28de686d188": {
     "original": "Verifieer jouw nieuwe e-mailadres via de link in de e-mail, daarna passen we het automatisch aan.",
     "translation": "Verify your new email address via the link in the email, then we will automatically adjust it."
@@ -4294,6 +4298,10 @@
   "367d239e-3b54-4eb0-b6bd-9c994f3f9523": {
     "original": "Net voor het betalen van inschrijvingen is het mogelijk om te vragen of een gezin wenst gebruik te maken van financiële ondersteuning. Of dat aanstaat kan je op verschillende niveau's configureren, o.a. via 'Gegevens van leden'. Maar als het ingeschakeld is, bepaal je hier hoe het werkt voor alle groepen.",
     "translation": "Just before paying for registrations, it is possible to ask whether a family wishes to make use of financial support. Whether this is enabled can be configured at different levels, including via 'Member data'. But if it is enabled, you determine here how it works for all groups."
+  },
+  "36817a3d-6e32-40ae-bec5-a3b912f1b65c": {
+    "original": "Alles selecteren",
+    "translation": "Select all"
   },
   "3686816f-e3c4-4d60-8e87-1f323dba4547": {
     "original": "Geverifieerd",
