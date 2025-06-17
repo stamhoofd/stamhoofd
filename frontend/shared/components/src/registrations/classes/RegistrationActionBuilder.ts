@@ -265,13 +265,28 @@ export class RegistrationActionBuilder {
     }
 
     private getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformRegistration> | null {
-        if (this.organizations.length !== 1 || this.groups.filter(g => g.type !== GroupType.EventRegistration).length === 0) {
-            console.error('Cannot move registrations');
+        if (this.organizations.length !== 1) {
             return null;
         }
 
         const organization = this.organizations[0];
         const period = selectedOrganizationRegistrationPeriod ?? organization.period;
+
+        let suggestedGroups = this.groups.map(g => g.waitingList).filter(g => g !== null);
+
+        for (const g of this.groups) {
+            const add = [g.event?.group, g.parentGroup, g.event?.group?.waitingList];
+            for (const a of add) {
+                if (a) {
+                    if (suggestedGroups.find(gg => gg.id === a.id)) {
+                        continue; // Already suggested
+                    }
+                    suggestedGroups.push(a);
+                }
+            }
+        }
+
+        suggestedGroups = suggestedGroups.filter(g => this.groups.find(gg => gg.id === g.id) === undefined); // Remove groups that are already selected
 
         return new MenuTableAction({
             name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
@@ -281,6 +296,17 @@ export class RegistrationActionBuilder {
             allowAutoSelectAll: false,
             enabled: this.hasWrite,
             childActions: () => [
+                ...suggestedGroups.map((g) => {
+                    return new InMemoryTableAction({
+                        name: g.settings.name.toString(),
+                        needsSelection: true,
+                        groupIndex: 0,
+                        allowAutoSelectAll: false,
+                        handler: async (members: PlatformRegistration[]) => {
+                            await this.moveRegistrations(members, g);
+                        },
+                    });
+                }),
                 new MenuTableAction({
                     name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
                     groupIndex: 0,
