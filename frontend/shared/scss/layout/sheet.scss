@@ -45,7 +45,10 @@
     }
 
     > div {
-        background: $color-background;
+        background: $color-background-lighter;
+        --color-current-background: #{$color-background-lighter};
+        --color-current-background-shade: #{$color-background-lighter-shade};
+
         border-radius: $border-radius-modals;
 
         position: absolute;

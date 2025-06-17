@@ -29,7 +29,7 @@ export class ColorHelper {
 
         const colorDark = Colors.hslToHex({
             h: h,
-            s: s,
+            s: s - 5,
             l: Math.min(100, l + 5),
         });
 
@@ -38,7 +38,7 @@ export class ColorHelper {
         // Invert dark or light colors depending on theme
         const blackContrast = Colors.getAPCAContrast(rgb, { r: 0, g: 0, b: 0 });
         const whiteContrast = Colors.getAPCAContrast(rgb, { r: 255, g: 255, b: 255 });
-        if (blackContrast < 50) {
+        if (blackContrast < 60) {
             const newL = 100 - l;
             const newRGB = Colors.HSLToRGB(h, s, newL);
             const newBlackContrast = Colors.getContrastRatio(newRGB, { r: 0, g: 0, b: 0 });

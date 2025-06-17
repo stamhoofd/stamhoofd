@@ -86,7 +86,7 @@ $checkbox-border-radius: 5px;
             border-radius: $checkbox-border-radius;
             border: 1px solid $color-border-shade;
             box-shadow: 0px 1px 2px 0px $color-input-shadow;
-            background: $color-background;
+            background: $color-current-background;
             box-sizing: border-box;
             transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
             display: flex;
@@ -96,7 +96,7 @@ $checkbox-border-radius: 5px;
             svg > path {
                 stroke-dasharray: 30;
                 stroke-dashoffset: 30;
-                stroke: $color-background;
+                stroke: $color-current-background;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
            
@@ -127,7 +127,7 @@ $checkbox-border-radius: 5px;
                 transform: translate(-50%, -50%);
                 width: 10px;
                 height: 2px;
-                background: $color-background;
+                background: $color-current-background;
                 border-radius: 2px;
                 transition: opacity 0.2s 0s;
             }
@@ -142,7 +142,7 @@ $checkbox-border-radius: 5px;
                 content: "";
                 height: 20px - $border-width * 2;
                 width: 20px - $border-width * 2;
-                background: $color-background;
+                background: $color-current-background;
                 border-radius: calc((20px - $border-width * 2) / 2);
                 transition: transform 0.2s;
                 transform: scale(0.9, 0.9);

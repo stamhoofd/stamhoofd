@@ -46,7 +46,10 @@
         left: 50%;
         top: 0;
 
-        background: $color-background;
+        background: $color-background-lighter;
+        --color-current-background: #{$color-background-lighter};
+        --color-current-background-shade: #{$color-background-lighter-shade};
+
         border-radius: $border-radius-modals;
 
         box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;

@@ -595,8 +595,8 @@
 }
 
 .style-input-box {
-    border: $border-width solid $color-border;
-    background: $color-background;
+    border: $border-width solid $color-border-shade;
+    background: $color-current-background;
     border-radius: $border-radius;
     transition: border-color 0.2s;
     @extend .style-input-shadow;
