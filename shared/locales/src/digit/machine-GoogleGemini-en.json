@@ -839,6 +839,10 @@
     "original": "Upload hier het logo zonder extra tekst of witruimtes. Laat leeg als je die niet hebt, en upload dan een banner. Zo kan Ravot de plaatsing optimaliseren. We plaatsen het logo bij voorkeur op de afgedrukte versie van een ticket als zowel een logo als banner aanwezig is.",
     "translation": "Upload the logo here without extra text or white spaces. Leave blank if you don't have one, and then upload a banner. This allows Ravot to optimise the placement. We prefer to place the logo on the printed version of a ticket if both a logo and banner are present."
   },
+  "dfd3083c-6483-46de-9cc8-0afeb7f021f3": {
+    "original": "Open Ravot",
+    "translation": "Open Play"
+  },
   "e07bc7a1-92c0-48fc-91f3-46e12573ee03": {
     "original": "Naam groep",
     "translation": "Group name"

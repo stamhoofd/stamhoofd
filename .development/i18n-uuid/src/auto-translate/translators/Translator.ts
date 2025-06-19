@@ -78,6 +78,7 @@ export abstract class Translator implements ITranslator {
 - If you don't have enough context to provide a correct translation, set the value to an empty string.
 - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
 - If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.
+- Do not change currencies. Keep the currency symbol or (translated) name as it is in the original text. 
 
 Translate this array: 
 
@@ -88,6 +89,7 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
 - If you don't have enough context to provide a correct translation, set the value to an empty string.
 - Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
 - If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.${consistentWordsText}
+- Do not change currencies. Keep the currency symbol or (translated) name as it is in the original text. 
 `;
 
         return prompt;

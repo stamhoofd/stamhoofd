@@ -31,6 +31,10 @@
     "original": "Je vindt",
     "translation": "Vous trouverez"
   },
+  "006de532-e3d1-4567-8def-48c99477d65e": {
+    "original": "Deze categorie is leeg en zal nog niet getoond worden.",
+    "translation": "Cette catégorie est vide et ne sera pas encore affichée."
+  },
   "006efcef-ff11-4003-b8d1-17d735535c05": {
     "original": "van {name}",
     "translation": "de {name}"
@@ -3091,6 +3095,10 @@
     "original": "Wil je deze ouder bij alle gezinsleden toevoegen?",
     "translation": "Souhaitez-vous ajouter ce parent à tous les membres de la famille ?"
   },
+  "270c18bf-7852-4d33-809d-6567c4bd56a9": {
+    "original": "Vragenlijst bewerken",
+    "translation": "Modifier le questionnaire"
+  },
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
     "translation": "et non choisi pour"
@@ -3102,6 +3110,10 @@
   "2712befc-5cc5-4013-b8df-ec0861a82c36": {
     "original": "Kies minstens één standaard leeftijdsgroep",
     "translation": "Choisissez au moins un groupe d'âge standard"
+  },
+  "2727f83e-20ba-436e-8449-1e6f3e15c628": {
+    "original": "Maand",
+    "translation": "Mois"
   },
   "272cfcc9-e917-4e74-8952-076b8f2e8b23": {
     "original": "Een lid moet een aansluiting hebben op de dag van de inschrijving.",
@@ -6130,6 +6142,10 @@
   "4e95caa9-bc2d-4772-80b2-624c42216c90": {
     "original": "E-mailadres ontvanger",
     "translation": "Adresse e-mail du destinataire"
+  },
+  "4e99ee6d-2445-4d3a-ab0f-343236295366": {
+    "original": "Jaar",
+    "translation": "Année"
   },
   "4ea84d3f-63f5-4ab0-bab2-a5c72fa0111d": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).",
@@ -9334,6 +9350,10 @@
   "770381c5-61af-483c-a21f-f55a63baba3a": {
     "original": "Bekijk de aangepaste overeenkomsten",
     "translation": "Consulter les accords mis à jour"
+  },
+  "770518af-b094-4fca-bc0a-641f508895ef": {
+    "original": "Categorie bewerken",
+    "translation": "Modifier la catégorie"
   },
   "771a87bb-4032-4cd4-967c-a145134f0b0a": {
     "original": "Kortingvoorwaarde toevoegen",
@@ -14054,6 +14074,10 @@
   "b56f4d0f-93c0-4f22-9597-735ee03cc9e2": {
     "original": "Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).",
     "translation": "La boutique en ligne propose des billets et des bons à la vente, chacun ayant son propre code QR et devant être scanné séparément. Idéal pour une fête ou un événement où l'accès est payant par personne. Moins idéal pour les grands groupes car vous devez alors scanner chaque ticket séparément (donc à éviter pour un repas festif)."
+  },
+  "b5822ffa-2c8b-4c88-bf4d-eb5566da56e7": {
+    "original": "Nieuwe categorie",
+    "translation": "Nouvelle catégorie"
   },
   "b584fc1c-6b13-442b-b2cc-f59e39fea6e7": {
     "original": "Bevestig de naam van de activiteit",
@@ -18839,6 +18863,10 @@
     "original": "E-mailsjablonen",
     "translation": "Modèles d'e-mails"
   },
+  "f0bd2c38-5490-4e28-a336-65c998cf3276": {
+    "original": "Dag",
+    "translation": "Jour"
+  },
   "f0c89199-09c8-48d4-ad73-bff0ac426df8": {
     "original": "Niet opslaan",
     "translation": "Ne pas enregistrer"
@@ -19154,6 +19182,10 @@
   "f4350366-03b5-4d0f-8bd5-a03672e347f5": {
     "original": "Deze kortingen worden op de volledige bestelling toegepast.",
     "translation": "Ces réductions sont appliquées sur la commande entière."
+  },
+  "f443476a-44f5-4dda-8c39-50332319d9ec": {
+    "original": "Vul een naam in",
+    "translation": "Entrez un nom"
   },
   "f45010df-47d0-4a9c-8da9-0c1d94e1154a": {
     "original": "Wachtwoord sterkte",

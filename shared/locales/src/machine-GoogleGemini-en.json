@@ -27,6 +27,10 @@
     "original": "Je vindt",
     "translation": "You will find"
   },
+  "006de532-e3d1-4567-8def-48c99477d65e": {
+    "original": "Deze categorie is leeg en zal nog niet getoond worden.",
+    "translation": "This category is empty and will not yet be shown."
+  },
   "006efcef-ff11-4003-b8d1-17d735535c05": {
     "original": "van {name}",
     "translation": "of {name}"
@@ -477,7 +481,7 @@
   },
   "05cb225f-376c-4685-b5d3-e7858171fa23": {
     "original": "Eénmalig € 49 (inclusief ticketverkoop-functie)",
-    "translation": "One-off £ 49 (including ticket sales function)"
+    "translation": "One-off € 49 (including ticket sales function)"
   },
   "05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9": {
     "original": "Beheerders",
@@ -905,7 +909,7 @@
   },
   "0b66eb2c-28ce-4e26-aecf-334880283bce": {
     "original": "€ 1 per jaar, per lid. Minimum € 79 per jaar, waarbij 79 leden inbegrepen (minder leden kan uiteraard)",
-    "translation": "£ 1 per year, per member. Minimum £ 79 per year, including 79 members (less members is possible of course)"
+    "translation": "€ 1 per year, per member. Minimum € 79 per year, with 79 members included (fewer members is of course possible)"
   },
   "0b6949f6-80b7-4d48-9e1e-16bfb826014a": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de vereniging) als een kampmelding wordt afgekeurd",
@@ -1577,7 +1581,7 @@
   },
   "141a681a-da48-45e8-a37f-058eb042d841": {
     "original": "Geef 25 euro en krijg zelf ook een tegoed",
-    "translation": "Give £25 and receive credit yourself"
+    "translation": "Give 25 euro and receive credit yourself"
   },
   "143d3f17-d547-47ff-9b83-f8587bcbc16c": {
     "original": "Markeer overschrijvingen als betaald.",
@@ -3035,6 +3039,10 @@
     "original": "Wil je deze ouder bij alle gezinsleden toevoegen?",
     "translation": "Do you want to add this parent to all family members?"
   },
+  "270c18bf-7852-4d33-809d-6567c4bd56a9": {
+    "original": "Vragenlijst bewerken",
+    "translation": "Edit questionnaire"
+  },
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
     "translation": "and not selected for"
@@ -3046,6 +3054,10 @@
   "2712befc-5cc5-4013-b8df-ec0861a82c36": {
     "original": "Kies minstens één standaard leeftijdsgroep",
     "translation": "Choose at least one default age group"
+  },
+  "2727f83e-20ba-436e-8449-1e6f3e15c628": {
+    "original": "Maand",
+    "translation": "Month"
   },
   "272cfcc9-e917-4e74-8952-076b8f2e8b23": {
     "original": "Een lid moet een aansluiting hebben op de dag van de inschrijving.",
@@ -3917,7 +3929,7 @@
   },
   "31bdee85-c1f4-4561-8f45-33e5527fc151": {
     "original": "Een lid kan naast deze opties altijd 0 euro aanduiden (dat is standaard geselecteerd) of zelf een bedrag ingeven.",
-    "translation": "In addition to these options, a member can always indicate £0 (this is selected by default) or enter an amount themselves."
+    "translation": "In addition to these options, a member can always indicate 0 euro (this is selected by default) or enter an amount themselves."
   },
   "31c28f13-d3b8-42ee-8979-c8224633237e": {
     "original": "Begunstigde",
@@ -5869,7 +5881,7 @@
   },
   "4c9238ec-4895-4ada-89c9-a4e2560d2f10": {
     "original": "€ 0",
-    "translation": "£ 0"
+    "translation": "€ 0"
   },
   "4ca2c5c7-44ba-4266-8189-b3c5ee7b9af8": {
     "original": "Wanneer een besteller kiest voor betaling ter plaatse/bij levering",
@@ -6018,6 +6030,10 @@
   "4e95caa9-bc2d-4772-80b2-624c42216c90": {
     "original": "E-mailadres ontvanger",
     "translation": "Recipient's email address"
+  },
+  "4e99ee6d-2445-4d3a-ab0f-343236295366": {
+    "original": "Jaar",
+    "translation": "Year"
   },
   "4ea84d3f-63f5-4ab0-bab2-a5c72fa0111d": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).",
@@ -9190,6 +9206,10 @@
   "770381c5-61af-483c-a21f-f55a63baba3a": {
     "original": "Bekijk de aangepaste overeenkomsten",
     "translation": "View the amended agreements"
+  },
+  "770518af-b094-4fca-bc0a-641f508895ef": {
+    "original": "Categorie bewerken",
+    "translation": "Edit category"
   },
   "771a87bb-4032-4cd4-967c-a145134f0b0a": {
     "original": "Kortingvoorwaarde toevoegen",
@@ -13089,7 +13109,7 @@
   },
   "ac19ae40-6e9d-4979-bd7c-01f0e672bf64": {
     "original": "Je kan bij het inschrijven de mogelijkheid geven om ook een vrije bijdrage (gift) te doen. Een lid kan dan kiezen uit 0 euro, enkele voorgestelde bedragen of een eigen gekozen bedrag.",
-    "translation": "When registering, you can give the option to also make a free contribution (donation). A member can then choose from £0, several suggested amounts or an amount of their own choosing."
+    "translation": "When registering, you can offer the possibility to also make a free contribution (donation). A member can then choose from 0 euro, several suggested amounts or a self-chosen amount."
   },
   "ac1d3647-1c2f-48a1-a08a-ce4821103fb1": {
     "original": "Ja, ontgrendelen",
@@ -13826,6 +13846,10 @@
   "b56f4d0f-93c0-4f22-9597-735ee03cc9e2": {
     "original": "Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).",
     "translation": "The webshop offers tickets and vouchers for sale, each with its own QR code and must be scanned separately. Ideal for a party or event where access is payable per person. Less ideal for large groups because you then have to scan each ticket separately (so best not to use for a feast)."
+  },
+  "b5822ffa-2c8b-4c88-bf4d-eb5566da56e7": {
+    "original": "Nieuwe categorie",
+    "translation": "New category"
   },
   "b584fc1c-6b13-442b-b2cc-f59e39fea6e7": {
     "original": "Bevestig de naam van de activiteit",
@@ -15945,7 +15969,7 @@
   },
   "d098733a-c6d7-4522-8a85-c4df8014506a": {
     "original": "€ 79 per jaar (inclusief ticketverkoop-functie) indien minder dan 50.000 euro omzet per jaar (zie website voor hogere omzet)",
-    "translation": "£ 79 per year (including ticket sales function) if less than £ 50,000 turnover per year (see website for higher turnover)"
+    "translation": "€ 79 per year (including ticket sales function) if less than 50,000 euro turnover per year (see website for higher turnover)"
   },
   "d098add1-c1b8-44d1-bf96-d762db3ea3cc": {
     "original": "Korting voor gezinsleden die inschrijven voor verschillende inschrijvingsgroepen/activiteiten met deze korting.",
@@ -18535,6 +18559,10 @@
     "original": "E-mailsjablonen",
     "translation": "Email templates"
   },
+  "f0bd2c38-5490-4e28-a336-65c998cf3276": {
+    "original": "Dag",
+    "translation": "Day"
+  },
   "f0c89199-09c8-48d4-ad73-bff0ac426df8": {
     "original": "Niet opslaan",
     "translation": "Do not save"
@@ -18846,6 +18874,10 @@
   "f4350366-03b5-4d0f-8bd5-a03672e347f5": {
     "original": "Deze kortingen worden op de volledige bestelling toegepast.",
     "translation": "These discounts are applied to the entire order."
+  },
+  "f443476a-44f5-4dda-8c39-50332319d9ec": {
+    "original": "Vul een naam in",
+    "translation": "Enter a name"
   },
   "f45010df-47d0-4a9c-8da9-0c1d94e1154a": {
     "original": "Wachtwoord sterkte",
