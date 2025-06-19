@@ -110,7 +110,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                             }),
                             ...(enableEvents ? [calendarTab] : []),
                             new TabBarItem({
-                                id: 'members',
+                                id: 'cart',
                                 icon: 'basket',
                                 name: $t(`88db9833-34e4-488a-9f74-b6e230c69dc1`),
                                 component: cartRoot,

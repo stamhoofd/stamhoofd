@@ -338,15 +338,6 @@ const selectTab = async (event: MouseEvent, tab: TabBarItem | TabBarItemGroup) =
     });
 };
 
-const selectTabByName = async (name: string) => {
-    const item = flatTabs.value.find(tab => Formatter.slug(unref(tab.name)) === Formatter.slug(name));
-    if (item) {
-        await selectItem(item);
-    } else {
-        console.error('No tab item found with name:', name);
-    }
-};
-
 const selectTabById = async (id: string) => {
     const item = flatTabs.value.find(tab => tab.id === id);
     if (item) {
@@ -397,7 +388,6 @@ const show = async (options: PushOptions) => {
 provide('reactive_navigation_show', show);
 
 onMounted(() => {
-    GlobalEventBus.addListener(this, 'selectTabByName', selectTabByName);
     GlobalEventBus.addListener(this, 'selectTabById', selectTabById);
 });
 
@@ -421,7 +411,7 @@ defineExpose({
     returnToHistoryIndex,
     show,
     shouldNavigateAway,
-    selectTabByName,
+    selectTabById
 });
 
 </script>

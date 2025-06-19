@@ -285,7 +285,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     });
 
     const calendarTab = new TabBarItem({
-        id: 'calendar',
+        id: 'events',
         icon: 'calendar',
         name: $t(`6ec2f1fd-3f8f-4814-9442-e628eea062a3`),
         component: new ComponentWithProperties(NavigationController, {

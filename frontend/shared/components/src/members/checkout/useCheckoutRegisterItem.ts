@@ -147,7 +147,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
                 else {
                     Toast.success($t(`fa2ecc9e-94d0-49fb-9968-2227528ef22f`)).setIcon('basket').show();
                 }
-                await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
+                await GlobalEventBus.sendEvent('selectTabById', 'cart');
             }
         }
 

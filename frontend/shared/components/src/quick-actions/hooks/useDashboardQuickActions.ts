@@ -104,7 +104,7 @@ export function useDashboardQuickActions(): QuickActions {
                         name: organizationStatus.organization.name,
                     }),
                     action: async () => {
-                        await GlobalEventBus.sendEvent('selectTabByName', 'boekhouding');
+                        await GlobalEventBus.sendEvent('selectTabById', 'finances');
                     },
                 });
             }
@@ -120,7 +120,7 @@ export function useDashboardQuickActions(): QuickActions {
                         title: deadline.reminderTitle || notificationType.title,
                         description: deadline.reminderText ?? '',
                         action: async () => {
-                            await GlobalEventBus.sendEvent('selectTabByName', 'activiteiten');
+                            await GlobalEventBus.sendEvent('selectTabById', 'events');
                             if (deadline.reminderText) {
                                 new Toast(deadline.reminderText, 'info').setHide(20_000).show();
                             }

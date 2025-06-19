@@ -78,7 +78,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     });
 
     const calendarTab = new TabBarItem({
-        id: 'calendar',
+        id: 'events',
         icon: 'calendar',
         name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
         component: new ComponentWithProperties(NavigationController, {

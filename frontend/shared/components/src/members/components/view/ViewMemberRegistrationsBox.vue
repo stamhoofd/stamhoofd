@@ -124,7 +124,7 @@ async function addRegistration() {
 
 async function openCart() {
     await dismiss({ force: true });
-    await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
+    await GlobalEventBus.sendEvent('selectTabById', 'cart');
 }
 
 const buildActions = useRegistrationsActionBuilder();

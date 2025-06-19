@@ -42,7 +42,7 @@ async function goNext() {
     await dismiss();
 
     if (!checkout.value.cart.isEmpty) {
-        await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
+        await GlobalEventBus.sendEvent('selectTabById', 'cart');
     }
 }
 

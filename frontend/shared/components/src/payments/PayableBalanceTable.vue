@@ -104,7 +104,7 @@ async function goToCheckout(checkout: RegisterCheckout) {
         checkout.defaultOrganization = props.item.organization;
         Toast.success($t(`bd7351b4-ec09-4faf-86f8-122621812af0`)).setIcon('basket').show();
         await dismiss({ force: true });
-        await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
+        await GlobalEventBus.sendEvent('selectTabById', 'cart');
         return;
     }
 

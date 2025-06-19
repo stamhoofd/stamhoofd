@@ -32,7 +32,7 @@ export function useRegistrationQuickActions(): QuickActions {
     const $navigate = useNavigate();
 
     async function openCart() {
-        await GlobalEventBus.sendEvent('selectTabByName', 'mandje');
+        await GlobalEventBus.sendEvent('selectTabById', 'cart');
     }
 
     async function fillInMemberMissingData(member: PlatformMember) {
