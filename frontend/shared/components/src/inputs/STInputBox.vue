@@ -109,7 +109,7 @@ export default class STInputBox extends VueComponent {
         }
     }
 
-    > div {
+    > h4 + div {
         > * {
             margin-top: 8px;
         }
