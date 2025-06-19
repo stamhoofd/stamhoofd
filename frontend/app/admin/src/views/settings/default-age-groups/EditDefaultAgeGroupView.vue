@@ -51,7 +51,7 @@
                 <AgeInput v-model="maxAge" :year="startYear" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
             </STInputBox>
         </div>
-        <p class="st-list-description">
+        <p class="style-description-small">
             {{ $t('ea927f14-835b-43f6-bf6e-3e689b5a0824', {startYear: startYear.toString()}) }}
         </p>
 

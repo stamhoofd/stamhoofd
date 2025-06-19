@@ -35,10 +35,10 @@
             <STInputBox error-fields="mailDomain" :error-box="errorBox" :title="$t(`30e5c996-ef97-4ad6-8503-049163cd197d`)">
                 <input v-model="mailDomain" class="input" type="text" :placeholder="$t('d687b491-be68-4e5b-9acb-e2c090951c23')" @change="domainChanged">
             </STInputBox>
-            <p v-if="mailDomain && enableMemberModule" class="st-list-description">
+            <p v-if="mailDomain && enableMemberModule">
                 {{ $t('7eb24df0-af88-42cf-b52f-7f59b5070255', {usedRegisterDomain, mailDomain}) }}
             </p>
-            <p v-else-if="mailDomain" class="st-list-description">
+            <p v-else-if="mailDomain">
                 {{ $t('bd5418b3-5d06-43da-a0e6-4ced20644825', {mailDomain}) }}
             </p>
 
@@ -59,9 +59,11 @@
             </template>
 
             <STInputBox v-if="enableMemberModule && customRegisterDomain" error-fields="registerDomain" :error-box="errorBox" :title="$t(`ff993893-62e4-459c-88e2-54b5bf760c13`)">
-                <input v-model="registerDomain" class="input" type="text" 
-                :placeholder="$t('a6d56271-af8e-40a4-9f23-1d29009d315e')"
-                @change="registerDomainChanged">
+                <input
+                    v-model="registerDomain" class="input" type="text"
+                    :placeholder="$t('a6d56271-af8e-40a4-9f23-1d29009d315e')"
+                    @change="registerDomainChanged"
+                >
             </STInputBox>
         </main>
 

@@ -7,7 +7,7 @@
                 {{ $t('dd939547-4b02-4ee5-a134-7901eb0dfa27') }}
             </h1>
 
-            <p class="st-list-description">
+            <p>
                 {{ $t('21602156-65ef-4761-85e6-4d0c04b68636') }}
             </p>
 

@@ -33,7 +33,7 @@
             <STInputBox error-fields="customUrl" :error-box="errors.errorBox" class="max" :title="$t(`463fbf45-5a96-4caf-9bee-2b63158f9be3`)">
                 <input v-model="customUrl" class="input" type="text" :placeholder="$t('e06f1e9b-dc4c-4b3b-8ab7-52cd8048d894')" autocomplete="off" @blur="resetCache">
             </STInputBox>
-            <p class="st-list-description">
+            <p class="style-description-small">
                 {{ $t('2ad81e83-bca1-43c9-9f18-3af1ae6e35a7') }}
             </p>
 

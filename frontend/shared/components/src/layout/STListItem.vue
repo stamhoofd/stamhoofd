@@ -73,11 +73,6 @@ export default class STListItem extends VueComponent {
 @use "@stamhoofd/scss/base/variables" as *;
 @use "@stamhoofd/scss/base/text-styles" as *;
 
-.st-list-description {
-  @extend .style-description;
-  padding: 5px 0;
-}
-
 a.st-list-item {
   &,
   &:hover,

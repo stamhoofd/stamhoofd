@@ -7,10 +7,10 @@
                 {{ $t('fab17919-181e-4ed5-a4b1-aca110d5200f') }}
             </h1>
 
-            <p v-if="enableMemberModule" class="st-list-description">
+            <p v-if="enableMemberModule">
                 {{ $t('af699619-5a29-4df0-8c40-0047f6f5a7b3', {mailDomain, registerDomain}) }}
             </p>
-            <p v-else class="st-list-description">
+            <p v-else>
                 {{ $t('74bef3e3-7fad-483d-9232-9e6626a7ff30', {mailDomain}) }}
             </p>
         </main>

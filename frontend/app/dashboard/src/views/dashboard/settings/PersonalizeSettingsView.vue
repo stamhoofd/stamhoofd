@@ -11,14 +11,14 @@
             <div>
                 <ImageInput v-model="horizontalLogo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" :title="$t(`d318cac1-28c1-4a21-88a1-98ae60f7a619`)" />
 
-                <p class="st-list-description">
+                <p class="style-description-small">
                     {{ $t('20e536a4-be51-42f4-92ec-ce64b3af3c7f') }}
                 </p>
             </div>
 
             <div>
                 <ImageInput v-model="squareLogo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" :title="$t(`af11402d-47f2-4dfc-a522-b29c37014738`)" />
-                <p class="st-list-description">
+                <p class="style-description-small">
                     {{ $t('9c6061e0-11f7-4f88-99c7-7a0bd6c5dea4') }}
                 </p>
             </div>
@@ -27,12 +27,12 @@
         <Checkbox v-model="expandLogo">
             {{ $t('9e68d551-a532-4681-9040-95e4c0f673aa') }}
         </Checkbox>
-        <p class="st-list-description">
+        <p class="style-description-small">
             {{ $t('6c68261d-e165-48c0-b93d-759fd08a8511') }}
         </p>
 
         <ColorInput v-model="color" :validator="validator" :required="false" :disallowed="['#FFFFFF']" :title="$t(`d111d211-9cc2-48be-9c8f-9483dded7fef`)" :placeholder="$t(`dc5f036d-4aac-4894-8d3f-70ae0874ebcc`)" />
-        <p class="st-list-description">
+        <p class="style-description-small">
             {{ $t('e1447811-99f2-4c3b-90c2-3ae2599d4454') }}
         </p>
 
@@ -60,14 +60,14 @@
                     </p>
                 </template>
 
-                <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="st-list-description">
+                <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="style-button-bar">
                     <button class="button text" type="button" @click="setupDomain">
                         <span class="icon settings" />
                         <span>{{ $t('b2248880-cba7-4115-912b-9cb981e3c2d1') }}</span>
                     </button>
                 </p>
 
-                <p v-else class="st-list-description">
+                <p v-else class="style-button-bar">
                     <button class="button text" type="button" @click="setupDomain">
                         <span class="icon settings" />
                         <span>{{ $t('a6118aff-7bfe-4a5a-91d5-9c8fd09ae93d') }}</span>
@@ -76,14 +76,14 @@
             </template>
 
             <template v-else>
-                <p v-if="organization.registerUrl && enableMemberModule" class="st-list-description">
+                <p v-if="organization.registerUrl && enableMemberModule" class="style-description-block">
                     {{ $t('0388d1ce-079c-4609-b11e-78ba654029d6') }} <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('57e20ed4-d50a-4947-96fc-57958550dcfa') }}
                 </p>
-                <p v-else class="st-list-description">
+                <p v-else class="style-description-block">
                     {{ $t('8b32118a-658d-4e17-96f9-a009449ec342') }}
                 </p>
 
-                <p class="st-list-description">
+                <p class="style-button-bar">
                     <button class="button text" type="button" @click="setupDomain">
                         <span class="icon settings" />
                         <span>{{ $t('a6118aff-7bfe-4a5a-91d5-9c8fd09ae93d') }}</span>

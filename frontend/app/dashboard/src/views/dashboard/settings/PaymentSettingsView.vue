@@ -151,8 +151,9 @@
         </template>
 
         <template v-if="payconiqApiKey || forcePayconiq">
-            <hr><h2>{{ $t('df421a41-36de-4225-b22b-2401a4009f90') }}</h2>
-            <p class="st-list-description">
+            <hr>
+            <h2>{{ $t('df421a41-36de-4225-b22b-2401a4009f90') }}</h2>
+            <p>
                 {{ $t('455200de-131e-4508-b5e7-3f94a05fb52b') }} <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
             </p>
 
@@ -165,19 +166,20 @@
         </template>
 
         <template v-if="!enableBuckaroo && (organization.privateMeta?.mollieOnboarding || forceMollie)">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('8392834f-9cfb-4af0-8a8d-55c727cbfd66') }}
             </h2>
 
             <template v-if="!organization.privateMeta?.mollieOnboarding">
-                <p class="st-list-description">
+                <p>
                     {{ $t('fa1b8694-6a8c-46ea-ab5e-7ed792083bf0') }}
                 </p>
                 <p v-if="isBelgium" class="info-box">
                     {{ $t('ab21ae18-0181-44ea-b41d-ff61c9358858') }}
                 </p>
 
-                <p class="st-list-description">
+                <p>
                     <button class="button text" type="button" @click="linkMollie">
                         <span class="icon link" />
                         <span>{{ $t('b0d861f2-1bad-4feb-aec7-116a9a954260') }}</span>
@@ -195,14 +197,14 @@
                     {{ $t('2951c3d6-8a53-4678-b041-dff464dd44e9') }}
                 </p>
 
-                <p v-if="organization.privateMeta.mollieOnboarding.status === 'NeedsData'" class="st-list-description">
+                <p v-if="organization.privateMeta.mollieOnboarding.status === 'NeedsData'" class="style-description-block">
                     {{ $t('f4bd8e62-6828-4ae7-b2b8-4d3dbdf01d57') }}
                 </p>
-                <p v-if="organization.privateMeta.mollieOnboarding.status === 'InReview'" class="st-list-description">
+                <p v-if="organization.privateMeta.mollieOnboarding.status === 'InReview'" class="style-description-block">
                     {{ $t('0e46dfc8-f362-4d1d-a3d1-1e28ba5f41c9') }}
                 </p>
 
-                <p class="st-list-description">
+                <p class="style-button-bar">
                     <LoadingButton :loading="loadingMollie">
                         <button class="button text" type="button" @click="mollieDashboard">
                             <span class="icon external" />
@@ -210,7 +212,7 @@
                         </button>
                     </LoadingButton>
                 </p>
-                <p class="st-list-description">
+                <p class="style-button-bar">
                     <button class="button text" type="button" @click="disconnectMollie">
                         <span class="icon trash" />
                         <span>{{ $t('eb55e12d-0c0a-491e-bdbc-6e705b9d82a7') }}</span>

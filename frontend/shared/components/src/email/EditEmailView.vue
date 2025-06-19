@@ -24,8 +24,9 @@
         </Checkbox>
 
         <template v-if="enableMemberModule && groups.length">
-            <hr><h2>{{ $t('c0b96584-ebf2-452b-89e2-0bea5e63eb74') }}</h2>
-            <p class="st-list-description">
+            <hr>
+            <h2>{{ $t('c0b96584-ebf2-452b-89e2-0bea5e63eb74') }}</h2>
+            <p>
                 {{ $t('a481dcc6-d66e-4098-adc4-66ae9b1ed35f') }}
             </p>
 
@@ -42,8 +43,9 @@
         </template>
 
         <template v-if="enableWebshopModule && webshops.length">
-            <hr><h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
-            <p class="st-list-description">
+            <hr>
+            <h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
+            <p>
                 {{ $t('6fbddfd5-c9af-492a-819f-a22370084cb6') }}
             </p>
 

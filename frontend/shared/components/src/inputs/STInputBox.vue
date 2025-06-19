@@ -72,7 +72,7 @@ export default class STInputBox extends VueComponent {
         display: flex;
         flex-direction: row;
         align-items: center;
-        height: 24px;
+        // height: 24px;
 
         > label {
             flex-grow: 1; // fix safari newline glitch

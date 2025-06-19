@@ -105,7 +105,7 @@
 
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
 
-                <p v-if="stockText" class="st-list-description" v-text="stockText" />
+                <p v-if="stockText" class="style-description-smal" v-text="stockText" />
             </template>
 
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
