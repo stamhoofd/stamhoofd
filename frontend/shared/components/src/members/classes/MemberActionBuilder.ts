@@ -381,7 +381,7 @@ export class MemberActionBuilder {
                 singleSelection: true,
                 enabled: this.context.auth.hasFullAccess(),
                 handler: (members: PlatformMember[]) => {
-                    presentEditResponsibilities({ member: members[0], present: this.present }).catch(console.error);
+                    this.editResponsibilities(members[0]);
                 },
             }),
 
