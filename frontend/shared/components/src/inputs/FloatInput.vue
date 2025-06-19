@@ -225,7 +225,8 @@ function step(add: number) {
                 }
 
                 &.placeholder {
-                    opacity: 0.5;
+                    color: $color-gray-5;
+                    opacity: 1;
                 }
             }
 

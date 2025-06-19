@@ -24,7 +24,7 @@
             <div v-else-if="valueString !== ''">
                 <span>{{ valueString }}</span> {{ internalValue === 1 && suffixSingular !== null ? suffixSingular : suffix }}
             </div>
-            <div v-else>{{ placeholder }}</div>
+            <div v-else class="placeholder">{{ placeholder }}</div>
         </label>
         <StepperInput v-if="stepper" v-model="stepperValue" :min="min" :max="max" />
     </div>
@@ -153,7 +153,7 @@ export default class NumberInput extends VueComponent {
     // Restore invalid input, make the input value again
     // And set valueString
     clean() {
-        if (!this.valid) {
+        if (!this.valid || (this.modelValue === null && this.required)) {
             return;
         }
 
@@ -245,6 +245,11 @@ export default class NumberInput extends VueComponent {
         span {
             white-space: pre;
         }
+    }
+
+    .placeholder {
+        color: $color-gray-5;
+        opacity: 1;
     }
 
     & > input {
