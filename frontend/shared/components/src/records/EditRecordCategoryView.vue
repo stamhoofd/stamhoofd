@@ -7,7 +7,7 @@
         <p v-if="allowChildCategories && type === RecordEditorType.PlatformMember" class="style-description">
             {{ $t('73a3d0bc-55a4-47e6-b650-27bb961a0721') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
-        <p v-else class="style-description">
+        <p v-else-if="isRootCategory" class="style-description">
             {{ $t('8485e7ea-6d66-4f2c-b92a-bd44cb2f4eb4') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('0487c3b0-3f93-4344-a34a-9a9198f37023') }}</a> {{ $t('69551005-512c-4240-8e20-fd546cefafaa') }}
         </p>
 
@@ -38,8 +38,9 @@
             </STListItem>
         </STList>
 
-        <hr><p v-if="records.length === 0 && categories.length === 0" class="info-box">
-            {{ $t('86e7714a-6658-4efd-9cd2-00ba243b4d10') }}
+        <hr>
+        <p v-if="records.length === 0 && categories.length === 0" class="info-box">
+            {{ isRootCategory ? $t('86e7714a-6658-4efd-9cd2-00ba243b4d10') : $t('Deze categorie is leeg en zal nog niet getoond worden.') }}
         </p>
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
@@ -130,6 +131,8 @@ import EditRecordView from './EditRecordView.vue';
 import FillRecordCategoryView from './FillRecordCategoryView.vue';
 import { RecordEditorSettings, RecordEditorType } from './RecordEditorSettings';
 import RecordRow from './components/RecordRow.vue';
+import { useValidation } from '../errors/useValidation';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 // Define
 const props = defineProps<{
@@ -153,6 +156,7 @@ const deleting = ref(false);
 const filterBuilder = computed(() => props.settings.filterBuilder(props.rootCategories));
 const app = useAppContext();
 const type = props.settings.type;
+const isRootCategory = computed(() => patchedRootCategories.value.some(c => c.id === props.categoryId));
 
 // Computed
 const patchedCategory = computed(() => {
@@ -174,7 +178,12 @@ const hasFilters = computed(() => {
     return filterBuilder.value instanceof GroupUIFilterBuilder && filterBuilder.value.builders.length > 1;
 });
 
-const title = computed(() => props.isNew ? $t(`51f9909d-c91f-455d-8cd4-ee0a1897e59d`) : patchedCategory.value.name);
+const title = computed(() => {
+    if (isRootCategory.value) {
+        return props.isNew ? $t(`51f9909d-c91f-455d-8cd4-ee0a1897e59d`) : $t('Vragenlijst bewerken');
+    }
+    return props.isNew ? $t(`Nieuwe categorie`) : $t('Categorie bewerken');
+});
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
 
@@ -198,6 +207,18 @@ const name = computed({
         );
     },
 });
+
+useValidation(errors.validator, () => {
+    if (name.value.length < 1) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            field: 'name',
+            message: $t('Vul een naam in')
+        })
+    }
+});
+
+
 const description = computed({
     get: () => patchedCategory.value.description,
     set: (v: string) => {
@@ -334,8 +355,14 @@ async function save() {
     if (saving.value) {
         return;
     }
+    errors.errorBox = null;
     saving.value = true;
     try {
+        const valid = await errors.validator.validate();
+        if (!valid) {
+            saving.value = false;
+            return;
+        }
         props.saveHandler(patch.value);
         await pop({ force: true });
     }
