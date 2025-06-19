@@ -40,7 +40,7 @@
 
         <hr>
         <p v-if="records.length === 0 && categories.length === 0" class="info-box">
-            {{ isRootCategory ? $t('86e7714a-6658-4efd-9cd2-00ba243b4d10') : $t('Deze categorie is leeg en zal nog niet getoond worden.') }}
+            {{ isRootCategory ? $t('86e7714a-6658-4efd-9cd2-00ba243b4d10') : $t('006de532-e3d1-4567-8def-48c99477d65e') }}
         </p>
 
         <STList :model-value="getDraggableRecords(patchedCategory).computed.value" :draggable="true" @update:model-value="newValue => getDraggableRecords(patchedCategory).computed.value = newValue!">
@@ -180,9 +180,9 @@ const hasFilters = computed(() => {
 
 const title = computed(() => {
     if (isRootCategory.value) {
-        return props.isNew ? $t(`51f9909d-c91f-455d-8cd4-ee0a1897e59d`) : $t('Vragenlijst bewerken');
+        return props.isNew ? $t(`51f9909d-c91f-455d-8cd4-ee0a1897e59d`) : $t('270c18bf-7852-4d33-809d-6567c4bd56a9');
     }
-    return props.isNew ? $t(`Nieuwe categorie`) : $t('Categorie bewerken');
+    return props.isNew ? $t(`b5822ffa-2c8b-4c88-bf4d-eb5566da56e7`) : $t('770518af-b094-4fca-bc0a-641f508895ef');
 });
 const records = computed(() => patchedCategory.value.records);
 const categories = computed(() => patchedCategory.value.childCategories);
@@ -213,7 +213,7 @@ useValidation(errors.validator, () => {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'name',
-            message: $t('Vul een naam in')
+            message: $t('f443476a-44f5-4dda-8c39-50332319d9ec')
         })
     }
 });
