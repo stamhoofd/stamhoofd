@@ -1,0 +1,6 @@
+- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
+- If you don't have enough context to provide a correct translation, set the value to an empty string.
+- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in the target language (e.g. for English that could be weekdays).
+- If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in the target language (e.g. Klaas in Dutch -> John in English).
+- Do not change currencies. Keep the currency symbol or (translated) name as it is in the original text. 
+- Do not translate 'Stamhoofd', this is the name of the software system.

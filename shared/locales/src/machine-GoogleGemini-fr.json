@@ -2149,7 +2149,7 @@
   },
   "1a559b46-1863-4782-8cb5-ee6517a2e91d": {
     "original": "Vragenlijsten",
-    "translation": "Questionnaires"
+    "translation": "Formulaires personnalisés"
   },
   "1a6e956a-aa3c-4e04-8ac4-46d45180d6c9": {
     "original": "Wielrennen",
@@ -2377,7 +2377,7 @@
   },
   "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
     "original": "Vragenlijst van Stamhoofd",
-    "translation": "Questionnaire du chef de tribu"
+    "translation": "Formulaire personnalisé de Stamhoofd"
   },
   "1e050d5b-9e14-41ea-9334-9b11a10eedde": {
     "original": "Korting niet gevonden",
@@ -2485,7 +2485,7 @@
   },
   "1f1e0d12-3960-46f9-b1e7-d8b42a89e51f": {
     "original": "Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.",
-    "translation": "Ce questionnaire contient des données pour lesquelles vous devez demander l'autorisation. Activez l'autorisation de collecte de données pour activer ce questionnaire."
+    "translation": "Ce formulaire personnalisé contient des données pour lesquelles vous devez demander l’autorisation. Activez l’autorisation de collecte de données pour activer ce formulaire personnalisé."
   },
   "1f618c07-ec09-4465-b7af-59e30b0c7585": {
     "original": "Tijdzone",
@@ -3097,7 +3097,7 @@
   },
   "270c18bf-7852-4d33-809d-6567c4bd56a9": {
     "original": "Vragenlijst bewerken",
-    "translation": "Modifier le questionnaire"
+    "translation": "Modifier le formulaire personnalisé"
   },
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
@@ -3405,7 +3405,7 @@
   },
   "2a38f9c1-2904-4b14-a477-40c7ada7b743": {
     "original": "Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.",
-    "translation": "Si vous désactivez cette option, ce questionnaire est désactivé par défaut, mais peut être activé à des niveaux inférieurs. Vous conservez ainsi une flexibilité maximale."
+    "translation": "Si vous désactivez cette option, ce formulaire personnalisé sera désactivé par défaut, mais pourra être activé à des niveaux inférieurs. Vous conservez ainsi une flexibilité maximale."
   },
   "2a3d1996-17cd-4ef7-827b-63f2f9b5b84a": {
     "original": "Plaatsen",
@@ -3613,7 +3613,7 @@
   },
   "2ccc972d-a3a4-4ea4-8a47-20d7b57f035c": {
     "original": "vragenlijst",
-    "translation": "questionnaire"
+    "translation": "formulaire personnalisé"
   },
   "2cd40bd9-b158-42e3-81e2-c02c560ab2e5": {
     "original": "Aansluiten",
@@ -4213,7 +4213,7 @@
   },
   "34760087-cbb3-416b-b4ef-212f15fc07a8": {
     "original": "Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (",
-    "translation": "Ce questionnaire sera déplacé vers le questionnaire choisi ("
+    "translation": "Ce formulaire personnalisé sera déplacé vers le formulaire personnalisé choisi ("
   },
   "3476c558-2f2c-4fbf-b745-e4d09d79a819": {
     "original": "december",
@@ -5925,7 +5925,7 @@
   },
   "4b82085a-2d05-4172-8503-8aadd2767343": {
     "original": "Deze subcategorie zal worden omgezet in een vragenlijst als je de huidige vragenlijst opslaat.",
-    "translation": "Cette sous-catégorie sera convertie en questionnaire si vous enregistrez le questionnaire actuel."
+    "translation": "Cette sous-catégorie sera convertie en formulaire personnalisé lorsque vous enregistrez le formulaire personnalisé actuel."
   },
   "4b8ef510-9139-49dc-a151-31aa5b418dc7": {
     "original": "Knop om wachtwoord opnieuw in te stellen",
@@ -6093,7 +6093,7 @@
   },
   "4dea71e9-0965-4c9a-81ac-6ee7046a0d8e": {
     "original": "Eigen vragenlijst",
-    "translation": "Questionnaire propre"
+    "translation": "Formulaire personnalisé"
   },
   "4df013df-328f-47b6-b90a-fc40813d3c0a": {
     "original": "Je moet minimaal één betaalmethode accepteren",
@@ -6441,7 +6441,7 @@
   },
   "51f9909d-c91f-455d-8cd4-ee0a1897e59d": {
     "original": "Nieuwe vragenlijst",
-    "translation": "Nouveau questionnaire"
+    "translation": "Nouveau formulaire personnalisé"
   },
   "52161405-1c8f-4abc-adc3-969bcb0f607f": {
     "original": "Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.",
@@ -6937,7 +6937,7 @@
   },
   "58351618-cc4a-4785-a8c7-dfd741aa9985": {
     "original": "Verplaats naar vragenlijst",
-    "translation": "Déplacer vers le questionnaire"
+    "translation": "Déplacer vers le formulaire personnalisé"
   },
   "5842a365-ee3e-452c-85d8-2967e4e172ef": {
     "original": "zit",
@@ -7857,7 +7857,7 @@
   },
   "63b03f2b-6f8c-465f-9a4f-328fd67131e3": {
     "original": "Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.",
-    "translation": "Si un questionnaire n'est pas obligatoire, l'étape pourra être sautée tant que rien n'a été rempli. Il n'est généralement pas nécessaire d'utiliser cette option. Si le questionnaire est toujours obligatoire à remplir, vous pouvez toujours avoir des questions facultatives dans cette liste. Il est généralement plus clair d'utiliser des questions facultatives. Mais parfois, vous voulez par exemple 'tout remplir' ou 'rien remplir', alors vous pouvez utiliser cette option."
+    "translation": "Si un formulaire personnalisé n’est pas obligatoire, l’utilisateur pourra sauter l’étape tant qu’il n’a rien rempli. Généralement, il n’est pas nécessaire d’utiliser cette option. Si le formulaire personnalisé doit toujours être rempli, vous pouvez quand même avoir des questions facultatives dans la liste. Généralement, il est plus clair d’utiliser des questions facultatives. Mais parfois, vous voulez par exemple « tout remplir » ou « ne rien remplir », alors vous pouvez utiliser cette option."
   },
   "63b9a0c4-ee88-49b4-8609-dc014bc3e3a3": {
     "original": "Aansluiting verwijderd",
@@ -8229,7 +8229,7 @@
   },
   "69551005-512c-4240-8e20-fd546cefafaa": {
     "original": "meer informatie na over hoe je een vragenlijst kan instellen.",
-    "translation": "plus d'informations sur la façon de configurer un questionnaire."
+    "translation": "plus d’informations sur la configuration d’un formulaire personnalisé."
   },
   "69783c9e-0199-4e1b-be23-35625515167d": {
     "original": "Vanaf {index}e inschrijving",
@@ -9085,7 +9085,7 @@
   },
   "73a3d0bc-55a4-47e6-b650-27bb961a0721": {
     "original": "Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees",
-    "translation": "Un questionnaire contient une ou plusieurs données à caractère personnel, éventuellement réparties en catégories. Lisez"
+    "translation": "Un formulaire personnalisé contient une ou plusieurs données personnelles, éventuellement divisées en catégories. Lire"
   },
   "73acbb7e-5bd3-4e9b-9721-3300de84e32a": {
     "original": "het antwoord hangt dus vast aan de inschrijving, niet het lid zelf. De antwoorden zijn enkel zichtbaar in de context van een inschrijving, niet tussen de gegevens van een lid.",
@@ -9269,7 +9269,7 @@
   },
   "75c82427-9666-4de0-8a79-2a8851b44a88": {
     "original": "Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.",
-    "translation": "Cette fonction est obsolète. Si vous supprimez tous les champs de saisie libre, vous pouvez utiliser des questionnaires plus complets."
+    "translation": "Cette fonction est obsolète. Si vous supprimez tous les champs de saisie libre, vous pouvez utiliser des formulaires personnalisés plus complets."
   },
   "75e4605c-cfa2-4906-a922-fffe2af099db": {
     "original": "Typ het over",
@@ -10397,7 +10397,7 @@
   },
   "86161523-8879-4092-a332-567bf55e0f52": {
     "original": "Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens).",
-    "translation": "Ajoutez vous-même des questionnaires à remplir lors de la passation d'une commande (après les données intégrées)."
+    "translation": "Ajoutez vos propres formulaires personnalisés qui peuvent être remplis lors de la passation d’une commande (après les données intégrées)."
   },
   "86165fe1-6bd8-4af4-8213-3158be8dad35": {
     "original": "Iedereen moet manueel worden goedgekeurd. Betaling gebeurt pas bij de definitieve inschrijving.",
@@ -10473,7 +10473,7 @@
   },
   "86e7714a-6658-4efd-9cd2-00ba243b4d10": {
     "original": "Deze vragenlijst is leeg en zal nog niet getoond worden.",
-    "translation": "Ce questionnaire est vide et ne sera pas encore affiché."
+    "translation": "Ce formulaire personnalisé est vide et ne sera pas encore affiché."
   },
   "86ebf633-c9d5-459d-8f7b-259d0d3f2ea4": {
     "original": "Stel je facturatiegegevens in voor je verder gaat",
@@ -11633,7 +11633,7 @@
   },
   "95557c11-2b92-4a70-8945-99f6c6f7051c": {
     "original": "Weet je zeker dat je deze vragenlijst wilt verwijderen?",
-    "translation": "Êtes-vous sûr de vouloir supprimer ce questionnaire ?"
+    "translation": "Êtes-vous sûr de vouloir supprimer ce formulaire personnalisé ?"
   },
   "9562217e-b18e-480e-ad7f-7fd6596dddd6": {
     "original": "Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.",
@@ -11933,7 +11933,7 @@
   },
   "9a390ab2-bb28-49dc-9837-b389f5877c53": {
     "original": "Nieuwe vragenlijst",
-    "translation": "Nouveau questionnaire"
+    "translation": "Nouveau formulaire personnalisé"
   },
   "9a528611-db36-4bb0-9de4-29b653ea6165": {
     "original": "Je kan dit niet ongedaan maken",
@@ -12669,7 +12669,7 @@
   },
   "a3605548-d249-489e-bf64-4d3bd3555a8c": {
     "original": "Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.",
-    "translation": "Cette sous-catégorie sera déplacée vers ce questionnaire si vous enregistrez le questionnaire actuel."
+    "translation": "Cette sous-catégorie sera déplacée vers ce formulaire personnalisé lorsque vous enregistrez le formulaire personnalisé actuel."
   },
   "a36700a3-64be-49eb-b1fd-60af7475eb4e": {
     "original": "Meer info",
@@ -14017,7 +14017,7 @@
   },
   "b4cd468d-e3fd-47d2-b59c-cf19b1d3aee0": {
     "original": "Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.",
-    "translation": "N'utilisez pas les questionnaires pour collecter des données temporaires. Ajoutez des menus déroulants à vos groupes d'inscription ou activités."
+    "translation": "N’utilisez pas les formulaires personnalisés pour collecter des données temporaires. Ajoutez des menus déroulants à vos groupes d’inscription ou activités."
   },
   "b4f47589-f6b4-4f9e-a83b-ad4cbb3de416": {
     "original": "Prijs",
@@ -14097,7 +14097,7 @@
   },
   "b609c4cb-238c-4b27-bae5-9ee9f307ffb4": {
     "original": "vragenlijsten",
-    "translation": "questionnaires"
+    "translation": "formulaires personnalisés"
   },
   "b60dbf08-bc14-4cf0-81c4-a4bcb20e28cd": {
     "original": "Betaling registreren",
@@ -14441,7 +14441,7 @@
   },
   "ba261762-9151-487c-a3a1-deb1c59e2a14": {
     "original": "Hoofdvragenlijst",
-    "translation": "Questionnaire principal"
+    "translation": "Formulaire personnalisé principal"
   },
   "ba2b2a5a-8c8a-42c5-9ee7-78daa3b6c5ec": {
     "original": "Als eerstsvolgende deadline",
@@ -14733,7 +14733,7 @@
   },
   "bd76a4c0-1c0c-4ba7-b3be-a1cd059f3640": {
     "original": "Deze functie is verouderd. Als je alle vrije invoervelden wist, en daarna opslaat, kan je gebruik maken van uitgebreidere vragenlijsten.",
-    "translation": "Cette fonction est obsolète. Si vous supprimez tous les champs de saisie libre, puis enregistrez, vous pouvez utiliser des questionnaires plus complets."
+    "translation": "Cette fonction est obsolète. Si vous supprimez tous les champs de saisie libre, puis enregistrez, vous pouvez utiliser des formulaires personnalisés plus complets."
   },
   "bd8e47cd-5d0a-4ca3-b5d2-947e6f7a8299": {
     "original": "Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.",
@@ -16249,7 +16249,7 @@
   },
   "d0f49d2a-6b83-4e03-9480-4d0995bbb0a1": {
     "original": "Vragenlijsten en gegevens",
-    "translation": "Questionnaires et données"
+    "translation": "Formulaires personnalisés et données"
   },
   "d1048e80-095f-4fda-9ff2-eed515fef882": {
     "original": "We organiseren momenteel helaas geen verkoop. Kom later nog eens terug.",
@@ -17029,7 +17029,7 @@
   },
   "da5f0578-ebf9-40e1-8caf-baa3a7970b28": {
     "original": "Vragenlijsten en gegevens",
-    "translation": "Questionnaires et données"
+    "translation": "Formulaires personnalisés et données"
   },
   "da735211-2f9d-45bf-a688-d76aaf796cc4": {
     "original": "Totaal bedrag",
@@ -17905,7 +17905,7 @@
   },
   "e48fd329-0701-47d6-998e-7598691b0200": {
     "original": "Ben je zeker dat je deze vragenlijst wilt verplaatsen?",
-    "translation": "Êtes-vous sûr de vouloir déplacer ce questionnaire ?"
+    "translation": "Êtes-vous sûr de vouloir déplacer ce formulaire personnalisé ?"
   },
   "e49699b5-d1bb-4547-8002-08ed2883997c": {
     "original": "Maatschappelijke zetel",
@@ -18561,7 +18561,7 @@
   },
   "ec8efff4-e2cf-4755-b8fb-a47f686be173": {
     "original": "Vragenlijsten tijdens afrekenen",
-    "translation": "Questionnaires lors du paiement"
+    "translation": "Formulaires personnalisés lors du paiement"
   },
   "eca0a260-096c-413a-9fa0-0c91acd9c780": {
     "original": "De ouder ontvangt enkel communicatie op het eerste e-mailadres.",

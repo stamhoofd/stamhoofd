@@ -2101,7 +2101,7 @@
   },
   "1a559b46-1863-4782-8cb5-ee6517a2e91d": {
     "original": "Vragenlijsten",
-    "translation": "Questionnaires"
+    "translation": "Forms"
   },
   "1a6e956a-aa3c-4e04-8ac4-46d45180d6c9": {
     "original": "Wielrennen",
@@ -2329,7 +2329,7 @@
   },
   "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
     "original": "Vragenlijst van Stamhoofd",
-    "translation": "Questionnaire of Stamhoofd"
+    "translation": "Stamhoofd form"
   },
   "1e050d5b-9e14-41ea-9334-9b11a10eedde": {
     "original": "Korting niet gevonden",
@@ -2437,7 +2437,7 @@
   },
   "1f1e0d12-3960-46f9-b1e7-d8b42a89e51f": {
     "original": "Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.",
-    "translation": "This questionnaire contains data that you need to ask permission for. Enable permission for data collection to activate this questionnaire."
+    "translation": "This form contains data for which you must request permission. Enable permission for data collection to activate this form."
   },
   "1f618c07-ec09-4465-b7af-59e30b0c7585": {
     "original": "Tijdzone",
@@ -3041,7 +3041,7 @@
   },
   "270c18bf-7852-4d33-809d-6567c4bd56a9": {
     "original": "Vragenlijst bewerken",
-    "translation": "Edit questionnaire"
+    "translation": "Edit form"
   },
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
@@ -3345,7 +3345,7 @@
   },
   "2a38f9c1-2904-4b14-a477-40c7ada7b743": {
     "original": "Schakel je dit uit, dan staat deze vragenlijst standaard uit maar kan deze op lagere niveau's worden ingeschakeld. Zo behoud je maximale flexibiliteit.",
-    "translation": "If you disable this, this questionnaire is off by default but can be enabled at lower levels. This allows you to maintain maximum flexibility."
+    "translation": "If you disable this, this form is off by default but can be enabled at lower levels. This way you maintain maximum flexibility."
   },
   "2a3d1996-17cd-4ef7-827b-63f2f9b5b84a": {
     "original": "Plaatsen",
@@ -3549,7 +3549,7 @@
   },
   "2ccc972d-a3a4-4ea4-8a47-20d7b57f035c": {
     "original": "vragenlijst",
-    "translation": "questionnaire"
+    "translation": "form"
   },
   "2cd40bd9-b158-42e3-81e2-c02c560ab2e5": {
     "original": "Aansluiten",
@@ -4141,7 +4141,7 @@
   },
   "34760087-cbb3-416b-b4ef-212f15fc07a8": {
     "original": "Deze vragenlijst zal worden verplaatst naar de gekozen vragenlijst (",
-    "translation": "This questionnaire will be moved to the selected questionnaire ("
+    "translation": "This form will be moved to the selected form ("
   },
   "3476c558-2f2c-4fbf-b745-e4d09d79a819": {
     "original": "december",
@@ -5813,7 +5813,7 @@
   },
   "4b82085a-2d05-4172-8503-8aadd2767343": {
     "original": "Deze subcategorie zal worden omgezet in een vragenlijst als je de huidige vragenlijst opslaat.",
-    "translation": "This subcategory will be converted into a questionnaire when you save the current questionnaire."
+    "translation": "This subcategory will be converted into a form when you save the current form."
   },
   "4b8ef510-9139-49dc-a151-31aa5b418dc7": {
     "original": "Knop om wachtwoord opnieuw in te stellen",
@@ -5981,7 +5981,7 @@
   },
   "4dea71e9-0965-4c9a-81ac-6ee7046a0d8e": {
     "original": "Eigen vragenlijst",
-    "translation": "Own questionnaire"
+    "translation": "Own form"
   },
   "4df013df-328f-47b6-b90a-fc40813d3c0a": {
     "original": "Je moet minimaal één betaalmethode accepteren",
@@ -6325,7 +6325,7 @@
   },
   "51f9909d-c91f-455d-8cd4-ee0a1897e59d": {
     "original": "Nieuwe vragenlijst",
-    "translation": "New questionnaire"
+    "translation": "New form"
   },
   "52161405-1c8f-4abc-adc3-969bcb0f607f": {
     "original": "Zoek de laatste (recente) e-mail die je van ons kreeg op een e-mailadres die we wél kennen. Daar vind je normaal een beveiligingscode.",
@@ -6817,7 +6817,7 @@
   },
   "58351618-cc4a-4785-a8c7-dfd741aa9985": {
     "original": "Verplaats naar vragenlijst",
-    "translation": "Move to questionnaire"
+    "translation": "Move to form"
   },
   "5842a365-ee3e-452c-85d8-2967e4e172ef": {
     "original": "zit",
@@ -7725,7 +7725,7 @@
   },
   "63b03f2b-6f8c-465f-9a4f-328fd67131e3": {
     "original": "Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.",
-    "translation": "If a questionnaire is not mandatory, the step can be skipped as long as nothing has been filled in yet. Usually it is not necessary to use this. If the questionnaire is always mandatory to fill in, you can still have optional questions in that list. Usually it is simply clearer to use optional questions. But sometimes you want to, for example, 'fill in everything' or 'fill in nothing', then you can best use this."
+    "translation": "If a form is not mandatory, the step can be skipped as long as nothing has been filled in yet. Usually it is not necessary to use this. If the form is always mandatory to fill in, you can still have optional questions in that list. Usually it is simply clearer to use optional questions. But sometimes you want to, for example, 'fill in everything' or 'fill in nothing', then you can best use this."
   },
   "63b9a0c4-ee88-49b4-8609-dc014bc3e3a3": {
     "original": "Aansluiting verwijderd",
@@ -8101,7 +8101,7 @@
   },
   "69551005-512c-4240-8e20-fd546cefafaa": {
     "original": "meer informatie na over hoe je een vragenlijst kan instellen.",
-    "translation": "more information on how to set up a questionnaire."
+    "translation": "more information on how to configure a form."
   },
   "69783c9e-0199-4e1b-be23-35625515167d": {
     "original": "Vanaf {index}e inschrijving",
@@ -8941,7 +8941,7 @@
   },
   "73a3d0bc-55a4-47e6-b650-27bb961a0721": {
     "original": "Een vragenlijst bevat één of meerdere persoonsgegevens, eventueel opgedeeld in categorieën. Lees",
-    "translation": "A questionnaire contains one or more personal data, possibly divided into categories. Read"
+    "translation": "A form contains one or more personal data, possibly divided into categories. Read"
   },
   "73acbb7e-5bd3-4e9b-9721-3300de84e32a": {
     "original": "het antwoord hangt dus vast aan de inschrijving, niet het lid zelf. De antwoorden zijn enkel zichtbaar in de context van een inschrijving, niet tussen de gegevens van een lid.",
@@ -9125,7 +9125,7 @@
   },
   "75c82427-9666-4de0-8a79-2a8851b44a88": {
     "original": "Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.",
-    "translation": "This function is obsolete. If you delete all free input fields, you can use more extensive questionnaires."
+    "translation": "This function is outdated. If you delete all free text fields, you can use more extensive forms."
   },
   "75e4605c-cfa2-4906-a922-fffe2af099db": {
     "original": "Typ het over",
@@ -10249,7 +10249,7 @@
   },
   "86161523-8879-4092-a332-567bf55e0f52": {
     "original": "Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens).",
-    "translation": "Add your own questionnaires that can be completed when placing an order (after the built-in data)."
+    "translation": "Add your own forms that can be filled in when placing an order (after the built-in data)."
   },
   "86165fe1-6bd8-4af4-8213-3158be8dad35": {
     "original": "Iedereen moet manueel worden goedgekeurd. Betaling gebeurt pas bij de definitieve inschrijving.",
@@ -10325,7 +10325,7 @@
   },
   "86e7714a-6658-4efd-9cd2-00ba243b4d10": {
     "original": "Deze vragenlijst is leeg en zal nog niet getoond worden.",
-    "translation": "This questionnaire is empty and will not yet be shown."
+    "translation": "This form is empty and will not yet be shown."
   },
   "86ebf633-c9d5-459d-8f7b-259d0d3f2ea4": {
     "original": "Stel je facturatiegegevens in voor je verder gaat",
@@ -11477,7 +11477,7 @@
   },
   "95557c11-2b92-4a70-8945-99f6c6f7051c": {
     "original": "Weet je zeker dat je deze vragenlijst wilt verwijderen?",
-    "translation": "Are you sure you want to delete this questionnaire?"
+    "translation": "Are you sure you want to delete this form?"
   },
   "9562217e-b18e-480e-ad7f-7fd6596dddd6": {
     "original": "Deze keuze wordt onzichtbaar in het ledenportaal en is enkel manueel toe te voegen door een beheerder.",
@@ -11765,7 +11765,7 @@
   },
   "9a390ab2-bb28-49dc-9837-b389f5877c53": {
     "original": "Nieuwe vragenlijst",
-    "translation": "New questionnaire"
+    "translation": "New form"
   },
   "9a528611-db36-4bb0-9de4-29b653ea6165": {
     "original": "Je kan dit niet ongedaan maken",
@@ -12477,7 +12477,7 @@
   },
   "a3605548-d249-489e-bf64-4d3bd3555a8c": {
     "original": "Deze subcategorie zal worden verplaatst naar deze vragenlijst als je de huidige vragenlijst opslaat.",
-    "translation": "This subcategory will be moved to this questionnaire when you save the current questionnaire."
+    "translation": "This subcategory will be moved to this form when you save the current form."
   },
   "a36700a3-64be-49eb-b1fd-60af7475eb4e": {
     "original": "Meer info",
@@ -13793,7 +13793,7 @@
   },
   "b4cd468d-e3fd-47d2-b59c-cf19b1d3aee0": {
     "original": "Gebruik vragenlijsten niet om tijdelijke gegevens te verzamelen. Voeg daarvoor keuzemenu's toe aan je inschrijvingsgroepen of activiteiten.",
-    "translation": "Do not use questionnaires to collect temporary data. Add selection menus to your registration groups or activities for this purpose."
+    "translation": "Do not use forms to collect temporary data. Add selection menus to your registration groups or activities instead."
   },
   "b4f47589-f6b4-4f9e-a83b-ad4cbb3de416": {
     "original": "Prijs",
@@ -13869,7 +13869,7 @@
   },
   "b609c4cb-238c-4b27-bae5-9ee9f307ffb4": {
     "original": "vragenlijsten",
-    "translation": "questionnaires"
+    "translation": "forms"
   },
   "b60dbf08-bc14-4cf0-81c4-a4bcb20e28cd": {
     "original": "Betaling registreren",
@@ -14213,7 +14213,7 @@
   },
   "ba261762-9151-487c-a3a1-deb1c59e2a14": {
     "original": "Hoofdvragenlijst",
-    "translation": "Main questionnaire"
+    "translation": "Main form"
   },
   "ba2b2a5a-8c8a-42c5-9ee7-78daa3b6c5ec": {
     "original": "Als eerstsvolgende deadline",
@@ -14505,7 +14505,7 @@
   },
   "bd76a4c0-1c0c-4ba7-b3be-a1cd059f3640": {
     "original": "Deze functie is verouderd. Als je alle vrije invoervelden wist, en daarna opslaat, kan je gebruik maken van uitgebreidere vragenlijsten.",
-    "translation": "This function is obsolete. If you delete all free input fields and then save, you can use more extensive questionnaires."
+    "translation": "This function is outdated. If you delete all free text fields and then save, you can use more extensive forms."
   },
   "bd8e47cd-5d0a-4ca3-b5d2-947e6f7a8299": {
     "original": "Stel een open vraag (bv. 'naam op de trui') waarbij men zelf tekst kan intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.",
@@ -15997,7 +15997,7 @@
   },
   "d0f49d2a-6b83-4e03-9480-4d0995bbb0a1": {
     "original": "Vragenlijsten en gegevens",
-    "translation": "Questionnaires and data"
+    "translation": "Forms and data"
   },
   "d1048e80-095f-4fda-9ff2-eed515fef882": {
     "original": "We organiseren momenteel helaas geen verkoop. Kom later nog eens terug.",
@@ -16753,7 +16753,7 @@
   },
   "da5f0578-ebf9-40e1-8caf-baa3a7970b28": {
     "original": "Vragenlijsten en gegevens",
-    "translation": "Questionnaires and data"
+    "translation": "Forms and data"
   },
   "da735211-2f9d-45bf-a688-d76aaf796cc4": {
     "original": "Totaal bedrag",
@@ -17613,7 +17613,7 @@
   },
   "e48fd329-0701-47d6-998e-7598691b0200": {
     "original": "Ben je zeker dat je deze vragenlijst wilt verplaatsen?",
-    "translation": "Are you sure you want to move this questionnaire?"
+    "translation": "Are you sure you want to move this form?"
   },
   "e49699b5-d1bb-4547-8002-08ed2883997c": {
     "original": "Maatschappelijke zetel",
@@ -18257,7 +18257,7 @@
   },
   "ec8efff4-e2cf-4755-b8fb-a47f686be173": {
     "original": "Vragenlijsten tijdens afrekenen",
-    "translation": "Questionnaires during checkout"
+    "translation": "Forms during checkout"
   },
   "eca0a260-096c-413a-9fa0-0c91acd9c780": {
     "original": "De ouder ontvangt enkel communicatie op het eerste e-mailadres.",

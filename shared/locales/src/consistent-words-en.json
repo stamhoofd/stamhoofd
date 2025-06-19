@@ -91,5 +91,6 @@
     "sjabloon": "template",
     "niveau": "level",
     "indiener": "petitioner",
-    "bundelkorting": "bundle discount"
+    "bundelkorting": "bundle discount",
+    "vragenlijst": "form"
   }

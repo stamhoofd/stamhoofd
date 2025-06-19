@@ -60,39 +60,29 @@ export abstract class Translator implements ITranslator {
             originalLocal,
             targetLocal,
             consistentWords,
+            prompt
         }: {
             originalLocal: string;
             targetLocal: string;
             consistentWords: Record<string, string> | null;
+            prompt: string;
         },
     ): string {
         const consistentWordsText =
             consistentWords && Object.keys(consistentWords).length > 0
                 ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n` +
                   JSON.stringify(consistentWords, undefined, "  ") +
-                  ".\n"
+                  "\n"
                 : "";
 
-        const prompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
-- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
-- If you don't have enough context to provide a correct translation, set the value to an empty string.
-- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
-- If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.
-- Do not change currencies. Keep the currency symbol or (translated) name as it is in the original text. 
-
+        const fullPrompt = `Translate the values of the JSON array from ${originalLocal} to ${targetLocal}.${consistentWordsText}
+${prompt ? (prompt + "\n") : ""}
 Translate this array: 
-
 ${JSON.stringify(batch, undefined, "  ")}
 
-Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}. 
-- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
-- If you don't have enough context to provide a correct translation, set the value to an empty string.
-- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
-- If you encounter a persons name (e.g. Klaas) or something similar try to also translate it to a common name in ${targetLocal}.${consistentWordsText}
-- Do not change currencies. Keep the currency symbol or (translated) name as it is in the original text. 
-`;
+Translate the above values of the JSON array from ${originalLocal} to ${targetLocal}.${prompt ? ("\n" + prompt): ""}`;
 
-        return prompt;
+        return fullPrompt;
     }
 
     // override if necessary
@@ -102,10 +92,12 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
             originalLocal,
             targetLocal,
             consistentWords,
+            prompt
         }: {
             originalLocal: string;
             targetLocal: string;
             consistentWords: Record<string, string> | null;
+            prompt: string;
         },
     ): string {
         const consistentWordsText =
@@ -114,23 +106,23 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
                   JSON.stringify(consistentWords, undefined, "  ") +
                   ".\n"
                 : "";
-
-        const prompt = `Given is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts in a consistent way so that the translation of the variant does not differ much of the translation of the original text.${consistentWordsText}
-- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
-- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
-- If you don't have enough context to provide a correct translation, set the value to an empty string.
-
+            
+        const fullPrompt = `Given is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants ("variant" property) of the original texts in a consistent way (in a new "value" property of each object), while trying to stay close to the example translation ("example" and "exampleTranslation"). ${consistentWordsText}
+${prompt ? (prompt + "\n") : ""}
 Translate the variants in this array to ${targetLocal}: 
     
-${JSON.stringify(batch, undefined, "  ")}
+${JSON.stringify(batch.map(b => {
+    return {
+        id: b.id,
+        "example": b.value.original,
+        "exampleTranslation": b.value.translation,
+        "variant": b.value.variant,
+    }
+}), undefined, "  ")}
 
-Above is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts in a consistent way so that the translation of the variant does not differ much of the translation of the original text.${consistentWordsText}
-- Do not translate words between curly brackets (even if it is a consistent word). For example {een-voorbeeld} must remain {een-voorbeeld}, {werkjaar} must remain {werkjaar} (only if between curly brackets, so do translate werkjaar).
-- Be consistent and copy the caps and punctuation of the original language unless a capital letter is required in English (e.g. weekdays).
-- If you don't have enough context to provide a correct translation, set the value to an empty string.
-`;
+Above is an array with an original text in ${originalLocal}, the translation of that text and a variant of the original translation. Translate the variants of the original texts ("variant" property) in a consistent way (in a new "value" property of each object), while trying to stay close to the example translation ("example" and "exampleTranslation").${consistentWordsText}${prompt ? ("\n" + prompt): ""}`;
 
-        return prompt;
+        return fullPrompt;
     }
 
     protected async getTextFromApiForSimpleTranslation(
@@ -142,6 +134,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             namespace: string;
             batchNumber: number;
             totalBatches: number;
+            prompt: string;
         },
     ): Promise<string> {
         const prompt = this.createPromptForSimpleTranslation(batch, args);
@@ -166,6 +159,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             namespace: string;
             batchNumber: number;
             totalBatches: number;
+            prompt: string;
         },
     ): Promise<string> {
         const prompt = this.createPromptForTranslationWithVariant(batch, args);
@@ -215,6 +209,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             namespace: string;
             batchNumber: number;
             totalBatches: number;
+            prompt: string;
         },
     ): Promise<Batch<string>> {
         const promptBatch: PromptBatch<string> = batch.map(({ value }, id) => {
@@ -246,6 +241,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             namespace: string;
             batchNumber: number;
             totalBatches: number;
+            prompt: string;
         },
     ): Promise<Batch<string>> {
         const promptBatch: PromptBatch<TranslationWithVariant> = batch.map(
@@ -286,6 +282,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
             translateBatch,
             getUntranslatedValue,
             afterBatchTranslated,
+            prompt
         }: {
             originalLocal: string;
             targetLocal: string;
@@ -301,10 +298,12 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                     namespace: string;
                     batchNumber: number;
                     totalBatches: number;
+                    prompt: string;
                 },
             ) => Promise<Batch<string>>;
             getUntranslatedValue: (item: T) => string;
             afterBatchTranslated?: AfterBatchTranslatedCallback;
+            prompt: string;
         },
     ): Promise<Translations> {
         const promises: Promise<Batch<string>>[] = batches.map(
@@ -330,6 +329,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                                     namespace,
                                     batchNumber,
                                     totalBatches,
+                                    prompt
                                 },
                             );
 
@@ -440,6 +440,10 @@ ${error}`;
             args.namespace,
         );
 
+        const prompt = this.manager.getPrompt(
+            args.namespace,
+        );
+
         const result = await this.translateBatches(batches, {
             originalLocal: args.originalLocal,
             targetLocal,
@@ -449,6 +453,7 @@ ${error}`;
             translateBatch: (batch, args) => this.translateSimpleBatch(batch, args),
             getUntranslatedValue: (item: string) => item,
             afterBatchTranslated: args.afterBatchTranslated,
+            prompt
         });
 
         console.log(
@@ -473,14 +478,20 @@ ${error}`;
 
         console.log(
             chalk.white(
-                `Start translate ${Object.keys(translationsWithVariant).length} items with replacements from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
+                `Start translate ${Object.keys(translationsWithVariant).length} items with variants from ${args.originalLocal} to ${targetLocal} for namespace ${args.namespace}`,
             ),
         );
+
+        console.log(chalk.cyan(JSON.stringify(translationsWithVariant)));
 
         const batches = this.splitInBatches(translationsWithVariant);
 
         const consistentWords = this.manager.getConsistentWords(
             targetLocal,
+            args.namespace,
+        );
+
+        const prompt = this.manager.getPrompt(
             args.namespace,
         );
 
@@ -494,6 +505,7 @@ ${error}`;
             getUntranslatedValue: (item: TranslationWithVariant) =>
                 item.variant,
             afterBatchTranslated: args.afterBatchTranslated,
+            prompt
         });
 
         console.log(

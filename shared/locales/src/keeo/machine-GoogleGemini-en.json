@@ -107,10 +107,6 @@
     "original": "Er bestaat al een eenheid met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
     "translation": "A unit with the same name already exists. For example, add the name of your municipality."
   },
-  "1af084bf-42d6-4a59-a7da-d1e87c6dba8e": {
-    "original": "Dit lid is niet langer aangesloten bij FOS Open Scouting, en de verzekering loopt binnenkort af",
-    "translation": "This member is no longer affiliated with FOS Open Scouting, and the insurance will expire soon"
-  },
   "1bb58aa1-e36e-4384-8c54-be3b71d77a3b": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt goedgekeurd",
     "translation": "Email sent to the submitter (and the unit's set contact persons) when a camp notification is approved"
@@ -121,7 +117,7 @@
   },
   "1dfaeb07-5f01-42c7-a9a4-0096047da86e": {
     "original": "Vragenlijst van FOS Open Scouting",
-    "translation": "FOS Open Scouting questionnaire"
+    "translation": "FOS Open Scouting Form"
   },
   "1f1d657d-bc73-4cae-9025-b3ec67a705e7": {
     "original": "Je kan geen aansluitingen meer verwijderen in dit scoutsjaar",

@@ -1,0 +1,6 @@
+- These are translations for the member administration, webshops and ticket sales platform of FOS Open Scouting (youth organization in Belgium), use that context in your translations.
+- The platform name of this platform is 'Keeo', don't translate 'Keeo'.
+- FOS Open Scouting is a pluralistic, co-educational Flemish scouting organization that promotes openness and inclusion. It was founded on the principles of the broader global scouting movement but emphasizes active citizenship, equality, and critical thinking. 
+- The content is used in an app aimed at young members, parents, and leaders, so the tone should be clear, friendly, and age-appropriate.
+- Translations should prioritize clarity and natural fluency in the target language, preserving the cultural meaning of Flemish youth movement terms.
+- Do not translate "FOS" or "FOS Open Scouting." These are official names. Translate only supporting text. If terms like “FOS-sfeer” appear, retain the brand but clarify if necessary.

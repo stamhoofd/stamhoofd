@@ -266,6 +266,27 @@ export class TranslationManager {
         return result;
     }
 
+    getPrompt(
+        namespace: string,
+    ): string {
+        let globalPrompt = '';
+        if (namespace !== globals.DEFAULT_NAMESPACE) {
+            globalPrompt = this.getPrompt(
+                globals.DEFAULT_NAMESPACE,
+            );
+        }
+
+        // first get default consistent words for locale
+        const filePath = `${this.getSourceDir(namespace)}/prompt.txt`;
+
+        if (!fs.existsSync(filePath)) {
+            return globalPrompt;
+        }
+
+        const result = fs.readFileSync(filePath, "utf8").trim()
+        return globalPrompt + '\n' +  result;
+    }
+
     private getSourceDir(namespace: string): string {
         const namespacePart =
             namespace === globals.DEFAULT_NAMESPACE ? "" : "/" + namespace;

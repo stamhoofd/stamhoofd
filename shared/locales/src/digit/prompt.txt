@@ -1,0 +1,6 @@
+- These are translations for the member administration, webshops and ticket sales platform of KSA Nationaal (youth organization in Belgium), use that context in your translations.
+- The platform name of this platform is 'Ravot', don't translate 'Ravot'.
+- KSA (Katholieke Studenten Actie) is a Flemish Catholic youth organization founded in 1928. It has over 37,000 members across 260 local groups in Flanders and organizes activities for children aged 6 and up.
+- The content is used in an app aimed at young members, parents, and leaders, so the tone should be clear, friendly, and age-appropriate.
+- Translations should prioritize clarity and natural fluency in the target language, preserving the cultural meaning of Flemish youth movement terms.
+- Do not translate "KSA". This is an official name. Translate only supporting text. If terms like KSA-sfeer” appear, retain the brand but clarify if necessary.
