@@ -91,7 +91,8 @@
             </STList>
 
             <template v-if="hasFullPermissions">
-                <hr><h2>{{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}</h2>
+                <hr>
+                <h2>{{ $t('bab38c80-8ab6-4cb7-80c3-1f607057e45d') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
