@@ -117,6 +117,15 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
 
+const props = withDefaults(defineProps<{
+    defaultSubject?: string;
+    recipientFilterOptions: (RecipientChooseOneOption | RecipientMultipleChoiceOption)[];
+    emailId?: string | null;
+}>(), {
+    defaultSubject: '',
+    emailId: null,
+});
+
 export type RecipientChooseOneOption = {
     type: 'ChooseOne';
     name?: string;
@@ -138,13 +147,6 @@ export type RecipientMultipleChoiceOption = {
     defaultSelection?: string[];
     build: (selectedIds: string[]) => EmailRecipientSubfilter[];
 };
-
-const props = withDefaults(defineProps<{
-    defaultSubject?: string;
-    recipientFilterOptions: (RecipientChooseOneOption | RecipientMultipleChoiceOption)[];
-}>(), {
-    defaultSubject: '',
-});
 
 class TmpFile {
     name: string;
@@ -349,8 +351,8 @@ async function createEmail() {
             path: '/email',
             body: Email.create({
                 recipientFilter: recipientFilter.value,
-                fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).email : null,
-                fromName: emails.value.length > 0 ? (emails.value.find(e => e.default) ?? emails.value[0]).name : null,
+                fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.id === props.emailId) ?? emails.value.find(e => e.default) ?? emails.value[0]).email : null,
+                fromName: emails.value.length > 0 ? (emails.value.find(e => e.id === props.emailId) ?? emails.value.find(e => e.default) ?? emails.value[0]).name : null,
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
             }),
