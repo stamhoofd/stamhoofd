@@ -629,7 +629,7 @@ function onFocus(index: number) {
     .input {
         padding: 5px 0;
         padding-right: 40px;
-        padding-left: 10px;
+        padding-left: 15px;
 
         display: grid;
         grid-template-columns: auto auto auto auto auto;
@@ -647,6 +647,10 @@ function onFocus(index: number) {
             &.hide {
                 display: none;
             }
+        }
+
+        >.placeholder + div {
+            margin-left: -5px;
         }
 
         > div {
