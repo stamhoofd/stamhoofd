@@ -6,7 +6,9 @@
                 <slot name="right" />
             </div>
         </h4>
-        <slot />
+        <div :class="{'without-title': !title}">
+            <slot />
+        </div>
     </STErrorsInput>
 </template>
 
@@ -37,21 +39,27 @@ export default class STInputBox extends VueComponent {
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .st-input-box {
-    padding: 12px 0;
+    padding: 10px 0;
     display: block;
-    max-width: 340px;
+
+    > div {
+        max-width: 340px;
+
+        @media (max-width: 500px) {
+            max-width: none;
+        }
+    }
+
+    &.max > div {
+        max-width: none;
+    }
 
     &:has(.st-list) {
         padding-bottom: 5px;
     }
 
-    @media (max-width: 500px) {
-        max-width: none;
-    }
-
     & + .style-description-small, & + .style-description, + div:not([class]) > .style-description-small:first-child {
-        margin-top: -2px;
-        padding-bottom: 12px;
+        padding-bottom: 15px;
     }
 
     &.indent {
@@ -99,26 +107,26 @@ export default class STInputBox extends VueComponent {
             align-items: center;
             gap: 7px;
         }
+    }
 
-        ~ * {
+    > div {
+        > * {
             margin-top: 8px;
-
-            &:last-child {
-                margin-top: 0; // error box
-            }
         }
 
-        + * {
+        > *:first-child {
             margin-top: 6px;
 
             &.st-list {
                 margin-top: 2px; // list
             }
         }
-    }
 
-    &.max {
-        max-width: none;
+        &.without-title {
+            > *:first-child {
+                margin-top: 0;
+            }
+        }
     }
 }
 </style>

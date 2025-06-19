@@ -1,6 +1,7 @@
 .split-inputs {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
 
     &.option {
         margin-top: 7px
@@ -20,21 +21,6 @@
             &:first-child {
                 flex-grow: 1;
             }
-        }
-    }
-
-    & > div {
-        flex-grow: 1;
-        flex-shrink: 0;
-        flex-basis: 0;
-        margin: 0 20px;
-
-        &:first-child {
-            margin-left: 0;
-        }
-
-        &:last-child {
-            margin-right: 0;
         }
     }
 
