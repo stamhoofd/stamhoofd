@@ -57,24 +57,28 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     setTitleSuffix($t(`13b501d3-2ffc-460e-9cc5-9858b21ba842`));
 
     const startTab = new TabBarItem({
+        id: 'start',
         icon: 'home',
         name: $t(`04548161-abc0-4bea-bdd3-fdbacddc22f8`),
         component: startView,
     });
 
     const membersTab = new TabBarItem({
+        id: 'members',
         icon: 'group',
         name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
         component: membersTableView,
     });
 
     const groupsTab = new TabBarItem({
+        id: 'organizations',
         icon: 'location',
         name: $t('6e884f27-427f-4f85-914c-d5c2780253b0'),
         component: organizationsTableView,
     });
 
     const calendarTab = new TabBarItem({
+        id: 'calendar',
         icon: 'calendar',
         name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
         component: new ComponentWithProperties(NavigationController, {
@@ -83,6 +87,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     });
 
     const financesTab = new TabBarItem({
+        id: 'finances',
         icon: 'calculator',
         name: $t(`bc00376e-db0e-4ace-aecc-9bfc05ee573e`),
         component: new ComponentWithProperties(NavigationController, {
@@ -91,6 +96,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     });
 
     const eventNotificationsTab = new TabBarItem({
+        id: 'event-notifications',
         icon: 'notification',
         name: $t(`caf486c6-818a-4d2b-9fdb-728c6af71481`),
         component: new ComponentWithProperties(NavigationController, {
@@ -99,6 +105,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     });
 
     const auditLogsTab = new TabBarItem({
+        id: 'audit-logs',
         icon: 'history',
         name: $t(`1b5413cd-5858-4a73-872b-5b6b26345039`),
         component: new ComponentWithProperties(SplitViewController, {
@@ -107,6 +114,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
     });
 
     const settingsTab = new TabBarItem({
+        id: 'settings',
         icon: 'settings',
         name: $t(`bab38c80-8ab6-4cb7-80c3-1f607057e45d`),
         component: settingsView,

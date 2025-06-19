@@ -147,7 +147,7 @@ async function onClickStep(type: SetupStepType) {
             break;
         }
         case SetupStepType.Registrations: {
-            await GlobalEventBus.sendEvent('selectTabByName', 'leden');
+            await GlobalEventBus.sendEvent('selectTabById', 'members');
             break;
         }
     }

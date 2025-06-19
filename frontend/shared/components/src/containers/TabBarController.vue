@@ -342,6 +342,17 @@ const selectTabByName = async (name: string) => {
     const item = flatTabs.value.find(tab => Formatter.slug(unref(tab.name)) === Formatter.slug(name));
     if (item) {
         await selectItem(item);
+    } else {
+        console.error('No tab item found with name:', name);
+    }
+};
+
+const selectTabById = async (id: string) => {
+    const item = flatTabs.value.find(tab => tab.id === id);
+    if (item) {
+        await selectItem(item);
+    } else {
+        console.error('No tab item found with id:', id);
     }
 };
 
@@ -387,6 +398,7 @@ provide('reactive_navigation_show', show);
 
 onMounted(() => {
     GlobalEventBus.addListener(this, 'selectTabByName', selectTabByName);
+    GlobalEventBus.addListener(this, 'selectTabById', selectTabById);
 });
 
 onBeforeUnmount(() => {

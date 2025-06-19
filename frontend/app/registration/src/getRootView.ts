@@ -81,6 +81,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     });
 
     const calendarTab = new TabBarItem({
+        id: 'events',
         icon: 'calendar',
         name: $t(`d9b4472a-a395-4877-82fd-da6cb0140594`),
         component: new ComponentWithProperties(NavigationController, {
@@ -102,12 +103,14 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                     return new ComponentWithProperties(TabBarController, {
                         tabs: [
                             new TabBarItem({
+                                id: 'start',
                                 icon: 'home',
                                 name: $t(`04548161-abc0-4bea-bdd3-fdbacddc22f8`),
                                 component: startView,
                             }),
                             ...(enableEvents ? [calendarTab] : []),
                             new TabBarItem({
+                                id: 'members',
                                 icon: 'basket',
                                 name: $t(`88db9833-34e4-488a-9f74-b6e230c69dc1`),
                                 component: cartRoot,

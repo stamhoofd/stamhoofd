@@ -1,7 +1,9 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { Formatter } from '@stamhoofd/utility';
 import { ComponentPublicInstance, markRaw, Ref, unref } from 'vue';
 
 export class TabBarItem {
+    id: string;
     name: string = '';
     icon = '';
     badge: string | Ref<string> | null = '';
@@ -9,7 +11,8 @@ export class TabBarItem {
     action?: (this: ComponentPublicInstance) => Promise<void> | void;
     savedScrollPositions: WeakMap<HTMLElement, number> = new WeakMap();
 
-    constructor(options: { name: string; icon: string; badge?: string | Ref<string> | null; component?: ComponentWithProperties; action?: (this: ComponentPublicInstance) => Promise<void> | void }) {
+    constructor(options: { id?: string; name: string; icon: string; badge?: string | Ref<string> | null; component?: ComponentWithProperties; action?: (this: ComponentPublicInstance) => Promise<void> | void }) {
+        this.id = options.id ?? Formatter.slug(options.name);
         this.name = options.name;
         this.icon = options.icon;
         this.component = options.component;
