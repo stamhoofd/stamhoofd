@@ -526,6 +526,10 @@
     &:last-child {
         padding-bottom: 0;
     }
+
+    &:empty {
+        display: none;
+    }
 }
 
 .style-description-small {
@@ -546,10 +550,6 @@
 
     > .style-tag:only-child {
         margin: 4px 0;
-    }
-
-    + .st-input-box {
-        margin-top: 15px;
     }
 }
 
@@ -642,9 +642,14 @@
 }
 
 .style-label {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: $font-weight-semibold;
     display: block;
+    line-height: 1.6;
+
+    @media (max-width: 450px) {
+        font-size: 15px;
+    }
 }
 
 .style-table-head {

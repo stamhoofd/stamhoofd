@@ -37,16 +37,21 @@ export default class STInputBox extends VueComponent {
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .st-input-box {
-    padding: 10px 0;
+    padding: 12px 0;
     display: block;
     max-width: 340px;
 
-    @media (max-width: 450px) {
+    &:has(.st-list) {
+        padding-bottom: 5px;
+    }
+
+    @media (max-width: 500px) {
         max-width: none;
     }
 
-    & + .style-description-small, & + .style-description {
-        padding-bottom: 10px;
+    & + .style-description-small, & + .style-description, + div:not([class]) > .style-description-small:first-child {
+        margin-top: -2px;
+        padding-bottom: 12px;
     }
 
     &.indent {
@@ -77,9 +82,9 @@ export default class STInputBox extends VueComponent {
         > label {
             flex-grow: 1; // fix safari newline glitch
             min-width: 0;
-            overflow: hidden;
+            /*overflow: hidden;
             white-space: nowrap;
-            text-overflow: ellipsis;
+            text-overflow: ellipsis;*/
             align-self: flex-start;
         }
 
@@ -104,7 +109,11 @@ export default class STInputBox extends VueComponent {
         }
 
         + * {
-            margin-top: 0;
+            margin-top: 6px;
+
+            &.st-list {
+                margin-top: 2px; // list
+            }
         }
     }
 

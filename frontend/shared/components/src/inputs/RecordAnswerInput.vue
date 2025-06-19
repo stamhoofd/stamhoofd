@@ -65,9 +65,8 @@
             </p>
         </div>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
-
         <p v-if="answer.settings.type !== RecordType.Checkbox && answer.settings.description.length" class="style-description-small pre-wrap style-wysiwyg" v-html="linkText(answer.settings.description.toString())" />
+        <STErrorsDefault :error-box="errors.errorBox" />
     </div>
 </template>
 
