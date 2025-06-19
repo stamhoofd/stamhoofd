@@ -47,7 +47,7 @@
                     </p>
                 </header>
 
-                <template v-if="!closed || showOpenAt">
+                <template v-if="(!closed || showOpenAt) && (categories.length > 0 || products.length > 0)">
                     <FullPageProduct v-if="products.length === 1 && webshopLayout === 'Split'" :product="products[0]" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" />
                     <div v-else class="products">
                         <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="onAddItem" :is-last="index === categories.length - 1" />
