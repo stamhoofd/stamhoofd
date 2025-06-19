@@ -17,6 +17,7 @@ import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate';
+import { MemberNumberService } from '../../../services/MemberNumberService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -533,6 +534,17 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 // Save if okay
                 await membership.save();
+
+                if (member.details.memberNumber === null) {
+                    try {
+                        await MemberNumberService.assignMemberNumber(member, membership);
+                    }
+                    catch (error) {
+                        console.error(`Failed to assign member number for id ${member.id}: ${error.message}`);
+                        // If the assignment of the member number fails the membership is not created but the member is registered
+                        continue;
+                    }
+                }
 
                 updateMembershipMemberIds.add(member.id);
             }
