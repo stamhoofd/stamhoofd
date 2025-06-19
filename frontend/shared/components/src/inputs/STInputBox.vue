@@ -50,7 +50,19 @@ export default class STInputBox extends VueComponent {
         }
     }
 
+    > h4:has(.button) {
+        max-width: 340px;
+
+        @media (max-width: 500px) {
+            max-width: none;
+        }
+    }
+
     &.max > div {
+        max-width: none;
+    }
+
+    &.max > h4 {
         max-width: none;
     }
 
