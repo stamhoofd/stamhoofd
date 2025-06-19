@@ -455,29 +455,35 @@ async function createGroup() {
     )) {
         return;
     }
-    createEventGroup(props.event, async (group: Group) => {
-        // Set event group and save
-        const patch = Event.patch({
-            id: props.event.id,
-            group: group,
+
+    try {
+        await createEventGroup(props.event, async (group: Group) => {
+            // Set event group and save
+            const patch = Event.patch({
+                id: props.event.id,
+                group: group,
+            });
+
+            const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+            arr.addPatch(patch);
+
+            const response = await context.value.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/events',
+                body: arr,
+                decoder: new ArrayDecoder(Event as Decoder<Event>),
+            });
+
+            // Make sure original event is patched
+            deepSetArray([props.event], response.data);
+
+            // Navigate to the new group settings
+            // $navigate(Routes.EditGroup).catch(console.error);
         });
-
-        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-        arr.addPatch(patch);
-
-        const response = await context.value.authenticatedServer.request({
-            method: 'PATCH',
-            path: '/events',
-            body: arr,
-            decoder: new ArrayDecoder(Event as Decoder<Event>),
-        });
-
-        // Make sure original event is patched
-        deepSetArray([props.event], response.data);
-
-        // Navigate to the new group settings
-        // $navigate(Routes.EditGroup).catch(console.error);
-    });
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
 }
 
 async function addMembers() {

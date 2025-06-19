@@ -5,6 +5,7 @@
         <main>
             <h1>{{ title }}</h1>
             <p v-if="description" class="style-description-block pre-wrap" v-text="description" />
+            <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
                 <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`d510896c-f601-4eb6-973e-5bd494a5c207`)">
@@ -12,7 +13,7 @@
 
             <Spinner v-if="loadingResults" class="gray center" />
             <STList v-else>
-                <STListItem v-for="organization in results" :key="organization.id" :selectable="true" @click="selectOrganization(organization, navigationActions)">
+                <STListItem v-for="organization in results" :key="organization.id" :selectable="true" @click="doSelectOrganization(organization)">
                     <template #left>
                         <OrganizationAvatar :organization="organization" />
                     </template>
@@ -34,14 +35,14 @@
 <script setup lang="ts">
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
-import { NavigationActions, OrganizationAvatar, Spinner, Toast, useNavigationActions } from '@stamhoofd/components';
+import { ErrorBox, NavigationActions, OrganizationAvatar, Spinner, Toast, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
 import { Ref, ref, watch } from 'vue';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         title?: string;
         description?: string;
@@ -58,7 +59,7 @@ const query = ref('');
 const results = ref([]) as Ref<Organization[]>;
 const owner = useRequestOwner();
 const defaultCountry = I18nController.shared.countryCode;
-
+const errors = useErrors();
 
 let lastQuery = '';
 let counter = 0;
@@ -130,6 +131,16 @@ const startUpdateResults = async () => {
 };
 
 watch(query, startUpdateResults);
+
+async function doSelectOrganization(organization: Organization) {
+    try {
+        errors.errorBox = null;
+        await props.selectOrganization(organization, navigationActions);
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+}
 
 </script>
 

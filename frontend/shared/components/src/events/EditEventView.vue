@@ -366,6 +366,8 @@ const hasGroup = computed({
                         // Create a new default group
                         group,
                     });
+                }).catch(e => () => {
+                    Toast.fromError(e).show();
                 })
             }
         }

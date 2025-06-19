@@ -11,7 +11,7 @@ export function useCreateEventGroup() {
     /**
      * We don't use a promise here because there would be a memory leak if the presented component would be closed without selecting an organization
      */
-    return function (event: Event, setGroup: (group: Group) => void | Promise<void>) {
+    return async function (event: Event, setGroup: (group: Group) => void | Promise<void>) {
         const organizationId = event.organizationId ?? organization.value?.id ?? '';
 
         const group = Group.create({
@@ -26,7 +26,7 @@ export function useCreateEventGroup() {
 
         if (!organizationId) {
             // Kies een organisator
-            present({
+            await present({
                 components: [
                     new ComponentWithProperties(NavigationController, {
                         root: new ComponentWithProperties(SearchOrganizationView, {
@@ -35,17 +35,16 @@ export function useCreateEventGroup() {
                             selectOrganization: async (organization: Organization, navigationActions: NavigationActions) => {
                                 group.organizationId = organization.id;
                                 group.periodId = organization.period.period.id;
-                                await navigationActions.dismiss({ force: true });
-
                                 await setGroup(group);
+                                await navigationActions.dismiss({ force: true });
                             },
                         }),
                     }),
                 ],
                 modalDisplayStyle: 'popup',
-            }).catch(console.error);
+            });
             return;
         }
-        setGroup(group);
+        await setGroup(group);
     };
 }
