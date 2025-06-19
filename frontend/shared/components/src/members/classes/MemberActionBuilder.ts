@@ -350,6 +350,10 @@ export class MemberActionBuilder {
     }
 
     editResponsibilities(member: PlatformMember) {
+        presentEditResponsibilities({ member, present: this.present }).catch(console.error);
+    }
+
+    editMember(member: PlatformMember) {
         presentEditMember({ member, present: this.present }).catch(console.error);
     }
 
@@ -364,7 +368,7 @@ export class MemberActionBuilder {
                 singleSelection: true,
                 enabled: this.hasWrite,
                 handler: (members: PlatformMember[]) => {
-                    this.editResponsibilities(members[0]);
+                    this.editMember(members[0]);
                 },
             }),
 

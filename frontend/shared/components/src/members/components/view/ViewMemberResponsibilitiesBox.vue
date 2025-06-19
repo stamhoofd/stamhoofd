@@ -82,6 +82,6 @@ const sortedResponsibilities = computed(() => {
 });
 
 async function editResponsibilities() {
-    await buildActions().editResponsibilities(props.member);
+    buildActions().editResponsibilities(props.member);
 }
 </script>
