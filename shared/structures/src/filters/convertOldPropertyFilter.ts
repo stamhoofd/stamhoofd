@@ -259,12 +259,12 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
             };
         }
         case NumberFilterMode.NotEqual: {
-            if (filter.end === undefined) {
+            if (filter.start === undefined) {
                 throw new Error('Not equal filter has no value');
             }
             return {
                 [sqlFilterId]: {
-                    $neq: filter.end,
+                    $neq: filter.start,
                 },
             };
         }
