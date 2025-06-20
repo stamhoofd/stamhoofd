@@ -182,29 +182,14 @@ export const BalanceItemService = {
 
     async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
         await this.markDue(balanceItem);
+        let shouldMarkUpdated = true;
 
-        if (balanceItem.paidAt) {
-            // Already ran side effects
-            // If we for example deleted a related order or registration - and we still have the balance item, mark it as paid again, we don't want to reactivate the order or registration
-            await this.markUpdated(balanceItem, payment, organization);
-            return;
-        }
-
-        // It is possible this balance item was earlier paid
-        // and later the regigstration / order has been canceled and it became a negative balance item - which as some point has been reembursed and marked as 'paid'
-        // in that case, we should be careful not to mark the registration as valid again
-
-        // If registration
-        if (balanceItem.registrationId) {
-            if (balanceItem.type === BalanceItemType.Registration) {
-                await RegistrationService.markValid(balanceItem.registrationId);
-            }
-        }
-
-        // If order
+        // For orders, we should always call markPaid on the order - it is safe to call this multiple times
+        // we need to call it multiple times, in case the order was previously marked unpaid, and then paid again - then we'll need to recreate the tickets
         if (balanceItem.orderId) {
             const order = await Order.getByID(balanceItem.orderId);
             if (order) {
+                shouldMarkUpdated = false;
                 await order.markPaid(payment, organization);
 
                 // Save number in balance description
@@ -216,6 +201,26 @@ export const BalanceItemService = {
                         await balanceItem.save();
                     }
                 }
+            }
+        }
+
+        if (balanceItem.paidAt) {
+            // Already ran side effects
+            // If we for example deleted a related order or registration - and we still have the balance item, mark it as paid again, we don't want to reactivate the order or registration
+            if (shouldMarkUpdated) {
+                await this.markUpdated(balanceItem, payment, organization);
+            }
+            return;
+        }
+
+        // It is possible this balance item was earlier paid
+        // and later the regigstration / order has been canceled and it became a negative balance item - which as some point has been reembursed and marked as 'paid'
+        // in that case, we should be careful not to mark the registration as valid again
+
+        // If registration
+        if (balanceItem.registrationId) {
+            if (balanceItem.type === BalanceItemType.Registration) {
+                await RegistrationService.markValid(balanceItem.registrationId);
             }
         }
 

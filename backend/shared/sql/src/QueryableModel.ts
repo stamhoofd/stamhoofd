@@ -4,9 +4,10 @@ import { SQL } from './SQL';
 import { SQLDelete } from './SQLDelete';
 import { SQLUpdate } from './SQLUpdate';
 import { SQLInsert } from './SQLInsert';
+import { SQLExpression } from './SQLExpression';
 
 export class QueryableModel extends Model {
-    static select<T extends typeof Model>(this: T): SQLSelect<InstanceType<T>> {
+    static select<T extends typeof Model>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
         const transformer = (row: SQLResultNamespacedRow): InstanceType<T> => {
             const d = (this as T).fromRow(row[this.table] as any) as InstanceType<T> | undefined;
 
@@ -17,7 +18,7 @@ export class QueryableModel extends Model {
             return d;
         };
 
-        const select = new SQLSelect(transformer, SQL.wildcard());
+        const select = new SQLSelect(transformer, ...(columns.length === 0 ? [SQL.wildcard()] : columns));
         return select.from(SQL.table(this.table));
     }
 

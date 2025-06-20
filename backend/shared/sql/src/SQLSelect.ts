@@ -183,7 +183,15 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
         // when debugging: log all queries
         // console.log(query, params);
-        const [rows] = await Database.select(query, params, { nestTables: true });
+        let rows: SQLResultNamespacedRow[];
+        try {
+            const [_rows] = await Database.select(query, params, { nestTables: true });
+            rows = _rows;
+        }
+        catch (e) {
+            console.error('Error executing SQL query', query, params, e);
+            throw e;
+        }
 
         // Now map aggregated queries to the correct namespace
         for (const row of rows) {
@@ -215,7 +223,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         const rows = await this.limit(1).fetch();
         if (rows.length === 0) {
             if (required) {
-                throw new Error('Required ' + this._from);
+                throw new Error('Expected at least one result at ' + this._from.getName());
             }
             return null;
         }

@@ -1,14 +1,14 @@
 import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel } from '@stamhoofd/sql';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, EmailTemplateType, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType, WebshopTimeSlot } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { WebshopCounter } from '../helpers/WebshopCounter';
-import { BalanceItem, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
+import { BalanceItem, BalanceItemPayment, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
 
 export class Order extends QueryableModel {
     static table = 'webshop_orders';
@@ -140,7 +140,7 @@ export class Order extends QueryableModel {
         return this.status !== OrderStatus.Canceled && this.status !== OrderStatus.Deleted;
     }
 
-    async shouldCreateTickets() {
+    async shouldCreateTickets(options?: { hasPaidPayment?: boolean }) {
         if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted || this.id === undefined || this.id === null) {
             return false;
         }
@@ -149,12 +149,32 @@ export class Order extends QueryableModel {
             return true;
         }
 
+        /* if (options?.hasPaidPayment) {
+            return true;
+        } */
+
         // Check we paid at least 1 cent
-        const allBalanceItems = await BalanceItem.where({ orderId: this.id });
-        if (allBalanceItems.find(b => b.pricePaid > 0)) {
+        // note: do not use cached values such as pricePaid here, because their value could be delayed.
+        console.log('Checking payments for order ' + this.id);
+        const payments = await Payment.select(
+            SQL.wildcard(Payment.table),
+        )
+            .join(
+                SQL.join(BalanceItemPayment.table).where('paymentId', SQL.parentColumn('id')),
+            )
+            .join(
+                SQL.join(BalanceItem.table).where('id', SQL.column(BalanceItemPayment.table, 'balanceItemId')),
+            )
+            .where(SQL.column(BalanceItem.table, 'orderId'), this.id)
+            .groupBy(SQL.column(Payment.table, 'id'))
+            .fetch();
+
+        if (payments.find(p => p.status === PaymentStatus.Succeeded && p.price > 0)) {
+            console.log('Order ' + this.id + ' has a succeeded payment with price > 0');
             return true;
         }
 
+        console.log('Order ' + this.id + ' has no succeeded payments with price > 0');
         return false;
     }
 
@@ -512,16 +532,16 @@ export class Order extends QueryableModel {
         return changed;
     }
 
-    async updateTickets(this: Order & { webshop: Webshop }): Promise<{ tickets: Ticket[]; didCreateTickets: boolean }> {
+    async updateTickets(this: Order & { webshop: Webshop }, options?: { hasPaidPayment?: boolean }): Promise<{ tickets: Ticket[]; didCreateTickets: boolean }> {
         const webshop = this.webshop;
 
         if (webshop.meta.ticketType !== WebshopTicketType.Tickets && webshop.meta.ticketType !== WebshopTicketType.SingleTicket) {
             return { tickets: [], didCreateTickets: false };
         }
 
-        const existingTickets = !this.id ? [] : await Ticket.where({ orderId: this.id });
+        const existingTickets = !this.id ? [] : await Ticket.select().where('orderId', this.id).fetch();
 
-        if (!(await this.shouldCreateTickets())) {
+        if (!(await this.shouldCreateTickets(options))) {
             // Delete all existing tickets
             for (const ticket of existingTickets) {
                 if (ticket.isDeleted) {
@@ -703,8 +723,7 @@ export class Order extends QueryableModel {
      */
     async markPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
         console.log('Marking order ' + this.id + ' as paid');
-        this.markUpdated();
-        await this.save();
+
         const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
         if (!webshop) {
             console.error('Missing webshop for order ' + this.id);
@@ -715,13 +734,16 @@ export class Order extends QueryableModel {
             await this.undoPaymentFailed(payment, organization);
         }
 
-        const { tickets, didCreateTickets } = await this.setRelation(Order.webshop, webshop).updateTickets();
+        const { tickets, didCreateTickets } = await this.setRelation(Order.webshop, webshop).updateTickets({ hasPaidPayment: true });
 
         // Needs to happen before validation, because we can include the tickets in the validation that way
         if (this.validAt === null) {
             await this.setRelation(Order.webshop, webshop).markValid(payment, tickets);
         }
         else {
+            this.markUpdated();
+            await this.save();
+
             if (!this.data.shouldSendPaymentUpdates) {
                 console.log('Skip sending paid email for order ' + this.id);
                 return;
