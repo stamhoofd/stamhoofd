@@ -11,6 +11,7 @@ export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
         ...baseInMemoryFilterCompilers,
         id: createInMemoryFilterCompiler('id'),
     }),
+    value: createInMemoryFilterCompiler('value'),
 };
 
 export const recordAnswersFilterCompilers: InMemoryFilterDefinitions = {
@@ -22,6 +23,7 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     age: createInMemoryFilterCompiler('details.defaultAge'),
     gender: createInMemoryFilterCompiler('details.gender'),
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
+    hasEmergencyContact: createInMemoryFilterCompiler('details.hasEmergencyContact'),
     recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 

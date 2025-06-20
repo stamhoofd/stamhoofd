@@ -456,6 +456,10 @@ export class MemberDetails extends AutoEncoder {
         return this.requiresFinancialSupport?.value ?? false;
     }
 
+    get hasEmergencyContact() {
+        return this.emergencyContacts.length > 0;
+    }
+
     /**
      * Check if this member could fit a group, ignoring dates and waiting lists
      */
