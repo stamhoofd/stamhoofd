@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, WebshopPreview } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethodType, OptionMenu, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
@@ -23,7 +23,7 @@ export class OrdersExcelExport {
     /**
      * List of all products for every order
      */
-    static createOrderLines(webshop: WebshopPreview, orders: PrivateOrder[]): XLSX.WorkSheet {
+    static createOrderLines(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
         const repeat = true;
 
@@ -42,7 +42,60 @@ export class OrdersExcelExport {
             }
         }
 
-        // todo: First add record settings in order
+        // First add record settings in order
+        for (const recordSettings of webshop.meta.recordCategories.flatMap(r => r.getAllRecords())) {
+            if (!answerColumns.has(recordSettings.id)) {
+                answerColumns.set(recordSettings.id, answerNames.length);
+                const columns = recordSettings.excelColumns;
+                for (const c of columns) {
+                    answerNames.push(c.defaultCategory ? (c.defaultCategory + ' - ' + c.name) : c.name);
+                }
+            }
+        }
+
+        for (const product of webshop.productsInOrder) {
+            // Produce prices
+            if (product.prices.length > 1) {
+                const name = $t(`d34e8bed-2fd2-4a01-b88f-94deab82d26f`);
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+
+            // Ticket date/time
+            if ((product.type === ProductType.Ticket || product.type === ProductType.Voucher) && product.dateRange) {
+                const name = $t(`3a58bc78-bf5e-4e9d-b9e1-98a06d0b6322`);
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+
+            // Produce options
+            for (const menu of product.optionMenus) {
+                const name = menu.name;
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+
+            // Open questions
+            for (const field of product.customFields) {
+                const name = field.name;
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+        }
+
+        // If there are still any deleted records or option menu's, that are no longer in the shop, also add them
         for (const order of orders) {
             for (const a of order.data.recordAnswers.values()) {
                 if (!answerColumns.has(a.settings.id)) {
@@ -278,7 +331,7 @@ export class OrdersExcelExport {
     /**
      * List all orders
      */
-    static createOrders(orders: PrivateOrder[], shouldIncludeSettements: boolean): XLSX.WorkSheet {
+    static createOrders(webshop: Webshop, orders: PrivateOrder[], shouldIncludeSettements: boolean): XLSX.WorkSheet {
         const answerColumns = new Map<string, number>();
         const answerNames: string[] = [];
 
@@ -291,7 +344,17 @@ export class OrdersExcelExport {
             }
         }
 
-        // todo: First add record settings in order
+        // First add record settings in order
+        for (const recordSettings of webshop.meta.recordCategories.flatMap(r => r.getAllRecords())) {
+            if (!answerColumns.has(recordSettings.id)) {
+                answerColumns.set(recordSettings.id, answerNames.length);
+                const columns = recordSettings.excelColumns;
+                for (const c of columns) {
+                    answerNames.push(c.defaultCategory ? (c.defaultCategory + ' - ' + c.name) : c.name);
+                }
+            }
+        }
+
         for (const order of orders) {
             for (const a of order.data.recordAnswers.values()) {
                 if (!answerColumns.has(a.settings.id)) {
@@ -450,7 +513,7 @@ export class OrdersExcelExport {
     /**
      * List all amount per product variant
      */
-    static createSettlements(orders: PrivateOrder[]): XLSX.WorkSheet {
+    static createSettlements(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
         // Columns
         const wsData: RowValue[][] = [
             [
@@ -521,7 +584,7 @@ export class OrdersExcelExport {
     /**
      * List all amount per product variant
      */
-    static createProducts(orders: PrivateOrder[]): XLSX.WorkSheet | null {
+    static createProducts(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet | null {
         // Columns
         const wsData: RowValue[][] = [
             [
@@ -575,16 +638,56 @@ export class OrdersExcelExport {
     /**
      * List all amount per option menu (unique names)
      */
-    static createOptions(orders: PrivateOrder[]): XLSX.WorkSheet {
+    static createOptions(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
         const productPriceColumns = new Map<string, { name: string }>();
         const optionColumns = new Map<string, { name: string }>();
+        type ProductData = { amount: number; name: string; date: string; optionCounts: Map<string, number>; productPriceCounts: Map<string, number> };
+        const counter: Map<string, ProductData> = new Map();
 
+        // First insert the products in order
+        for (const product of webshop.productsInOrder) {
+            let date = '';
+            if ((product.type === ProductType.Ticket || product.type === ProductType.Voucher) && product.dateRange) {
+                date = Formatter.capitalizeFirstLetter(product.dateRange.toString());
+            }
+            const code = Formatter.slug(product.name + date);
+            const productData = counter.get(code) ?? { amount: 0, name: product.name, date, optionCounts: new Map(), productPriceCounts: new Map() };
+            counter.set(code, productData);
+
+            for (const price of product.prices) {
+                const name = price.name || $t('Standaardtarief');
+                const slug = Formatter.slug(name);
+                productData.productPriceCounts.set(name, 0);
+
+                if (!productPriceColumns.has(slug)) {
+                    productPriceColumns.set(slug, {
+                        name,
+                    });
+                }
+            }
+
+            for (const optionMenu of product.optionMenus) {
+                for (const option of optionMenu.options) {
+                    const name = option.name;
+                    const slug = Formatter.slug(name);
+                    productData.optionCounts.set(slug, 0);
+
+                    if (!optionColumns.has(slug)) {
+                        optionColumns.set(slug, {
+                            name,
+                        });
+                    }
+                }
+            }
+        }
+
+        // Add missing products in webshop (in case of deleted products)
         for (const order of orders) {
             // Add all prodcuct options and variants
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.productPrice.name) {
-                    const name = item.productPrice.name || 'Standaardtarief';
+                    const name = item.productPrice.name || $t('Standaardtarief');
 
                     if (!productPriceColumns.has(Formatter.slug(name))) {
                         productPriceColumns.set(Formatter.slug(name), {
@@ -605,13 +708,8 @@ export class OrdersExcelExport {
             }
         }
 
-        // Sort productPriceColumns by name and change indexes
         const productPriceColumnsArr = Array.from(productPriceColumns.keys());
-        productPriceColumnsArr.sort();
-
-        // Sort optionColumns by name and change indexes
         const optionColumnsArr = Array.from(optionColumns.keys());
-        optionColumnsArr.sort();
 
         // Columns
         const wsData: RowValue[][] = [
@@ -623,9 +721,6 @@ export class OrdersExcelExport {
                 ...optionColumnsArr.map(a => optionColumns.get(a)!.name),
             ],
         ];
-
-        type ProductData = { amount: number; name: string; date: string; optionCounts: Map<string, number>; productPriceCounts: Map<string, number> };
-        const counter: Map<string, ProductData> = new Map();
 
         for (const order of orders) {
             for (const item of order.data.cart.items) {
@@ -652,9 +747,7 @@ export class OrdersExcelExport {
             }
         }
 
-        // Sort by amount
         const arr = Array.from(counter.values());
-        arr.sort((a, b) => Sorter.stack(Sorter.byStringProperty(a, b, 'name'), Sorter.byNumberProperty(a, b, 'amount')));
 
         for (const item of arr) {
             wsData.push([
@@ -686,23 +779,23 @@ export class OrdersExcelExport {
         });
     }
 
-    static export(webshop: WebshopPreview, orders: PrivateOrder[]) {
+    static export(webshop: Webshop, orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
 
         const shouldIncludeSettements = false;
 
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), $t(`1718783a-80df-4d97-a5b5-10c785abfba1`));
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), $t(`f10a9486-34c7-46d8-950b-21fd9f41b2b4`));
-        const products = this.createProducts(orders);
+        XLSX.utils.book_append_sheet(wb, this.createOrders(webshop, orders, shouldIncludeSettements), $t(`f10a9486-34c7-46d8-950b-21fd9f41b2b4`));
+        const products = this.createProducts(webshop, orders);
 
         if (products) {
             XLSX.utils.book_append_sheet(wb, products, $t('a2066dbc-3040-4c7d-a3f9-1f3580617542'));
         }
-        XLSX.utils.book_append_sheet(wb, this.createOptions(orders), $t(`3f6039ff-e157-4762-b10d-93e2d2fe56ce`));
+        XLSX.utils.book_append_sheet(wb, this.createOptions(webshop, orders), $t(`3f6039ff-e157-4762-b10d-93e2d2fe56ce`));
 
         if (shouldIncludeSettements) {
-            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), $t(`b037949c-50c3-400e-9633-ffaca32c0b01`));
+            XLSX.utils.book_append_sheet(wb, this.createSettlements(webshop, orders), $t(`b037949c-50c3-400e-9633-ffaca32c0b01`));
         }
 
         if (AppManager.shared.downloadFile) {
