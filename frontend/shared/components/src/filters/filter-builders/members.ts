@@ -928,6 +928,25 @@ export const getMemberWithRegistrationsBlobUIFilterBuilders: () => UIFilterBuild
             key: 'birthDay',
         }),
         new MultipleChoiceFilterBuilder({
+            name: $t(`Ontbrekende gegevens`),
+            options: [
+                new MultipleChoiceUIFilterOption($t('Geboortedatum'), 'birthDay'),
+                new MultipleChoiceUIFilterOption($t('Adres'), 'address'),
+                new MultipleChoiceUIFilterOption($t('Telefoonnummer'), 'phone'),
+                new MultipleChoiceUIFilterOption($t('E-mailadres'), 'email'),
+                new MultipleChoiceUIFilterOption($t('Ouders'), 'parents'),
+                new MultipleChoiceUIFilterOption($t('Tweede ouder'), 'secondParent'),
+                new MultipleChoiceUIFilterOption($t('Noodcontact'), 'emergencyContacts'),
+            ],
+            wrapper: {
+                missingData: {
+                    $elemMatch: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            },
+        }),
+        new MultipleChoiceFilterBuilder({
             name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
             options: [
                 new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
@@ -982,6 +1001,26 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
                 },
             }));
         }
+
+        all.push(new MultipleChoiceFilterBuilder({
+            name: $t(`Ontbrekende gegevens`),
+            options: [
+                new MultipleChoiceUIFilterOption($t('Geboortedatum'), 'birthDay'),
+                new MultipleChoiceUIFilterOption($t('Adres'), 'address'),
+                new MultipleChoiceUIFilterOption($t('Telefoonnummer'), 'phone'),
+                new MultipleChoiceUIFilterOption($t('E-mailadres'), 'email'),
+                new MultipleChoiceUIFilterOption($t('Ouders'), 'parents'),
+                new MultipleChoiceUIFilterOption($t('Tweede ouder'), 'secondParent'),
+                new MultipleChoiceUIFilterOption($t('Noodcontact'), 'emergencyContacts'),
+            ],
+            wrapper: {
+                missingData: {
+                    $elemMatch: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            },
+        }));
 
         // Add record categories
         all.push(...getFilterBuildersForRecordCategories(recordConfiguration.recordCategories));

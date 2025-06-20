@@ -23,7 +23,7 @@ export const memberWithRegistrationsBlobInMemoryFilterCompilers: InMemoryFilterD
     age: createInMemoryFilterCompiler('details.defaultAge'),
     gender: createInMemoryFilterCompiler('details.gender'),
     birthDay: createInMemoryFilterCompiler('details.birthDay'),
-    hasEmergencyContact: createInMemoryFilterCompiler('details.hasEmergencyContact'),
+    missingData: createInMemoryFilterCompiler('details.missingData'),
     recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
 

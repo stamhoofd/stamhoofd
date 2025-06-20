@@ -432,87 +432,49 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
     }
 
     if (filter.definitionId === 'member_missing_data') {
-        const filters: StamhoofdFilter[] = [];
-
-        const getEmptyFilter = (key: string) => {
-            return { $or: [
-                {
-                    [key]: {
-                        $eq: '',
-                    },
-                },
-                {
-                    [key]: {
-                        $eq: null,
-                    },
-                },
-            ],
-            };
-        };
-
-        for (const choiceId of filter.choiceIds) {
-            switch (choiceId) {
-                case 'birthDay': {
-                    filters.push(getEmptyFilter('birthDay'));
-                    break;
-                }
-                case 'address': {
-                    // todo: test
-                    filters.push(getEmptyFilter('details.address.street'));
-                    break;
-                }
-                case 'phone': {
-                    filters.push(getEmptyFilter('phone'));
-                    break;
-                }
-                case 'email': {
-                    filters.push(getEmptyFilter('email'));
-                    break;
-                }
-                case 'parents': {
-                    // todo: test
-                    filters.push({
-                        $and: [
-                            getEmptyFilter('details.parents[0]'),
-                            getEmptyFilter('details.parents[1]'),
-                        ],
-                    });
-                    break;
-                }
-                case 'secondParent': {
-                    filters.push(getEmptyFilter('details.parents[1]'));
-                    break;
-                }
-                case 'emergencyContact': {
-                    filters.push({
-                        hasEmergencyContact: {
-                            $eq: true,
-                        },
-                    });
-                    break;
-                }
-                default: {
-                    throw new Error('Unknown choiceId for member_missing_data: ' + choiceId);
-                }
+        const mappedChoiceIds = filter.choiceIds.map((choiceId) => {
+            if (choiceId === 'emergencyContact') {
+                return 'emergencyContacts';
             }
+            return choiceId;
+        });
+
+        if (filter.mode === ChoicesFilterMode.Or) {
+            return {
+                missingData: {
+                    $elemMatch: {
+                        $in: mappedChoiceIds,
+                    },
+                },
+            };
         }
 
+        if (filter.mode === ChoicesFilterMode.Nor) {
+            return {
+                $not: {
+                    missingData: {
+                        $elemMatch: {
+                            $in: mappedChoiceIds,
+                        },
+                    },
+                },
+            };
+        }
+
+        const filters: StamhoofdFilter[] = mappedChoiceIds.map((choiceId) => {
+            return {
+                missingData: {
+                    $elemMatch: {
+                        $in: [choiceId],
+                    },
+                },
+            };
+        });
+
         switch (filter.mode) {
-            case ChoicesFilterMode.Or: {
-                return {
-                    $or: filters,
-                };
-            }
             case ChoicesFilterMode.And: {
                 return {
                     $and: filters,
-                };
-            }
-            case ChoicesFilterMode.Nor: {
-                return {
-                    $not: {
-                        $or: filters,
-                    },
                 };
             }
             case ChoicesFilterMode.Nand: {

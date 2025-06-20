@@ -37,7 +37,7 @@ export class BooleanStatus extends AutoEncoder {
     }
 }
 
-export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber';
+export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber' | 'email';
 export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'parents.nationalRegisterNumber'>;
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.
@@ -456,8 +456,36 @@ export class MemberDetails extends AutoEncoder {
         return this.requiresFinancialSupport?.value ?? false;
     }
 
-    get hasEmergencyContact() {
-        return this.emergencyContacts.length > 0;
+    get missingData(): (MemberProperty | 'secondParent')[] {
+        const missing: (MemberProperty | 'secondParent') [] = [];
+        if (!this.birthDay) {
+            missing.push('birthDay');
+        }
+
+        if (!this.address) {
+            missing.push('address');
+        }
+
+        if (!this.phone) {
+            missing.push('phone');
+        }
+
+        if (!this.email) {
+            missing.push('email');
+        }
+
+        if (this.parents.length === 0) {
+            missing.push('parents');
+        }
+
+        if (this.parents.length === 1) {
+            missing.push('secondParent');
+        }
+
+        if (this.emergencyContacts.length === 0) {
+            missing.push('emergencyContacts');
+        }
+        return missing;
     }
 
     /**
