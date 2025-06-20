@@ -333,7 +333,6 @@ button.st-list-item {
         cursor: pointer;
         overflow: visible;
         position: relative;
-        contain: style;
 
         &:after {
             // This is the hover layer
