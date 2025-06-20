@@ -1,16 +1,16 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, DateDecoder, Decoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
-import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { type CellValue } from '@stamhoofd/excel-writer';
 import { Address } from '../../addresses/Address.js';
 import { CountryHelper } from '../../addresses/CountryDecoder.js';
-import { Image } from '../../files/Image.js';
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
-import { File } from '../../files/File.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
-import { type CellValue } from '@stamhoofd/excel-writer';
+import { File } from '../../files/File.js';
+import { Image } from '../../files/Image.js';
 import { TranslatedString } from '../../TranslatedString.js';
+import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -332,6 +332,13 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
 export class RecordChooseOneAnswer extends RecordAnswer {
     @field({ decoder: RecordChoice, nullable: true })
     selectedChoice: RecordChoice | null = null;
+
+    get selectedChoices(): RecordChoice[] {
+        if (this.selectedChoice === null) {
+            return [];
+        }
+        return [this.selectedChoice];
+    }
 
     get stringValue() {
         return this.selectedChoice?.name?.toString() ?? '/';
