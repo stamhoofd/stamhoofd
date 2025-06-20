@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethod,PaymentMethodHelper,PaymentProvider,PrivateOrder, ProductType, ReservedSeat, WebshopPreview } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -24,7 +24,7 @@ export class OrdersExcelExport {
     /**
      * List of all products for every order
      */
-    static createOrderLines(webshop: WebshopPreview, orders: PrivateOrder[]): XLSX.WorkSheet {
+    static createOrderLines(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
         /// Should we repeat all the duplicate fields for multiple lines in an order?
         const repeat = true
 
@@ -43,7 +43,60 @@ export class OrdersExcelExport {
             }
         }
 
-        // todo: First add record settings in order
+        // First add record settings in order
+        for (const recordSettings of webshop.meta.recordCategories.flatMap(r => r.getAllRecords())) {
+            if (!answerColumns.has(recordSettings.id)) {
+                answerColumns.set(recordSettings.id, answerNames.length);
+                const columns = recordSettings.excelColumns;
+                for (const c of columns) {
+                    answerNames.push(c);
+                }
+            }
+        }
+
+        for (const product of webshop.productsInOrder) {
+            // Produce prices
+            if (product.prices.length > 1) {
+                const name = 'Prijskeuze'
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+
+            // Ticket date/time
+            if ((product.type === ProductType.Ticket || product.type === ProductType.Voucher) && product.dateRange) {
+                const name = 'Ticketdatum'
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+
+            // Produce options
+            for (const menu of product.optionMenus) {
+                const name = menu.name;
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+
+            // Open questions
+            for (const field of product.customFields) {
+                const name = field.name;
+
+                if (!optionColumns.has(Formatter.slug(name))) {
+                    optionColumns.set(Formatter.slug(name), optionColumns.size);
+                    optionNames.push(name);
+                }
+            }
+        }
+
+        // If there are still any deleted records or option menu's, that are no longer in the shop, also add them
         for (const order of orders) {
             for (const a of order.data.recordAnswers) {
                 if (!answerColumns.has(a.settings.id)) {
@@ -276,9 +329,9 @@ export class OrdersExcelExport {
     /**
      * List all orders
      */
-    static createOrders(orders: PrivateOrder[]): XLSX.WorkSheet {
-        const answerColumns = new Map<string, number>()
-        const answerNames: string[] = []
+    static createOrders(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
+        const answerColumns = new Map<string, number>();
+        const answerNames: string[] = [];
 
         for (const order of orders) {
             for (const a of order.data.fieldAnswers) {
@@ -289,7 +342,17 @@ export class OrdersExcelExport {
             }
         }
 
-        // todo: First add record settings in order
+        // First add record settings in order
+        for (const recordSettings of webshop.meta.recordCategories.flatMap(r => r.getAllRecords())) {
+            if (!answerColumns.has(recordSettings.id)) {
+                answerColumns.set(recordSettings.id, answerNames.length);
+                const columns = recordSettings.excelColumns;
+                for (const c of columns) {
+                    answerNames.push(c);
+                }
+            }
+        }
+
         for (const order of orders) {
             for (const a of order.data.recordAnswers) {
                 if (!answerColumns.has(a.settings.id)) {
@@ -442,8 +505,7 @@ export class OrdersExcelExport {
     /**
      * List all amount per product variant
      */
-    static createProducts(orders: PrivateOrder[]): XLSX.WorkSheet | null {
-        
+    static createProducts(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet | null {
         // Columns
         const wsData: RowValue[][] = [
             [
@@ -498,10 +560,50 @@ export class OrdersExcelExport {
     /**
      * List all amount per option menu (unique names)
      */
-    static createOptions(orders: PrivateOrder[]): XLSX.WorkSheet {
-        const productPriceColumns = new Map<string, {name: string}>()
-        const optionColumns = new Map<string, {name: string}>()
-        
+    static createOptions(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
+        const productPriceColumns = new Map<string, { name: string }>();
+        const optionColumns = new Map<string, { name: string }>();
+        type ProductData = { amount: number; name: string; date: string; optionCounts: Map<string, number>; productPriceCounts: Map<string, number> };
+        const counter: Map<string, ProductData> = new Map();
+
+        // First insert the products in order
+        for (const product of webshop.productsInOrder) {
+            let date = '';
+            if ((product.type === ProductType.Ticket || product.type === ProductType.Voucher) && product.dateRange) {
+                date = Formatter.capitalizeFirstLetter(product.dateRange.toString());
+            }
+            const code = Formatter.slug(product.name + date);
+            const productData = counter.get(code) ?? { amount: 0, name: product.name, date, optionCounts: new Map(), productPriceCounts: new Map() };
+            counter.set(code, productData);
+
+            for (const price of product.prices) {
+                const name = price.name || 'Standaardtarief';
+                const slug = Formatter.slug(name);
+                productData.productPriceCounts.set(name, 0);
+
+                if (!productPriceColumns.has(slug)) {
+                    productPriceColumns.set(slug, {
+                        name,
+                    });
+                }
+            }
+
+            for (const optionMenu of product.optionMenus) {
+                for (const option of optionMenu.options) {
+                    const name = option.name;
+                    const slug = Formatter.slug(name);
+                    productData.optionCounts.set(slug, 0);
+
+                    if (!optionColumns.has(slug)) {
+                        optionColumns.set(slug, {
+                            name,
+                        });
+                    }
+                }
+            }
+        }
+
+        // Add missing products in webshop (in case of deleted products)
         for (const order of orders) {
             // Add all prodcuct options and variants
             for (const item of order.data.cart.items) {
@@ -528,13 +630,8 @@ export class OrdersExcelExport {
             }
         }
 
-        // Sort productPriceColumns by name and change indexes
-        const productPriceColumnsArr = Array.from(productPriceColumns.keys())
-        productPriceColumnsArr.sort();
-
-        // Sort optionColumns by name and change indexes
-        const optionColumnsArr = Array.from(optionColumns.keys())
-        optionColumnsArr.sort();
+        const productPriceColumnsArr = Array.from(productPriceColumns.keys());
+        const optionColumnsArr = Array.from(optionColumns.keys());
 
         // Columns
         const wsData: RowValue[][] = [
@@ -546,9 +643,6 @@ export class OrdersExcelExport {
                 ...optionColumnsArr.map(a => optionColumns.get(a)!.name)
             ],
         ];
-
-        type ProductData = { amount: number; name: string; date: string; optionCounts: Map<string, number>, productPriceCounts: Map<string, number> };
-        const counter: Map<string, ProductData> = new Map()
 
         for (const order of orders) {
             for (const item of order.data.cart.items) {
@@ -577,9 +671,7 @@ export class OrdersExcelExport {
             }
         }
 
-        // Sort by amount
-        const arr = Array.from(counter.values())
-        arr.sort((a, b) => Sorter.stack(Sorter.byStringProperty(a, b, "name"), Sorter.byNumberProperty(a, b, "amount")))
+        const arr = Array.from(counter.values());
 
         for (const item of arr) {
             wsData.push([
@@ -611,18 +703,18 @@ export class OrdersExcelExport {
         })
     }
 
-    static export(webshop: WebshopPreview, orders: PrivateOrder[]) {
+    static export(webshop: Webshop, orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
         
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), "Artikel per lijn");
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders), "Bestelling per lijn");
-        const products = this.createProducts(orders);
+        XLSX.utils.book_append_sheet(wb, this.createOrders(webshop, orders), "Bestelling per lijn");
+        const products = this.createProducts(webshop, orders);
 
         if (products) {
             XLSX.utils.book_append_sheet(wb, products, "Totalen per combinatie");
         }
-        XLSX.utils.book_append_sheet(wb, this.createOptions(orders), "Totalen");
+        XLSX.utils.book_append_sheet(wb, this.createOptions(webshop, orders), "Totalen");
 
 
         if (AppManager.shared.downloadFile) {

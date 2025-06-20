@@ -155,6 +155,19 @@ export class Webshop extends AutoEncoder {
     return this.meta.hasTickets;
   }
 
+  get productsInOrder() {
+      if (this.categories.length > 0) {
+          return this.categories.flatMap(category => category.productIds.flatMap((id) => {
+              const product = this.products.find(product => product.id === id);
+              if (product) {
+                  return [product];
+              }
+              return [];
+          }));
+      }
+      return this.products;
+  }
+
   /**
    * Whether we need to show the text 'Free' in webshops (only if we have at least one non-free product)
    */

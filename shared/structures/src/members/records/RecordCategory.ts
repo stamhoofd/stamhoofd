@@ -47,7 +47,7 @@ export class RecordCategory extends AutoEncoder {
 
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
-            return [...this.childCategories.flatMap(c => c.getAllRecords()), ...this.records]
+            return [...this.records, ...this.childCategories.flatMap(c => c.getAllRecords())];
         }
         return this.records
     }

@@ -264,6 +264,11 @@ export class OrderActionBuilder {
     }
 
     async exportToExcel(orders: PrivateOrder[]) {
+        if (!this.webshopManager.webshop) {
+            new Toast(`Webshop nog niet geladen`, 'error red').show();
+            return;
+        }
+
         const hasCanceledOrders = !!orders.find(o => o.status === OrderStatus.Canceled);
         const hasNotCanceled = !!orders.find(o => o.status !== OrderStatus.Canceled);
         if (hasCanceledOrders && hasNotCanceled) {
@@ -274,7 +279,7 @@ export class OrderActionBuilder {
         }
         const d = await import(/* webpackChunkName: "OrdersExcelExport" */ "../../../../classes/OrdersExcelExport");
         const OrdersExcelExport = d.OrdersExcelExport
-        OrdersExcelExport.export(this.webshopManager.preview, orders);
+        OrdersExcelExport.export(this.webshopManager.webshop, orders);
     }
 
     async markAs(orders: PrivateOrder[], status: OrderStatus) {
