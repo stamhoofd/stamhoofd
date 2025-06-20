@@ -5,9 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
 import { getPermissionLevelNumber, PermissionLevel } from '../../PermissionLevel.js';
-import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
-import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
 import { TranslatedString } from '../../TranslatedString.js';
+import { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
+import { RecordAnswer } from './RecordAnswer.js';
+import { RecordFilterOptions, RecordSettings } from './RecordSettings.js';
 
 export interface Filterable {
     doesMatchFilter(filter: StamhoofdFilter): boolean;
@@ -314,6 +315,26 @@ export class RecordCategory extends AutoEncoder {
             }
         }
         errors.throwIfNotEmpty();
+    }
+
+    static sortAnswers(answers: Map<string, RecordAnswer>, categories: RecordCategory[]) {
+        // Sort answers based on the category order + remove extra answers
+        const orderedMap = new Map<string, RecordAnswer>();
+        for (const record of categories.flatMap(c => c.getAllRecords())) {
+            const answer = answers.get(record.id);
+            if (answer) {
+                orderedMap.set(record.id, answer);
+            }
+        }
+
+        // Add missing answers
+        for (const answer of answers.values()) {
+            if (!orderedMap.has(answer.settings.id)) {
+                orderedMap.set(answer.settings.id, answer);
+            }
+        }
+
+        return [...orderedMap.values()];
     }
 
     static removeOldAnswers<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): T {

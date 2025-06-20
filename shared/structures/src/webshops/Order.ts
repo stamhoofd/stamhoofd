@@ -6,6 +6,7 @@ import { EmailRecipient } from '../email/Email.js';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import { Payment, PrivatePayment } from '../members/Payment.js';
 import { RecordCheckboxAnswer } from '../members/records/RecordAnswer.js';
+import { RecordCategory } from '../members/records/RecordCategory.js';
 import { Organization } from '../Organization.js';
 import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
@@ -227,7 +228,7 @@ export class Order extends AutoEncoder {
         return str + '</tbody></table>';
     }
 
-    getDetailsHTMLTable(): string {
+    getDetailsHTMLTable(webshop: WebshopPreview): string {
         let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
 
         const data = [
@@ -295,7 +296,7 @@ export class Order extends AutoEncoder {
                 title: a.field.name,
                 value: a.answer,
             })),
-            ...[...this.data.recordAnswers.values()].filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
+            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.recordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
                 title: a.settings.name.toString(),
                 value: a.stringValue,
             })),
@@ -418,7 +419,7 @@ export class Order extends AutoEncoder {
             Replacement.create({
                 token: 'orderDetailsTable',
                 value: '',
-                html: order.getDetailsHTMLTable(),
+                html: order.getDetailsHTMLTable(webshop),
             }),
             Replacement.create({
                 token: 'orderTable',
