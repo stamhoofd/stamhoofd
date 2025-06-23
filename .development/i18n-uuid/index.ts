@@ -10,7 +10,7 @@ import { replaceText } from "./src/replace-text/replace-text";
 const program = new Command();
 
 const replaceTextOptions: [string, string][] = [
-    ["--compare <commits...>", "Git commits to compare"],
+    ["--commits <commits...>", "Git commits to compare"],
     ["-c, --changes", "Only the changed files will be checked."],
     [
         "--attribute-white-list <attributes...>",
