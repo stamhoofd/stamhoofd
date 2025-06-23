@@ -222,3 +222,4 @@ yalc.lock
 
 # Vitest screenshots
 __screenshots__
+.internal-contributor

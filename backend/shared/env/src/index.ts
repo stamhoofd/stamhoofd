@@ -1,9 +1,36 @@
 import crypto from 'crypto';
 import fs from 'fs';
+import { promises } from 'fs';
+import chalk from 'chalk';
 
-function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admin' | 'renderer' | 'backup' }) {
+async function fileExists(path: string): Promise<boolean> {
+    try {
+        await promises.access(path);
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
+
+async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
+    let env: any;
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+        const builder = await import('@stamhoofd/build-development-env');
+        env = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+            backend: settings?.service ?? 'api',
+        });
+
+        if (await fileExists(settings?.path ?? '.env.json')) {
+            console.warn(chalk.red('Warning: please delete your local .env.json file, as it is not used in development any longer.'));
+        }
+    }
+    else {
+        env = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
+    }
+
     // Read environment from file: .env.json
-    (global as any).STAMHOOFD = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
+    (global as any).STAMHOOFD = env;
 
     // Mapping out environment for dependencies that need environment variables
     process.env.NODE_ENV = STAMHOOFD.environment === 'production' ? 'production' : 'development';
@@ -27,6 +54,10 @@ function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'admi
         if (!STAMHOOFD.translationNamespace) {
             throw new Error('Expected environment variable translationNamespace');
         }
+    }
+
+    if (!STAMHOOFD.DB_DATABASE) {
+        throw new Error('Expected environment variable DB_DATABASE');
     }
 
     // Database

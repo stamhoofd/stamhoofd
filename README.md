@@ -56,7 +56,7 @@ This is what you need to know:
 
 #### Dependencies
 
-Using MacOS or Linux is recommended. Setup using WSL can be very difficult given that Stamhoofd requires you to setup a local DNS server and trust a new local SSL root certificate, which is very hard to setup given that this cannot get automated by the used tools when using WSL.
+Using MacOS or Linux is recommended. Setup using WSL can be very difficult given that Stamhoofd requires you to setup a local DNS server and trust a new local SSL root certificate, which is very hard to setup given that this cannot get automated when using WSL.
 
 - Install MySQL8 and create a new local database
 ```
@@ -64,7 +64,7 @@ brew install mysql@8.4
 brew link mysql@8.4 --force
 ```
 
-- Add these lines to the mysql configuration (/usr/local/etc/my.cnf, but can be other location)
+- Add these lines to the mysql configuration (/usr/local/etc/my.cnf, but can be in a different location)
 ```
 mysql_native_password=ON
 sort_buffer_size = 2M
@@ -79,22 +79,39 @@ mysql -u root
 ```sql
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 FLUSH PRIVILEGES;
-CREATE DATABASE `stamhoofd` DEFAULT CHARACTER SET = `utf8mb4` DEFAULT COLLATE = `utf8mb4_0900_ai_ci`;
+exit;
 ```
 
-```
-exit
-```
+Stamhoofd will create the required database by default on boot when running in development mode.
 
 - Install Caddy (`brew install caddy` - do not start it in the background)
 - Install CoreDNS (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
-- Update your computer's DNS-server to 127.0.0.1 (in case coredns is not running). On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
+- Update your computer's DNS-server to 127.0.0.1. On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
 
 #### Environments
 
-- Make sure you create all `/backend/app/*/.env.json` based on `/backend/app/*/.env.template.json` (make sure you create the required MySQL8 database and start MySQL)
-- Make sure you create `/frontend/.env.json` based on `/frontend/.env.template.json`
-- Make sure you create `/.development/.env` based on `/.development/.env.template` (this is the DNS record value that will be used for the A records on all domains ending with *.stamhoofd, and should point to your local computer. You can use 127.0.0.1 or your local LAN address if you want to debug on other local devices)
+By default Stamhoofd will use the root `env.*.js` files as the environment file, you can replace this default file by creating a file named `env.*.local.js` (local files are not committed to git). 
+
+To be able to switch easily between different environment files, we use `STAMHOOFD_ENV`. E.g. If you want to test how Stamhoofd runs in a certain environment, you can use `STAMHOOFD_ENV=keeo yarn dev` and it will use the `env.keeo.js` and optionally `env.keeo.local.js` files. As a shorthand, we've created some shortcuts: `yarn dev:keeo`, `yarn dev:ravot` and `yarn dev:stamhoofd`.
+
+Since the environment files can get pretty long and complex, in development, the env files are built based on presets. These presets are stored in `shared/build-development-env/src/presets`.
+
+Noteable presets:
+- `ports-secundary`: run Stamhoofd on other ports, so you can run multiple instances of Stamhoofd on the same machine. 
+- `platform`: run in Platform mode (= used by platforms such as Ravot or Keeo)
+
+As an example, lets say you want to use a different database name locally. You can do this by creating a file `env.stamhoofd.local.js` to override the default database name:
+
+```
+module.exports = {
+    presets: [
+        ...
+    ],
+    DB_DATABASE: "my-database-name"
+}
+```
+
+Since locally you sometimes also need secrets, you better store those secrets in your `env.*.local.js` file. For internal development we use presets that call 1Password to fetch our internal development secrets, open-source collaborators cannot use these and should replace them with their own. This difference is triggered by the existence of the `.internal-contributor` file. Internal contributors can switch to this mode by running `touch .internal-contributor` in the root folder.
 
 #### VSCode (optional)
 
@@ -105,12 +122,7 @@ exit
 To run everything locally, we run everything on a fake TLD domain and host the dashboard on dashboard.stamhoofd. We use Caddy and Coredns to wire everything together. You can follow the following steps to run everything:
 
 1. When switching branches, cloning the repo or when pulling changes, run `yarn install` first in the project root
-2. Use `yarn build:shared` in the project directory to build all shared dependencies inside the project. This will make sure eslint works correctly.
-3. Run migrations by running `yarn migrate` in the root folder
-4. Run `yarn dev`. This will start all servers. If something fails, try to run it again and/or fix the error.
-5. Run caddy via `yarn caddy` (this serves the app on the default development domains). It might prompt for a password to install the root certificate for self-signed certificates the first time.
-6. Start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
-7. Next time you can run `yarn dev`, `yarn caddy` and `yarn dns` in one go by running `yarn dev:server`
+2. Run `yarn dev:stamhoofd`, `yarn dev:keeo` or `yarn dev:ravot`. These use the default presets (please read Environments documentation) that will automatically start Caddy, CoreDNS, MailDev and the Stripe webhooks listener. It will start all servers (backend and frontend). If something fails, try to run it again and/or fix the error.
 
 Everything should run fine now and you should be able to visit `https://dashboard.stamhoofd` (make sure to enter http(s):// manually because the browser won't recognize the TLD by default and will default to search otherwise) to create your first organization. You should **not** get a certificate error. Never manually trust an individual certificate, this won't work as Stamhoofd requires multiple certificates and browsers tend to forget you've manually added them as an exception. On top of that browsers won't ask the question for the api domains. Follow the steps in 'Firefox' if you need to trust the certificates on Firefox.
 
@@ -128,7 +140,7 @@ In Firefox, go to Settings > Privacy and security. Scroll down to certificates. 
 
 ### E-mails
 
-Stamhoofd bundles with maildev to test emails in development. This is automatically started when using the `yarn dev:server` command or `yarn mail` manually. This starts an SMTP server and web client at `http://0.0.0.0:1080/` (to see all incoming emails).
+Stamhoofd bundles with maildev to test emails in development. This is automatically started when using the `yarn dev:*` commands. This starts an SMTP server and web client at `http://0.0.0.0:1080/` (to see all incoming emails).
 
 ### Backend
 
@@ -165,7 +177,7 @@ You can use the following commands in both `/frontend/app/registration` and `/fr
 
 ### Shared dependencies
 
-All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `yarn build`. You can rebuild them all at once by running the same command in the project root.
+All shared dependencies are located in /shared. These packages are used by the backend and the frontend. If you make changes here, you must rebuild the package with `yarn build:shared`. You can rebuild them all at once by running the same command in the project root.
 
 # Support and information
 

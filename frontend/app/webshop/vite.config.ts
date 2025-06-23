@@ -8,5 +8,8 @@ process.env.TZ = 'UTC';
 // https://vitejs.dev/config/
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 export default defineConfig({
-    ...buildConfig({ port: 8082 }),
+    ...await buildConfig({
+        name: 'webshop',
+        port: 8082,
+    }),
 } as any);

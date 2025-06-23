@@ -12,35 +12,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "api.admin.stamhoofd"
-                                    ]
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "reverse_proxy",
-                                    "upstreams": [
-                                        {
-                                            "dial": "127.0.0.1:9991"
-                                        }
-                                    ],
-                                    "headers": {
-                                        "request": {
-                                            "set": {
-                                                "x-real-ip": [
-                                                    "{http.request.remote}"
-                                                ]
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "host": [
-                                        "renderer.stamhoofd"
+                                        "renderer.stamhoofd",
+                                        "*.renderer.stamhoofd"
                                     ]
                                 }
                             ],
@@ -69,7 +42,8 @@
                                 {
                                     "host": [
                                         "api.stamhoofd",
-                                        "*.api.stamhoofd"
+                                        "*.api.stamhoofd",
+                                        "*.*.api.stamhoofd"
                                     ]
                                 }
                             ],
@@ -97,7 +71,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "dashboard.stamhoofd"
+                                        "dashboard.stamhoofd",
+                                        "*.dashboard.stamhoofd"
                                     ]
                                 }
                             ],
@@ -119,57 +94,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "admin.stamhoofd"
-                                    ]
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "reverse_proxy",
-                                    "load_balancing": {
-                                        "retries": 5
-                                    },
-                                    "upstreams": [
-                                        {
-                                            "dial": "127.0.0.1:8083"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "host": [
-                                        "www.be.stamhoofd",
-                                        "www.nl.stamhoofd"
-                                    ],
-                                    "path": [
-                                        "/shop/*"
-                                    ]
-                                }
-                            ],
-                            "handle": [
-                                {
-                                    "handler": "reverse_proxy",
-                                    "load_balancing": {
-                                        "retries": 5
-                                    },
-                                    "upstreams": [
-                                        {
-                                            "dial": "127.0.0.1:8882"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "match": [
-                                {
-                                    "host": [
-                                        "*.shop.stamhoofd",
-                                        "shop.be.stamhoofd",
-                                        "shop.nl.stamhoofd"
+                                        "shop.stamhoofd",
+                                        "*.shop.stamhoofd"
                                     ]
                                 }
                             ],
@@ -191,8 +117,8 @@
                             "match": [
                                 {
                                     "host": [
-                                        "*.be.stamhoofd",
-                                        "*.nl.stamhoofd"
+                                        "*.registration.stamhoofd",
+                                        "*.*.registration.stamhoofd"
                                     ]
                                 }
                             ],
@@ -260,18 +186,12 @@
                         "subjects": [
                             "*.stamhoofd",
                             "*.shop.stamhoofd",
-                            "shop.be.stamhoofd",
-                            "shop.nl.stamhoofd",
-                            "www.be.stamhoofd",
-                            "www.nl.stamhoofd",
-                            "dashboard.stamhoofd",
-                            "*.be.stamhoofd",
-                            "*.nl.stamhoofd",
-                            "api.stamhoofd",   
+                            "*.dashboard.stamhoofd",
                             "*.api.stamhoofd",
-                            "api.admin.stamhoofd",
-                            "admin.stamhoofd",
-                            "renderer.stamhoofd"
+                            "*.*.api.stamhoofd",
+                            "*.renderer.stamhoofd",
+                            "*.registration.stamhoofd",
+                            "*.*.registration.stamhoofd"
                         ],
                         "on_demand": false,
                         "issuers": [
@@ -290,9 +210,8 @@
                 "on_demand": {
                     "rate_limit": {
                         "interval": "1d",
-                        "burst": 50
-                    },
-                    "ask": "http://127.0.0.1:9091/v203/check-domain-cert"
+                        "burst": 200
+                    }
                 }
             }
         }

@@ -13,6 +13,7 @@
         "strictNullChecks": true,
         "declarationMap": true,
         "noErrorTruncation": true,
+        "isolatedModules": true,
         "lib": [
             "esnext",
             "dom",

@@ -7,60 +7,56 @@ import { type ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
-const use_env: Record<string, string> = {};
-
-// This is a debug config as a replacement for process.env.NODE_ENV which seems to break webpack 5
-// process.env.BUILD_FOR_PRODUCTION
-
-if (process.env.NODE_ENV === 'production') {
-    console.log('Building for production...');
-}
-
-let loadedEnv: FrontendEnvironment | undefined = undefined;
-
-if (process.env.LOAD_ENV) {
-    // Load this in the environment
-    const decode = JSON.parse(process.env.LOAD_ENV);
-
-    if (!decode.userMode || !decode.translationNamespace) {
-        throw new Error('Invalid env file: missing some variables');
-    }
-
-    // We restringify to make sure encoding is minified
-    loadedEnv = decode;
-    use_env['STAMHOOFD'] = JSON.stringify(decode);
-    use_env['process.env.NODE_ENV'] = JSON.stringify(decode.environment === 'production' ? 'production' : 'development');
-}
-else if (process.env.ENV_FILE) {
-    // Reading environment from a JSON env file (JSON is needed)
-    const file = path.resolve(process.env.ENV_FILE);
-
-    // Load this in the environment
-    const contents = fs.readFileSync(file, { encoding: 'utf-8' });
-    const decode = JSON.parse(contents);
-    const node_env = JSON.stringify(decode.environment === 'production' ? 'production' : 'development');
-
-    if (!decode.userMode || !decode.translationNamespace) {
-        throw new Error('Invalid env file: missing some variables');
-    }
-
-    console.log('Using environment file: ' + file);
-
-    loadedEnv = decode;
-    const stamhoofdEnv = JSON.stringify(decode);
-
-    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env['STAMHOOFD'] = stamhoofdEnv;
-
-    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env['process.env.NODE_ENV'] = node_env;
-}
-else {
-    throw new Error('ENV_FILE or LOAD_ENV environment variables are missing');
-}
-
 // https://vitejs.dev/config/
-export function buildConfig(options: { port: number; clientFiles?: string[] }): ViteUserConfig {
+export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
+    if (process.env.NODE_ENV === 'production') {
+        console.log('Building for production...');
+    }
+
+    let loadedEnv: FrontendEnvironment | undefined = undefined;
+
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+        const builder = await import('@stamhoofd/build-development-env');
+        loadedEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+            frontend: options.name,
+        });
+    }
+    else if (process.env.LOAD_ENV) {
+        // Load this in the environment
+        const decode = JSON.parse(process.env.LOAD_ENV);
+
+        // We restringify to make sure encoding is minified
+        loadedEnv = decode;
+    }
+    else if (process.env.ENV_FILE) {
+        // Reading environment from a JSON env file (JSON is needed)
+        const file = path.resolve(process.env.ENV_FILE);
+
+        // Load this in the environment
+        const contents = fs.readFileSync(file, { encoding: 'utf-8' });
+        const decode = JSON.parse(contents);
+        loadedEnv = decode;
+    }
+
+    if (!loadedEnv) {
+        throw new Error('Failed to load environment variables');
+    }
+
+    // Validation
+    if (!loadedEnv.userMode || !loadedEnv.translationNamespace) {
+        console.error('Invalid environement:', loadedEnv);
+        throw new Error('Invalid environement: missing some variables');
+    }
+
+    // Build env
+    const use_env: Record<string, string> = {};
+
+    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
+    use_env['STAMHOOFD'] = JSON.stringify(loadedEnv);
+
+    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
+    use_env['process.env.NODE_ENV'] = JSON.stringify(loadedEnv.environment === 'production' ? 'production' : 'development');
+
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
         logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
@@ -97,7 +93,7 @@ export function buildConfig(options: { port: number; clientFiles?: string[] }): 
         server: process.env.NODE_ENV !== 'production'
             ? {
                     host: '127.0.0.1',
-                    port: options.port,
+                    port: loadedEnv.PORT ?? options.port,
                     strictPort: true,
                     warmup: {
                         clientFiles: [

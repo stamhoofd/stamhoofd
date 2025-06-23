@@ -54,7 +54,7 @@ export default new Migration(async () => {
     const allProvinces = await Province.where({ country: Country.Netherlands });
 
     for (const p of provinces) {
-        console.log(p.name);
+        // console.log(p.name);
 
         const province = await getProvince(p.name.trim(), allProvinces);
 

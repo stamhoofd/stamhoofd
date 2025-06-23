@@ -1,12 +1,12 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import { AppliedRegistrationDiscount, EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
+import { AppliedRegistrationDiscount, EmailTemplateType, GroupPrice, GroupType, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Group, Organization, User } from './';
+import { Group, Organization, OrganizationRegistrationPeriod, User } from './';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';

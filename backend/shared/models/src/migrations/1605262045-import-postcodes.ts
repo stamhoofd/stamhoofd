@@ -112,12 +112,12 @@ export default new Migration(async () => {
             cities.push(city);
             // do not create a postal code here, these don't have one
 
-            console.log('Assigning ' + gemeente.gemeente + ' to ' + city.name);
+            // console.log('Assigning ' + gemeente.gemeente + ' to ' + city.name);
             gemeente.city.parentCityId = city.id;
             await gemeente.city.save();
         }
         else {
-            console.log('Assigning ' + gemeente.gemeente + ' to ' + hoofd.name);
+            // console.log('Assigning ' + gemeente.gemeente + ' to ' + hoofd.name);
             gemeente.city.parentCityId = hoofd.id;
             await gemeente.city.save();
         }
