@@ -14,7 +14,7 @@ Executes all commands in order. The arguments of each command can be passed.
 Search untranslated text in Vue templates and replaces them with a translation function.
 
 #### arguments
-- `--compare <commits...>`: Git commits to compare
+- `--commits <commits...>`: Git commits to compare
 - `-c, --changes`: Only the changed files will be checked.
 - `--attribute-white-list <attributes...>`: Array of html attributes to white list. Text of other attributes will not be checked.
 - `--dry-run`: Do not write the translated files.
