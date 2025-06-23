@@ -1,5 +1,5 @@
-import { PropertyFilter } from './PropertyFilter';
-import { StamhoofdFilter } from './StamhoofdFilter';
+import { PropertyFilter } from './PropertyFilter.js';
+import { StamhoofdFilter } from './StamhoofdFilter.js';
 
 // todo: remove after migration
 
