@@ -64,7 +64,7 @@
                 <tbody>
                     <tr v-for="column in columns" :key="column.name">
                         <td>
-                            <Checkbox :checked="getColumnSelected(column)" @change="setColumnSelected(column, $event)">
+                            <Checkbox :model-value="column.selected" @update:model-value=" setColumnSelected(column, $event)">
                                 <h2 class="style-title-list">
                                     {{ column.name }}
                                 </h2>
@@ -109,17 +109,22 @@
 </template>
 
 <script lang="ts" setup>
-import { useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, usePatch } from '@stamhoofd/components';
 import { MemberDetails, RecordType } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 
+import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { computed, onMounted, Ref, ref } from 'vue';
 import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { allMatchers } from '../../../../../classes/import/defaultMatchers';
+import { ImportError } from '../../../../../classes/import/ImportError';
+import { ImportResult } from '../../../../../classes/import/ImportResult';
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
-import { MatcherCategory } from '../../../../../classes/import/MatcherCategory';
+import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';
+import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 
 // errorBox: ErrorBox | null = null
 // validator = new Validator()
@@ -178,7 +183,7 @@ onMounted(() => {
 
     // If parents are disabled, remove all parent categories
     if (organizationManager.value.organization.meta.recordsConfiguration.parents === null) {
-        matchers.value = matchers.value.filter(m => m.category !== MatcherCategory.Parent1 as string && m.category !== MatcherCategory.Parent2 as string);
+        matchers.value = matchers.value.filter(m => m.category !== MemberDetailsMatcherCategory.Parent1 as string && m.category !== MemberDetailsMatcherCategory.Parent2 as string);
     }
 
     // Include all custom fields
@@ -282,7 +287,7 @@ const hasMembers = computed(() => {
 });
 
 const matcherCategories = computed(() => {
-    const arr: Partial<Record<MatcherCategory, { name: string; matchers: ColumnMatcher<MemberDetails>[] }>> = {};
+    const arr: Partial<Record<MemberDetailsMatcherCategory, { name: string; matchers: ColumnMatcher<MemberDetails>[] }>> = {};
     for (const matcher of matchers.value) {
         const cat = matcher.category.toLowerCase();
         if (arr[cat]) {
@@ -395,11 +400,12 @@ function readColumns() {
     }
 }
 
-function getColumnSelected(column: MatchedMemberDetailsColumn) {
-    return column.selected;
-}
+// function getColumnSelected(column: MatchedMemberDetailsColumn) {
+//     return column.selected;
+// }
 
 function setColumnSelected(column: MatchedMemberDetailsColumn, value: boolean) {
+    console.error('set column selected');
     column.selected = value;
 
     if (value && column.matcher === null) {
@@ -439,6 +445,86 @@ function didChangeColumn(column: MatchedMemberDetailsColumn) {
     }
 }
 
+function importData(sheet: XLSX.WorkSheet, columns: MatchedMemberDetailsColumn[]) {
+    if (!sheet['!ref']) {
+        throw new Error('Missing ref in sheet');
+    }
+
+    // Start! :D
+    // const allMembers = await MemberManager.loadMembers([], null, null);
+
+    const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
+    const result = new ImportResult<MemberDetails>();
+
+    for (let row = range.s.r + 1; row <= range.e.r; row++) {
+        // const member = new ImportingMember(row, organization);
+        const partialMemberDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>> = {};
+        let allEmpty = true;
+        const errorStack: ImportError[] = [];
+
+        for (const column of columns) {
+            if (!column.selected) {
+                continue;
+            }
+
+            if (!column.matcher) {
+                throw new Error("Koppel de kolom '" + column.name + "' eerst aan een bijhorende waarde");
+            }
+
+            const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject;
+
+            if (valueCell) {
+                allEmpty = false;
+            }
+
+            try {
+                column.matcher.setValue(valueCell, partialMemberDetails);
+            }
+            catch (e: any) {
+                console.error(e);
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    errorStack.push(new ImportError(row, column.index, e.getHuman()));
+                }
+                else if (typeof e['message'] === 'string') {
+                    errorStack.push(new ImportError(row, column.index, e['message']));
+                }
+            }
+        }
+
+        if (allEmpty) {
+            // ignore empty row
+            continue;
+        }
+        result.errors.push(...errorStack);
+
+        // Clean data
+        // member.details.cleanData();
+
+        // Check if we find the same member
+        // if (member.details.firstName.length > 0 && member.details.lastName.length > 0) {
+        //     for (const m of allMembers) {
+        //         if (member.isEqual(m)) {
+        //             member.equal = m;
+        //             break;
+        //         }
+        //     }
+
+        //     if (!member.equal) {
+        //         for (const m of allMembers) {
+        //             if (member.isProbablyEqual(m)) {
+        //                 member.probablyEqual = m;
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
+
+        result.data.push(partialMemberDetails);
+    }
+
+    return result;
+}
+
 async function goNext() {
     if (!sheet.value || saving.value) {
         return;
@@ -448,32 +534,34 @@ async function goNext() {
 
     try {
         // todo
-        // const result = await ImportingMember.importAll(sheet.value, columns.value, organization);
+        const result = importData(sheet.value, columns.value);
 
-        // if (result.errors.length > 0) {
-        //     show(new ComponentWithProperties(ImportMembersErrorsView, {
-        //         errors: result.errors,
-        //     })).catch(console.error);
-        // }
-        // else {
-        //     const probablyEqual = result.members.filter(m => !m.equal && m.probablyEqual);
-        //     if (probablyEqual.length) {
-        //         show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
-        //             members: probablyEqual,
-        //             onVerified: (component) => {
-        //                 component.show(new ComponentWithProperties(ImportMembersQuestionsView, {
-        //                     members: result.members,
-        //                 }));
-        //             },
-        //         })).catch(console.error);
-        //         saving.value = false;
-        //         return;
-        //     }
+        console.error(JSON.stringify(result));
 
-        //     show(new ComponentWithProperties(ImportMembersQuestionsView, {
-        //         members: result.members,
-        //     })).catch(console.error);
-        // }
+        if (result.errors.length > 0) {
+            show(new ComponentWithProperties(ImportMembersErrorsView, {
+                errors: result.errors,
+            })).catch(console.error);
+        }
+        else {
+            // const probablyEqual = result.members.filter(m => !m.equal && m.probablyEqual);
+            // if (probablyEqual.length) {
+            //     show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
+            //         members: probablyEqual,
+            //         onVerified: (component) => {
+            //             component.show(new ComponentWithProperties(ImportMembersQuestionsView, {
+            //                 members: result.members,
+            //             }));
+            //         },
+            //     })).catch(console.error);
+            //     saving.value = false;
+            //     return;
+            // }
+
+            // show(new ComponentWithProperties(ImportMembersQuestionsView, {
+            //     members: result.members,
+            // })).catch(console.error);
+        }
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);

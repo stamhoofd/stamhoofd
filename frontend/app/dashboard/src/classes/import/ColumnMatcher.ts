@@ -8,5 +8,5 @@ export interface ColumnMatcher<T extends AutoEncoder> {
     getName(): string;
     doesMatch(columnName: string, examples: string[]): boolean;
 
-    getPatchValue(cell: XLSX.CellObject | undefined, accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<T>>): PartialWithoutMethods<AutoEncoderPatchType<T>>;
+    setValue(cell: XLSX.CellObject | undefined, accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<T>>): void;
 }
