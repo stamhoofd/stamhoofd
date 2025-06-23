@@ -149,9 +149,9 @@ export class Order extends QueryableModel {
             return true;
         }
 
-        /* if (options?.hasPaidPayment) {
+        if (options?.hasPaidPayment) {
             return true;
-        } */
+        }
 
         // Check we paid at least 1 cent
         // note: do not use cached values such as pricePaid here, because their value could be delayed.
