@@ -311,7 +311,7 @@ function changedFile(event: any) {
     const reader = new FileReader();
     reader.onload = (e: any) => {
         if (!e.target || !e.target.result) {
-            new CenteredMessage('Inlezen mislukt, kijk na of dit wel een geldig bestand is').addCloseButton().show();
+            new CenteredMessage($t(`Inlezen mislukt, kijk na of dit wel een geldig bestand is`)).addCloseButton().show();
             return;
         }
 
