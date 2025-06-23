@@ -4,6 +4,7 @@ import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Filterable } from '../members/records/RecordCategory.js';
 import { StamhoofdFilterDecoder } from './FilteredRequest.js';
 import { isEmptyFilter, StamhoofdFilter } from './StamhoofdFilter.js';
+import { convertOldPropertyFilter } from './convertOldPropertyFilter.js';
 
 export class PropertyFilter implements Encodeable {
     constructor(enabledWhen: StamhoofdFilter | null, requiredWhen: StamhoofdFilter | null) {
@@ -55,8 +56,8 @@ export class PropertyFilter implements Encodeable {
 
     static decode<T>(data: Data): PropertyFilter {
         if (data.context.version < 251) {
-            console.error('PropertyFilter: legacy filter detected - this is not implemented yet. Possible data loss.');
-            return PropertyFilter.createDefault();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            return convertOldPropertyFilter(data.value);
         }
 
         return new PropertyFilter(
