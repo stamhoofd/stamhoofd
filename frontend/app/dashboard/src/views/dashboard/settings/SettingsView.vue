@@ -207,6 +207,22 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.MembersImport)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Leden importeren') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Importeer leden vanaf een Excel of CSV bestand') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -350,6 +366,7 @@ import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
+import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 type ttt = FreeContributionSettingsView;
@@ -374,6 +391,7 @@ enum Routes {
     Labs = 'experimenten',
     Premises = 'lokalen',
     BalanceNotifications = 'openstaande-bedragen-notificaties',
+    MembersImport = 'leden-importeren',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -517,6 +535,11 @@ defineRoutes([
         url: Routes.BalanceNotifications,
         present: 'popup',
         component: BalanceNotificationSettingsView,
+    },
+    {
+        url: Routes.MembersImport,
+        present: 'popup',
+        component: ImportMembersView,
     },
 ]);
 
