@@ -792,6 +792,35 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
         const categoryPrefix = category.name + ' → ';
 
         for (const record of category.records) {
+            if (record.type === RecordType.Text || record.type === RecordType.Textarea) {
+                allForCategory.push(
+                    new StringFilterBuilder({
+                        name: prefix + categoryPrefix + record.name,
+                        key: 'value',
+                        wrapper: {
+                            recordAnswers: {
+                                [record.id]: FilterWrapperMarker,
+                            },
+                        },
+                    }),
+                );
+            }
+
+            if (record.type === RecordType.Integer || record.type === RecordType.Price) {
+                allForCategory.push(
+                    new NumberFilterBuilder({
+                        name: prefix + categoryPrefix + record.name,
+                        key: 'value',
+                        type: record.type === RecordType.Price ? NumberFilterFormat.Currency : NumberFilterFormat.Number,
+                        wrapper: {
+                            recordAnswers: {
+                                [record.id]: FilterWrapperMarker,
+                            },
+                        },
+                    }),
+                );
+            }
+
             if (record.type === RecordType.Checkbox) {
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
