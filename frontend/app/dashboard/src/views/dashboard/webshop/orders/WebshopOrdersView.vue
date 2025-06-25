@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, UIFilterBuilders, useIsMobile, useTableObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
+import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, UIFilterBuilders, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
