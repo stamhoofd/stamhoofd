@@ -3,6 +3,31 @@ import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 let requestCounter = 0;
 
+function removePII(object: unknown) {
+    if (object === null || object === undefined) {
+        return;
+    }
+
+    if (typeof object === 'object') {
+        // Loop all keys
+        for (const key of Object.keys(object)) {
+            removePII(object[key]);
+            if (key === 'password' || key === 'clientSecret') {
+                object[key] = '*******';
+            }
+        }
+        return;
+    }
+
+    // Loop array
+    if (Array.isArray(object)) {
+        for (const item of object) {
+            removePII(item);
+        }
+        return;
+    }
+}
+
 function logRequestDetails(request: Request) {
     if (Object.keys(request.query).length) {
         const json: any = { ...request.query };
@@ -27,13 +52,7 @@ function logRequestDetails(request: Request) {
         try {
             const json = JSON.parse(body);
             if (Array.isArray(json) || Object.keys(json).length) {
-                if (json && json.password) {
-                    json.password = '*******';
-                }
-
-                if (json && json.clientSecret) {
-                    json.clientSecret = '*******';
-                }
+                removePII(json);
 
                 logger.error(
                     ...requestPrefix(request, 'body'),
@@ -43,11 +62,21 @@ function logRequestDetails(request: Request) {
             }
         }
         catch (e) {
-            logger.error(
-                ...requestPrefix(request, 'body'),
-                'Request body was ',
-                body,
-            );
+            if (typeof body === 'string') {
+                logger.error(
+                    ...requestPrefix(request, 'body'),
+                    'Request body was invalid JSON ',
+                    body,
+                );
+            }
+            else {
+                // Don't log
+                logger.error(
+                    ...requestPrefix(request, 'body'),
+                    'Request body was of type ' + typeof body,
+                    body,
+                );
+            }
         }
     }).catch(console.error);
 }
