@@ -401,6 +401,7 @@ export class User extends QueryableModel {
     static async register(
         organization: Organization | null,
         data: NewUser,
+        options?: { allowPlatform?: boolean },
     ): Promise<User | undefined> {
         const {
             email,
@@ -414,7 +415,7 @@ export class User extends QueryableModel {
             throw new Error('A password is required for new users');
         }
 
-        if (!organization && STAMHOOFD.userMode !== 'platform') {
+        if (!organization && STAMHOOFD.userMode !== 'platform' && !options?.allowPlatform) {
             throw new Error('Missing organization');
         }
 
