@@ -18,7 +18,7 @@
                     {{ familyMember.patchedMember.firstName }} {{ familyMember.patchedMember.details ? familyMember.patchedMember.details.lastName : "" }}
                 </h3>
                 <p class="style-description-small">
-                    {{ member.registrationDescription }}
+                    {{ familyMember.registrationDescription }}
                 </p>
                 <template #right>
                     <span class="icon arrow-right-small gray" />
