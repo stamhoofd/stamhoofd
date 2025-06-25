@@ -1,3 +1,4 @@
+import { Formatter } from '@stamhoofd/utility';
 import { type ConcurrentlyCommandInput } from 'concurrently';
 import fs from 'fs/promises';
 import { exec as execCallback } from 'node:child_process';
@@ -126,7 +127,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
         routes.push({
             match: [
                 {
-                    host: [...Object.values(domains.webshop)],
+                    host: Formatter.uniqueArray([...Object.values(domains.webshop)]),
                 },
             ],
             handle: [
@@ -149,7 +150,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
         routes.push({
             match: [
                 {
-                    host: [...Object.values(domains.registration)].map(domain => ('*.' + domain)),
+                    host: Formatter.uniqueArray([...Object.values(domains.registration)].map(domain => ('*.' + domain))),
                 },
             ],
             handle: [
@@ -227,14 +228,14 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                 automation: {
                     policies: [
                         {
-                            subjects: [
+                            subjects: Formatter.uniqueArray([
                                 domains.dashboard,
                                 domains.api,
                                 '*.' + domains.api,
                                 ...(domains.registration ? [...Object.values(domains.registration)].map(domain => ('*.' + domain)) : []),
                                 ...(domains.webshop ? [...Object.values(domains.webshop)] : []),
                                 domains.rendererApi,
-                            ],
+                            ]),
                             on_demand: false,
                             issuers: [
                                 {
