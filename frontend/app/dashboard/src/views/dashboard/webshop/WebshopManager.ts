@@ -341,6 +341,7 @@ export class WebshopManager {
             // Sometimes a browser hangs when trying to open a database. We cannot wait forever...
             setTimeout(() => {
                 if (!resolved) {
+                    resolved = true;
                     // Abort
                     reject(new SimpleError({
                         code: 'not_supported',
@@ -602,18 +603,24 @@ export class WebshopManager {
             let request: IDBRequest<IDBCursorWithValue | null>;
 
             // use an index if a SortItem is defined
-            if (sortItem) {
-                let direction: IDBCursorDirection = 'next';
+            try {
+                if (sortItem) {
+                    let direction: IDBCursorDirection = 'next';
 
-                if (sortItem.order === SortItemDirection.DESC) {
-                    direction = 'prev';
+                    if (sortItem.order === SortItemDirection.DESC) {
+                        direction = 'prev';
+                    }
+
+                    request = (sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key))
+                        .openCursor(null, direction);
                 }
-
-                request = (sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key))
-                    .openCursor(null, direction);
+                else {
+                    request = objectStore.openCursor();
+                }
             }
-            else {
-                request = objectStore.openCursor();
+            catch (e) {
+                reject(e);
+                return;
             }
 
             let matchedItemsCount = 0;
@@ -685,6 +692,10 @@ export class WebshopManager {
             if (e instanceof CallbackError || e instanceof CompilerFilterError) {
                 throw e;
             }
+            throw new SimpleError({
+                code: 'loading_failed',
+                message: $t('Er ging iets mis bij het ophalen van de bestellingen. Mogelijks wordt een bepaalde filter of ordening niet ondersteund, pas die aan indien mogelijk.'),
+            });
         });
 
         if (networkFetch) {
