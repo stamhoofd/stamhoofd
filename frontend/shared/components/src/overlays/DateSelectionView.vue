@@ -13,8 +13,9 @@
                     </div>
 
                     <div class="input-icon-container right icon arrow-down-small gray">
-                        <select v-model="currentYear" data-testid="select-year" @mousedown.stop>
-                            <option v-for="year in 105" :key="year" :value="nowYear - year + 5">
+                        <!-- key is added here because the select should be recreated when the offset changes, otherwise we get DOM issues and it looks like the wrong value is selected -->
+                        <select :key="nowYear" v-model="currentYear" data-testid="select-year" @mousedown.stop>
+                            <option v-for="year in 105" :key="nowYear - year + 5" :value="nowYear - year + 5">
                                 {{ nowYear - year + 5 }}
                             </option>
                         </select>
