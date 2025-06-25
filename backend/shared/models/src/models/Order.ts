@@ -991,9 +991,14 @@ export class Order extends QueryableModel {
                     }
                 }
                 else {
-                    await this.sendEmailTemplate({
-                        type: EmailTemplateType.TicketsConfirmationTransfer,
-                    });
+                    if (payment && payment.method === PaymentMethod.Transfer) {
+                        await this.sendEmailTemplate({
+                            type: EmailTemplateType.TicketsConfirmationTransfer,
+                        });
+                    }
+                    else {
+                        console.error('Unexpected missing tickets for order where tickets are expected');
+                    }
                 }
             }
         }
