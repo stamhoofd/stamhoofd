@@ -280,6 +280,18 @@ export class PlatformMembershipService {
                     // Check if already have the same membership
                     // if that is the case, we'll keep that one and update the price + dates if the organization matches the cheapest/earliest membership
                     let didFind: MemberPlatformMembership | null = null;
+
+                    // First, try to find any undeletable membership - use this as the priority one and delete all others that can be deleted
+                    // Check if we do have the same membership for a different organization that cannot be deleted (locked)
+                    // This is to prevent creating duplicate memberships
+                    for (const m of activeMemberships) {
+                        if (m.membershipTypeId === cheapestMembership.membership.id && !m.locked) {
+                            didFind = m;
+                            break;
+                        }
+                    }
+
+                    // Then update all memberships from the same organization for the selected registration date range
                     for (const m of activeMemberships) {
                         if (m.membershipTypeId === cheapestMembership.membership.id && m.organizationId === cheapestMembership.registration.organizationId) {
                             if (!m.locked) {
@@ -295,12 +307,14 @@ export class PlatformMembershipService {
                                 }
                                 await m.save();
                             }
-                            didFind = m;
-                            break;
+
+                            if (!didFind) {
+                                didFind = m;
+                            }
                         }
                     }
 
-                    // Delete all other generated memberships that are not the cheapest one
+                    // Delete all other generated memberships that are not the chosen one
                     for (const m of activeMemberships) {
                         if (m.id !== didFind?.id) {
                             if (!m.locked && (m.generated || m.membershipTypeId === cheapestMembership.membership.id)) {
@@ -327,6 +341,7 @@ export class PlatformMembershipService {
                         }
                     }
 
+                    // We already have a membership, don't create a new one
                     if (didFind) {
                         continue;
                     }
