@@ -77,6 +77,10 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             expressData = {};
         }
 
+        if (type === 'express') {
+            expressData.controller = undefined;
+        }
+
         // Create a new Stripe account
         const stripe = StripeHelper.getInstance();
         const account = await stripe.accounts.create({
