@@ -38,6 +38,7 @@ export function build(service: Service): any {
         platformName: 'stamhoofd',
 
         DB_DATABASE: 'stamhoofd-development',
+        STRIPE_CONNECT_METHOD: 'express',
     };
 
     return config;

@@ -12,6 +12,8 @@ export async function build(service: Service) {
     const hostname = Formatter.slug(os.hostname());
 
     if ('backend' in service && service.backend === 'api') {
+        console.log('Loading development credentials via 1Password CLI...');
+
         // In development, we do connect to a DigitalOcean database in development mode
         Object.assign(config, {
             SPACES_ENDPOINT: 'ams3.digitaloceanspaces.com',
@@ -19,6 +21,21 @@ export async function build(service: Service) {
             SPACES_KEY: await read1PasswordCli('op://DevOps Development/digitalocean-spaces.stamhoofd-development/key'),
             SPACES_SECRET: await read1PasswordCli('op://DevOps Development/digitalocean-spaces.stamhoofd-development/secret'),
             SPACES_PREFIX: username || hostname || 'unknown',
+        });
+
+        // Add Mollie credentials
+        Object.assign(config, {
+            MOLLIE_CLIENT_ID: await read1PasswordCli('op://DevOps Development/Mollie/MOLLIE_CLIENT_ID', { optional: true }),
+            MOLLIE_API_KEY: await read1PasswordCli('op://DevOps Development/Mollie/MOLLIE_API_KEY', { optional: true }),
+            MOLLIE_SECRET: await read1PasswordCli('op://DevOps Development/Mollie/MOLLIE_SECRET', { optional: true }),
+            MOLLIE_ORGANIZATION_TOKEN: await read1PasswordCli('op://DevOps Development/Mollie/MOLLIE_ORGANIZATION_TOKEN', { optional: true }),
+
+        });
+
+        // Add Stripe credentials
+        Object.assign(config, {
+            STRIPE_ACCOUNT_ID: await read1PasswordCli('op://DevOps Development/Stripe/STRIPE_ACCOUNT_ID', { optional: true }),
+            STRIPE_SECRET_KEY: await read1PasswordCli('op://DevOps Development/Stripe/STRIPE_SECRET_KEY', { optional: true }),
         });
     }
 

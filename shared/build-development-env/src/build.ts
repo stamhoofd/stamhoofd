@@ -1,4 +1,5 @@
 import { buildPresets, InitFunction } from './buildPresets';
+import { getProjectPath } from './helpers/project-path';
 import { Service } from './Service';
 import fs from 'node:fs/promises';
 
@@ -13,22 +14,7 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 export async function loadEnvironmentFile(name: string) {
-    let depth = 2;
-
-    while (true) {
-        // check lerna.json exists at depth
-        const fileName = __dirname + '/' + '../'.repeat(depth) + `lerna.json`;
-        if (await fileExists(fileName)) {
-            break;
-        }
-        depth++;
-
-        if (depth >= 6) {
-            throw new Error('Could not find lerna.json in the parent directories');
-        }
-    }
-
-    const rootPath = __dirname + '/' + '../'.repeat(depth);
+    const rootPath = await getProjectPath();
 
     const envFileName = name ? `env.${name}` : 'env';
 
@@ -62,6 +48,7 @@ export async function loadEnvironmentFile(name: string) {
 }
 
 export async function buildConfig(name: string, service: Service): Promise<{ config: any; initFunctions: InitFunction[] }> {
+    const projectPath = await getProjectPath();
     const environment = await loadEnvironmentFile(name);
 
     // Only return these env variables in backend services, to not expose development credentials in the browser
@@ -107,7 +94,7 @@ export async function buildConfig(name: string, service: Service): Promise<{ con
         WHITELISTED_EMAIL_DESTINATIONS: ['*'],
 
         // Whether to store cache files: todo
-        CACHE_PATH: '/Users/simon/Documents/Projects/stamhoofd/backend/app/api/.cache',
+        CACHE_PATH: 'backend' in service ? (projectPath + 'backend/app/' + service.backend + '/.cache') : undefined,
 
         // These are used in development, and are not used in production so safe to use.
         FILE_SIGNING_PUBLIC_KEY: { kty: 'EC', x: 'LZPou8JKNPoxgc1FXqLW_dqAYrv3_3ZoFHACwCiiunw', y: 'kBSKvtDVpa29J2mh5pICQD12dKO25fU3Bz-JItNAgEE', crv: 'P-256' },

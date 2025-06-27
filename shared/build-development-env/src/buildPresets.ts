@@ -60,6 +60,25 @@ export async function buildPresets(presets: string[], service: Service): Promise
         }
     }
 
+    // Some presets still need to inject things, because they depend on the total configuration of the service
+    for (const preset of presetsSet) {
+        const fileLocation = `./presets/${preset}.js`;
+        try {
+            const presetBuilder = await import(fileLocation);
+
+            if ('inject' in presetBuilder) {
+                const injectedConfig = await presetBuilder.inject(result, service);
+                Object.assign(result, injectedConfig);
+            }
+        }
+        catch (error) {
+            if (error.message.includes('Cannot find module')) {
+                throw new Error(`Preset ${preset} does not exist. Please check the presets directory.`);
+            }
+            throw new Error(`Failed to inject preset ${preset}: ${error.message}`);
+        }
+    }
+
     return {
         config: result,
         initFunctions,
