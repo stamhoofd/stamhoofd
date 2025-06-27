@@ -29,8 +29,8 @@ export class StripeBusinessProfile extends AutoEncoder {
 }
 
 export class StripeCompany extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    name = '';
+    @field({ decoder: StringDecoder, nullable: true })
+    name: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true })
     structure: string | null = null;
