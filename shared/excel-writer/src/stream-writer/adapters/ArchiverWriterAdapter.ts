@@ -31,7 +31,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
             console.log('PassThrough closed file: File written to disk', filePath);
         });
 
-        const webStream = Writable.toWeb(s);
+        const webStream = Writable.toWeb(s) as WritableStream<Buffer>;
 
         this.fileStreams.push({ tmpFile: filePath, fileName: name, stream: webStream });
 

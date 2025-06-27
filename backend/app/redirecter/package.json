@@ -10,7 +10,7 @@
         "lint": "eslint"
     },
     "devDependencies": {
-        "@types/node": "^20.12"
+        "@types/node": "^22"
     },
     "dependencies": {
         "@simonbackx/simple-endpoints": "1.20.1",

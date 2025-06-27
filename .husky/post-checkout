@@ -1,4 +1,6 @@
 echo "Clearing builds...";
+nvm use;
+nvm install;
 yarn;
 yarn clear;
 yarn clear-vite-cache;

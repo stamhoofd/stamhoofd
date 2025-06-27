@@ -27,7 +27,7 @@
         "@types/luxon": "3.4.2",
         "@types/mailparser": "3.4.4",
         "@types/mysql": "^2.15.20",
-        "@types/node": "^20.12",
+        "@types/node": "^22",
         "nock": "^13.5.1",
         "qs": "^6.11.2",
         "sinon": "^18.0.0"

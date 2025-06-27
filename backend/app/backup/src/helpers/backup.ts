@@ -42,7 +42,7 @@ async function hashFile(path: string, algo = 'md5') {
     const hashFunc = createHash(algo); // you can also sha256, sha512 etc
 
     const contentStream = createReadStream(path);
-    const updateDone = new Promise((resolve, reject) => {
+    const updateDone = new Promise<void>((resolve, reject) => {
         contentStream.on('data', data => hashFunc.update(data));
         contentStream.on('close', resolve);
         contentStream.on('error', reject);
