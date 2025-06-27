@@ -29,7 +29,7 @@
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",
         "mysql2": "^3.14.1",
-        "puppeteer": "^23.9.0"
+        "puppeteer": "^24.11.0"
     },
     "publishConfig": {
         "access": "public"
