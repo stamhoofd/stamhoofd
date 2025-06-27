@@ -13,17 +13,19 @@ import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
+import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 
 const props = defineProps<{
     title: string;
     items: BalanceItem[];
     isPayable: boolean;
-    saveHandler: (list: BalanceItemPaymentDetailed[]) => void | Promise<void>;
+    saveHandler: (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => void | Promise<void>;
 }>();
 
 const list = ref([] as BalanceItemPaymentDetailed[]);
 const errors = useErrors();
 const saving = ref(false);
+const navigate = useNavigationActions();
 
 const total = computed(() => {
     return list.value.reduce((total, item) => total + item.price, 0);
@@ -40,7 +42,7 @@ async function save() {
     saving.value = true;
     try {
         errors.errorBox = null;
-        await props.saveHandler(list.value);
+        await props.saveHandler(navigate, list.value);
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);

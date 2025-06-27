@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
-import { GlobalEventBus, SelectBalanceItemsView, Toast, useAppContext, useOrganizationCart } from '@stamhoofd/components';
+import { GlobalEventBus, NavigationActions, SelectBalanceItemsView, Toast, useAppContext, useOrganizationCart } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
 import { BalanceItemCartItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -62,7 +62,7 @@ async function checkout() {
                         title: $t(`9a9fcc54-b73c-4c9f-ba2e-56ae8c3f150d`),
                         items: items.value,
                         isPayable: true,
-                        saveHandler: async (list: BalanceItemPaymentDetailed[]) => {
+                        saveHandler: async (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => {
                             // First clear
                             for (const g of filteredItems.value) {
                                 checkout.removeBalanceItemByBalance(g);
@@ -77,6 +77,8 @@ async function checkout() {
                                     }));
                                 }
                             }
+
+                            await navigate.pop({ force: true });
                             await goToCheckout(checkout);
                         },
                     },
