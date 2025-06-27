@@ -5,12 +5,7 @@ import { DataValidator, Formatter, sleep } from '@stamhoofd/utility';
 import htmlToText from 'html-to-text';
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import { type default as Postmark } from 'postmark';
 import { EmailAddress } from '../models/EmailAddress';
-
-// Importing postmark returns undefined (this is a bug, so we need to use require)
-
-const postmark = require('postmark');
 
 export type EmailInterfaceRecipient = {
     name?: string | null;
@@ -437,15 +432,9 @@ class EmailStatic {
                 };
             }
 
-            if (STAMHOOFD.POSTMARK_SERVER_TOKEN && (data.retryCount === 1)) {
-                await this.sendApi(mail);
-                console.log('Message sent via api:', to, data.subject, data.type);
-            }
-            else {
-                console.log('Sending email', to, data.subject, data.type);
-                const info = await transporter.sendMail(mail);
-                console.log('Message sent:', to, data.subject, info.messageId, data.type);
-            }
+            console.log('Sending email', to, data.subject, data.type);
+            const info = await transporter.sendMail(mail);
+            console.log('Message sent:', to, data.subject, info.messageId, data.type);
 
             try {
                 data.callback?.(null);
@@ -494,40 +483,6 @@ class EmailStatic {
                     }
                 }
             }
-        }
-    }
-
-    private async sendApi(data: InternalEmailData) {
-        if (!STAMHOOFD.POSTMARK_SERVER_TOKEN) {
-            throw new Error('Missing POSTMARK_SERVER_TOKEN');
-        }
-        const client = new postmark.ServerClient(STAMHOOFD.POSTMARK_SERVER_TOKEN);
-        const headers: { Name: string; Value: string }[] = [];
-        for (const key in data.headers) {
-            headers.push({ Name: key, Value: data.headers[key] });
-        }
-
-        const message: Postmark.Models.Message = {
-            From: data.from,
-            To: data.to,
-            Bcc: data.bcc,
-            Subject: data.subject,
-            TextBody: data.text,
-            HtmlBody: data.html,
-            Headers: headers,
-            ReplyTo: data.replyTo,
-            Tag: 'api',
-            MessageStream: (data.headers?.['X-PM-Message-Stream'] ?? 'outbound'),
-        };
-
-        console.log('Falling back to Postmark API', message);
-
-        try {
-            await client.sendEmail(message);
-        }
-        catch (e) {
-            console.error('Failed to send email with Postmark API', e);
-            throw e;
         }
     }
 

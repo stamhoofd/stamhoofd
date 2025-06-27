@@ -159,6 +159,9 @@ declare global {
 
         // Postmark
         // To catch email bounces
+        /**
+         * @deprecated not used anymore
+         */
         readonly POSTMARK_SERVER_TOKEN?: string,
         
         // AWS
