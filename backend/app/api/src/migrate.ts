@@ -20,15 +20,15 @@ const start = async () => {
         throw new Error('STAMHOOFD.DB_DATABASE is not set');
     }
 
-    process.on('SIGTERM', () => {
+    let killSignalReceived = false;
+    const handler = () => {
         // Ignore
         console.error('Ignoring SIGTERM signal during migration');
-    });
+        killSignalReceived = true;
+    };
 
-    process.on('SIGINT', () => {
-        // Ignore
-        console.error('Ignoring SIGINT signal during migration');
-    });
+    process.on('SIGTERM', handler);
+    process.on('SIGINT', handler);
 
     // Create database if not exists
     const query = 'CREATE DATABASE IF NOT EXISTS `' + STAMHOOFD.DB_DATABASE + '` DEFAULT CHARACTER SET = `utf8mb4` DEFAULT COLLATE = `utf8mb4_0900_ai_ci`';
@@ -46,6 +46,14 @@ const start = async () => {
 
     // Internal
     await Migration.runAll(__dirname + '/src/migrations');
+
+    if (killSignalReceived) {
+        console.error(chalk.red('Killing process due to received signal during migration'));
+        process.exit(1);
+    }
+
+    process.off('SIGTERM', handler);
+    process.off('SIGINT', handler);
 };
 
 export async function run() {
