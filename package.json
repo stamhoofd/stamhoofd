@@ -47,7 +47,6 @@
     "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
   },
   "dependencies": {
-    "@babel/runtime": "^7.15.4",
     "@simonbackx/simple-encoding": "2.22.0",
     "@simonbackx/simple-errors": "^1.5.0",
     "@simonbackx/simple-networking": "1.20.0",
@@ -76,9 +75,6 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
-    "@babel/cli": "^7.16.0",
-    "@babel/core": "^7.16.5",
-    "@babel/preset-env": "^7.16.5",
     "@eslint/js": "^9.11.1",
     "@stylistic/eslint-plugin": "^2.8.0",
     "@testing-library/dom": "^10.4.0",
