@@ -285,7 +285,7 @@ export class PlatformMembershipService {
                     // Check if we do have the same membership for a different organization that cannot be deleted (locked)
                     // This is to prevent creating duplicate memberships
                     for (const m of activeMemberships) {
-                        if (m.membershipTypeId === cheapestMembership.membership.id && !m.locked) {
+                        if (m.membershipTypeId === cheapestMembership.membership.id && m.locked) {
                             didFind = m;
                             break;
                         }
