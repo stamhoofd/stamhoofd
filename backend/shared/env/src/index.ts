@@ -15,7 +15,7 @@ async function fileExists(path: string): Promise<boolean> {
 
 async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
     let env: any;
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development')) {
         const builder = await import('@stamhoofd/build-development-env');
         env = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
             backend: settings?.service ?? 'api',
