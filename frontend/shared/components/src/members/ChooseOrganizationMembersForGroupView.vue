@@ -17,7 +17,7 @@
             {{ $t('8fa09d5b-957e-49c0-b02f-2aca8e17eb24') }}
         </p>
 
-        <p v-if="checkout.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization" class="warning-box">
+        <p v-if="checkout.totalPrice && contextOrganization && checkout.asOrganizationId && !checkout.isAdminFromSameOrganization && checkout.cart.items.length" class="warning-box">
             {{ $t('0696b0bc-d2e2-4dc5-88d3-7ee188953cdf', {organization: contextOrganization.name}) }}
         </p>
 
