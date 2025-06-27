@@ -26,7 +26,7 @@
         "@aws-sdk/client-s3": "3.823.0",
         "@simonbackx/simple-endpoints": "1.20.1",
         "@simonbackx/simple-logging": "^1.0.1",
-        "formidable": "3.5.1",
+        "formidable": "3.5.4",
         "luxon": "3.4.4",
         "mockdate": "^3.0.2",
         "mysql2": "^3.14.1"
