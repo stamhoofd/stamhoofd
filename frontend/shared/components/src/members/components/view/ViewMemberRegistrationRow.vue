@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PlatformMember, Registration } from '@stamhoofd/structures';
+import { GroupType, PlatformMember, Registration } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -90,6 +90,10 @@ const registrationOrganization = computed(() => {
 });
 
 const defaultAgeGroup = computed(() => {
+    if (group.value.type !== GroupType.Membership) {
+        return null;
+    }
+    
     if (!group.value.defaultAgeGroupId) {
         return $t(`22e7c344-54b6-493e-84c3-cbb453810781`);
     }
