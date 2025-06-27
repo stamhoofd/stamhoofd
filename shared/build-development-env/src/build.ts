@@ -77,9 +77,7 @@ export async function buildConfig(name: string, service: Service): Promise<{ con
         MOLLIE_API_KEY: '',
 
         // Stripe secret key - required to test Stripe locally
-        STRIPE_SECRET_KEY: 'sk_test_',
-
-        // Todo: fill the secrets returned by the Stripe CLI
+        STRIPE_SECRET_KEY: '',
         STRIPE_ENDPOINT_SECRET: '',
         STRIPE_CONNECT_ENDPOINT_SECRET: '',
 

@@ -12,8 +12,6 @@ export async function build(service: Service) {
     const hostname = Formatter.slug(os.hostname());
 
     if ('backend' in service && service.backend === 'api') {
-        console.log('Loading development credentials via 1Password CLI...');
-
         // In development, we do connect to a DigitalOcean database in development mode
         Object.assign(config, {
             SPACES_ENDPOINT: 'ams3.digitaloceanspaces.com',

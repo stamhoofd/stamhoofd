@@ -8,13 +8,16 @@
 import fs from 'node:fs/promises';
 import { getProjectPath } from './project-path';
 
+// Wait max 60 seconds to acquire the lock
 const LOCK_RETRY_INTERVAL = 100; // ms
-const MAX_RETRIES = 50;
+const MAX_RETRIES = 600;
 
 function withTemporarySignalHandler(cleanup: () => Promise<void>) {
     const handleShutdown = () => {
-        console.log('Caught shutdown signal. Cleaning up...');
-        cleanup().catch((err) => {
+        cleanup().then(() => {
+            // Cleanup completed, exit the process
+            process.exit(0); // Exit gracefully
+        }).catch((err) => {
             console.error('Error during cleanup:', err);
         });
     };
@@ -40,29 +43,42 @@ export async function withFileLock<T>(
         if (!didLock) return; // No need to clean up if we never acquired the lock
         try {
             await fs.unlink(lockPath);
-            console.log(`Lock file ${lockPath} removed successfully during shutdown.`);
             didLock = false; // Reset the lock state
         }
         catch (err) {
-            console.error(`Failed to remove lock file ${lockPath}:`, err);
+            // ignore
         }
     });
 
     try {
         for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
             try {
+                if (attempt > 0 && attempt * LOCK_RETRY_INTERVAL % 1000 === 0) {
+                    console.log('Waiting for lock...');
+                }
+
                 const fd = await fs.open(lockPath, 'wx'); // 'wx' fails if exists
                 await fd.close();
                 didLock = true;
 
                 try {
                     const result = await action(); // Do the actual file operation
-                    await fs.unlink(lockPath); // Release the lock
+                    try {
+                        await fs.unlink(lockPath); // Release the lock
+                    }
+                    catch (err) {
+                        // ignore
+                    }
                     didLock = false;
                     return result;
                 }
                 catch (err) {
-                    await fs.unlink(lockPath); // Clean up lock on failure
+                    try {
+                        await fs.unlink(lockPath); // Release the lock
+                    }
+                    catch (err) {
+                        // ignore
+                    }
                     didLock = false;
                     throw err;
                 }
@@ -111,17 +127,10 @@ export async function cache(key: string, getValue?: () => Promise<string>) {
                     const now = new Date().getTime();
                     const age = now - decoded.date;
 
-                    // If the cache is older than 1 hour, we consider it stale
-                    if (age < 60 * 60 * 1000) {
-                        console.log('Reusing cache for', key);
+                    // If the cache is older than 1 day, we consider it stale
+                    if (age < 60 * 60 * 1000 * 24) {
                         return decoded.value; // Return cached value if it's still fresh
                     }
-                    else {
-                        console.log('Cache for', key, 'is stale, fetching fresh value');
-                    }
-                }
-                else {
-                    console.log('Cache for', key, 'is invalid, fetching fresh value');
                 }
             }
             catch (error) {
@@ -129,8 +138,6 @@ export async function cache(key: string, getValue?: () => Promise<string>) {
                     console.error('Failed to read cache file:', error);
                     throw error;
                 }
-                // File does not exist, continue to get fresh value
-                console.log('Cache file does not exist for', key, ', fetching fresh value');
             }
 
             // Write file
@@ -144,7 +151,6 @@ export async function cache(key: string, getValue?: () => Promise<string>) {
             };
 
             // Write the value to the cache file
-            console.log('Writing cache for', key);
             await fs.writeFile(filePath, JSON.stringify(data), 'utf-8');
             return value;
         },

@@ -1,7 +1,9 @@
 import { concurrently, type ConcurrentlyCommandInput } from 'concurrently';
 import { buildConfig } from './build';
+import chalk from 'chalk';
 
 async function init() {
+    console.log(chalk.magenta('[INIT]') + ' Initializing development environment...');
     const services: ConcurrentlyCommandInput[] = [];
 
     // Loop all presets with a init method and call that method.
@@ -27,7 +29,12 @@ async function init() {
         cwd: process.cwd(),
     });
 
-    await result;
+    try {
+        await result;
+    }
+    catch (e) {
+        // Ignore error
+    }
 }
 
 init().catch((error) => {

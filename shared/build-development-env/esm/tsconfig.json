@@ -4,8 +4,5 @@
         // module NodeNext is not working here for some magical reason because TypeScript then still decides to use CommonJS
         "module": "esnext", // esnext is needed to make lazy loading work in webpack
         "outDir": "dist"
-    },
-    "exclude": [
-        "../src"
-    ]
+    }
 }

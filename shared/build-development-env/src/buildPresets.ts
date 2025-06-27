@@ -53,7 +53,8 @@ export async function buildPresets(presets: string[], service: Service): Promise
             }
         }
         catch (error) {
-            if (error.message.includes('Cannot find module')) {
+            if (error.message.includes('Cannot find module') && !error.message.includes('package.json')) {
+                console.error(error);
                 throw new Error(`Preset ${preset} does not exist. Please check the presets directory.`);
             }
             throw new Error(`Failed to load preset ${preset}: ${error.message}`);
