@@ -95,6 +95,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     host: '127.0.0.1',
                     port: loadedEnv.PORT ?? options.port,
                     strictPort: true,
+                    allowedHosts: ['.stamhoofd'],
                     warmup: {
                         clientFiles: [
                             ...(options?.clientFiles ?? []),
