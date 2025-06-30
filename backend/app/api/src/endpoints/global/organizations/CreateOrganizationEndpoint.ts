@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, Organization, User } from '@stamhoofd/models';
-import { CreateOrganization, PermissionLevel, Permissions, SignupResponse, UserPermissions } from '@stamhoofd/structures';
+import { EmailVerificationCode, Organization, RegistrationPeriod, User } from '@stamhoofd/models';
+import { CreateOrganization, PermissionLevel, Permissions, RegistrationPeriodSettings, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;
@@ -85,6 +85,16 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.address = request.body.organization.address;
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
 
+        const period = new RegistrationPeriod();
+
+        // WIP
+        period.settings = RegistrationPeriodSettings.create({});
+        period.startDate = new Date();
+        period.endDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 31); // 1 month
+
+        await period.save();
+        organization.periodId = period.id;
+
         try {
             await organization.save();
         }
@@ -96,6 +106,8 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 statusCode: 500,
             });
         }
+        period.organizationId = organization.id;
+        await period.save();
 
         const user = await User.register(
             organization,
