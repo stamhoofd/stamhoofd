@@ -65,11 +65,19 @@ export class OrganizationManager {
 
         // Keep admins
         const admins = this.$context.organization.admins;
-
         this.$context.updateOrganization(response.data);
 
         if (admins && !response.data.admins && patch.admins) {
             this.$context.organization.admins = patch.admins.applyTo(admins);
+        }
+
+        if (patch.period) {
+            // Clear cached periods
+            this.$context.organization.periods = undefined;
+
+            // There is something fishy going on with the period that doesn't get set using deepSet (updateOrganization) - can't explain why atm
+            // this fixes it for now
+            this.$context.organization.period = response.data.period;
         }
 
         // Call handlers: also update the stored organization in localstorage

@@ -12,12 +12,15 @@
             <template v-if="auth.hasFullAccess()">
                 <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">
                     <span class="icon flag" />
-                    <span>{{ $t('b91fa8bc-9922-49c5-b773-5190b5103c25') }} {{ newestPeriod.name }}</span>
+                    <span>{{ $t('Schakel over naar {werkjaar-2025-2026}', {'werkjaar-2025-2026': newestPeriod.name}) }}</span>
                 </button>
                 <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
                     <span class="icon flag" />
                     <span>{{ $t('410f13a0-286d-4f7a-b6f6-aef22327056b') }}</span>
                 </button>
+                <div v-else-if="period.id !== $organization.period.id" class="info-box">
+                    {{ $t('Dit werkjaar is niet actief') }}
+                </div>
 
                 <hr v-if="canUpgradePeriod || canSetDefaultPeriod">
             </template>
@@ -72,13 +75,12 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
-import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
 import { useSwitchablePeriod } from './useSwitchablePeriod';
 
 const $organization = useOrganization();
@@ -87,7 +89,6 @@ const $navigate = useNavigate();
 const collapsed = useCollapsed('leden');
 const platform = usePlatform();
 const organizationManager = useOrganizationManager();
-const owner = useRequestOwner();
 const present = usePresent();
 const auth = useAuth();
 const splitViewController = useSplitViewController();
@@ -100,7 +101,7 @@ const tree = computed(() => {
     });
 });
 
-const { period, switchPeriod } = useSwitchablePeriod({
+const { period, switchPeriod, openPeriod } = useSwitchablePeriod({
     onSwitch: async () => {
         // Make sure we open the first group again
         if (!splitViewController.value?.shouldCollapse()) {
@@ -119,12 +120,15 @@ const newestPeriod = computed(() => {
 });
 
 const canUpgradePeriod = computed(() => {
-    return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate;
+    return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate && !platform.value.period.locked;
 });
 
 const canSetDefaultPeriod = computed(() => {
-    return (period.value.period.id === platform.value.period.id && $organization.value!.period.period.id !== platform.value.period.id)
-        || (period.value.period.startDate > $organization.value!.period.period.startDate && !period.value.period.locked);
+    if (period.value.id === $organization.value!.period.id) {
+        return false;
+    }
+    return (period.value.period.id === platform.value.period.id && $organization.value!.period.period.id !== platform.value.period.id && !platform.value.period.locked)
+        || (period.value.period.startDate > $organization.value!.period.period.startDate && !period.value.period.locked && (period.value.period.startDate.getTime() < new Date().getTime() + 1000 * 60 * 60 * 24 * 62));
 });
 
 const $rootCategory = computed(() => period.value.rootCategory);
@@ -259,7 +263,9 @@ async function setDefaultPeriod() {
                 period: period.value,
             }),
         );
-        new Toast(period.value.period.name + ' is nu ingesteld als het huidige werkjaar', 'success').show();
+
+        // The period
+        Toast.success($t('{name} is nu ingesteld als het huidige werkjaar', { name: period.value.period.name })).show();
     }
     catch (e) {
         Toast.fromError(e).show();
@@ -267,26 +273,7 @@ async function setDefaultPeriod() {
 }
 
 async function upgradePeriod() {
-    const list = await organizationManager.value.loadPeriods(false, false, owner);
-    const organizationPeriod = list.organizationPeriods.find(o => o.period.id === platform.value.period.id);
-
-    if (organizationPeriod) {
-        // We can just set the default
-        period.value = organizationPeriod;
-        return await setDefaultPeriod();
-    }
-
-    await present({
-        components: [
-            new ComponentWithProperties(StartNewRegistrationPeriodView, {
-                period: platform.value.period,
-                callback: () => {
-                    period.value = organizationManager.value.organization.period;
-                },
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    });
+    await openPeriod(platform.value.period);
 }
 
 async function editMe() {

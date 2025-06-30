@@ -356,7 +356,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
-                if (period.startDate > new Date(Date.now() + maximumStart)) {
+                if (period.startDate > new Date(Date.now() + maximumStart) && STAMHOOFD.environment !== 'development') {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'The period you want to set has not started yet',
