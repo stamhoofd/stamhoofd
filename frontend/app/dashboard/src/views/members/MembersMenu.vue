@@ -12,14 +12,14 @@
             <template v-if="auth.hasFullAccess()">
                 <button v-if="canUpgradePeriod" type="button" class="menu-button button cta" @click="upgradePeriod">
                     <span class="icon flag" />
-                    <span>{{ $t('Schakel over naar {werkjaar-2025-2026}', {'werkjaar-2025-2026': newestPeriod.name}) }}</span>
+                    <span>{{ $t('33a6805e-a4f3-44ca-bd10-f26bc1664963', {'werkjaar-2025-2026': newestPeriod.name}) }}</span>
                 </button>
                 <button v-else-if="canSetDefaultPeriod" type="button" class="menu-button button cta" @click="setDefaultPeriod">
                     <span class="icon flag" />
                     <span>{{ $t('410f13a0-286d-4f7a-b6f6-aef22327056b') }}</span>
                 </button>
                 <div v-else-if="period.id !== $organization.period.id" class="info-box">
-                    {{ $t('Dit werkjaar is niet actief') }}
+                    {{ $t('b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1') }}
                 </div>
 
                 <hr v-if="canUpgradePeriod || canSetDefaultPeriod">
@@ -265,7 +265,7 @@ async function setDefaultPeriod() {
         );
 
         // The period
-        Toast.success($t('{name} is nu ingesteld als het huidige werkjaar', { name: period.value.period.name })).show();
+        Toast.success($t('e875d12e-fa1d-43f5-b96a-be4ba8af04eb', { name: period.value.period.name })).show();
     }
     catch (e) {
         Toast.fromError(e).show();

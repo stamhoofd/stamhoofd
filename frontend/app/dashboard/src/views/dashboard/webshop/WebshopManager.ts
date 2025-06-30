@@ -694,7 +694,7 @@ export class WebshopManager {
             }
             throw new SimpleError({
                 code: 'loading_failed',
-                message: $t('Er ging iets mis bij het ophalen van de bestellingen. Mogelijks wordt een bepaalde filter of ordening niet ondersteund, pas die aan indien mogelijk.'),
+                message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
             });
         });
 

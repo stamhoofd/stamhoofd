@@ -655,7 +655,7 @@ export class OrdersExcelExport {
             counter.set(code, productData);
 
             for (const price of product.prices) {
-                const name = price.name || $t('Standaardtarief');
+                const name = price.name || $t('e942f245-9e13-427b-960e-5500a2711a05');
                 const slug = Formatter.slug(name);
                 productData.productPriceCounts.set(name, 0);
 
@@ -687,7 +687,7 @@ export class OrdersExcelExport {
             for (const item of order.data.cart.items) {
                 // Produce prices
                 if (item.productPrice.name) {
-                    const name = item.productPrice.name || $t('Standaardtarief');
+                    const name = item.productPrice.name || $t('e942f245-9e13-427b-960e-5500a2711a05');
 
                     if (!productPriceColumns.has(Formatter.slug(name))) {
                         productPriceColumns.set(Formatter.slug(name), {

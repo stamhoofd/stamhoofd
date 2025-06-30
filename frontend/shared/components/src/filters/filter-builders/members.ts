@@ -928,15 +928,15 @@ export const getMemberWithRegistrationsBlobUIFilterBuilders: () => UIFilterBuild
             key: 'birthDay',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`Ontbrekende gegevens`),
+            name: $t(`8e92e034-b745-4d0f-8ac1-4363101f9603`),
             options: [
-                new MultipleChoiceUIFilterOption($t('Geboortedatum'), 'birthDay'),
-                new MultipleChoiceUIFilterOption($t('Adres'), 'address'),
-                new MultipleChoiceUIFilterOption($t('Telefoonnummer'), 'phone'),
-                new MultipleChoiceUIFilterOption($t('E-mailadres'), 'email'),
-                new MultipleChoiceUIFilterOption($t('Ouders'), 'parents'),
-                new MultipleChoiceUIFilterOption($t('Tweede ouder'), 'secondParent'),
-                new MultipleChoiceUIFilterOption($t('Noodcontact'), 'emergencyContacts'),
+                new MultipleChoiceUIFilterOption($t('00650ac3-eb78-4c8b-b7ec-d892772837a1'), 'birthDay'),
+                new MultipleChoiceUIFilterOption($t('8aad46a6-a864-4e60-a3f0-dffe2b37033c'), 'address'),
+                new MultipleChoiceUIFilterOption($t('a68020d1-1ee8-4b57-a307-840fb5deaa02'), 'phone'),
+                new MultipleChoiceUIFilterOption($t('effd2b1f-01f6-46e0-a5af-488bcbd93f1d'), 'email'),
+                new MultipleChoiceUIFilterOption($t('3f196c5f-1b59-4d18-8fca-feaef78e7f09'), 'parents'),
+                new MultipleChoiceUIFilterOption($t('a148463b-5ae7-44d8-9cac-20538fc95431'), 'secondParent'),
+                new MultipleChoiceUIFilterOption($t('23911c89-12b5-403a-a355-20f3c986c76f'), 'emergencyContacts'),
             ],
             wrapper: {
                 missingData: {
@@ -1003,15 +1003,15 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
         }
 
         all.push(new MultipleChoiceFilterBuilder({
-            name: $t(`Ontbrekende gegevens`),
+            name: $t(`8e92e034-b745-4d0f-8ac1-4363101f9603`),
             options: [
-                new MultipleChoiceUIFilterOption($t('Geboortedatum'), 'birthDay'),
-                new MultipleChoiceUIFilterOption($t('Adres'), 'address'),
-                new MultipleChoiceUIFilterOption($t('Telefoonnummer'), 'phone'),
-                new MultipleChoiceUIFilterOption($t('E-mailadres'), 'email'),
-                new MultipleChoiceUIFilterOption($t('Ouders'), 'parents'),
-                new MultipleChoiceUIFilterOption($t('Tweede ouder'), 'secondParent'),
-                new MultipleChoiceUIFilterOption($t('Noodcontact'), 'emergencyContacts'),
+                new MultipleChoiceUIFilterOption($t('00650ac3-eb78-4c8b-b7ec-d892772837a1'), 'birthDay'),
+                new MultipleChoiceUIFilterOption($t('8aad46a6-a864-4e60-a3f0-dffe2b37033c'), 'address'),
+                new MultipleChoiceUIFilterOption($t('a68020d1-1ee8-4b57-a307-840fb5deaa02'), 'phone'),
+                new MultipleChoiceUIFilterOption($t('effd2b1f-01f6-46e0-a5af-488bcbd93f1d'), 'email'),
+                new MultipleChoiceUIFilterOption($t('3f196c5f-1b59-4d18-8fca-feaef78e7f09'), 'parents'),
+                new MultipleChoiceUIFilterOption($t('a148463b-5ae7-44d8-9cac-20538fc95431'), 'secondParent'),
+                new MultipleChoiceUIFilterOption($t('23911c89-12b5-403a-a355-20f3c986c76f'), 'emergencyContacts'),
             ],
             wrapper: {
                 missingData: {

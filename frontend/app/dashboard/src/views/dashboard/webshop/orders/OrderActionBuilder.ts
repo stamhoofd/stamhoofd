@@ -304,7 +304,7 @@ export class OrderActionBuilder {
 
     async exportToExcel(orders: PrivateOrder[]) {
         if (!this.webshopManager.webshop) {
-            new Toast($t(`Webshop nog niet geladen`), 'error red').show();
+            new Toast($t(`f9b0679e-029b-4d34-a848-66674f33cdcf`), 'error red').show();
             return;
         }
 
