@@ -13,6 +13,8 @@ import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes'
 
 import { ErrorBox } from '../errors/ErrorBox';
 import LoadingViewTransition from './LoadingViewTransition.vue';
+import { Request } from '@simonbackx/simple-networking';
+import { Toast } from '../overlays/Toast';
 
 @Component({
     components: {
@@ -55,6 +57,7 @@ export default class PromiseView extends Mixins(NavigationMixin) {
             console.error('Promise error not caught, defaulting to dismiss behaviour in PromiseView');
 
             if (this.canDismiss) {
+                Toast.fromError(e).show();
                 this.dismiss({ force: true });
             }
             else {

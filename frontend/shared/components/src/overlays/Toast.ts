@@ -38,7 +38,7 @@ export class Toast {
     button: ToastButton | null = null;
     forceButtonClick = false;
 
-    autohideAfter: number | null = 7000;
+    autohideAfter: number | null = 8_000;
 
     doHide: (() => void) | null = null;
     action: (() => void) | null = null;
@@ -139,7 +139,7 @@ export class Toast {
     }
 
     show() {
-        if (Toast.listeners.size == 0) {
+        if (Toast.listeners.size === 0) {
             console.log('Delayed Toast show');
             // Delayed show
             setTimeout(() => {
