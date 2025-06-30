@@ -1,7 +1,6 @@
-import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import { ImportError } from './ImportError';
 
-export class ImportResult<T extends AutoEncoder> {
+export class ImportResult<T> {
     errors: ImportError[] = [];
-    data: PartialWithoutMethods<AutoEncoderPatchType<T>>[] = [];
+    data: T[] = [];
 }

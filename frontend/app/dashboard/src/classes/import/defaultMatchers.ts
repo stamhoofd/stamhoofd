@@ -1,11 +1,13 @@
-import { MemberDetails } from '@stamhoofd/structures';
 import { ColumnMatcher } from './ColumnMatcher';
 import { DateColumnMatcher } from './DateColumnMatcher';
 import { FirstNameColumnMatcher } from './default-matchers/FirstNameColumnMatcher';
+import { FullNameColumnMatcher } from './default-matchers/FullNameColumnMatcher';
 import { LastNameColumnMatcher } from './default-matchers/LastNameColumnMatcher';
+import { ImportMemberAccumulatedResult } from './ImportMemberAccumulatedResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 
-export const allMatchers: ColumnMatcher<MemberDetails>[] = [
+export const allMatchers: ColumnMatcher<ImportMemberAccumulatedResult>[] = [
+    new FullNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new FirstNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new LastNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new DateColumnMatcher({
