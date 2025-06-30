@@ -39,7 +39,12 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                     new ComponentWithProperties(StartNewRegistrationPeriodView, {
                         period: p,
                         callback: async () => {
-                            period.value = organizationManager.value.organization.period;
+                            const newList = await organizationManager.value.loadPeriods(false, false, owner);
+                            const organizationPeriod = newList.organizationPeriods.find(o => o.period.id === p.id);
+
+                            if (organizationPeriod) {
+                                period.value = organizationPeriod;
+                            }
 
                             if (options?.onSwitch) {
                                 await options.onSwitch();

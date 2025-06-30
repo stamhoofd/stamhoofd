@@ -20,6 +20,11 @@ export function usePatchOrganizationPeriods() {
 
         // If current organization in scope, make sure the in-memory version is updated
         organization.value?.updatePeriods(response.data);
+
+        if (organization.value) {
+            // We need to clear because there could be new periods
+            organization.value.periods = undefined;
+        }
         return response.data;
     };
 }

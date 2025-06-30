@@ -250,6 +250,8 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
         if (updated) {
             this.period.deepSet(updated);
         }
+
+        // Add missing periods
     }
 }
 
