@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { Column, Database, DatabaseInstance, Migration } from '@simonbackx/simple-database';
+import { Column, DatabaseInstance, Migration } from '@simonbackx/simple-database';
 import { Version } from '@stamhoofd/structures';
 import path from 'path';
 
