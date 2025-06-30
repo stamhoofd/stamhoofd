@@ -1,7 +1,6 @@
-import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { ColumnMatcher } from './ColumnMatcher';
 
-export class MatchedColumn<T extends AutoEncoder> {
+export class MatchedColumn<T> {
     index = 0;
     selected = false;
     name: string;

@@ -1,13 +1,14 @@
-import { MemberDetails, Parent, ParentType } from '@stamhoofd/structures';
+import { Parent, ParentType } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray } from '@simonbackx/simple-encoding';
+import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ColumnMatcher } from '../ColumnMatcher';
+import { ImportMemberAccumulatedResult } from '../ImportMemberAccumulatedResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
-export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher<MemberDetails> {
+export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher<ImportMemberAccumulatedResult> {
     getName(): string {
         return 'Voornaam';
     }
@@ -36,7 +37,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
         return false;
     }
 
-    setValue(cell: XLSX.CellObject | undefined, accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) {
+    setValue(cell: XLSX.CellObject | undefined, { data }: ImportMemberAccumulatedResult) {
         if (!cell && this.category === MemberDetailsMatcherCategory.Member) {
             throw new SimpleError({
                 code: 'invalid_type',
@@ -62,28 +63,28 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
         }
 
         if (this.category === MemberDetailsMatcherCategory.Member) {
-            accumulatedResult.firstName = value;
+            data.firstName = value;
         }
         else if (this.category === MemberDetailsMatcherCategory.Parent1) {
-            if (accumulatedResult.parents === undefined) {
-                accumulatedResult.parents = new PatchableArray();
+            if (data.parents === undefined) {
+                data.parents = new PatchableArray();
             }
-            if (accumulatedResult.parents.getPuts().length === 0) {
+            if (data.parents.getPuts().length === 0) {
                 // todo: test
-                accumulatedResult.parents.addPut(Parent.create({
+                data.parents.addPut(Parent.create({
                     firstName: value,
                     type: ParentType.Parent1,
                 }));
             }
         }
         else if (this.category === MemberDetailsMatcherCategory.Parent2) {
-            if (accumulatedResult.parents === undefined) {
-                accumulatedResult.parents = new PatchableArray();
+            if (data.parents === undefined) {
+                data.parents = new PatchableArray();
             }
 
-            while (accumulatedResult.parents!.getPuts().length < 2) {
+            while (data.parents!.getPuts().length < 2) {
                 // todo: test
-                accumulatedResult.parents.addPut(Parent.create({
+                data.parents.addPut(Parent.create({
                     firstName: value,
                     type: ParentType.Parent2,
                 }));
