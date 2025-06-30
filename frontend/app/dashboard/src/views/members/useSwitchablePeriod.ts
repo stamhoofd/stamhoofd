@@ -29,7 +29,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
             }
 
             // or if not starging within 8 months
-            if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 31 * 8 && STAMHOOFD.environment !== 'development') {
+            if (p.startDate.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 31 * 8) {
                 new CenteredMessage($t(`9128d20d-f23a-4d1e-a631-c61a25ade53c`), $t('0ab4ec6b-ae79-4d48-bd45-37da8e712509')).addCloseButton().show();
                 return false;
             }

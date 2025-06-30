@@ -294,8 +294,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
-        const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
-        if (STAMHOOFD.environment !== 'development' && period.startDate > new Date(Date.now() + maximumStart)) {
+        const maximumStart = 1000 * 60 * 60 * 24 * 31 * 8; // 8 months in advance
+        if (period.startDate > new Date(Date.now() + maximumStart)) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Period start date is too far in the future',
