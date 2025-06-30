@@ -20,13 +20,13 @@ export async function inject(config: BackendEnvironment, service: Service) {
             const stripeListenCommand = `stripe listen --print-secret${apiKeyFlag}`;
             stripeSecret = await Promise.race([
                 execPromise(stripeListenCommand),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Stripe listen command timed out after 5 seconds')), 5000)),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Stripe listen command timed out after 15 seconds')), 15_000)),
             ]);
         }
         catch (err) {
             console.error('Failed to fetch Stripe webhook secret:');
             console.error(err);
-            process.exit(1);
+            throw err;
         }
 
         const webhookSecret = stripeSecret.stdout.trim();
