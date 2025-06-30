@@ -85,6 +85,16 @@ const defaultLocalTime: ComputedRef<{ hour: number; minute: number; second: numb
         };
     }
 
+    if (model.value) {
+        const dateTime = Formatter.luxon(model.value);
+        return {
+            hour: dateTime.hour,
+            minute: dateTime.minute,
+            second: 0,
+            millisecond: 0,
+        };
+    }
+
     return ({ hour: 12, minute: 0, second: 0, millisecond: 0 });
 });
 
