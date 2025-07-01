@@ -40,6 +40,9 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
     @Prop({ default: '' })
     accept: string;
 
+    @Prop({ default: 20 * 1024 * 1024 })
+    maxSize: number;
+
     uploading = false;
 
     beforeUnmount() {
@@ -57,7 +60,7 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
 
         const file = event.target.files[0];
 
-        if (file.size > 20 * 1024 * 1024) {
+        if (file.size > this.maxSize) {
             const error = new SimpleError({
                 code: 'file_too_large',
                 message: $t(`97f9599f-cfdd-4705-a94e-8ec6351e99d4`),
