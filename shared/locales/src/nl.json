@@ -4858,7 +4858,7 @@
   "e3a72c38-8d17-402e-8da8-bb4cab1b1b70": "Enkel beheerders kunnen inschrijvingen verplaatsen.",
   "12d2ff48-8cb0-42a7-ad43-f5e6ef705320": "De inschrijvingen voor {group} zijn nog niet geopend.",
   "b527f658-6cb6-488c-9447-61533d63db74": "De inschrijvingen voor {group} zijn gesloten.",
-  "78a012a9-3caa-405f-851d-429610138852": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).",
+  "78a012a9-3caa-405f-851d-429610138852": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een #lokale-groep).",
   "f7b1a08a-1431-45e3-83c3-8aa8bb1b18e6": "{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel",
   "33845ee8-009e-4ad2-a3d7-183e79033c4c": "{member} kan pas inschrijven met een geldige aansluiting (en dus verzekering) bij de koepel op de datum van de inschrijving",
   "4837a21c-e894-45fb-873f-1b09cbebc495": "en hun broers/zussen",
