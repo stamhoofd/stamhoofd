@@ -1,8 +1,12 @@
 import { registerCron } from '@stamhoofd/crons';
 import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup';
 
-let lastCleanupYear: number = -1;
-let lastCleanupMonth: number = -1;
+// Only delete responsibilities when the server is running during a month change.
+// Chances are almost zero that we reboot during a month change
+// Running on every reboot also would have unintended consequences
+const now = new Date();
+let lastCleanupYear: number = now.getFullYear();
+let lastCleanupMonth: number = now.getMonth();
 
 registerCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);
 
