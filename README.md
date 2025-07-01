@@ -88,6 +88,13 @@ Stamhoofd will create the required database by default on boot when running in d
 - Install CoreDNS (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
 - Update your computer's DNS-server to 127.0.0.1. On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
 
+#### Optional dependencies
+
+These dependencies are optional, and mostly used for internal development.
+
+- [Stripe CLI](https://docs.stripe.com/stripe-cli): for local webhooks
+- [1Password CLI](https://developer.1password.com/docs/cli/get-started/): for using secrets in your dev environment
+
 #### Environments
 
 By default Stamhoofd will use the root `env.*.js` files as the environment file, you can replace this default file by creating a file named `env.*.local.js` (local files are not committed to git). 
