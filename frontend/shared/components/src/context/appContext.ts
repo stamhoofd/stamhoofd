@@ -18,8 +18,6 @@ export const getAppName = (app: AppType, $t: ReturnType<typeof useTranslate>) =>
 };
 
 export function useAppData() {
-    
-
     return {
         getAppTitle: (app: AppType | 'auto', organization: Organization | undefined | null) => getAppTitle(app, organization, $t),
         getAppDescription: (app: AppType | 'auto', organization: Organization | undefined | null) => getAppDescription(app, organization, $t),
