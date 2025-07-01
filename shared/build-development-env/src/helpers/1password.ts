@@ -14,7 +14,7 @@ export function escapeShellArg(arg) {
 export async function read1PasswordCli(key: string, options?: { optional: boolean }): Promise<string> {
     return await cache(Formatter.slug('1password-cli-' + key), async () => {
         // Read key from 1Password
-        const result = await execPromise(`op read ${escapeShellArg(key)}`);
+        const result = await execPromise(`op read --account stamhoofd.1password.eu ${escapeShellArg(key)}`);
         const value = result.stdout;
 
         // Remove trailing newline (only 1)
