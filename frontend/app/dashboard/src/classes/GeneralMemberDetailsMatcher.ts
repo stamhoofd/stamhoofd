@@ -1,18 +1,17 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import XLSX from 'xlsx';
 
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { MemberDetails } from '@stamhoofd/structures';
 import { ColumnMatcher } from './import/ColumnMatcher';
+import { ImportMemberResult } from './import/ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from './import/MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from './import/SharedMemberDetailsMatcher';
 
-export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetailsMatcher implements ColumnMatcher<MemberDetails> {
+export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetailsMatcher implements ColumnMatcher {
     name: string;
     required = false;
 
-    get?: (accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) => T | undefined;
-    save: (value: T, accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) => void;
+    get?: (importResult: ImportMemberResult) => T | undefined;
+    save: (value: T, importResult: ImportMemberResult) => void;
 
     abstract parse(v: string, current: T | undefined): T;
 
@@ -33,8 +32,8 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
         required?: boolean;
         possibleMatch?: string[];
         negativeMatch?: string[];
-        save: (value: T, accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) => void;
-        get?: (accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) => T | undefined;
+        save: (value: T, importResult: ImportMemberResult) => void;
+        get?: (importResult: ImportMemberResult) => T | undefined;
     }) {
         super(category);
         this.name = name;
@@ -68,7 +67,7 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
         return false;
     }
 
-    setValue(cell: XLSX.CellObject | undefined, accumulatedResult: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) {
+    getValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult | undefined): NonNullable<T> | undefined {
         if (!cell && this.required) {
             throw new SimpleError({
                 code: 'invalid_type',
@@ -80,7 +79,8 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
             return;
         }
 
-        const value = this.parseObject(cell, this.get ? this.get(accumulatedResult) : undefined);
+        const value = importResult ? this.parseObject(cell, this.get ? this.get(importResult) : undefined) : this.parseObject(cell, undefined);
+
         if (!value) {
             if (this.required) {
                 throw new SimpleError({
@@ -90,6 +90,14 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
             }
             return;
         }
-        this.save(value, accumulatedResult);
+
+        return value;
+    }
+
+    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+        const value = this.getValue(cell, importResult);
+        if (value !== undefined) {
+            this.save(value, importResult);
+        }
     }
 }

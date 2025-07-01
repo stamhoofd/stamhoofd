@@ -24,6 +24,7 @@ type CountryExtendsGlobalCountry = ValidateExtends<GlobalCountry, Country>;
 type GlobalCountryExtendsCountry = ValidateExtends<Country, GlobalCountry>;
 
 export type CountryCode = Exclude<Country, Country.Other>;
+export const countryCodes = Object.values(Country).filter(country => country !== Country.Other) as CountryCode[];
 
 export function countryToCode({ country, defaultCountryCode }: { country: Country; defaultCountryCode: CountryCode }): CountryCode {
     if (country === Country.Other) {

@@ -2,45 +2,52 @@ import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-
 import { MemberDetails, Organization, PlatformMember } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { ImportingRegistration, ImportMemberAccumulatedResult } from './ImportMemberAccumulatedResult';
-
+import { ImportingRegistration } from './ImportMemberAccumulatedResult';
+import { ImportMemberBase } from './ImportMemberBase';
 export class ImportMemberResult {
-    readonly patchedDetails: MemberDetails;
-    readonly newDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>;
+    private _patch: AutoEncoderPatchType<MemberDetails>;
     readonly existingMember: PlatformMember | null = null;
-    readonly registration: ImportingRegistration;
+    readonly details: MemberDetails;
+    readonly registration = new ImportingRegistration();
     readonly isExisting: boolean;
     readonly memberId: string;
     readonly organization: Organization;
 
+    get patchedDetails() {
+        return this.details.patch(this._patch);
+    }
+
+    getPatch() {
+        return this._patch;
+    }
+
     constructor({
         existingMember,
-        memberDetails,
-        registration,
         organization,
     }: {
         existingMember: PlatformMember | null;
-        memberDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>;
-        registration: ImportingRegistration;
         organization: Organization;
     }) {
-        this.newDetails = memberDetails;
-        this.registration = registration;
         this.organization = organization;
 
         if (existingMember) {
             this.existingMember = existingMember;
-            this.patchedDetails = existingMember.member.details.patch(memberDetails);
+            this.details = existingMember.member.details;
             this.memberId = existingMember.id;
         }
         else {
-            // todo
-            this.patchedDetails = MemberDetails.create({}).patch(memberDetails);
             // todo?
             this.memberId = uuidv4();
+            this.details = MemberDetails.create({});
         }
 
+        this._patch = MemberDetails.patch({});
+
         this.isExisting = existingMember !== null;
+    }
+
+    addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) {
+        this._patch = this._patch.patch(MemberDetails.patch(newPatch));
     }
 }
 
@@ -48,16 +55,12 @@ export class ExistingMemberResult {
     readonly existingMember: PlatformMember | null = null;
     private _isEqual: boolean = false;
 
-    get details() {
-        return this.accumulatedResult.data;
-    }
-
     get name() {
-        return this.details.firstName + ' ' + this.details.lastName;
+        return this.baseMemerData.firstName + ' ' + this.baseMemerData.lastName;
     }
 
     get birthDayFormatted() {
-        const birthDay = this.details.birthDay;
+        const birthDay = this.baseMemerData.birthDay;
 
         if (!birthDay) {
             return null;
@@ -74,16 +77,10 @@ export class ExistingMemberResult {
         return !this.isEqual && this.existingMember !== null;
     }
 
-    get registration() {
-        return this.accumulatedResult.registration;
-    }
+    constructor(readonly baseMemerData: ImportMemberBase, allMembers: PlatformMember[], readonly organization: Organization) {
+        const { birthDay, firstName, lastName } = this.baseMemerData;
 
-    constructor(readonly accumulatedResult: ImportMemberAccumulatedResult, allMembers: PlatformMember[], readonly organization: Organization) {
-        const birthDay = this.details.birthDay;
-        const firstName = this.details.firstName;
-        const lastName = this.details.lastName;
-
-        if (firstName === undefined || lastName === undefined) {
+        if (firstName === null || lastName === null) {
             return;
         }
 
@@ -114,8 +111,6 @@ export class ExistingMemberResult {
     toImportMemberResult() {
         return new ImportMemberResult({
             existingMember: this.isEqual ? this.existingMember : null,
-            memberDetails: this.details,
-            registration: this.registration,
             organization: this.organization,
         });
     }

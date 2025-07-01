@@ -109,20 +109,20 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, PushOptions, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, useMembersObjectFetcher, usePatch } from '@stamhoofd/components';
-import { LimitedFilteredRequest, MemberDetails, RecordType } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, RecordType } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { computed, onMounted, Ref, ref } from 'vue';
 import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
-import { allMatchers } from '../../../../../classes/import/defaultMatchers';
-import { ExistingMemberResult } from '../../../../../classes/import/ExistingMemberResult';
+import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
+import { ExistingMemberResult, ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
 import { ImportError } from '../../../../../classes/import/ImportError';
-import { ImportMemberAccumulatedResult } from '../../../../../classes/import/ImportMemberAccumulatedResult';
-import { ImportResult } from '../../../../../classes/import/ImportResult';
+import { ImportMemberBase } from '../../../../../classes/import/ImportMemberBase';
+import { ImportMembersBaseResult, ImportMembersResult } from '../../../../../classes/import/ImportResult';
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
 import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
@@ -134,8 +134,6 @@ import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
 
 // const organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
 
-type MatchedMemberDetailsColumn = MatchedColumn<ImportMemberAccumulatedResult>;
-
 const errors = useErrors();
 const saving = ref(false);
 const file = ref<null | string>(null);
@@ -143,8 +141,9 @@ const organizationManager = useOrganizationManager();
 const { patched, patch, hasChanges, addPatch } = usePatch(organizationManager.value.organization);
 const rowCount = ref(0);
 const columnCount = ref(0);
-const matchers: Ref<ColumnMatcher<ImportMemberAccumulatedResult>[]> = ref(allMatchers.slice());
-const columns = ref<MatchedMemberDetailsColumn[]>([]);
+// todo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(patched.value.period.groups).slice());
+const columns = ref<MatchedColumn[]>([]);
 const sheets = ref<Record<string, XLSX.WorkSheet>>({});
 const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
@@ -182,7 +181,7 @@ const sheetKey = computed({
 });
 
 onMounted(() => {
-    matchers.value = allMatchers.slice();
+    // matchers.value = getAllMatchers.slice();
 
     // If parents are disabled, remove all parent categories
     if (organizationManager.value.organization.meta.recordsConfiguration.parents === null) {
@@ -290,7 +289,7 @@ const hasMembers = computed(() => {
 });
 
 const matcherCategories = computed(() => {
-    const arr: Partial<Record<MemberDetailsMatcherCategory, { name: string; matchers: ColumnMatcher<MemberDetails>[] }>> = {};
+    const arr: Partial<Record<MemberDetailsMatcherCategory, { name: string; matchers: ColumnMatcher[] }>> = {};
     for (const matcher of matchers.value) {
         const cat = matcher.category.toLowerCase();
         if (arr[cat]) {
@@ -403,11 +402,11 @@ function readColumns() {
     }
 }
 
-// function getColumnSelected(column: MatchedMemberDetailsColumn) {
+// function getColumnSelected(column: MatchedColumn) {
 //     return column.selected;
 // }
 
-function setColumnSelected(column: MatchedMemberDetailsColumn, value: boolean) {
+function setColumnSelected(column: MatchedColumn, value: boolean) {
     column.selected = value;
 
     if (value && column.matcher === null) {
@@ -429,7 +428,7 @@ function setColumnSelected(column: MatchedMemberDetailsColumn, value: boolean) {
     }
 }
 
-function didChangeColumn(column: MatchedMemberDetailsColumn) {
+function didChangeColumn(column: MatchedColumn) {
     if (column.matcher === null) {
         return;
     }
@@ -447,7 +446,7 @@ function didChangeColumn(column: MatchedMemberDetailsColumn) {
     }
 }
 
-function importData(sheet: XLSX.WorkSheet, columns: MatchedMemberDetailsColumn[]) {
+function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
     if (!sheet['!ref']) {
         throw new Error('Missing ref in sheet');
     }
@@ -456,14 +455,75 @@ function importData(sheet: XLSX.WorkSheet, columns: MatchedMemberDetailsColumn[]
     // const allMembers = await MemberManager.loadMembers([], null, null);
 
     const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
-    const result = new ImportResult<ImportMemberAccumulatedResult>();
+    const result = new ImportMembersBaseResult();
+
+    const filteredColumns = columns.filter(c => c.selected && c.isBaseMatcher);
+
+    if (filteredColumns.length) {
+        for (let row = range.s.r + 1; row <= range.e.r; row++) {
+        // const member = new ImportingMember(row, organization);
+            const base = new ImportMemberBase();
+            // const partialMemberDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>> = {};
+            let allEmpty = true;
+            const errorStack: ImportError[] = [];
+
+            for (const column of filteredColumns) {
+                const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject;
+
+                if (valueCell) {
+                    allEmpty = false;
+                }
+
+                try {
+                    column.baseMatcher!.setBaseValue(valueCell, base);
+                }
+                catch (e: any) {
+                    console.error(e);
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        errorStack.push(new ImportError(row, column.index, e.getHuman()));
+                    }
+                    else if (typeof e['message'] === 'string') {
+                        errorStack.push(new ImportError(row, column.index, e['message']));
+                    }
+                }
+            }
+
+            if (allEmpty) {
+            // ignore empty row
+                continue;
+            }
+            result.errors.push(...errorStack);
+
+            result.data.push(base);
+        }
+    }
+
+    return result;
+}
+
+async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], results: ImportMemberResult[]) {
+    if (!sheet['!ref']) {
+        throw new Error('Missing ref in sheet');
+    }
+
+    const stack = [...results];
+
+    // Start! :D
+    // const allMembers = await MemberManager.loadMembers([], null, null);
+
+    const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
+    const result = new ImportMembersResult();
 
     for (let row = range.s.r + 1; row <= range.e.r; row++) {
         // const member = new ImportingMember(row, organization);
-        const accumulatedResult = new ImportMemberAccumulatedResult(patched.value);
+        // const accumulatedResult = new ImportMemberAccumulatedResult(patched.value);
         // const partialMemberDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>> = {};
         let allEmpty = true;
         const errorStack: ImportError[] = [];
+        const importMemberResult = stack.shift();
+        if (!importMemberResult) {
+            break;
+        }
 
         for (const column of columns) {
             if (!column.selected) {
@@ -481,7 +541,7 @@ function importData(sheet: XLSX.WorkSheet, columns: MatchedMemberDetailsColumn[]
             }
 
             try {
-                column.matcher.setValue(valueCell, accumulatedResult);
+                await column.matcher.setValue(valueCell, importMemberResult);
             }
             catch (e: any) {
                 console.error(e);
@@ -522,7 +582,7 @@ function importData(sheet: XLSX.WorkSheet, columns: MatchedMemberDetailsColumn[]
         //     }
         // }
 
-        result.data.push(accumulatedResult);
+        result.data.push(importMemberResult);
     }
 
     return result;
@@ -550,9 +610,25 @@ async function fetchAllMembers() {
     return await fetchAll(initialRequest, memberFetcher);
 }
 
-async function findExistingMembers(data: ImportMemberAccumulatedResult[]) {
+async function findExistingMembers(data: ImportMemberBase[]) {
     const allMembers = await fetchAllMembers();
     return data.map(item => new ExistingMemberResult(item, allMembers, organizationManager.value.organization));
+}
+
+async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], existingMemberResults: ExistingMemberResult[], showCallback: (options: PushOptions | ComponentWithProperties) => Promise<void> = show) {
+    const importResults = existingMemberResults.map(m => m.toImportMemberResult());
+    const result = await importData(sheet, columns, importResults);
+
+    if (result.errors.length > 0) {
+        showCallback(new ComponentWithProperties(ImportMembersErrorsView, {
+            errors: result.errors,
+        })).catch(console.error);
+    }
+    else {
+        showCallback(new ComponentWithProperties(ImportMembersQuestionsView, {
+            members: result.data,
+        })).catch(console.error);
+    }
 }
 
 async function goNext() {
@@ -564,7 +640,7 @@ async function goNext() {
 
     try {
         // todo
-        const result = importData(sheet.value, columns.value);
+        const result = importBaseData(sheet.value, columns.value);
 
         console.error(JSON.stringify(result));
 
@@ -583,19 +659,19 @@ async function goNext() {
             if (probablyEqualResults.length) {
                 show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
                     members: probablyEqualResults,
-                    onVerified: (show) => {
-                        show(new ComponentWithProperties(ImportMembersQuestionsView, {
-                            members: results.map(m => m.toImportMemberResult()),
-                        })).catch(console.error);
+                    onVerified: (show: (options: PushOptions | ComponentWithProperties) => Promise<void>) => {
+                        if (!sheet.value) {
+                            console.error('sheet is null');
+                            return;
+                        }
+                        startImport(sheet.value, columns.value, results, show).catch(e => new ErrorBox(e));
                     },
-                })).catch(console.error);
+                })).catch(e => new ErrorBox(e));
                 saving.value = false;
                 return;
             }
 
-            show(new ComponentWithProperties(ImportMembersQuestionsView, {
-                members: results.map(m => m.toImportMemberResult()),
-            })).catch(console.error);
+            await startImport(sheet.value, columns.value, results, show);
         }
     }
     catch (e) {

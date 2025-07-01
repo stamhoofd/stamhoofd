@@ -4,10 +4,10 @@ import { StringCompare } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
 import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberAccumulatedResult } from '../ImportMemberAccumulatedResult';
+import { ImportMemberResult } from '../ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
-export class GroupColumnMatcher implements ColumnMatcher<ImportMemberAccumulatedResult> {
+export class GroupColumnMatcher implements ColumnMatcher {
     id = 'GroupColumnMatcher';
     category: MemberDetailsMatcherCategory = MemberDetailsMatcherCategory.Member;
 
@@ -19,7 +19,7 @@ export class GroupColumnMatcher implements ColumnMatcher<ImportMemberAccumulated
         return 'Inschrijvingsgroep';
     }
 
-    doesMatch(columnName: string, examples: string[]): boolean {
+    doesMatch(columnName: string, _examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase();
 
         const possibleMatch = ['groep', 'tak', 'indeling', 'categorie', 'ploeg'];
@@ -33,7 +33,7 @@ export class GroupColumnMatcher implements ColumnMatcher<ImportMemberAccumulated
         return false;
     }
 
-    getGroup(cell: XLSX.CellObject | undefined): Group {
+    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
@@ -59,9 +59,7 @@ export class GroupColumnMatcher implements ColumnMatcher<ImportMemberAccumulated
                 minErrorGroup = group;
             }
         }
-
-        // accumulatedResult.
-        // member.registration.group = minErrorGroup;
+        importResult.registration.group = minErrorGroup;
 
         if (!minErrorGroup) {
             throw new SimpleError({
@@ -69,11 +67,5 @@ export class GroupColumnMatcher implements ColumnMatcher<ImportMemberAccumulated
                 message: "'" + value + "' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
             });
         }
-
-        return minErrorGroup;
-    }
-
-    setValue(cell: XLSX.CellObject | undefined, accumulatedResult: ImportMemberAccumulatedResult) {
-        this.getGroup(cell);
     }
 }

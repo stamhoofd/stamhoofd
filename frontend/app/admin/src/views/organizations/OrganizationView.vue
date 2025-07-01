@@ -191,7 +191,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useBackForward, useContext, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

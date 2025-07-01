@@ -1,6 +1,13 @@
+import { ImportMemberResult } from './ExistingMemberResult';
 import { ImportError } from './ImportError';
+import { ImportMemberBase } from './ImportMemberBase';
 
-export class ImportResult<T> {
+export class ImportMembersBaseResult {
     errors: ImportError[] = [];
-    data: T[] = [];
+    data: ImportMemberBase[] = [];
+}
+
+export class ImportMembersResult {
+    errors: ImportError[] = [];
+    data: ImportMemberResult[] = [];
 }
