@@ -8,8 +8,7 @@
       "frontend/shared/*",
       "backend/app/*",
       "backend/shared/*",
-      "shared/*",
-      "*"
+      "shared/*"
     ],
     "nohoist": [
       "@simonbackx/simple-encoding"
