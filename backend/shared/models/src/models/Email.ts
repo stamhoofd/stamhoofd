@@ -326,7 +326,7 @@ export class Email extends QueryableModel {
             const attachments = upToDate.attachments.map((attachment, index) => {
                 let filename = 'bijlage-' + index;
 
-                if (attachment.contentType == 'application/pdf') {
+                if (attachment.contentType === 'application/pdf') {
                     // tmp solution for pdf only
                     filename += '.pdf';
                 }

@@ -13,37 +13,37 @@
 </template>
 
 <script lang="ts">
-import { SimpleError } from "@simonbackx/simple-errors";
-import { Request } from "@simonbackx/simple-networking";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from "@simonbackx/vue-app-navigation/classes";
-import { File } from "@stamhoofd/structures";
+import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+import { File } from '@stamhoofd/structures';
 
-import { Decoder } from "@simonbackx/simple-encoding";
-import LoadingButton from "../navigation/LoadingButton.vue";
-import { Toast } from "../overlays/Toast";
-import STInputBox from "./STInputBox.vue";
+import { Decoder } from '@simonbackx/simple-encoding';
+import LoadingButton from '../navigation/LoadingButton.vue';
+import { Toast } from '../overlays/Toast';
+import STInputBox from './STInputBox.vue';
 
 @Component({
     components: {
         STInputBox,
-        LoadingButton
-    }
+        LoadingButton,
+    },
 })
 export default class UploadFileButton extends Mixins(NavigationMixin) {
     @Prop({ default: 'label' })
-        elementName!: string;
+    elementName!: string;
 
-    @Prop({ default: "" }) 
-        text: string;
+    @Prop({ default: '' })
+    text: string;
 
-    @Prop({ default: "" }) 
-        accept: string;
+    @Prop({ default: '' })
+    accept: string;
 
-    uploading = false
+    uploading = false;
 
     beforeUnmount() {
-        Request.cancelAll(this)
+        Request.cancelAll(this);
     }
 
     changedFile(event) {
@@ -53,41 +53,41 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
         if (this.uploading) {
             return;
         }
-        Request.cancelAll(this)
+        Request.cancelAll(this);
 
         const file = event.target.files[0];
 
         if (file.size > 20 * 1024 * 1024) {
             const error = new SimpleError({
                 code: 'file_too_large',
-                message: $t(`97f9599f-cfdd-4705-a94e-8ec6351e99d4`)
-            })
-            Toast.fromError(error).setHide(null).show()
+                message: $t(`97f9599f-cfdd-4705-a94e-8ec6351e99d4`),
+            });
+            Toast.fromError(error).setHide(null).show();
             return;
         }
 
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append('file', file);
 
         this.uploading = true;
-        //this.errorBox = null;
+        // this.errorBox = null;
 
         this.$context.authenticatedServer
             .request({
-                method: "POST",
-                path: "/upload-file",
+                method: 'POST',
+                path: '/upload-file',
                 body: formData,
                 decoder: File as Decoder<File>,
-                timeout: 5*60*1000,
+                timeout: 5 * 60 * 1000,
                 shouldRetry: false,
-                owner: this
+                owner: this,
             })
-            .then(response => {
-                this.$emit('change', response.data)
+            .then((response) => {
+                this.$emit('change', response.data);
             })
-            .catch(e => {
+            .catch((e) => {
                 console.error(e);
-                Toast.fromError(e).setHide(null).show()
+                Toast.fromError(e).setHide(null).show();
             })
             .finally(() => {
                 this.uploading = false;
