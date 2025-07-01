@@ -1,6 +1,7 @@
-import { Group, MemberResponsibilityRecord, Platform, Registration } from '@stamhoofd/models';
-import { SQL, SQLWhereExists, SQLWhereSign } from '@stamhoofd/sql';
+import { Group, Member, MemberResponsibilityRecord, Platform, Registration } from '@stamhoofd/models';
+import { SQL, SQLWhereExists } from '@stamhoofd/sql';
 import { GroupType } from '@stamhoofd/structures';
+import { MemberUserSyncer } from './MemberUserSyncer';
 
 export class FlagMomentCleanup {
     /**
@@ -16,6 +17,11 @@ export class FlagMomentCleanup {
             responsibility.endDate = now;
             await responsibility.save();
             console.log(`Ended responsibility with id ${responsibility.id}`);
+
+            const member = await Member.getByID(responsibility.memberId);
+            if (member) {
+                await MemberUserSyncer.onChangeMember(member);
+            }
         }));
     }
 
@@ -50,9 +56,15 @@ export class FlagMomentCleanup {
                         ).where(
                             SQL.column(Registration.table, 'deactivatedAt'),
                             null,
+                        ).whereNot(
+                            SQL.column(Registration.table, 'registeredAt'),
+                            null,
                         ).where(
                             SQL.column(Group.table, 'type'),
                             GroupType.Membership,
+                        ).where(
+                            SQL.column(Group.table, 'deletedAt'),
+                            null,
                         ),
                 ),
             )
