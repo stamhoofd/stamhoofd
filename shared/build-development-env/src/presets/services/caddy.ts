@@ -250,12 +250,7 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                             }],
                         },
                     ],
-                    on_demand: {
-                        rate_limit: {
-                            interval: '1d',
-                            burst: 200,
-                        },
-                    },
+                    on_demand: { },
                 },
             },
         },
