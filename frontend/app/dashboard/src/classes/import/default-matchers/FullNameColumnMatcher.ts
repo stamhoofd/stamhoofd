@@ -1,14 +1,14 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Parent, ParentType } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 
-import { PatchableArray } from '@simonbackx/simple-encoding';
-import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberAccumulatedResult } from '../ImportMemberAccumulatedResult';
+import { BaseColumnMatcher } from '../ColumnMatcher';
+import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
+import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberBase } from '../ImportMemberBase';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
-export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher<ImportMemberAccumulatedResult> {
+export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements BaseColumnMatcher {
     getName(): string {
         return 'Volledige naam';
     }
@@ -53,68 +53,73 @@ export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements
         return true;
     }
 
-    setValue(cell: XLSX.CellObject | undefined, { data }: ImportMemberAccumulatedResult) {
-        if (!cell && this.category === MemberDetailsMatcherCategory.Member) {
+    private getValueFromCell(cell: XLSX.CellObject | undefined): string {
+        if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
                 message: 'Deze cel is leeg',
             });
         }
 
-        if (!cell) {
-            return;
-        }
+        const value = ((cell.w ?? cell.v) + '').trim();
 
-        const v = ((cell.w ?? cell.v) + '').trim();
-
-        if (!v) {
+        if (!value) {
             if (this.category === MemberDetailsMatcherCategory.Member) {
                 throw new SimpleError({
                     code: 'invalid_type',
                     message: 'Deze cel is leeg',
                 });
             }
-            // Not required field
+        }
+
+        return value;
+    }
+
+    private getFirstNameAndLastName(value: string) {
+        // TODO: improve splitting
+        const firstName = value.split(' ')[0].trim();
+        const lastName = value.substr(firstName.length + 1).trim();
+
+        return {
+            firstName,
+            lastName,
+        };
+    }
+
+    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+        if (!cell && this.category !== MemberDetailsMatcherCategory.Member) {
             return;
         }
 
-        // TODO: improve splitting
-        let firstName = v.split(' ')[0];
-        let lastName = v.substr(firstName.length + 1);
+        const value = this.getValueFromCell(cell);
+        if (!value) {
+            return;
+        }
 
-        firstName = firstName.trim();
-        lastName = lastName.trim();
+        const { firstName, lastName } = this.getFirstNameAndLastName(value);
 
         if (this.category === MemberDetailsMatcherCategory.Member) {
-            data.firstName = firstName;
-            data.lastName = lastName;
+            importResult.addPatch({
+                firstName,
+                lastName,
+            });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1) {
-            if (data.parents === undefined) {
-                data.parents = new PatchableArray();
-            }
-            if (data.parents.getPuts().length === 0) {
-                // todo: test
-                data.parents.addPut(Parent.create({
-                    firstName,
-                    lastName,
-                    type: ParentType.Parent1,
-                }));
-            }
+        else if (this.category === MemberDetailsMatcherCategory.Parent1 || this.category === MemberDetailsMatcherCategory.Parent2) {
+            ColumnMatcherHelper.patchParent(importResult, this.category, {
+                firstName,
+                lastName,
+            });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent2) {
-            if (data.parents === undefined) {
-                data.parents = new PatchableArray();
-            }
+    }
 
-            while (data.parents!.getPuts().length < 2) {
-                // todo: test
-                data.parents.addPut(Parent.create({
-                    firstName,
-                    lastName,
-                    type: ParentType.Parent2,
-                }));
-            }
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
+        if (this.category !== MemberDetailsMatcherCategory.Member) {
+            return;
         }
+
+        const value = this.getValueFromCell(cell);
+        const { firstName, lastName } = this.getFirstNameAndLastName(value);
+        base.setFirstName(firstName);
+        base.setLastName(lastName);
     }
 }

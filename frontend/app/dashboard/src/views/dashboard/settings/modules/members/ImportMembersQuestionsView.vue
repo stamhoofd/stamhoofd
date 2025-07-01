@@ -472,7 +472,7 @@ function openResultView() {
 
             if (member.existingMember) {
                 const existingDetails = member.existingMember.member.details;
-                const newDetails = member.newDetails;
+                const newDetails = member.getPatch();
                 const patched = member.patchedDetails;
 
                 // Data changes

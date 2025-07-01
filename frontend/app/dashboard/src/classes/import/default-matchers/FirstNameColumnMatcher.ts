@@ -1,14 +1,14 @@
-import { Parent, ParentType } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 
-import { PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberAccumulatedResult } from '../ImportMemberAccumulatedResult';
+import { BaseColumnMatcher } from '../ColumnMatcher';
+import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
+import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberBase } from '../ImportMemberBase';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
-export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher<ImportMemberAccumulatedResult> {
+export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implements BaseColumnMatcher {
     getName(): string {
         return 'Voornaam';
     }
@@ -37,16 +37,12 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
         return false;
     }
 
-    setValue(cell: XLSX.CellObject | undefined, { data }: ImportMemberAccumulatedResult) {
-        if (!cell && this.category === MemberDetailsMatcherCategory.Member) {
+    private getValueFromCell(cell: XLSX.CellObject | undefined): string {
+        if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
                 message: 'Deze cel is leeg',
             });
-        }
-
-        if (!cell) {
-            return;
         }
 
         const value = ((cell.w ?? cell.v) + '').trim();
@@ -58,37 +54,39 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
                     message: 'Deze cel is leeg',
                 });
             }
-            // Not required field
+        }
+
+        return value;
+    }
+
+    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+        if (!cell && this.category !== MemberDetailsMatcherCategory.Member) {
+            return;
+        }
+
+        const value = this.getValueFromCell(cell);
+        if (!value) {
             return;
         }
 
         if (this.category === MemberDetailsMatcherCategory.Member) {
-            data.firstName = value;
+            importResult.addPatch({
+                firstName: value,
+            });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1) {
-            if (data.parents === undefined) {
-                data.parents = new PatchableArray();
-            }
-            if (data.parents.getPuts().length === 0) {
-                // todo: test
-                data.parents.addPut(Parent.create({
-                    firstName: value,
-                    type: ParentType.Parent1,
-                }));
-            }
+        else if (this.category === MemberDetailsMatcherCategory.Parent1 || this.category === MemberDetailsMatcherCategory.Parent2) {
+            ColumnMatcherHelper.patchParent(importResult, this.category, {
+                firstName: value,
+            });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent2) {
-            if (data.parents === undefined) {
-                data.parents = new PatchableArray();
-            }
+    }
 
-            while (data.parents!.getPuts().length < 2) {
-                // todo: test
-                data.parents.addPut(Parent.create({
-                    firstName: value,
-                    type: ParentType.Parent2,
-                }));
-            }
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
+        if (this.category !== MemberDetailsMatcherCategory.Member) {
+            return;
         }
+
+        const value = this.getValueFromCell(cell);
+        base.setFirstName(value);
     }
 }
