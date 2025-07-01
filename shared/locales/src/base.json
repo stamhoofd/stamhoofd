@@ -1,5 +1,16 @@
 {
     "replacements": {
+        "#groepseigenfuncties": "verenigingseigenfuncties",
+        "#Groepseigenfuncties": "Verenigingseigenfuncties",
+        "#groepen": "verenigingen",
+        "#Groepen": "Verenigingen",
+        "#groep": "verenigingen",
+        "#Groep": "Verenigingen",
+        "#lokale-groepen": "verenigingen",
+        "#Lokale-groepen": "Verenigingen",
+        "#lokale-groep": "vereniging",
+        "#Lokale-groep": "Vereniging",
+        "#platform": "Stamhoofd",
         "#koepel": "Stamhoofd"
     }
 }

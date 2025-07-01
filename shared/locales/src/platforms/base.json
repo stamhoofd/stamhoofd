@@ -1,3 +1,22 @@
 {
+    "replacements": {
+        "#groepseigenfuncties": "groepseigenfuncties",
+        "#Groepseigenfuncties": "Groepseigenfuncties",
+        "#groepen": "groepen",
+        "#Groepen": "Groepen",
+        "#groep": "groep",
+        "#Groep": "Groep",
+        "#lokale-groepen": "lokale groepen",
+        "#Lokale-groepen": "Lokale groepen",
+        "#lokale-groep": "lokale groep",
+        "#Lokale-groep": "Lokale groep",
+        "#platform": "het platform",
+        "Stamhoofd": "het platform",
+        "#koepel": "de koepel",
+        "Vereniging": "Groep",
+        "Verenigingen": "Groepen",
+        "vereniging": "groep",
+        "verenigingen": "groepen"
+    },
     "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": "Je kan meerdere Stripe accounts aanmaken en koppelen aan jouw #groep. Voor alle inschrijvingen en per webshop kan je een ander Stripe account selecteren bij de betaalinstellingen."
 }
