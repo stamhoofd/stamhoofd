@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <STInputBox :title="$t('4c61c43e-ed3c-418e-8773-681d19323520')" error-fields="uri" :error-box="errors.errorBox">
+                <STInputBox v-if="STAMHOOFD.userMode === 'platform'" :title="$t('4c61c43e-ed3c-418e-8773-681d19323520')" error-fields="uri" :error-box="errors.errorBox">
                     <input id="organization-uri" :value="uri" class="input" type="text" disabled>
                 </STInputBox>
 
@@ -100,7 +100,6 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AddressInput, CenteredMessage, ErrorBox, FillRecordCategoryBox, SaveView, STErrorsDefault, STInputBox, UrlInput, useDraggableArray, useErrors, usePatch, usePlatform, useReview } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useOrganizationManager } from '@stamhoofd/networking';
 import { Company, OrganizationMetaData, OrganizationPrivateMetaData, PatchAnswers, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref, watch } from 'vue';
