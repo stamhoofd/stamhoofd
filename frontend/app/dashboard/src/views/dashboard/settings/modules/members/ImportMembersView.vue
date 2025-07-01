@@ -111,12 +111,12 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, PushOptions, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, useMembersObjectFetcher, usePatch } from '@stamhoofd/components';
-import { LimitedFilteredRequest, RecordType } from '@stamhoofd/structures';
+import { LimitedFilteredRequest } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { computed, onMounted, Ref, ref } from 'vue';
+import { computed, Ref, ref } from 'vue';
 import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
 import { ExistingMemberResult, ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
@@ -142,7 +142,7 @@ const { patched, patch, hasChanges, addPatch } = usePatch(organizationManager.va
 const rowCount = ref(0);
 const columnCount = ref(0);
 // todo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(patched.value.period.groups).slice());
+const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(patched.value));
 const columns = ref<MatchedColumn[]>([]);
 const sheets = ref<Record<string, XLSX.WorkSheet>>({});
 const sheetSelectionList = Object.keys(sheets.value);
@@ -178,102 +178,6 @@ const sheetKey = computed({
         // todo
         readColumns();
     },
-});
-
-onMounted(() => {
-    // matchers.value = getAllMatchers.slice();
-
-    // If parents are disabled, remove all parent categories
-    if (organizationManager.value.organization.meta.recordsConfiguration.parents === null) {
-        matchers.value = matchers.value.filter(m => m.category !== MemberDetailsMatcherCategory.Parent1 as string && m.category !== MemberDetailsMatcherCategory.Parent2 as string);
-    }
-
-    // Include all custom fields
-    for (const category of organizationManager.value.organization.meta.recordsConfiguration.recordCategories) {
-        for (const record of category.getAllRecords()) {
-            switch (record.type) {
-                case RecordType.Textarea:
-                case RecordType.Phone:
-                case RecordType.Email:
-                case RecordType.Text: {
-                    // todo
-                    // matchers.push(new TextColumnMatcher({
-                    //     name: record.name,
-                    //     category: category.name,
-                    //     required: false,
-                    //     save(value: string, member: ImportingMember) {
-                    //         if (!value) {
-                    //             return;
-                    //         }
-
-                    //         const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
-                    //         if (index !== -1) {
-                    //             member.details.recordAnswers.splice(index, 1)
-                    //         }
-
-                    //         const answer = RecordTextAnswer.create({
-                    //             settings: record
-                    //         })
-                    //         answer.value = value
-                    //         member.details.recordAnswers.push(answer);
-                    //     }
-                    // }));
-                    break;
-                }
-                case RecordType.Address: {
-                    // todo
-                    // matchers.push(new AddressColumnMatcher({
-                    //     name: record.name,
-                    //     category: category.name,
-                    //     required: false,
-                    //     save(value: Address, member: ImportingMember) {
-                    //         if (!value) {
-                    //             return;
-                    //         }
-
-                    //         const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
-                    //         if (index !== -1) {
-                    //             member.details.recordAnswers.splice(index, 1)
-                    //         }
-
-                    //         const answer = RecordAddressAnswer.create({
-                    //             settings: record
-                    //         })
-                    //         answer.address = value
-                    //         member.details.recordAnswers.push(answer);
-                    //     }
-                    // }));
-                    break;
-                }
-                case RecordType.Date: {
-                    // todo
-                    // matchers.value.push(new DateColumnMatcher({
-                    //     name: record.name,
-                    //     category: category.name,
-                    //     required: false,
-                    //     save(value: Date, member: ImportingMember) {
-                    //         if (!value) {
-                    //             return;
-                    //         }
-                    //         console.log(value)
-
-                    //         const index = member.details.recordAnswers.findIndex(a => a.settings.id === record.id)
-                    //         if (index !== -1) {
-                    //             member.details.recordAnswers.splice(index, 1)
-                    //         }
-
-                    //         const answer = RecordDateAnswer.create({
-                    //             settings: record
-                    //         })
-                    //         answer.dateValue = value
-                    //         member.details.recordAnswers.push(answer);
-                    //     }
-                    // }));
-                    break;
-                }
-            }
-        }
-    }
 });
 
 const sheet = computed(() => {

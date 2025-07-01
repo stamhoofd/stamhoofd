@@ -3,7 +3,6 @@ import XLSX from 'xlsx';
 
 import { ColumnMatcher } from './import/ColumnMatcher';
 import { ImportMemberResult } from './import/ExistingMemberResult';
-import { MemberDetailsMatcherCategory } from './import/MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from './import/SharedMemberDetailsMatcher';
 
 export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetailsMatcher implements ColumnMatcher {
@@ -28,7 +27,7 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
 
     constructor({ name, category, required, possibleMatch, negativeMatch, save, get }: {
         name: string;
-        category: MemberDetailsMatcherCategory;
+        category: string;
         required?: boolean;
         possibleMatch?: string[];
         negativeMatch?: string[];

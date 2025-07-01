@@ -2,20 +2,20 @@ import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 
 /// Logic that is shared between matchers for members and parents
 export class SharedMemberDetailsMatcher {
-    category: MemberDetailsMatcherCategory;
+    category: string;
     protected negativeMatch: string[] = [];
     protected possibleMatch: string[] = [];
 
-    constructor(category: MemberDetailsMatcherCategory) {
+    constructor(category: string) {
         this.category = category;
 
-        if (category === MemberDetailsMatcherCategory.Member) {
+        if (category === MemberDetailsMatcherCategory.Member as string) {
             this.negativeMatch = ['ouder', 'parent', 'vader', 'moeder', 'mama', 'papa', 'voogd', 'contact'];
         }
-        if (category === MemberDetailsMatcherCategory.Parent1) {
+        if (category === MemberDetailsMatcherCategory.Parent1 as string) {
             this.negativeMatch = ['lid', 'member', '2', 'tweede'];
         }
-        if (category === MemberDetailsMatcherCategory.Parent2) {
+        if (category === MemberDetailsMatcherCategory.Parent2 as string) {
             this.negativeMatch = ['lid', 'member', '1', 'eerste'];
         }
     }

@@ -1,24 +1,32 @@
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { Address, Parent, ParentType } from '@stamhoofd/structures';
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchMap, patchObject } from '@simonbackx/simple-encoding';
+import { Address, Parent, ParentType, RecordAnswer } from '@stamhoofd/structures';
 import { ImportMemberResult } from './ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 
 export class ColumnMatcherHelper {
-    static patchAddress(importResult: ImportMemberResult, category: MemberDetailsMatcherCategory, address: PartialWithoutMethods<AutoEncoderPatchType<Address>>) {
+    static patchRecordAnswers(importResult: ImportMemberResult, recordAnswer: RecordAnswer) {
+        const patchMap = importResult.getPatch().recordAnswers;
+        patchObject(patchMap, new PatchMap([[recordAnswer.id, recordAnswer]]));
+        importResult.addPatch({
+            recordAnswers: patchMap,
+        });
+    }
+
+    static patchAddress(importResult: ImportMemberResult, category: string, address: PartialWithoutMethods<AutoEncoderPatchType<Address>>) {
         const addressPatch = Address.patch(address);
 
         switch (category) {
-            case MemberDetailsMatcherCategory.Member: {
+            case MemberDetailsMatcherCategory.Member as string: {
                 importResult.addPatch({
                     address: addressPatch,
                 });
                 break;
             }
-            case MemberDetailsMatcherCategory.Parent1: {
+            case MemberDetailsMatcherCategory.Parent1 as string: {
                 this.patchParent1(importResult, { address: addressPatch });
                 break;
             }
-            case MemberDetailsMatcherCategory.Parent2: {
+            case MemberDetailsMatcherCategory.Parent2 as string: {
                 this.patchParent2(importResult, { address: addressPatch });
                 break;
             }

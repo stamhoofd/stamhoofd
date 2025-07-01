@@ -1,4 +1,4 @@
-import { Group } from '@stamhoofd/structures';
+import { Address, Group, Organization, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';
 import { ColumnMatcherHelper } from './ColumnMatcherHelper';
 import { DateColumnMatcher } from './DateColumnMatcher';
@@ -20,7 +20,9 @@ import { StreetColumnMatcher } from './default-matchers/StreetColumnMatcher';
 import { StreetNumberColumnMatcher } from './default-matchers/StreetNumberColumnMatcher';
 import { StreetWithNumberColumnMatcher } from './default-matchers/StreetWithNumberColumnMatcher';
 import { ZipColumnMatcher } from './default-matchers/ZipColumnMatcher';
+import { ImportMemberResult } from './ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
+import { TextColumnMatcher } from './TextColumnMatcher';
 
 // Always make sure fullname is before lastname!
 export const getMemberMatchers = (groups: Group[]) => [
@@ -118,9 +120,94 @@ export const paymentMatchers = [
     new PaymentPriceColumnMatcher(),
 ];
 
-export const getAllMatchers = (groups: Group[]) => [
-    ...getMemberMatchers(groups),
-    ...paymentMatchers,
-    ...parentMatchers1,
-    ...parentMatchers2,
-];
+export const getAllMatchers = (organization: Organization) => {
+    const groups = organization.period.groups;
+
+    let matchers = [
+        ...getMemberMatchers(groups),
+        ...paymentMatchers,
+        ...parentMatchers1,
+        ...parentMatchers2,
+    ];
+
+    const recordsConfiguration = organization.meta.recordsConfiguration;
+
+    if (recordsConfiguration.parents === null) {
+        matchers = matchers.filter(m => m.category !== MemberDetailsMatcherCategory.Parent1 as string && m.category !== MemberDetailsMatcherCategory.Parent2 as string);
+    }
+
+    for (const category of recordsConfiguration.recordCategories) {
+        for (const record of category.getAllRecords()) {
+            switch (record.type) {
+                case RecordType.Textarea:
+                case RecordType.Phone:
+                case RecordType.Email:
+                case RecordType.Text: {
+                    matchers.push(new TextColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(value: string, importResult: ImportMemberResult) {
+                            if (!value) {
+                                return;
+                            }
+
+                            let recordAnswer = importResult.patchedDetails.recordAnswers.get(record.id);
+                            if (!recordAnswer) {
+                                recordAnswer = RecordTextAnswer.create({
+                                    settings: record,
+                                });
+                            }
+                            ColumnMatcherHelper.patchRecordAnswers(importResult, recordAnswer);
+                        },
+                    }));
+                    break;
+                }
+                case RecordType.Address: {
+                    matchers.push(new AddressColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(value: Address, importResult: ImportMemberResult) {
+                            if (!value) {
+                                return;
+                            }
+
+                            let recordAnswer = importResult.patchedDetails.recordAnswers.get(record.id);
+                            if (!recordAnswer) {
+                                recordAnswer = RecordAddressAnswer.create({
+                                    settings: record,
+                                });
+                            }
+                            ColumnMatcherHelper.patchRecordAnswers(importResult, recordAnswer);
+                        },
+                    }));
+                    break;
+                }
+                case RecordType.Date: {
+                    matchers.push(new DateColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(value: Date, importResult: ImportMemberResult) {
+                            if (!value) {
+                                return;
+                            }
+
+                            let recordAnswer = importResult.patchedDetails.recordAnswers.get(record.id);
+                            if (!recordAnswer) {
+                                recordAnswer = RecordDateAnswer.create({
+                                    settings: record,
+                                });
+                            }
+                            ColumnMatcherHelper.patchRecordAnswers(importResult, recordAnswer);
+                        },
+                    }));
+                    break;
+                }
+            }
+        }
+    }
+
+    return matchers;
+};
