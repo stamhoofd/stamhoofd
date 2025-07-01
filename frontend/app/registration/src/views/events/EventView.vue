@@ -21,7 +21,7 @@
 
                 <EventInfoTable :event="event" :family="memberManager.family" />
 
-                <template v-if="!$isMobile && event.group">
+                <template v-if="!$isMobile && event.group && !event.group.closed">
                     <hr><p class="style-button-bar right-align">
                         <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
                             <span>{{ $t('eb52f3e4-1daa-41d6-8716-18785bdc8a8d') }}</span>
@@ -31,7 +31,7 @@
                 </template>
             </main>
 
-            <STToolbar v-if="$isMobile && event.group">
+            <STToolbar v-if="$isMobile && event.group && !event.group.closed">
                 <template #right>
                     <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
                         <span>{{ $t('eb52f3e4-1daa-41d6-8716-18785bdc8a8d') }}</span>
