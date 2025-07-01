@@ -7,18 +7,16 @@
 </template>
 
 <script setup lang="ts">
-import { Organization } from "@stamhoofd/structures";
-import { AppType } from "./appContext";
-import OrganizationAvatar from "./OrganizationAvatar.vue";
-import PlatformAvatar from "./PlatformAvatar.vue";
+import { AppType, Organization } from '@stamhoofd/structures';
+import OrganizationAvatar from './OrganizationAvatar.vue';
+import PlatformAvatar from './PlatformAvatar.vue';
 
 defineProps<{
-    organization: Organization|undefined|null,
-    app: AppType|'auto'
+    organization: Organization | undefined | null;
+    app: AppType | 'auto';
 }>();
 
 </script>
-
 
 <style lang="scss">
 @use '@stamhoofd/scss/base/variables' as *;

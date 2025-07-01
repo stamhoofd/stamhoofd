@@ -189,11 +189,10 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArr
 import { SimpleError } from '@simonbackx/simple-errors';
 import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
 import { usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
-import { EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import { appToUri, EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, Ref, ref } from 'vue';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
-import { appToUri } from '../context';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
 import { useAuth, useContext, useFeatureFlag, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';

@@ -1,6 +1,6 @@
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { appToUri, Group, GroupCategoryTree, Organization, OrganizationRegistrationPeriod, PermissionLevel, PlatformMember, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { checkoutRegisterItem, chooseOrganizationMembersForGroup } from '..';
 import { useContext, useOrganization } from '../../hooks';
 import { InMemoryTableAction, MenuTableAction, TableAction } from '../../tables/classes';
@@ -202,7 +202,7 @@ export class RegistrationsActionBuilder {
                 icon: 'external',
                 enabled: this.hasWrite,
                 handler: async () => {
-                    const href = '/beheerders/' + organization.uri;
+                    const href = '/' + appToUri('dashboard') + '/' + organization.uri;
                     window.open(href, '_blank');
                 },
             }),

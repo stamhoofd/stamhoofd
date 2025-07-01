@@ -1,10 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, UrlHelper } from '@simonbackx/vue-app-navigation';
-import { appToUri, AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem, uriToApp } from '@stamhoofd/components';
+import { AuthenticatedView, ColorHelper, manualFeatureFlag, PromiseView, TabBarController, TabBarItem } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, sessionFromOrganization, wrapContext } from '@stamhoofd/dashboard';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Country, Language, Organization } from '@stamhoofd/structures';
+import { Country, Language, Organization, uriToApp } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 import CartView from './views/cart/CartView.vue';

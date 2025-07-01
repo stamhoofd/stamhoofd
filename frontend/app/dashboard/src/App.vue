@@ -9,13 +9,13 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptions, useManualPresent } from '@simonbackx/vue-app-navigation';
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
-import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox, uriToApp } from '@stamhoofd/components';
+import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager, LoginHelper, NetworkManager, SessionContext, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
-import { Country, EmailAddressSettings, Language, Platform } from '@stamhoofd/structures';
-import { nextTick, onMounted, reactive, Ref, ref } from 'vue';
+import { Country, EmailAddressSettings, Language, Platform, uriToApp } from '@stamhoofd/structures';
+import { nextTick, onMounted, Ref, ref } from 'vue';
 import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFromUrl } from './getRootViews';
-import { I18nController } from '@stamhoofd/frontend-i18n';
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();

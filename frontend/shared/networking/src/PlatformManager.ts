@@ -1,8 +1,7 @@
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import { AppType, ColorHelper, GlobalEventBus } from '@stamhoofd/components';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import { ColorHelper, GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, UserWithMembers, Version } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { AppType, LimitedFilteredRequest, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, UserWithMembers, Version } from '@stamhoofd/structures';
 import { inject, reactive, Ref, toRef } from 'vue';
 
 export function usePlatformManager(): Ref<PlatformManager> {

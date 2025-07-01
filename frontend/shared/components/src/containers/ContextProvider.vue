@@ -8,8 +8,8 @@
 <script lang="ts">
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from '@simonbackx/vue-app-navigation';
 import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+import { appToUri } from '@stamhoofd/structures';
 import { isReactive } from 'vue';
-import { appToUri } from '../context';
 
 @Component({
     components: {

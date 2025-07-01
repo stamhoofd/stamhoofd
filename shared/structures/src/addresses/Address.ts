@@ -39,8 +39,8 @@ export class Address extends AutoEncoder {
         return this.shortString();
     }
 
-    anonymousString(currentCountry: Country): string {
-        if (this.country == currentCountry) {
+    anonymousString(currentCountry: Country = $getCountry()): string {
+        if (this.country === currentCountry) {
             return this.street + ', ' + this.city;
         }
         return this.street + ', ' + this.city + ' (' + CountryHelper.getName(this.country) + ')';
