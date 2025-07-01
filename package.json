@@ -79,8 +79,10 @@
     "@types/eslint__js": "^8.42.3",
     "@types/file-saver": "^2.0.5",
     "@types/jest": "^29.0.0",
+    "@types/node": "^22",
     "@types/pdfkit": "0.13.4",
     "@types/qrcode": "1.5.3",
+    "@types/sortablejs": "^1.15.8",
     "@vitejs/plugin-vue": "5.1.0",
     "@vitest/browser": "^3.2.4",
     "autoprefixer": "^10.4.0",
@@ -105,9 +107,7 @@
     "vitest": "^3.2.4",
     "vitest-browser-vue": "^1.0.0",
     "vue-tsc": "^2.0.14",
-    "wait-on": "^8.0.3",
-    "@types/node": "^22",
-    "@types/sortablejs": "^1.15.8"
+    "wait-on": "^8.0.3"
   },
   "resolutions": {
     "**/@mollie/api-client/axios": "^0.30.0",
@@ -122,9 +122,9 @@
     "postcss": "8.4.38",
     "socket.io": "4.6.2",
     "ws": "8.17.1",
-    "express": "4.20.0",
     "@types/node": "^22",
     "@types/jest": "^29.0.0",
-    "semver": "^7.7.2"
+    "semver": "^7.7.2",
+    "cookie": "^0.7.1"
   }
 }
