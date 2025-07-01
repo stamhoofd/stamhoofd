@@ -26,7 +26,7 @@ export async function build(service: Service) {
             MOLLIE_CLIENT_ID: await read1PasswordCli('op://Localhost/Mollie/MOLLIE_CLIENT_ID', { optional: true }),
             MOLLIE_API_KEY: await read1PasswordCli('op://Localhost/Mollie/MOLLIE_API_KEY', { optional: true }),
             MOLLIE_SECRET: await read1PasswordCli('op://Localhost/Mollie/MOLLIE_SECRET', { optional: true }),
-            MOLLIE_ORGANIZATION_TOKEN: await read1PasswordCli('op:/Localhost/Mollie/MOLLIE_ORGANIZATION_TOKEN', { optional: true }),
+            MOLLIE_ORGANIZATION_TOKEN: await read1PasswordCli('op://Localhost/Mollie/MOLLIE_ORGANIZATION_TOKEN', { optional: true }),
 
         });
 
