@@ -2,42 +2,41 @@
     <div class="stepper-input" @pointerdown.prevent>
         <button class="icon min" type="button" @click="step(-1)" />
         <hr>
-        <button class="icon plus" type="button" @click="step(1)" /> 
+        <button class="icon plus" type="button" @click="step(1)" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { Toast } from '../overlays/Toast';
 
-export interface Props {
-    min: number | null,
-    max?: number | null
-}
-
-const model = defineModel<number>({default: 1})
-const props = withDefaults(defineProps<Props>(), {
+const model = defineModel<number>({ default: 1 });
+const props = withDefaults(defineProps<{
+    min?: number | null;
+    max?: number | null;
+}>(), {
     min: 0,
-    max: null
-})
+    max: null,
+});
 
 const constrain = (value: number): number => {
     if (props.min !== null && value < props.min) {
         value = props.min;
-    } else if (props.max !== null && value > props.max) {
+    }
+    else if (props.max !== null && value > props.max) {
         value = props.max;
     }
-    return value
-}
+    return value;
+};
 
 const step = (add: number) => {
-    const v = constrain(model.value + add)
+    const v = constrain(model.value + add);
 
     if (v === model.value && add !== 0) {
-        Toast.warning(add > 0 ? $t(`947eb845-90da-43e5-a3bb-78903f7edd72`) : $t(`5c717b44-dae1-4fe0-970b-36a8546dee2a`)).show()
-        return
+        Toast.warning(add > 0 ? $t(`947eb845-90da-43e5-a3bb-78903f7edd72`) : $t(`5c717b44-dae1-4fe0-970b-36a8546dee2a`)).show();
+        return;
     }
-    model.value = v
-}
+    model.value = v;
+};
 
 </script>
 
@@ -54,7 +53,7 @@ const step = (add: number) => {
     height: $input-height;
     vertical-align: middle;
     contain: strict;
-    width: 52px * 2 - $border-width; 
+    width: 52px * 2 - $border-width;
 
     hr {
         width: $border-width;
