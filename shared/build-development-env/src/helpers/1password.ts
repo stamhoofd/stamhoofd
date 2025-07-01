@@ -14,19 +14,38 @@ export function escapeShellArg(arg) {
 export async function read1PasswordCli(key: string, options?: { optional: boolean }): Promise<string> {
     return await cache(Formatter.slug('1password-cli-' + key), async () => {
         // Read key from 1Password
-        const result = await execPromise(`op read --account stamhoofd.1password.eu ${escapeShellArg(key)}`);
-        const value = result.stdout;
+        try {
+            const result = await execPromise(`op read --account stamhoofd.1password.eu ${escapeShellArg(key)}`);
+            const value = result.stdout;
 
-        // Remove trailing newline (only 1)
-        const val = value.substring(0, value.length - 1);
+            // Remove trailing newline (only 1)
+            const val = value.substring(0, value.length - 1);
 
-        if (val === '') {
-            if (options?.optional) {
-                return '';
+            if (val === '') {
+                if (options?.optional) {
+                    return '';
+                }
+                throw new Error('Key not found in 1Password: ' + key);
             }
-            throw new Error('Key not found in 1Password: ' + key);
+            return val;
         }
+        catch (e) {
+            if (e.message && e.message.includes('found no accounts for filter')) {
+                const result = await execPromise(`op read ${escapeShellArg(key)}`);
+                const value = result.stdout;
 
-        return val;
+                // Remove trailing newline (only 1)
+                const val = value.substring(0, value.length - 1);
+
+                if (val === '') {
+                    if (options?.optional) {
+                        return '';
+                    }
+                    throw new Error('Key not found in 1Password: ' + key);
+                }
+                return val;
+            }
+            throw e;
+        }
     });
 }
