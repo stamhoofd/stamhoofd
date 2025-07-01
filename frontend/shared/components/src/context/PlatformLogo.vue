@@ -23,11 +23,17 @@ const logoDark = computed(() => width.value > 800 ? (platform.value.config.horiz
 </script>
 
 <style lang="scss">
+@use '@stamhoofd/scss/base/variables' as *;
+
 .platform-logo {
     height: 40px;
     width: 100%;
     position: relative;
-    display: block;
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    text-decoration: none;
 
     &.expand {
         height: 60px;
@@ -48,6 +54,31 @@ const logoDark = computed(() => width.value > 800 ? (platform.value.config.horiz
 
         img {
             object-position: left center;
+        }
+    }
+
+    .logo-text {
+        -webkit-text-fill-color: transparent;
+        background: linear-gradient(94.7deg, #0053ff 29.42%, #7000ff 71.5%), #868686;
+        -webkit-background-clip: text;
+        background-clip: text;
+        font-size: 16px;
+        opacity: 1;
+        font-style: normal;
+        font-weight: $font-weight-bold;
+        display: block;
+        margin-top: 5px; // Fix alignment with the logo
+
+        &.vertical {
+            font-size: 14px;
+            padding-left: 33px;
+            padding-top: 5px;
+        }
+
+        &.horizontal {
+            @media (max-width: 450px) {
+                display: none;
+            }
         }
     }
 }

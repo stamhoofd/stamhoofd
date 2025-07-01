@@ -33,31 +33,6 @@
     height: var(--block-width, 40px);
 }
 
-.logo-text {
-    -webkit-text-fill-color: transparent;
-    text-fill-color: transparent;
-    background: linear-gradient(94.7deg, #0053ff 29.42%, #7000ff 71.5%), #868686;
-    -webkit-background-clip: text;
-    background-clip: text;
-    font-size: 16px;
-    opacity: 1;
-    font-style: normal;
-    font-weight: $font-weight-bold;
-    display: block;
-
-    &.vertical {
-        font-size: 14px;
-        padding-left: 33px;
-        padding-top: 5px;
-    }
-
-    &.horizontal {
-        @media (max-width: 450px) {
-            display: none;
-        }
-    }
-}
-
 .stamhoofd-logo {
     display: block;
 
