@@ -50,7 +50,6 @@
     "@simonbackx/simple-errors": "^1.5.0",
     "@simonbackx/simple-networking": "1.20.0",
     "@simonbackx/vue-app-navigation": "2.10.0",
-    "@types/sortablejs": "^1.15.8",
     "@zxcvbn-ts/core": "^0.3.0",
     "@zxcvbn-ts/language-common": "^0.1.2",
     "@zxcvbn-ts/language-nl-be": "^0.3.0",
@@ -106,7 +105,9 @@
     "vitest": "^3.2.4",
     "vitest-browser-vue": "^1.0.0",
     "vue-tsc": "^2.0.14",
-    "wait-on": "^8.0.3"
+    "wait-on": "^8.0.3",
+    "@types/node": "^22",
+    "@types/sortablejs": "^1.15.8"
   },
   "resolutions": {
     "**/@mollie/api-client/axios": "^0.30.0",
