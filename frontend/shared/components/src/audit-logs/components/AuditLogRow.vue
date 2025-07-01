@@ -44,7 +44,7 @@ import { RenderTextComponent } from './RenderTextComponent';
 const props = withDefaults(
     defineProps<{
         log: AuditLog;
-        canFilter: boolean;
+        canFilter?: boolean;
     }>(), {
         canFilter: true,
     });
