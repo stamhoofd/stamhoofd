@@ -60,12 +60,12 @@ export class MemberManager {
         }, { deep: true });
     }
 
-    async loadGroups(groupIds: string[], { owner, shouldRetry }: { owner?: any; shouldRetry?: boolean } = {}) {
+    async loadGroups(organizationId: string, groupIds: string[], { owner, shouldRetry }: { owner?: any; shouldRetry?: boolean } = {}) {
         if (groupIds.length === 0) {
             return [];
         }
 
-        const response = await this.$context.authenticatedServer.request({
+        const response = await this.$context.getAuthenticatedServerForOrganization(organizationId).request({
             method: 'GET',
             path: '/groups',
             query: new LimitedFilteredRequest({
@@ -133,7 +133,7 @@ export class MemberManager {
                 const knownGroups = organization.period.groups;
                 const requestGroupIds = groupIds.filter(id => !knownGroups.some(g => g.id === id));
 
-                const groups = await this.loadGroups(requestGroupIds, {
+                const groups = await this.loadGroups(organizationId, requestGroupIds, {
                     owner: {},
                     shouldRetry: true,
                 });
