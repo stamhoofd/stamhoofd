@@ -2,6 +2,7 @@
     "recommendations": [
         "dbaeumer.vscode-eslint",
         "vue.volar",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "lokalise.i18n-ally"
     ]
 }
