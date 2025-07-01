@@ -65,8 +65,8 @@ onMounted(async () => {
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
-@import "@stamhoofd/scss/base/dark-modus";
-@import "@simonbackx/vue-app-navigation/dist/main.css";
+@use "@stamhoofd/scss/base/dark-modus";
+@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
 
 html {
     -webkit-touch-callout:none;

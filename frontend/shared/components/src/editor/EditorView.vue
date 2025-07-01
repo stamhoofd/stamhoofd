@@ -555,6 +555,7 @@ defineExpose({
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
+@use './email.mixin.scss' as EmailMixin;
 
 .editor-view {
     > main {
@@ -632,10 +633,7 @@ defineExpose({
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-
-        $element: ".ProseMirror";
-
-        @import './email.url.scss';
+        @include EmailMixin.email-content('.ProseMirror');
 
         & > .ProseMirror {
             flex-grow: 1;

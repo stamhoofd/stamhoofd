@@ -161,5 +161,5 @@ export default class App extends VueComponent {
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
-@import "@simonbackx/vue-app-navigation/dist/main.css";
+@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
 </style>

@@ -195,8 +195,8 @@ watch(modalStack, (modalStack) => {
 <style lang="scss">
 // We need to include the component styling of vue-app-navigation first
 @use "@stamhoofd/scss/main";
-@import "@simonbackx/vue-app-navigation/dist/main.css";
-@import "@stamhoofd/scss/base/dark-modus";
+@use "@simonbackx/vue-app-navigation/dist/main.css" as VueAppNavigation;
+@use "@stamhoofd/scss/base/dark-modus";
 
 body {
     --st-sheet-width: 450px;
