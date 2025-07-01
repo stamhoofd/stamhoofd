@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Address, Country, DNSRecordStatus, EmailTemplateType, Language, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
+import { Address, appToUri, Country, DNSRecordStatus, EmailTemplateType, Language, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 
 import { CreateEmailIdentityCommand, DeleteEmailIdentityCommand, GetEmailIdentityCommand, GetEmailIdentityCommandOutput, PutEmailIdentityFeedbackAttributesCommand, PutEmailIdentityMailFromAttributesCommand, SESv2Client } from '@aws-sdk/client-sesv2';
 
@@ -225,7 +225,7 @@ export class Organization extends QueryableModel {
 
     getDefaultHost(i18n?: I18n): string {
         if (!STAMHOOFD.domains.registration) {
-            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/leden/' + this.uri;
+            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('registration') + '/' + this.uri;
         }
         let defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[''];
 

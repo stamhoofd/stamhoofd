@@ -15,6 +15,7 @@ import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
 import { UserWithMembers } from './UserWithMembers.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
+import { appToUri } from './AppType.js';
 
 export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -62,14 +63,14 @@ export class BaseOrganization extends AutoEncoder {
     get registerUrl() {
         const d = this.resolvedRegisterDomain;
         if (!d) {
-            return 'https://' + STAMHOOFD.domains.dashboard + '/leden/' + this.uri;
+            return 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('registration') + '/' + this.uri;
         }
 
         return 'https://' + d;
     }
 
     get dashboardUrl() {
-        return 'https://' + STAMHOOFD.domains.dashboard + '/beheerders/' + this.uri;
+        return 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('dashboard') + '/' + this.uri;
     }
 
     get dashboardDomain(): string {

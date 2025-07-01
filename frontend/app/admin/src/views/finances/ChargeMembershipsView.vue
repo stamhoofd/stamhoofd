@@ -18,7 +18,7 @@
                         <hr><h2>{{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }} {{ membershipOrganization.name }}</h2>
 
                         <STList class="illustration-list">
-                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/exporteren'">
+                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/' + appToUri('dashboard') + '/' + membershipOrganization.uri + '/boekhouding/exporteren'">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/calculator.svg">
                                 </template>
@@ -33,7 +33,7 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/overschrijvingen'">
+                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/' + appToUri('dashboard') + '/' + membershipOrganization.uri + '/boekhouding/overschrijvingen'">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
                                 </template>
@@ -48,7 +48,7 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/betalingen'">
+                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/' + appToUri('dashboard') + '/' + membershipOrganization.uri + '/boekhouding/betalingen'">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                                 </template>
@@ -63,7 +63,7 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/beheerders/' + membershipOrganization.uri + '/boekhouding/openstaande-bedragen'">
+                            <STListItem :selectable="true" class="left-center" element-name="a" :href="'/' + appToUri('dashboard') + '/' + membershipOrganization.uri + '/boekhouding/openstaande-bedragen'">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
                                 </template>
@@ -272,9 +272,8 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { CenteredMessage, ErrorBox, LoadingViewTransition, OrganizationAvatar, Toast, useContext, useErrors, useExternalOrganization, useInterval, usePatch, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
+import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary, PlatformMembershipType } from '@stamhoofd/structures';
 import { computed, onActivated, Ref, ref } from 'vue';
 
 const errors = useErrors();
@@ -287,7 +286,6 @@ const platformManager = usePlatformManager();
 const saving = ref(false);
 const charging = ref(false);
 let loading = false;
-
 
 const { externalOrganization: membershipOrganization, choose: $chooseMembershipOrganization, loading: loadingOrganization, errorBox: loadingOrganizationErrorBox } = useExternalOrganization(
     computed({

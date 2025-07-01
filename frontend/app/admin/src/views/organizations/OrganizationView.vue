@@ -120,7 +120,7 @@
             <p>{{ $t('Deze functies verhuizen in de toekomst grotendeels naar het administratieportaal zelf. Voorlopig zijn de acties bereikbaar via het beheerdersportaal.' ) }}</p>
 
             <STList class="illustration-list">
-                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/instellingen'" :target="$isMobile ? undefined : '_blank'">
+                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/' + appToUri('dashboard') + '/' + organization.uri + '/instellingen'" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                     </template>
@@ -135,7 +135,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri + '/leden'" :target="$isMobile ? undefined : '_blank'">
+                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/' + appToUri('dashboard') + '/' + organization.uri + '/leden'" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/group.svg">
                     </template>
@@ -150,7 +150,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/beheerders/' + organization.uri" :target="$isMobile ? undefined : '_blank'">
+                <STListItem :selectable="true" class="left-center right-stack" element-name="a" :href="'/' + appToUri('dashboard') + '/' + organization.uri" :target="$isMobile ? undefined : '_blank'">
                     <template #left>
                         <img src="~@stamhoofd/assets/images/illustrations/laptop-key.svg">
                     </template>
@@ -191,9 +191,8 @@
 import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useBackForward, useContext, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Organization } from '@stamhoofd/structures';
+import { appToUri, Organization } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
