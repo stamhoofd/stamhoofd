@@ -93,7 +93,7 @@
     "jest-console-group-reporter": "^1.1.1",
     "jest-extended": "4.0.2",
     "lerna": "^8.2.2",
-    "maildev": "^2.1.0",
+    "maildev": "^2.2.1",
     "nodemon": "^3.1.0",
     "playwright": "^1.51.0",
     "postcss": "8.4.38",
