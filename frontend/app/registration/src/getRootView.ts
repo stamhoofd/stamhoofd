@@ -17,7 +17,7 @@ export function wrapWithModalStack(...components: ComponentWithProperties[]) {
 
 export async function getScopedRegistrationRootFromUrl() {
     const parts = UrlHelper.shared.getParts();
-    const ignoreUris = ['login', 'start', 'mandje'];
+    const ignoreUris = ['login', 'start', 'mandje', 'activiteiten'];
 
     let session: SessionContext | null = null;
 
