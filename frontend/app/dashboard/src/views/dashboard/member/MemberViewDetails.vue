@@ -501,12 +501,12 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         } else if (syncStatus === 'outdated') {
             warnings.push(RecordWarning.create({
                 text: this.hasFull ? 'Gewijzigde inschrijvingen. Synchroniseer met de groepsadministratie.' : 'Gewijzigde inschrijvingen. Vraag jouw VGA/groepsleiding om te synchroniseren met de groepsadministratie.',
-                type: RecordWarningType.Error
+                type: RecordWarningType.Info
             }))
         } else if (syncStatus === 'changed') {
             warnings.push(RecordWarning.create({
                 text: this.hasFull ? 'Dit lid werd gewijzigd, maar die wijzigingen werden nog niet gesynchroniseerd met de groepadministratie. Synchroniseer met de groepsadministratie' : 'Dit lid werd gewijzigd, maar die wijzigingen werden nog niet gesynchroniseerd met de groepadministratie. Vraag jouw VGA/groepsleiding om te synchroniseren.',
-                type: RecordWarningType.Warning
+                type: RecordWarningType.Info
             }))
         }
 
