@@ -66,7 +66,7 @@ function getGlobals(): Globals {
                 default: "BE",
             },
         },
-        TRANSLATOR: TranslatorType.GoogleGemini,
+        TRANSLATOR: TranslatorType.OpenAi,
         ...envVariables
 
     };
