@@ -28,7 +28,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
     @field({ decoder: new ArrayDecoder(MemberPlatformMembership), version: 270 })
     platformMemberships: MemberPlatformMembership[] = [];
 
-    @field({ decoder: new ArrayDecoder(GenericBalance), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(GenericBalance), version: 375 })
     balances: GenericBalance[] = [];
 
     doesMatchFilter(filter: StamhoofdFilter) {

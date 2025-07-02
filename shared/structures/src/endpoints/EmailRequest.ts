@@ -140,7 +140,7 @@ export class EmailAttachment extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     content: string | null = null;
 
-    @field({ decoder: File, nullable: true, ...NextVersion })
+    @field({ decoder: File, nullable: true, version: 375 })
     file: File | null = null;
 
     get bytes() {
