@@ -1,6 +1,7 @@
 {
     "extends": ["platforms"],
     "replacements": {
+        "Demovereniging": "Scoutsgroep De Goudvis",
         "#Groep": "Eenheid",
         "#Groepen": "Eenheden",
         "#Lokale-groep": "Eenheid",
@@ -11,7 +12,6 @@
         "#lokale-groep": "eenheid",
         "#lokale-groepen": "eenheden",
         "#platform": "Jamboree",
-        "Demovereniging": "Scoutsgroep De Goudvis",
         "Groepsnaam": "Eenheidsnaam",
         "Groepsnummer": "Eenheidsnummer",
         "KSA Nationaal": "GSB",
