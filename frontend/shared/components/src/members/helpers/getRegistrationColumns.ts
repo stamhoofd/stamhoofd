@@ -157,11 +157,11 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (group) {
         if (group.settings.prices.length > 1) {
             allColumns.push(
-                new Column<ObjectType, GroupPrice>({
+                new Column<ObjectType, string>({
                     id: 'groupPrice',
                     allowSorting: false,
                     name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
-                    getValue: registration => registration.groupPrice,
+                    getValue: registration => registration.groupPrice.name.toString(),
                     minimumWidth: 100,
                     recommendedWidth: 300,
                 }),
