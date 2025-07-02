@@ -1,4 +1,5 @@
 import { I18nController } from '.';
+import { appToUri } from '@stamhoofd/structures';
 
 export class LocalizedDomains {
     static getDomain(localizedDomain: LocalizedDomain) {
@@ -6,7 +7,7 @@ export class LocalizedDomains {
     }
 
     static get adminUrl() {
-        return 'https://' + STAMHOOFD.domains.dashboard + '/administratie';
+        return 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('admin');
     }
 
     static get dashboard() {

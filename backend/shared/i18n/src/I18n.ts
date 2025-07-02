@@ -1,7 +1,7 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 import { countries, languages } from '@stamhoofd/locales';
-import { Country, Language } from '@stamhoofd/structures';
+import { appToUri, Country, Language } from '@stamhoofd/structures';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -224,7 +224,7 @@ export class I18n {
     }
 
     localizedDomains = {
-        adminUrl: 'https://' + STAMHOOFD.domains.dashboard + '/administratie',
+        adminUrl: () => 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('admin'),
         dashboard: STAMHOOFD.domains.dashboard,
         marketing: (): string => this.getDomain(STAMHOOFD.domains.marketing),
         defaultTransactionalEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultTransactionalEmail ?? { ['']: 'stamhoofd.be' }),
