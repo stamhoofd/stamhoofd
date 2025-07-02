@@ -14,7 +14,7 @@
             </template>
         </template>
 
-        <div v-if="syncWarning" type="button" :class="syncStatus === 'changed' ? 'selectable info-box icon sync' : 'selectable error-box icon sync'" @click="hasFull ? openSyncScoutsEnGidsen(true) : undefined">
+        <div v-if="false && syncWarning" type="button" :class="syncStatus === 'changed' ? 'selectable info-box icon sync' : 'selectable error-box icon sync'" @click="hasFull ? openSyncScoutsEnGidsen(true) : undefined">
             {{ syncWarning }}
             <span v-if="hasFull" class="button text">
                 Synchroniseer
