@@ -181,8 +181,10 @@ export class AdminPermissionChecker {
         const organization = await this.getOrganization(group.organizationId);
 
         if (group.periodId !== organization.periodId) {
-            if (!await this.hasFullAccess(group.organizationId)) {
-                return false;
+            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
+                if (!await this.hasFullAccess(group.organizationId)) {
+                    return false;
+                }
             }
         }
 
@@ -940,7 +942,7 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async hasFinancialMemberAccess(member: MemberWithRegistrations, level: PermissionLevel = PermissionLevel.Read, organizationId?: string): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager && level === PermissionLevel.Read) {
@@ -959,11 +961,19 @@ export class AdminPermissionChecker {
                 organizations.push(await this.getOrganization(member.organizationId));
             }
         }
-
-        for (const registration of member.registrations) {
-            if (this.checkScope(registration.organizationId)) {
-                if (!organizations.find(o => o.id === registration.organizationId)) {
-                    organizations.push(await this.getOrganization(registration.organizationId));
+        else {
+            if (organizationId) {
+                if (this.checkScope(organizationId)) {
+                    organizations.push(await this.getOrganization(organizationId));
+                }
+            }
+            else {
+                for (const registration of member.registrations) {
+                    if (this.checkScope(registration.organizationId)) {
+                        if (!organizations.find(o => o.id === registration.organizationId)) {
+                            organizations.push(await this.getOrganization(registration.organizationId));
+                        }
+                    }
                 }
             }
         }
