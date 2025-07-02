@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { File } from '../files/File';
 
 export class EmailInformation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -132,12 +133,25 @@ export class EmailAttachment extends AutoEncoder {
     contentType: string;
 
     /**
-     * base64 encoded content
+     * @deprecated
+     * Legacy email attachments have a base64 encoded content.
+     * This became deprecated because the size became too large to store efficiently. Instead we now require the usage of (private) files.
      */
-    @field({ decoder: StringDecoder })
-    content: string;
+    @field({ decoder: StringDecoder, nullable: true })
+    content: string | null = null;
+
+    @field({ decoder: File, nullable: true, ...NextVersion })
+    file: File | null = null;
 
     get bytes() {
+        if (this.file) {
+            return this.file.size;
+        }
+
+        if (!this.content) {
+            return 0;
+        }
+
         // Calculates bytes of base64 string
         return Math.ceil((this.content.length / 4) * 3) - (this.content.endsWith('==') ? 2 : this.content.endsWith('=') ? 1 : 0);
     }

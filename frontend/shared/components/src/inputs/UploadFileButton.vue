@@ -40,6 +40,9 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
     @Prop({ default: '' })
     accept: string;
 
+    @Prop({ default: false })
+    isPrivate: boolean;
+
     @Prop({ default: 20 * 1024 * 1024 })
     maxSize: number;
 
@@ -84,6 +87,9 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
                 timeout: 5 * 60 * 1000,
                 shouldRetry: false,
                 owner: this,
+                query: {
+                    private: this.isPrivate ? true : undefined,
+                },
             })
             .then((response) => {
                 this.$emit('change', response.data);
@@ -107,6 +113,10 @@ export default class UploadFileButton extends Mixins(NavigationMixin) {
 .upload-button {
     .file-upload {
         display: none;
+    }
+
+    .loading-button {
+        display: block;
     }
 }
 
