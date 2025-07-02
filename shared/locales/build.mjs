@@ -13,7 +13,7 @@ async function fileExists(file) {
     return false;
 }
 
-const translatorType = 'GoogleGemini';
+const translatorType = 'OpenAi';
 const namespaces = ['stamhoofd', 'digit', 'keeo', 'jamboree'];
 
 for (const namespace of namespaces) {
@@ -161,14 +161,14 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
     }
 
     // machine translations of language file
-    const machineLanguageFile = `${folder}/machine-${translatorType}-${language}.json`;
+    const machineLanguageFile = `${folder}/machine-${language}.json`;
     if (await fileExists(machineLanguageFile)) {
         const specifics = await readMachineTranslations(machineLanguageFile);
         json = mergeObjects(json, specifics);
     }
 
     // machine translations of locale file (before normal language to simplify changes in the language file because machine translations duplicate everything atm)
-    const machineLocaleFile = `${folder}/machine-${translatorType}-${locale}.json`;
+    const machineLocaleFile = `${folder}/machine-${locale}.json`;
     if (await fileExists(machineLocaleFile)) {
         const specifics = await readMachineTranslations(machineLocaleFile);
         json = mergeObjects(json, specifics);

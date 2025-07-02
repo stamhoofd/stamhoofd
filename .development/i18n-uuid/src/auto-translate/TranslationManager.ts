@@ -314,7 +314,7 @@ export class TranslationManager {
         locale: string,
         namespace: string,
     ): string {
-        return `${this.getSourceDir(namespace)}/machine-${translatorType}-${locale}.json`;
+        return `${this.getSourceDir(namespace)}/machine-${locale}.json`;
     }
 
     private getAllLocalesInProject(): string[] {
