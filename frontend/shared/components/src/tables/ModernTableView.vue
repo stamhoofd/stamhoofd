@@ -68,7 +68,7 @@
 
                         <div class="columns">
                             <div v-for="(column, index) of columns" :key="column.id" :class="{isDragging: isDraggingColumn === column && isColumnDragActive && dragType === 'order'}" :data-align="column.align">
-                                <button type="button" @mouseup.left="toggleSort(column)" @mousedown.left="(event) => columnDragStart(event, column)" @touchstart="(event) => columnDragStart(event, column)">
+                                <button v-tooltip="column.description" type="button" @mouseup.left="toggleSort(column)" @mousedown.left="(event) => columnDragStart(event, column)" @touchstart="(event) => columnDragStart(event, column)">
                                     <span>{{ column.name }}</span>
 
                                     <span
@@ -471,11 +471,11 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
             : (
                     customMarkedRows.length
                         ? mergeFilters([
-                            props.tableObjectFetcher.filter,
-                            {
-                                $not: idFilter,
-                            },
-                        ])
+                                props.tableObjectFetcher.filter,
+                                {
+                                    $not: idFilter,
+                                },
+                            ])
                         : props.tableObjectFetcher.filter
                 );
 
