@@ -8,16 +8,6 @@ type ObjectType = PlatformRegistration;
 export function getRegistrationColumns({ organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
     const allColumns: Column<ObjectType, any>[] = [
         new Column<ObjectType, string>({
-            id: 'id',
-            name: 'id',
-            getValue: registration => registration.id,
-            minimumWidth: 100,
-            recommendedWidth: 150,
-            grow: true,
-            allowSorting: true,
-            enabled: true,
-        }),
-        new Column<ObjectType, string>({
             id: 'member.memberNumber',
             name: '#',
             getValue: registration => registration.member.member.details.memberNumber ?? '',
