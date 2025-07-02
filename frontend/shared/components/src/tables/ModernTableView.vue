@@ -1857,6 +1857,10 @@ defineExpose({
         color: $color-gray-5;
     }
 
+    &[data-style="negative"] {
+        color: $color-error;
+    }
+
     &[data-style="success"], &[data-style="error"], &[data-style="info"], &[data-style="warn"], &[data-style="secundary"], &[data-style="tertiary"], &[data-style="tag-gray"] {
         > span {
             display: inline-block;
