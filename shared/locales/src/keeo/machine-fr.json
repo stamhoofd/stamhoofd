@@ -27,10 +27,6 @@
     "original": "Welpen",
     "translation": "Louveteaux"
   },
-  "07d18e1b-2935-4945-9595-50e16a929b19": {
-    "original": "Voeg zelf nog persoonsgegevens toe die voor alle eenheden beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen eenheden deze ook nog inschakelen volgens hun wensen.",
-    "translation": "Ajoutez vous-même des données personnelles disponibles pour toutes les unités. Vous pouvez ensuite les rendre obligatoires pour tous les membres qui s'inscrivent à n'importe quel groupe d'âge standard, ou les rendre obligatoires par groupe d'âge standard (via les paramètres de chaque groupe d'âge standard). Si cette option n'est pas activée, les unités peuvent également l'activer selon leurs souhaits."
-  },
   "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
     "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je eenheid een ondernemingsnummer heeft.",
     "translation": "Pour activer les paiements en ligne, vous devez d'abord fournir divers documents (toutes les instructions via le bouton ci-dessous), l'activation prend environ 1 à 3 semaines. Cela vous permet d'activer les paiements via Bancontact, Payconiq, iDEAL et carte de crédit. La carte de crédit n'est possible que si votre unité a un numéro d'entreprise."
@@ -1150,10 +1146,6 @@
   "e6405d38-2bd8-4e24-8e35-24f4daea2a37": {
     "original": "Gegevens van eenheiden",
     "translation": "Données des unités"
-  },
-  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
-    "original": "Deze functies worden gekoppeld aan een lid samen met een eenheid, door een hoofdbeheerder van die eenheid. Een eenheid kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
-    "translation": "Ces fonctions sont liées à un membre ainsi qu'à une unité, par un administrateur principal de cette unité. Une unité peut également ajouter des fonctions propres au groupe pour les étendre."
   },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen scoutsjaar liggen",

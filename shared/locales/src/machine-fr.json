@@ -179,10 +179,6 @@
     "original": "Verhinder automatische toekenning",
     "translation": "Empêcher l'attribution automatique"
   },
-  "022aad3d-6250-4000-9336-4ae7e8e75c23": {
-    "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
-    "translation": "Tous les membres ayant cette fonction obtiennent automatiquement des droits d'accès au groupe d'âge d'un groupe local auquel la fonction a été ajoutée - uniquement pour une année associative spécifique."
-  },
   "02313223-edde-443f-8620-8951e696e77e": {
     "original": "Te jong",
     "translation": "Trop jeune"
@@ -662,10 +658,6 @@
   "07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f": {
     "original": "Optioneel",
     "translation": "Facultatif"
-  },
-  "07d18e1b-2935-4945-9595-50e16a929b19": {
-    "original": "Voeg zelf nog persoonsgegevens toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard-leeftijdsgroep, of deze verplichten per standaard-leeftijdsgroep (via de instellingen van elke standaard-leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen deze ook nog inschakelen volgens hun wensen.",
-    "translation": "Ajoutez vous-même des données personnelles qui sont disponibles pour tous les groupes locaux. Vous pouvez ensuite les rendre obligatoires pour tous les membres qui s'inscrivent à n'importe quel groupe d'âge standard, ou les rendre obligatoires par groupe d'âge standard (via les paramètres de chaque groupe d'âge standard). Si elles ne sont pas activées, les groupes locaux peuvent également les activer selon leurs souhaits."
   },
   "07d642d2-d04a-4d96-b155-8dbdb1a9e4ff": {
     "original": "Alle leeftijdsgroepen",
@@ -1575,10 +1567,6 @@
     "original": "De annuleringskost wordt individueel en rekenkundig afgerond op 1 cent.",
     "translation": "Les frais d'annulation sont arrondis individuellement et arithmétiquement à 1 cent."
   },
-  "13a4b7fa-7de6-497e-9e7c-6aee4f783260": {
-    "original": "Je kan activiteiten voor andere groepen enkel aanmaken via het beheerdersportaal van die groep zelf.",
-    "translation": "Vous ne pouvez créer des activités pour d'autres groupes que via le portail administrateur du groupe lui-même."
-  },
   "13b42902-e159-4e6a-8562-e87c9c691c8b": {
     "original": "Typ hier het onderwerp van je e-mail",
     "translation": "Tapez ici l'objet de votre e-mail"
@@ -2022,10 +2010,6 @@
   "18a3f444-ebbc-4ff5-97a1-d998cd2f492f": {
     "original": "betaling ter plaatse",
     "translation": "paiement sur place"
-  },
-  "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
-    "original": "Beperk tot bepaalde lokale groepen (tags)",
-    "translation": "Limiter à certains groupes locaux (balises)"
   },
   "18aed6d0-0880-4d06-9260-fe342e6e8064": {
     "original": "Te betalen",
@@ -2603,10 +2587,6 @@
     "original": "adres van een vertegenwoordiger",
     "translation": "adresse d'un représentant"
   },
-  "20d0f420-edec-4c9f-9584-990258dcf1bf": {
-    "original": "Groepseigenfuncties",
-    "translation": "Fonctions propres au groupe"
-  },
   "20e536a4-be51-42f4-92ec-ce64b3af3c7f": {
     "original": "Beter voor grotere schermen.",
     "translation": "Meilleur pour les grands écrans."
@@ -2979,10 +2959,6 @@
     "original": "Open beheerderportaal",
     "translation": "Ouvrir le portail administrateur"
   },
-  "25fc3805-35f8-4cb4-9d1e-dff607f9738f": {
-    "original": "Groepseigenfuncties",
-    "translation": "Fonctions propres au groupe"
-  },
   "25fe78a6-38fc-4ead-b19c-62bf131525d9": {
     "original": "Kies welke gegevens je wilt vermelden op de documenten. Afhankelijk van waarvoor het document gebruikt moet worden, zijn bepaalde gegevens vereist. Sommige mutualiteiten vereisen bijvoorbeeld een rijksregisternummer.",
     "translation": "Choisissez les données que vous souhaitez mentionner sur les documents. Certaines données sont nécessaires en fonction de l'utilisation du document. Certaines mutualités exigent par exemple un numéro national."
@@ -3038,10 +3014,6 @@
   "26667b28-4e39-4218-9f9b-131bf3bae6ab": {
     "original": "Inschrijvingen activeren",
     "translation": "Activer les inscriptions"
-  },
-  "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
-    "original": "Zoek een groep waar je {firstName} wilt inschrijven",
-    "translation": "Recherchez un groupe auquel vous souhaitez inscrire {firstName}"
   },
   "268546f2-5dd0-492c-8680-e93b5d40807d": {
     "original": "Ken alle verplichte functies toe aan je leidingsploeg",
@@ -3102,10 +3074,6 @@
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
     "translation": "et non choisi pour"
-  },
-  "271299b8-7b44-40b8-a4ce-e345abf164cb": {
-    "original": "Van welke groep is deze activiteit?",
-    "translation": "À quel groupe appartient cette activité ?"
   },
   "2712befc-5cc5-4013-b8df-ec0861a82c36": {
     "original": "Kies minstens één standaard leeftijdsgroep",
@@ -3718,10 +3686,6 @@
   "2e5b9210-6e4a-44b2-ab5a-b3883c687dc6": {
     "original": "Dag {name},",
     "translation": "Bonjour {name},"
-  },
-  "2e5e052c-98b7-4375-b771-05a8913c145b": {
-    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
-    "translation": "Pour les activités nationales, vous devez choisir le groupe via lequel tous les paiements seront effectués. Les paramètres de paiement de ce groupe seront alors utilisés et toutes les inscriptions seront enregistrées dans la comptabilité de ce groupe.\n\nEn outre, l'organisateur définit également des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
   },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de vereniging of persoon die instaat voor de opvang.",
@@ -4735,10 +4699,6 @@
     "original": "Deze straat bestaat niet, kijk je deze even na op fouten? Formuleer de naam zonder afkortingen.",
     "translation": "Cette rue n'existe pas, vérifiez si vous n'avez pas fait de faute de frappe ? Formulez le nom sans abréviations."
   },
-  "3c283583-6a2d-497e-abe4-0e67852497b7": {
-    "original": "Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard-leeftijdsgroep",
-    "translation": "Activé obligatoirement pour tous les membres inscrits à au moins un groupe d’âge standard"
-  },
   "3c390322-a9dd-43c7-9f2a-3d766d021169": {
     "original": "oktober",
     "translation": "octobre"
@@ -5295,10 +5255,6 @@
     "original": "meisjes",
     "translation": "filles"
   },
-  "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
-    "original": "Je hebt geen rechten om een activiteit aan te maken voor deze groep.",
-    "translation": "Vous n'avez pas les droits nécessaires pour créer une activité pour ce groupe."
-  },
   "4402e10d-4229-492a-b7f7-fcf2a49af08d": {
     "original": "Buurvrouw",
     "translation": "Voisine"
@@ -5530,10 +5486,6 @@
   "46944c50-6c15-4547-90d4-bba60421b471": {
     "original": "Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).",
     "translation": "Vous pouvez ajouter des intervalles de temps entre lesquels la commande peut être consommée sur place. Si vous n'en ajoutez aucun, aucun choix ne doit être fait (déconseillé). Si votre événement est organisé à un moment précis, nous vous recommandons d'ajouter une seule heure ici (aucun choix ne doit encore être fait, mais nous pouvons communiquer clairement cette heure dans la confirmation de commande)."
-  },
-  "4697c731-26fd-4ba5-8aeb-0f5b8385a54b": {
-    "original": "Zoek een groep",
-    "translation": "Rechercher un groupe"
   },
   "46a3962f-7d21-4cf4-b3a9-bfec8007e68a": {
     "original": "Kortingscode",
@@ -5803,10 +5755,6 @@
     "original": "Ja, ik ben 100% zeker",
     "translation": "Oui, j'en suis sûr à 100 %"
   },
-  "4a2a630f-3396-404f-9316-d660df9935a9": {
-    "original": "Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een lokale groep na een manuele actie. Daarna kan een lokale groep het bedrag betalen via een online betaling in hun beheerdersportaal.",
-    "translation": "Toutes les affiliations qui sont (automatiquement ou non) ajoutées aux membres ne sont ajoutées au montant en souffrance d'un groupe local qu'après une action manuelle. Ensuite, un groupe local peut payer le montant via un paiement en ligne dans son portail administrateur."
-  },
   "4a2f9baa-da83-4cf9-a39c-59e7f37c1823": {
     "original": "Opgelet: je zal deze bestelling nog moeten betalen",
     "translation": "Attention : vous devrez encore payer cette commande"
@@ -5814,10 +5762,6 @@
   "4a3878c2-ee66-4e0c-9c3f-8221d0944469": {
     "original": "onbekende betaalmethodes",
     "translation": "modes de paiement inconnus"
-  },
-  "4a39e12b-efa2-46fe-aa30-83bc576548a3": {
-    "original": "Aangesloten via Stamhoofd (niet aangerekend aan een groep)",
-    "translation": "Affilié via Stamhoofd (non facturé à un groupe)"
   },
   "4a3b54dc-e945-4a15-8b31-b9b4bb483b2a": {
     "original": "Betaling via Payconiq is tijdelijk onbeschikbaar",
@@ -5954,14 +5898,6 @@
   "4bd1a990-6f9b-4949-90be-3f0898c4e298": {
     "original": "Onzichtbaar",
     "translation": "Invisible"
-  },
-  "4be45e47-0ee2-43cd-b719-8a60513f0965": {
-    "original": "Dit is een standaardinstelling. Een lokale groep kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting groepen.",
-    "translation": "Il s'agit d'un paramètre standard. Un groupe local peut encore modifier ces paramètres. Ce paramètre sert donc principalement de paramètre standard et à communiquer avec les groupes."
-  },
-  "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": {
-    "original": "Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.",
-    "translation": "Chaque groupe local doit associer un groupe d'âge standard à chaque groupe d'inscription. Ainsi, le nom du groupe peut être associé au nom général de la fédération."
   },
   "4c1658ea-d89c-4634-9be5-e0a23febe2bb": {
     "original": "Ik heb nog niet betaald",
@@ -6435,10 +6371,6 @@
     "original": "Bestelling bevestiging: overschrijving",
     "translation": "Confirmation de commande : virement bancaire"
   },
-  "51c27c5e-c2be-441b-a571-7bf573ee6848": {
-    "original": "Reken een bedrag aan aan de geselecteerde groep.",
-    "translation": "Facturez un montant au groupe sélectionné."
-  },
   "51f9909d-c91f-455d-8cd4-ee0a1897e59d": {
     "original": "Nieuwe vragenlijst",
     "translation": "Nouveau formulaire personnalisé"
@@ -6686,10 +6618,6 @@
   "54f1115a-1f70-4a72-8f1d-80f7fae7ed47": {
     "original": "geboortedatum van een persoon",
     "translation": "date de naissance d'une personne"
-  },
-  "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
-    "original": "Gebruik de boekhoudmodule van deze groep om een zicht te krijgen op alle betalingen.",
-    "translation": "Utilisez le module de comptabilité de ce groupe pour avoir une vue d'ensemble de tous les paiements."
   },
   "5562135d-197d-4251-ada8-ffe747622e7b": {
     "original": "Leveringsmethode",
@@ -7271,10 +7199,6 @@
     "original": "Koptekst",
     "translation": "En-tête"
   },
-  "5d1da89a-aa00-4953-aa59-53c0342c5c1a": {
-    "original": "Kies voor welke lokale groepen deze standaard leeftijdsgroep beschikbaar is.",
-    "translation": "Choisissez pour quels groupes locaux ce groupe d'âge standard est disponible."
-  },
   "5d3c6960-1c2c-497b-99db-02523b97c9a6": {
     "original": "Luxemburg",
     "translation": "Luxembourg"
@@ -7494,10 +7418,6 @@
   "5f25a20d-ca03-4155-88c6-f9ae3872c052": {
     "original": "Naam betalende groep",
     "translation": "Nom du groupe payant"
-  },
-  "5f37ed88-8822-44bb-8f06-7f527c5d00fe": {
-    "original": "Groepseigenfuncties",
-    "translation": "Fonctions propres au groupe"
   },
   "5f5561e5-1d01-4ba0-8b17-5ae69377b391": {
     "original": "Meer informatie",
@@ -8091,10 +8011,6 @@
     "original": "Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.",
     "translation": "Non supporté. Rechargez l'application si nécessaire et réessayez."
   },
-  "671147bd-cf0e-42fc-b456-18ce7d75b867": {
-    "original": "Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
-    "translation": "Tous les groupes sont maintenant transférés vers la nouvelle année associative. Cela peut prendre un certain temps, vous devrez peut-être recharger la page pour voir toutes les dernières modifications correctement."
-  },
   "671cfb26-2018-4186-aa06-f167102db2b1": {
     "original": "De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep",
     "translation": "La fonction doit alors être attribuée à un groupe d'inscription spécifique"
@@ -8647,10 +8563,6 @@
     "original": "Selecteer een land",
     "translation": "Sélectionnez un pays"
   },
-  "6e884f27-427f-4f85-914c-d5c2780253b0": {
-    "original": "Groepen",
-    "translation": "Groupes"
-  },
   "6e9064fc-f18e-40c7-b36b-e544a4801b2d": {
     "original": "Bestand",
     "translation": "Fichier"
@@ -8834,10 +8746,6 @@
   "7087e475-b3a9-492c-9d56-bfa3e763e713": {
     "original": "Pas de volgende instellingen aan",
     "translation": "Ajustez les paramètres suivants"
-  },
-  "70894bb8-da5a-4f1a-929d-08f4479c4de3": {
-    "original": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via het platform.",
-    "translation": "Confirmez que les méthodes de paiement sont correctement configurées. Ces méthodes de paiement sont utilisées lorsque les membres s’inscrivent via la plateforme."
   },
   "709a5ff3-8d79-447b-906d-2c3cdabb41cf": {
     "original": "Onderwerp",
@@ -9247,10 +9155,6 @@
     "original": "Noodcontactpersoon",
     "translation": "Personne de contact en cas d'urgence"
   },
-  "75815048-939a-4ac1-a81c-f23fc3ec5006": {
-    "original": "Jouw lokale groep betaalt {price} aan Stamhoofd.",
-    "translation": "Votre groupe local paie {price} à Stamhoofd."
-  },
   "75913b92-4a79-4902-91ad-cb56e0549b7c": {
     "original": "Andere domeinnaam voor registratie",
     "translation": "Autre nom de domaine pour l'enregistrement"
@@ -9330,10 +9234,6 @@
   "76a41c36-99d1-467c-a243-3a30a56c272e": {
     "original": "Voorbeeld: de aangerekende administratiekost bedraagt {exampleAdministrationFee1} op een bedrag van {exampleAdministrationFeeValue1}, en {exampleAdministrationFee2} op een bedrag van {exampleAdministrationFeeValue2}.",
     "translation": "Exemple : les frais administratifs facturés s’élèvent à {exampleAdministrationFee1} sur un montant de {exampleAdministrationFeeValue1}, et {exampleAdministrationFee2} sur un montant de {exampleAdministrationFeeValue2}."
-  },
-  "76b00f58-a587-431f-9c28-1b86d394fc26": {
-    "original": "Stel in welke soorten lokalen groepen kunnen toevoegen",
-    "translation": "Définissez les types de salles que les groupes peuvent ajouter"
   },
   "76eb7982-9fc5-490a-9414-42bb7f10b8d6": {
     "original": "Bewerk inschrijvingsinstellingen",
@@ -9494,10 +9394,6 @@
   "789da13b-5f65-4ab7-8318-ed015e0303cf": {
     "original": "bestelling + naam",
     "translation": "commande + nom"
-  },
-  "78a012a9-3caa-405f-851d-429610138852": {
-    "original": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving bij lokale groep).",
-    "translation": "{member} ne peut s’inscrire que s’il possède une inscription active valide (inscription obligatoire auprès du groupe local)."
   },
   "78a4c6c3-c0d0-457c-adfb-44122307161a": {
     "original": "Dit document kan niet gedownload worden omdat er nog gegevens ontbreken of ongeldig zijn. Kijk alle gegevens van {name} na en contacteer ons indien het probleem nog niet is verholpen.",
@@ -10551,10 +10447,6 @@
     "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
     "translation": "La prochaine adhésion de ce membre commence le {date}. Aujourd’hui, ce membre n’est pas affilié à KSA National et n’est donc pas assuré."
   },
-  "88119ffc-b692-4222-8217-75a9fa64f675": {
-    "original": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
-    "translation": "Facturez un montant aux {count} groupes sélectionnés."
-  },
   "88136719-d85f-499f-8c5f-252519947c03": {
     "original": "Instellingen",
     "translation": "Paramètres"
@@ -11158,10 +11050,6 @@
   "8eb5f50e-d00d-444d-979a-f80ae834eb9a": {
     "original": "E-mailadres administratie",
     "translation": "Adresse e-mail de l'administration"
-  },
-  "8ecaf93e-e872-4556-9067-f89b3f81332e": {
-    "original": "Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.",
-    "translation": "Un groupe local peut modifier ce modèle. Ce modèle est utilisé s'il n'y a pas de modèle local."
   },
   "8ed2c90d-f77a-4d9d-aca5-64a76ed50e32": {
     "original": "Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).",
@@ -12235,10 +12123,6 @@
     "original": "van",
     "translation": "de"
   },
-  "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
-    "original": "Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)",
-    "translation": "Tous les groupes d'âge sont fermés (sauf si le groupe est déjà passé à cette année associative)"
-  },
   "9e0461d2-7439-4588-837c-750de6946287": {
     "original": "Optioneel",
     "translation": "Optionnel"
@@ -12454,10 +12338,6 @@
   "a09b08eb-216c-4f07-b05c-0a26a4c580eb": {
     "original": "Keuze 2",
     "translation": "Choix 2"
-  },
-  "a0b1e726-345d-4288-a1db-7437d1b47482": {
-    "original": "Groep",
-    "translation": "Groupe"
   },
   "a0b2d272-5bcf-4ecb-9bb1-f2ba239b6c03": {
     "original": "Bezig met doorverwijzen",
@@ -12883,10 +12763,6 @@
     "original": "kan zelf inloggen of registreren op",
     "translation": "peut se connecter ou s’inscrire sur"
   },
-  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": {
-    "original": "het platform is in orde",
-    "translation": "la plateforme est en ordre"
-  },
   "a654d6d0-2ada-492a-8090-a78a9486da5a": {
     "original": "Nog even geduld. Bestellen kan vanaf {date}.",
     "translation": "Un peu de patience. Les commandes seront possibles à partir du {date}."
@@ -13203,10 +13079,6 @@
     "original": "Kan in enkele uren worden geraden door een computer",
     "translation": "Peut être deviné en quelques heures par un ordinateur"
   },
-  "aad47217-df26-43ce-a43c-896697d5fbd4": {
-    "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen groep.",
-    "translation": "Ajoutez vos propres fonctions qui ne s'appliquent qu'à votre propre groupe."
-  },
   "aad50919-a9bc-4f59-8bf9-28c61f2bd4d7": {
     "original": "Adres ontbreekt",
     "translation": "Adresse manquante"
@@ -13223,10 +13095,6 @@
     "original": "Voeg toe",
     "translation": "Ajouter"
   },
-  "ab00e79e-c7cb-4595-9119-4fb5ca366dd1": {
-    "original": "Kies een groep",
-    "translation": "Choisissez un groupe"
-  },
   "ab0535e6-bbaa-4961-a34f-aca39ef0d785": {
     "original": "Verschuldigd sinds",
     "translation": "Dû depuis"
@@ -13242,10 +13110,6 @@
   "ab071f11-e05b-4bd9-9370-cd4f220c1b54": {
     "original": "Je hebt geen toegangsrechten voor deze actie",
     "translation": "Vous n'avez pas les droits d'accès pour cette action"
-  },
-  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
-    "original": "Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.",
-    "translation": "Votre groupe se trouve dans un exercice différent de celui de KSA National."
   },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)",
@@ -13883,10 +13747,6 @@
     "original": "Enkel",
     "translation": "Uniquement"
   },
-  "b34e7f10-2e03-42f5-b865-2d88571d2a6e": {
-    "original": "Deze periode is niet beschikbaar voor jouw organisatie.",
-    "translation": "Cette période n'est pas disponible pour votre organisation."
-  },
   "b353c151-6304-4a75-887f-3b84a757734b": {
     "original": "Open inschrijvingen pas na een bepaalde datum",
     "translation": "Ouvrir les inscriptions seulement après une certaine date"
@@ -13946,10 +13806,6 @@
   "b41926c9-7846-4032-814c-2bf739ca6314": {
     "original": "Inschrijvingen door organisaties zijn niet toegestaan voor",
     "translation": "Les inscriptions par les organisations ne sont pas autorisées pour"
-  },
-  "b422c6f2-be24-4edd-aa99-a2d72d59c496": {
-    "original": "Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een lokale groep en per leeftijdsgroep, wachtlijst of activiteit van een lokale groep (of activiteit op nationaal niveau).",
-    "translation": "Cela peut être étendu à plusieurs niveaux : par groupe d'âge standard de la fédération, au niveau local d'un groupe local et par groupe d'âge, liste d'attente ou activité d'un groupe local (ou activité au niveau national)."
   },
   "b427a2eb-4d55-4f41-b60e-ae3c6819100d": {
     "original": "inschrijvingsgroep",
@@ -14227,17 +14083,9 @@
     "original": "Kampmelding nakijken",
     "translation": "Vérifier la notification de camp"
   },
-  "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
-    "original": "Unieke groepen",
-    "translation": "Groupes uniques"
-  },
   "b78c8455-7e28-47b2-b2fd-ba6a82302976": {
     "original": "personen",
     "translation": "personnes"
-  },
-  "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
-    "original": "De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.",
-    "translation": "Les catégories et les groupes d'âge des groupes sont dupliqués vers la nouvelle année associative."
   },
   "b78e0854-14c4-4474-bbb4-7ba80056ff49": {
     "original": "zijn niet",
@@ -15931,10 +15779,6 @@
     "original": "maart",
     "translation": "mars"
   },
-  "cd0975fc-75c4-4c1e-b80a-f611f0992caa": {
-    "original": "Alle groepen",
-    "translation": "Tous les groupes"
-  },
   "cd099f48-7a5e-4993-854d-697104201871": {
     "original": "Je hebt geen toegang om deze API-user te wijzigen",
     "translation": "Vous n'avez pas l'autorisation de modifier cet utilisateur API"
@@ -15947,10 +15791,6 @@
     "original": "Bevestig de naam van het lid",
     "translation": "Confirmez le nom du membre"
   },
-  "cd37a13c-6779-49fa-a97f-1eddb6b61ebb": {
-    "original": "Deze groep is nog niet actief in dit werkjaar, maak dat eerst aan.",
-    "translation": "Ce groupe n'est pas encore actif pour cette année associative, créez-le d'abord."
-  },
   "cd511a0e-71cc-44bb-8107-7de1a18dab9d": {
     "original": "Een extra rij boven de kolomnamen met de categorie van elke kolom, voor een duidelijkere weergave.",
     "translation": "Une ligne supplémentaire au-dessus des noms de colonnes avec la catégorie de chaque colonne, pour une meilleure lisibilité."
@@ -15962,10 +15802,6 @@
   "cd539f63-31c0-46f3-a0b5-a3826796a9d0": {
     "original": "Kies je afhaalmethode",
     "translation": "Choisissez votre méthode de retrait"
-  },
-  "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
-    "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in het platform). Er worden geen lagere tarieven automatisch toegepast.",
-    "translation": "La réponse est inconnue (elle n’a jamais été saisie sur la plateforme). Aucun tarif réduit n’est appliqué automatiquement."
   },
   "cd60d49f-9fc8-4fb7-b574-1231874c1d43": {
     "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.",
@@ -16102,10 +15938,6 @@
   "cec2dffb-f38d-4337-b575-8cf37d6556a2": {
     "original": "Zoek bestaande leden voor {group}",
     "translation": "Chercher des membres existants pour {group}"
-  },
-  "ced29068-facb-4692-9fd7-d9ac74e35359": {
-    "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via het platform kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via het platform kunnen inschrijven.",
-    "translation": "Vérifiez que tous les paramètres des groupes sont corrects. Si tout est correctement configuré, vous pouvez vous assurer que tous les membres peuvent s'inscrire et payer via la plateforme. Faites donc attention aux tarifs que vous définissez et aux restrictions d'âge que vous utilisez. Lorsque vous avez terminé, vous pouvez ouvrir un groupe d'âge afin que les membres puissent s'inscrire via la plateforme."
   },
   "ced74e50-34b9-4d83-a89d-542c4b0c4c45": {
     "original": "Voorwaarden bewerken",
@@ -16630,10 +16462,6 @@
   "d5c7e037-e526-41d5-9151-d9e115b4b8de": {
     "original": "Dit is leeg maar werd wel ingevuld in een andere taal",
     "translation": "Ceci est vide mais a été rempli dans une autre langue"
-  },
-  "d5d2e25f-588e-496e-925f-f7e375c3888a": {
-    "original": "Mijn groep",
-    "translation": "Mon groupe"
   },
   "d5d7b908-50a5-4b3e-94d2-1e54e549764b": {
     "original": "Onbekend karakters in bestandsnaam",
@@ -17655,10 +17483,6 @@
     "original": "Wijzig status",
     "translation": "Modifier le statut"
   },
-  "e0fff936-3f3c-46b8-adcf-c723c33907a2": {
-    "original": "Het werkjaar die je wilt instellen is nog niet gestart",
-    "translation": "L'année associative que vous souhaitez définir n'a pas encore commencé"
-  },
   "e11ad49e-d853-464c-a951-d45b9549ec30": {
     "original": "Deze categorie is niet zichtbaar voor gewone leden",
     "translation": "Cette catégorie n'est pas visible pour les membres ordinaires"
@@ -18087,10 +17911,6 @@
     "original": "Aankruisen",
     "translation": "Cocher"
   },
-  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
-    "original": "Deze functies worden gekoppeld aan een lid samen met een lokale groep, door een hoofdbeheerder van die groep. Een lokale groep kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
-    "translation": "Ces fonctions sont associées à un membre ainsi qu'à un groupe local, par un administrateur principal de ce groupe. Un groupe local peut également ajouter ses propres fonctions pour les étendre."
-  },
   "e6dff01b-1b53-4722-8791-e5a848ffa906": {
     "original": "Deze tekst zal bovenaan op elk document worden geplaatst.",
     "translation": "Ce texte sera placé en haut de chaque document."
@@ -18327,10 +18147,6 @@
     "original": "Vrije invoervelden",
     "translation": "Champs de saisie libre"
   },
-  "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
-    "original": "* Voor de aansluiting bij Stamhoofd moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van Stamhoofd.",
-    "translation": "* Pour l'affiliation à Stamhoofd, vous devez encore sélectionner un groupe d'inscription standard correct afin que le nom utilisé par votre groupe puisse être lié au nom de Stamhoofd."
-  },
   "e9a19cd1-7a57-440d-a97e-6cff23a7f46c": {
     "original": "Voorwaarden",
     "translation": "Conditions"
@@ -18526,10 +18342,6 @@
   "ec0978f8-95bc-44c9-a906-ceaf6fd55baf": {
     "original": "Ben je zeker dat je deze melding wilt indienen?",
     "translation": "Êtes-vous sûr de vouloir soumettre cette notification ?"
-  },
-  "ec0c482e-0528-499f-82fa-b081bf708ded": {
-    "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
-    "translation": "Ce membre n'est inscrit à aucun groupe pour l'année associative en cours et ne peut donc pas être connecté"
   },
   "ec252aa0-30df-4d49-9a37-a2ce6a0fc6dc": {
     "original": "Webshop zonder tickets",
@@ -18891,10 +18703,6 @@
     "original": "Bestelling per lijn",
     "translation": "Commande par ligne"
   },
-  "f1248bd5-36f4-40fd-9467-08bda59127d6": {
-    "original": "Lijst van alle groepen die nog een openstaand bedrag hebben tegenover {name}",
-    "translation": "Liste de tous les groupes ayant un montant en souffrance envers {name}"
-  },
   "f129e12b-9079-4a88-b94c-d6abace21e80": {
     "original": "Basketbal",
     "translation": "Basket-ball"
@@ -18938,10 +18746,6 @@
   "f193133e-143e-48fa-8d13-afcc01031343": {
     "original": "Wanneer ingeschakeld?",
     "translation": "Quand activé ?"
-  },
-  "f1931dcf-219f-4ca2-935b-d5a6747ddbdb": {
-    "original": "De aansluitingkosten worden altijd aangerekend via een organisatie/groep die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die groep worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.",
-    "translation": "Les frais d'affiliation sont toujours facturés via une organisation/un groupe qui représente la fédération. Les paramètres de paiement et les données de facturation de ce groupe sont utilisés pour collecter tous les paiements. De cette façon, vous pouvez configurer les méthodes de paiement et les comptes de paiement disponibles."
   },
   "f19516b2-0c37-4dce-86f4-46690ec3dfc9": {
     "original": "Geen vervaldatum",
@@ -19071,10 +18875,6 @@
     "original": "Bewerk",
     "translation": "Modifier"
   },
-  "f3236c83-b7ba-453f-981a-3e06925c9b7a": {
-    "original": "Geef iedereen toegang tot het platform door ze de juiste functies te geven.",
-    "translation": "Donnez à chacun l’accès à la plateforme en lui attribuant les fonctions appropriées."
-  },
   "f3262b38-7afe-485b-bd97-fab76e825818": {
     "original": "Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit het systeem gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.",
     "translation": "Le montant payé pour l'inscription. Cela peut être automatiquement extrait du système, en tenant également compte des réductions. Le prix journalier est calculé sur la base des dates de début et de fin. Les inscriptions gratuites ne sont pas éligibles à une déduction fiscale et aucun document n'est donc créé à cet effet."
@@ -19138,10 +18938,6 @@
   "f3f810dd-cd4b-4766-b19e-ec995c9cca77": {
     "original": "Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.",
     "translation": "Créez une compensation de solde avec un prix total de 0 euro qui combine des éléments positifs et négatifs pour simplifier le compte en suspens."
-  },
-  "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
-    "original": "Het maximum geldt per lokale groep",
-    "translation": "Le maximum s'applique par groupe local"
   },
   "f4052a0b-9564-49c4-a6b6-41af3411f3b0": {
     "original": "Lid",
@@ -19219,10 +19015,6 @@
     "original": "Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.",
     "translation": "Mollie est connecté, mais vous devez encore compléter quelques données."
   },
-  "f4c0da5a-03a8-4be2-9ae1-ea049b5b46af": {
-    "original": "Er is nog geen verantwoordelijke groep ingesteld. Kies een groep die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
-    "translation": "Aucun groupe responsable n'a encore été défini. Choisissez un groupe responsable de la collecte des frais d'affiliation."
-  },
   "f4caaf58-4248-4f91-9e76-c8cec82f528d": {
     "original": "Optionele functies",
     "translation": "Fonctions optionnelles"
@@ -19251,10 +19043,6 @@
     "original": "Vul de gemeente in",
     "translation": "Veuillez saisir la commune"
   },
-  "f4fef92e-cb28-408b-ada2-cf8b0da0fbfd": {
-    "original": "Groepseigenfuncties",
-    "translation": "Fonctions propres au groupe"
-  },
   "f501785a-7e57-4184-8cf0-a3413ad2f2a4": {
     "original": "Link toevoegen",
     "translation": "Ajouter un lien"
@@ -19270,10 +19058,6 @@
   "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
     "original": "De betaling loopt niet via Stamhoofd",
     "translation": "Le paiement ne passe pas par Stamhoofd"
-  },
-  "f5229cc1-c908-4409-855a-1dba40371815": {
-    "original": "Jouw leiding kan in het platform jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
-    "translation": "Votre direction peut rechercher votre code de sécurité sur la plateforme et vous le transmettre. Si vous êtes vous-même dirigeant, demandez-le à vos collègues ou à KSA National."
   },
   "f52db2d7-c0f5-4f9c-b567-62f657787339": {
     "original": "Inschrijvingsgroep",
@@ -19363,10 +19147,6 @@
     "original": "Gelijk aan...",
     "translation": "Égal à..."
   },
-  "f675d723-b1b9-4abd-9e7c-0459c24e474b": {
-    "original": "Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze groep.",
-    "translation": "Cette activité est uniquement visible pour les membres inscrits à ce groupe."
-  },
   "f67ccf42-d4a8-4fe6-b7dc-91f43726646e": {
     "original": "Vaste kost",
     "translation": "Coût fixe"
@@ -19402,10 +19182,6 @@
   "f6de6c56-6326-42b2-b586-2bf607e058a7": {
     "original": "Developers",
     "translation": "Développeurs"
-  },
-  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
-    "original": "Jouw lokale groep betaalt {price} aan Stamhoofd, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
-    "translation": "Votre groupe local paie {price} à Stamhoofd, mais pour les adhésions ultérieures, le montant est désormais de {priceReduced}."
   },
   "f6f77de7-7691-4512-bf95-e07d12e9a43c": {
     "original": "Tijdstip",
@@ -19934,10 +19710,6 @@
   "fd3fea4f-73c7-4c8d-90cd-80ea90e53b98": {
     "original": "Gender",
     "translation": "Genre"
-  },
-  "fd52fa36-16e6-4106-807c-c387bc0acc0e": {
-    "original": "Geen groepen beschikbaar in dit werkjaar",
-    "translation": "Aucun groupe disponible cette année associative"
   },
   "fd5e3142-7a0e-4305-8a49-35f2f4d89083": {
     "original": "bv. 'Geen toestemming om foto's te maken'",
