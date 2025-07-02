@@ -170,7 +170,11 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('groups', 'deletedAt'),
                 null,
             ),
-        baseRegistrationFilterCompilers,
+        {
+            ...baseRegistrationFilterCompilers,
+            // Override the registration periodId - can be outdated - and always use the group periodId
+            periodId: createSQLColumnFilterCompiler(SQL.column('groups', 'periodId')),
+        },
     ),
     'responsibilities': createSQLRelationFilterCompiler(
         SQL.select()
