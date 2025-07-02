@@ -432,11 +432,11 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
-            recommendedWidth: 200,
+            recommendedWidth: 220,
         }),
     );
 
-    if (!waitingList && financialRead) {
+    if (!waitingList && financialRead && groups.length > 0) {
         allColumns.push(
             new Column<ObjectType, number>({
                 name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
@@ -451,7 +451,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     }
                     return Formatter.price(outstandingBalance);
                 },
-                getStyle: v => v <= 0 ? 'gray' : '',
+                getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
                 minimumWidth: 70,
                 recommendedWidth: 80,
                 enabled: false,
@@ -461,8 +461,9 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         allColumns.push(
             new Column<ObjectType, number>({
                 name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+                description: $t('Nog te betalen specifiek voor deze inschrijving'),
                 allowSorting: false,
-                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen), 0),
+                getValue: v => v.filterRegistrations({ groups: groups }).flatMap(r => r.balances).reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0),
                 format: (outstandingBalance) => {
                     if (outstandingBalance < 0) {
                         return Formatter.price(outstandingBalance);
@@ -472,13 +473,29 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                     }
                     return Formatter.price(outstandingBalance);
                 },
-                getStyle: v => v <= 0 ? 'gray' : '',
+                getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
                 minimumWidth: 70,
-                recommendedWidth: 80,
+                recommendedWidth: 120,
                 enabled: false,
             }),
         );
     }
+
+    allColumns.push(
+        new Column<ObjectType, number>({
+            name: $t(`Openstaand bedrag`),
+            description: $t('Totaal openstaand bedrag van dit lid, exclusief het deel in verwerking (bv. overschrijvingen)'),
+            allowSorting: false,
+            getValue: v => v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
+            format: (outstandingBalance) => {
+                return Formatter.price(outstandingBalance);
+            },
+            getStyle: v => v === 0 ? 'gray' : (v < 0 ? 'negative' : ''),
+            minimumWidth: 70,
+            recommendedWidth: 200,
+            enabled: false,
+        }),
+    );
 
     if (category) {
         allColumns.push(
