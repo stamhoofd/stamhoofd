@@ -286,6 +286,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         for (const member of members) {
             if (!await Context.auth.canAccessMember(member, permissionLevel)) {
+                console.error('Unexpected member returned', member.id, requestQuery, query.getSQL());
                 throw Context.auth.error();
             }
         }
