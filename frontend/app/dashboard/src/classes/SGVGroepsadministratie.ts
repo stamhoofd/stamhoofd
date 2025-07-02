@@ -58,7 +58,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     redirect_uri: this.redirectUri
                 },
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Accept: "application/json"
                 },
                 overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
             })
@@ -98,7 +99,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     redirect_uri: this.redirectUri
                 },
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    Accept: "application/json"
                 },
                 overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
             })
@@ -916,6 +918,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         request.overrideXMLHttpRequest = AppManager.shared.overrideXMLHttpRequest
         request.errorDecoder = new SGVFoutenDecoder()
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
+        request.headers["Accept"] = "application/json";
 
         // The server is a bit buggy, so always parse as JSON
         request.responseContentTypeOverride = "application/json"
