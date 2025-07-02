@@ -7,6 +7,14 @@
     "original": "Vertel Ravot door aan andere groepen",
     "translation": "Tell Ravot about other groups"
   },
+  "022aad3d-6250-4000-9336-4ae7e8e75c23": {
+    "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een lokale groep waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
+    "translation": "All members with this role automatically get access rights to the age group of a local group for which the role was added – only for one specific work year."
+  },
+  "02ed38bf-5516-4e5a-b28c-6e73d7cf1009": {
+    "original": "Deze ouder kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en ‘Mijn account’.",
+    "translation": "This parent can log in or register with the entered email address and will then automatically get access to the data of {firstName} and 'My account'."
+  },
   "02f2c884-7524-4c41-90c9-746a074185aa": {
     "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere groepen.",
     "translation": "Save a copy of your seating plan so you can share it with other groups."
@@ -14,6 +22,10 @@
   "05479234-2977-4bfd-a44b-924b01021b6e": {
     "original": "Op aanraden van andere groep / persoon",
     "translation": "On the recommendation of another group/person"
+  },
+  "07d18e1b-2935-4945-9595-50e16a929b19": {
+    "original": "Voeg zelf nog persoonsgegevens toe die voor alle lokale groepen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard leeftijdsgroep, of deze verplichten per standaard leeftijdsgroep (via de instellingen van elke standaard leeftijdsgroep). Indien niet ingeschakeld kunnen lokale groepen deze ook nog inschakelen volgens hun wensen.",
+    "translation": "You can add additional personal data fields that are available to all local groups. You can then require these fields for all members who register with any default age group, or set them as required per default age group (through the settings of each default age group). If not enabled, local groups can also choose to enable these fields as needed."
   },
   "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
     "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je groep een ondernemingsnummer heeft.",
@@ -59,6 +71,10 @@
     "original": "Ravot verwijdert automatisch het reeds aangerekende bedrag van het openstaande bedrag van alle leden die je uitschrijft. Als je wilt kan je wel een annuleringskost in rekening brengen, bv. als je het bedrag niet zal terugbetalen stel je dit in op 100%. Als je geen annuleringskost in rekening brengt, zal het openstaande bedrag van een lid dat al betaald had negatief worden en kan je dit terugbetalen via het tabblad ‘Rekening’ van een lid.",
     "translation": "Ravot automatically removes the already charged amount from the outstanding amount of all members you unsubscribe. If you wish, you can charge a cancellation fee, e.g. if you will not refund the amount, set this to 100%. If you do not charge a cancellation fee, the outstanding amount of a member who has already paid will become negative and you can refund this via the 'Account' tab of a member."
   },
+  "13a4b7fa-7de6-497e-9e7c-6aee4f783260": {
+    "original": "Je kan activiteiten voor andere groepen enkel aanmaken via het beheerdersportaal van die groep zelf.",
+    "translation": "You can only create activities for other groups via the administrator portal of that group."
+  },
   "1452c1a3-6203-4ab2-92c4-c0496661cd21": {
     "original": "Het lid zal deze stap terug moeten doorlopen via ‘Mijn account’",
     "translation": "The member will have to go through this step again via ‘My account’"
@@ -66,6 +82,10 @@
   "15b6f0c8-6287-4b4d-bf34-4da2f4a0e575": {
     "original": "*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
     "translation": "*You can postpone an outstanding amount - e.g. for staggered payments or a trial period. It only appears as a quick action in 'My account' from one week before this date (together with any automatic email) and must be paid by the entered date. It is possible to pay it earlier, but certainly not obligatory."
+  },
+  "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
+    "original": "Beperk tot bepaalde lokale groepen (tags)",
+    "translation": "Limit to specific local groups (tags)"
   },
   "1985f023-e846-4ea2-9526-b24358c7a294": {
     "original": "Maak een kopie van de instellingen van jouw groep.",
@@ -91,6 +111,10 @@
     "original": "Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Ravot, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en \"Functies bewerken\" kiezen.",
     "translation": "Check below to see if all roles have been assigned. To assign a role, first make sure that the person is registered in Ravot, then you can assign roles by clicking open the member in the 'Members' tab. There you can right-click on a member and choose \"Edit roles\"."
   },
+  "20d0f420-edec-4c9f-9584-990258dcf1bf": {
+    "original": "Groepseigenfuncties",
+    "translation": "Custom group roles"
+  },
   "227a2170-37b7-46b0-ac1e-516f603379b5": {
     "original": "Sommige aansluitingen verlopen via KSA Nationaal (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele groep. Je kan deze via deze filter uitsluiten.",
     "translation": "Some affiliations run via KSA National (member pays directly to the umbrella organisation) and are therefore not really charged to an individual group. You can exclude these via this filter."
@@ -107,9 +131,21 @@
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Ravot instellingen > Betaalaccounts.",
     "translation": "You cannot activate {paymentMethod}, you must first connect to a payment provider via the Ravot settings > Payment accounts."
   },
+  "25fc3805-35f8-4cb4-9d1e-dff607f9738f": {
+    "original": "Groepseigenfuncties",
+    "translation": "Custom group roles"
+  },
   "26089c85-ad50-4c71-9013-4fadc243c12e": {
     "original": "Dit document is zichtbaar in ‘Mijn account’.",
     "translation": "This document is visible in 'My account'."
+  },
+  "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
+    "original": "Zoek een groep waar je {firstName} wilt inschrijven",
+    "translation": "Search for a group where you want to register {firstName}"
+  },
+  "271299b8-7b44-40b8-a4ce-e345abf164cb": {
+    "original": "Van welke groep is deze activiteit?",
+    "translation": "Which group is organizing this activity?"
   },
   "2803b7f1-be08-48ec-8b4c-2dced27f7113": {
     "original": "Breid het aantal gegevens van groepen zelf nog uit.",
@@ -134,6 +170,10 @@
   "2cc5355d-3c19-4a6e-a2c7-1d93e423a8d2": {
     "original": "Groepsnummer",
     "translation": "Group number"
+  },
+  "2e5e052c-98b7-4375-b771-05a8913c145b": {
+    "original": "Voor nationale activiteiten moet je kiezen via welke groep alle betalingen verlopen. De betaalinstellingen van die groep worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die groep.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "For national activities, you need to choose through which group all payments are handled. The payment settings of that group will then be used and all registrations will be recorded in the bookkeeping of that group.\n\nAdditionally, the organizer also sets options that impact data collection and other more subtle details."
   },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de groep of persoon die instaat voor de opvang.",
@@ -207,9 +247,17 @@
     "original": "De link naar deze activiteit in ‘Mijn account’. Deel deze link met leden.",
     "translation": "The link to this activity in ‘My account’. Share this link with members."
   },
+  "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
+    "original": "Je hebt geen rechten om een activiteit aan te maken voor deze groep.",
+    "translation": "You do not have rights to create an activity for this group."
+  },
   "467951bf-92b1-417b-a56b-19ce254c3571": {
     "original": "Je kan op ‘Mijn account’ inloggen met",
     "translation": "You can log in to ‘My account’ with"
+  },
+  "4697c731-26fd-4ba5-8aeb-0f5b8385a54b": {
+    "original": "Zoek een groep",
+    "translation": "Search for a group"
   },
   "47e866d9-5349-4318-b779-161da61c2250": {
     "original": "Openstaande bedragen tussen groepen",
@@ -223,6 +271,10 @@
     "original": "Alle groepen",
     "translation": "All groups"
   },
+  "49397bef-c935-42b4-980e-a3174d8a4710": {
+    "original": "{firstName} kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en ‘Mijn account’.",
+    "translation": "{firstName} can log in or register with any of the entered email addresses and will then automatically get access to {firstName}'s data and 'My account'."
+  },
   "49742012-1ca8-4b91-a176-9ce3e17c1fe0": {
     "original": "Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de groep.",
     "translation": "A unique member number could not be created. Possibly there are too many members with the same date of birth. Contact the group."
@@ -235,9 +287,21 @@
     "original": "bv. Ruimtereis groep",
     "translation": "e.g. Space travel group"
   },
+  "4a2a630f-3396-404f-9316-d660df9935a9": {
+    "original": "Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een lokale groep na een manuele actie. Daarna kan een lokale groep het bedrag betalen via een online betaling in hun beheerdersportaal.",
+    "translation": "All affiliations that are (automatically or manually) added to members will only be added to the open amount of a local group after a manual step. After that, the local group can pay the amount through an online payment in their administrator portal."
+  },
   "4a39e12b-efa2-46fe-aa30-83bc576548a3": {
     "original": "Aangesloten via KSA Nationaal (niet aangerekend aan een groep)",
     "translation": "Affiliated via KSA National (not charged to a group)"
+  },
+  "4be45e47-0ee2-43cd-b719-8a60513f0965": {
+    "original": "Dit is een standaardinstelling. Een lokale groep kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting groepen.",
+    "translation": "This is a default setting. A local group can still edit these settings. So this setting mostly serves as a default and is used to communicate with groups."
+  },
+  "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": {
+    "original": "Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.",
+    "translation": "Each local group must link a default age group to every registration group. This way, the group's naming can be matched to the general naming used by the national organization."
   },
   "4d995169-f792-40f5-addf-60d8aed00362": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Ravot-API.",
@@ -255,6 +319,10 @@
     "original": "Groep",
     "translation": "Group"
   },
+  "51c27c5e-c2be-441b-a571-7bf573ee6848": {
+    "original": "Reken een bedrag aan aan de geselecteerde groep.",
+    "translation": "Charge an amount to the selected group."
+  },
   "528545c4-028b-4711-9b16-f6fa990c3130": {
     "original": "Aansluiting/verzekering KSA Nationaal*",
     "translation": "Affiliation/insurance KSA National*"
@@ -266,6 +334,10 @@
   "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
     "original": "Naamloos",
     "translation": "Unnamed"
+  },
+  "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
+    "original": "Gebruik de boekhoudmodule van deze groep om een zicht te krijgen op alle betalingen.",
+    "translation": "Use this group's bookkeeping module to get an overview of all payments."
   },
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
@@ -286,6 +358,10 @@
   "5c7d8f29-9d83-4f33-9d6b-0f947e384f75": {
     "original": "Importeer een zaalplan dat jij of een andere groep eerder uit Ravot hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
     "translation": "Import a seating plan that you or another group has previously exported from Ravot. Importing from other systems is not possible."
+  },
+  "5d1da89a-aa00-4953-aa59-53c0342c5c1a": {
+    "original": "Kies voor welke lokale groepen deze standaard leeftijdsgroep beschikbaar is.",
+    "translation": "Select for which local groups this default age group is available."
   },
   "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": {
     "original": "Je kan meerdere Stripe accounts aanmaken en koppelen aan jouw groep. Voor alle inschrijvingen en per webshop kan je een ander Stripe account selecteren bij de betaalinstellingen.",
@@ -310,6 +386,10 @@
   "5f0e24bb-10db-428b-a480-6f73d959cafa": {
     "original": "De link naar de website van deze groep.",
     "translation": "The link to the website of this group."
+  },
+  "5f37ed88-8822-44bb-8f06-7f527c5d00fe": {
+    "original": "Groepseigenfuncties",
+    "translation": "Custom group roles"
   },
   "5fe7a400-8c6a-42ba-b920-c8518e60e091": {
     "original": "Beperk welke groepen hun leden kunnen aansluiten met deze aansluiting.",
@@ -346,6 +426,10 @@
   "6507f89c-5c50-4c37-943f-ec17f5831cf0": {
     "original": "Lid betaald aan individuele groep",
     "translation": "Member pays to individual group"
+  },
+  "671147bd-cf0e-42fc-b456-18ce7d75b867": {
+    "original": "Alle groepen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
+    "translation": "All groups are now being moved to the new work year. This might take a while; you may need to refresh the page to see all the latest changes."
   },
   "6720c55c-b9a5-44ad-bdd5-4681e8e2478e": {
     "original": "Je hebt één openstaande persoonlijke actie in ‘Mijn account’.",
@@ -395,6 +479,10 @@
     "original": "website van je groep",
     "translation": "website of your group"
   },
+  "6e884f27-427f-4f85-914c-d5c2780253b0": {
+    "original": "Groepen",
+    "translation": "Groups"
+  },
   "6ef5e456-73f7-4baf-845c-4321094bbc6b": {
     "original": "Er ging iets mis. Je hebt geen toegang tot deze groep.",
     "translation": "Something went wrong. You do not have access to this group."
@@ -438,6 +526,14 @@
   "768afe13-5f57-4a82-a6ac-77c8999b8aeb": {
     "original": "Ravot toont op enkele plaatsen het logo van Ravot op jullie webshop. Op die manier kunnen we Ravot bekender maken bij andere groepen, waardoor we Ravot ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.",
     "translation": "Ravot shows the Ravot logo in a few places on your webshop. In this way, we can make Ravot better known to other groups, allowing us to keep Ravot affordable. You can reduce this if you prefer not to."
+  },
+  "76b00f58-a587-431f-9c28-1b86d394fc26": {
+    "original": "Stel in welke soorten lokalen groepen kunnen toevoegen",
+    "translation": "Choose which types of premises groups can add"
+  },
+  "78a012a9-3caa-405f-851d-429610138852": {
+    "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een lokale groep).",
+    "translation": "{member} can only register with a valid and active registration (registration with a local group is required)."
   },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een groep die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
@@ -483,6 +579,10 @@
     "original": "Groep",
     "translation": "Group"
   },
+  "88119ffc-b692-4222-8217-75a9fa64f675": {
+    "original": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
+    "translation": "Charge an amount to the {count} selected groups."
+  },
   "89a760d7-8995-458c-9635-da104971e95c": {
     "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via ‘Mijn account’. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
     "translation": "Trial periods allow you to give new members the opportunity to register without paying. After a set period, they will then receive a payment request (paying earlier is always possible) and can pay via ‘My account’. If you unsubscribe members before the end of the trial period, the outstanding amount will also be removed."
@@ -495,6 +595,10 @@
     "original": "Bepaal wie een e-mail krijgt als notificatie van een kampmelding op niveau van een groep, naast de indiener van de melding.",
     "translation": "Determine who receives an email as notification of a camp notification at group level, in addition to the petitioner of the notification."
   },
+  "8bc01345-6078-4949-91e6-c003001896ab": {
+    "original": "Deze ouder kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en ‘Mijn account’.",
+    "translation": "This parent can log in or register with any of the entered email addresses and will then automatically get access to the data of {firstName} and 'My account'."
+  },
   "8bc53634-08a5-4404-9455-421955e83ce4": {
     "original": "Je hebt geen toegangsrechten om de facturatiegegevens van deze groep te bewerken.",
     "translation": "You do not have access rights to edit the billing data of this group."
@@ -506,6 +610,10 @@
   "8e77d1c1-87dc-4fdb-ad6e-13145bc96f78": {
     "original": "Breng Ravot in orde",
     "translation": "Get Ravot in order"
+  },
+  "8ecaf93e-e872-4556-9067-f89b3f81332e": {
+    "original": "Een lokale groep kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.",
+    "translation": "A local group can edit this template. This template is used when there is no local template available."
   },
   "8fa09d5b-957e-49c0-b02f-2aca8e17eb24": {
     "original": "De kosten zullen aan het openstaande bedrag van elk lid worden toegevoegd. Leden kunnen dit betalen via ‘Mijn account’.",
@@ -563,6 +671,10 @@
     "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via ‘Mijn account’.",
     "translation": "You will receive an additional confirmation via email. If data changes in the future, you can now manage it via ‘My account’."
   },
+  "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
+    "original": "Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)",
+    "translation": "All age groups will be closed (unless the group already switched to this work year earlier)"
+  },
   "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
     "original": "Een hoofdbeheerder van jouw groep moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
     "translation": "A main administrator of your group must first set email addresses before you can send an email."
@@ -571,9 +683,17 @@
     "original": "Terug naar Ravot",
     "translation": "Back to Ravot"
   },
+  "9f6b9a67-e024-4cbc-9849-769807c6fc69": {
+    "original": "{firstName} kan inloggen of registreren op het ingevoerde e-mailadres en krijgt dan automatisch toegang tot de gegevens van {firstName} en ‘Mijn account’.",
+    "translation": "{firstName} can log in or register with the entered email address and will then automatically get access to {firstName}'s data and 'My account'."
+  },
   "a010c110-bf4e-4c12-a324-6b84c992e728": {
     "original": "Je kan geen groep aanmaken",
     "translation": "You cannot create a group"
+  },
+  "a0b1e726-345d-4288-a1db-7437d1b47482": {
+    "original": "Groep",
+    "translation": "Group"
   },
   "a15aada7-18bf-4c94-9165-c0f6ed539164": {
     "original": "Oeps, deze website is enkel voor administrators. Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
@@ -619,6 +739,14 @@
     "original": "Deze functie is niet beschikbaar voor deze groep",
     "translation": "This role is not available for this group"
   },
+  "aad47217-df26-43ce-a43c-896697d5fbd4": {
+    "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen groep.",
+    "translation": "Add custom roles that only apply within your own group."
+  },
+  "ab00e79e-c7cb-4595-9119-4fb5ca366dd1": {
+    "original": "Kies een groep",
+    "translation": "Select a group"
+  },
   "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
     "original": "Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.",
     "translation": "Your group is in a different work year than KSA National."
@@ -659,9 +787,17 @@
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw groep. Stel deze eerst in voor je verder gaat.",
     "translation": "You have not yet added billing data to your group. Set this up before continuing."
   },
+  "b34e7f10-2e03-42f5-b865-2d88571d2a6e": {
+    "original": "Deze periode is niet beschikbaar voor jouw groep.",
+    "translation": "This period is not available for your group."
+  },
   "b375f5be-879c-4696-8ccf-0e7066e3f5f4": {
     "original": "De ideale afmeting voor een banner van een sponsor is 1104x450px. De banner wordt maximaal 150px hoog getoond, maar een veelvoud is noodzakelijk voor een niet-pixelachtige weergave op smartphones. Upload bij voorkeur voor alle sponsors een afbeelding met dezelfde afmetingen. Vermijd het uploaden van het logo als banner, laat dan de banner weg. Als zowel een logo als banner werd geupload zal Ravot de banner verkiezen op mobiele tickets, en het logo op de afgedrukte tickets.",
     "translation": "The ideal size for a sponsor's banner is 1104x450px. The banner is displayed at a maximum height of 150px, but a multiple is necessary for a non-pixelated display on smartphones. Preferably upload an image with the same dimensions for all sponsors. Avoid uploading the logo as a banner, then leave the banner out. If both a logo and banner have been uploaded, Ravot will choose the banner on mobile tickets, and the logo on the printed tickets."
+  },
+  "b422c6f2-be24-4edd-aa99-a2d72d59c496": {
+    "original": "Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een lokale groep en per leeftijdsgroep, wachtlijst of activiteit van een lokale groep (of activiteit op nationaal niveau).",
+    "translation": "This can be extended at multiple levels: per default age group at the umbrella level, at the local level of a local group, and per age group, waiting list, or activity of a local group (or activity at national level)."
   },
   "b4307772-62dd-48a4-bae3-9d46df314727": {
     "original": "Welkom op Ravot. Zoek hieronder de groep waar je wilt inschrijven of ga naar het algemene ledenportaal.",
@@ -674,6 +810,14 @@
   "b7298a1c-aba3-4839-a7e0-b0e390d07476": {
     "original": "Naam van de groep of van het platform",
     "translation": "Name of the group or platform"
+  },
+  "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
+    "original": "Unieke groepen",
+    "translation": "Unique groups"
+  },
+  "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
+    "original": "De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.",
+    "translation": "The categories and age groups of the groups will be copied to the new work year."
   },
   "bb17dafc-4305-4213-90c9-2bb2701d777f": {
     "original": "Deze functie is niet beschikbaar omdat jouw groep nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
@@ -747,6 +891,14 @@
     "original": "verwijderde groep",
     "translation": "deleted group"
   },
+  "cd0975fc-75c4-4c1e-b80a-f611f0992caa": {
+    "original": "Alle groepen",
+    "translation": "All groups"
+  },
+  "cd37a13c-6779-49fa-a97f-1eddb6b61ebb": {
+    "original": "Deze groep is nog niet actief in dit werkjaar, maak dat eerst aan.",
+    "translation": "This group is not yet active in this work year; please create it first."
+  },
   "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
     "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Ravot). Er worden geen lagere tarieven automatisch toegepast.",
     "translation": "The answer is not known (was never filled in in Ravot). No lower tariffs are automatically applied."
@@ -794,6 +946,10 @@
   "d54c9b23-2d3c-49cd-b1fc-7e821d36fd41": {
     "original": "Inloggen bij KSA",
     "translation": "Log in to KSA"
+  },
+  "d5d2e25f-588e-496e-925f-f7e375c3888a": {
+    "original": "Mijn groep",
+    "translation": "My group"
   },
   "d687b491-be68-4e5b-9acb-e2c090951c23": {
     "original": "bv. jouwgroep.be",
@@ -867,6 +1023,10 @@
     "original": "Gegevens van groepen",
     "translation": "Groups data"
   },
+  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
+    "original": "Deze functies worden gekoppeld aan een lid samen met een lokale groep, door een hoofdbeheerder van die groep. Een lokale groep kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
+    "translation": "These roles are assigned to a member together with a local group, by a main administrator of that group. A local group can also add custom group-specific roles to expand the list."
+  },
   "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een groep terug stabiel te zijn.",
     "translation": "After periodic checks, the DNS settings of a group's domain name appear to be stable again."
@@ -883,6 +1043,10 @@
     "original": "Bekijk alle leden van deze groep via het beheerdersportaal",
     "translation": "View all members of this group via the administrator portal"
   },
+  "ec0c482e-0528-499f-82fa-b081bf708ded": {
+    "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
+    "translation": "This member is not registered with any group for the current work year and therefore cannot be affiliated."
+  },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze groep",
     "translation": "This role cannot be assigned to this group"
@@ -890,6 +1054,14 @@
   "f0ff8a76-a986-440c-b966-a5579e0844f4": {
     "original": "Je kan geen documenten aanmaken in de gratis versie van Ravot",
     "translation": "You cannot create documents in the free version of Ravot"
+  },
+  "f1248bd5-36f4-40fd-9467-08bda59127d6": {
+    "original": "Lijst van alle groepen die nog een openstaand bedrag hebben tegenover {name}",
+    "translation": "List of all groups that still have an open amount owed to {name}"
+  },
+  "f1931dcf-219f-4ca2-935b-d5a6747ddbdb": {
+    "original": "De aansluitingkosten worden altijd aangerekend via een organisatie/groep die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die groep worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.",
+    "translation": "Affiliation fees are always charged through an organization/group that represents the umbrella group. The payment settings and billing data of that group are used to collect all payments. This way, you can configure available payment methods and payment accounts."
   },
   "f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208": {
     "original": "Kies hieronder wat er precies terugbetaald (negatief bedrag invullen) werd. Let op dat Ravot momenteel geen automatische terugbetalingen doet voor online betalingen. Je moet dus zelf het bedrag manueel terugbetalen of storten.",
@@ -899,6 +1071,10 @@
     "original": "Geef iedereen toegang tot Ravot door ze de juiste functies te geven.",
     "translation": "Give everyone access to Ravot by giving them the right functions."
   },
+  "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
+    "original": "Het maximum geldt per lokale groep",
+    "translation": "The maximum applies per local group"
+  },
   "f4324095-61d6-44a7-9c81-0a114355cbaa": {
     "original": "Deze link is al in gebruik. Kies een andere. Voeg iets uniek toe, bv. de naam van je groep.",
     "translation": "This link is already in use. Choose another one. Add something unique, e.g. the name of your group."
@@ -906,6 +1082,14 @@
   "f477755c-2d6e-473c-b9b9-2ebe0af173f3": {
     "original": "Verwijder deze groep",
     "translation": "Delete this group"
+  },
+  "f4c0da5a-03a8-4be2-9ae1-ea049b5b46af": {
+    "original": "Er is nog geen verantwoordelijke groep ingesteld. Kies een groep die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
+    "translation": "No responsible group has been set yet. Select a group to collect affiliation fees."
+  },
+  "f4fef92e-cb28-408b-ada2-cf8b0da0fbfd": {
+    "original": "Groepseigenfuncties",
+    "translation": "Custom group roles"
   },
   "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
     "original": "De betaling loopt niet via Ravot",
@@ -918,6 +1102,10 @@
   "f5bf8b84-52d2-49a3-b4b4-73573b320739": {
     "original": "Kies welke informatie je verzamelt van groepen",
     "translation": "Choose what information you collect from groups"
+  },
+  "f675d723-b1b9-4abd-9e7c-0459c24e474b": {
+    "original": "Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze groep.",
+    "translation": "This activity is only visible to members who are registered in this group."
   },
   "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
     "original": "Jouw lokale groep betaalt {price} aan KSA Nationaal, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
@@ -954,6 +1142,10 @@
   "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",
     "translation": "Make sure users can log in via your own account system, separate from Ravot. For Microsoft you can"
+  },
+  "fd52fa36-16e6-4106-807c-c387bc0acc0e": {
+    "original": "Geen groepen beschikbaar in dit werkjaar",
+    "translation": "No groups available in this work year"
   },
   "fd68e1a7-6059-47fc-b7ad-fdfe4924a67d": {
     "original": "Bepaalde gegevens zijn ingebouwd in Ravot zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",

@@ -31,6 +31,10 @@
     "original": "Je vindt",
     "translation": "Vous trouverez"
   },
+  "00650ac3-eb78-4c8b-b7ec-d892772837a1": {
+    "original": "Geboortedatum",
+    "translation": "Date de naissance"
+  },
   "006de532-e3d1-4567-8def-48c99477d65e": {
     "original": "Deze categorie is leeg en zal nog niet getoond worden.",
     "translation": "Cette catégorie est vide et ne sera pas encore affichée."
@@ -178,6 +182,10 @@
   "0208fdd1-27c1-42bc-b6fb-32dd4fafe7ee": {
     "original": "Verhinder automatische toekenning",
     "translation": "Empêcher l'attribution automatique"
+  },
+  "022aad3d-6250-4000-9336-4ae7e8e75c23": {
+    "original": "Alle leden met deze functie, krijgen automatisch toegangsrechten tot de leeftijdsgroep van een vereniging waarvoor de functie werd toegevoegd - enkel voor één specifiek werkjaar.",
+    "translation": "Tous les membres ayant cette fonction reçoivent automatiquement les droits d'accès au groupe d'âge de l'association pour laquelle la fonction a été ajoutée – et ce pour une année associative spécifique seulement."
   },
   "02313223-edde-443f-8620-8951e696e77e": {
     "original": "Te jong",
@@ -659,6 +667,10 @@
     "original": "Optioneel",
     "translation": "Facultatif"
   },
+  "07d18e1b-2935-4945-9595-50e16a929b19": {
+    "original": "Voeg zelf nog persoonsgegevens toe die voor alle verenigingen beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard leeftijdsgroep, of deze verplichten per standaard leeftijdsgroep (via de instellingen van elke standaard leeftijdsgroep). Indien niet ingeschakeld kunnen verenigingen deze ook nog inschakelen volgens hun wensen.",
+    "translation": "Ajoutez des données personnelles supplémentaires qui seront accessibles à toutes les associations. Vous pouvez ensuite les rendre obligatoires pour tous les membres inscrits dans n'importe quel groupe d'âge standard, ou rendre celles-ci obligatoires par groupe d'âge standard (via les paramètres de chaque groupe d'âge standard). Si ce n'est pas activé, chaque association pourra décider de les activer ou non selon ses besoins."
+  },
   "07d642d2-d04a-4d96-b155-8dbdb1a9e4ff": {
     "original": "Alle leeftijdsgroepen",
     "translation": "Tous les groupes d’âge"
@@ -870,6 +882,10 @@
   "0ab03598-06c3-433b-a8c6-39daa3aa16f1": {
     "original": "Je kan nog steeds aan de gegevens van vorig jaar",
     "translation": "Vous pouvez toujours accéder aux données de l'année dernière"
+  },
+  "0ab4ec6b-ae79-4d48-bd45-37da8e712509": {
+    "original": "Je kan pas je volgende werkjaar klaarzetten ten vroegste 8 maanden voor de start ervan.",
+    "translation": "Vous ne pouvez préparer la prochaine année associative qu’au plus tôt 8 mois avant son début."
   },
   "0ab71307-8f4f-4701-b120-b552a1b6bdd0": {
     "original": "Oeps, de facturatiegegevens die je probeerde te selecteren lijken niet meer te bestaan. Herlaad de pagina en probeer opnieuw.",
@@ -1567,6 +1583,10 @@
     "original": "De annuleringskost wordt individueel en rekenkundig afgerond op 1 cent.",
     "translation": "Les frais d'annulation sont arrondis individuellement et arithmétiquement à 1 cent."
   },
+  "13a4b7fa-7de6-497e-9e7c-6aee4f783260": {
+    "original": "Je kan activiteiten voor andere verenigingen enkel aanmaken via het beheerdersportaal van die vereniging zelf.",
+    "translation": "Vous ne pouvez créer des activités pour d'autres associations que via le portail d'administration propre à ces associations."
+  },
   "13b42902-e159-4e6a-8562-e87c9c691c8b": {
     "original": "Typ hier het onderwerp van je e-mail",
     "translation": "Tapez ici l'objet de votre e-mail"
@@ -2010,6 +2030,10 @@
   "18a3f444-ebbc-4ff5-97a1-d998cd2f492f": {
     "original": "betaling ter plaatse",
     "translation": "paiement sur place"
+  },
+  "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
+    "original": "Beperk tot bepaalde verenigingen (tags)",
+    "translation": "Limiter à certaines associations (tags)"
   },
   "18aed6d0-0880-4d06-9260-fe342e6e8064": {
     "original": "Te betalen",
@@ -2587,6 +2611,10 @@
     "original": "adres van een vertegenwoordiger",
     "translation": "adresse d'un représentant"
   },
+  "20d0f420-edec-4c9f-9584-990258dcf1bf": {
+    "original": "Verenigingseigenfuncties",
+    "translation": "Fonctions propres à l'association"
+  },
   "20e536a4-be51-42f4-92ec-ce64b3af3c7f": {
     "original": "Beter voor grotere schermen.",
     "translation": "Meilleur pour les grands écrans."
@@ -2799,6 +2827,10 @@
     "original": "Er is een fout opgetreden bij het ophalen van de betaalaccounts",
     "translation": "Une erreur s'est produite lors de la récupération des comptes de paiement"
   },
+  "23911c89-12b5-403a-a355-20f3c986c76f": {
+    "original": "Noodcontact",
+    "translation": "Contact d'urgence"
+  },
   "239382e0-0906-4e0f-ba1a-c58574b92e78": {
     "original": "Code injection",
     "translation": "Injection de code"
@@ -2959,6 +2991,10 @@
     "original": "Open beheerderportaal",
     "translation": "Ouvrir le portail administrateur"
   },
+  "25fc3805-35f8-4cb4-9d1e-dff607f9738f": {
+    "original": "Verenigingseigenfuncties",
+    "translation": "Fonctions propres à l'association"
+  },
   "25fe78a6-38fc-4ead-b19c-62bf131525d9": {
     "original": "Kies welke gegevens je wilt vermelden op de documenten. Afhankelijk van waarvoor het document gebruikt moet worden, zijn bepaalde gegevens vereist. Sommige mutualiteiten vereisen bijvoorbeeld een rijksregisternummer.",
     "translation": "Choisissez les données que vous souhaitez mentionner sur les documents. Certaines données sont nécessaires en fonction de l'utilisation du document. Certaines mutualités exigent par exemple un numéro national."
@@ -3014,6 +3050,10 @@
   "26667b28-4e39-4218-9f9b-131bf3bae6ab": {
     "original": "Inschrijvingen activeren",
     "translation": "Activer les inscriptions"
+  },
+  "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
+    "original": "Zoek een vereniging waar je {firstName} wilt inschrijven",
+    "translation": "Cherchez une association où vous souhaitez inscrire {firstName}"
   },
   "268546f2-5dd0-492c-8680-e93b5d40807d": {
     "original": "Ken alle verplichte functies toe aan je leidingsploeg",
@@ -3074,6 +3114,10 @@
   "27103382-c303-4e1d-872e-ec37c499ad5c": {
     "original": "en niet gekozen voor",
     "translation": "et non choisi pour"
+  },
+  "271299b8-7b44-40b8-a4ce-e345abf164cb": {
+    "original": "Van welke vereniging is deze activiteit?",
+    "translation": "De quelle association cette activité dépend-elle ?"
   },
   "2712befc-5cc5-4013-b8df-ec0861a82c36": {
     "original": "Kies minstens één standaard leeftijdsgroep",
@@ -3687,6 +3731,10 @@
     "original": "Dag {name},",
     "translation": "Bonjour {name},"
   },
+  "2e5e052c-98b7-4375-b771-05a8913c145b": {
+    "original": "Voor nationale activiteiten moet je kiezen via welke vereniging alle betalingen verlopen. De betaalinstellingen van die vereniging worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die vereniging.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir par quelle association tous les paiements seront gérés. Ce sont alors les paramètres de paiement de cette association qui seront utilisés, et toutes les inscriptions seront comptabilisées dans sa comptabilité.\n\nDe plus, l'organisateur détermine aussi des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
+  },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de vereniging of persoon die instaat voor de opvang.",
     "translation": "Coordonnées de l'association ou de la personne responsable de l'accueil."
@@ -4126,6 +4174,10 @@
   "33a674c2-6981-442b-9bd4-01f71da7a159": {
     "original": "Startdatum",
     "translation": "Date de début"
+  },
+  "33a6805e-a4f3-44ca-bd10-f26bc1664963": {
+    "original": "Schakel over naar {werkjaar-2025-2026}",
+    "translation": "Passer à {werkjaar-2025-2026}"
   },
   "33a926ea-9bc7-444e-becc-c0f2f70e1f0e": {
     "original": "Inschrijving",
@@ -4699,6 +4751,10 @@
     "original": "Deze straat bestaat niet, kijk je deze even na op fouten? Formuleer de naam zonder afkortingen.",
     "translation": "Cette rue n'existe pas, vérifiez si vous n'avez pas fait de faute de frappe ? Formulez le nom sans abréviations."
   },
+  "3c283583-6a2d-497e-abe4-0e67852497b7": {
+    "original": "Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard leeftijdsgroep",
+    "translation": "Obligatoirement activé pour tous les membres inscrits à au moins un groupe d'âge standard"
+  },
   "3c390322-a9dd-43c7-9f2a-3d766d021169": {
     "original": "oktober",
     "translation": "octobre"
@@ -4918,6 +4974,10 @@
   "3ef919e4-b9a3-4b58-a316-83c9340c9830": {
     "original": "School",
     "translation": "École"
+  },
+  "3f196c5f-1b59-4d18-8fca-feaef78e7f09": {
+    "original": "Ouders",
+    "translation": "Parents"
   },
   "3f34c1d2-0305-432f-b789-7d334a7c093b": {
     "original": "Al bezig met opslaan... Even geduld.",
@@ -5255,6 +5315,14 @@
     "original": "meisjes",
     "translation": "filles"
   },
+  "43f93b0e-debd-4afa-b81a-fac67c7401ea": {
+    "original": "{werkjaar-2025-2026} is nu aangemaakt als kopie van je huidige werkjaar. Kijk de prijzen en instellingen goed na van je kopie.",
+    "translation": "{werkjaar-2025-2026} a été créé comme copie de votre année associative actuelle. Vérifiez bien les prix et paramètres de cette copie."
+  },
+  "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
+    "original": "Je hebt geen rechten om een activiteit aan te maken voor deze vereniging.",
+    "translation": "Vous n'avez pas les droits pour créer une activité pour cette association."
+  },
   "4402e10d-4229-492a-b7f7-fcf2a49af08d": {
     "original": "Buurvrouw",
     "translation": "Voisine"
@@ -5487,6 +5555,10 @@
     "original": "Je kan tijdsintervallen toevoegen waartussen men de bestelling ter plaatse kan consumeren. Als je er geen toevoegt, dan moet er geen keuze gemaakt worden (afgeraden). Als je jouw evenement organiseert op één tijdstip, dan raden we je aan om hier één tijdstip toe te voegen (dan moet er nog steeds geen keuze gemaakt worden, maar dan kunnen we dit tijdstip duidelijk communiceren in de bestelbevestiging).",
     "translation": "Vous pouvez ajouter des intervalles de temps entre lesquels la commande peut être consommée sur place. Si vous n'en ajoutez aucun, aucun choix ne doit être fait (déconseillé). Si votre événement est organisé à un moment précis, nous vous recommandons d'ajouter une seule heure ici (aucun choix ne doit encore être fait, mais nous pouvons communiquer clairement cette heure dans la confirmation de commande)."
   },
+  "4697c731-26fd-4ba5-8aeb-0f5b8385a54b": {
+    "original": "Zoek een vereniging",
+    "translation": "Chercher une association"
+  },
   "46a3962f-7d21-4cf4-b3a9-bfec8007e68a": {
     "original": "Kortingscode",
     "translation": "Code de réduction"
@@ -5578,6 +5650,10 @@
   "47f56c92-fcfb-4ef4-8d0b-fb0c959fb624": {
     "original": "Oops! Je gebruikt een oude versie van de applicatie om in te schrijven. Herlaad de website en verwijder indien nodig de cache van jouw browser.",
     "translation": "Oups ! Vous utilisez une ancienne version de l’application pour vous inscrire. Rechargez le site Web et supprimez le cache de votre navigateur si nécessaire."
+  },
+  "480abc28-3803-4d24-b5ad-4f8fb1a44471": {
+    "original": "{year-2025-2026} aanmaken",
+    "translation": "Créer {year-2025-2026}"
   },
   "48148df3-81a8-439e-a368-64355aa7da6e": {
     "original": "Lid betaald rechtstreeks aan Stamhoofd",
@@ -5755,6 +5831,10 @@
     "original": "Ja, ik ben 100% zeker",
     "translation": "Oui, j'en suis sûr à 100 %"
   },
+  "4a2a630f-3396-404f-9316-d660df9935a9": {
+    "original": "Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een vereniging na een manuele actie. Daarna kan een vereniging het bedrag betalen via een online betaling in hun beheerdersportaal.",
+    "translation": "Les affiliations ajoutées aux membres (automatiquement ou non) ne sont ajoutées au solde ouvert d'une association qu'après une action manuelle. Ensuite, l'association peut régler le montant via un paiement en ligne dans son portail d'administration."
+  },
   "4a2f9baa-da83-4cf9-a39c-59e7f37c1823": {
     "original": "Opgelet: je zal deze bestelling nog moeten betalen",
     "translation": "Attention : vous devrez encore payer cette commande"
@@ -5762,6 +5842,10 @@
   "4a3878c2-ee66-4e0c-9c3f-8221d0944469": {
     "original": "onbekende betaalmethodes",
     "translation": "modes de paiement inconnus"
+  },
+  "4a39e12b-efa2-46fe-aa30-83bc576548a3": {
+    "original": "Aangesloten via Stamhoofd (niet aangerekend aan een vereniging)",
+    "translation": "Inscrit via Stamhoofd (non facturé à une association)"
   },
   "4a3b54dc-e945-4a15-8b31-b9b4bb483b2a": {
     "original": "Betaling via Payconiq is tijdelijk onbeschikbaar",
@@ -5899,6 +5983,14 @@
     "original": "Onzichtbaar",
     "translation": "Invisible"
   },
+  "4be45e47-0ee2-43cd-b719-8a60513f0965": {
+    "original": "Dit is een standaardinstelling. Een vereniging kan deze instellingen nog aanpassen. Deze instelling dient dus vooral als standaardinstelling en om te communiceren richting verenigingen.",
+    "translation": "Ceci est une configuration par défaut. Une association peut toujours modifier ces paramètres. Elle sert principalement de valeur par défaut et pour la communication vers les associations."
+  },
+  "4bff53d6-7455-45fc-aa6d-ae0bafbe0b47": {
+    "original": "Elke vereniging moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de vereniging gekoppeld worden aan de algemene benaming van de koepel.",
+    "translation": "Chaque association doit lier un groupe d'inscription standard à chaque groupe d'âge. Cela permet de relier l'appellation utilisée par l'association à celle de la fédération."
+  },
   "4c1658ea-d89c-4634-9be5-e0a23febe2bb": {
     "original": "Ik heb nog niet betaald",
     "translation": "Je n’ai pas encore payé"
@@ -6026,6 +6118,10 @@
   "4dd7660f-3a18-4791-87b9-0e47115148f0": {
     "original": "Beschrijving onder tekstvak",
     "translation": "Description sous le champ de texte"
+  },
+  "4de518e0-b600-4aa9-912d-4cba86331427": {
+    "original": "Jouw bestand in bijlage mist een naam. Probeer eventuele om het document via een ander toestel te uploaden of een andere naam te geven.",
+    "translation": "Le fichier joint ne comporte pas de nom. Essayez de l'envoyer depuis un autre appareil ou de lui donner un autre nom."
   },
   "4dea71e9-0965-4c9a-81ac-6ee7046a0d8e": {
     "original": "Eigen vragenlijst",
@@ -6371,6 +6467,10 @@
     "original": "Bestelling bevestiging: overschrijving",
     "translation": "Confirmation de commande : virement bancaire"
   },
+  "51c27c5e-c2be-441b-a571-7bf573ee6848": {
+    "original": "Reken een bedrag aan aan de geselecteerde vereniging.",
+    "translation": "Facturez un montant à l'association sélectionnée."
+  },
   "51f9909d-c91f-455d-8cd4-ee0a1897e59d": {
     "original": "Nieuwe vragenlijst",
     "translation": "Nouveau formulaire personnalisé"
@@ -6618,6 +6718,10 @@
   "54f1115a-1f70-4a72-8f1d-80f7fae7ed47": {
     "original": "geboortedatum van een persoon",
     "translation": "date de naissance d'une personne"
+  },
+  "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
+    "original": "Gebruik de boekhoudmodule van deze vereniging om een zicht te krijgen op alle betalingen.",
+    "translation": "Utilisez le module de comptabilité de cette association pour avoir un aperçu de tous les paiements."
   },
   "5562135d-197d-4251-ada8-ffe747622e7b": {
     "original": "Leveringsmethode",
@@ -7199,6 +7303,10 @@
     "original": "Koptekst",
     "translation": "En-tête"
   },
+  "5d1da89a-aa00-4953-aa59-53c0342c5c1a": {
+    "original": "Kies voor welke verenigingen deze standaard leeftijdsgroep beschikbaar is.",
+    "translation": "Choisissez pour quelles associations ce groupe d'âge standard est disponible."
+  },
   "5d3c6960-1c2c-497b-99db-02523b97c9a6": {
     "original": "Luxemburg",
     "translation": "Luxembourg"
@@ -7206,6 +7314,10 @@
   "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": {
     "original": "Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account.",
     "translation": "Un compte Stripe supplémentaire, en plus de votre premier compte Stripe, coûte 5 euros une seule fois. Cela vous permet de recevoir les paiements par boutique en ligne sur un autre compte en y associant un autre compte bancaire via votre nouveau compte."
+  },
+  "5d5224a4-26d6-4a01-ac3d-8ed7728522b2": {
+    "original": "Kopie maken",
+    "translation": "Faire une copie"
   },
   "5d52a9c2-e473-494a-a0e5-e087682534a6": {
     "original": "Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.",
@@ -7418,6 +7530,10 @@
   "5f25a20d-ca03-4155-88c6-f9ae3872c052": {
     "original": "Naam betalende groep",
     "translation": "Nom du groupe payant"
+  },
+  "5f37ed88-8822-44bb-8f06-7f527c5d00fe": {
+    "original": "Verenigingseigenfuncties",
+    "translation": "Fonctions propres à l'association"
   },
   "5f5561e5-1d01-4ba0-8b17-5ae69377b391": {
     "original": "Meer informatie",
@@ -8011,6 +8127,10 @@
     "original": "Niet ondersteund. Herlaad de app indien nodig en probeer opnieuw.",
     "translation": "Non supporté. Rechargez l'application si nécessaire et réessayez."
   },
+  "671147bd-cf0e-42fc-b456-18ce7d75b867": {
+    "original": "Alle verenigingen worden nu overgezet op het nieuw werkjaar. Dit kan even duren, mogelijks moet je de pagina nog even herladen om alle laatste wijzigingen correct te zien.",
+    "translation": "Toutes les associations sont en train d'être transférées vers la nouvelle année associative. Cela peut prendre un moment ; vous devrez peut-être recharger la page pour voir les dernières modifications."
+  },
   "671cfb26-2018-4186-aa06-f167102db2b1": {
     "original": "De functie moet dan worden toegekend aan een specifieke inschrijvingsgroep",
     "translation": "La fonction doit alors être attribuée à un groupe d'inscription spécifique"
@@ -8391,6 +8511,10 @@
     "original": "Overschrijvingen",
     "translation": "Virements"
   },
+  "6c5de33a-dbbd-4b9c-866d-104e007836b3": {
+    "original": "Totaal openstaand bedrag van dit lid, exclusief het deel in verwerking (bv. overschrijvingen)",
+    "translation": "Montant total dû pour ce membre, hors paiements en cours de traitement (par exemple, virements)"
+  },
   "6c68261d-e165-48c0-b93d-759fd08a8511": {
     "original": "Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten. Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.",
     "translation": "Avez-vous un logo carré avec beaucoup de texte ou beaucoup d’espace vide ? Cochez cette option, sinon, il est préférable de la laisser décochée. Dans tous les cas, il est conseillé de supprimer d’abord tout l’espace vide de votre logo avant de le télécharger ici."
@@ -8562,6 +8686,10 @@
   "6e880cc3-2426-4762-b47e-d6e8d09bab4e": {
     "original": "Selecteer een land",
     "translation": "Sélectionnez un pays"
+  },
+  "6e884f27-427f-4f85-914c-d5c2780253b0": {
+    "original": "Verenigingen",
+    "translation": "Associations"
   },
   "6e9064fc-f18e-40c7-b36b-e544a4801b2d": {
     "original": "Bestand",
@@ -8746,6 +8874,10 @@
   "7087e475-b3a9-492c-9d56-bfa3e763e713": {
     "original": "Pas de volgende instellingen aan",
     "translation": "Ajustez les paramètres suivants"
+  },
+  "70894bb8-da5a-4f1a-929d-08f4479c4de3": {
+    "original": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via Stamhoofd.",
+    "translation": "Vérifiez que les méthodes de paiement sont bien configurées. Ces méthodes seront utilisées lorsque des membres s'inscrivent via Stamhoofd."
   },
   "709a5ff3-8d79-447b-906d-2c3cdabb41cf": {
     "original": "Onderwerp",
@@ -9155,6 +9287,10 @@
     "original": "Noodcontactpersoon",
     "translation": "Personne de contact en cas d'urgence"
   },
+  "75815048-939a-4ac1-a81c-f23fc3ec5006": {
+    "original": "Jouw vereniging betaalt {price} aan Stamhoofd.",
+    "translation": "Votre association paie {price} à Stamhoofd."
+  },
   "75913b92-4a79-4902-91ad-cb56e0549b7c": {
     "original": "Andere domeinnaam voor registratie",
     "translation": "Autre nom de domaine pour l'enregistrement"
@@ -9234,6 +9370,10 @@
   "76a41c36-99d1-467c-a243-3a30a56c272e": {
     "original": "Voorbeeld: de aangerekende administratiekost bedraagt {exampleAdministrationFee1} op een bedrag van {exampleAdministrationFeeValue1}, en {exampleAdministrationFee2} op een bedrag van {exampleAdministrationFeeValue2}.",
     "translation": "Exemple : les frais administratifs facturés s’élèvent à {exampleAdministrationFee1} sur un montant de {exampleAdministrationFeeValue1}, et {exampleAdministrationFee2} sur un montant de {exampleAdministrationFeeValue2}."
+  },
+  "76b00f58-a587-431f-9c28-1b86d394fc26": {
+    "original": "Stel in welke soorten lokalen verenigingen kunnen toevoegen",
+    "translation": "Définissez quels types de salles peuvent être ajoutés par les associations"
   },
   "76eb7982-9fc5-490a-9414-42bb7f10b8d6": {
     "original": "Bewerk inschrijvingsinstellingen",
@@ -9395,6 +9535,10 @@
     "original": "bestelling + naam",
     "translation": "commande + nom"
   },
+  "78a012a9-3caa-405f-851d-429610138852": {
+    "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een vereniging).",
+    "translation": "{member} ne peut s'inscrire qu'avec une inscription active et valable (inscription obligatoire dans une association)."
+  },
   "78a4c6c3-c0d0-457c-adfb-44122307161a": {
     "original": "Dit document kan niet gedownload worden omdat er nog gegevens ontbreken of ongeldig zijn. Kijk alle gegevens van {name} na en contacteer ons indien het probleem nog niet is verholpen.",
     "translation": "Ce document ne peut pas être téléchargé car des données sont manquantes ou invalides. Veuillez vérifier toutes les données de {name} et contactez-nous si le problème persiste."
@@ -9522,6 +9666,10 @@
   "7a8c848b-8ffe-488f-9635-43a2c2b10a9f": {
     "original": "Naam, type en beschikbaarheid.",
     "translation": "Nom, type et disponibilité."
+  },
+  "7a8d174e-2807-4ada-ad94-6f519edc9c14": {
+    "original": "Nog te betalen specifiek voor deze inschrijving",
+    "translation": "Montant encore à payer spécifiquement pour cette inscription"
   },
   "7aa189c8-5a21-4c4f-99c9-98e26119ee9b": {
     "original": "Inschrijven mogelijk van",
@@ -10447,6 +10595,10 @@
     "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
     "translation": "La prochaine adhésion de ce membre commence le {date}. Aujourd’hui, ce membre n’est pas affilié à KSA National et n’est donc pas assuré."
   },
+  "88119ffc-b692-4222-8217-75a9fa64f675": {
+    "original": "Reken een bedrag aan aan de {count} geselecteerde verenigingen.",
+    "translation": "Facturez un montant aux {count} associations sélectionnées."
+  },
   "88136719-d85f-499f-8c5f-252519947c03": {
     "original": "Instellingen",
     "translation": "Paramètres"
@@ -10666,6 +10818,10 @@
   "8a9a35d5-ff86-48e3-81e1-42cf85708e06": {
     "original": "Het bestand is verlopen",
     "translation": "Le fichier a expiré"
+  },
+  "8aad46a6-a864-4e60-a3f0-dffe2b37033c": {
+    "original": "Adres",
+    "translation": "Adresse"
   },
   "8abc595b-a705-499b-b4a2-17cb3cf99e47": {
     "original": "niet aangevinkt",
@@ -11027,6 +11183,10 @@
     "original": "Bekijk leden op de wachtlijst",
     "translation": "Voir les membres sur la liste d'attente"
   },
+  "8e92e034-b745-4d0f-8ac1-4363101f9603": {
+    "original": "Ontbrekende gegevens",
+    "translation": "Informations manquantes"
+  },
   "8ea1d574-6388-4033-bb4e-f2e031d2da3b": {
     "original": "Ben je zeker dat je de e-mail wilt versturen?",
     "translation": "Êtes-vous sûr de vouloir envoyer l’e-mail ?"
@@ -11050,6 +11210,10 @@
   "8eb5f50e-d00d-444d-979a-f80ae834eb9a": {
     "original": "E-mailadres administratie",
     "translation": "Adresse e-mail de l'administration"
+  },
+  "8ecaf93e-e872-4556-9067-f89b3f81332e": {
+    "original": "Een vereniging kan deze template aanpassen. Deze template wordt gebruikt als er geen lokale template is.",
+    "translation": "Une association peut personnaliser ce modèle. Ce modèle est utilisé s'il n'existe pas de modèle local."
   },
   "8ed2c90d-f77a-4d9d-aca5-64a76ed50e32": {
     "original": "Deze beheerders hebben enkel een account en zijn niet aangesloten als lid (of hun account kon niet gekoppeld worden aan een lid omdat ze een onbekend e-mailadres gebruiken).",
@@ -11150,6 +11314,10 @@
   "905afd18-5e9a-4d30-9040-646d29b25c15": {
     "original": "Gemengd",
     "translation": "Mixte"
+  },
+  "9063147f-5dee-4da0-8928-69d7dcb352c4": {
+    "original": "Na controle van alle instellingen kan je overschakelen op het nieuwe werkjaar. Dit kan ten vroegste vanaf juli.",
+    "translation": "Après avoir vérifié tous les paramètres, vous pourrez passer à la nouvelle année associative, au plus tôt à partir de juillet."
   },
   "90816551-3afb-44d2-b698-bef4a73d36b3": {
     "original": "Via opzoekwerk (bv. Google)",
@@ -12123,6 +12291,10 @@
     "original": "van",
     "translation": "de"
   },
+  "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
+    "original": "Alle leeftijdsgroepen worden gesloten (tenzij de vereniging al eerder overschakelde naar dit werkjaar)",
+    "translation": "Tous les groupes d'âge seront fermés (sauf si l'association a déjà migré vers cette année associative)"
+  },
   "9e0461d2-7439-4588-837c-750de6946287": {
     "original": "Optioneel",
     "translation": "Optionnel"
@@ -12339,6 +12511,10 @@
     "original": "Keuze 2",
     "translation": "Choix 2"
   },
+  "a0b1e726-345d-4288-a1db-7437d1b47482": {
+    "original": "Vereniging",
+    "translation": "Association"
+  },
   "a0b2d272-5bcf-4ecb-9bb1-f2ba239b6c03": {
     "original": "Bezig met doorverwijzen",
     "translation": "Redirection en cours"
@@ -12398,6 +12574,10 @@
   "a122d0f1-c29d-40de-8700-7506596cdf63": {
     "original": "Wijzig de instellingen rond toestemming voor gegevensverzameling",
     "translation": "Modifiez les paramètres relatifs à l'autorisation de collecte de données"
+  },
+  "a148463b-5ae7-44d8-9cac-20538fc95431": {
+    "original": "Tweede ouder",
+    "translation": "Deuxième parent"
   },
   "a159e71b-e975-48c0-a33b-fdb52ad22299": {
     "original": "Er is een fout opgetreden bij het maken van de webshop, kies een andere naam voor jouw webshop",
@@ -12763,6 +12943,10 @@
     "original": "kan zelf inloggen of registreren op",
     "translation": "peut se connecter ou s’inscrire sur"
   },
+  "a654551b-6dcd-48a9-a5c5-4609fdcba5f3": {
+    "original": "Stamhoofd is in orde",
+    "translation": "Stamhoofd est en ordre"
+  },
   "a654d6d0-2ada-492a-8090-a78a9486da5a": {
     "original": "Nog even geduld. Bestellen kan vanaf {date}.",
     "translation": "Un peu de patience. Les commandes seront possibles à partir du {date}."
@@ -12782,6 +12966,10 @@
   "a67e18e6-6159-40c9-8515-4de601ff586b": {
     "original": "Naam van deze sponsor",
     "translation": "Nom de ce sponsor"
+  },
+  "a68020d1-1ee8-4b57-a307-840fb5deaa02": {
+    "original": "Telefoonnummer",
+    "translation": "Numéro de téléphone"
   },
   "a6862509-523b-4b07-bbd7-6bfba863874e": {
     "original": "Jouw winkelmandje is leeg. Ga terug en klik op een product om iets toe te voegen.",
@@ -13079,6 +13267,10 @@
     "original": "Kan in enkele uren worden geraden door een computer",
     "translation": "Peut être deviné en quelques heures par un ordinateur"
   },
+  "aad47217-df26-43ce-a43c-896697d5fbd4": {
+    "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen vereniging.",
+    "translation": "Ajoutez des fonctions spécifiques qui ne s'appliquent qu'à votre propre association."
+  },
   "aad50919-a9bc-4f59-8bf9-28c61f2bd4d7": {
     "original": "Adres ontbreekt",
     "translation": "Adresse manquante"
@@ -13095,6 +13287,10 @@
     "original": "Voeg toe",
     "translation": "Ajouter"
   },
+  "ab00e79e-c7cb-4595-9119-4fb5ca366dd1": {
+    "original": "Kies een vereniging",
+    "translation": "Choisissez une association"
+  },
   "ab0535e6-bbaa-4961-a34f-aca39ef0d785": {
     "original": "Verschuldigd sinds",
     "translation": "Dû depuis"
@@ -13110,6 +13306,10 @@
   "ab071f11-e05b-4bd9-9370-cd4f220c1b54": {
     "original": "Je hebt geen toegangsrechten voor deze actie",
     "translation": "Vous n'avez pas les droits d'accès pour cette action"
+  },
+  "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
+    "original": "Jouw vereniging bevindt zich in een ander werkjaar dan KSA Nationaal.",
+    "translation": "Votre association se trouve dans une autre année associative que KSA National."
   },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)",
@@ -13567,6 +13767,10 @@
     "original": "Deze kleur is niet toegelaten. Kies een andere kleur.",
     "translation": "Cette couleur n'est pas autorisée. Choisissez une autre couleur."
   },
+  "b1291584-d2ad-4ebd-88ed-cbda4f3755b4": {
+    "original": "bijlage",
+    "translation": "pièce jointe"
+  },
   "b1491db8-95be-4d67-ad4a-5edb124b23a5": {
     "original": "Beroepsvereniging",
     "translation": "Association professionnelle"
@@ -13586,6 +13790,10 @@
   "b1713243-3ede-4818-b67d-01f83154776f": {
     "original": "Kampmeldingen goedkeuren",
     "translation": "Approuver les inscriptions aux camps"
+  },
+  "b17b2abe-34a5-4231-a170-5a9b849ecd3c": {
+    "original": "Er ging iets mis bij het ophalen van de bestellingen. Mogelijks wordt een bepaalde filter of ordening niet ondersteund, pas die aan indien mogelijk.",
+    "translation": "Une erreur est survenue lors du chargement des commandes. Il se peut qu'un certain filtre ou tri ne soit pas supporté ; modifiez-le si possible."
   },
   "b182a5e2-aae7-48ae-bb42-c51edfb5df29": {
     "original": "Volledige toegang",
@@ -13699,6 +13907,10 @@
     "original": "Ongeldig rekeningnummer:",
     "translation": "Numéro de compte invalide :"
   },
+  "b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1": {
+    "original": "Dit werkjaar is niet actief",
+    "translation": "Cette année associative n'est pas active"
+  },
   "b2e7a448-e564-4549-8ddb-0d7a795ed505": {
     "original": "Webshop archief",
     "translation": "Archives boutique en ligne"
@@ -13746,6 +13958,10 @@
   "b34be63d-0883-42b5-9d06-b245f065c84d": {
     "original": "Enkel",
     "translation": "Uniquement"
+  },
+  "b34e7f10-2e03-42f5-b865-2d88571d2a6e": {
+    "original": "Deze periode is niet beschikbaar voor jouw vereniging.",
+    "translation": "Cette période n'est pas disponible pour votre association."
   },
   "b353c151-6304-4a75-887f-3b84a757734b": {
     "original": "Open inschrijvingen pas na een bepaalde datum",
@@ -13806,6 +14022,10 @@
   "b41926c9-7846-4032-814c-2bf739ca6314": {
     "original": "Inschrijvingen door organisaties zijn niet toegestaan voor",
     "translation": "Les inscriptions par les organisations ne sont pas autorisées pour"
+  },
+  "b422c6f2-be24-4edd-aa99-a2d72d59c496": {
+    "original": "Dit kan op meerdere niveau's worden uitgebreid: per standaard leeftijdsgroep van de koepel, op lokaal niveau van een vereniging en per leeftijdsgroep, wachtlijst of activiteit van een vereniging (of activiteit op nationaal niveau).",
+    "translation": "Vous pouvez élargir cela à plusieurs niveaux : par groupe d'âge standard de la fédération, au niveau local d'une association et par groupe d'âge, liste d'attente ou activité d'une association (ou activité au niveau national)."
   },
   "b427a2eb-4d55-4f41-b60e-ae3c6819100d": {
     "original": "inschrijvingsgroep",
@@ -14083,9 +14303,17 @@
     "original": "Kampmelding nakijken",
     "translation": "Vérifier la notification de camp"
   },
+  "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
+    "original": "Unieke verenigingen",
+    "translation": "Associations uniques"
+  },
   "b78c8455-7e28-47b2-b2fd-ba6a82302976": {
     "original": "personen",
     "translation": "personnes"
+  },
+  "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
+    "original": "De categorieën en leeftijdsgroepen van de verenigingen worden gedupliceerd naar het nieuwe werkjaar.",
+    "translation": "Les catégories et groupes d'âge des associations seront dupliqués pour la nouvelle année associative."
   },
   "b78e0854-14c4-4474-bbb4-7ba80056ff49": {
     "original": "zijn niet",
@@ -14354,6 +14582,10 @@
   "badafccc-80ac-4716-87dc-0385f4741af7": {
     "original": "Geavanceerd",
     "translation": "Avancé"
+  },
+  "bae1933a-d646-4d5c-983d-8c62319b924c": {
+    "original": "De inschrijvingen van elke inschrijvingsgroep wordt gesloten, je kan deze na controle open zetten.",
+    "translation": "Les inscriptions de chaque groupe d'inscription seront clôturées ; après vérification, vous pourrez les rouvrir si nécessaire."
   },
   "baf6fd8e-1937-4c8b-8510-fa811473c157": {
     "original": "Geen lid gevonden, of je hebt geen toegang tot dit lid",
@@ -14682,6 +14914,10 @@
   "bea5dd9d-12e8-4f85-8bea-133467c3a737": {
     "original": "Scouts & Gidsen Vlaanderen",
     "translation": "Scouts et Guides de Flandre"
+  },
+  "beb45452-dee7-4a7f-956c-e6db06aac20f": {
+    "original": "Openstaand bedrag",
+    "translation": "Montant impayé"
   },
   "beb8d8e8-9ea2-4976-82b8-ca7956cc57cc": {
     "original": "Tijdvak bewerken",
@@ -15779,6 +16015,10 @@
     "original": "maart",
     "translation": "mars"
   },
+  "cd0975fc-75c4-4c1e-b80a-f611f0992caa": {
+    "original": "Alle verenigingen",
+    "translation": "Toutes les associations"
+  },
   "cd099f48-7a5e-4993-854d-697104201871": {
     "original": "Je hebt geen toegang om deze API-user te wijzigen",
     "translation": "Vous n'avez pas l'autorisation de modifier cet utilisateur API"
@@ -15791,6 +16031,10 @@
     "original": "Bevestig de naam van het lid",
     "translation": "Confirmez le nom du membre"
   },
+  "cd37a13c-6779-49fa-a97f-1eddb6b61ebb": {
+    "original": "Deze vereniging is nog niet actief in dit werkjaar, maak dat eerst aan.",
+    "translation": "Cette association n'est pas encore active pendant cette année associative, créez-la d'abord."
+  },
   "cd511a0e-71cc-44bb-8107-7de1a18dab9d": {
     "original": "Een extra rij boven de kolomnamen met de categorie van elke kolom, voor een duidelijkere weergave.",
     "translation": "Une ligne supplémentaire au-dessus des noms de colonnes avec la catégorie de chaque colonne, pour une meilleure lisibilité."
@@ -15802,6 +16046,10 @@
   "cd539f63-31c0-46f3-a0b5-a3826796a9d0": {
     "original": "Kies je afhaalmethode",
     "translation": "Choisissez votre méthode de retrait"
+  },
+  "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
+    "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Stamhoofd). Er worden geen lagere tarieven automatisch toegepast.",
+    "translation": "La réponse n'est pas connue (n'a jamais été complétée dans Stamhoofd). Aucun tarif réduit ne sera automatiquement appliqué."
   },
   "cd60d49f-9fc8-4fb7-b574-1231874c1d43": {
     "original": "Overloop alle stappen en bevestig dat je alles hebt nagekeken bij elke stap. Zorg dat alles ten laatste tegen 15 oktober is nagekeken.",
@@ -15899,6 +16147,10 @@
     "original": "Naar wie?",
     "translation": "À qui ?"
   },
+  "ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2": {
+    "original": "Er ging iets mis bij het ophalen van de bijlage.",
+    "translation": "Une erreur s'est produite lors de la récupération de la pièce jointe."
+  },
   "ce7d2ca1-bda6-4701-b6a9-3e0cd7ac23c2": {
     "original": "Feedback systeem openen...",
     "translation": "Ouverture du système de feedback…"
@@ -15938,6 +16190,10 @@
   "cec2dffb-f38d-4337-b575-8cf37d6556a2": {
     "original": "Zoek bestaande leden voor {group}",
     "translation": "Chercher des membres existants pour {group}"
+  },
+  "ced29068-facb-4692-9fd7-d9ac74e35359": {
+    "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Stamhoofd kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Stamhoofd kunnen inschrijven.",
+    "translation": "Vérifiez que tous les paramètres des groupes sont corrects. Quand tout est bien configuré, vous permettez aux membres de s'inscrire et de payer via Stamhoofd. Veillez donc à bien choisir les tarifs et restrictions d'âge. Quand tout est prêt, vous pouvez ouvrir un groupe d'âge afin que les membres puissent s'inscrire via Stamhoofd."
   },
   "ced74e50-34b9-4d83-a89d-542c4b0c4c45": {
     "original": "Voorwaarden bewerken",
@@ -16462,6 +16718,10 @@
   "d5c7e037-e526-41d5-9151-d9e115b4b8de": {
     "original": "Dit is leeg maar werd wel ingevuld in een andere taal",
     "translation": "Ceci est vide mais a été rempli dans une autre langue"
+  },
+  "d5d2e25f-588e-496e-925f-f7e375c3888a": {
+    "original": "Mijn vereniging",
+    "translation": "Mon association"
   },
   "d5d7b908-50a5-4b3e-94d2-1e54e549764b": {
     "original": "Onbekend karakters in bestandsnaam",
@@ -17407,6 +17667,10 @@
     "original": "Klaassen",
     "translation": "Jacques"
   },
+  "e0433c50-b6df-4fd9-92ba-e79d3b21aaa0": {
+    "original": "Je kan een kopie maken van de instellingen van je huidige werkjaar (bv. de prijzen en onderverdelingen) als voorbereiding op je nieuwe werkjaar. Je kan daarna op een moment naar keuze overschakelen naar het nieuwe werkjaar (bv. als je al in juli begint met inschrijvingen voor het volgende werkjaar). Maar je kan ook wachten tot het einde van het huidige werkjaar, dan zal je automatisch worden overgeschakeld.",
+    "translation": "Vous pouvez préparer votre nouvelle année associative en copiant les paramètres de votre année actuelle (par exemple : prix et subdivisions). Vous pourrez ensuite passer à la nouvelle année associative au moment qui vous convient (par exemple si vous commencez déjà les inscriptions en juillet). Vous pouvez aussi attendre la fin de l'année associative actuelle ; la transition vers la nouvelle année se fera alors automatiquement."
+  },
   "e0517811-de10-4974-9818-efd3570aefe6": {
     "original": "gewest",
     "translation": "région"
@@ -17482,6 +17746,10 @@
   "e0fff11f-5ddc-4edc-bab9-a1b293d2681f": {
     "original": "Wijzig status",
     "translation": "Modifier le statut"
+  },
+  "e0fff936-3f3c-46b8-adcf-c723c33907a2": {
+    "original": "Het werkjaar dat je wilt instellen is nog niet gestart",
+    "translation": "L'année associative que vous souhaitez définir n'a pas encore commencé"
   },
   "e11ad49e-d853-464c-a951-d45b9549ec30": {
     "original": "Deze categorie is niet zichtbaar voor gewone leden",
@@ -17911,6 +18179,10 @@
     "original": "Aankruisen",
     "translation": "Cocher"
   },
+  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
+    "original": "Deze functies worden gekoppeld aan een lid samen met een vereniging, door een hoofdbeheerder van die vereniging. Een vereniging kan zelf ook nog verenigingseigenfuncties toevoegen om deze uit te breiden.",
+    "translation": "Ces fonctions sont attribuées à un membre et associées à une association, par un administrateur principal de cette association. Une association peut également ajouter ses propres fonctions spécifiques pour les étendre."
+  },
   "e6dff01b-1b53-4722-8791-e5a848ffa906": {
     "original": "Deze tekst zal bovenaan op elk document worden geplaatst.",
     "translation": "Ce texte sera placé en haut de chaque document."
@@ -18071,6 +18343,10 @@
     "original": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe werkjaar.",
     "translation": "La date d'expiration se situe entre la date de début et la date de fin et est facultative. La connexion reste valable après cette date, mais dans le système, elle est partiellement considérée comme 'expirée'. Utilisez-la pour prolonger une connexion dans la nouvelle année associative."
   },
+  "e875d12e-fa1d-43f5-b96a-be4ba8af04eb": {
+    "original": "{name} is nu ingesteld als het huidige werkjaar",
+    "translation": "{name} est maintenant défini comme l'année associative en cours"
+  },
   "e883ae60-e858-4bcf-9e60-5d03986459c2": {
     "original": "Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar",
     "translation": "Une ou plusieurs possibilités de choix de {group} ne sont plus disponibles"
@@ -18119,6 +18395,10 @@
     "original": "Wijzig de status terug naar 'wacht op betaling'.",
     "translation": "Remettre le statut à 'en attente de paiement'."
   },
+  "e942f245-9e13-427b-960e-5500a2711a05": {
+    "original": "Standaardtarief",
+    "translation": "Tarif standard"
+  },
   "e955be72-7a4e-4a0d-9872-043cf75f1134": {
     "original": "Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken",
     "translation": "Après avoir enregistré, vous ne pouvez plus annuler cela"
@@ -18146,6 +18426,10 @@
   "e98f3227-23ff-4db5-9326-10bc43548738": {
     "original": "Vrije invoervelden",
     "translation": "Champs de saisie libre"
+  },
+  "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
+    "original": "* Voor de aansluiting bij Stamhoofd moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw vereniging gebruikt gekoppeld kan worden aan de benaming van Stamhoofd.",
+    "translation": "* Pour l'affiliation à Stamhoofd, vous devez encore sélectionner un groupe d'inscription standard correct afin de pouvoir relier l'appellation de votre association à celle de Stamhoofd."
   },
   "e9a19cd1-7a57-440d-a97e-6cff23a7f46c": {
     "original": "Voorwaarden",
@@ -18342,6 +18626,10 @@
   "ec0978f8-95bc-44c9-a906-ceaf6fd55baf": {
     "original": "Ben je zeker dat je deze melding wilt indienen?",
     "translation": "Êtes-vous sûr de vouloir soumettre cette notification ?"
+  },
+  "ec0c482e-0528-499f-82fa-b081bf708ded": {
+    "original": "Dit lid is bij geen enkele vereniging ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
+    "translation": "Ce membre n'est inscrit dans aucune association pour l'année associative en cours et ne peut donc pas être affilié"
   },
   "ec252aa0-30df-4d49-9a37-a2ce6a0fc6dc": {
     "original": "Webshop zonder tickets",
@@ -18607,6 +18895,10 @@
     "original": "Leeftijdsgroepen",
     "translation": "Groupes d'âge"
   },
+  "effd2b1f-01f6-46e0-a5af-488bcbd93f1d": {
+    "original": "E-mailadres",
+    "translation": "Adresse e-mail"
+  },
   "f001f5c4-f3ea-46c0-bd0c-0b30ad8098f5": {
     "original": "Meerdere dagen",
     "translation": "Plusieurs jours"
@@ -18703,6 +18995,10 @@
     "original": "Bestelling per lijn",
     "translation": "Commande par ligne"
   },
+  "f1248bd5-36f4-40fd-9467-08bda59127d6": {
+    "original": "Lijst van alle verenigingen die nog een openstaand bedrag hebben tegenover {name}",
+    "translation": "Liste de toutes les associations avec un solde ouvert envers {name}"
+  },
   "f129e12b-9079-4a88-b94c-d6abace21e80": {
     "original": "Basketbal",
     "translation": "Basket-ball"
@@ -18746,6 +19042,10 @@
   "f193133e-143e-48fa-8d13-afcc01031343": {
     "original": "Wanneer ingeschakeld?",
     "translation": "Quand activé ?"
+  },
+  "f1931dcf-219f-4ca2-935b-d5a6747ddbdb": {
+    "original": "De aansluitingkosten worden altijd aangerekend via een organisatie/vereniging die de koepel vertegenwoordigt. De betaalinstellingen en facturatiegegevens van die vereniging worden gebruikt voor het verzamelen van alle betalingen. Op die manier kan je de beschikbare betaalmethodes en betaalaccounts configureren.",
+    "translation": "Les frais d'affiliation sont toujours facturés via une organisation/association représentant la fédération. Les paramètres de paiement et les données de facturation de cette association sont utilisés pour collecter tous les paiements. De cette manière vous pouvez configurer les méthodes et comptes de paiement disponibles."
   },
   "f19516b2-0c37-4dce-86f4-46690ec3dfc9": {
     "original": "Geen vervaldatum",
@@ -18875,6 +19175,10 @@
     "original": "Bewerk",
     "translation": "Modifier"
   },
+  "f3236c83-b7ba-453f-981a-3e06925c9b7a": {
+    "original": "Geef iedereen toegang tot Stamhoofd door ze de juiste functies te geven.",
+    "translation": "Donnez à chacun l'accès à Stamhoofd en leur attribuant les bonnes fonctions."
+  },
   "f3262b38-7afe-485b-bd97-fab76e825818": {
     "original": "Het bedrag dat betaald werd voor de inschrijving. Dit kan automatisch uit het systeem gehaald worden, waarbij ook rekening gehouden wordt met kortingen. De dagprijs wordt berekend op basis van de begin en einddatum. Gratis inschrijvingen komen niet in aanmerking voor een fiscale aftrek en daarvoor wordt dus geen document aangemaakt.",
     "translation": "Le montant payé pour l'inscription. Cela peut être automatiquement extrait du système, en tenant également compte des réductions. Le prix journalier est calculé sur la base des dates de début et de fin. Les inscriptions gratuites ne sont pas éligibles à une déduction fiscale et aucun document n'est donc créé à cet effet."
@@ -18938,6 +19242,10 @@
   "f3f810dd-cd4b-4766-b19e-ec995c9cca77": {
     "original": "Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.",
     "translation": "Créez une compensation de solde avec un prix total de 0 euro qui combine des éléments positifs et négatifs pour simplifier le compte en suspens."
+  },
+  "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
+    "original": "Het maximum geldt per vereniging",
+    "translation": "Le maximum s'applique par association"
   },
   "f4052a0b-9564-49c4-a6b6-41af3411f3b0": {
     "original": "Lid",
@@ -19015,6 +19323,10 @@
     "original": "Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.",
     "translation": "Mollie est connecté, mais vous devez encore compléter quelques données."
   },
+  "f4c0da5a-03a8-4be2-9ae1-ea049b5b46af": {
+    "original": "Er is nog geen verantwoordelijke vereniging ingesteld. Kies een vereniging die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
+    "translation": "Aucune association responsable n'a encore été définie. Choisissez une association qui prendra en charge la collecte des frais d'affiliation."
+  },
   "f4caaf58-4248-4f91-9e76-c8cec82f528d": {
     "original": "Optionele functies",
     "translation": "Fonctions optionnelles"
@@ -19043,6 +19355,10 @@
     "original": "Vul de gemeente in",
     "translation": "Veuillez saisir la commune"
   },
+  "f4fef92e-cb28-408b-ada2-cf8b0da0fbfd": {
+    "original": "Verenigingseigenfuncties",
+    "translation": "Fonctions propres à l'association"
+  },
   "f501785a-7e57-4184-8cf0-a3413ad2f2a4": {
     "original": "Link toevoegen",
     "translation": "Ajouter un lien"
@@ -19058,6 +19374,10 @@
   "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
     "original": "De betaling loopt niet via Stamhoofd",
     "translation": "Le paiement ne passe pas par Stamhoofd"
+  },
+  "f5229cc1-c908-4409-855a-1dba40371815": {
+    "original": "Jouw leiding kan in Stamhoofd jouw beveiligingscode opzoeken en aan jou doorgeven. Ben je zelf leiding, vraag het dan aan jouw medeleiding of KSA Nationaal.",
+    "translation": "Votre encadrement peut retrouver votre code de sécurité dans Stamhoofd et vous le transmettre. Si vous faites partie de l'encadrement, demandez-le à vos collègues ou à KSA National."
   },
   "f52db2d7-c0f5-4f9c-b567-62f657787339": {
     "original": "Inschrijvingsgroep",
@@ -19147,6 +19467,10 @@
     "original": "Gelijk aan...",
     "translation": "Égal à..."
   },
+  "f675d723-b1b9-4abd-9e7c-0459c24e474b": {
+    "original": "Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze vereniging.",
+    "translation": "Cette activité n’est visible que pour les membres inscrits à cette association."
+  },
   "f67ccf42-d4a8-4fe6-b7dc-91f43726646e": {
     "original": "Vaste kost",
     "translation": "Coût fixe"
@@ -19182,6 +19506,10 @@
   "f6de6c56-6326-42b2-b586-2bf607e058a7": {
     "original": "Developers",
     "translation": "Développeurs"
+  },
+  "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
+    "original": "Jouw vereniging betaalt {price} aan Stamhoofd, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
+    "translation": "Votre association paie {price} à Stamhoofd, mais pour des affiliations ultérieures, le tarif est désormais de {priceReduced}."
   },
   "f6f77de7-7691-4512-bf95-e07d12e9a43c": {
     "original": "Tijdstip",
@@ -19410,6 +19738,10 @@
   "f9a69315-3aab-475f-844d-5f56097ad2cd": {
     "original": "Eén keer",
     "translation": "Une fois"
+  },
+  "f9b0679e-029b-4d34-a848-66674f33cdcf": {
+    "original": "Webshop nog niet geladen",
+    "translation": "La boutique en ligne n'a pas encore été chargée"
   },
   "f9c27b43-9514-4e18-94b4-d1abd79ce689": {
     "original": "Een VZW is bijna nooit BTW-plichtig",
@@ -19710,6 +20042,10 @@
   "fd3fea4f-73c7-4c8d-90cd-80ea90e53b98": {
     "original": "Gender",
     "translation": "Genre"
+  },
+  "fd52fa36-16e6-4106-807c-c387bc0acc0e": {
+    "original": "Geen verenigingen beschikbaar in dit werkjaar",
+    "translation": "Aucune association disponible pour cette année associative"
   },
   "fd5e3142-7a0e-4305-8a49-35f2f4d89083": {
     "original": "bv. 'Geen toestemming om foto's te maken'",

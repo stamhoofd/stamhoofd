@@ -27,6 +27,10 @@
     "original": "Welpen",
     "translation": "Louveteaux"
   },
+  "07d18e1b-2935-4945-9595-50e16a929b19": {
+    "original": "Voeg zelf nog persoonsgegevens toe die voor alle eenheden beschikbaar zijn. Je kan deze vervolgens verplichten voor alle leden die inschrijven bij gelijk welke standaard leeftijdsgroep, of deze verplichten per standaard leeftijdsgroep (via de instellingen van elke standaard leeftijdsgroep). Indien niet ingeschakeld kunnen eenheden deze ook nog inschakelen volgens hun wensen.",
+    "translation": "Ajoutez des données personnelles supplémentaires qui seront disponibles pour toutes les unités. Vous pouvez ensuite les rendre obligatoires pour tous les membres s'inscrivant dans n'importe quel groupe d'âge standard, ou uniquement pour certains groupes d'âge (via les paramètres de chaque groupe d'âge standard). Si ce n'est pas activé, chaque unité peut également choisir de les activer selon ses besoins."
+  },
   "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
     "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je eenheid een ondernemingsnummer heeft.",
     "translation": "Pour activer les paiements en ligne, vous devez d'abord fournir divers documents (toutes les instructions via le bouton ci-dessous), l'activation prend environ 1 à 3 semaines. Cela vous permet d'activer les paiements via Bancontact, Payconiq, iDEAL et carte de crédit. La carte de crédit n'est possible que si votre unité a un numéro d'entreprise."
@@ -34,6 +38,10 @@
   "0998a455-9ffc-4222-8432-ef7681908ad7": {
     "original": "Als een andere eenheid schulden aan jouw eenheid heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
     "translation": "Si une autre unité a des dettes envers votre unité, vous pouvez également envoyer des e-mails automatiques. Cela se fait sur la base de fonctions que vous pouvez définir ci-dessous."
+  },
+  "0ab4ec6b-ae79-4d48-bd45-37da8e712509": {
+    "original": "Je kan pas je volgende scoutsjaar klaarzetten ten vroegste 8 maanden voor de start ervan.",
+    "translation": "Vous ne pouvez préparer le prochain année scoute qu’au plus tôt 8 mois avant son début."
   },
   "0b4ece85-60f0-46b8-a6fc-09eb605b4138": {
     "original": "naam van je eenheid",
@@ -131,6 +139,10 @@
     "original": "Kijk hieronder na of alle functies toegekend zijn. Om een functie toe te kennen zorg je er eerst voor dat de persoon is ingeschreven in Keeo, daarna kan je functies toekennen door het lid open te klikken in het tabblad ‘Leden’. Daar kan je met de rechtermuisknop op een lid klikken en \"Functies bewerken\" kiezen.",
     "translation": "Vérifiez ci-dessous si toutes les fonctions ont été attribuées. Pour attribuer une fonction, assurez-vous d'abord que la personne est inscrite dans Keeo, puis vous pouvez attribuer des fonctions en ouvrant le membre dans l'onglet « Membres ». Là, vous pouvez cliquer avec le bouton droit sur un membre et choisir « Modifier les fonctions »."
   },
+  "20d0f420-edec-4c9f-9584-990258dcf1bf": {
+    "original": "Eenheidseigenfuncties",
+    "translation": "Fonctions propres à l’unité"
+  },
   "227a2170-37b7-46b0-ac1e-516f603379b5": {
     "original": "Sommige aansluitingen verlopen via FOS Open Scouting (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele eenheid. Je kan deze via deze filter uitsluiten.",
     "translation": "Certaines connexions passent par FOS Open Scouting (le membre paie directement à la fédération) et ne sont donc pas réellement facturées à une unité individuelle. Vous pouvez les exclure via ce filtre."
@@ -151,6 +163,14 @@
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
     "translation": "Vous ne pouvez pas activer {paymentMethod}, vous devez d'abord vous connecter à un fournisseur de paiement via les paramètres Keeo > Comptes de paiement."
   },
+  "25fc3805-35f8-4cb4-9d1e-dff607f9738f": {
+    "original": "Eenheidseigenfuncties",
+    "translation": "Fonctions propres à l’unité"
+  },
+  "2655c006-55af-47e6-959c-16acdb1917dc": {
+    "original": "Het scoutsjaar dat je wilt instellen is nog niet gestart",
+    "translation": "L'année scoute que vous souhaitez définir n'a pas encore commencé"
+  },
   "2669729c-718d-49a1-9e4f-b3a65a6479a8": {
     "original": "Zoek een eenheid waar je {firstName} wilt inschrijven",
     "translation": "Recherchez une unité où vous souhaitez inscrire {firstName}"
@@ -158,6 +178,10 @@
   "26b8398d-a17c-4854-ae64-99a410ddeffb": {
     "original": "Je kan niet inschrijven voor {group} omdat scoutsjaar {period} is afgesloten.",
     "translation": "Vous ne pouvez pas vous inscrire pour {group} car l’année scoute {period} est clôturée."
+  },
+  "271299b8-7b44-40b8-a4ce-e345abf164cb": {
+    "original": "Van welke eenheid is deze activiteit?",
+    "translation": "De quelle unité dépend cette activité ?"
   },
   "275f674b-bf05-4d34-a1ff-105a1563fbcc": {
     "original": "Je kan pas 2 maand voor de start van het nieuwe scoutsjaar overschakelen.",
@@ -191,6 +215,10 @@
     "original": "Eenheidsnummer",
     "translation": "Numéro d'unité"
   },
+  "2e5e052c-98b7-4375-b771-05a8913c145b": {
+    "original": "Voor nationale activiteiten moet je kiezen via welke eenheid alle betalingen verlopen. De betaalinstellingen van die eenheid worden dan gebruikt en alle inschrijvingen worden dan ingeboekt in de boekhouding van die eenheid.\n\nDaarnaast bepaalt de organisator ook instellingen die invloed hebben op de dataverzameling en andere subtielere zaken.",
+    "translation": "Pour les activités nationales, vous devez choisir via quelle unité tous les paiements seront gérés. Ce sont alors les paramètres de paiement de cette unité qui seront utilisés, et toutes les inscriptions seront comptabilisées dans sa comptabilité.\n\nL'organisateur définit également des paramètres qui influencent la collecte de données et d'autres aspects plus subtils."
+  },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de eenheid of persoon die instaat voor de opvang.",
     "translation": "Coordonnées de l'unité ou de la personne responsable de l'accueil."
@@ -218,6 +246,10 @@
   "322dd34f-a4ec-4065-be53-040725915e20": {
     "original": "Scoutsjaar",
     "translation": "Année scoute"
+  },
+  "347463a0-1e9a-40fe-996c-d77ba13bc05b": {
+    "original": "Dit scoutsjaar bestaat niet of is niet gekoppeld aan jouw organisatie.",
+    "translation": "Cette année scoute n'existe pas ou n'est pas liée à votre organisation."
   },
   "34aff020-6017-4c23-85b1-44a692988ee6": {
     "original": "Kies een eenheid",
@@ -279,9 +311,17 @@
     "original": "Dit scoutsjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode",
     "translation": "Cette année scoute est verrouillée, vous ne pouvez plus modifier les notifications pour cette période"
   },
+  "43f93b0e-debd-4afa-b81a-fac67c7401ea": {
+    "original": "{werkjaar-2025-2026} is nu aangemaakt als kopie van je huidige scoutsjaar. Kijk de prijzen en instellingen goed na van je kopie.",
+    "translation": "{werkjaar-2025-2026} a été créé comme copie de votre année scoute actuelle. Vérifiez bien les prix et les paramètres de cette copie."
+  },
   "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
     "original": "Je hebt geen rechten om een activiteit aan te maken voor deze eenheid.",
     "translation": "Vous n’avez pas les droits nécessaires pour créer une activité pour cette unité."
+  },
+  "44ff6618-ecbf-408b-9cc1-b1479e8ba8a2": {
+    "original": "Het scoutsjaar dat je wilt instellen is al afgelopen",
+    "translation": "L'année scoute que vous souhaitez définir est déjà terminée"
   },
   "4697c731-26fd-4ba5-8aeb-0f5b8385a54b": {
     "original": "Zoek een eenheid",
@@ -430,6 +470,10 @@
   "5f0e24bb-10db-428b-a480-6f73d959cafa": {
     "original": "De link naar de website van deze eenheid.",
     "translation": "Le lien vers le site web de cette unité."
+  },
+  "5f37ed88-8822-44bb-8f06-7f527c5d00fe": {
+    "original": "Eenheidseigenfuncties",
+    "translation": "Fonctions propres à l’unité"
   },
   "5fe7a400-8c6a-42ba-b920-c8518e60e091": {
     "original": "Beperk welke eenheiden hun leden kunnen aansluiten met deze aansluiting.",
@@ -595,6 +639,10 @@
     "original": "Stel in welke soorten lokalen eenheden kunnen toevoegen",
     "translation": "Définissez les types de locaux que les unités peuvent ajouter"
   },
+  "78a012a9-3caa-405f-851d-429610138852": {
+    "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een eenheid).",
+    "translation": "{member} ne peut s'inscrire qu'avec une inscription active et valable (inscription obligatoire dans une unité)."
+  },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
     "translation": "Choisissez une unité responsable de la collecte des frais d'affiliation"
@@ -691,6 +739,10 @@
     "original": "Soms wil je personen die geen lid zijn toegang geven tot Keeo. Dat kan door externe beheerdersrollen aan te maken, en die rollen vervolgens toe te kennen aan externe beheerders.",
     "translation": "Parfois, vous souhaitez donner accès à Keeo à des personnes qui ne sont pas membres. Vous pouvez le faire en créant des rôles d'administrateurs externes et en attribuant ensuite ces rôles à des administrateurs externes."
   },
+  "9063147f-5dee-4da0-8928-69d7dcb352c4": {
+    "original": "Na controle van alle instellingen kan je overschakelen op het nieuwe scoutsjaar. Dit kan ten vroegste vanaf juli.",
+    "translation": "Après avoir vérifié tous les paramètres, vous pourrez passer au nouveau scoutisme, au plus tôt à partir de juillet."
+  },
   "9086aa79-923c-4b8a-8926-45aeee3a8676": {
     "original": "Kunsteenheid",
     "translation": "Unité artistique"
@@ -743,6 +795,10 @@
     "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Keeo afkomstig is.",
     "translation": "Une erreur s'est produite lors de l'importation du plan de salle. Vérifiez si le fichier que vous avez choisi provient bien de Keeo."
   },
+  "9c775d8c-1e2c-40c4-9f61-6be6cb6bd5bb": {
+    "original": "Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen in hetzelfde scoutsjaar.",
+    "translation": "Appliquez une réduction pour plusieurs inscriptions d'un membre ou d'une famille, par exemple pour des frères et sœurs qui s'inscrivent à un camp, ou des membres qui suivent plusieurs cours la même année scoute."
+  },
   "9c916015-e69c-44b3-a568-d0af15854787": {
     "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
     "translation": "Tous les groupes sont transférés vers cette nouvelle année scoute. Les administrateurs principaux peuvent toujours consulter la précédente année scoute."
@@ -770,6 +826,10 @@
   "a010c110-bf4e-4c12-a324-6b84c992e728": {
     "original": "Je kan geen eenheid aanmaken",
     "translation": "Vous ne pouvez pas créer d’unité"
+  },
+  "a0b1e726-345d-4288-a1db-7437d1b47482": {
+    "original": "Eenheid",
+    "translation": "Unité"
   },
   "a1f57ce7-a96a-4c8d-b43f-79a07a78114f": {
     "original": "Je kan de hoofdgroep niet verwijderen. Als je dit toch wil doen, kan je eerst een andere eenheid instellen als hoofdgroep via ')Boekhouding en aansluitingen'.",
@@ -814,6 +874,10 @@
   "aad47217-df26-43ce-a43c-896697d5fbd4": {
     "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen eenheid.",
     "translation": "Ajoutez vos propres fonctions qui ne s'appliquent que dans votre propre unité."
+  },
+  "ab00e79e-c7cb-4595-9119-4fb5ca366dd1": {
+    "original": "Kies een eenheid",
+    "translation": "Choisissez une unité"
   },
   "ab0c7981-0d5f-4c36-bd3f-07ddc2a63759": {
     "original": "Jouw eenheid bevindt zich in een ander scoutsjaar dan FOS Open Scouting.",
@@ -863,9 +927,17 @@
     "original": "Type eenheid",
     "translation": "Type d'unité"
   },
+  "b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1": {
+    "original": "Dit scoutsjaar is niet actief",
+    "translation": "Cette année scoute n'est pas active"
+  },
   "b2fbd227-40a3-495d-9826-0e199000cda9": {
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw eenheid. Stel deze eerst in voor je verder gaat.",
     "translation": "Vous n’avez pas encore ajouté de données de facturation à votre unité. Configurez-les d’abord avant de continuer."
+  },
+  "b34e7f10-2e03-42f5-b865-2d88571d2a6e": {
+    "original": "Deze periode is niet beschikbaar voor jouw eenheid.",
+    "translation": "Cette période n'est pas disponible pour votre unité."
   },
   "b375f5be-879c-4696-8ccf-0e7066e3f5f4": {
     "original": "De ideale afmeting voor een banner van een sponsor is 1104x450px. De banner wordt maximaal 150px hoog getoond, maar een veelvoud is noodzakelijk voor een niet-pixelachtige weergave op smartphones. Upload bij voorkeur voor alle sponsors een afbeelding met dezelfde afmetingen. Vermijd het uploaden van het logo als banner, laat dan de banner weg. Als zowel een logo als banner werd geupload zal Keeo de banner verkiezen op mobiele tickets, en het logo op de afgedrukte tickets.",
@@ -999,9 +1071,17 @@
     "original": "Er kunnen geen wijzigingen meer aangebracht worden aan inschrijvingen in dit scoutsjaar.",
     "translation": "Aucune modification supplémentaire ne peut être apportée aux inscriptions de cette année scoute."
   },
+  "cc658db0-ee90-40fc-8a8c-1074a4f1f2f2": {
+    "original": "Je kan geen wijzigingen meer aanbrengen in scoutsjaar {2000-2001} omdat deze is afgesloten.",
+    "translation": "Vous ne pouvez plus apporter de modifications à l'année scoute {2000-2001} car elle est clôturée."
+  },
   "cd0975fc-75c4-4c1e-b80a-f611f0992caa": {
     "original": "Alle eenheden",
     "translation": "Toutes les unités"
+  },
+  "cd37a13c-6779-49fa-a97f-1eddb6b61ebb": {
+    "original": "Deze eenheid is nog niet actief in dit scoutsjaar, maak dat eerst aan.",
+    "translation": "Cette unité n'est pas encore active pendant cette année scoute, créez-la d'abord."
   },
   "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
     "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Keeo). Er worden geen lagere tarieven automatisch toegepast.",
@@ -1115,9 +1195,17 @@
     "original": "Klaassen",
     "translation": "Marcs"
   },
+  "e0433c50-b6df-4fd9-92ba-e79d3b21aaa0": {
+    "original": "Je kan een kopie maken van de instellingen van je huidige scoutsjaar (bv. de prijzen en onderverdelingen) als voorbereiding op je nieuwe scoutsjaar. Je kan daarna op een moment naar keuze overschakelen naar het nieuwe scoutsjaar (bv. als je al in juli begint met inschrijvingen voor het volgende scoutsjaar). Maar je kan ook wachten tot het einde van het huidige scoutsjaar, dan zal je automatisch worden overgeschakeld.",
+    "translation": "Vous pouvez préparer votre nouvelle année scoute en copiant les paramètres de votre année scoute actuelle (par exemple : prix et subdivisions). Ensuite, vous pourrez passer à la nouvelle année scoute à tout moment (par exemple si vous commencez déjà les inscriptions en juillet). Vous pouvez aussi attendre la fin de l'année scoute actuelle ; à ce moment, la transition se fera automatiquement."
+  },
   "e07bc7a1-92c0-48fc-91f3-46e12573ee03": {
     "original": "Naam eenheid",
     "translation": "Nom de l'unité"
+  },
+  "e0fff936-3f3c-46b8-adcf-c723c33907a2": {
+    "original": "Het scoutsjaar dat je wilt instellen is nog niet gestart",
+    "translation": "L'année scoute que vous souhaitez définir n'a pas encore commencé"
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
     "original": "Is jouw eenheid een feitelijke eenheid zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
@@ -1147,6 +1235,10 @@
     "original": "Gegevens van eenheiden",
     "translation": "Données des unités"
   },
+  "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
+    "original": "Deze functies worden gekoppeld aan een lid samen met een eenheid, door een hoofdbeheerder van die eenheid. Een eenheid kan zelf ook nog eenheidseigenfuncties toevoegen om deze uit te breiden.",
+    "translation": "Ces fonctions sont attribuées à un membre et associées à une unité, par un administrateur principal de cette unité. Une unité peut également ajouter ses propres fonctions spécifiques pour les étendre."
+  },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen scoutsjaar liggen",
     "translation": "La période d'affiliation doit se situer dans la période de l'année scoute choisie"
@@ -1158,6 +1250,10 @@
   "e866488b-bc8d-481f-900b-9cf1779f44b8": {
     "original": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe scoutsjaar.",
     "translation": "La date d'expiration se situe entre la date de début et la date de fin et est facultative. La connexion reste valable après cette date, mais le système la considère partiellement comme 'expirée'. Utilisez ceci pour prolonger une connexion dans la nouvelle année scoute."
+  },
+  "e875d12e-fa1d-43f5-b96a-be4ba8af04eb": {
+    "original": "{name} is nu ingesteld als het huidige scoutsjaar",
+    "translation": "{name} est maintenant défini comme l'année scoute en cours"
   },
   "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
     "original": "* Voor de aansluiting bij Keeo moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw eenheid gebruikt gekoppeld kan worden aan de benaming van Keeo.",
@@ -1231,6 +1327,10 @@
     "original": "Er is nog geen verantwoordelijke eenheid ingesteld. Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
     "translation": "Aucune unité responsable n'a encore été définie. Choisissez une unité responsable de la collecte des frais d'affiliation."
   },
+  "f4fef92e-cb28-408b-ada2-cf8b0da0fbfd": {
+    "original": "Eenheidseigenfuncties",
+    "translation": "Fonctions propres à l'unité"
+  },
   "f511ce18-7a60-4fe8-8695-16216ffb7bdc": {
     "original": "De betaling loopt niet via Keeo",
     "translation": "Le paiement ne passe pas par Keeo."
@@ -1250,6 +1350,10 @@
   "f6360ada-86e7-4ec8-86fb-fe9e750c4926": {
     "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar is afgesloten.",
     "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute est clôturée."
+  },
+  "f675d723-b1b9-4abd-9e7c-0459c24e474b": {
+    "original": "Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze eenheid.",
+    "translation": "Cette activité n’est visible que pour les membres inscrits à cette unité."
   },
   "f6e06abd-3e58-4f99-bc8d-6cf6a44273b3": {
     "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
