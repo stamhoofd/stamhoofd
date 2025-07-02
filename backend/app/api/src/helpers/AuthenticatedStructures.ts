@@ -400,6 +400,10 @@ export class AuthenticatedStructures {
             await BalanceItemService.flushCaches(Context.organization.id);
         }
         const balances = await CachedBalance.getForObjects(registrationIds, null);
+        const memberIds = members.map(m => m.id);
+        const allMemberBalances = Context.organization
+            ? (await CachedBalance.getForObjects(memberIds, Context.organization.id))
+            : [];
 
         if (includeUser) {
             for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
@@ -451,15 +455,27 @@ export class AuthenticatedStructures {
                 }
             }
             member.registrations = member.registrations.filter(r => (Context.auth.organization && Context.auth.organization.active && r.organizationId === Context.auth.organization.id) || (organizations.get(r.organizationId)?.active ?? false));
-            const balancesPermission = await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read);
+            const balancesPermission = await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id);
+
+            let memberBalances: GenericBalance[] = [];
+
+            if (balancesPermission && Context.organization) {
+                // Only return balances if in an organization scope and you have permission for the finances of that specific organization AND member
+                memberBalances = allMemberBalances
+                    .filter(b => member.id === b.objectId && b.objectType === ReceivableBalanceType.member)
+                    .map((b) => {
+                        return GenericBalance.create(b);
+                    });
+            }
 
             const blob = MemberWithRegistrationsBlob.create({
                 ...member,
+                balances: memberBalances,
                 registrations: member.registrations.map((r) => {
                     const base = r.getStructure();
 
                     base.balances = balancesPermission
-                        ? (balances.filter(b => r.id === b.objectId).map((b) => {
+                        ? (balances.filter(b => r.id === b.objectId && b.objectType === ReceivableBalanceType.registration).map((b) => {
                                 return GenericBalance.create(b);
                             }))
                         : [];
