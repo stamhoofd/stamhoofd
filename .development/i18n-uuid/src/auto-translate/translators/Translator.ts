@@ -594,7 +594,7 @@ ${error}`;
         return this.transformParsedJson(json);
     }
 
-    private validateJson(json: any): { isValid: boolean; message?: string } {
+    protected validateJson(json: any): { isValid: boolean; message?: string } {
         if (typeof json !== "object") {
             return {
                 isValid: false,
