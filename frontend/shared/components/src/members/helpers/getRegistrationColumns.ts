@@ -436,7 +436,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, number>({
                 name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
-                description: $t('Nog te betalen specifiek voor deze inschrijving'),
+                description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
                 allowSorting: false,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
@@ -460,8 +460,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
     allColumns.push(
         new Column<ObjectType, number>({
-            name: $t(`Openstaand bedrag`),
-            description: $t('Totaal openstaand bedrag van dit lid, exclusief het deel in verwerking (bv. overschrijvingen)'),
+            name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+            description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
             allowSorting: false,
             getValue: v => v.member.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
             format: (outstandingBalance) => {

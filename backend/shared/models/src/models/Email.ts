@@ -358,7 +358,7 @@ export class Email extends QueryableModel {
                     continue;
                 }
 
-                let filename = $t('bijlage');
+                let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
 
                 if (attachment.contentType === 'application/pdf') {
                     // tmp solution for pdf only
@@ -389,7 +389,7 @@ export class Email extends QueryableModel {
                         throw new SimpleError({
                             code: 'attachment_not_found',
                             message: 'Attachment not found',
-                            human: $t(`Er ging iets mis bij het ophalen van de bijlage.`),
+                            human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
                         });
                     }
 
@@ -403,7 +403,7 @@ export class Email extends QueryableModel {
                         throw new SimpleError({
                             code: 'attachment_not_found',
                             message: 'Attachment not found',
-                            human: $t(`Er ging iets mis bij het ophalen van de bijlage.`),
+                            human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
                         });
                     }
 

@@ -5145,5 +5145,11 @@
   "3f196c5f-1b59-4d18-8fca-feaef78e7f09": "Ouders",
   "a148463b-5ae7-44d8-9cac-20538fc95431": "Tweede ouder",
   "23911c89-12b5-403a-a355-20f3c986c76f": "Noodcontact",
-  "8e92e034-b745-4d0f-8ac1-4363101f9603": "Ontbrekende gegevens"
+  "8e92e034-b745-4d0f-8ac1-4363101f9603": "Ontbrekende gegevens",
+  "b1291584-d2ad-4ebd-88ed-cbda4f3755b4": "bijlage",
+  "ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2": "Er ging iets mis bij het ophalen van de bijlage.",
+  "4de518e0-b600-4aa9-912d-4cba86331427": "Jouw bestand in bijlage mist een naam. Probeer eventuele om het document via een ander toestel te uploaden of een andere naam te geven.",
+  "7a8d174e-2807-4ada-ad94-6f519edc9c14": "Nog te betalen specifiek voor deze inschrijving",
+  "6c5de33a-dbbd-4b9c-866d-104e007836b3": "Totaal openstaand bedrag van dit lid, exclusief het deel in verwerking (bv. overschrijvingen)",
+  "beb45452-dee7-4a7f-956c-e6db06aac20f": "Openstaand bedrag"
 }

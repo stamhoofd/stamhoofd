@@ -661,7 +661,7 @@ async function appendAttachment(file: File) {
     }
 
     if (!file.name) {
-        const error = $t(`Jouw bestand in bijlage mist een naam. Probeer eventuele om het document via een ander toestel te uploaden of een andere naam te geven.`);
+        const error = $t(`4de518e0-b600-4aa9-912d-4cba86331427`);
         Toast.error(error).setHide(20 * 1000).show();
         return;
     }
