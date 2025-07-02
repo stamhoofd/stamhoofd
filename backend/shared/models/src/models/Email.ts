@@ -177,6 +177,32 @@ export class Email extends QueryableModel {
                     field: 'attachments',
                 });
             }
+
+            if (!attachment.content) {
+                if (!attachment.file) {
+                    throw new SimpleError({
+                        code: 'invalid_attachment',
+                        message: 'Invalid attachment: missing file or content',
+                        field: 'attachments',
+                    });
+                }
+
+                if (!attachment.file.isPrivate) {
+                    throw new SimpleError({
+                        code: 'invalid_attachment',
+                        message: 'Invalid attachment: file must be private',
+                        field: 'attachments',
+                    });
+                }
+
+                if (!attachment.file.signature) {
+                    throw new SimpleError({
+                        code: 'invalid_attachment',
+                        message: 'Invalid attachment: file must be signed',
+                        field: 'attachments',
+                    });
+                }
+            }
         }
     }
 
@@ -323,12 +349,24 @@ export class Email extends QueryableModel {
             const batchSize = 100;
             const recipientsSet = new Set<string>();
 
-            const attachments = upToDate.attachments.map((attachment, index) => {
-                let filename = 'bijlage-' + index;
+            // Create a buffer of all attachments
+            const attachments: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[] = [];
+
+            for (const attachment of upToDate.attachments) {
+                if (!attachment.content && !attachment.file) {
+                    console.warn('Attachment without content found, skipping', attachment);
+                    continue;
+                }
+
+                let filename = $t('bijlage');
 
                 if (attachment.contentType === 'application/pdf') {
                     // tmp solution for pdf only
                     filename += '.pdf';
+                }
+
+                if (attachment.file?.name) {
+                    filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
                 }
 
                 // Correct file name if needed
@@ -336,13 +374,46 @@ export class Email extends QueryableModel {
                     filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
                 }
 
-                return {
-                    filename: filename,
-                    content: attachment.content,
-                    contentType: attachment.contentType ?? undefined,
-                    encoding: 'base64',
-                };
-            });
+                if (attachment.content) {
+                    attachments.push({
+                        filename: filename,
+                        content: attachment.content,
+                        contentType: attachment.contentType ?? undefined,
+                        encoding: 'base64',
+                    });
+                }
+                else {
+                    // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
+                    const withSigned = await attachment.file!.withSignedUrl();
+                    if (!withSigned || !withSigned.signedUrl) {
+                        throw new SimpleError({
+                            code: 'attachment_not_found',
+                            message: 'Attachment not found',
+                            human: $t(`Er ging iets mis bij het ophalen van de bijlage.`),
+                        });
+                    }
+
+                    const filePath = withSigned.signedUrl;
+                    let fileBuffer: Buffer | null = null;
+                    try {
+                        const response = await fetch(filePath);
+                        fileBuffer = Buffer.from(await response.arrayBuffer());
+                    }
+                    catch (e) {
+                        throw new SimpleError({
+                            code: 'attachment_not_found',
+                            message: 'Attachment not found',
+                            human: $t(`Er ging iets mis bij het ophalen van de bijlage.`),
+                        });
+                    }
+
+                    attachments.push({
+                        filename: filename,
+                        contentType: attachment.contentType ?? undefined,
+                        content: fileBuffer,
+                    });
+                }
+            }
 
             while (true) {
                 abort.throwIfAborted();

@@ -19,7 +19,7 @@ export type EmailInterfaceBase = {
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string }[];
+    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[];
     retryCount?: number;
     type?: 'transactional' | 'broadcast';
     headers?: Record<string, string> | null;

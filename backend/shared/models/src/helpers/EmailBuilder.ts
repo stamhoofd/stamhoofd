@@ -229,12 +229,7 @@ export type EmailBuilderOptions = {
     replyTo?: EmailInterfaceRecipient | null;
     subject: string;
     html: string;
-    attachments?: {
-        filename: string;
-        content: string;
-        contentType: string | undefined;
-        encoding: string;
-    }[];
+    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[];
     type?: 'transactional' | 'broadcast';
     unsubscribeType?: 'all' | 'marketing';
     fromStamhoofd?: boolean;

@@ -178,6 +178,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             size: fileContent.length,
             name: file.originalFilename,
             isPrivate: request.query.isPrivate,
+            contentType: file.mimetype ?? null,
         });
 
         // Generate an upload signature for this file if it is private

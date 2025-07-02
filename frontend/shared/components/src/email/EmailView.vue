@@ -9,9 +9,17 @@
 
             <!-- Buttons -->
             <template #buttons>
-                <label v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button icon attachment">
-                    <input type="file" multiple="true" style="display: none;" accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif" @change="(e: any) => changedFile(e)"><span v-if="$isMobile && files.length > 0" class="style-bubble">{{ files.length }}</span>
-                </label>
+                <UploadFileButton
+                    :is-private="true"
+                    :max-size="9.5 * 1024 * 1024"
+                    accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif"
+                    @change="appendAttachment($event)"
+                >
+                    <span v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button text">
+                        <span class="icon attachment" />
+                        <span v-if="$isMobile && patchedEmail.attachments.length > 0" class="bubble">{{ patchedEmail.attachments.length }}</span>
+                    </span>
+                </UploadFileButton>
 
                 <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
             </template>
@@ -103,7 +111,7 @@
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, OrganizationEmail } from '@stamhoofd/structures';
+import { Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, OrganizationEmail } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
@@ -116,6 +124,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
+import UploadFileButton from '../inputs/UploadFileButton.vue';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -148,18 +157,6 @@ export type RecipientMultipleChoiceOption = {
     build: (selectedIds: string[]) => EmailRecipientSubfilter[];
 };
 
-class TmpFile {
-    name: string;
-    file: File;
-    size: string;
-
-    constructor(name: string, file: File) {
-        this.name = name;
-        this.file = file;
-        this.size = Formatter.fileSize(file.size);
-    }
-}
-
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
@@ -167,7 +164,6 @@ const replacements = computed(() => {
     return email.value ? (email.value.exampleRecipient?.getReplacements(organization.value, platform.value) ?? []) : [];
 });
 const errors = useErrors();
-const files = ref([]) as Ref<TmpFile[]>;
 const auth = useAuth();
 const $isMobile = useIsMobile();
 const email = ref(null) as Ref<EmailPreview | null>;
@@ -651,60 +647,41 @@ function deleteAttachment(attachment: EmailAttachment) {
     addPatch({ attachments: arr });
 }
 
-async function toBase64(file: File) {
-    return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            // Remove data:*;base64,
-            const str = reader.result as string;
-            const index = str.indexOf('base64,');
-            if (index !== -1) {
-                resolve(str.slice(index + 7));
-            }
-            else {
-                reject('Invalid base64');
-            }
-        };
-        reader.onerror = (e) => {
-            reject(e);
-        };
-
-        reader.readAsDataURL(file);
-    });
-}
-
-async function changedFile(event: InputEvent & { target: HTMLInputElement & { files: FileList } }) {
-    if (!event.target.files || event.target.files.length === 0) {
+async function appendAttachment(file: File) {
+    // Add this file as an attachment
+    if (file.size > 9.5 * 1024 * 1024) {
+        const error = $t(`93533097-46c1-4f88-a582-1634d57ac2c0`);
+        Toast.error(error).setHide(20 * 1000).show();
         return;
     }
 
-    const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmailAttachment>;
-
-    for (const file of event.target.files as FileList) {
-        if (file.size > 10 * 1024 * 1024) {
-            const error = $t(`93533097-46c1-4f88-a582-1634d57ac2c0`);
-            Toast.error(error).setHide(20 * 1000).show();
-            continue;
-        }
-
-        // const f = new TmpFile(file.name, file)
-        // files.value.push(f)
-
-        // Add attachment
-        arr.addPut(EmailAttachment.create({
-            filename: file.name,
-            contentType: file.type,
-            content: await toBase64(file),
-        }));
-
-        if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
-            const error = $t(`70436d52-5a86-4231-89d5-2adf8bfd628f`);
-            Toast.warning(error).setHide(30 * 1000).show();
-        }
+    if (!file.isPrivate) {
+        console.error('Unexpected public file in email attachments', file);
+        return;
     }
 
-    // Clear selection
-    (event.target as any).value = null;
+    if (!file.name) {
+        const error = $t(`Jouw bestand in bijlage mist een naam. Probeer eventuele om het document via een ander toestel te uploaden of een andere naam te geven.`);
+        Toast.error(error).setHide(20 * 1000).show();
+        return;
+    }
+
+    if (!file.contentType) {
+        file.contentType = 'application/octet-stream';
+    }
+
+    // todo
+    if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
+        const error = $t(`70436d52-5a86-4231-89d5-2adf8bfd628f`);
+        Toast.warning(error).setHide(30 * 1000).show();
+    }
+
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<EmailAttachment>;
+    arr.addPut(EmailAttachment.create({
+        filename: file.name,
+        contentType: file.contentType,
+        file,
+    }));
 
     // Add patch
     addPatch({ attachments: arr });
@@ -745,11 +722,11 @@ async function openTemplates() {
                 },
                 createOption: hasExistingContent
                     ? EmailTemplate.create({
-                        id: '',
-                        ...current,
-                        subject: subject.value,
-                        type,
-                    })
+                            id: '',
+                            ...current,
+                            subject: subject.value,
+                            type,
+                        })
                     : null,
             }),
         ],

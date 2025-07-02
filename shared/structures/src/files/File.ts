@@ -10,6 +10,11 @@ export class File implements Encodeable {
 
     name: string | null;
 
+    /**
+     * Set by the uploader, so not trustworthy - can be used as a hint.
+     */
+    contentType: string | null;
+
     /// Path relative to the server
     path: string;
 
@@ -37,7 +42,17 @@ export class File implements Encodeable {
     static signFile: ((file: File) => Promise<void>) | null = null;
     static getWithSignedUrl: ((file: File) => Promise<File | null>) | null = null;
 
-    constructor(data: { id: string; server: string; path: string; size: number; name?: string | null; isPrivate?: boolean; signedUrl?: string | null; signature?: string | null }) {
+    constructor(data: {
+        id: string;
+        server: string;
+        path: string;
+        size: number;
+        name?: string | null;
+        isPrivate?: boolean;
+        signedUrl?: string | null;
+        signature?: string | null;
+        contentType?: string | null;
+    }) {
         this.id = data.id;
         this.server = data.server;
         this.path = data.path;
@@ -46,6 +61,7 @@ export class File implements Encodeable {
         this.isPrivate = data.isPrivate ?? false;
         this.signedUrl = data.signedUrl ?? null;
         this.signature = data.signature ?? null;
+        this.contentType = data.contentType ?? null;
     }
 
     getDiffValue() {
@@ -62,7 +78,8 @@ export class File implements Encodeable {
             + 'path: ' + this.path + '\n'
             + 'size: ' + this.size.toFixed(0) + '\n'
             + 'name: ' + this.name + '\n'
-            + 'isPrivate: ' + (this.isPrivate ? 'true' : 'false');
+            + 'isPrivate: ' + (this.isPrivate ? 'true' : 'false')
+            + (this.contentType ? '\ncontentType: ' + this.contentType : '');
     }
 
     static get signingEnabled() {
@@ -117,6 +134,7 @@ export class File implements Encodeable {
             isPrivate: data.optionalField('isPrivate')?.boolean ?? false,
             signedUrl: data.optionalField('signedUrl')?.string ?? null,
             signature: data.optionalField('signature')?.string ?? null,
+            contentType: data.optionalField('contentType')?.string ?? null,
         });
 
         if (data.context.medium === EncodeMedium.Database || !file.isPrivate || !file.signature) {
@@ -148,6 +166,7 @@ export class File implements Encodeable {
             isPrivate: this.isPrivate,
             signedUrl: this.isPrivate && this.signedUrl ? this.signedUrl : undefined,
             signature: this.isPrivate ? this.signature : undefined,
+            contentType: this.contentType || undefined,
         };
     }
 
