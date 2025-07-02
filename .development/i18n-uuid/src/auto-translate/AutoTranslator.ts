@@ -373,7 +373,6 @@ export class AutoTranslator {
         const missingTranslationIds = this.getMissingTranslationIds(
             baseTranslations,
             distTranslations,
-            locale,
             namespace,
         );
 
@@ -392,10 +391,17 @@ export class AutoTranslator {
         return missingTranslations;
     }
 
+    /**
+     * 
+     * @param baseTranslations 
+     * @param distTranslations 
+     * @param locale 
+     * @param namespace 
+     * @returns 
+     */
     private getMissingTranslationIds(
         baseTranslations: Translations,
         distTranslations: Translations,
-        locale: string,
         namespace: string,
     ): string[] {
         const isDefaultNamespace = namespace === globals.DEFAULT_NAMESPACE;
@@ -411,23 +417,41 @@ export class AutoTranslator {
         }
 
         // if not in default namespace
-        const defaultNamespaceTranslations = this.manager.readDist(
-            locale,
+        const defaultTexts = this.manager.readDist(
+            'nl-BE',
             globals.DEFAULT_NAMESPACE,
+        );
+
+        const defaultNamespaceTexts = this.manager.readDist(
+            'nl-BE',
+            namespace,
         );
 
         return Object.entries(distTranslations)
             .filter((entry) => {
                 const key = entry[0];
                 if (baseTranslations.hasOwnProperty(key) === false) {
-                    const defaultNamespaceTranslation =
-                        defaultNamespaceTranslations[key];
-                    const translation = entry[1];
+                    // Only translate this key for this namespace if the
+                    // value in dutch for the default namespace is not the same for the value in dutch for this namespace
+                    const defaultText = defaultTexts[key];
+                    const defaultNamespaceText = defaultNamespaceTexts[key];
 
-                    // not missing if the translation is the same as the default namespace
-                    return defaultNamespaceTranslation !== translation;
+                    if (defaultText === undefined) {
+                        throw new Error(
+                            `Missing default translation for ${key} in default namespace`,
+                        );
+                    }
+
+                    if (defaultNamespaceText === undefined) {
+                        throw new Error(
+                            `Missing default translation for ${key} in namespace ${namespace}`,
+                        );
+                    }
+
+                    return defaultNamespaceText !== defaultText;
                 }
 
+                // This translation is already present in the base translations (machine translations + custom)
                 return false;
             })
             .map((entry) => entry[0]);
