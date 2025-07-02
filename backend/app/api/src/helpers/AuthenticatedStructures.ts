@@ -579,7 +579,6 @@ export class AuthenticatedStructures {
 
             return RegistrationWithMemberBlob.create({
                 ...registration,
-                balances: registration.balances ?? [],
                 member: memberBlob,
             });
         });
