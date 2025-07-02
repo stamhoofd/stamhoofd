@@ -135,40 +135,9 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Also include the source, in private mode
         const fileId = uuidv4();
-        let uploadExt = '';
+        const uploadExt = File.contentTypeToExtension(file.mimetype ?? '') ?? '';
 
-        switch (file.mimetype?.toLocaleLowerCase()) {
-            case 'image/jpeg':
-            case 'image/jpg':
-                uploadExt = 'jpg';
-                break;
-            case 'image/png':
-                uploadExt = 'png';
-                break;
-            case 'image/gif':
-                uploadExt = 'gif';
-                break;
-            case 'image/webp':
-                uploadExt = 'webp';
-                break;
-            case 'image/svg+xml':
-                uploadExt = 'svg';
-                break;
-            case 'application/pdf':
-                uploadExt = 'pdf';
-                break;
-            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-            case 'application/vnd.ms-excel':
-                uploadExt = 'xlsx';
-                break;
-
-            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            case 'application/msword':
-                uploadExt = 'docx';
-                break;
-        }
-
-        const filenameWithoutExt = file.originalFilename?.split('.').slice(0, -1).join('.') ?? fileId;
+        const filenameWithoutExt = file.originalFilename ? File.removeExtension(file.originalFilename) : fileId;
         const key = prefix + fileId + '/' + (Formatter.slug(filenameWithoutExt) + (uploadExt ? ('.' + uploadExt) : ''));
 
         const fileStruct = new File({
@@ -197,7 +166,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             Bucket: STAMHOOFD.SPACES_BUCKET,
             Key: key,
             Body: fileContent,
-            ContentType: file.mimetype ?? 'application/pdf',
+            ContentType: file.mimetype ?? 'application/octet-stream',
             ACL: request.query.isPrivate ? 'private' : 'public-read',
         });
         await Image.getS3Client().send(cmd);

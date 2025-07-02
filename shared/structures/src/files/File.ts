@@ -176,4 +176,35 @@ export class File implements Encodeable {
         }
         return this.server + '/' + this.path;
     }
+
+    static contentTypeToExtension(contentType: string): string | null {
+        switch (contentType.toLocaleLowerCase()) {
+            case 'image/jpeg':
+            case 'image/jpg':
+                return 'jpg';
+            case 'image/png':
+                return 'png';
+            case 'image/gif':
+                return 'gif';
+            case 'image/webp':
+                return 'webp';
+            case 'image/svg+xml':
+                return 'svg';
+            case 'application/pdf':
+                return 'pdf';
+            case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+            case 'application/vnd.ms-excel':
+                return 'xlsx';
+
+            case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            case 'application/msword':
+                return 'docx';
+        }
+
+        return null;
+    }
+
+    static removeExtension(filename: string): string {
+        return filename.split('.').slice(0, -1).join('.');
+    }
 }
