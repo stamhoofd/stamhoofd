@@ -1,175 +1,171 @@
 <template>
-    <div id="import-members-questions-view" class="st-view background">
-        <STNavigationBar title="Leden importeren" :pop="canPop" :dismis="canDismiss" />
+    <SaveView :title="$t('Leden importeren')" :loading="saving" :save-text="`Importeer ${importMemberResults.length} leden`" @save="goNext">
+        <h1>Importeer instellingen</h1>
+        <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-        <main>
-            <h1>Importeer instellingen</h1>
-            <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
-            <STErrorsDefault :error-box="errors.errorBox" />
+        <template v-if="!saving">
+            <p v-if="existingCount > 0 && existingCount === importMemberResults.length" class="warning-box">
+                Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven. <template v-if="membersWithNewRegistrations.length">
+                    Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.
+                </template>Let goed op, je kan dit niet ongedaan maken.
+            </p>
+            <p v-else-if="existingCount > 0" class="warning-box">
+                {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ importMemberResults.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
+            </p>
 
-            <template v-if="!saving">
-                <p v-if="existingCount > 0 && existingCount === importMemberResults.length" class="warning-box">
-                    Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven. <template v-if="membersWithNewRegistrations.length">
-                        Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.
-                    </template>Let goed op, je kan dit niet ongedaan maken.
-                </p>
-                <p v-else-if="existingCount > 0" class="warning-box">
-                    {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ importMemberResults.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
-                </p>
+            <p v-if="deletedRegistrationsCount > 0" class="warning-box">
+                Stamhoofd zal {{ deletedRegistrationsCount }} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.
+            </p>
+            <p v-if="membersWithoutNewRegistrations.length" class="success-box">
+                {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
+            </p>
 
-                <p v-if="deletedRegistrationsCount > 0" class="warning-box">
-                    Stamhoofd zal {{ deletedRegistrationsCount }} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.
-                </p>
-                <p v-if="membersWithoutNewRegistrations.length" class="success-box">
-                    {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
-                </p>
+            <template v-if="membersWithNewRegistrations.length">
+                <hr>
+                <h2>Inschrijvingstatus</h2>
 
-                <template v-if="membersWithNewRegistrations.length">
-                    <hr>
-                    <h2>Inschrijvingstatus</h2>
+                <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errors.errorBox" class="max">
+                    <RadioGroup>
+                        <Radio v-model="isWaitingList" :value="false">
+                            Nee
+                        </Radio>
+                        <Radio v-model="isWaitingList" :value="true">
+                            Ja, zet op wachtlijst
+                        </Radio>
+                    </RadioGroup>
+                </STInputBox>
 
-                    <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errors.errorBox" class="max">
+                <template v-if="!isWaitingList">
+                    <STInputBox v-if="needsPaidStatus" :title="'Hebben deze leden al betaald?'" error-fields="paid" :error-box="errors.errorBox" class="max">
                         <RadioGroup>
-                            <Radio v-model="isWaitingList" :value="false">
-                                Nee
+                            <Radio v-model="paid" :value="true">
+                                Al betaald
                             </Radio>
-                            <Radio v-model="isWaitingList" :value="true">
-                                Ja, zet op wachtlijst
+                            <Radio v-model="paid" :value="false">
+                                Niet betaald
+                            </Radio>
+                            <Radio v-model="paid" :value="null">
+                                Sommigen wel, anderen niet
                             </Radio>
                         </RadioGroup>
                     </STInputBox>
-
-                    <template v-if="!isWaitingList">
-                        <STInputBox v-if="needsPaidStatus" :title="'Hebben deze leden al betaald?'" error-fields="paid" :error-box="errors.errorBox" class="max">
-                            <RadioGroup>
-                                <Radio v-model="paid" :value="true">
-                                    Al betaald
-                                </Radio>
-                                <Radio v-model="paid" :value="false">
-                                    Niet betaald
-                                </Radio>
-                                <Radio v-model="paid" :value="null">
-                                    Sommigen wel, anderen niet
-                                </Radio>
-                            </RadioGroup>
-                        </STInputBox>
-                        <p v-if="!needsPaidStatus && somePaid" class="success-box">
-                            De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.
-                        </p>
-
-                        <p v-if="needsPaidStatus && somePaid" class="warning-box">
-                            Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
-                        </p>
-
-                        <p v-if="needsPaidStatus && paid === null" class="warning-box">
-                            We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten.
-                        </p>
-                    </template>
-                </template>
-
-                <template v-if="needsGroupAssignment">
-                    <hr>
-                    <h2>Inschrijvingsgroep</h2>
-
-                    <p class="warning-box">
-                        {{ membersNeedingAssignment.length }} leden uit jouw lijst hebben geen inschrijvingsgroep toegewezen gekregen (in een kolom). Kies hieronder hoe je deze wilt inschrijven in de juiste groep, of voeg een kolom in jouw bestand toe met de groep waar je elk lid wilt inschrijven.
+                    <p v-if="!needsPaidStatus && somePaid" class="success-box">
+                        De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.
                     </p>
 
-                    <STInputBox title="Leeftijdsgroep toewijzen" error-fields="group" :error-box="errors.errorBox" class="max">
-                        <RadioGroup>
-                            <Radio v-model="autoAssign" :value="true">
-                                Automatisch groep bepalen
-                            </Radio>
-                            <Radio v-model="autoAssign" :value="false">
-                                Allemaal in één groep inschrijven
-                            </Radio>
-                        </RadioGroup>
+                    <p v-if="needsPaidStatus && somePaid" class="warning-box">
+                        Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
+                    </p>
+
+                    <p v-if="needsPaidStatus && paid === null" class="warning-box">
+                        We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten.
+                    </p>
+                </template>
+            </template>
+
+            <template v-if="needsGroupAssignment">
+                <hr>
+                <h2>Inschrijvingsgroep</h2>
+
+                <p class="warning-box">
+                    {{ membersNeedingAssignment.length }} leden uit jouw lijst hebben geen inschrijvingsgroep toegewezen gekregen (in een kolom). Kies hieronder hoe je deze wilt inschrijven in de juiste groep, of voeg een kolom in jouw bestand toe met de groep waar je elk lid wilt inschrijven.
+                </p>
+
+                <STInputBox title="Leeftijdsgroep toewijzen" error-fields="group" :error-box="errors.errorBox" class="max">
+                    <RadioGroup>
+                        <Radio v-model="autoAssign" :value="true">
+                            Automatisch groep bepalen
+                        </Radio>
+                        <Radio v-model="autoAssign" :value="false">
+                            Allemaal in één groep inschrijven
+                        </Radio>
+                    </RadioGroup>
+
+                    <template #right>
+                        <button class="button text" type="button" @click.stop="openAssignment">
+                            <span class="icon help" />
+                            <span>Toon resultaat</span>
+                        </button>
+                    </template>
+                </STInputBox>
+
+                <template v-if="autoAssign">
+                    <STInputBox v-if="membersWithMultipleGroups.length > 0" title="Prioriteit van groepen" error-fields="group" :error-box="errors.errorBox" class="max">
+                        <p class="info-box">
+                            {{ membersWithMultipleGroups.length }} {{ membersWithMultipleGroups.length == 1 ? 'lid past' : 'leden passen' }} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > inschrijvingsgroepen)
+                        </p>
+
+                        <STList v-model="draggableGroups" :draggable="true">
+                            <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
+                                {{ index + 1 }}. {{ group.settings.name }}
+
+                                <template #right>
+                                    <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
+                                    <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
+                                    <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                                </template>
+                            </STListItem>
+                        </STList>
 
                         <template #right>
-                            <button class="button text" type="button" @click.stop="openAssignment">
+                            <button type="button" class="button text" @click.stop="openMultipleGroups">
                                 <span class="icon help" />
-                                <span>Toon resultaat</span>
+                                <span>Toon leden</span>
                             </button>
                         </template>
                     </STInputBox>
 
-                    <template v-if="autoAssign">
-                        <STInputBox v-if="membersWithMultipleGroups.length > 0" title="Prioriteit van groepen" error-fields="group" :error-box="errors.errorBox" class="max">
-                            <p class="info-box">
-                                {{ membersWithMultipleGroups.length }} {{ membersWithMultipleGroups.length == 1 ? 'lid past' : 'leden passen' }} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > inschrijvingsgroepen)
-                            </p>
+                    <STInputBox v-if="membersWithoutMatchingGroups.length > 0" title="In welke groep wil je leden inschrijven die nergens in passen?" error-fields="group" :error-box="errors.errorBox" class="max">
+                        <p class="info-box">
+                            {{ membersWithoutMatchingGroups.length }} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.
+                        </p>
 
-                            <STList v-model="draggableGroups" :draggable="true">
-                                <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
-                                    {{ index + 1 }}. {{ group.settings.name }}
+                        <Dropdown v-model="defaultGroup">
+                            <option v-for="group in groups" :key="group.id" :value="group">
+                                {{ group.settings.name }}
+                            </option>
+                        </Dropdown>
 
-                                    <template #right>
-                                        <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
-                                        <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
-                                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                                    </template>
-                                </STListItem>
-                            </STList>
-
-                            <template #right>
-                                <button type="button" class="button text" @click.stop="openMultipleGroups">
-                                    <span class="icon help" />
-                                    <span>Toon leden</span>
-                                </button>
-                            </template>
-                        </STInputBox>
-
-                        <STInputBox v-if="membersWithoutMatchingGroups.length > 0" title="In welke groep wil je leden inschrijven die nergens in passen?" error-fields="group" :error-box="errors.errorBox" class="max">
-                            <p class="info-box">
-                                {{ membersWithoutMatchingGroups.length }} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.
-                            </p>
-
-                            <Dropdown v-model="defaultGroup">
-                                <option v-for="group in groups" :key="group.id" :value="group">
-                                    {{ group.settings.name }}
-                                </option>
-                            </Dropdown>
-
-                            <template #right>
-                                <button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
-                                    <span class="icon help" />
-                                    <span>Toon leden</span>
-                                </button>
-                            </template>
-                        </STInputBox>
-                    </template>
-                    <template v-else>
-                        <STInputBox title="In welke groep wil je deze leden inschrijven?" error-fields="group" :error-box="errors.errorBox" class="max">
-                            <Dropdown v-model="defaultGroup">
-                                <option v-for="group in groups" :key="group.id" :value="group">
-                                    {{ group.settings.name }}
-                                </option>
-                            </Dropdown>
-                        </STInputBox>
-                    </template>
+                        <template #right>
+                            <button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
+                                <span class="icon help" />
+                                <span>Toon leden</span>
+                            </button>
+                        </template>
+                    </STInputBox>
+                </template>
+                <template v-else>
+                    <STInputBox title="In welke groep wil je deze leden inschrijven?" error-fields="group" :error-box="errors.errorBox" class="max">
+                        <Dropdown v-model="defaultGroup">
+                            <option v-for="group in groups" :key="group.id" :value="group">
+                                {{ group.settings.name }}
+                            </option>
+                        </Dropdown>
+                    </STInputBox>
                 </template>
             </template>
-        </main>
+        </template>
 
-        <STToolbar>
-            <template #right>
-                <button type="button" class="button secundary" @click="openResultView">
-                    Toon wijzigingen
-                </button>
+        <hr>
 
-                <LoadingButton :loading="saving">
-                    <button type="button" class="button primary" @click="goNext">
-                        Importeer {{ importMemberResults.length }} leden
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <STList>
+            <STListItem :selectable="true" @click.prevent="openResultView">
+                <template #left>
+                    <span class="icon eye" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Toon wijzigingen') }}
+                </h3>
+            </STListItem>
+        </STList>
+    </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanDismiss, useCanPop, usePresent } from '@simonbackx/vue-app-navigation';
-import { Dropdown, LoadingButton, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { Dropdown, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemCartItem, BalanceItemType, Gender, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RecordAnswer, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
@@ -182,8 +178,6 @@ const props = defineProps<{
 }>();
 
 const present = usePresent();
-const canPop = useCanPop();
-const canDismiss = useCanDismiss();
 const errors = useErrors();
 const platform = usePlatform();
 const platformFamilyManager = usePlatformFamilyManager();
