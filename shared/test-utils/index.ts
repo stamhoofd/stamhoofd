@@ -66,9 +66,9 @@ class TestInstance {
         }
     }
 
-    loadEnvironment() {
+    async loadEnvironment() {
         // Clear env
-        loadEnvironment();
+        await loadEnvironment();
 
         // Reset permanent environment overrides
         for (const key in this.permanentEnvironmentOverrides) {
@@ -77,7 +77,7 @@ class TestInstance {
     }
 
     async beforeEach() {
-        this.loadEnvironment();
+        await this.loadEnvironment();
     }
 
     /**
@@ -85,7 +85,7 @@ class TestInstance {
      */
     setup() {
         beforeAll(async () => {
-            this.loadEnvironment();
+            await this.loadEnvironment();
             await this.beforeAll();
         });
 
@@ -100,16 +100,13 @@ class TestInstance {
         afterAll(async () => {
             await this.afterAll();
         });
-
-        // Sometimes there is code outside the test 'describe' that needs the environment already
-        this.loadEnvironment();
     }
 
     /**
      * Run this in each jest.global.setup.ts file
      */
     async globalSetup() {
-        this.loadEnvironment();
+        await this.loadEnvironment();
     }
 }
 

@@ -1,6 +1,6 @@
 import testEnv from './env.json';
 
-export function loadEnvironment() {
+export async function loadEnvironment() {
     let globalObject: any = null;
     if (typeof window === 'object') {
         globalObject = window;

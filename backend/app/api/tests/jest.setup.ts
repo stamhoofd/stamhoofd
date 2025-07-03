@@ -75,7 +75,7 @@ beforeAll(async () => {
     await GlobalHelper.load();
 
     // Override default $t handlers
-    TestUtils.loadEnvironment();
+    await TestUtils.loadEnvironment();
 });
 
 afterAll(async () => {
