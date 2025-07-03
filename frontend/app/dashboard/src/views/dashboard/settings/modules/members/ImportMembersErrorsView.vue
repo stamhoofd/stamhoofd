@@ -1,50 +1,36 @@
 <template>
-    <div id="import-members-errors-view" class="st-view background">
-        <STNavigationBar title="Kijk deze fouten na" :dismiss="canDismiss" :pop="canPop" />
+    <SaveView :title="$t('Kijk deze fouten na')" :loading="saving" :save-text="$t('Nieuw bestand uploaden')" @save="goNext">
+        <h1>Kijk deze fouten na</h1>
+        <p>In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.</p>
 
-        <main>
-            <h1>Kijk deze fouten na</h1>
-            <p>In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>
+                        Fout
+                    </th>
+                    <th>Cel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(error, index) in importErrors" :key="index">
+                    <td>
+                        {{ error.message }}
+                    </td>
+                    <td class="nowrap">
+                        {{ error.cellPath }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>
-                            Fout
-                        </th>
-                        <th>Cel</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(error, index) in importErrors" :key="index">
-                        <td>
-                            {{ error.message }}
-                        </td>
-                        <td class="nowrap">
-                            {{ error.cellPath }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <STErrorsDefault :error-box="errors.errorBox" />
-        </main>
-
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" type="button" @click="() => pop()">
-                        Nieuw bestand uploaden
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+        <STErrorsDefault :error-box="errors.errorBox" />
+    </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { useCanDismiss, useCanPop, usePop } from '@simonbackx/vue-app-navigation';
-import { LoadingButton, STErrorsDefault, STNavigationBar, STToolbar, useErrors } from '@stamhoofd/components';
+import { usePop } from '@simonbackx/vue-app-navigation';
+import { STErrorsDefault, useErrors } from '@stamhoofd/components';
 import { ref } from 'vue';
 import { ImportError } from '../../../../../classes/import/ImportError';
 
@@ -53,9 +39,11 @@ defineProps<{
 }>();
 
 const errors = useErrors();
-const canDismiss = useCanDismiss();
-const canPop = useCanPop();
 const pop = usePop();
 
 const saving = ref(false);
+
+function goNext() {
+    pop()?.catch(console.error);
+}
 </script>

@@ -474,7 +474,7 @@ async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], exis
 
     if (result.errors.length > 0) {
         showCallback(new ComponentWithProperties(ImportMembersErrorsView, {
-            errors: result.errors,
+            importErrors: result.errors,
         })).catch(console.error);
     }
     else {
@@ -497,7 +497,7 @@ async function goNext() {
 
         if (result.errors.length > 0) {
             show(new ComponentWithProperties(ImportMembersErrorsView, {
-                errors: result.errors,
+                importErrors: result.errors,
             })).catch(console.error);
         }
         else {
