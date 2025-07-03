@@ -11,7 +11,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
     id = 'GroupColumnMatcher';
     category: MemberDetailsMatcherCategory = MemberDetailsMatcherCategory.Member;
 
-    constructor(private readonly groups: Group[]) {
+    constructor(private readonly getGroups: () => Group[]) {
 
     }
 
@@ -53,7 +53,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         let minErrorGroup: Group | null = null;
         const minError = 0;
 
-        for (const group of this.groups) {
+        for (const group of this.getGroups()) {
             const err = StringCompare.typoCount(group.settings.name.toString(), value);
             if (err < 2 && (minErrorGroup === null || err < minError)) {
                 minErrorGroup = group;

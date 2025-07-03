@@ -2,12 +2,12 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { SessionContext } from '@stamhoofd/networking';
 import { PaymentStatus, PlatformFamily, PlatformMember, RegisterCheckout, RegisterResponse } from '@stamhoofd/structures';
+import { updateContextFromMembersBlob } from '../';
 import { GlobalEventBus } from '../../EventBus';
 import { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { PaymentHandler } from '../../views/PaymentHandler';
 import { RegistrationSuccessView } from '../checkout';
 import { ViewStep, ViewStepsManager } from '../classes/ViewStepsManager';
-import { updateContextFromMembersBlob } from '../';
 import { FreeContributionStep } from './steps/FreeContributionStep';
 import { PaymentCustomerStep } from './steps/PaymentCustomerStep';
 import { PaymentSelectionStep } from './steps/PaymentSelectionStep';
@@ -26,6 +26,11 @@ export async function startCheckout({ checkout, context, displayOptions, admin, 
     }, displayOptions);
 
     await stepManager.saveHandler(null, navigate);
+}
+
+export async function startRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
+    checkout.validate({});
+    await register({ checkout, context, admin, members }, navigate);
 }
 
 async function register({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {

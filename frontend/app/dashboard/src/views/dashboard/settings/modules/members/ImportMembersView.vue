@@ -52,48 +52,52 @@
                 <hr>
             </template>
 
-            <table v-if="file && columns.length > 0" class="data-table">
-                <thead>
-                    <tr>
-                        <th>
-                            Kolom uit jouw bestand
-                        </th>
-                        <th>Koppelen aan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="column in columns" :key="column.name">
-                        <td>
-                            <Checkbox :model-value="column.selected" @update:model-value=" setColumnSelected(column, $event)">
-                                <h2 class="style-title-list">
-                                    {{ column.name }}
-                                </h2>
-                                <p v-if="column.examples.length > 0" class="style-description-small">
-                                    {{ column.examples.slice(0, 2).join(', ') }}...
-                                </p>
-                            </Checkbox>
-                        </td>
-                        <td>
-                            <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
-                                <option :value="null" disabled>
-                                    Maak een keuze
-                                </option>
-                                <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
-                                    <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
-                                        {{ matcher.getName() }} ({{ cat.name }})
+            <template v-if="file && columns.length > 0">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Kolom uit jouw bestand
+                            </th>
+                            <th>Koppelen aan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="column in columns" :key="column.name">
+                            <td>
+                                <Checkbox :model-value="column.selected" @update:model-value=" setColumnSelected(column, $event)">
+                                    <h2 class="style-title-list">
+                                        {{ column.name }}
+                                    </h2>
+                                    <p v-if="column.examples.length > 0" class="style-description-small">
+                                        {{ column.examples.slice(0, 2).join(', ') }}...
+                                    </p>
+                                </Checkbox>
+                            </td>
+                            <td>
+                                <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
+                                    <option :value="null" disabled>
+                                        Maak een keuze
                                     </option>
-                                </optgroup>
-                            </Dropdown>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <p v-if="file && columns.length > 0" class="warning-box">
-                Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
-            </p>
-
-            <STErrorsDefault :error-box="errors.errorBox" />
+                                    <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
+                                        <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
+                                            {{ matcher.getName() }} ({{ cat.name }})
+                                        </option>
+                                    </optgroup>
+                                </Dropdown>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p v-if="file && columns.length > 0" class="warning-box">
+                    Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
+                </p>
+                <STErrorsDefault :error-box="errors.errorBox" />
+                <hr>
+                <STInputBox :title="$t('In welk werkjaar wil je de leden inschrijven?')" error-fields="period" :error-box="errors.errorBox">
+                    <RegistrationPeriodSelector v-model="period" />
+                </STInputBox>
+            </template>
         </main>
 
         <STToolbar>
@@ -109,14 +113,13 @@
 </template>
 
 <script lang="ts" setup>
+import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, PushOptions, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, useMembersObjectFetcher, usePatch } from '@stamhoofd/components';
-import { LimitedFilteredRequest } from '@stamhoofd/structures';
-import XLSX from 'xlsx';
-
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { useOrganizationManager } from '@stamhoofd/networking';
+import { LimitedFilteredRequest, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
+import XLSX from 'xlsx';
 import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
 import { ExistingMemberResult, ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
@@ -128,11 +131,7 @@ import { MemberDetailsMatcherCategory } from '../../../../../classes/import/Memb
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
-
-// errorBox: ErrorBox | null = null
-// validator = new Validator()
-
-// const organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
+import RegistrationPeriodSelector from './RegistrationPeriodSelector.vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -141,12 +140,12 @@ const organizationManager = useOrganizationManager();
 const { patched, patch, hasChanges, addPatch } = usePatch(organizationManager.value.organization);
 const rowCount = ref(0);
 const columnCount = ref(0);
-// todo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(patched.value));
 const columns = ref<MatchedColumn[]>([]);
 const sheets = ref<Record<string, XLSX.WorkSheet>>({});
 const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
+const period: Ref<OrganizationRegistrationPeriod> = ref(patched.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
+const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(patched.value, () => period.value.groups));
 
 const show = useShow();
 const canDismiss = useCanDismiss();
@@ -175,8 +174,9 @@ const sheetKey = computed({
         rowCount.value = range.e.r + 1;
         columnCount.value = range.e.c + 1;
         internalSheetKey.value = key;
-        // todo
-        readColumns();
+
+        columns.value = [];
+        columns.value = readColumns(columns.value);
     },
 });
 
@@ -248,18 +248,19 @@ function changedFile(event: any) {
     event.target.value = null;
 }
 
-function readColumns() {
+function readColumns(previousColumns: MatchedColumn[]): MatchedColumn[] {
     if (!sheet.value) {
-        return;
+        return [];
     }
 
     if (!sheet.value['!ref']) {
         throw new Error('Missing ref in sheet');
     }
 
+    console.error('read columns');
+
     const range = XLSX.utils.decode_range(sheet.value['!ref']); // get the range
-    const previousColumns = columns.value;
-    columns.value = [];
+    const columns: MatchedColumn[] = [];
     let skipAuto = previousColumns.length > 0;
 
     const availableMatchers = matchers.value.slice();
@@ -267,6 +268,9 @@ function readColumns() {
     // Read all the names + some examples and try to match them to columns
     for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
         const cell = sheet.value[XLSX.utils.encode_cell({ r: range.s.r, c: colNum })] as XLSX.CellObject;
+        if (!cell) {
+            continue;
+        }
         const columnName = (cell.w ?? cell.v ?? '') + '';
         const matched = new MatchedColumn(colNum, columnName, matchers.value);
 
@@ -302,13 +306,11 @@ function readColumns() {
             }
         }
 
-        columns.value.push(matched);
+        columns.push(matched);
     }
-}
 
-// function getColumnSelected(column: MatchedColumn) {
-//     return column.selected;
-// }
+    return columns;
+}
 
 function setColumnSelected(column: MatchedColumn, value: boolean) {
     column.selected = value;
@@ -412,16 +414,10 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
 
     const stack = [...results];
 
-    // Start! :D
-    // const allMembers = await MemberManager.loadMembers([], null, null);
-
     const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
     const result = new ImportMembersResult();
 
     for (let row = range.s.r + 1; row <= range.e.r; row++) {
-        // const member = new ImportingMember(row, organization);
-        // const accumulatedResult = new ImportMemberAccumulatedResult(patched.value);
-        // const partialMemberDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>> = {};
         let allEmpty = true;
         const errorStack: ImportError[] = [];
         const importMemberResult = stack.shift();
@@ -463,28 +459,6 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
             continue;
         }
         result.errors.push(...errorStack);
-
-        // Clean data
-        // member.details.cleanData();
-
-        // Check if we find the same member
-        // if (member.details.firstName.length > 0 && member.details.lastName.length > 0) {
-        //     for (const m of allMembers) {
-        //         if (member.isEqual(m)) {
-        //             member.equal = m;
-        //             break;
-        //         }
-        //     }
-
-        //     if (!member.equal) {
-        //         for (const m of allMembers) {
-        //             if (member.isProbablyEqual(m)) {
-        //                 member.probablyEqual = m;
-        //                 break;
-        //             }
-        //         }
-        //     }
-        // }
 
         result.data.push(importMemberResult);
     }
@@ -530,7 +504,8 @@ async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], exis
     }
     else {
         showCallback(new ComponentWithProperties(ImportMembersQuestionsView, {
-            members: result.data,
+            importMemberResults: result.data,
+            period: period.value,
         })).catch(console.error);
     }
 }
@@ -543,10 +518,7 @@ async function goNext() {
     saving.value = true;
 
     try {
-        // todo
         const result = importBaseData(sheet.value, columns.value);
-
-        console.error(JSON.stringify(result));
 
         if (result.errors.length > 0) {
             show(new ComponentWithProperties(ImportMembersErrorsView, {
@@ -557,9 +529,6 @@ async function goNext() {
             // find equal members and possible equal members
             const results = await findExistingMembers(result.data);
             const probablyEqualResults = results.filter(r => r.isProbablyEqual);
-
-            console.error('go next');
-
             if (probablyEqualResults.length) {
                 show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
                     members: probablyEqualResults,

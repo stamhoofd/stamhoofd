@@ -1,9 +1,10 @@
-import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { MemberDetails, Organization, PlatformMember } from '@stamhoofd/structures';
+import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { MemberDetails, Organization, Platform, PlatformFamily, PlatformMember, Version } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { ImportingRegistration } from './ImportMemberAccumulatedResult';
 import { ImportMemberBase } from './ImportMemberBase';
+
 export class ImportMemberResult {
     private _patch: AutoEncoderPatchType<MemberDetails>;
     readonly existingMember: PlatformMember | null = null;
@@ -12,9 +13,23 @@ export class ImportMemberResult {
     readonly isExisting: boolean;
     readonly memberId: string;
     readonly organization: Organization;
+    private _newPlatformMember: PlatformMember | null = null;
+    private _cachedDetails: MemberDetails | null = null;
 
     get patchedDetails() {
-        return this.details.patch(this._patch);
+        if (this._cachedDetails) {
+            return this._cachedDetails;
+        }
+
+        const details = this.details.patch(this._patch);
+        details.cleanData();
+        this._cachedDetails = details;
+
+        return details;
+    }
+
+    get newPlatformMember() {
+        return this._newPlatformMember;
     }
 
     getPatch() {
@@ -46,8 +61,46 @@ export class ImportMemberResult {
         this.isExisting = existingMember !== null;
     }
 
+    hasChanges() {
+        if (this.isExisting) {
+            return patchContainsChanges(this._patch, this.details, { version: Version });
+        }
+
+        return true;
+    }
+
     addPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>>) {
+        this._cachedDetails = null;
         this._patch = this._patch.patch(MemberDetails.patch(newPatch));
+    }
+
+    private getNewOrExistingPlatformMember(platform: Platform) {
+        if (this.existingMember) {
+            return this.existingMember;
+        }
+
+        const family = new PlatformFamily({ contextOrganization: this.organization, platform });
+        const newMember = family.newMember();
+        this._newPlatformMember = newMember;
+        return newMember;
+    }
+
+    getPatchedPlatformMember(platform: Platform) {
+        const platformMember = this.getNewOrExistingPlatformMember(platform);
+        platformMember.addDetailsPatch(this._patch);
+        return platformMember;
+    }
+
+    getCheckoutMember() {
+        if (this.existingMember) {
+            return this.existingMember;
+        }
+
+        if (this._newPlatformMember) {
+            return this._newPlatformMember;
+        }
+
+        throw new Error('No member found');
     }
 }
 
@@ -119,7 +172,7 @@ export class ExistingMemberResult {
 function isMemberEqual(member: PlatformMember, birthDay: Date | null | undefined, firstName: string, lastName: string): boolean {
     const memberDetails = member.member.details;
 
-    if (!birthDay || memberDetails.birthDay === null || birthDay !== memberDetails.birthDay) {
+    if (!birthDay || memberDetails.birthDay === null || birthDay.getTime() !== memberDetails.birthDay.getTime()) {
         return false;
     }
 

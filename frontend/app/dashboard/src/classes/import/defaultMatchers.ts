@@ -25,14 +25,14 @@ import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from './TextColumnMatcher';
 
 // Always make sure fullname is before lastname!
-export const getMemberMatchers = (groups: Group[]) => [
+export const getMemberMatchers = (getGroups: () => Group[]) => [
     new MemberNumberColumnMatcher(),
     new FullNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new FirstNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new LastNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new BirthDayColumnMatcher(),
     new GenderColumnMatcher(),
-    new GroupColumnMatcher(groups),
+    new GroupColumnMatcher(getGroups),
     new PhoneColumnMatcher(MemberDetailsMatcherCategory.Member),
     new EmailColumnMatcher(MemberDetailsMatcherCategory.Member),
     new StreetWithNumberColumnMatcher(MemberDetailsMatcherCategory.Member),
@@ -120,11 +120,9 @@ export const paymentMatchers = [
     new PaymentPriceColumnMatcher(),
 ];
 
-export const getAllMatchers = (organization: Organization) => {
-    const groups = organization.period.groups;
-
+export const getAllMatchers = (organization: Organization, getGroups: () => Group[]) => {
     let matchers = [
-        ...getMemberMatchers(groups),
+        ...getMemberMatchers(getGroups),
         ...paymentMatchers,
         ...parentMatchers1,
         ...parentMatchers2,
