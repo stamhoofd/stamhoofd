@@ -1,8 +1,19 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasTokenRepository } from './UitpasTokenRepository';
+import { DataValidator } from '@stamhoofd/utility';
 
 export class UitpasNumberValidatorStatic {
     async checkUitpasNumber(uitpasNumber: string) {
+        // static check (using regex)
+        if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
+            throw new SimpleError({
+                code: 'invalid_uitpas_number',
+                message: `Invalid UiTPAS number: ${uitpasNumber}`,
+                human: $t(
+                    `Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.`,
+                ),
+            });
+        }
         if (!STAMHOOFD.UITPAS_API_CLIENT_ID) {
             throw new SimpleError({
                 code: 'uitpas_api_not_configured',
