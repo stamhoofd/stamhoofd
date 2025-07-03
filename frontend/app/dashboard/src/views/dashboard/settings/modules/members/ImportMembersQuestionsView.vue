@@ -8,13 +8,13 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <template v-if="!saving">
-                <p v-if="existingCount > 0 && existingCount === members.length" class="warning-box">
+                <p v-if="existingCount > 0 && existingCount === importMemberResults.length" class="warning-box">
                     Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven. <template v-if="membersWithNewRegistrations.length">
                         Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.
                     </template>Let goed op, je kan dit niet ongedaan maken.
                 </p>
                 <p v-else-if="existingCount > 0" class="warning-box">
-                    {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ members.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
+                    {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ importMemberResults.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
                 </p>
 
                 <p v-if="deletedRegistrationsCount > 0" class="warning-box">
@@ -125,7 +125,7 @@
                             </p>
 
                             <Dropdown v-model="defaultGroup">
-                                <option v-for="group of patched.groups" :key="group.id" :value="group">
+                                <option v-for="group in groups" :key="group.id" :value="group">
                                     {{ group.settings.name }}
                                 </option>
                             </Dropdown>
@@ -141,7 +141,7 @@
                     <template v-else>
                         <STInputBox title="In welke groep wil je deze leden inschrijven?" error-fields="group" :error-box="errors.errorBox" class="max">
                             <Dropdown v-model="defaultGroup">
-                                <option v-for="group of patched.groups" :key="group.id" :value="group">
+                                <option v-for="group in groups" :key="group.id" :value="group">
                                     {{ group.settings.name }}
                                 </option>
                             </Dropdown>
@@ -159,7 +159,7 @@
 
                 <LoadingButton :loading="saving">
                     <button type="button" class="button primary" @click="goNext">
-                        Importeer {{ members.length }} leden
+                        Importeer {{ importMemberResults.length }} leden
                     </button>
                 </LoadingButton>
             </template>
@@ -168,40 +168,38 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanDismiss, useCanPop, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { Dropdown, getDefaultItem, LoadingButton, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, useCheckoutRegisterItem, useContext, useErrors, usePatch } from '@stamhoofd/components';
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { Gender, Group, GroupPrice, GroupType, Organization, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformMember, RecordAnswer, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { ComponentWithProperties, useCanDismiss, useCanPop, usePresent } from '@simonbackx/vue-app-navigation';
+import { Dropdown, LoadingButton, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemCartItem, BalanceItemType, Gender, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RecordAnswer, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, ComputedRef, onMounted, Ref, ref } from 'vue';
+import { computed, Ref, ref, watch } from 'vue';
 import { ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
 import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
 
 const props = defineProps<{
-    members: ImportMemberResult[];
+    period: OrganizationRegistrationPeriod;
+    importMemberResults: ImportMemberResult[];
 }>();
 
-const errors = useErrors();
-const saving = ref(false);
-const multipleGroups = ref([]) as Ref<Group[]>;
 const present = usePresent();
-const dismiss = useDismiss();
 const canPop = useCanPop();
 const canDismiss = useCanDismiss();
-
-const organizationManager = useOrganizationManager();
-const { patched } = usePatch(organizationManager.value.organization);
-
-onMounted(() => {
-    multipleGroups.value = calculateMultipleGroups();
-    autoAssignMembers(props.members);
-});
-
-// todo: should these all be refs?
+const errors = useErrors();
+const platform = usePlatform();
+const platformFamilyManager = usePlatformFamilyManager();
+const navigate = useNavigationActions();
+const organization = useRequiredOrganization();
+const saving = ref(false);
 const paid = ref<boolean | null>(true);
 const isWaitingList = ref(false);
 const autoAssign = ref(true);
-const defaultGroup = computed(() => patched.value.groups[0]);
+const groups = props.period.groups;
+const defaultGroup = ref(groups[0]) as unknown as Ref<Group>;
+const multipleGroups = ref(calculateMultipleGroups(groups)) as unknown as Ref<Group[]>;
+
+watch([autoAssign, defaultGroup], () => {
+    autoAssignMembers(props.importMemberResults);
+});
 
 const needsPaidStatus = computed(() => {
     return !!membersWithNewRegistrations.value.find(m => m.registration.paid === null && m.registration.paidPrice === null);
@@ -212,21 +210,18 @@ const somePaid = computed(() => {
 });
 
 const needsGroupAssignment = computed(() => membersNeedingAssignment.value.length > 0);
-
-const existingCount = computed(() => props.members.filter(m => m.isExisting).length);
-
-// todo: groups is deprecated
-const hasWaitingLists = computed(() => !!patched.value.groups.find(g => g.waitingList !== null));
+const existingCount = computed(() => props.importMemberResults.filter(m => m.isExisting).length);
+const hasWaitingLists = !!groups.find(g => g.waitingList !== null);
 
 const membersNeedingAssignment = computed(() => {
-    return props.members.filter((m) => {
+    return props.importMemberResults.filter((m) => {
         return shouldAssignRegistrationToMember(m);
     });
 });
 
-const membersWithNewRegistrations = computed(() => props.members.filter(m => hasNewRegistration(m)));
+const membersWithNewRegistrations = computed(() => props.importMemberResults.filter(m => hasNewRegistration(m)));
 
-const membersWithoutNewRegistrations = computed(() => props.members.filter(m => !hasNewRegistration(m)));
+const membersWithoutNewRegistrations = computed(() => props.importMemberResults.filter(m => !hasNewRegistration(m)));
 
 const deletedRegistrationsCount = computed(() => {
     return membersWithNewRegistrations.value.reduce((acc, m) => {
@@ -245,13 +240,13 @@ function shouldAssignRegistrationToMember(m: ImportMemberResult) {
 
     const activeRegistrations = m.existingMember?.member.registrations.filter(r => r.isActive) ?? [];
     // todo: is this correct?
-    const waingingGroups = m.existingMember?.member.registrations.filter(r => r.isActive && r.group.type === GroupType.WaitingList) ?? [];
+    const waitingGroups = m.existingMember?.member.registrations.filter(r => r.isActive && r.group.type === GroupType.WaitingList) ?? [];
 
     if (activeRegistrations.length > 0 && !isWaitingList.value) {
         return false;
     }
 
-    if (waingingGroups.length > 0 && isWaitingList.value) {
+    if (waitingGroups.length > 0 && isWaitingList.value) {
         return false;
     }
 
@@ -260,35 +255,35 @@ function shouldAssignRegistrationToMember(m: ImportMemberResult) {
 
 const membersWithMultipleGroups = computed(() => {
     return membersNeedingAssignment.value.filter((m) => {
-        const groups = m.patchedDetails.getMatchingGroups(patched.value.period.groups);
-        return (groups.length > 1);
+        const matchedGroups = m.patchedDetails.getMatchingGroups(groups);
+        return (matchedGroups.length > 1);
     });
 });
 
 const membersWithoutMatchingGroups = computed(() => {
     return membersNeedingAssignment.value.filter((m) => {
-        const groups = m.patchedDetails.getMatchingGroups(patched.value.period.groups);
-        return (groups.length === 0);
+        const matchedGroups = m.patchedDetails.getMatchingGroups(groups);
+        return (matchedGroups.length === 0);
     });
 });
 
 /**
      * Groups for which we need to set a priority, because some members fit in more than one of them
      */
-function calculateMultipleGroups() {
-    const groups = new Map<string, Group>();
-    for (const member of props.members) {
+function calculateMultipleGroups(groups: Group[]) {
+    const multipleGroups = new Map<string, Group>();
+    for (const member of props.importMemberResults) {
         if (member.registration.group !== null) {
             continue;
         }
-        const g = member.patchedDetails.getMatchingGroups(patched.value.period.groups);
+        const g = member.patchedDetails.getMatchingGroups(groups);
         if (g.length > 1) {
             for (const gg of g) {
-                groups.set(gg.id, gg);
+                multipleGroups.set(gg.id, gg);
             }
         }
     }
-    return [...groups.values()].sort((a, b) => -Sorter.stack(Sorter.byNumberValue(a.settings.maxAge ?? 9, b.settings.maxAge ?? 99), Sorter.byNumberValue(a.settings.minAge ?? 0, b.settings.minAge ?? 0)));
+    return [...multipleGroups.values()].sort((a, b) => -Sorter.stack(Sorter.byNumberValue(a.settings.maxAge ?? 9, b.settings.maxAge ?? 99), Sorter.byNumberValue(a.settings.minAge ?? 0, b.settings.minAge ?? 0)));
 }
 
 /**
@@ -307,7 +302,7 @@ function autoAssignMembers(members: ImportMemberResult[]) {
             continue;
         }
 
-        const g = member.patchedDetails.getMatchingGroups(patched.value.period.groups);
+        const g = member.patchedDetails.getMatchingGroups(groups);
         if (g.length === 0) {
             // use default: todo
             member.registration.autoAssignedGroup = defaultGroup.value;
@@ -335,7 +330,7 @@ function getGroupAutoAssignCountForPriority(group: Group) {
 }
 
 function openAssignment() {
-    autoAssignMembers(props.members);
+    autoAssignMembers(props.importMemberResults);
     present(new ComponentWithProperties(ImportAutoAssignedView, {
         title: 'Wijzigingen aan inschrijvingen',
         description: 'Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand',
@@ -362,10 +357,10 @@ function openPriorityAssignedToGroup(group: Group) {
             }
 
             if (m.registration.autoAssignedGroup?.id === group.id) {
-                const groups = m.patchedDetails.getMatchingGroups(patched.value.period.groups);
+                const matchingGroups = m.patchedDetails.getMatchingGroups(groups);
                 return [{
                     name: m.patchedDetails.name,
-                    description: groups.map(g => g.settings.name).join(', '),
+                    description: matchingGroups.map(g => g.settings.name).join(', '),
                 }];
             }
 
@@ -383,10 +378,10 @@ function openMultipleGroups() {
                 return [];
             }
 
-            const groups = m.patchedDetails.getMatchingGroups(patched.value.period.groups);
+            const matchingGroups = m.patchedDetails.getMatchingGroups(groups);
             return [{
                 name: m.patchedDetails.name,
-                description: groups.map(g => g.settings.name).join(', '),
+                description: matchingGroups.map(g => g.settings.name).join(', '),
             }];
         }),
     }).setDisplayStyle('popup')).catch(console.error);
@@ -414,30 +409,33 @@ function openResultView() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
         title: 'Wijzigingen',
         description: 'Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.',
-        members: props.members.map((member) => {
+        members: props.importMemberResults.map((member) => {
             let description: string[] = [];
             const registration = buildRegistration(member);
 
             if (registration !== null) {
-                const group = groups.value.find(g => g.id === registration.groupId);
+                const group = groups.find(g => g.id === registration.group.id);
                 const groupName = (group?.settings.name ?? 'onbekende groep');
 
                 if (member.existingMember) {
                     if (registration !== null) {
                         let suffix = '';
-                        if (registration.pricePaid) {
-                            suffix += ' (' + Formatter.price(registration.pricePaid) + ' betaald)';
-                        }
-                        if (registration.pricePaid !== registration.price) {
-                            if (registration.price === 0) {
-                                suffix += ' (gratis)';
-                            }
-                            else {
-                                suffix += ' (' + Formatter.price(registration.pricePaid) + ' totaal te betalen)';
-                            }
-                        }
+                        // todo
+                        // if (registration.pricePaid) {
+                        //     suffix += ' (' + Formatter.price(registration.pricePaid) + ' betaald)';
+                        // }
+                        const price = registration.groupPrice?.price.getPrice(member.patchedDetails.shouldApplyReducedPrice);
+                        // todo
+                        // if (registration.pricePaid !== price) {
+                        //     if (price === 0) {
+                        //         suffix += ' (gratis)';
+                        //     }
+                        //     else {
+                        //         suffix += ' (' + Formatter.price(registration.pricePaid) + ' totaal te betalen)';
+                        //     }
+                        // }
 
-                        if (registration.isWaitingList) {
+                        if (registration.group.type === GroupType.WaitingList) {
                             description.push('Wachtlijst plaatsen voor ' + groupName + suffix);
                         }
                         else {
@@ -447,7 +445,7 @@ function openResultView() {
                         // Delete conflicting registrations (based on categories too!)
                         const deleteRegs = getOverrideRegistrations(registration, member);
                         for (const r of deleteRegs) {
-                            const groupName = (groups.value.find(g => g.id === r.groupId)?.settings.name ?? 'onbekende groep');
+                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? 'onbekende groep');
                             if (r.group.type === GroupType.WaitingList) {
                                 description.push('Verwijderen van wachtlijst van ' + groupName);
                             }
@@ -458,7 +456,7 @@ function openResultView() {
                     }
                 }
                 else {
-                    if (registration.isWaitingList) {
+                    if (registration.group.type === GroupType.WaitingList) {
                         description.push('Toevoegen in het systeem en op wachtlijst plaatsen voor ' + groupName);
                     }
                     else {
@@ -488,7 +486,7 @@ function openResultView() {
                 if (newDetails.phone !== undefined && newDetails.phone && existingDetails.phone !== newDetails.phone) {
                     description.push('Telefoonnummer wijzigen naar ' + newDetails.phone);
                 }
-                if (newDetails.birthDay !== undefined && newDetails.birthDay && (!existingDetails.birthDay || Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(newDetails.birthDay))) {
+                if (newDetails.birthDay && (!existingDetails.birthDay || (Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(newDetails.birthDay)))) {
                     description.push('Geboortedatum wijzigen naar ' + Formatter.date(newDetails.birthDay, true));
                 }
 
@@ -608,7 +606,7 @@ function hasNewRegistration(member: ImportMemberResult) {
 
     // Check if we are already registered for this group
     if (member.existingMember) {
-        const periodId = period.value.id;
+        const periodId = props.period.id;
         const existing = member.existingMember.filterRegistrations({ groups: [group], periodId });
 
         if (existing.length && isWaitingList.value) {
@@ -625,65 +623,87 @@ function hasNewRegistration(member: ImportMemberResult) {
 }
 
 interface RegistrationData {
-    groupId: string;
-    isWaitingList: boolean;
-    pricePaid: number;
-    registeredAt: Date | null;
-    createdAt: Date;
-    price: number;
+    group: Group;
+    groupPrice: GroupPrice | null;
+    customStartDate: Date | null;
 }
 
 const context = useContext();
 
-const checkout = useCheckoutRegisterItem();
-const owner = useRequestOwner();
+function createCheckout(importMemberResults: ImportMemberResult[]): RegisterCheckout {
+    const checkout = new RegisterCheckout();
+    checkout.asOrganizationId = organization.value.id;
 
-async function getRegisterItem(member: PlatformMember, group: Group, organization: Organization, replaceRegistrations: RegistrationWithPlatformMember[]) {
-    // const registerItem = getDefaultItem
-    const item = await getDefaultItem({
-        group,
-        member,
-        groupOrganization: organization,
-        context: context.value,
-        owner,
-    });
+    for (const importResult of importMemberResults) {
+        const member = importResult.getCheckoutMember();
+        member.family.checkout = checkout;
+        member.family.pendingRegisterItems = [];
 
-    if (!item) {
-        throw new Error('Failed to get default item');
+        const organization = importResult.organization;
+
+        const regsitrationData = buildRegistration(importResult);
+
+        if (regsitrationData) {
+            const registrationsToRemove = getOverrideRegistrations(regsitrationData, importResult);
+
+            const item = new RegisterItem({
+                member,
+                group: regsitrationData.group,
+                organization,
+                customStartDate: regsitrationData?.customStartDate,
+                groupPrice: regsitrationData?.groupPrice ?? undefined,
+            });
+
+            for (const registration of registrationsToRemove) {
+                checkout.removeRegistration(new RegistrationWithPlatformMember({ registration, member }), { calculate: false });
+            }
+
+            checkout.addBalanceItem(BalanceItemCartItem.create({
+                item: BalanceItem.create({
+                    type: BalanceItemType.Registration,
+                }),
+                price: 0,
+            }), { calculate: false });
+            checkout.add(item, { calculate: false });
+        }
     }
 
-    item.replaceRegistrations = replaceRegistrations;
-    return item;
+    // todo: creat balance items to set price paid later
+
+    return checkout;
 }
 
-// async function checkoutRegistration(member: PlatformMember, group: Group, organization: Organization, replaceRegistrations: RegistrationWithPlatformMember[]) {
-//     // const registerItem = getDefaultItem
-//     const item = await getDefaultItem({
-//         group,
-//         member,
-//         groupOrganization: organization,
-//         context: context.value,
-//         owner,
-//     });
-
-//     if (item) {
-//         item.replaceRegistrations = replaceRegistrations;
-
-//         await checkout({
-//             item,
-//             startCheckoutFlow: true,
-//         });
-//     }
-//     else {
-//         console.error('Failed to get default item');
-//     }
-// }
-
-function getGroupPrice(group: Group): GroupPrice {
+function getGroupPrice(group: Group, matchPrice?: { priceValue?: number; priceName?: string; isReducedPrice: boolean }): GroupPrice {
     // todo: is admin?
     const prices = group.settings.getFilteredPrices({ admin: true });
+    let matchedOnName: GroupPrice[] = [];
+    let matchedOnPrice: GroupPrice[] = [];
 
     for (const price of prices) {
+        if (matchPrice !== undefined) {
+            const { priceValue, priceName, isReducedPrice } = matchPrice;
+
+            if (priceName !== undefined) {
+                if (price.name.toString() !== priceName) {
+                    continue;
+                }
+                matchedOnName.push(price);
+            }
+
+            if (priceValue !== undefined) {
+                if (isReducedPrice) {
+                    if (price.price.reducedPrice !== priceValue) {
+                        continue;
+                    }
+                }
+                else if (price.price.price !== priceValue) {
+                    continue;
+                }
+
+                matchedOnPrice.push(price);
+            }
+        }
+
         const stock = price.getRemainingStock(group);
         if (stock !== 0) {
             return price;
@@ -692,89 +712,53 @@ function getGroupPrice(group: Group): GroupPrice {
 
     // Probably all sold out
     // Select the first one anyway
+
+    if (matchPrice?.priceName !== undefined && matchedOnName.length > 0) {
+        return matchedOnName[0];
+    }
+
+    if (matchPrice?.priceValue !== undefined && matchedOnPrice.length > 0) {
+        return matchedOnPrice[0];
+    }
+
     return prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('83c99392-7efa-44d3-8531-1843c5fa7c4d')), id: '' });
 }
-
-// function createCheckout(member: PlatformMember, group: Group, organization: Organization) {
-//     const registerItem = RegisterItem.defaultFor(member, group, organization);
-
-//     // const groupPrice = getGroupPrice(group);
-
-//     //     if (this.existingMember) {
-//     //         const existingRegistration = this.existingMember.member.registrations.filter(r => r.isActive && r.groupId === group.id);
-//     //         if (existingRegistration.length > 0) {
-//     //             // update existing registrations for group
-//     //             replaceRegistrationIds = [...replaceRegistrationIds, ...existingRegistration.map(r => r.id)];
-//     //         }
-//     //     }
-
-//     return IDRegisterCheckout.create({
-//         cart: IDRegisterCart.create({
-//             items: [
-//                 // IDRegisterItem.create({
-//                 //     id: uuidv4(),
-//                 //     replaceRegistrationIds,
-//                 //     options: [],
-//                 //     groupPrice,
-//                 //     organizationId: this.organization.id,
-//                 //     groupId: group.id,
-//                 //     memberId: this.memberId,
-//                 // }),
-//             ],
-//             balanceItems: [],
-//             deleteRegistrationIds: [],
-//         }),
-//         // todo
-//         administrationFee: 0,
-//         // todo
-//         freeContribution: 0,
-//         // todo
-//         paymentMethod: PaymentMethod.Unknown,
-//         // todo
-//         totalPrice: 25_00,
-//         customer: null,
-//     });
-// }
 
 function buildRegistration(member: ImportMemberResult): RegistrationData | null {
     if (!hasNewRegistration(member)) {
         return null;
     }
 
-    const group = (member.registration.group ?? member.registration.autoAssignedGroup);
+    let group = (member.registration.group ?? member.registration.autoAssignedGroup);
 
     if (!group) {
         return null;
     }
 
-    const isReduced = member.patchedDetails.shouldApplyReducedPrice;
-    let price = isWaitingList.value ? 0 : (member.registration.price === null ? getGroupPrice(group).price.getPrice(isReduced) : member.registration.price);
+    let groupPrice: GroupPrice | null = null;
 
-    let paidPrice = (member.registration.paid ?? paid.value ?? false) ? price : 0;
-
-    if (member.registration.paidPrice !== null) {
-        paidPrice = member.registration.paidPrice;
+    if (isWaitingList.value) {
+        if (group.waitingList) {
+            group = group.waitingList;
+        }
     }
-
-    if (paidPrice && paidPrice > price) {
-        price = paidPrice;
+    else {
+        const isReducedPrice = member.patchedDetails.shouldApplyReducedPrice;
+        groupPrice = getGroupPrice(group, {
+            priceValue: member.registration.price === null ? undefined : member.registration.price,
+            priceName: member.registration.priceName === null ? undefined : member.registration.priceName,
+            isReducedPrice,
+        });
     }
 
     const registrationData: RegistrationData = {
-        groupId: group.id,
-        isWaitingList: isWaitingList.value,
-        price,
-        pricePaid: isWaitingList.value ? 0 : paidPrice,
-        registeredAt: isWaitingList.value ? null : (member.registration.date ?? new Date()),
-        createdAt: member.registration.date ?? new Date(),
+        group,
+        groupPrice,
+        customStartDate: member.registration.date ?? new Date(),
     };
 
     return registrationData;
 }
-
-// todo
-const period = ref(patched.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
-const groups = computed(() => period.value.groups as Group[]) as ComputedRef<Group[]>;
 
 function getOverrideRegistrations(registration: RegistrationData, member: ImportMemberResult): Registration[] {
     if (!member.existingMember) {
@@ -784,40 +768,90 @@ function getOverrideRegistrations(registration: RegistrationData, member: Import
     let list: Registration[] = [];
 
     // TODO: delete more conflicting registrations (based on categories too!)
-    const group = groups.value.find(g => g.id === registration.groupId);
-    const periodId = period.value.id;
+    const group = registration.group;
+    const periodId = props.period.id;
 
-    if (group) {
-        // if (registration.group.type !== GroupType.WaitingList) {
-        //     // Delete from waiting list
-        //     const existing = member.existingMember.filterRegistrations({ groups: [group], periodId, types: [GroupType.WaitingList] });
-        //     for (const r of existing) {
-        //         if (list.find(l => l.id === r.id)) {
-        //             continue;
-        //         }
-        //         list.push(r);
-        //     }
-        // }
+    // todo: is this correct?
+    const parents = group.getParentCategories(props.period.availableCategories, false);
 
-        // todo: is this correct?
-        const parents = group.getParentCategories(period.value.availableCategories, false);
+    for (const parent of parents) {
+        const groupsInParent = parent.groupIds.map(id => groups.find(g => g.id === id)).filter(g => !!g) as Group[];
 
-        for (const parent of parents) {
-            const groupsInParent = parent.groupIds.map(id => groups.value.find(g => g.id === id)).filter(g => !!g) as Group[];
-
-            if (parent.settings.maximumRegistrations === 1) {
-                // Delete all registrations for these groups
-                const existing = member.existingMember.filterRegistrations({ groups: groupsInParent, periodId });
-                for (const r of existing) {
-                    if (list.find(l => l.id === r.id)) {
-                        continue;
-                    }
-                    list.push(r);
+        if (parent.settings.maximumRegistrations === 1) {
+            // Delete all registrations for these groups
+            const existing = member.existingMember.filterRegistrations({ groups: groupsInParent, periodId });
+            for (const r of existing) {
+                if (list.find(l => l.id === r.id)) {
+                    continue;
                 }
+                list.push(r);
             }
         }
     }
     return list;
+}
+
+function getExistingFamilies(importMemberResults: ImportMemberResult[]) {
+    const result = new Map<string, PlatformFamily>();
+
+    for (const importResult of importMemberResults) {
+        if (importResult.existingMember) {
+            const existingFamily = importResult.existingMember.family;
+            const uuid = existingFamily.uuid;
+
+            if (result.has(uuid)) {
+                continue;
+            }
+            else {
+                result.set(uuid, existingFamily);
+            }
+        }
+    }
+
+    return [...result.values()];
+}
+
+function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) {
+    const existingFamilies = getExistingFamilies(importMemberResults);
+
+    for (const importResult of importMemberResults) {
+        const newPlatformMember = importResult.newPlatformMember;
+
+        if (newPlatformMember !== null) {
+            const family = existingFamilies.find(f => f.belongsToFamily(newPlatformMember.member));
+
+            if (family) {
+                family.add(newPlatformMember);
+            }
+            else {
+                const family = newPlatformMember.family;
+                if (!existingFamilies.includes(family)) {
+                    existingFamilies.push(family);
+                }
+            }
+        }
+    }
+}
+
+async function saveMembers(importMemberResults: ImportMemberResult[]) {
+    const allPlatformMembers = importMemberResults.map(m => m.getPatchedPlatformMember(platform.value));
+    await platformFamilyManager.save(allPlatformMembers, true);
+
+    // the backend will add users to the member -> the new members should be regrouped in families
+    regroupNewMembersInFamilies(importMemberResults);
+
+    const checkout = createCheckout(importMemberResults);
+
+    if (checkout.cart.isEmpty) {
+        return;
+    }
+
+    // add new registrations
+    await startRegister({
+        checkout,
+        context: context.value,
+        admin: true,
+    }, navigate);
 }
 
 async function goNext() {
@@ -827,52 +861,15 @@ async function goNext() {
 
     saving.value = true;
 
-    // Show message
     const toast = new Toast('Bezig met importeren...', 'spinner').setHide(null).show();
 
     try {
-        // Add all members that do not yet exist
-        autoAssignMembers(props.members);
-
-        // TODO: group family
-        for (const member of props.members) {
-            // todo
-            // if (member.synced) {
-            //     // Already synced: prevent doing it twice
-            //     continue;
-            // }
-            // const family = new FamilyManager([]);
-
-            // if (member.isEqual) {
-            //     // Merge data (this is an edge case)
-            //     member.equal.details!.merge(member.details);
-            //     await family.patchAllMembersWith(member.equal);
-
-            //     const patchRegistrations: PatchableArrayAutoEncoder<Registration> = new PatchableArray();
-            //     const registration = buildRegistration(member);
-
-            //     if (registration !== null) {
-            //         // Okay to add: no duplicate
-            //         patchRegistrations.addPut(registration);
-            //         await family.patchMemberRegistrations(member.equal, patchRegistrations);
-
-            //         // Delete conflicting registrations (based on categories too!)
-            //         const deleteRegs = getOverrideRegistrations(registration, member);
-            //         for (const r of deleteRegs) {
-            //             patchRegistrations.addDelete(r.id);
-            //         }
-            //     }
-            // }
-            // else {
-            //     const registration = buildRegistration(member);
-            //     await family.addMember(member.details, registration ? [registration] : []);
-            // }
-            // member.synced = true;
-        }
-
+        autoAssignMembers(props.importMemberResults);
+        await saveMembers(props.importMemberResults);
         toast.hide();
+
         new Toast('Importeren voltooid', 'success green').show();
-        dismiss({ force: true }).catch(console.error);
+        navigate.dismiss({ force: true }).catch(console.error);
     }
     catch (e) {
         toast.hide();

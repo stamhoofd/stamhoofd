@@ -96,6 +96,22 @@ export class PlatformFamily {
         return family;
     }
 
+    add(platformMember: PlatformMember) {
+        if (!this.belongsToFamily(platformMember.member)) {
+            console.error('PlatformMember does not belong to this family');
+            return;
+        }
+
+        const existing = this.members.find(m => m.id === platformMember.id);
+        if (!existing) {
+            this.members.push(platformMember);
+        }
+
+        if (platformMember.family !== this) {
+            platformMember.family = this;
+        }
+    }
+
     insertFromBlob(blob: MembersBlob, removeMissing = false) {
         for (const organization of blob.organizations) {
             this.insertOrganization(organization);
@@ -429,6 +445,18 @@ export class PlatformFamily {
 
     setDocuments(documents: DocumentStruct[]) {
         this.documents = documents;
+    }
+
+    belongsToFamily(member: MemberWithRegistrationsBlob): boolean {
+        const allUserIds = new Set(this.members.flatMap(m => m.member.users.map(u => u.id)));
+
+        for (const user of member.users) {
+            if (allUserIds.has(user.id)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

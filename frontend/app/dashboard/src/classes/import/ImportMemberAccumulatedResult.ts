@@ -15,9 +15,12 @@ export class ImportMemberAccumulatedResult {
 export class ImportingRegistration {
     group: Group | null = null;
     autoAssignedGroup: Group | null = null;
+    // todo
     paid: boolean | null = null;
+    // todo
     paidPrice: number | null = null;
     price: number | null = null;
+    priceName: string | null = null;
     paymentMethod: PaymentMethod | null = null;
     date: Date | null = null;
 }
