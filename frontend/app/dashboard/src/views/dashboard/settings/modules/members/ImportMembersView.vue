@@ -1,121 +1,107 @@
 <template>
-    <div id="import-members-settings-view" class="st-view background">
-        <STNavigationBar title="Leden importeren" :dismiss="canDismiss" :pop="canPop" />
+    <SaveView :title="$t('Leden importeren')" :loading="saving" :disabled="!file || columns.length == 0 || rowCount === 0" :save-text="$t('Volgende')" @save="goNext">
+        <h1>Leden importeren</h1>
+        <p>
+            Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.
+        </p>
 
-        <main>
-            <h1>Leden importeren</h1>
-            <p>
-                Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.
-            </p>
+        <p v-if="!hasMembers" class="warning-box">
+            <span>Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
+                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">Meer info</a>
+            </span>
+        </p>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
-            <p v-if="!hasMembers" class="warning-box">
-                <span>Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
-                    <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">Meer info</a>
-                </span>
+        <label class="upload-box">
+            <span v-if="!file" class="icon upload" />
+            <span v-else class="icon file-excel color-excel" />
+            <div v-if="!file">
+                <h2 class="style-title-list">
+                    Kies een bestand
+                </h2>
+                <p class="style-description">
+                    Ondersteunde formaten zijn .xls, .xlsx of .csv
+                </p>
+            </div>
+            <div v-else>
+                <h2 class="style-title-list">
+                    {{ file }}
+                </h2>
+                <p class="style-description">
+                    {{ rowCount }} rijen, {{ columnCount }} kolommen
+                </p>
+            </div>
+            <input type="file" multiple style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
+            <span v-if="file" class="icon sync gray" />
+        </label>
+
+        <template v-if="sheetSelectionList.length > 1">
+            <STInputBox title="Werkblad" error-fields="sheet" :error-box="errors.errorBox">
+                <Dropdown v-model="sheetKey">
+                    <option :value="null" disabled>
+                        Maak een keuze
+                    </option>
+                    <option v-for="key in sheetSelectionList" :key="key" :value="key">
+                        {{ key }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+            <hr>
+        </template>
+
+        <template v-if="file && columns.length > 0">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            Kolom uit jouw bestand
+                        </th>
+                        <th>Koppelen aan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="column in columns" :key="column.name">
+                        <td>
+                            <Checkbox :model-value="column.selected" @update:model-value=" setColumnSelected(column, $event)">
+                                <h2 class="style-title-list">
+                                    {{ column.name }}
+                                </h2>
+                                <p v-if="column.examples.length > 0" class="style-description-small">
+                                    {{ column.examples.slice(0, 2).join(', ') }}...
+                                </p>
+                            </Checkbox>
+                        </td>
+                        <td>
+                            <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
+                                <option :value="null" disabled>
+                                    Maak een keuze
+                                </option>
+                                <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
+                                    <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
+                                        {{ matcher.getName() }} ({{ cat.name }})
+                                    </option>
+                                </optgroup>
+                            </Dropdown>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p v-if="file && columns.length > 0" class="warning-box">
+                Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
             </p>
             <STErrorsDefault :error-box="errors.errorBox" />
-
-            <label class="upload-box">
-                <span v-if="!file" class="icon upload" />
-                <span v-else class="icon file-excel color-excel" />
-                <div v-if="!file">
-                    <h2 class="style-title-list">
-                        Kies een bestand
-                    </h2>
-                    <p class="style-description">
-                        Ondersteunde formaten zijn .xls, .xlsx of .csv
-                    </p>
-                </div>
-                <div v-else>
-                    <h2 class="style-title-list">
-                        {{ file }}
-                    </h2>
-                    <p class="style-description">
-                        {{ rowCount }} rijen, {{ columnCount }} kolommen
-                    </p>
-                </div>
-                <input type="file" multiple style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
-                <span v-if="file" class="icon sync gray" />
-            </label>
-
-            <template v-if="sheetSelectionList.length > 1">
-                <STInputBox title="Werkblad" error-fields="sheet" :error-box="errors.errorBox">
-                    <Dropdown v-model="sheetKey">
-                        <option :value="null" disabled>
-                            Maak een keuze
-                        </option>
-                        <option v-for="key in sheetSelectionList" :key="key" :value="key">
-                            {{ key }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-                <hr>
-            </template>
-
-            <template v-if="file && columns.length > 0">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>
-                                Kolom uit jouw bestand
-                            </th>
-                            <th>Koppelen aan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="column in columns" :key="column.name">
-                            <td>
-                                <Checkbox :model-value="column.selected" @update:model-value=" setColumnSelected(column, $event)">
-                                    <h2 class="style-title-list">
-                                        {{ column.name }}
-                                    </h2>
-                                    <p v-if="column.examples.length > 0" class="style-description-small">
-                                        {{ column.examples.slice(0, 2).join(', ') }}...
-                                    </p>
-                                </Checkbox>
-                            </td>
-                            <td>
-                                <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
-                                    <option :value="null" disabled>
-                                        Maak een keuze
-                                    </option>
-                                    <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
-                                        <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
-                                            {{ matcher.getName() }} ({{ cat.name }})
-                                        </option>
-                                    </optgroup>
-                                </Dropdown>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p v-if="file && columns.length > 0" class="warning-box">
-                    Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
-                </p>
-                <STErrorsDefault :error-box="errors.errorBox" />
-                <hr>
-                <STInputBox :title="$t('In welk werkjaar wil je de leden inschrijven?')" error-fields="period" :error-box="errors.errorBox">
-                    <RegistrationPeriodSelector v-model="period" />
-                </STInputBox>
-            </template>
-        </main>
-
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="saving">
-                    <button class="button primary" :disabled="!file || columns.length == 0 || rowCount === 0" type="button" @click="goNext">
-                        Volgende
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
-    </div>
+            <hr>
+            <STInputBox :title="$t('In welk werkjaar wil je de leden inschrijven?')" error-fields="period" :error-box="errors.errorBox">
+                <RegistrationPeriodSelector v-model="period" />
+            </STInputBox>
+        </template>
+    </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, PushOptions, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, useMembersObjectFetcher, useRequiredOrganization } from '@stamhoofd/components';
+import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, STErrorsDefault, STInputBox, useErrors, useMembersObjectFetcher, useRequiredOrganization } from '@stamhoofd/components';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import XLSX from 'xlsx';
@@ -146,8 +132,6 @@ const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.perio
 const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(organization.value, () => period.value.groups));
 
 const show = useShow();
-const canDismiss = useCanDismiss();
-const canPop = useCanPop();
 
 const sheetKey = computed({
     get: () => internalSheetKey.value,
@@ -235,7 +219,6 @@ function changedFile(event: any) {
             return;
         }
         sheets.value = workbook.Sheets;
-        // Vue.set(this, 'sheets', workbook.Sheets);
         file.value = newFile.name;
         sheetKey.value = keys[0];
     };
@@ -353,19 +336,14 @@ function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
         throw new Error('Missing ref in sheet');
     }
 
-    // Start! :D
-    // const allMembers = await MemberManager.loadMembers([], null, null);
-
-    const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
+    const range = XLSX.utils.decode_range(sheet['!ref']);
     const result = new ImportMembersBaseResult();
 
     const filteredColumns = columns.filter(c => c.selected && c.isBaseMatcher);
 
     if (filteredColumns.length) {
         for (let row = range.s.r + 1; row <= range.e.r; row++) {
-        // const member = new ImportingMember(row, organization);
-            const base = new ImportMemberBase();
-            // const partialMemberDetails: PartialWithoutMethods<AutoEncoderPatchType<MemberDetails>> = {};
+            const importBase = new ImportMemberBase();
             let allEmpty = true;
             const errorStack: ImportError[] = [];
 
@@ -377,7 +355,7 @@ function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
                 }
 
                 try {
-                    column.baseMatcher!.setBaseValue(valueCell, base);
+                    column.baseMatcher!.setBaseValue(valueCell, importBase);
                 }
                 catch (e: any) {
                     console.error(e);
@@ -396,7 +374,7 @@ function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
             }
             result.errors.push(...errorStack);
 
-            result.data.push(base);
+            result.data.push(importBase);
         }
     }
 
@@ -410,7 +388,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
 
     const stack = [...results];
 
-    const range = XLSX.utils.decode_range(sheet['!ref']); // get the range
+    const range = XLSX.utils.decode_range(sheet['!ref']);
     const result = new ImportMembersResult();
 
     for (let row = range.s.r + 1; row <= range.e.r; row++) {
@@ -563,11 +541,10 @@ defineExpose({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-#import-members-settings-view {
     .upload-box {
         max-width: 100%;
         box-sizing: border-box;
@@ -603,6 +580,4 @@ defineExpose({
             margin-left: auto;
         }
     }
-}
-
 </style>
