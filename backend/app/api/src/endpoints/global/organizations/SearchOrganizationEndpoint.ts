@@ -56,6 +56,7 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         const whereMatch: SQLWhere = new SQLMatch(SQL.column(Organization.table, 'searchIndex'), scalarToSQLExpression(matchValue));
 
         let organizations = await Organization.select()
+            .where('active', true)
             .where(whereMatch)
             .orderBy(whereMatch, 'DESC')
             .limit(limit).fetch();
