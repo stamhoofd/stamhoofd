@@ -115,8 +115,7 @@
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, PushOptions, useCanDismiss, useCanPop, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, useMembersObjectFetcher, usePatch } from '@stamhoofd/components';
-import { useOrganizationManager } from '@stamhoofd/networking';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, useErrors, useMembersObjectFetcher, useRequiredOrganization } from '@stamhoofd/components';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import XLSX from 'xlsx';
@@ -136,16 +135,15 @@ import RegistrationPeriodSelector from './RegistrationPeriodSelector.vue';
 const errors = useErrors();
 const saving = ref(false);
 const file = ref<null | string>(null);
-const organizationManager = useOrganizationManager();
-const { patched, patch, hasChanges, addPatch } = usePatch(organizationManager.value.organization);
+const organization = useRequiredOrganization();
 const rowCount = ref(0);
 const columnCount = ref(0);
 const columns = ref<MatchedColumn[]>([]);
 const sheets = ref<Record<string, XLSX.WorkSheet>>({});
 const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
-const period: Ref<OrganizationRegistrationPeriod> = ref(patched.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
-const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(patched.value, () => period.value.groups));
+const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
+const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(organization.value, () => period.value.groups));
 
 const show = useShow();
 const canDismiss = useCanDismiss();
@@ -188,8 +186,8 @@ const sheet = computed(() => {
 });
 
 const hasMembers = computed(() => {
-    const count = patched.value.adminCategoryTree.getMemberCount({});
-    return patched.value.meta.packages.useMembers && !patched.value.meta.packages.isMembersTrial && count !== null && count > 30;
+    const count = organization.value.adminCategoryTree.getMemberCount({});
+    return organization.value.meta.packages.useMembers && !organization.value.meta.packages.isMembersTrial && count !== null && count > 30;
 });
 
 const matcherCategories = computed(() => {
@@ -256,8 +254,6 @@ function readColumns(previousColumns: MatchedColumn[]): MatchedColumn[] {
     if (!sheet.value['!ref']) {
         throw new Error('Missing ref in sheet');
     }
-
-    console.error('read columns');
 
     const range = XLSX.utils.decode_range(sheet.value['!ref']); // get the range
     const columns: MatchedColumn[] = [];
@@ -474,7 +470,8 @@ async function fetchAllMembers() {
         filter: {
             registrations: {
                 $elemMatch: {
-                    organizationId: organizationManager.value.organization.id,
+                    organizationId: organization.value.id,
+                    // todo: only filter for selected period + previous period?
                     // periodId: {
                     //     $in: Formatter.uniqueArray(periodIds),
                     // },
@@ -490,7 +487,7 @@ async function fetchAllMembers() {
 
 async function findExistingMembers(data: ImportMemberBase[]) {
     const allMembers = await fetchAllMembers();
-    return data.map(item => new ExistingMemberResult(item, allMembers, organizationManager.value.organization));
+    return data.map(item => new ExistingMemberResult(item, allMembers, organization.value));
 }
 
 async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], existingMemberResults: ExistingMemberResult[], showCallback: (options: PushOptions | ComponentWithProperties) => Promise<void> = show) {
