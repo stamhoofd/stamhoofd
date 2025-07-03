@@ -154,7 +154,10 @@ export class ContextInstance {
             return await this.setOrganizationScope(options);
         }
         catch (e) {
+            if (isSimpleError(e) && e.hasCode('invalid_host')) {
                 return null;
+            }
+            throw e;
         }
     }
 

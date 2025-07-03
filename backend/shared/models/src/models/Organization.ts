@@ -181,14 +181,13 @@ export class Organization extends QueryableModel {
      * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
      */
     static async fromApiHost(host: string, options?: { allowInactive?: boolean }): Promise<Organization> {
-        const splitted = host.split('.');
-        if (splitted.length < 2) {
+        if (!host.endsWith('.' + STAMHOOFD.domains.api)) {
             throw new SimpleError({
                 code: 'invalid_host',
                 message: 'Please specify the organization in the hostname',
             });
         }
-        const id = splitted[0];
+        const id = host.substring(0, host.length - STAMHOOFD.domains.api.length - 1);
         const organization = await this.getByID(id);
         if (!organization) {
             throw new SimpleError({
