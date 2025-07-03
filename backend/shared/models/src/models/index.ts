@@ -55,3 +55,5 @@ export * from './EventNotification';
 export * from './CachedBalance';
 export * from './AuditLog';
 export * from './MemberUser';
+
+export * from './UitpasToken';
