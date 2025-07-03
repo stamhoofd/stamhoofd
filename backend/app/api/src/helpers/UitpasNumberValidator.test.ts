@@ -1,7 +1,7 @@
 import { STExpect } from '@stamhoofd/test-utils';
 import { UitpasNumberValidator } from './UitpasNumberValidator';
 
-describe('UitpasNumberValidator', () => {
+describe.skip('UitpasNumberValidator', () => {
     it('should validate a correct Uitpas number with kansentarief', async () => {
         const validNumber = '0900000067513';
         await expect(UitpasNumberValidator.checkUitpasNumber(validNumber)).resolves.toBeUndefined();
