@@ -484,24 +484,34 @@ function openResultView() {
                     description.push('Geboortedatum wijzigen naar ' + Formatter.date(newDetails.birthDay, true));
                 }
 
-                const changedParents = new Set<Parent>();
+                if (newDetails.address && newDetails.address.toString() !== existingDetails.address?.toString()) {
+                    description.push('Adres wijzigen naar ' + newDetails.address.toString());
+                }
+
+                const changedParents: Parent[] = [];
 
                 if (newDetails.parents) {
+                    const changedParentIds = new Set();
+
                     for (const parentPatch of newDetails.parents.getPatches()) {
                         const parentId = parentPatch.id;
-
-                        const parent = patched.parents.find(p => p.id === parentId);
-                        if (parent) {
-                            changedParents.add(parent);
-                        }
+                        changedParentIds.add(parentId);
                     }
 
                     for (const parentPut of newDetails.parents.getPuts()) {
-                        changedParents.add(parentPut.put);
+                        const parentId = parentPut.put.id;
+                        changedParentIds.add(parentId);
+                    }
+
+                    for (const parentId of changedParentIds.values()) {
+                        const parent = patched.parents.find(p => p.id === parentId);
+                        if (parent) {
+                            changedParents.push(parent);
+                        }
                     }
                 }
 
-                for (const parent of changedParents.values()) {
+                for (const parent of changedParents) {
                     description.push(...getParentDescription(parent));
                 }
 
@@ -548,8 +558,12 @@ function openResultView() {
                 if (patched.birthDay) {
                     description.push('Geboortedatum: ' + Formatter.date(patched.birthDay, true));
                 }
+
+                if (patched.address) {
+                    description.push('Adres: ' + patched.address.toString());
+                }
+
                 for (const parent of patched.parents) {
-                    // todo: is this correct?
                     description.push(...getParentDescription(parent));
                 }
 

@@ -22,7 +22,6 @@ export class ImportMemberResult {
         }
 
         const details = this.details.patch(this._patch);
-        details.cleanData();
         this._cachedDetails = details;
 
         return details;
@@ -30,10 +29,6 @@ export class ImportMemberResult {
 
     get newPlatformMember() {
         return this._newPlatformMember;
-    }
-
-    getPatch() {
-        return this._patch;
     }
 
     constructor({
