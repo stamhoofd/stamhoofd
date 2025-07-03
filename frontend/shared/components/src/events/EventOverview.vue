@@ -160,7 +160,7 @@
                             </template>
                         </STListItem>
 
-                        <STListItem v-copyable="link" :selectable="true" class="left-center">
+                        <STListItem v-if="event.meta.visible" v-copyable="link" :selectable="true" class="left-center">
                             <template #left>
                                 <IconContainer icon="link" />
                             </template>
