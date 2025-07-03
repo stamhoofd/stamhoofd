@@ -1,23 +1,22 @@
 <template>
-    <LoadingBoxTransition :errorBox="errorBox" :view="true" :loading="loading">
+    <LoadingBoxTransition :error-box="errorBox" :view="true" :loading="loading">
         <slot />
     </LoadingBoxTransition>
 </template>
 
-
 <script lang="ts" setup>
-import { ErrorBox } from "../errors/ErrorBox";
-import LoadingBoxTransition from "./LoadingBoxTransition.vue";
+import { ErrorBox } from '../errors/ErrorBox';
+import LoadingBoxTransition from './LoadingBoxTransition.vue';
 
 withDefaults(
     defineProps<{
-        errorBox?: ErrorBox|null;
+        errorBox?: ErrorBox | null;
         loading?: boolean;
     }>(),
     {
         errorBox: null,
-        loading: false
-    }
+        loading: false,
+    },
 );
 
 </script>

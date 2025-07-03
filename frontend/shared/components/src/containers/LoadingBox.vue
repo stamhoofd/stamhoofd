@@ -3,37 +3,36 @@
         <div v-if="errorBox">
             <STErrorsDefault :error-box="errorBox" />
         </div>
-        <div v-else class="loading-view" v-if="show">
+        <div v-else-if="show" class="loading-view">
             <Spinner class="center gray" />
         </div>
     </div>
     <div v-else-if="errorBox">
         <STErrorsDefault :error-box="errorBox" />
     </div>
-    <div v-else class="loading-view" v-if="show">
+    <div v-else-if="show" class="loading-view">
         <Spinner class="center gray" />
     </div>
 </template>
 
-
 <script lang="ts" setup>
-import { onMounted, ref } from "vue";
-import { ErrorBox } from "../errors/ErrorBox";
-import Spinner from "../Spinner.vue";
+import { onMounted, ref } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import Spinner from '../Spinner.vue';
 
 withDefaults(
     defineProps<{
-        view?: boolean,
-        show?: boolean,
-        appear?: boolean,
-        errorBox?: ErrorBox|null;
+        view?: boolean;
+        show?: boolean;
+        appear?: boolean;
+        errorBox?: ErrorBox | null;
     }>(),
     {
         view: false,
         show: true,
         appear: true,
-        errorBox: null
-    }
+        errorBox: null,
+    },
 );
 
 const mounted = ref(false);

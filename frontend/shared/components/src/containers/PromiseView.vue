@@ -12,9 +12,8 @@ import { ComponentWithProperties, ComponentWithPropertiesInstance, NavigationMix
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import LoadingViewTransition from './LoadingViewTransition.vue';
-import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '../overlays/Toast';
+import LoadingViewTransition from './LoadingViewTransition.vue';
 
 @Component({
     components: {
