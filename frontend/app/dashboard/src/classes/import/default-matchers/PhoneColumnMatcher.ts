@@ -102,13 +102,13 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
 
         const v = phoneNumber.formatInternational();
 
-        if (this.category === MemberDetailsMatcherCategory.Member) {
+        if (this.category === MemberDetailsMatcherCategory.Member as string) {
             importResult.addPatch({
                 phone: v,
             });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 || this.category === MemberDetailsMatcherCategory.Parent2) {
-            ColumnMatcherHelper.patchParent(importResult, this.category, {
+        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+            ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 phone: v,
             });
         }
