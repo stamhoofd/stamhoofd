@@ -38,8 +38,6 @@ export function useContextOptions() {
         if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
             if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty === false) {
                 const context = new SessionContext(null);
-                // await context.loadFromStorage();
-
                 opts.push({
                     id: 'admin',
                     organization: null,
@@ -56,6 +54,11 @@ export function useContextOptions() {
         let organizationIds = [...$user.value?.permissions?.organizationPermissions.keys() ?? []];
         if (STAMHOOFD.singleOrganization) {
             organizationIds = [STAMHOOFD.singleOrganization];
+        }
+
+        // Always add membership organization (we'll check permissions in the loop)
+        if (platform.value.membershipOrganizationId) {
+            organizationIds.push(platform.value.membershipOrganizationId);
         }
 
         for (const organizationId of organizationIds) {

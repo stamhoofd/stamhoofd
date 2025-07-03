@@ -443,6 +443,17 @@ export class AuthenticatedStructures {
             }
         }
 
+        const membershipOrganizationId = Platform.shared.membershipOrganizationId;
+        if (Context.auth.hasSomePlatformAccess() && membershipOrganizationId) {
+            if (await Context.auth.hasSomeAccess(membershipOrganizationId)) {
+                const found = organizations.get(membershipOrganizationId);
+                if (!found) {
+                    const organization = await Context.auth.getOrganization(membershipOrganizationId);
+                    organizations.set(organization.id, organization);
+                }
+            }
+        }
+
         const memberBlobs: MemberWithRegistrationsBlob[] = [];
         for (const member of members) {
             for (const registration of member.registrations) {
