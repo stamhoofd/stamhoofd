@@ -109,7 +109,7 @@ class TestInstance {
      * Run this in each jest.global.setup.ts file
      */
     async globalSetup() {
-        // todo
+        this.loadEnvironment();
     }
 }
 

@@ -1,14 +1,8 @@
-import backendEnv from '@stamhoofd/backend-env';
-backendEnv.load({ path: __dirname + '/../../.env.test.json' });
-
-import { Database, Migration } from '@simonbackx/simple-database';
-import * as jose from 'jose';
+import { TestUtils } from '@stamhoofd/test-utils';
 import nock from 'nock';
 import path from 'path';
-import { GlobalHelper } from '../src/helpers/GlobalHelper';
 const emailPath = require.resolve('@stamhoofd/email');
 const modelsPath = require.resolve('@stamhoofd/models');
-import { TestUtils } from '@stamhoofd/test-utils';
 
 // Disable network requests
 nock.disableNetConnect();
@@ -22,6 +16,10 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 export default async () => {
+    await TestUtils.globalSetup();
+
+    const { Database, Migration } = await import('@simonbackx/simple-database');
+
     // External migrations
     await Migration.runAll(path.dirname(modelsPath) + '/migrations');
     await Migration.runAll(path.dirname(emailPath) + '/migrations');
@@ -30,6 +28,4 @@ export default async () => {
     await Migration.runAll(__dirname + '/src/migrations');
 
     await Database.end();
-
-    await TestUtils.globalSetup();
 };
