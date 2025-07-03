@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, field, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { File } from '../files/File';
+import { File } from '../files/File.js';
 
 export class EmailInformation extends AutoEncoder {
     @field({ decoder: StringDecoder })
