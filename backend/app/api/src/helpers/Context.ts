@@ -312,6 +312,7 @@ export class ContextInstance {
             if (!await Context.auth.hasFullAccess(this.organization.id)) {
                 throw Context.auth.error({
                     message: 'Full access is required to view inactive organizations',
+                    human: $t('Je moet een hoofdbeheerder zijn om inactieve verenigingen te bekijken'),
                 });
             }
         }
