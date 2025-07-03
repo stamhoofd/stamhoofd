@@ -1,8 +1,10 @@
 <template>
     <div v-if="view" class="st-view loading-view-container">
-        <div v-if="errorBox">
+        <STNavigationBar />
+        <main v-if="errorBox">
+            <h1>{{ $t('Oeps, er ging iets mis') }}</h1>
             <STErrorsDefault :error-box="errorBox" />
-        </div>
+        </main>
         <div v-else-if="show" class="loading-view">
             <Spinner class="center gray" />
         </div>
