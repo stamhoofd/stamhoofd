@@ -24,7 +24,7 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope({ willAuthenticate: false });
         const order = await Order.getByID(request.params.orderId);
 
         if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {

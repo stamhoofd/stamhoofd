@@ -28,7 +28,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setUserOrganizationScope();
+        const organization = await Context.setUserOrganizationScope({ willAuthenticate: false });
 
         if (STAMHOOFD.userMode === 'platform') {
             const platform = await Platform.getShared();

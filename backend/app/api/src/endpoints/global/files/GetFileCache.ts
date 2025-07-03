@@ -45,7 +45,7 @@ export class GetFileCache extends Endpoint<Params, Query, Body, ResponseBody> {
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setOptionalOrganizationScope();
+        await Context.setOptionalOrganizationScope({ willAuthenticate: false });
 
         limiter.track(request.request.getIP(), 1);
 

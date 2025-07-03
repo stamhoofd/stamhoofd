@@ -26,7 +26,7 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope({ willAuthenticate: false });
         const payment = await Payment.getByID(request.params.paymentId);
 
         if (!payment || payment.organizationId !== organization.id) {

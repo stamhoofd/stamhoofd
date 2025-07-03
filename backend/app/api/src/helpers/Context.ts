@@ -1,5 +1,5 @@
 import { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';
 import { AsyncLocalStorage } from 'async_hooks';
@@ -149,12 +149,12 @@ export class ContextInstance {
         return this.#auth;
     }
 
-    async setOptionalOrganizationScope() {
+    async setOptionalOrganizationScope(options?: { willAuthenticate?: boolean }) {
         try {
-            return await this.setOrganizationScope();
+            return await this.setOrganizationScope(options);
         }
         catch (e) {
-            return null;
+                return null;
         }
     }
 
@@ -170,15 +170,21 @@ export class ContextInstance {
     /**
      * Require organization scope if userMode is not platform
      */
-    async setUserOrganizationScope() {
+    async setUserOrganizationScope(options?: { willAuthenticate?: boolean }) {
         if (STAMHOOFD.userMode === 'platform') {
             return null;
         }
-        return await this.setOrganizationScope();
+        return await this.setOrganizationScope(options);
     }
 
-    async setOrganizationScope(options?: { allowInactive?: boolean }) {
-        const organization = await Organization.fromApiHost(this.request.host, options);
+    async setOrganizationScope(options?: { willAuthenticate?: boolean }) {
+        if (!options) {
+            options = {};
+        }
+
+        const organization = await Organization.fromApiHost(this.request.host, {
+            allowInactive: options.willAuthenticate ?? true,
+        });
 
         this.organization = organization;
         this.i18n.switchToLocale({ country: organization.address.country });
@@ -192,6 +198,14 @@ export class ContextInstance {
         }
         catch (e) {
             if (e.code === 'not_authenticated') {
+                // Do not allow to optional authenticate to inactive organizations
+                if (this.organization && !this.organization.active) {
+                    throw new SimpleError({
+                        code: 'not_authenticated',
+                        message: 'You need to authenticate to view inactive organizations',
+                        statusCode: 401,
+                    });
+                }
                 return {};
             }
             throw e;
@@ -289,6 +303,15 @@ export class ContextInstance {
         // todo
 
         this.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), this.organization);
+
+        if (this.organization && !this.organization.active) {
+            // For inactive organizations, you always need permissions to view them
+            if (!await Context.auth.hasFullAccess(this.organization.id)) {
+                throw Context.auth.error({
+                    message: 'Full access is required to view inactive organizations',
+                });
+            }
+        }
 
         return { user, token };
     }

@@ -26,7 +26,7 @@ export class OpenIDConnectCallbackEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        await Context.setUserOrganizationScope();
+        await Context.setUserOrganizationScope({ willAuthenticate: false });
         const ssoService = await SSOServiceWithSession.fromSession(request);
         return await ssoService.callback();
     }

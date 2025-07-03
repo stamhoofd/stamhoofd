@@ -28,7 +28,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
 
         if (STAMHOOFD.userMode === 'platform') {
             const platform = await Platform.getSharedPrivateStruct();

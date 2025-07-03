@@ -147,7 +147,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
     }
 
     static async buildDetailedData(requestQuery: LimitedFilteredRequest) {
-        const organization = Context.organization ?? await Context.setOrganizationScope();
+        const organization = Context.organization ?? await Context.setOrganizationScope({ willAuthenticate: false });
         const { data, next } = await GetReceivableBalancesEndpoint.buildDataHelper(requestQuery);
 
         return new PaginatedResponse<DetailedReceivableBalance[], LimitedFilteredRequest>({

@@ -42,7 +42,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOrganizationScope({ willAuthenticate: false });
 
         if (request.query.secret) {
             const [ticket] = await Ticket.where({

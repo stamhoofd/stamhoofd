@@ -1,10 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { computed, ref, Ref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
-import { useOrganization } from '../../hooks';
+import { useContext, useOrganization } from '../../hooks';
 import { SearchOrganizationView } from '../../members';
 import { NavigationActions } from '../../types/NavigationActions';
 
@@ -13,6 +13,7 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
     const loadedOrganization = ref(null) as Ref<Organization | null>;
     const errorBox = ref(null) as Ref<ErrorBox | null>;
     const present = usePresent();
+    const context = useContext();
 
     let loadingOrganizationId: string | null; // not reactive
     let loadingCount = 0;
@@ -59,7 +60,7 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
 
         try {
             errorBox.value = null;
-            const response = await SessionContext.serverForOrganization(organizationId.value).request({
+            const response = await context.value.getAuthenticatedServerForOrganization(organizationId.value).request({
                 method: 'GET',
                 path: '/organization',
                 decoder: Organization as Decoder<Organization>,

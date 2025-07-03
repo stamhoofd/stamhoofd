@@ -28,7 +28,7 @@ export class OpenIDConnectStartEndpoint extends Endpoint<Params, Query, Body, Re
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Check webshop and/or organization
-        await Context.setUserOrganizationScope();
+        await Context.setUserOrganizationScope({ willAuthenticate: false });
         const service = await SSOService.fromContext(request.query.provider);
         return await service.validateAndStartAuthCodeFlow(request.query);
     }

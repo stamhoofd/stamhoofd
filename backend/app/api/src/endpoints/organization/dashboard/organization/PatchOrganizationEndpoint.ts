@@ -39,7 +39,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope({ allowInactive: true });
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
         if (!await Context.auth.hasSomeAccess(organization.id)) {

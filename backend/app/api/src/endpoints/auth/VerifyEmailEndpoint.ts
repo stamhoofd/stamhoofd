@@ -28,7 +28,7 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
 
         const code = await EmailVerificationCode.verify(organization?.id ?? null, request.body.token, request.body.code);
 

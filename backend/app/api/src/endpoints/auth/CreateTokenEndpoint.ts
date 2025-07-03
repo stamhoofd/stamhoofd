@@ -34,7 +34,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - check if not multiple attempts for the same username are started in parallel
         // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
-        const organization = await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
 
         switch (request.body.grantType) {
             case 'refresh_token': {
