@@ -15,6 +15,10 @@
 
             <p>{{ $t('5dbc2f08-f2d0-43bc-973d-b789077ca3ad') }}</p>
 
+            <p v-if="!organization.active" class="error-box">
+                {{ $t('8ccdb08d-3127-4fc7-ba15-5a0af262bcc8') }}
+            </p>
+
             <p>
                 <a :href="$domains.getDocs('stappenplan-opstart-werkjaar')" target="_blank" class="button text selected">
                     <span class="icon book" />
