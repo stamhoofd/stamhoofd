@@ -1,5 +1,5 @@
 import testEnv from './env.json';
-import { read1PasswordCli } from '@stamhoofd/build-development-env';
+// import { read1PasswordCli } from '@stamhoofd/build-development-env';
 
 export async function loadEnvironment() {
     let globalObject: any = null;
