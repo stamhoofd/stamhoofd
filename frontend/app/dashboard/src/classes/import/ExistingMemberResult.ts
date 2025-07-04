@@ -1,5 +1,5 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { MemberDetails, Organization, Platform, PlatformFamily, PlatformMember, Version } from '@stamhoofd/structures';
+import { MemberDetails, Organization, Parent, Platform, PlatformFamily, PlatformMember, RecordAnswer, Version } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { ImportingRegistration } from './ImportMemberAccumulatedResult';
@@ -78,6 +78,58 @@ export class ImportMemberResult {
         const newMember = family.newMember();
         this._newPlatformMember = newMember;
         return newMember;
+    }
+
+    getChangedParents(): Parent[] {
+        const changedParents: Parent[] = [];
+        const patched = this.patchedDetails;
+        const patch = this._patch;
+
+        if (patched.parents.length) {
+            const changedParentIds = new Set();
+
+            for (const parentPatch of patch.parents.getPatches()) {
+                const parentId = parentPatch.id;
+                changedParentIds.add(parentId);
+            }
+
+            for (const parentPut of patch.parents.getPuts()) {
+                const parentId = parentPut.put.id;
+                changedParentIds.add(parentId);
+            }
+
+            for (const parentId of changedParentIds.values()) {
+                const parent = patched.parents.find(p => p.id === parentId);
+                if (parent) {
+                    changedParents.push(parent);
+                }
+            }
+        }
+
+        return changedParents;
+    }
+
+    getChangedRecordAnswers(): RecordAnswer[] {
+        const changedRecordAnswers = new Set<RecordAnswer>();
+        const existingRecordAnswers = [...(this.existingMember?.member.details.recordAnswers?.values() ?? [])];
+
+        for (const value of this._patch.recordAnswers?.values() ?? []) {
+            if (!value) {
+                continue;
+            }
+
+            if (value.isPut()) {
+                changedRecordAnswers.add(value);
+            }
+            else {
+                const existingRecordAnswer = existingRecordAnswers.find(a => a.id === value.id);
+                if (existingRecordAnswer) {
+                    changedRecordAnswers.add(existingRecordAnswer);
+                }
+            }
+        }
+
+        return [...changedRecordAnswers.values()];
     }
 
     getPatchedPlatformMember(platform: Platform) {
