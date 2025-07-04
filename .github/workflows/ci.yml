@@ -215,7 +215,7 @@ jobs:
       - name: Install production dependencies only
         run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Running migrations
-        run: cd backend/app/api && node ./dist/migrations.js
+        run: cd backend/app/api && NODE_ENV=test node ./dist/migrations.js
       - name: Run boot test
         run: bash test/boot/boot-test.sh
       - name: Notify Slack of failure
