@@ -12,7 +12,7 @@ import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {
     getName(): string {
-        return I18nController.i18n.t('shared.inputs.mobile.label').toString();
+        return $t('GSM-nummer');
     }
 
     get id() {
