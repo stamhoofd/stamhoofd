@@ -20,7 +20,7 @@ import { PhoneColumnMatcher } from './default-matchers/PhoneColumnMatcher';
 import { StreetColumnMatcher } from './default-matchers/StreetColumnMatcher';
 import { StreetNumberColumnMatcher } from './default-matchers/StreetNumberColumnMatcher';
 import { StreetWithNumberColumnMatcher } from './default-matchers/StreetWithNumberColumnMatcher';
-import { UitpasNumberColumnMatcher } from './default-matchers/UitpasNumberMatcher';
+import { UitpasNumberColumnMatcher } from './default-matchers/UitpasNumberColumnMatcher';
 import { ZipColumnMatcher } from './default-matchers/ZipColumnMatcher';
 import { ImportMemberResult } from './ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
