@@ -94,7 +94,7 @@ export class UitpasNumberValidatorStatic {
             // we use a generic error message and try to parse the response to get a better message
             let humanErrorMessage = '';
 
-            const json = await response.json().catch(() => { /* ignore */ });
+            const json: unknown = await response.json().catch(() => { /* ignore */ });
             try {
                 assertIsUitpasNumberErrorResponse(json);
                 if (json.endUserMessage) {
@@ -130,7 +130,7 @@ export class UitpasNumberValidatorStatic {
         });
         assertIsUitpasNumberSuccessfulResponse(json);
         if (json.messages) {
-            const text = json.messages[0].text; // only display the first message
+            const humanMessage = json.messages[0].text; // only display the first message
 
             // alternatively, join all messages
             // const text = json.messages.map((message: any) => message.text).join(', ');
@@ -138,7 +138,7 @@ export class UitpasNumberValidatorStatic {
             throw new SimpleError({
                 code: 'uitpas_number_issue',
                 message: `UiTPAS API returned an error: ${json.messages[0].text}`,
-                human: text,
+                human: humanMessage,
             });
         }
         if (json.socialTariff.status !== 'ACTIVE') {
