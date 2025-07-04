@@ -6,5 +6,6 @@ CREATE TABLE `uitpas_tokens` (
    `updatedAt` datetime NOT NULL,
    `organizationId` varchar(36),
    PRIMARY KEY (id),
-   UNIQUE KEY `organizationId` (`organizationId`)
+   UNIQUE KEY `organizationId` (`organizationId`),
+   CONSTRAINT `organizationId` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
