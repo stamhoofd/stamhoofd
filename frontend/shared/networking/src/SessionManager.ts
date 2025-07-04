@@ -157,26 +157,18 @@ export class SessionManagerStatic {
             }
         }
         else {
-            if (session.canGetCompleted()) {
-                // Already complete
-                // Initiate a slow background update without retry
-                // = we don't need to block the UI for this ;)
-                session.updateData(true, false, false, true).catch((e) => {
-                    // Ignore network errors
-                    console.error('Background fetch session error', e, session);
-                    session.callListeners('preventComplete');
+            // Already complete
+            // Initiate a slow background update without retry
+            // = we don't need to block the UI for this ;)
+            session.updateData(true, false, false, true).catch((e) => {
+                // Ignore network errors
+                console.error('Background fetch session error', e, session);
+                session.callListeners('preventComplete');
 
-                    if (!session.isComplete()) {
-                        session.setLoadingError(e);
-                    }
-                });
-            }
-            else {
-                // Update organization
-                if (session.organization) {
-                    await session.fetchOrganization(shouldRetry);
+                if (!session.isComplete()) {
+                    session.setLoadingError(e);
                 }
-            }
+            });
         }
 
         const storage = await this.getSessionStorage(false);

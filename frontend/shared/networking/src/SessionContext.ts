@@ -709,7 +709,7 @@ export class SessionContext implements RequestMiddleware {
         }
 
         if (skipIfNotOutdated) {
-            if (!this.isOutdated(this._lastFetchedUser) && !this.isOutdated(this._lastFetchedOrganization)) {
+            if ((!this.canGetCompleted() || !this.isOutdated(this._lastFetchedUser)) && (!this.organization || !this.isOutdated(this._lastFetchedOrganization))) {
                 console.log('Data is not outdated, skipping update');
                 return;
             }
@@ -721,12 +721,14 @@ export class SessionContext implements RequestMiddleware {
             let fetchedUser = false;
             let fetchedOrganization = false;
 
+            if (this.canGetCompleted()) {
             if (force || !this.user) {
                 fetchedUser = true;
                 await this.fetchUser(shouldRetry);
 
                 // The user also includes the organization, so we don't need to fetch it again
                 fetchedOrganization = true;
+                }
             }
 
             if (this.organization && ((force && !fetchedOrganization) || (this.organizationPermissions && !this.organization.privateMeta))) {
@@ -734,7 +736,7 @@ export class SessionContext implements RequestMiddleware {
                 await this.fetchOrganization(shouldRetry);
             }
 
-            if (((!fetchedOrganization && this.organization) || (!fetchedUser)) && background) {
+            if (((!fetchedOrganization && this.organization) || (!fetchedUser && this.canGetCompleted())) && background) {
                 // Initiate a slow background update without retry
                 // = we don't need to block the UI for this ;)
                 this.updateData(true, false, false).catch((e) => {
