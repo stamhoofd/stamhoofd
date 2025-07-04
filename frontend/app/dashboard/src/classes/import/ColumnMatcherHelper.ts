@@ -1,12 +1,49 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
-import { Address, Parent, ParentType, RecordAnswer } from '@stamhoofd/structures';
+import { Address, Parent, ParentType, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordSettings, RecordTextAnswer } from '@stamhoofd/structures';
 import { ImportMemberResult } from './ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 
 export class ColumnMatcherHelper {
-    static patchRecordAnswers(importResult: ImportMemberResult, recordAnswer: RecordAnswer) {
+    static patchRecordTextdAnswer(importResult: ImportMemberResult, value: string, settings: RecordSettings) {
+        if (!value) {
+            return;
+        }
+
+        this.patchRecordAnswers(settings, importResult, RecordTextAnswer.patch({
+            value,
+        }));
+    }
+
+    static patchRecordAddressAnswer(importResult: ImportMemberResult, address: Address | null, settings: RecordSettings) {
+        if (!address) {
+            return;
+        }
+
+        this.patchRecordAnswers(settings, importResult, RecordAddressAnswer.patch({
+            address,
+        }));
+    }
+
+    static patchRecordDateAnswer(importResult: ImportMemberResult, dateValue: Date | null, settings: RecordSettings) {
+        if (!dateValue) {
+            return;
+        }
+
+        this.patchRecordAnswers(settings, importResult, RecordDateAnswer.patch({
+            dateValue,
+        }));
+    }
+
+    private static patchRecordAnswers(settings: RecordSettings, importResult: ImportMemberResult, patch: AutoEncoderPatchType<RecordAnswer>) {
+        const id = settings.id;
+        const base = importResult.patchedDetails.recordAnswers.get(id) ?? RecordAnswer.createDefaultAnswer(settings);
+        const patchMap = new PatchMap() as PatchAnswers;
+
+        // PatchAnswer doesn't support pathces becase it is a generic type (needs type for decoding, which we don't support yet - See RecordAnswerDecoder)
+        patchMap.set(id, base.patch(patch));
+
         importResult.addPatch({
-            recordAnswers: new PatchMap([[recordAnswer.id, recordAnswer]]),
+            recordAnswers: patchMap,
         });
     }
 
