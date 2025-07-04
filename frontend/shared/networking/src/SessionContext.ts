@@ -10,6 +10,7 @@ import { ContextPermissions } from './ContextPermissions';
 import { ManagedToken } from './ManagedToken';
 import { NetworkManager } from './NetworkManager';
 import { Storage } from './Storage';
+import { QueueHandler } from './QueueHandler';
 
 type AuthenticationStateListener = (changed: 'user' | 'organization' | 'token' | 'preventComplete') => void;
 
@@ -142,6 +143,10 @@ export class SessionContext implements RequestMiddleware {
             return;
         }
 
+        if (this.token && this.token.isRefreshing()) {
+            console.error('[SessionContext] Loading token from storage while current token is refreshing - something is wrong with timing and locking');
+        }
+
         console.log('[SessionContext] Loading Token from Storage');
 
         // Check localstorage
@@ -183,38 +188,40 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async loadFromStorage() {
-        if (this.isStorageDisabled) {
-            return;
-        }
+        await QueueHandler.schedule('session-context-token', async () => {
+            if (this.isStorageDisabled) {
+                return;
+            }
 
-        // Check localstorage
-        try {
-            await this.loadTokenFromStorage();
+            // Check localstorage
+            try {
+                await this.loadTokenFromStorage();
 
-            if (this.token) {
-                // Also check if we have the user (optional)
-                const json = await Storage.secure.getItem('user-' + (!this.usedPlatformStorage ? this.organization!.id : 'platform'));
-                if (json) {
-                    try {
-                        const parsed = JSON.parse(json);
-                        this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data;
-                        this.clearAuthCache();
-                        this.callListeners('user');
-                        return;
-                    }
-                    catch (e) {
-                        console.error(e);
+                if (this.token) {
+                    // Also check if we have the user (optional)
+                    const json = await Storage.secure.getItem('user-' + (!this.usedPlatformStorage ? this.organization!.id : 'platform'));
+                    if (json) {
+                        try {
+                            const parsed = JSON.parse(json);
+                            this.user = new ObjectData(parsed, { version: 0 }).decode(new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>) as Decoder<VersionBox<UserWithMembers>>).data;
+                            this.clearAuthCache();
+                            this.callListeners('user');
+                            return;
+                        }
+                        catch (e) {
+                            console.error(e);
+                        }
                     }
                 }
             }
-        }
-        catch (e) {
-            console.error('Localstorage error');
-            console.error(e);
-        }
+            catch (e) {
+                console.error('Localstorage error');
+                console.error(e);
+            }
+        });
     }
 
-    async saveToStorage() {
+    private async doSaveToStorage() {
         if (this.isStorageDisabled) {
             return;
         }
@@ -256,19 +263,25 @@ export class SessionContext implements RequestMiddleware {
         }
     }
 
-    deleteFromStorage() {
+    async saveToStorage() {
+        await QueueHandler.schedule('session-context-token', async () => {
+            await this.doSaveToStorage();
+        });
+    }
+
+    private async deleteFromStorage() {
         if (this.isStorageDisabled) {
             return;
         }
 
         try {
             if (this.organization) {
-                void Storage.secure.removeItem('token-' + this.organization.id);
-                void Storage.secure.removeItem('user-' + this.organization.id);
+                await Storage.secure.removeItem('token-' + this.organization.id);
+                await Storage.secure.removeItem('user-' + this.organization.id);
             }
             if (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform') {
-                void Storage.secure.removeItem('token-platform');
-                void Storage.secure.removeItem('user-platform');
+                await Storage.secure.removeItem('token-platform');
+                await Storage.secure.removeItem('user-platform');
             }
         }
         catch (e) {
@@ -552,7 +565,7 @@ export class SessionContext implements RequestMiddleware {
     }
 
     protected async onTokenChanged() {
-        await this.saveToStorage();
+        await this.doSaveToStorage();
         this.callListeners('token');
     }
 
@@ -562,6 +575,7 @@ export class SessionContext implements RequestMiddleware {
         if (this.token) {
             // Disable listener before clearing the token
             this.token.onChange = () => {
+                console.error('Oops, old token was updated while we are using a different token');
                 // emtpy
             };
         }
@@ -576,8 +590,10 @@ export class SessionContext implements RequestMiddleware {
     }
 
     async setToken(token: Token, usedPlatformStorage?: boolean) {
-        this.setTokenWithoutSaving(token, usedPlatformStorage);
-        await this.onTokenChanged();
+        await QueueHandler.schedule('session-context-token', async () => {
+            this.setTokenWithoutSaving(token, usedPlatformStorage);
+            await this.onTokenChanged();
+        });
     }
 
     _lastFetchedUser: Date | null = null;
@@ -722,12 +738,12 @@ export class SessionContext implements RequestMiddleware {
             let fetchedOrganization = false;
 
             if (this.canGetCompleted()) {
-            if (force || !this.user) {
-                fetchedUser = true;
-                await this.fetchUser(shouldRetry);
+                if (force || !this.user) {
+                    fetchedUser = true;
+                    await this.fetchUser(shouldRetry);
 
-                // The user also includes the organization, so we don't need to fetch it again
-                fetchedOrganization = true;
+                    // The user also includes the organization, so we don't need to fetch it again
+                    fetchedOrganization = true;
                 }
             }
 
@@ -806,6 +822,18 @@ export class SessionContext implements RequestMiddleware {
             }
 
             this.isLoggingOut = false;
+            await this.unsetToken(updateUIForLogout);
+        }
+    }
+
+    /**
+     * Clears the token from memory and storage
+     */
+    private async unsetToken(updateUIForLogout = true) {
+        await QueueHandler.schedule('session-context-token', async () => {
+            if (!this.token) {
+                return;
+            }
             this.token.onChange = () => {
                 // emtpy
             };
@@ -816,7 +844,7 @@ export class SessionContext implements RequestMiddleware {
             if (updateUIForLogout) {
                 await this.onTokenChanged();
             }
-        }
+        });
     }
 
     async deleteAccount() {
@@ -848,58 +876,56 @@ export class SessionContext implements RequestMiddleware {
             }
 
             this.isLoggingOut = false;
-            this.token.onChange = () => {
-                // emtpy
-            };
-            this.token = null;
-            this.user = null; // force refetch in the future
-            await this.deleteFromStorage();
-            await this.onTokenChanged();
+            await this.unsetToken(true);
         }
     }
 
     // -- Implementation for requestMiddleware ----
 
     async onBeforeRequest(request: Request<any>): Promise<void> {
-        // Check if we have an updated token in storage (other browser tab refreshed the token)
-        await this.loadTokenFromStorage();
+        // We need to use a queue here, to avoid doing multiple token refreshes at the same time.
+        await QueueHandler.schedule('session-context-token', async () => {
+            // Check if we have an updated token in storage (other browser tab refreshed the token)
+            await this.loadTokenFromStorage();
 
-        if (!this.token) {
-            // Euhm? The user is not signed in!
-            throw new Error('Could not authenticate request without token');
-        }
-
-        if (this.token.isRefreshing() || this.token.needsRefresh()) {
-            // Already expired.
-            console.log('Request started with expired access token, refreshing before starting request...');
-            try {
-                await this.token.refresh(this.server, () => request.shouldRetry);
+            if (!this.token) {
+                // Euhm? The user is not signed in!
+                throw new Error('Could not authenticate request without token');
             }
-            catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    if (e.hasCode('invalid_refresh_token')) {
-                        await this.logout();
-                        throw new SimpleError({
-                            code: '',
-                            message: '',
-                            human: $t(`6628730c-e78a-4430-a3b6-646999ec821b`),
-                        });
-                    }
+
+            if (this.token.isRefreshing() || this.token.needsRefresh()) {
+                // Already expired.
+                console.log(this.requestPrefix(request) + 'Request started with expired access token, refreshing before starting request...');
+                try {
+                    await this.token.refresh(this.server, () => request.shouldRetry);
                 }
-                throw e;
+                catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        if (e.hasCode('invalid_refresh_token')) {
+                            this.setLoadingError(e);
+                            await this.unsetToken(true);
+                            throw new SimpleError({
+                                code: '',
+                                message: '',
+                                human: $t(`6628730c-e78a-4430-a3b6-646999ec821b`),
+                            });
+                        }
+                    }
+                    this.setLoadingError(e);
+                    throw e;
+                }
             }
-        }
 
-        request.headers['Authorization'] = 'Bearer ' + this.token.token.accessToken;
+            request.headers['Authorization'] = 'Bearer ' + this.token.token.accessToken;
+        });
+    }
+
+    private requestPrefix(request: Request<any>) {
+        return '[' + request.method + ' ' + request.path + '] ';
     }
 
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
-        if (!this.token) {
-            // Euhm? The user is not signed in!
-            return false;
-        }
-
-        if (error.hasCode('invalid_organization') && this.organization) {
+        if ((error.hasCode('invalid_organization') || error.hasCode('archived')) && this.organization) {
             // Clear from session storage
             await SessionManager.removeOrganizationFromStorage(this.organization.id);
             this.setLoadingError(error);
@@ -909,61 +935,74 @@ export class SessionContext implements RequestMiddleware {
 
         if (error.hasCode('not_activated') && !this.isStorageDisabled) {
             // The user is not activated, logout
+            // (logout instead of unsetToken because here we probably still have a valid access token which we need to delete)
             await this.logout();
             return false;
         }
 
-        if (response.status !== 401) {
-            return false;
-        }
+        // Only start queue here, because we should never call logout or any other authenticated request
+        // inside the queue (queue in queue deadlock)
+        return await QueueHandler.schedule('session-context-token', async () => {
+            // Load token from storage, because it could have been refreshed in another tab
+            await this.loadTokenFromStorage();
 
-        if (error.hasCode('expired_access_token')) {
-            if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
-                console.log('This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh');
-                return true;
-            }
-
-            // Try to refresh
-            try {
-                console.log('Request failed due to expired access token, refreshing...');
-                await this.token.refresh(this.server, () => request.shouldRetry);
-                console.log('Retrying request...');
-            }
-            catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    if (e.hasCode('invalid_refresh_token')) {
-                        console.log('Refresh token is invalid, logout');
-                        this.setLoadingError(e);
-                        await this.logout();
-                        return false;
-                    }
-                }
-
-                if (Request.isNetworkError(e) || Request.isAbortError(e)) {
-                    return false;
-                }
-
-                // Something went wrong
-                this.setLoadingError(e);
+            if (!this.token) {
+                // Euhm? The user is not signed in!
                 return false;
             }
-            return true;
-        }
-        else {
-            if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
-                console.log('This request started with an old token that might not be valid anymore. Retry with new token');
+
+            if (response.status !== 401) {
+                return false;
+            }
+
+            if (error.hasCode('expired_access_token')) {
+                if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
+                    console.log(this.requestPrefix(request) + 'This request started with an old token that might not be valid anymore. Retry with new token before doing a refresh');
+                    return true;
+                }
+
+                // Try to refresh
+                try {
+                    console.log(this.requestPrefix(request) + 'Request failed due to expired access token, refreshing...');
+                    await this.token.refresh(this.server, () => request.shouldRetry);
+                    console.log(this.requestPrefix(request) + 'Retrying request...');
+                }
+                catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        if (e.hasCode('invalid_refresh_token')) {
+                            console.log(this.requestPrefix(request) + 'Refresh token is invalid');
+                            this.setLoadingError(e);
+                            await this.unsetToken(true);
+                            return false;
+                        }
+                    }
+
+                    if (Request.isNetworkError(e) || Request.isAbortError(e)) {
+                        return false;
+                    }
+
+                    // Something went wrong
+                    this.setLoadingError(e);
+                    return false;
+                }
                 return true;
             }
             else {
-                if (error.hasCode('invalid_access_token')) {
-                    await this.logout();
+                if (request.headers.Authorization !== 'Bearer ' + this.token.token.accessToken) {
+                    console.log(this.requestPrefix(request) + 'This request started with an old token that might not be valid anymore. Retry with new token');
+                    return true;
                 }
                 else {
-                    this.setLoadingError(error);
+                    if (error.hasCode('invalid_access_token')) {
+                        await this.unsetToken(true);
+                    }
+                    else {
+                        this.setLoadingError(error);
+                    }
                 }
             }
-        }
 
-        return false;
+            return false;
+        });
     }
 }
