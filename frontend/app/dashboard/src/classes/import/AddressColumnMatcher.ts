@@ -30,7 +30,8 @@ export class AddressColumnMatcher extends GeneralMemberDetailsMatcher<Address> {
         let country: Country | undefined;
         for (const c of Object.values(Country)) {
             const name = CountryHelper.getName(c);
-            if (Formatter.slug(name) === Formatter.slug(countryString) || Formatter.slug(name) === Formatter.slug(c)) {
+
+            if (Formatter.slug(name) === Formatter.slug(countryString) || Formatter.slug(countryString) === Formatter.slug(c)) {
                 country = c;
                 break;
             }
