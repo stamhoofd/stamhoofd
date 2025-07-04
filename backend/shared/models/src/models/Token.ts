@@ -146,10 +146,11 @@ export class Token extends QueryableModel {
         }
 
         if (token.refreshTokenValidUntil < new Date()) {
-            // Refreh token invalid = can throw it away
-            token.delete().catch((e) => {
-                console.error(e);
-            });
+            // If a user tries to use a refresh token that is expired - there is a possibility of a user
+            // being compromised.
+            // So we delete all tokens for this user.
+            console.error('Detected an expired refresh token, deleting all tokens for user', token.userId);
+            await this.delete().where('userId', token.userId);
             return undefined;
         }
 
@@ -191,7 +192,7 @@ export class Token extends QueryableModel {
             const [
                 rows,
             ] = await Database.delete(
-                `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`refreshTokenValidUntil\` DESC LIMIT ? OFFSET ?) x)`,
+                `DELETE FROM \`${this.table}\` WHERE ${this.primary.name} IN (SELECT ${this.primary.name} FROM (SELECT ${this.primary.name} FROM \`${this.table}\` WHERE \`userId\` = ? ORDER BY\`createdAt\` DESC LIMIT ? OFFSET ?) x)`,
                 [user.id, this.MAX_DEVICES, this.MAX_DEVICES],
             );
 
