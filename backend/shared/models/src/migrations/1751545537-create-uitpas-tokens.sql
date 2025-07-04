@@ -3,6 +3,7 @@ CREATE TABLE `uitpas_tokens` (
    `clientId` varchar(255) NOT NULL,
    `clientSecret` varchar(255) NOT NULL,
    `createdAt` date NOT NULL,
+   `updatedAt` datetime NOT NULL,
    `organizationId` varchar(36),
    PRIMARY KEY (id),
    UNIQUE KEY `organizationId` (`organizationId`)

@@ -36,4 +36,14 @@ export class UitpasToken extends QueryableModel {
         },
     })
     createdAt: Date;
+
+    @column({
+        type: 'datetime', beforeSave() {
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
+        skipUpdate: true,
+    })
+    updatedAt: Date;
 }
