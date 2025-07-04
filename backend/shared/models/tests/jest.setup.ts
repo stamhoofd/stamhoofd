@@ -1,6 +1,3 @@
-import backendEnv from '@stamhoofd/backend-env';
-backendEnv.load({ path: __dirname + '/../../.env.test.json' });
-
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
@@ -26,6 +23,9 @@ afterAll(async () => {
     await Database.delete('DELETE FROM `emails`');
     await Database.delete('DELETE FROM `email_addresses`');
     await Database.end();
+
+    // Override default $t handlers
+    await TestUtils.loadEnvironment();
 });
 
 TestUtils.setup();

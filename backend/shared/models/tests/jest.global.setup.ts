@@ -1,15 +1,14 @@
-import backendEnv from '@stamhoofd/backend-env';
 import { TestUtils } from '@stamhoofd/test-utils';
 import path from 'path';
 
-backendEnv.load({ path: __dirname + '/../../.env.test.json' });
-
-import { Database, Migration } from '@simonbackx/simple-database';
-import { EmailMocker } from '@stamhoofd/email';
 const modelsPath = require.resolve('@stamhoofd/models');
 const emailPath = require.resolve('@stamhoofd/email');
 
 export default async () => {
+    await TestUtils.globalSetup();
+
+    const { Database, Migration } = await import('@simonbackx/simple-database');
+
     // External migrations
     await Migration.runAll(path.dirname(modelsPath) + '/migrations');
     await Migration.runAll(path.dirname(emailPath) + '/migrations');
