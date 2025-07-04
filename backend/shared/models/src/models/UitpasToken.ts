@@ -18,8 +18,12 @@ export class UitpasToken extends QueryableModel {
     @column({ type: 'string' })
     clientSecret: string;
 
+    /**
+     * The organizationId is the ID of the organization that this token belongs to.
+     * If it is null, it means that this token is for the platform.
+     */
     @column({ type: 'string', nullable: true })
-    organizationId: string | null; // null means platform
+    organizationId: string | null;
 
     @column({
         type: 'datetime', beforeSave(old?: any) {
