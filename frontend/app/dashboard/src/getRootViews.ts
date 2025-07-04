@@ -63,6 +63,11 @@ export async function sessionFromOrganization(data: ({ organization: Organizatio
     const session = await SessionContext.createFrom(data);
     await session.loadFromStorage();
     await session.checkSSO();
+    if ('organization' in data) {
+        // Up to date organization
+        session.setOrganization(data.organization);
+        session._lastFetchedOrganization = new Date();
+    }
     await SessionManager.prepareSessionForUsage(session, false);
     return session;
 }
@@ -103,6 +108,7 @@ export async function loadSessionFromUrl() {
 
     if (!session) {
         session = await SessionManager.getLastGlobalSession();
+        await SessionManager.prepareSessionForUsage(session, false);
         await session.checkSSO();
     }
 
@@ -145,9 +151,6 @@ export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { 
 }
 
 export async function getOrganizationSelectionRoot(session: SessionContext) {
-    await session.loadFromStorage();
-    await SessionManager.prepareSessionForUsage(session, false);
-
     let baseRoot = new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(OrganizationSelectionView, {}),
@@ -196,8 +199,6 @@ export async function getScopedDashboardRootFromUrl() {
 
 export async function getScopedAutoRootFromUrl() {
     const session = await loadSessionFromUrl();
-    await SessionManager.prepareSessionForUsage(session, false);
-
     return await getScopedAutoRoot(session);
 }
 
