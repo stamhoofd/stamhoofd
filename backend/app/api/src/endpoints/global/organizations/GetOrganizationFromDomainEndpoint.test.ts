@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, OrganizationFactory } from '@stamhoofd/models';
+import { OrganizationFactory } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/structures';
 
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -14,7 +14,7 @@ describe('Endpoint.GetOrganizationFromDomain', () => {
 
         const r = Request.buildJson('GET', '/v2/organization-from-domain');
         r.query = {
-            domain: organization.uri + '.stamhoofd.dev',
+            domain: organization.uri + '.' + STAMHOOFD.domains.registration!['']!,
         };
 
         const response = await testServer.test(endpoint, r);
