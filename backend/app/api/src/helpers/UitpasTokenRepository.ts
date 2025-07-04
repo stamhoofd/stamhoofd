@@ -114,7 +114,7 @@ export class UitpasTokenRepository {
                 human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
             });
         }
-        const json = await response.json().catch(() => {
+        const json: unknown = await response.json().catch(() => {
             // Handle JSON parsing errors
             throw new SimpleError({
                 code: 'invalid_json_fetching_uitpas_token',
