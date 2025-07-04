@@ -95,6 +95,12 @@ export class UitpasNumberValidatorStatic {
             let humanErrorMessage = '';
 
             const json: unknown = await response.json().catch(() => { /* ignore */ });
+            if (json) {
+                console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber}:`, json);
+            }
+            else {
+                console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber}:`, response.statusText);
+            }
             try {
                 assertIsUitpasNumberErrorResponse(json);
                 if (json.endUserMessage) {
@@ -105,10 +111,6 @@ export class UitpasNumberValidatorStatic {
 
             if (!humanErrorMessage) {
                 humanErrorMessage = $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`);
-                console.error(`UiTPAS API returned an error without a user-friendly message:`, response.statusText);
-            }
-            else {
-                console.error(`UiTPAS API returned an error with a user-friendly message:`, humanErrorMessage);
             }
             // in all cases, we throw an error
             throw new SimpleError({
