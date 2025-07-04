@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { UitpasToken } from '@stamhoofd/models';
+import { UitpasClientCredential } from '@stamhoofd/models';
 
 type UitpasTokenResponse = {
     access_token: string;
@@ -28,10 +28,10 @@ function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasToken
 export class UitpasTokenRepository {
     accessToken?: string;
     expiresOn: Date = new Date(0); // Set to minimum time initially
-    uitpasToken: UitpasToken;
+    uitpasClientCredential: UitpasClientCredential;
 
-    constructor(uitpasToken: UitpasToken) {
-        this.uitpasToken = uitpasToken;
+    constructor(uitpasClientCredential: UitpasClientCredential) {
+        this.uitpasClientCredential = uitpasClientCredential;
     }
 
     /**
@@ -52,8 +52,8 @@ export class UitpasTokenRepository {
             return repo.getAccessToken(forceRefresh);
         }
         // query db
-        let uitpasToken = await UitpasToken.select().where('organizationId', organizationId).first(false);
-        if (!uitpasToken) {
+        let uitpasClientCredential = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
+        if (!uitpasClientCredential) {
             // temporary solution, because platform client id and secret are not yet in the database
             if (organizationId === null) {
                 if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
@@ -63,10 +63,10 @@ export class UitpasTokenRepository {
                         human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
                     });
                 }
-                uitpasToken = new UitpasToken();
-                uitpasToken.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
-                uitpasToken.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
-                uitpasToken.organizationId = null; // null means platform
+                uitpasClientCredential = new UitpasClientCredential();
+                uitpasClientCredential.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
+                uitpasClientCredential.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
+                uitpasClientCredential.organizationId = null; // null means platform
             }
             else {
                 throw new SimpleError({
@@ -76,7 +76,7 @@ export class UitpasTokenRepository {
                 });
             }
         }
-        const newRepo = new UitpasTokenRepository(uitpasToken);
+        const newRepo = new UitpasTokenRepository(uitpasClientCredential);
         this.knownTokens.set(organizationId, newRepo);
         return newRepo.getAccessToken(true);
     }
@@ -90,8 +90,8 @@ export class UitpasTokenRepository {
         myHeaders.append('Content-Type', 'application/x-www-form-urlencoded');
         const params = new URLSearchParams({
             grant_type: 'client_credentials',
-            client_id: this.uitpasToken.clientId,
-            client_secret: this.uitpasToken.clientSecret,
+            client_id: this.uitpasClientCredential.clientId,
+            client_secret: this.uitpasClientCredential.clientSecret,
         });
         const requestOptions: RequestInit = {
             method: 'POST',
@@ -107,7 +107,7 @@ export class UitpasTokenRepository {
             });
         });
         if (!response.ok) {
-            console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasToken.organizationId}:`, response.statusText);
+            console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`, response.statusText);
             throw new SimpleError({
                 code: 'unsuccessful_response_fetching_uitpas_token',
                 message: `Unsuccesful response when fetching UiTPAS token`,

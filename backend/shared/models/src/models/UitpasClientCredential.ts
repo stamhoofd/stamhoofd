@@ -2,8 +2,8 @@ import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 
-export class UitpasToken extends QueryableModel {
-    static table = 'uitpas_tokens';
+export class UitpasClientCredential extends QueryableModel {
+    static table = 'uitpas_client_credentials';
 
     @column({
         primary: true, type: 'string', beforeSave(value) {
