@@ -12,6 +12,7 @@ import { GenderColumnMatcher } from './default-matchers/GenderColumnMatcher';
 import { GroupColumnMatcher } from './default-matchers/GroupColumnMatcher';
 import { LastNameColumnMatcher } from './default-matchers/LastNameColumnMatcher';
 import { MemberNumberColumnMatcher } from './default-matchers/MemberNumberColumnMatcher';
+import { NationalRegisterNumberColumnMatcher } from './default-matchers/NationalRegisterNumberMatcher';
 import { PaidColumnMatcher } from './default-matchers/PaidColumnMatcher';
 import { PaidPriceColumnMatcher } from './default-matchers/PaidPriceColumnMatcher';
 import { PaymentPriceColumnMatcher } from './default-matchers/PaymentPriceColumnMatcher';
@@ -63,6 +64,7 @@ export const getMemberMatchers = (getGroups: () => Group[]) => [
             importResult.registration.date = d;
         },
     }),
+    new NationalRegisterNumberColumnMatcher(MemberDetailsMatcherCategory.Member),
 ];
 
 export const parentMatchers1 = [
@@ -88,6 +90,7 @@ export const parentMatchers1 = [
         },
     }),
     new CityWithZipColumnMatcher(MemberDetailsMatcherCategory.Parent1),
+    new NationalRegisterNumberColumnMatcher(MemberDetailsMatcherCategory.Parent1),
 ];
 
 export const parentMatchers2 = [
@@ -112,6 +115,7 @@ export const parentMatchers2 = [
         },
     }),
     new CityWithZipColumnMatcher(MemberDetailsMatcherCategory.Parent2),
+    new NationalRegisterNumberColumnMatcher(MemberDetailsMatcherCategory.Parent2),
 ];
 
 export const paymentMatchers = [
