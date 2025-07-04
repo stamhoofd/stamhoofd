@@ -54,8 +54,6 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             return;
         }
 
-        console.error('category: ' + this.category);
-
         if (!DataValidator.verifyBelgianNationalNumber(value)) {
             throw new SimpleError({
                 code: 'invalid_field',

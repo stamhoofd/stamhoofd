@@ -396,7 +396,7 @@ function getParentDescription(parent: Parent) {
     if (parent.address) {
         description.push(type + ' adres: ' + parent.address.toString());
     }
-    if(parent.nationalRegisterNumber) {
+    if (parent.nationalRegisterNumber) {
         description.push(type + ' rijksregisternummer: ' + parent.nationalRegisterNumber.toString());
     }
     return description;
@@ -496,6 +496,10 @@ function openResultView() {
                     description.push('Lidnummer wijzigen naar ' + patched.memberNumber);
                 }
 
+                if (patched.uitpasNumber && patched.uitpasNumber !== existingDetails.uitpasNumber) {
+                    description.push('UiTPAS-nummer wijzigen naar ' + patched.uitpasNumber);
+                }
+
                 for (const parent of member.getChangedParents()) {
                     description.push(...getParentDescription(parent));
                 }
@@ -535,12 +539,15 @@ function openResultView() {
                     description.push('Lidnummer: ' + patched.memberNumber);
                 }
 
+                if (patched.uitpasNumber) {
+                    description.push('UiTPAS-nummer: ' + patched.uitpasNumber);
+                }
+
                 for (const parent of patched.parents) {
                     description.push(...getParentDescription(parent));
                 }
 
                 for (const answer of patched.recordAnswers.values()) {
-                    // todo: is this correct?
                     description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue);
                 }
             }

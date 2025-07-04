@@ -20,6 +20,7 @@ import { PhoneColumnMatcher } from './default-matchers/PhoneColumnMatcher';
 import { StreetColumnMatcher } from './default-matchers/StreetColumnMatcher';
 import { StreetNumberColumnMatcher } from './default-matchers/StreetNumberColumnMatcher';
 import { StreetWithNumberColumnMatcher } from './default-matchers/StreetWithNumberColumnMatcher';
+import { UitpasNumberColumnMatcher } from './default-matchers/UitpasNumberMatcher';
 import { ZipColumnMatcher } from './default-matchers/ZipColumnMatcher';
 import { ImportMemberResult } from './ExistingMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
@@ -64,6 +65,7 @@ export const getMemberMatchers = (getGroups: () => Group[]) => [
             importResult.registration.date = d;
         },
     }),
+    new UitpasNumberColumnMatcher(),
     new NationalRegisterNumberColumnMatcher(MemberDetailsMatcherCategory.Member),
 ];
 
