@@ -10,8 +10,18 @@ export class UitpasTokenRepository {
         this.uitpasToken = uitpasToken;
     }
 
-    static knownTokens: Map<string | null, UitpasTokenRepository> = new Map(); // organizationId (null means platform) -> UitpasToken
+    /**
+     * organizationId (null means platform) -> UitpasTokenRepository
+     */
+    static knownTokens: Map<string | null, UitpasTokenRepository> = new Map();
 
+    /**
+     * Get the access token for the organization or platform.
+     * @param organizationId the organization ID for which to get the access token. If null, it means the platform.
+     * @param forceRefresh if true, the access token will be refreshed even if a previously stored token it is still valid
+     * @returns Promise<string> the access token for the organization or platform
+     * @throws SimpleError if the token cannot be obtained or the API is not configured
+     */
     static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<string> {
         const repo = UitpasTokenRepository.knownTokens.get(organizationId);
         if (repo) {
