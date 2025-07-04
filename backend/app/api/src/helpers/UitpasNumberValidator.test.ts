@@ -10,14 +10,14 @@ describe.skip('UitpasNumberValidator', () => {
     it('should throw an error for an invalid Uitpas number', async () => {
         const invalidNumber = '1234567890123';
         await expect(UitpasNumberValidator.checkUitpasNumber(invalidNumber)).rejects.toThrow(
-            STExpect.simpleError({ code: 'error_retrieving_pass_by_uitpas_number' }),
+            STExpect.simpleError({ code: 'unsuccessful_but_expected_response_retrieving_pass_by_uitpas_number' }),
         );
     });
 
     it('should throw an error for a Uitpas number with kansentarief expired', async () => {
         const expiredNumber = '0900000058918';
         await expect(UitpasNumberValidator.checkUitpasNumber(expiredNumber)).rejects.toThrow(
-            STExpect.simpleError({ code: 'non_active_social_tariff' }),
+            STExpect.simpleError({ code: 'uitpas_number_issue' }),
         );
     });
 });

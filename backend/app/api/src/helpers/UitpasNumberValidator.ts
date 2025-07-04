@@ -91,32 +91,34 @@ export class UitpasNumberValidatorStatic {
             });
         });
         if (!response.ok) {
-            // we use a generic error message and try to parse the response to get a better message
-            let humanErrorMessage = '';
-
             const json: unknown = await response.json().catch(() => { /* ignore */ });
+            let endUserMessage = '';
+
             if (json) {
                 console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber}:`, json);
             }
             else {
                 console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber}:`, response.statusText);
             }
+
             try {
                 assertIsUitpasNumberErrorResponse(json);
-                if (json.endUserMessage) {
-                    humanErrorMessage = json.endUserMessage.nl;
-                }
+                endUserMessage = json.endUserMessage ? json.endUserMessage.nl : '';
             }
             catch { /* ignore */ }
 
-            if (!humanErrorMessage) {
-                humanErrorMessage = $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`);
+            if (endUserMessage) {
+                throw new SimpleError({
+                    code: 'unsuccessful_but_expected_response_retrieving_pass_by_uitpas_number',
+                    message: `Unsuccesful response with message when retrieving pass by UiTPAS number, message: ${endUserMessage}`,
+                    human: endUserMessage,
+                });
             }
-            // in all cases, we throw an error
+
             throw new SimpleError({
                 code: 'unsuccessful_and_unexpected_response_retrieving_pass_by_uitpas_number',
                 message: `Unsuccesful response without message when retrieving pass by UiTPAS number`,
-                human: humanErrorMessage,
+                human: $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`),
             });
         }
 
@@ -139,11 +141,12 @@ export class UitpasNumberValidatorStatic {
 
             throw new SimpleError({
                 code: 'uitpas_number_issue',
-                message: `UiTPAS API returned an error: ${json.messages[0].text}`,
+                message: `UiTPAS API returned an error: ${humanMessage}`,
                 human: humanMessage,
             });
         }
         if (json.socialTariff.status !== 'ACTIVE') {
+            // THIS SHOULD NOT HAPPEN, as in that case json.messages should be present
             throw new SimpleError({
                 code: 'non_active_social_tariff',
                 message: `UiTPAS social tariff is not ACTIVE but ${json.socialTariff.status}`,
