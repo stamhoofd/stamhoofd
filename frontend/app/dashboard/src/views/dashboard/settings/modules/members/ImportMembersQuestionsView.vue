@@ -396,6 +396,9 @@ function getParentDescription(parent: Parent) {
     if (parent.address) {
         description.push(type + ' adres: ' + parent.address.toString());
     }
+    if(parent.nationalRegisterNumber) {
+        description.push(type + ' rijksregisternummer: ' + parent.nationalRegisterNumber.toString());
+    }
     return description;
 }
 
@@ -469,6 +472,9 @@ function openResultView() {
                 if (patched.name !== undefined && existingDetails.name !== patched.name) {
                     description.push('Naam wijzigen naar ' + patched.name);
                 }
+                if (patched.nationalRegisterNumber && patched.nationalRegisterNumber !== existingDetails.nationalRegisterNumber) {
+                    description.push('Rijksregisternummer wijzigen naar ' + patched.nationalRegisterNumber.toString());
+                }
                 if (patched.gender !== undefined && existingDetails.gender !== patched.gender) {
                     description.push('Geslacht wijzigen naar ' + getGenderName(patched.gender));
                 }
@@ -504,6 +510,9 @@ function openResultView() {
 
                 if (patched.name) {
                     description.push('Naam: ' + patched.name);
+                }
+                if (patched.nationalRegisterNumber) {
+                    description.push('Rijksregisternummer: ' + patched.nationalRegisterNumber.toString());
                 }
                 if (patched.gender) {
                     description.push('Geslacht: ' + getGenderName(patched.gender));
