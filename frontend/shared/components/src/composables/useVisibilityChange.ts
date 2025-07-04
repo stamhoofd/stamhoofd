@@ -1,7 +1,7 @@
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted } from 'vue';
 
 export function useVisibilityChange(callback: () => void | Promise<void>) {
-    let wasVisible = false;
+    let wasVisible = true;
 
     function isVisible() {
         return document.visibilityState === 'visible' && !document.hidden;
