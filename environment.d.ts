@@ -217,6 +217,10 @@ declare global {
 
         readonly MEMBER_NUMBER_ALGORITHM?: MemberNumberAlgorithm
         readonly MEMBER_NUMBER_ALGORITHM_LENGTH?: number
+
+        // UiTPAS
+        readonly UITPAS_API_CLIENT_ID?: string 
+        readonly UITPAS_API_CLIENT_SECRET?: string
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

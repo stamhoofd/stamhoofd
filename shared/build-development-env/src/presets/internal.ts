@@ -35,6 +35,12 @@ export async function build(service: Service) {
             STRIPE_ACCOUNT_ID: await read1PasswordCli('op://Localhost/Stripe/STRIPE_ACCOUNT_ID', { optional: true }),
             STRIPE_SECRET_KEY: await read1PasswordCli('op://Localhost/Stripe/STRIPE_SECRET_KEY', { optional: true }),
         });
+
+        // Add UiTPAS credentials
+        Object.assign(config, {
+            UITPAS_API_CLIENT_ID: await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/client ID', { optional: true }),
+            UITPAS_API_SECRET: await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/client secret', { optional: true }),
+        });
     }
 
     return config;
