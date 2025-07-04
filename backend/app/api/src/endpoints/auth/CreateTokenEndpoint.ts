@@ -61,7 +61,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
                 // In the rare event our response doesn't reach the client anymore, we don't want the client to sign out...
                 // So we give them a second chance and create a new token BUT we expire our existing token in an hour (forever!)
-                oldToken.refreshTokenValidUntil = new Date(Date.now() + 60 * 60 * 1000);
+                oldToken.refreshTokenValidUntil = new Date(Math.min(oldToken.refreshTokenValidUntil.getTime(), Date.now() + 60 * 60 * 1000));
                 oldToken.accessTokenValidUntil = new Date(Date.now() - 60 * 60 * 1000);
 
                 // Do not delete the old one, only expire it fast so it will get deleted in the future
