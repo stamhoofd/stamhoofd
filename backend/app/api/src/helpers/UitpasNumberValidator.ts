@@ -2,6 +2,60 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasTokenRepository } from './UitpasTokenRepository';
 import { DataValidator } from '@stamhoofd/utility';
 
+type UitpasNumberSuccessfulResponse = {
+    socialTariff: {
+        status: 'ACTIVE' | 'EXPIRED' | 'NONE';
+    };
+    messages?: Array<{
+        text: string;
+    }>;
+};
+
+type UitpasNumberErrorResponse = {
+    title: string; // e.g., "Invalid uitpas number"
+    endUserMessage?: {
+        nl: string;
+    };
+};
+
+function assertIsUitpasNumberSuccessfulResponse(
+    json: unknown,
+): asserts json is UitpasNumberSuccessfulResponse {
+    if (
+        typeof json !== 'object'
+        || json === null
+        || !('socialTariff' in json)
+        || typeof json.socialTariff !== 'object'
+        || json.socialTariff === null
+        || !('status' in json.socialTariff)
+        || typeof json.socialTariff.status !== 'string'
+    ) {
+        throw new SimpleError({
+            code: 'invalid_response_getting_pass_by_uitpas_number',
+            message: `Invalid response when fetching pass by UiTPAS number: ${JSON.stringify(json)}`,
+            human: $t(`Er is een fout opgetreden bij de communicatie met UiTPAS. Probeer het later opnieuw.`),
+        });
+    }
+}
+
+function assertIsUitpasNumberErrorResponse(
+    json: unknown,
+): asserts json is UitpasNumberErrorResponse {
+    if (
+        typeof json !== 'object'
+        || json === null
+        || !('title' in json)
+        || typeof json.title !== 'string'
+        || ('endUserMessage' in json && (typeof json.endUserMessage !== 'object' || json.endUserMessage === null || !('nl' in json.endUserMessage) || typeof json.endUserMessage.nl !== 'string'))
+    ) {
+        throw new SimpleError({
+            code: 'invalid_error_response_getting_pass_by_uitpas_number',
+            message: `Invalid error response when fetching pass by UiTPAS number: ${JSON.stringify(json)}`,
+            human: $t(`Er is een fout opgetreden bij de communicatie met UiTPAS. Probeer het later opnieuw.`),
+        });
+    }
+}
+
 export class UitpasNumberValidatorStatic {
     async checkUitpasNumber(uitpasNumber: string) {
         // static check (using regex)
@@ -45,29 +99,23 @@ export class UitpasNumberValidatorStatic {
             });
         });
         if (!response.ok) {
-            // Handle non-200 responses by attempting to parse the response to get a message from UiTPAS API
-            const json = await response.json().catch(() => {}); // Ignore JSON parsing errors -> we will throw a generic error below
-            if (
-                json
-                && json.endUserMessage
-                && json.endUserMessage.nl
-                && typeof json.endUserMessage.nl === 'string'
-                && json.title
-                && typeof json.title === 'string'
-            ) {
-                // If the response contains an endUserMessage, throw an error with that message
-                throw new SimpleError({
-                    code: 'error_retrieving_pass_by_uitpas_number',
-                    message: `UiTPAS API returned an error: ${json.title}`,
-                    human: json.endUserMessage,
-                });
+            // we use a generic error message and try to parse the response to get a better message
+            let humanErrorMessage = $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`);
+
+            const json = await response.json().catch(() => { /* ignore */ });
+            try {
+                assertIsUitpasNumberErrorResponse(json);
+                if (json.endUserMessage) {
+                    humanErrorMessage = json.endUserMessage.nl;
+                }
             }
+            catch { /* ignore */ }
+
+            // in all cases, we throw an error
             throw new SimpleError({
-                code: 'bad_response_when_fetching_uitpas_number',
-                message: `Unsuccessful response from UiTPAS API: ${response.statusText}`,
-                human: $t(
-                    `Er is een fout opgetreden bij het ophalen van je UiTPAS. Probeer het later opnieuw.`,
-                ),
+                code: 'error_retrieving_pass_by_uitpas_number',
+                message: `Error retrieving pass by UiTPAS number: ${json?.title || response.statusText}`,
+                human: humanErrorMessage,
             });
         }
 
@@ -81,31 +129,16 @@ export class UitpasNumberValidatorStatic {
                 ),
             });
         });
-        if (!json || !json.socialTariff || !json.socialTariff.status) {
-            throw new SimpleError({
-                code: 'invalid_json_response',
-                message: `Invalid JSON response from UiTPAS API: ${JSON.stringify(json)}`,
-                human: $t(
-                    `Er is een fout opgetreden bij het verwerken van de UiTPAS-gegevens. Probeer het later opnieuw.`,
-                ),
-            });
-        }
-        if (
-            json.messages
-            && Array.isArray(json.messages)
-            && json.messages.length > 0
-            && json.messages[0].message
-            && json.messages[0].message.text
-        ) {
+        assertIsUitpasNumberSuccessfulResponse(json);
+        if (json.messages) {
             const text = json.messages[0].text; // only display the first message
 
             // alternatively, join all messages
             // const text = json.messages.map((message: any) => message.text).join(', ');
 
-            // If there are messages, throw an error with the first message
             throw new SimpleError({
                 code: 'uitpas_number_issue',
-                message: `UiTPAS API returned an error: ${json.messages[0].message}`,
+                message: `UiTPAS API returned an error: ${json.messages[0].text}`,
                 human: text,
             });
         }
