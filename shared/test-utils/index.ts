@@ -1,4 +1,4 @@
-import { loadEnvironment } from './src/loadEnvironment';
+import { loadEnvironment } from './src/loadEnvironment.js';
 
 type AfterCallback = () => void | Promise<void>;
 class TestInstance {

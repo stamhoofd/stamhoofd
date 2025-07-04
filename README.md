@@ -101,7 +101,9 @@ By default Stamhoofd will use the root `env.*.js` files as the environment file,
 
 To be able to switch easily between different environment files, we use `STAMHOOFD_ENV`. E.g. If you want to test how Stamhoofd runs in a certain environment, you can use `STAMHOOFD_ENV=keeo yarn dev` and it will use the `env.keeo.js` and optionally `env.keeo.local.js` files. As a shorthand, we've created some shortcuts: `yarn dev:keeo`, `yarn dev:ravot` and `yarn dev:stamhoofd`.
 
-Not setting the STAMHOOFD_ENV variable, will default to use the local .env.json files in every backend service folder - as on production. During tests the .env.test.json and .env.ci.json files are used.
+Not setting the STAMHOOFD_ENV variable, will default to use the local .env.json files in every backend service folder - as on production. 
+
+Tests use the default environment in `shared/test-utils/src/env.json` - you can override this within your tests using the helpers from the test-utils package.
 
 Since the environment files can get pretty long and complex, in development, the env files are built based on presets. These presets are stored in `shared/build-development-env/src/presets`.
 

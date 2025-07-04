@@ -9,6 +9,11 @@
             "import": "./esm/dist/index.js",
             "require": "./dist/index.js",
             "types": "./dist/index.d.ts"
+        },
+        "./cjs": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
         }
     },
     "license": "UNLICENCED",

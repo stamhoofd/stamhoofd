@@ -7,3 +7,4 @@ import { beforeAll, beforeEach, afterEach } from 'vitest';
 (window as any).afterEach = afterEach;
 
 TestUtils.setup();
+await TestUtils.loadEnvironment();

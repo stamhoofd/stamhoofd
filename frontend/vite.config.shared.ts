@@ -15,7 +15,14 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
 
     let loadedEnv: FrontendEnvironment | undefined = undefined;
 
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
+        // Force load the cjs version of test-utils because the esm version gives issues with the json environment
+        const builder = await import('@stamhoofd/test-utils/cjs');
+        await builder.TestUtils.loadEnvironment();
+        loadedEnv = STAMHOOFD;
+    }
+    else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+        console.log('Building for development...', process.env.NODE_ENV);
         const builder = await import('@stamhoofd/build-development-env');
         loadedEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
             frontend: options.name,
@@ -55,7 +62,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
     use_env['STAMHOOFD'] = JSON.stringify(loadedEnv);
 
     // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env['process.env.NODE_ENV'] = JSON.stringify(loadedEnv.environment === 'production' ? 'production' : 'development');
+    use_env['process.env.NODE_ENV'] = JSON.stringify(loadedEnv.environment);
 
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',

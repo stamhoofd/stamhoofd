@@ -1,20 +1,17 @@
-import backendEnv from '@stamhoofd/backend-env';
-backendEnv.load({ path: __dirname + '/../../.env.test.json' });
-
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, EmailMocker } from '@stamhoofd/email';
+import { QueueHandler } from '@stamhoofd/queues';
 import { Version } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
 import { sleep } from '@stamhoofd/utility';
+import * as jose from 'jose';
 import nock from 'nock';
 import { GlobalHelper } from '../src/helpers/GlobalHelper';
-import * as jose from 'jose';
-import { TestUtils } from '@stamhoofd/test-utils';
-import './toMatchMap';
-import { PayconiqMocker } from './helpers/PayconiqMocker';
 import { BalanceItemService } from '../src/services/BalanceItemService';
-import { QueueHandler } from '@stamhoofd/queues';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { PayconiqMocker } from './helpers/PayconiqMocker';
+import './toMatchMap';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
