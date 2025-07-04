@@ -1,4 +1,4 @@
-CREATE TABLE `uitpas_tokens` (
+CREATE TABLE `uitpas_client_credentials` (
    `id` varchar(36) NOT NULL,
    `clientId` varchar(255) NOT NULL,
    `clientSecret` varchar(255) NOT NULL,
@@ -7,5 +7,5 @@ CREATE TABLE `uitpas_tokens` (
    `organizationId` varchar(36),
    PRIMARY KEY (id),
    UNIQUE KEY `organizationId` (`organizationId`),
-   CONSTRAINT `organizationId` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+   CONSTRAINT `fk_uitpas_client_credentials_organization` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
