@@ -126,6 +126,7 @@ export * from './src/endpoints/tokens/RefreshTokenGrantStruct.js';
 export * from './src/endpoints/tokens/RequestChallengeGrantStruct.js';
 export * from './src/endpoints/VerifyEmailRequest.js';
 export * from './src/endpoints/WebshopUriAvailabilityResponse.js';
+export * from './src/endpoints/UitpasPriceCheckRequest.js';
 
 // email
 export * from './src/email/EditorSmartButton.js';
