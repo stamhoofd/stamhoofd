@@ -16,10 +16,11 @@ function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasToken
         || typeof json.expires_in !== 'number'
         || json.expires_in <= 0
     ) {
+        console.error('Invalid response when fetching UiTPAS token:', json);
         throw new SimpleError({
             code: 'invalid_response_fetching_uitpas_token',
-            message: `Invalid response when fetching UiTPAS token: ${JSON.stringify(json)}`,
-            human: $t(`Er is een fout opgetreden bij de communicatie met UiTPAS. Probeer het later opnieuw.`),
+            message: `Invalid response when fetching UiTPAS token`,
+            human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
         });
     }
 }
@@ -57,9 +58,9 @@ export class UitpasTokenRepository {
             if (organizationId === null) {
                 if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
                     throw new SimpleError({
-                        code: 'uitpas_api_not_configured',
-                        message: 'UiTPAS API is not configured',
-                        human: $t('UiTPAS is niet volledig geconfigureerd. Neem contact op met de platformbeheerder.'),
+                        code: 'uitpas_api_not_configured_for_platform',
+                        message: 'UiTPAS api is not configured for the platform',
+                        human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
                     });
                 }
                 uitpasToken = new UitpasToken();
@@ -69,8 +70,8 @@ export class UitpasTokenRepository {
             }
             else {
                 throw new SimpleError({
-                    code: 'uitpas_token_not_found',
-                    message: organizationId ? `Uitpas token not found for clientId ${organizationId}` : 'Uitpas token not found for platform',
+                    code: 'uitpas_api_not_configured_for_this_organization',
+                    message: `UiTPAS api not configured for organization with id ${organizationId}`,
                     human: $t(`De UiTPAS integratie is niet compleet, contacteer de beheerder.`),
                 });
             }
@@ -97,27 +98,27 @@ export class UitpasTokenRepository {
             headers: myHeaders,
             body: params.toString(),
         };
-        const response = await fetch(url, requestOptions).catch((error) => {
+        const response = await fetch(url, requestOptions).catch(() => {
             // Handle network errors
             throw new SimpleError({
-                code: 'uitpas_unreachable',
-                message: `Network error when fetching UiTPAS token for client id ${this.uitpasToken.clientId}: ${error.message}`,
+                code: 'uitpas_unreachable_fetching_uitpas_token',
+                message: `Network issue when fetching UiTPAS  token`,
                 human: $t(`We konden UiTPAS niet bereiken. Probeer het later opnieuw.`),
             });
         });
         if (!response.ok) {
-            // Handle non-200 responses
+            console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasToken.organizationId}:`, response.statusText);
             throw new SimpleError({
                 code: 'unsuccessful_response_fetching_uitpas_token',
-                message: `Could not successfully obtain an UiTPAS token for client id ${this.uitpasToken.clientId}: ${response.statusText}`,
+                message: `Unsuccesful response when fetching UiTPAS token`,
                 human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
             });
         }
-        const json = await response.json().catch((error) => {
+        const json = await response.json().catch(() => {
             // Handle JSON parsing errors
             throw new SimpleError({
                 code: 'invalid_json_fetching_uitpas_token',
-                message: `Invalid JSON response when fetching UiTPAS token for client id ${this.uitpasToken.clientId}: ${error.message}`,
+                message: `Invalid json when fetching UiTPAS token`,
                 human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
             });
         });
