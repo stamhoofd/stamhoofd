@@ -1,6 +1,29 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasToken } from '@stamhoofd/models';
 
+type UitpasTokenResponse = {
+    access_token: string;
+    expires_in: number;
+};
+
+function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasTokenResponse {
+    if (
+        typeof json !== 'object'
+        || json === null
+        || !('access_token' in json)
+        || !('expires_in' in json)
+        || typeof json.access_token !== 'string'
+        || typeof json.expires_in !== 'number'
+        || json.expires_in <= 0
+    ) {
+        throw new SimpleError({
+            code: 'invalid_response_fetching_uitpas_token',
+            message: `Invalid response when fetching UiTPAS token: ${JSON.stringify(json)}`,
+            human: $t(`Er is een fout opgetreden bij de communicatie met UiTPAS. Probeer het later opnieuw.`),
+        });
+    }
+}
+
 export class UitpasTokenRepository {
     accessToken?: string;
     expiresOn: Date = new Date(0); // Set to minimum time initially
@@ -93,21 +116,14 @@ export class UitpasTokenRepository {
         const json = await response.json().catch((error) => {
             // Handle JSON parsing errors
             throw new SimpleError({
-                code: 'invalid_json_response_fetching_uitpas_token',
+                code: 'invalid_json_fetching_uitpas_token',
                 message: `Invalid JSON response when fetching UiTPAS token for client id ${this.uitpasToken.clientId}: ${error.message}`,
                 human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
             });
         });
-        if (!json.access_token || typeof json.access_token === 'string' || !json.expires_in || typeof json.expires_in !== 'number' || json.expires_in <= 0) {
-            // Handle invalid response
-            throw new SimpleError({
-                code: 'invalid_response_fetching_uitpas_token',
-                message: `Invalid response when fetching UiTPAS token for client id ${this.uitpasToken.clientId}: ${JSON.stringify(json)}`,
-                human: $t(`Er is een fout opgetreden bij de communicatie met UiTPAS. Probeer het later opnieuw.`),
-            });
-        }
+        assertIsUitpasTokenResponse(json);
         this.accessToken = json.access_token;
         this.expiresOn = new Date((Date.now() + json.expires_in * 1000) - 10000); // Set expiration 10 seconds earlier to be safe
-        return this.accessToken!;
+        return this.accessToken;
     }
 }
