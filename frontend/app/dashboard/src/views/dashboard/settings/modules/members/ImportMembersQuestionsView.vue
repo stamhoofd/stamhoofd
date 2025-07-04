@@ -486,6 +486,10 @@ function openResultView() {
                     description.push('Adres wijzigen naar ' + patched.address.toString());
                 }
 
+                if (patched.memberNumber && patched.memberNumber !== existingDetails.memberNumber) {
+                    description.push('Lidnummer wijzigen naar ' + patched.memberNumber);
+                }
+
                 for (const parent of member.getChangedParents()) {
                     description.push(...getParentDescription(parent));
                 }
@@ -516,6 +520,10 @@ function openResultView() {
 
                 if (patched.address) {
                     description.push('Adres: ' + patched.address.toString());
+                }
+
+                if (patched.memberNumber) {
+                    description.push('Lidnummer: ' + patched.memberNumber);
                 }
 
                 for (const parent of patched.parents) {
