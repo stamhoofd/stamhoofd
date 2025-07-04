@@ -1,4 +1,4 @@
-import { Address, Group, Organization, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { Address, Group, Organization, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';
 import { ColumnMatcherHelper } from './ColumnMatcherHelper';
 import { DateColumnMatcher } from './DateColumnMatcher';
@@ -146,17 +146,7 @@ export const getAllMatchers = (organization: Organization, getGroups: () => Grou
                         category: category.name.toString(),
                         required: false,
                         save(value: string, importResult: ImportMemberResult) {
-                            if (!value) {
-                                return;
-                            }
-
-                            let recordAnswer = importResult.patchedDetails.recordAnswers.get(record.id);
-                            if (!recordAnswer) {
-                                recordAnswer = RecordTextAnswer.create({
-                                    settings: record,
-                                });
-                            }
-                            ColumnMatcherHelper.patchRecordAnswers(importResult, recordAnswer);
+                            ColumnMatcherHelper.patchRecordTextdAnswer(importResult, value, record);
                         },
                     }));
                     break;
@@ -167,17 +157,7 @@ export const getAllMatchers = (organization: Organization, getGroups: () => Grou
                         category: category.name.toString(),
                         required: false,
                         save(value: Address, importResult: ImportMemberResult) {
-                            if (!value) {
-                                return;
-                            }
-
-                            let recordAnswer = importResult.patchedDetails.recordAnswers.get(record.id);
-                            if (!recordAnswer) {
-                                recordAnswer = RecordAddressAnswer.create({
-                                    settings: record,
-                                });
-                            }
-                            ColumnMatcherHelper.patchRecordAnswers(importResult, recordAnswer);
+                            ColumnMatcherHelper.patchRecordAddressAnswer(importResult, value, record);
                         },
                     }));
                     break;
@@ -188,17 +168,7 @@ export const getAllMatchers = (organization: Organization, getGroups: () => Grou
                         category: category.name.toString(),
                         required: false,
                         save(value: Date, importResult: ImportMemberResult) {
-                            if (!value) {
-                                return;
-                            }
-
-                            let recordAnswer = importResult.patchedDetails.recordAnswers.get(record.id);
-                            if (!recordAnswer) {
-                                recordAnswer = RecordDateAnswer.create({
-                                    settings: record,
-                                });
-                            }
-                            ColumnMatcherHelper.patchRecordAnswers(importResult, recordAnswer);
+                            ColumnMatcherHelper.patchRecordDateAnswer(importResult, value, record);
                         },
                     }));
                     break;
