@@ -166,7 +166,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Dropdown, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemCartItem, BalanceItemType, Gender, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RecordAnswer, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemCartItem, BalanceItemType, getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
 import { ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
@@ -464,90 +464,45 @@ function openResultView() {
 
             if (member.existingMember) {
                 const existingDetails = member.existingMember.member.details;
-                const newDetails = member.getPatch();
                 const patched = member.patchedDetails;
 
-                // Data changes
-                if (newDetails.name !== undefined && existingDetails.name !== newDetails.name) {
-                    description.push('Naam wijzigen naar ' + newDetails.name);
+                if (patched.name !== undefined && existingDetails.name !== patched.name) {
+                    description.push('Naam wijzigen naar ' + patched.name);
                 }
-                if (newDetails.gender !== undefined && newDetails.gender !== Gender.Other && existingDetails.gender !== newDetails.gender) {
-                    description.push('Geslacht wijzigen naar ' + newDetails.gender);
+                if (patched.gender !== undefined && existingDetails.gender !== patched.gender) {
+                    description.push('Geslacht wijzigen naar ' + getGenderName(patched.gender));
                 }
-                if (newDetails.email !== undefined && newDetails.email && existingDetails.email !== newDetails.email) {
-                    description.push('E-mail wijzigen naar ' + newDetails.email);
+                if (patched.email !== undefined && patched.email && existingDetails.email !== patched.email) {
+                    description.push('E-mail wijzigen naar ' + patched.email);
                 }
-                if (newDetails.phone !== undefined && newDetails.phone && existingDetails.phone !== newDetails.phone) {
-                    description.push('Telefoonnummer wijzigen naar ' + newDetails.phone);
+                if (patched.phone !== undefined && patched.phone && existingDetails.phone !== patched.phone) {
+                    description.push('Telefoonnummer wijzigen naar ' + patched.phone);
                 }
-                if (newDetails.birthDay && (!existingDetails.birthDay || (Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(newDetails.birthDay)))) {
-                    description.push('Geboortedatum wijzigen naar ' + Formatter.date(newDetails.birthDay, true));
-                }
-
-                if (newDetails.address && newDetails.address.toString() !== existingDetails.address?.toString()) {
-                    description.push('Adres wijzigen naar ' + newDetails.address.toString());
+                if (patched.birthDay && (!existingDetails.birthDay || (Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(patched.birthDay)))) {
+                    description.push('Geboortedatum wijzigen naar ' + Formatter.date(patched.birthDay, true));
                 }
 
-                const changedParents: Parent[] = [];
-
-                if (newDetails.parents) {
-                    const changedParentIds = new Set();
-
-                    for (const parentPatch of newDetails.parents.getPatches()) {
-                        const parentId = parentPatch.id;
-                        changedParentIds.add(parentId);
-                    }
-
-                    for (const parentPut of newDetails.parents.getPuts()) {
-                        const parentId = parentPut.put.id;
-                        changedParentIds.add(parentId);
-                    }
-
-                    for (const parentId of changedParentIds.values()) {
-                        const parent = patched.parents.find(p => p.id === parentId);
-                        if (parent) {
-                            changedParents.push(parent);
-                        }
-                    }
+                if (patched.address && patched.address.toString() !== existingDetails.address?.toString()) {
+                    description.push('Adres wijzigen naar ' + patched.address.toString());
                 }
 
-                for (const parent of changedParents) {
+                for (const parent of member.getChangedParents()) {
                     description.push(...getParentDescription(parent));
                 }
 
-                const changedRecordAnswers = new Set<RecordAnswer>();
-                const existingRecordAnswers = [...existingDetails.recordAnswers.values()];
-
-                for (const value of newDetails.recordAnswers?.values() ?? []) {
-                    if (!value) {
-                        continue;
-                    }
-
-                    if (value.isPut()) {
-                        changedRecordAnswers.add(value);
-                    }
-                    else {
-                        const existingRecordAnswer = existingRecordAnswers.find(a => a.id === value.id);
-                        if (existingRecordAnswer) {
-                            changedRecordAnswers.add(existingRecordAnswer);
-                        }
-                    }
-                }
-
-                for (const answer of changedRecordAnswers.values()) {
+                for (const answer of member.getChangedRecordAnswers()) {
+                    console.error(answer);
                     description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue);
                 }
             }
             else {
-                // todo: test
                 const patched = member.patchedDetails;
 
-                // Data changes
                 if (patched.name) {
                     description.push('Naam: ' + patched.name);
                 }
-                if (patched.gender !== Gender.Other) {
-                    description.push('Geslacht: ' + patched.gender);
+                if (patched.gender) {
+                    description.push('Geslacht: ' + getGenderName(patched.gender));
                 }
                 if (patched.email) {
                     description.push('E-mail: ' + patched.email);
