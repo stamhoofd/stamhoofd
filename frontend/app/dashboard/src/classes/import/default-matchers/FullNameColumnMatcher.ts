@@ -64,7 +64,7 @@ export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements
         const value = ((cell.w ?? cell.v) + '').trim();
 
         if (!value) {
-            if (this.category === MemberDetailsMatcherCategory.Member) {
+            if (this.category === MemberDetailsMatcherCategory.Member as string) {
                 throw new SimpleError({
                     code: 'invalid_type',
                     message: 'Deze cel is leeg',
@@ -87,7 +87,7 @@ export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements
     }
 
     setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
-        if (!cell && this.category !== MemberDetailsMatcherCategory.Member) {
+        if (!cell && this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }
 
@@ -98,14 +98,14 @@ export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements
 
         const { firstName, lastName } = this.getFirstNameAndLastName(value);
 
-        if (this.category === MemberDetailsMatcherCategory.Member) {
+        if (this.category === MemberDetailsMatcherCategory.Member as string) {
             importResult.addPatch({
                 firstName,
                 lastName,
             });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 || this.category === MemberDetailsMatcherCategory.Parent2) {
-            ColumnMatcherHelper.patchParent(importResult, this.category, {
+        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+            ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 firstName,
                 lastName,
             });
@@ -113,7 +113,7 @@ export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements
     }
 
     setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
-        if (this.category !== MemberDetailsMatcherCategory.Member) {
+        if (this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }
 

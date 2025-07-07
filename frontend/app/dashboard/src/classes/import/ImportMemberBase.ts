@@ -2,6 +2,12 @@ export class ImportMemberBase {
     private _firstName: string | null = null;
     private _lastName: string | null = null;
     private _birthDay: Date | null = null;
+    private _memberNumber: string | null = null;
+    private _nationalRegisterNumber: string | null = null;
+
+    constructor(readonly row: number) {
+
+    }
 
     get firstName() {
         return this._firstName;
@@ -15,6 +21,14 @@ export class ImportMemberBase {
         return this._birthDay;
     }
 
+    get memberNumber() {
+        return this._memberNumber;
+    }
+
+    get nationalRegisterNumber() {
+        return this._nationalRegisterNumber;
+    }
+
     setFirstName(firstName: string) {
         this._firstName = firstName;
     }
@@ -25,5 +39,13 @@ export class ImportMemberBase {
 
     setBirthDay(birthDay: Date) {
         this._birthDay = birthDay;
+    }
+
+    setMemberNumber(memberNumber: string) {
+        this._memberNumber = memberNumber;
+    }
+
+    setNationalRegisterNumber(nationalRegisterNumber: string) {
+        this._nationalRegisterNumber = nationalRegisterNumber;
     }
 }

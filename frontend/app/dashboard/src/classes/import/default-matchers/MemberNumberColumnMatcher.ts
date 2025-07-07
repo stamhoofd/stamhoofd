@@ -1,10 +1,11 @@
 import XLSX from 'xlsx';
 
-import { ColumnMatcher } from '../ColumnMatcher';
+import { BaseColumnMatcher } from '../ColumnMatcher';
 import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberBase } from '../ImportMemberBase';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
-export class MemberNumberColumnMatcher implements ColumnMatcher {
+export class MemberNumberColumnMatcher implements BaseColumnMatcher {
     id = 'MemberNumberColumnMatcher';
     category: MemberDetailsMatcherCategory = MemberDetailsMatcherCategory.Member;
 
@@ -31,15 +32,30 @@ export class MemberNumberColumnMatcher implements ColumnMatcher {
         return false;
     }
 
-    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+    private getValueFromCell(cell: XLSX.CellObject | undefined): string | null {
         if (!cell) {
-            return;
+            return null;
         }
 
-        const value = ((cell.w ?? cell.v) + '').trim();
+        return ((cell.w ?? cell.v) + '').trim();
+    }
+
+    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+        const value = this.getValueFromCell(cell);
+        if (!value) {
+            return;
+        }
 
         importResult.addPatch({
             memberNumber: value,
         });
+    }
+
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
+        const value = this.getValueFromCell(cell);
+        if (!value) {
+            return;
+        }
+        base.setMemberNumber(value);
     }
 }

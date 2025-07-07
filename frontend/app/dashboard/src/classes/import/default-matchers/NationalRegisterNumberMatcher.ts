@@ -2,14 +2,15 @@ import XLSX from 'xlsx';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator } from '@stamhoofd/utility';
-import { ColumnMatcher } from '../ColumnMatcher';
+import { BaseColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
 import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberBase } from '../ImportMemberBase';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 // should come after birthday
-export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {
+export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatcher implements BaseColumnMatcher {
     getName(): string {
         return $t('Rijksregisternummer');
     }
@@ -43,12 +44,16 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
         return false;
     }
 
-    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+    private getValueFromCell(cell: XLSX.CellObject | undefined): string | null {
         if (!cell) {
-            return;
+            return null;
         }
 
-        const value = ((cell.w ?? cell.v) + '').trim();
+        return ((cell.w ?? cell.v) + '').trim();
+    }
+
+    setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
+        const value = this.getValueFromCell(cell);
 
         if (!value) {
             return;
@@ -80,6 +85,39 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 nationalRegisterNumber: DataValidator.formatBelgianNationalNumber(value),
             });
+        }
+    }
+
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
+        if (this.category !== MemberDetailsMatcherCategory.Member as string) {
+            return;
+        }
+
+        const value = this.getValueFromCell(cell);
+
+        if (!value) {
+            return;
+        }
+
+        if (!DataValidator.verifyBelgianNationalNumber(value)) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: $t('Ongeldig rijksregisternummer'),
+            });
+        }
+
+        if (this.category === MemberDetailsMatcherCategory.Member as string) {
+            const birthDay = base.birthDay;
+
+            if (birthDay && !DataValidator.doesMatchBelgianNationalNumber(value, birthDay)) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: $t(`b809571c-08ed-464c-9f40-3522f8dac440`),
+
+                });
+            }
+
+            base.setNationalRegisterNumber(DataValidator.formatBelgianNationalNumber(value));
         }
     }
 }

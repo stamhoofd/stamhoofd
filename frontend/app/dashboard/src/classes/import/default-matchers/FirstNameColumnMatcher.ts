@@ -48,7 +48,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
         const value = ((cell.w ?? cell.v) + '').trim();
 
         if (!value) {
-            if (this.category === MemberDetailsMatcherCategory.Member) {
+            if (this.category === MemberDetailsMatcherCategory.Member as string) {
                 throw new SimpleError({
                     code: 'invalid_type',
                     message: 'Deze cel is leeg',
@@ -60,7 +60,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
     }
 
     setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
-        if (!cell && this.category !== MemberDetailsMatcherCategory.Member) {
+        if (!cell && this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }
 
@@ -69,20 +69,20 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
             return;
         }
 
-        if (this.category === MemberDetailsMatcherCategory.Member) {
+        if (this.category === MemberDetailsMatcherCategory.Member as string) {
             importResult.addPatch({
                 firstName: value,
             });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 || this.category === MemberDetailsMatcherCategory.Parent2) {
-            ColumnMatcherHelper.patchParent(importResult, this.category, {
+        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+            ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 firstName: value,
             });
         }
     }
 
     setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
-        if (this.category !== MemberDetailsMatcherCategory.Member) {
+        if (this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }
 

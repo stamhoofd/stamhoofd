@@ -31,7 +31,7 @@ export class ImportMemberResult {
         return this._newPlatformMember;
     }
 
-    constructor({
+    constructor(readonly row: number, {
         existingMember,
         organization,
     }: {
@@ -178,22 +178,20 @@ export class ExistingMemberResult {
     }
 
     constructor(readonly baseMemerData: ImportMemberBase, allMembers: PlatformMember[], readonly organization: Organization) {
-        const { birthDay, firstName, lastName } = this.baseMemerData;
+        const { birthDay, firstName, lastName, nationalRegisterNumber, memberNumber } = this.baseMemerData;
 
         if (firstName === null || lastName === null) {
             return;
         }
 
-        if (birthDay !== null) {
-            const equalMember = allMembers.find(m => isMemberEqual(m, birthDay, firstName, lastName));
-            if (equalMember) {
-                this.existingMember = equalMember;
-                this._isEqual = true;
-                return;
-            }
+        const equalMember = allMembers.find(m => isMemberEqual(m, { birthDay, firstName, lastName, memberNumber, nationalRegisterNumber }));
+        if (equalMember) {
+            this.existingMember = equalMember;
+            this._isEqual = true;
+            return;
         }
 
-        const probablyEqualMember = allMembers.find(m => isMemberProbablyEqual(m, birthDay, firstName, lastName));
+        const probablyEqualMember = allMembers.find(m => isMemberProbablyEqual(m, { birthDay, firstName, lastName, memberNumber, nationalRegisterNumber }));
         if (probablyEqualMember) {
             this.existingMember = probablyEqualMember;
             return;
@@ -209,15 +207,23 @@ export class ExistingMemberResult {
     }
 
     toImportMemberResult() {
-        return new ImportMemberResult({
+        return new ImportMemberResult(this.baseMemerData.row, {
             existingMember: this.isEqual ? this.existingMember : null,
             organization: this.organization,
         });
     }
 }
 
-function isMemberEqual(member: PlatformMember, birthDay: Date | null | undefined, firstName: string, lastName: string): boolean {
+function isMemberEqual(member: PlatformMember, { birthDay, firstName, lastName, memberNumber, nationalRegisterNumber }: { birthDay: Date | null | undefined; firstName: string; lastName: string; memberNumber?: string | null; nationalRegisterNumber?: string | null }): boolean {
     const memberDetails = member.member.details;
+
+    if (nationalRegisterNumber && memberDetails.nationalRegisterNumber) {
+        return memberDetails.nationalRegisterNumber === nationalRegisterNumber;
+    }
+
+    if (memberNumber && memberDetails.memberNumber) {
+        return memberDetails.memberNumber === memberNumber;
+    }
 
     if (!birthDay || memberDetails.birthDay === null || birthDay.getTime() !== memberDetails.birthDay.getTime()) {
         return false;
@@ -226,8 +232,16 @@ function isMemberEqual(member: PlatformMember, birthDay: Date | null | undefined
     return StringCompare.typoCount(memberDetails.firstName + ' ' + memberDetails.lastName, firstName + ' ' + lastName) === 0 && StringCompare.typoCount(Formatter.dateNumber(memberDetails.birthDay), Formatter.dateNumber(memberDetails.birthDay)) === 0;
 }
 
-function isMemberProbablyEqual(member: PlatformMember, birthDay: Date | null | undefined, firstName: string, lastName: string): boolean {
+function isMemberProbablyEqual(member: PlatformMember, { birthDay, firstName, lastName, memberNumber, nationalRegisterNumber }: { birthDay: Date | null | undefined; firstName: string; lastName: string; memberNumber?: string | null; nationalRegisterNumber?: string | null }): boolean {
     const memberDetails = member.member.details;
+
+    if (nationalRegisterNumber) {
+        return memberDetails.nationalRegisterNumber === nationalRegisterNumber;
+    }
+
+    if (memberNumber) {
+        return memberDetails.memberNumber === memberNumber;
+    }
 
     if (!memberDetails.birthDay || !birthDay) {
         return StringCompare.typoCount(memberDetails.firstName + ' ' + memberDetails.lastName, firstName + ' ' + lastName) === 0;
