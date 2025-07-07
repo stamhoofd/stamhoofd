@@ -97,15 +97,17 @@
                         </p>
 
                         <STList v-model="draggableGroups" :draggable="true">
-                            <STListItem v-for="(group, index) of multipleGroups" :key="group.id" class="right-description">
-                                {{ index + 1 }}. {{ group.settings.name }}
+                            <template #item="{item: group, index}">
+                                <STListItem class="right-description">
+                                    {{ index + 1 }}. {{ group.settings.name }}
 
-                                <template #right>
-                                    <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
-                                    <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
-                                    <span class="button icon drag gray" @click.stop @contextmenu.stop />
-                                </template>
-                            </STListItem>
+                                    <template #right>
+                                        <span>{{ getGroupAutoAssignCountForPriority(group) }}</span>
+                                        <button class="button icon external" type="button" @click="openPriorityAssignedToGroup(group)" />
+                                        <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                                    </template>
+                                </STListItem>
+                            </template>
                         </STList>
 
                         <template #right>
@@ -265,12 +267,14 @@ const membersWithoutMatchingGroups = computed(() => {
      * Groups for which we need to set a priority, because some members fit in more than one of them
      */
 function calculateMultipleGroups(groups: Group[]) {
+    const filteredGroups = groups.filter(g => g.type === GroupType.Membership);
     const multipleGroups = new Map<string, Group>();
+
     for (const member of props.importMemberResults) {
         if (member.registration.group !== null) {
             continue;
         }
-        const g = member.patchedDetails.getMatchingGroups(groups);
+        const g = member.patchedDetails.getMatchingGroups(filteredGroups);
         if (g.length > 1) {
             for (const gg of g) {
                 multipleGroups.set(gg.id, gg);
