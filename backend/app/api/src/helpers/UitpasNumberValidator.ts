@@ -29,6 +29,9 @@ function assertIsUitpasNumberSuccessfulResponse(
         || json.socialTariff === null
         || !('status' in json.socialTariff)
         || typeof json.socialTariff.status !== 'string'
+        || (json.socialTariff.status !== 'ACTIVE' && json.socialTariff.status !== 'EXPIRED' && json.socialTariff.status !== 'NONE')
+        || ('messages' in json && (!Array.isArray(json.messages) || !json.messages.every(
+            (message: unknown) => typeof message === 'object' && message !== null && 'text' in message && typeof message.text === 'string')))
     ) {
         console.error('Invalid response when retrieving pass by UiTPAS number:', json);
         throw new SimpleError({
