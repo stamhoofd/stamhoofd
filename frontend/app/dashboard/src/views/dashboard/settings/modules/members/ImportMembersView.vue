@@ -343,7 +343,7 @@ function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
 
     if (filteredColumns.length) {
         for (let row = range.s.r + 1; row <= range.e.r; row++) {
-            const importBase = new ImportMemberBase();
+            const importBase = new ImportMemberBase(row);
             let allEmpty = true;
             const errorStack: ImportError[] = [];
 
@@ -386,7 +386,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
         throw new Error('Missing ref in sheet');
     }
 
-    const stack = [...results];
+    const importMap = new Map(results.map(r => [r.row, r]));
 
     const range = XLSX.utils.decode_range(sheet['!ref']);
     const result = new ImportMembersResult();
@@ -394,10 +394,11 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
     for (let row = range.s.r + 1; row <= range.e.r; row++) {
         let allEmpty = true;
         const errorStack: ImportError[] = [];
-        const importMemberResult = stack.shift();
+        const importMemberResult = importMap.get(row);
         if (!importMemberResult) {
-            break;
+            continue;
         }
+        importMap.delete(row);
 
         for (const column of columns) {
             if (!column.selected) {
@@ -503,6 +504,7 @@ async function goNext() {
         else {
             // find equal members and possible equal members
             const results = await findExistingMembers(result.data);
+            
             const probablyEqualResults = results.filter(r => r.isProbablyEqual);
             if (probablyEqualResults.length) {
                 show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
