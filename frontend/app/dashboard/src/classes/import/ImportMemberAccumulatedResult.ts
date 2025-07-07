@@ -1,5 +1,5 @@
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { Group, MemberDetails, Organization, PaymentMethod } from '@stamhoofd/structures';
+import { Group, MemberDetails, Organization, PaymentMethod, RecordAnswer } from '@stamhoofd/structures';
 
 // todo: rename?
 export class ImportMemberAccumulatedResult {
@@ -23,4 +23,5 @@ export class ImportingRegistration {
     priceName: string | null = null;
     paymentMethod: PaymentMethod | null = null;
     date: Date | null = null;
+    recordAnswers = new Map<string, RecordAnswer>();
 }

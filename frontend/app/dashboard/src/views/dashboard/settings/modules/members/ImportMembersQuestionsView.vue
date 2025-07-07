@@ -166,9 +166,10 @@
 </template>
 
 <script lang="ts" setup>
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Dropdown, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemCartItem, BalanceItemType, getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
 import { ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
@@ -465,7 +466,7 @@ function openResultView() {
                     }
                 }
             }
-            else {
+            else if (member.isExisting) {
                 description.push('Geen wijziging aan inschrijvingen');
             }
 
@@ -642,6 +643,7 @@ function createCheckout(importMemberResults: ImportMemberResult[]): RegisterChec
                 organization,
                 customStartDate: regsitrationData?.customStartDate,
                 groupPrice: regsitrationData?.groupPrice ?? undefined,
+                recordAnswers: importResult.registration.recordAnswers.size ? importResult.registration.recordAnswers : undefined,
             });
 
             for (const registration of registrationsToRemove) {
@@ -825,6 +827,12 @@ function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) 
 
 async function saveMembers(importMemberResults: ImportMemberResult[]) {
     const allPlatformMembers = importMemberResults.map(m => m.getPatchedPlatformMember(platform.value));
+    if (importMemberResults.find(m => !m.isExisting && m.registration.group === null)) {
+        throw new SimpleError({
+            code: 'no_group',
+            message: 'Er is een nieuw lid zonder groep.',
+        });
+    }
     await platformFamilyManager.save(allPlatformMembers, true);
 
     // the backend will add users to the member -> the new members should be regrouped in families

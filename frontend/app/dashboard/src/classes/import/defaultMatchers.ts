@@ -1,4 +1,4 @@
-import { Address, Group, Organization, Platform, RecordCategory, RecordType } from '@stamhoofd/structures';
+import { Address, Group, Organization, Platform, RecordAddressAnswer, RecordCategory, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';
 import { ColumnMatcherHelper } from './ColumnMatcherHelper';
 import { DateColumnMatcher } from './DateColumnMatcher';
@@ -182,6 +182,50 @@ export const getAllMatchers = (platform: Platform, organization: Organization, g
                         required: false,
                         save(value: Date, importResult: ImportMemberResult) {
                             ColumnMatcherHelper.patchRecordDateAnswer(importResult, value, record);
+                        },
+                    }));
+                    break;
+                }
+            }
+        }
+    }
+
+    // todo: update groups
+    for (const category of getGroups().flatMap(g => g.settings.recordCategories)) {
+        for (const record of category.getAllRecords()) {
+            switch (record.type) {
+                case RecordType.Textarea:
+                case RecordType.Phone:
+                case RecordType.Email:
+                case RecordType.Text: {
+                    matchers.push(new TextColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(value: string, importResult: ImportMemberResult) {
+                            importResult.registration.recordAnswers.set(record.id, RecordTextAnswer.create({ settings: record, value }));
+                        },
+                    }));
+                    break;
+                }
+                case RecordType.Address: {
+                    matchers.push(new AddressColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(address: Address, importResult: ImportMemberResult) {
+                            importResult.registration.recordAnswers.set(record.id, RecordAddressAnswer.create({ settings: record, address }));
+                        },
+                    }));
+                    break;
+                }
+                case RecordType.Date: {
+                    matchers.push(new DateColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(dateValue: Date, importResult: ImportMemberResult) {
+                            importResult.registration.recordAnswers.set(record.id, RecordDateAnswer.create({ settings: record, dateValue }));
                         },
                     }));
                     break;
