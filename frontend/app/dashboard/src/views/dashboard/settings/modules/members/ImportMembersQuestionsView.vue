@@ -509,7 +509,6 @@ function openResultView() {
                 }
 
                 for (const answer of member.getChangedRecordAnswers()) {
-                    console.error(answer);
                     description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue);
                 }
             }
@@ -597,7 +596,7 @@ function hasNewRegistration(member: ImportMemberResult) {
 
     // Check if we are already registered for this group
     if (member.existingMember) {
-        const periodId = props.period.id;
+        const periodId = props.period.period.id;
         const existing = member.existingMember.filterRegistrations({ groups: [group], periodId });
 
         if (existing.length && isWaitingList.value) {
@@ -760,7 +759,7 @@ function getOverrideRegistrations(registration: RegistrationData, member: Import
 
     // TODO: delete more conflicting registrations (based on categories too!)
     const group = registration.group;
-    const periodId = props.period.id;
+    const periodId = props.period.period.id;
 
     // todo: is this correct?
     const parents = group.getParentCategories(props.period.availableCategories, false);
