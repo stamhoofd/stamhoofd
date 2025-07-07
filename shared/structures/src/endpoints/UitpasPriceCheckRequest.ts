@@ -7,7 +7,7 @@ export class UitpasPriceCheckRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     uitpasEventId: string;
 
-    @field({ decoder: StringDecoder })
+    @field({ decoder: StringDecoder, nullable: true })
     uitpasNumber: string;
 }
 
