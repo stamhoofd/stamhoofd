@@ -649,12 +649,12 @@ function createCheckout(importMemberResults: ImportMemberResult[]): RegisterChec
                 checkout.removeRegistration(new RegistrationWithPlatformMember({ registration, member }), { calculate: false });
             }
 
-            checkout.addBalanceItem(BalanceItemCartItem.create({
-                item: BalanceItem.create({
-                    type: BalanceItemType.Registration,
-                }),
-                price: 0,
-            }), { calculate: false });
+            // checkout.addBalanceItem(BalanceItemCartItem.create({
+            //     item: BalanceItem.create({
+            //         type: BalanceItemType.Registration,
+            //     }),
+            //     price: 0,
+            // }), { calculate: false });
             checkout.add(item, { calculate: false });
         }
     }
