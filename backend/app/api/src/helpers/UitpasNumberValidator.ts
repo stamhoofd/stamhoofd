@@ -42,22 +42,16 @@ function assertIsUitpasNumberSuccessfulResponse(
     }
 }
 
-function assertIsUitpasNumberErrorResponse(
+function isUitpasNumberErrorResponse(
     json: unknown,
-): asserts json is UitpasNumberErrorResponse {
-    if (
-        typeof json !== 'object'
-        || json === null
-        || !('title' in json)
-        || typeof json.title !== 'string'
-        || ('endUserMessage' in json && (typeof json.endUserMessage !== 'object' || json.endUserMessage === null || !('nl' in json.endUserMessage) || typeof json.endUserMessage.nl !== 'string'))
-    ) {
-        throw new SimpleError({
-            code: 'unsuccessful_and_unexpected_response_retrieving_pass_by_uitpas_number',
-            message: `Unsuccesful response without message when retrieving pass by UiTPAS number`,
-            human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
-        });
-    }
+): json is UitpasNumberErrorResponse {
+    return typeof json === 'object'
+        && json !== null
+        && 'title' in json
+        && typeof json.title === 'string'
+        && (!('endUserMessage' in json)
+            || (typeof json.endUserMessage === 'object' && json.endUserMessage !== null && 'nl' in json.endUserMessage && typeof json.endUserMessage.nl === 'string')
+        );
 }
 
 export class UitpasNumberValidatorStatic {
@@ -104,11 +98,9 @@ export class UitpasNumberValidatorStatic {
                 console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber}:`, response.statusText);
             }
 
-            try {
-                assertIsUitpasNumberErrorResponse(json);
+            if (isUitpasNumberErrorResponse(json)) {
                 endUserMessage = json.endUserMessage ? json.endUserMessage.nl : '';
             }
-            catch { /* ignore */ }
 
             if (endUserMessage) {
                 throw new SimpleError({
