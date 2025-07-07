@@ -101,7 +101,7 @@
 <script lang="ts" setup>
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, STErrorsDefault, STInputBox, useErrors, useMembersObjectFetcher, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, STErrorsDefault, STInputBox, useErrors, useMembersObjectFetcher, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed, Ref, ref } from 'vue';
 import XLSX from 'xlsx';
@@ -128,8 +128,9 @@ const columns = ref<MatchedColumn[]>([]);
 const sheets = ref<Record<string, XLSX.WorkSheet>>({});
 const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
+const platform = usePlatform();
 const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
-const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(organization.value, () => period.value.groups));
+const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(platform.value, organization.value, () => period.value.groups));
 
 const show = useShow();
 
@@ -208,7 +209,6 @@ function changedFile(event: any) {
             return;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array', raw: true });
 

@@ -1,4 +1,4 @@
-import { Address, Group, Organization, RecordType } from '@stamhoofd/structures';
+import { Address, Group, Organization, Platform, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';
 import { ColumnMatcherHelper } from './ColumnMatcherHelper';
 import { DateColumnMatcher } from './DateColumnMatcher';
@@ -126,7 +126,7 @@ export const paymentMatchers = [
     new PaymentPriceColumnMatcher(),
 ];
 
-export const getAllMatchers = (organization: Organization, getGroups: () => Group[]) => {
+export const getAllMatchers = (platform: Platform, organization: Organization, getGroups: () => Group[]) => {
     let matchers = [
         ...getMemberMatchers(getGroups),
         ...paymentMatchers,
@@ -140,7 +140,14 @@ export const getAllMatchers = (organization: Organization, getGroups: () => Grou
         matchers = matchers.filter(m => m.category !== MemberDetailsMatcherCategory.Parent1 as string && m.category !== MemberDetailsMatcherCategory.Parent2 as string);
     }
 
-    for (const category of recordsConfiguration.recordCategories) {
+    const recordCategories = [
+        ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
+        ...platform.config.recordsConfiguration.recordCategories,
+    ];
+
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+
+    for (const category of flattenedCategories) {
         for (const record of category.getAllRecords()) {
             switch (record.type) {
                 case RecordType.Textarea:
