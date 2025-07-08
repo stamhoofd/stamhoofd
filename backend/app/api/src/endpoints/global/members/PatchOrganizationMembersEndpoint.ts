@@ -101,7 +101,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // We risk creating a new member without being able to access it manually afterwards
             // Cache access to this member temporarily in memory
-            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Write);
+            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
 
             if (STAMHOOFD.userMode !== 'platform' && !member.organizationId) {
                 throw new SimpleError({
@@ -925,7 +925,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             console.log('checkSecurityCode: security code is correct - for ' + member.id);
 
             // Grant temporary access to this member without needing to enter the security code again
-            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Write);
+            await Context.auth.temporarilyGrantMemberAccess(member, PermissionLevel.Full);
 
             const log = new AuditLog();
 
