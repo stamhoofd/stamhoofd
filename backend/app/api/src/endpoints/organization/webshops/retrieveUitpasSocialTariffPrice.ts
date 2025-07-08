@@ -39,7 +39,7 @@ export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Bod
             throw new SimpleError({
                 code: 'not_implemented',
                 message: 'Official flow not yet implemented',
-                human: $t(`De officiële flow voor het valideren van een UiTPAS-nummer wordt nog niet ondersteund.`),
+                human: 'De officiële flow voor het valideren van een UiTPAS-nummer wordt nog niet ondersteund.',
             });
         }
         else {
