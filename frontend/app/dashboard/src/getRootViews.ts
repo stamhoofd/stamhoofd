@@ -125,29 +125,31 @@ export function getLoginRoot() {
         });
     }
 
-    return new ComponentWithProperties(CoverImageContainer, {
+    const base = new ComponentWithProperties(CoverImageContainer, {
         root: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(LoginView, {
                 initialEmail: UrlHelper.shared.getSearchParams().get('email') ?? '',
             }),
         }),
     });
+
+    return base;
 }
 
 export function getNonAutoLoginRoot(reactiveSession: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     // In platform mode, we always redirect to the 'auto' login view, so that we redirect the user to the appropriate environment after signin in
-    if (STAMHOOFD.userMode === 'platform') {
-        return new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                // Replace itself again after a successful login
-                const root = await getScopedAutoRoot(reactiveSession, options);
-                await ReplaceRootEventBus.sendEvent('replace', root);
-                return new ComponentWithProperties({}, {});
-            },
-        });
-    }
+    // if (STAMHOOFD.userMode === 'platform') {
+    return new ComponentWithProperties(PromiseView, {
+        promise: async () => {
+            // Replace itself again after a successful login
+            const root = await getScopedAutoRoot(reactiveSession, options);
+            await ReplaceRootEventBus.sendEvent('replace', root);
+            return new ComponentWithProperties({}, {});
+        },
+    });
+    // }
 
-    return getLoginRoot();
+    // return getLoginRoot();
 }
 
 export async function getOrganizationSelectionRoot(session: SessionContext) {
@@ -204,6 +206,10 @@ export async function getScopedAutoRootFromUrl() {
 
 export async function getScopedAutoRoot(session: SessionContext, options: { initialPresents?: PushOptions[] } = {}) {
     if (!session.user) {
+        if (!session.organization && STAMHOOFD.userMode === 'organization') {
+            return getOrganizationSelectionRoot(session);
+        }
+
         // We can't really determine the automatic root view because we are not signed in
         // So return the login view, that will call getScopedAutoRoot again after login
         const reactiveSession = session;

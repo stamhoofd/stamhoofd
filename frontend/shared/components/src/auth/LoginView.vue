@@ -5,7 +5,12 @@
         <main class="center small flex">
             <div class="st-view-vertical-center">
                 <div class="container">
-                    <h1>{{ $t('d54c9b23-2d3c-49cd-b1fc-7e821d36fd41') }}</h1>
+                    <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
+                        {{ $t('Inloggen bij {organization}', {organization: $context.organization.name}) }}
+                    </h1>
+                    <h1 v-else>
+                        {{ $t('d54c9b23-2d3c-49cd-b1fc-7e821d36fd41') }}
+                    </h1>
 
                     <STErrorsDefault :error-box="errors.errorBox" />
 

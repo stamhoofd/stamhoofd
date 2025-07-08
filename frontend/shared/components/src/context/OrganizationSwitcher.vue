@@ -1,6 +1,6 @@
 <template>
-    <PlatformLogo v-if="app === 'auto' || (app === 'registration' && !canSwitch && !organization)" />
-    <OrganizationLogo v-else-if="app === 'registration' && organization && !canSwitch" :organization="organization" />
+    <PlatformLogo v-if="!organization && (app === 'auto' || (app === 'registration' && !canSwitch))" />
+    <OrganizationLogo v-else-if="(app === 'registration' && organization) || !canSwitch" :organization="organization" />
     <button v-else v-long-press="($event) => open($event)" class="organization-switcher" :class="{small}" type="button" @click="open" @contextmenu.prevent="open($event)">
         <ContextLogo :organization="organization" :app="app" />
         <div>
@@ -35,7 +35,8 @@ const { getAppTitle, getAppDescription } = useAppData();
 const { getDefaultOptions } = useContextOptions();
 
 const options = getDefaultOptions();
-const canSwitch = options.length > 1;
+const hasAdmin = options.some(o => o.app === 'admin');
+const canSwitch = options.length > 1 || ((STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization);
 
 withDefaults(
     defineProps<{
@@ -47,7 +48,7 @@ withDefaults(
 );
 
 const open = async (event: MouseEvent) => {
-    if (app === 'auto') {
+    if (!canSwitch) {
         return;
     }
 
@@ -64,6 +65,9 @@ const open = async (event: MouseEvent) => {
     }, { padding: 25 });
 };
 
+function computed(arg0: () => any) {
+    throw new Error('Function not implemented.');
+}
 </script>
 
 <style lang="scss">
