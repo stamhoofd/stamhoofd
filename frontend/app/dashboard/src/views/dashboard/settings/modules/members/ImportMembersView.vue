@@ -102,10 +102,12 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, STErrorsDefault, STInputBox, useErrors, useMembersObjectFetcher, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
-import { LimitedFilteredRequest, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { computed, Ref, ref } from 'vue';
+import { Address, LimitedFilteredRequest, OrganizationRegistrationPeriod, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import { computed, Ref, ref, watch } from 'vue';
 import XLSX from 'xlsx';
+import { AddressColumnMatcher } from '../../../../../classes/import/AddressColumnMatcher';
 import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
+import { DateColumnMatcher } from '../../../../../classes/import/DateColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
 import { ExistingMemberResult, ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
 import { ImportError } from '../../../../../classes/import/ImportError';
@@ -113,6 +115,7 @@ import { ImportMemberBase } from '../../../../../classes/import/ImportMemberBase
 import { ImportMembersBaseResult, ImportMembersResult } from '../../../../../classes/import/ImportResult';
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
 import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';
+import { TextColumnMatcher } from '../../../../../classes/import/TextColumnMatcher';
 import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
@@ -130,7 +133,69 @@ const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
 const platform = usePlatform();
 const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
-const matchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(platform.value, organization.value, () => period.value.groups));
+const baseMatchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(platform.value, organization.value, () => period.value.groups));
+
+const groupSpecificMatchers = computed(() => {
+    const result: ColumnMatcher[] = [];
+    const groups = period.value.groups;
+
+    for (const category of groups.flatMap(g => g.settings.recordCategories)) {
+        for (const record of category.getAllRecords()) {
+            switch (record.type) {
+                case RecordType.Textarea:
+                case RecordType.Phone:
+                case RecordType.Email:
+                case RecordType.Text: {
+                    result.push(new TextColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(value: string, importResult: ImportMemberResult) {
+                            importResult.registration.recordAnswers.set(record.id, RecordTextAnswer.create({ settings: record, value }));
+                        },
+                    }));
+                    break;
+                }
+                case RecordType.Address: {
+                    result.push(new AddressColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(address: Address, importResult: ImportMemberResult) {
+                            importResult.registration.recordAnswers.set(record.id, RecordAddressAnswer.create({ settings: record, address }));
+                        },
+                    }));
+                    break;
+                }
+                case RecordType.Date: {
+                    result.push(new DateColumnMatcher({
+                        name: record.name.toString(),
+                        category: category.name.toString(),
+                        required: false,
+                        save(dateValue: Date, importResult: ImportMemberResult) {
+                            importResult.registration.recordAnswers.set(record.id, RecordDateAnswer.create({ settings: record, dateValue }));
+                        },
+                    }));
+                    break;
+                }
+            }
+        }
+    }
+
+    return result;
+});
+
+watch(groupSpecificMatchers, (_newMatchers, oldMatchers) => {
+    // clear group specific matcher if not available anymore
+    for (const column of columns.value) {
+        if (oldMatchers.find(m => m.id === column.matcher?.id)) {
+            column.matcher = null;
+            column.selected = false;
+        }
+    }
+});
+
+const allMatchers = computed(() => [...baseMatchers.value, ...groupSpecificMatchers.value]);
 
 const show = useShow();
 
@@ -177,7 +242,7 @@ const hasMembers = computed(() => {
 
 const matcherCategories = computed(() => {
     const arr: Partial<Record<MemberDetailsMatcherCategory, { name: string; matchers: ColumnMatcher[] }>> = {};
-    for (const matcher of matchers.value) {
+    for (const matcher of allMatchers.value) {
         const cat = matcher.category.toLowerCase();
         if (arr[cat]) {
             arr[cat].matchers.push(matcher);
@@ -242,7 +307,7 @@ function readColumns(previousColumns: MatchedColumn[]): MatchedColumn[] {
     const columns: MatchedColumn[] = [];
     let skipAuto = previousColumns.length > 0;
 
-    const availableMatchers = matchers.value.slice();
+    const availableMatchers = allMatchers.value.slice();
 
     // Read all the names + some examples and try to match them to columns
     for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
@@ -251,7 +316,7 @@ function readColumns(previousColumns: MatchedColumn[]): MatchedColumn[] {
             continue;
         }
         const columnName = (cell.w ?? cell.v ?? '') + '';
-        const matched = new MatchedColumn(colNum, columnName, matchers.value);
+        const matched = new MatchedColumn(colNum, columnName, allMatchers.value);
 
         for (let row = range.s.r + 1; row <= range.e.r && row < 10; row++) {
             const valueCell = sheet.value[XLSX.utils.encode_cell({ r: row, c: colNum })];
@@ -296,7 +361,7 @@ function setColumnSelected(column: MatchedColumn, value: boolean) {
 
     if (value && column.matcher === null) {
         // Find best matching by default
-        for (const matcher of matchers.value) {
+        for (const matcher of allMatchers.value) {
             // Not yet used
             if (columns.value.find(c => c.matcher?.id === matcher.id)) {
                 continue;
@@ -504,7 +569,7 @@ async function goNext() {
         else {
             // find equal members and possible equal members
             const results = await findExistingMembers(result.data);
-            
+
             const probablyEqualResults = results.filter(r => r.isProbablyEqual);
             if (probablyEqualResults.length) {
                 show(new ComponentWithProperties(ImportVerifyProbablyEqualView, {
