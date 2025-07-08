@@ -13,7 +13,6 @@ async function fileExists(file) {
     return false;
 }
 
-const translatorType = 'OpenAi';
 const namespaces = ['stamhoofd', 'digit', 'keeo', 'jamboree'];
 
 for (const namespace of namespaces) {
