@@ -32,6 +32,7 @@ import { Product, ProductPrice } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import ProductPriceBox from './ProductPriceBox.vue';
+import { useDeleteProductPrice } from '@stamhoofd/components/src/context/hooks/useDeleteProductPrice';
 
 const props = defineProps<{
     productPrice: ProductPrice;
@@ -59,11 +60,10 @@ function save() {
 }
 
 async function deleteMe() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je deze prijskeuze wilt verwijderen?', 'Verwijderen')) {
+    const p = await useDeleteProductPrice(props.product, props.productPrice);
+    if (!p) {
         return;
     }
-    const p = Product.patch({});
-    p.prices.addDelete(props.productPrice.id);
     props.saveHandler(p);
     pop({ force: true })?.catch(console.error);
 }
