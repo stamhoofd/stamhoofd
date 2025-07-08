@@ -821,10 +821,6 @@ async function importResults(importMemberResults: ImportMemberResult[]) {
     }
 
     await importMembers(importMemberResults);
-
-    // the backend will add users to the member -> the new members should be regrouped in families
-    regroupNewMembersInFamilies(importMemberResults);
-
     await importRegistrations(importMemberResults);
     await importPayments(importMemberResults);
 }
@@ -845,6 +841,9 @@ async function importMembers(importMemberResults: ImportMemberResult[]) {
     }
 
     await platformFamilyManager.save(allPlatformMembers, true);
+    // the backend will add users to the member -> the new members should be regrouped in families
+    regroupNewMembersInFamilies(importMemberResults);
+
     registerCallbacksAfterSave.forEach(callback => callback());
 }
 
