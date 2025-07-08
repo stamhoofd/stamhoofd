@@ -68,9 +68,9 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="!isSingle || useUitpasSocialTariff /* useUitpasSocialTariff=true, should not be possible */" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
+            <STListItem v-if="!isSingle || enableUitpasSocialTariff /* useUitpasSocialTariff=true, should not be possible */" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
                 <template #left>
-                    <Checkbox v-model="useUitpasSocialTariff" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0" />
+                    <Checkbox v-model="enableUitpasSocialTariff" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0" />
                 </template>
 
                 <h3 class="style-title-list">
@@ -217,7 +217,7 @@ const uitpasBaseProductPriceId = computed({
     },
 });
 
-const useUitpasSocialTariff = computed({
+const enableUitpasSocialTariff = computed({
     get: () => uitpasBaseProductPriceId.value !== null,
     set: (isUitpasSocialTariff: boolean) => {
         if (!isUitpasSocialTariff) {
