@@ -84,7 +84,7 @@
                 <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('Basisprijs')" :description="$t('Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.')">
                     <Dropdown v-model="uitpasBaseProductPriceId">
                         <option v-for="item in productPricesAvailableForUitpasBaseProductPrice" :key="item.id" :value="item.id">
-                            {{ item.name ? item.name + ' (' + (item.price / 100).toString() + ' euro)' : (item.price / 100).toString() + ' euro' }}
+                            {{ item.name ? item.name + ' (' + formatPrice(item.price) + ')' : formatPrice(item.price) }}
                         </option>
                     </Dropdown>
 
