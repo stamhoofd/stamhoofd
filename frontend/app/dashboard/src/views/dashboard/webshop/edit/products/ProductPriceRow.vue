@@ -27,10 +27,11 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 
 import EditProductPriceView from './EditProductPriceView.vue';
+import { useDeleteProductPrice } from '@stamhoofd/components/src/context/hooks/useDeleteProductPrice';
 
 const props = defineProps<{ productPrice: ProductPrice; product: Product }>();
 
@@ -55,11 +56,10 @@ function moveDown() {
 }
 
 async function doDelete() {
-    if (!(await CenteredMessage.confirm('Deze prijs verwijderen?', 'Verwijderen'))) {
+    const p = await useDeleteProductPrice(props.product, props.productPrice);
+    if (!p) {
         return;
     }
-    const p = Product.patch({ id: props.product.id });
-    p.prices.addDelete(props.productPrice.id);
     emits('patch', p);
 }
 
