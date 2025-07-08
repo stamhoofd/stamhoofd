@@ -159,6 +159,9 @@ export class CartItem extends AutoEncoder {
             if (optionMenu.multipleChoice) {
                 continue;
             }
+            if (!optionMenu.autoSelectFirst) {
+                continue;
+            }
 
             let cartItemOption: CartItemOption | null = null;
 
@@ -207,6 +210,10 @@ export class CartItem extends AutoEncoder {
         // Fill in all default options here
         for (const optionMenu of c.product.optionMenus) {
             if (optionMenu.multipleChoice) {
+                continue;
+            }
+
+            if (!optionMenu.autoSelectFirst) {
                 continue;
             }
 
@@ -559,10 +566,9 @@ export class CartItem extends AutoEncoder {
             const remainingMenus = this.product.optionMenus.slice();
 
             for (const o of this.options) {
-                let index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
+                const index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
                 if (index === -1) {
                     // Check if it has a multiple choice one
-                    index = this.product.optionMenus.findIndex(m => m.id === o.optionMenu.id);
                     errors.addError(new SimpleError({
                         code: 'option_menu_unavailable',
                         message: 'Option menu unavailable',
@@ -594,13 +600,17 @@ export class CartItem extends AutoEncoder {
             }
 
             if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
-                errors.addError(
-                    new SimpleError({
-                        code: 'missing_menu',
-                        message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                        human: $t(`362767ca-4cfb-4ecd-a8d7-7831c40f39df`, { product: this.product.name }),
-                    }),
-                );
+                for (const remaining of remainingMenus) {
+                    errors.addError(
+                        new SimpleError({
+                            code: 'missing_menu',
+                            message: 'Missing menu',
+                            human: $t(`Maak een keuze voor '{option_menu_name}'`, { option_menu_name: remaining.name }),
+                            field: 'optionMenus.' + remaining.id,
+                            meta: { recoverable: true },
+                        }),
+                    );
+                }
             }
         }
 

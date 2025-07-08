@@ -12,12 +12,31 @@
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`7d80640e-7ecc-40b0-86df-4f375d9fd300`)">
         </STInputBox>
 
-        <Checkbox v-model="multipleChoice">
-            {{ $t('d95331fe-56b0-4423-b485-5f600b6ab49c') }}
-        </Checkbox>
-        <p class="style-description">
-            {{ $t("ad0d3d8a-67b1-4eb1-bce3-159acfecbaa0") }}
-        </p>
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="multipleChoice" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('d95331fe-56b0-4423-b485-5f600b6ab49c') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t("ad0d3d8a-67b1-4eb1-bce3-159acfecbaa0") }}
+                </p>
+            </STListItem>
+
+            <STListItem v-if="!multipleChoice" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="autoSelectFirst" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Selecteer standaard alvast de eerste optie') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t("In sommige situaties wil je toch dat er manueel een keuze moet worden gemaakt om te verhinderen dat bestellers per ongeluk doorklikken zonder alles goed nagekeken te hebben. We raden aan om dit enkel uit te schakelen als je veel of lange keuzemenu's hebt.") }}
+                </p>
+            </STListItem>
+        </STList>
 
         <hr><h2 class="style-with-button">
             <div>{{ $t('6c90965a-8334-43e6-8494-031e2932bc45') }}</div>
@@ -87,6 +106,13 @@ const multipleChoice = computed({
     get: () => patchedOptionMenu.value.multipleChoice,
     set: (multipleChoice: boolean) => {
         addOptionMenuPatch(OptionMenu.patch({ multipleChoice }));
+    },
+});
+
+const autoSelectFirst = computed({
+    get: () => patchedOptionMenu.value.autoSelectFirst,
+    set: (autoSelectFirst: boolean) => {
+        addOptionMenuPatch(OptionMenu.patch({ autoSelectFirst }));
     },
 });
 

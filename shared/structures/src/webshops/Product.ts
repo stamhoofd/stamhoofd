@@ -111,6 +111,12 @@ export class OptionMenu extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     multipleChoice = false;
 
+    /**
+     * By default, we select the first option if multipleChoise is false.
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    autoSelectFirst = true;
+
     @field({ decoder: new ArrayDecoder(Option) })
     options: Option[] = [
         Option.create({}),

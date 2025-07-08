@@ -1,7 +1,7 @@
 <template>
     <STListItem v-long-press="(e: MouseEvent) => showContextMenu(e)" :selectable="true" class="right-description right-stack" @click="editOption()" @contextmenu.prevent="showContextMenu">
         <template #left>
-            <Radio v-if="!optionMenu.multipleChoice" v-model="isFirst" :value="true" :disabled="true" />
+            <Radio v-if="!optionMenu.multipleChoice" :model-value="isFirst && optionMenu.autoSelectFirst" :value="true" :disabled="true" />
             <Checkbox v-else :disabled="true" />
         </template>
 

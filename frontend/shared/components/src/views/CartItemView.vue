@@ -96,7 +96,7 @@
                 </STList>
             </div>
 
-            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop" />
+            <OptionMenuBox v-for="optionMenu in cartItem.product.optionMenus" :key="optionMenu.id" :error-box="errors.errorBox" :cart-item="cartItem" :option-menu="optionMenu" :cart="cart" :old-item="oldItem" :admin="admin" :webshop="webshop" />
 
             <FieldBox v-for="field in cartItem.product.customFields" :key="field.id" :field="field" :answers="cartItem.fieldAnswers" :error-box="errors.errorBox" />
 
@@ -181,7 +181,6 @@ const cart = computed(() => props.checkout.cart);
 
 onMounted(() => {
     onChangeItem();
-    console.log('Cartview', this, props.cartItem);
 });
 
 // External changes should trigger a price update
