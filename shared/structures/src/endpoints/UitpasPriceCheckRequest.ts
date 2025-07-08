@@ -2,7 +2,14 @@ import { AutoEncoder, StringDecoder, field, IntegerDecoder } from '@simonbackx/s
 
 export class UitpasPriceCheckRequest extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
-    price: number;
+    basePrice: number;
+
+    /**
+     * The reduced price in the non-official flow is an estimate, the response will have the effective price for this UiTPAS number
+     * The reduced price can thus only be null when doing a static check (using uitpasEventId and without UiTPAS number) (e.g. when configuring the webshop)
+     */
+    @field({ decoder: IntegerDecoder, nullable: true })
+    reducedPrice: number;
 
     @field({ decoder: StringDecoder, nullable: true })
     uitpasEventId: string;
