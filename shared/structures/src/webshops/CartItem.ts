@@ -131,6 +131,13 @@ export class CartItem extends AutoEncoder {
     calculatedPrices: CartItemPrice[] = [];
 
     /**
+     * In case this product is a UiTPAS social tarrif, we hold a list of UiTPAS numbers (length is equal to amount).
+     * In case this is not a UiTPAS social tarrif, this will be an empty array.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    uitpasNumbers: string[] = [];
+
+    /**
      * Show an error in the cart for recovery
      */
     cartError: SimpleError | SimpleErrors | null = null;
