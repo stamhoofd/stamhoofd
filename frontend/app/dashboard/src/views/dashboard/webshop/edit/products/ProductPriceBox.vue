@@ -81,7 +81,7 @@
                     {{ props.product.prices.some(p => p.uitpasBaseProductPriceId === props.productPrice.id) ? $t('Deze prijs is reeds een basisprijs voor een ander UiTPAS kansentarief') : $t('Een UiTPAS kansentarief, heeft een basisprijs nodig.') }}
                 </p>
 
-                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('Basisprijs')" :description="$t('Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.')">
+                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('Basisprijs')">
                     <Dropdown v-model="uitpasBaseProductPriceId">
                         <option v-for="item in productPricesAvailableForUitpasBaseProductPrice" :key="item.id" :value="item.id">
                             {{ item.name ? item.name + ' (' + formatPrice(item.price) + ')' : formatPrice(item.price) }}
