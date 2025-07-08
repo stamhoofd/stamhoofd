@@ -105,7 +105,17 @@ function runReplacements(json) {
             if (typeof value !== 'string') {
                 return value;
             }
-            for (const r of Object.keys(replacements)) {
+            const keys = Object.keys(replacements);
+
+            // Sort keys from longest to shortest, then from caps to no caps, then alphabetically
+            keys.sort((a, b) => {
+                if (a.length !== b.length) {
+                    return b.length - a.length; // longer keys first
+                }
+                return a.localeCompare(b, undefined, { caseFirst: 'upper' }); // alphabetically
+            });
+
+            for (const r of keys) {
                 value = value.replaceAll(new RegExp(`${r}+(?![^{]*})`, 'g'), replacements[r]);
             }
 
