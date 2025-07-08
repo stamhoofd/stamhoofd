@@ -8,7 +8,7 @@ export async function useDeleteProductPrice(product: Product, productPrice: Prod
         Toast.error($t('Deze prijs kan niet verwijderd worden omdat deze gebruikt wordt als basisprijs voor een UiTPAS kansentarief.')).show();
         return;
     }
-    const confirmed = await CenteredMessage.confirm('Deze prijs verwijderen?', 'Verwijderen');
+    const confirmed = await CenteredMessage.confirm($t('Deze prijs verwijderen?'), $t('Verwijderen'));
     if (!confirmed) return;
 
     const patch = Product.patch({ id: product.id });
