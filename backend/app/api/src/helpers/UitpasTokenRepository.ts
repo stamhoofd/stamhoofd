@@ -1,5 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasClientCredential } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 
 type UitpasTokenResponse = {
     access_token: string;
@@ -39,18 +40,7 @@ export class UitpasTokenRepository {
      */
     static knownTokens: Map<string | null, UitpasTokenRepository> = new Map();
 
-    /**
-     * Get the access token for the organization or platform.
-     * @param organizationId the organization ID for which to get the access token. If null, it means the platform.
-     * @param forceRefresh if true, the access token will be refreshed even if a previously stored token it is still valid
-     * @returns Promise<string> the access token for the organization or platform
-     * @throws SimpleError if the token cannot be obtained or the API is not configured
-     */
-    static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<string> {
-        const repo = UitpasTokenRepository.knownTokens.get(organizationId);
-        if (repo) {
-            return repo.getAccessToken(forceRefresh);
-        }
+    private static async createRepoFromDb(organizationId: string | null): Promise<UitpasTokenRepository> {
         // query db
         let uitpasClientCredential = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
         if (!uitpasClientCredential) {
@@ -78,13 +68,10 @@ export class UitpasTokenRepository {
         }
         const newRepo = new UitpasTokenRepository(uitpasClientCredential);
         this.knownTokens.set(organizationId, newRepo);
-        return newRepo.getAccessToken(true);
+        return newRepo;
     }
 
-    private async getAccessToken(forceRefresh: boolean = false): Promise<string> {
-        if (this.accessToken && !forceRefresh && this.expiresOn > new Date()) {
-            return this.accessToken;
-        }
+    private async getNewAccessToken(): Promise<string> {
         const url = 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token';
         const myHeaders = new Headers();
         myHeaders.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -126,5 +113,34 @@ export class UitpasTokenRepository {
         this.accessToken = json.access_token;
         this.expiresOn = new Date((Date.now() + json.expires_in * 1000) - 10000); // Set expiration 10 seconds earlier to be safe
         return this.accessToken;
+    }
+
+    /**
+     * Get the access token for the organization or platform.
+     * @param organizationId the organization ID for which to get the access token. If null, it means the platform.
+     * @param forceRefresh if true, the access token will be refreshed even if a previously stored token it is still valid
+     * @returns Promise<string> the access token for the organization or platform
+     * @throws SimpleError if the token cannot be obtained or the API is not configured
+     */
+    static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<string> {
+        let repo = UitpasTokenRepository.knownTokens.get(organizationId);
+        if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
+            return repo.accessToken;
+        }
+
+        // Prevent multiple concurrent requests for the same organization, asking for an access token to the UiTPAS API.
+        // The queue can only run one at a time for the same organizationId
+        return await QueueHandler.schedule('uitpas/token-' + (organizationId ?? 'platform'), async () => {
+            // we re-search for the repo, as another call to this funcion might have added while we we're waiting in the queue
+            repo = UitpasTokenRepository.knownTokens.get(organizationId);
+            if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
+                return repo.accessToken;
+            }
+            if (!repo) {
+                repo = await UitpasTokenRepository.createRepoFromDb(organizationId);
+            }
+            // ask for a new access token
+            return repo.getNewAccessToken(); ;
+        });
     }
 }
