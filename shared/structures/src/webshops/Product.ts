@@ -41,6 +41,14 @@ export class ProductPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 221 })
     usedStock = 0;
 
+    /**
+     * If this id is not null, this productPrice is the UiTPAS social tariff.
+     * In that case it refers to the base price on which the UiTPAS social tariff is applied.
+     * If it is null, this is not an UiTPAS social tariff.
+     */
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion, defaultValue: () => null })
+    uitpasBaseProductPrice: string | null;
+
     get isSoldOut(): boolean {
         if (this.stock === null) {
             return false;
