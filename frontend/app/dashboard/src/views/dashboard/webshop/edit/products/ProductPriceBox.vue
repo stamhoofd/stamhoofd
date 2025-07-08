@@ -78,7 +78,7 @@
                 </h3>
 
                 <p v-if="productPricesAvailableForUitpasBaseProductPrice.length === 0" class="style-description-small">
-                    {{ props.product.prices.some(p => p.uitpasBaseProductPrice === props.productPrice.id) ? $t('Deze prijs is reeds een basisprijs voor een ander UiTPAS kansentarief') : $t('Een UiTPAS kansentarief, heeft een basisprijs nodig.') }}
+                    {{ props.product.prices.some(p => p.uitpasBaseProductPriceId === props.productPrice.id) ? $t('Deze prijs is reeds een basisprijs voor een ander UiTPAS kansentarief') : $t('Een UiTPAS kansentarief, heeft een basisprijs nodig.') }}
                 </p>
 
                 <STInputBox v-if="uitpasBaseProductPriceId" error-fields="useUitpasSocialTariff" :error-box="errorBox" :title="$t('Basisprijs')" :description="$t('Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.')">
@@ -188,9 +188,9 @@ function addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
 const isSingle = computed(() => props.product.prices.length <= 1);
 
 const uitpasBaseProductPriceId = computed({
-    get: () => patchedProductPrice.value.uitpasBaseProductPrice,
+    get: () => patchedProductPrice.value.uitpasBaseProductPriceId,
     set: (value: string | null) => {
-        if (value === patchedProductPrice.value.uitpasBaseProductPrice) {
+        if (value === patchedProductPrice.value.uitpasBaseProductPriceId) {
             return;
         }
 
@@ -203,7 +203,7 @@ const uitpasBaseProductPriceId = computed({
         const basePriceName = props.product.prices.find(p => p.id === value)?.name;
         const suggestedPriceName = 'UiTPAS kansentarief' + (basePriceName ? ' ' + basePriceName : '');
         if (name.value) {
-            const oldBasePriceName = props.product.prices.find(p => p.id === patchedProductPrice.value.uitpasBaseProductPrice)?.name;
+            const oldBasePriceName = props.product.prices.find(p => p.id === patchedProductPrice.value.uitpasBaseProductPriceId)?.name;
             const oldSuggestedPriceName = 'UiTPAS kansentarief' + (oldBasePriceName ? ' ' + oldBasePriceName : '');
             if (name.value === oldSuggestedPriceName) {
                 name.value = suggestedPriceName;
@@ -213,7 +213,7 @@ const uitpasBaseProductPriceId = computed({
             name.value = suggestedPriceName;
         }
         */
-        addPricePatch(ProductPrice.patch({ uitpasBaseProductPrice: value }));
+        addPricePatch(ProductPrice.patch({ uitpasBaseProductPriceId: value }));
     },
 });
 
@@ -236,11 +236,11 @@ const useUitpasSocialTariff = computed({
 });
 
 const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
-    if (props.product.prices.some(p => p.uitpasBaseProductPrice === props.productPrice.id)) {
+    if (props.product.prices.some(p => p.uitpasBaseProductPriceId === props.productPrice.id)) {
         // This price is already a base price for another uitpas social tariff, so it cannot be a UiTPAS social tariff.
         return [];
     }
-    return props.product.prices.filter(p => (p.uitpasBaseProductPrice === null && p.id !== patchedProductPrice.value.id));
+    return props.product.prices.filter(p => (p.uitpasBaseProductPriceId === null && p.id !== patchedProductPrice.value.id));
 });
 
 </script>
