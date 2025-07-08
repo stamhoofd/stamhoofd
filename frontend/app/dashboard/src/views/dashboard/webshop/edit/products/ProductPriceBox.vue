@@ -64,13 +64,39 @@
                     </STInputBox>
                 </div>
             </STListItem>
+
+            <STListItem v-if="!isSingle || useUitpasSocialTariff /* useUitpasSocialTariff=true, should not be possible */" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
+                <template #left>
+                    <Checkbox v-model="useUitpasSocialTariff" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Verplicht het invullen van een UiTPAS-nummer met kansentarief') }}
+                </h3>
+
+                <p v-if="productPricesAvailableForUitpasBaseProductPrice.length === 0" class="style-description-small">
+                    {{ props.product.prices.some(p => p.uitpasBaseProductPrice === props.productPrice.id) ? $t('Deze prijs is reeds een basisprijs voor een ander UiTPAS kansentarief') : $t('Een UiTPAS kansentarief, heeft een basisprijs nodig.') }}
+                </p>
+
+                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="useUitpasSocialTariff" :error-box="errorBox" :title="$t('Basisprijs')" :description="$t('Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.')">
+                    <Dropdown v-model="uitpasBaseProductPriceId">
+                        <option v-for="item in productPricesAvailableForUitpasBaseProductPrice" :key="item.id" :value="item.id">
+                            {{ item.name ? item.name + ' (' + (item.price / 100).toString() + ' euro)' : (item.price / 100).toString() + ' euro' }}
+                        </option>
+                    </Dropdown>
+
+                    <p class="style-description-small">
+                        {{ $t('Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.') }}
+                    </p>
+                </STInputBox>
+            </STListItem>
         </STList>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem } from '@stamhoofd/components';
+import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -157,4 +183,61 @@ function addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
 }
 
 const isSingle = computed(() => props.product.prices.length <= 1);
+
+const uitpasBaseProductPriceId = computed({
+    get: () => patchedProductPrice.value.uitpasBaseProductPrice,
+    set: (value: string | null) => {
+        if (value === patchedProductPrice.value.uitpasBaseProductPrice) {
+            return;
+        }
+
+        // If no name is set for this price, we suggest the name UiTPAS kansentarief.
+        if (!name.value) {
+            name.value = 'UiTPAS kansentarief';
+        }
+        /* We could suggest a name based on the base price, but there are a lot of edge cases.
+
+        const basePriceName = props.product.prices.find(p => p.id === value)?.name;
+        const suggestedPriceName = 'UiTPAS kansentarief' + (basePriceName ? ' ' + basePriceName : '');
+        if (name.value) {
+            const oldBasePriceName = props.product.prices.find(p => p.id === patchedProductPrice.value.uitpasBaseProductPrice)?.name;
+            const oldSuggestedPriceName = 'UiTPAS kansentarief' + (oldBasePriceName ? ' ' + oldBasePriceName : '');
+            if (name.value === oldSuggestedPriceName) {
+                name.value = suggestedPriceName;
+            }
+        }
+        else {
+            name.value = suggestedPriceName;
+        }
+        */
+        addPricePatch(ProductPrice.patch({ uitpasBaseProductPrice: value }));
+    },
+});
+
+const useUitpasSocialTariff = computed({
+    get: () => uitpasBaseProductPriceId.value !== null,
+    set: (isUitpasSocialTariff: boolean) => {
+        if (!isUitpasSocialTariff) {
+            uitpasBaseProductPriceId.value = null;
+            return;
+        }
+        if (productPricesAvailableForUitpasBaseProductPrice.value.length === 0) {
+            // This should never be possible
+            Toast.error($t('Géén enkele andere prijs is beschikbaar als basisprijs')).show();
+            console.error('No uitpas base product price available, setting to null');
+            uitpasBaseProductPriceId.value = null;
+            return;
+        }
+        uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+    },
+});
+
+const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
+    if (props.product.prices.some(p => p.uitpasBaseProductPrice === props.productPrice.id)) {
+        // This price is already a base price for another uitpas social tariff, so it cannot be a UiTPAS social tariff.
+        return [];
+    }
+    return props.product.prices.filter(p => (p.uitpasBaseProductPrice === null && p.id !== patchedProductPrice.value.id));
+});
+
 </script>
