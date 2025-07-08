@@ -9,13 +9,13 @@ export class UitpasPriceCheckRequest extends AutoEncoder {
      * The reduced price can thus only be null when doing a static check (using uitpasEventId and without UiTPAS number) (e.g. when configuring the webshop)
      */
     @field({ decoder: IntegerDecoder, nullable: true })
-    reducedPrice: number;
+    reducedPrice: number | null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    uitpasEventId: string;
+    uitpasEventId: string | null;
 
     @field({ decoder: StringDecoder, nullable: true })
-    uitpasNumber: string;
+    uitpasNumber: string | null;
 }
 
 export class UitpasPriceCheckResponse extends AutoEncoder {

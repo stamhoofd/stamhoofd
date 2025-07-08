@@ -44,12 +44,19 @@ export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Bod
         }
         else {
             // NON-OFFICIAL FLOW
-            // request should include reduced price AND base price
+            // request should include UiTPAS-number, reduced price AND base price
             if (!request.body.reducedPrice) {
                 throw new SimpleError({
                     code: 'missing_reduced_price',
                     message: 'Reduced price must be provided for non-official flow.',
                     human: $t('Je moet een verlaagd tarief opgeven voor de UiTPAS.'),
+                });
+            }
+            if (!request.body.uitpasNumber) {
+                throw new SimpleError({
+                    code: 'missing_uitpas_number',
+                    message: 'Uitpas number must be provided for non-official flow.',
+                    human: $t('Je moet een UiTPAS-nummer opgeven.'),
                 });
             }
             await UitpasNumberValidator.checkUitpasNumber(request.body.uitpasNumber);
