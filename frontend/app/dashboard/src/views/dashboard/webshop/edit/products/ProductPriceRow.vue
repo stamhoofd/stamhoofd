@@ -34,6 +34,7 @@ import EditProductPriceView from './EditProductPriceView.vue';
 import { useDeleteProductPrice } from '@stamhoofd/components/src/context/hooks/useDeleteProductPrice';
 
 const props = defineProps<{ productPrice: ProductPrice; product: Product }>();
+const { deleteProductPrice } = useDeleteProductPrice();
 
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void; (e: 'move-up'): void; (e: 'move-down'): void }>();
 
@@ -56,7 +57,7 @@ function moveDown() {
 }
 
 async function doDelete() {
-    const p = await useDeleteProductPrice(props.product, props.productPrice);
+    const p = await deleteProductPrice(props.product, props.productPrice);
     if (!p) {
         return;
     }
