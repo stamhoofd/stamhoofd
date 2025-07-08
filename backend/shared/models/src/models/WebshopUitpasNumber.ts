@@ -25,8 +25,8 @@ export class WebshopUitpasNumber extends QueryableModel {
     @column({ type: 'string' })
     orderId = '';
 
-    static async getUitpasNumbers(webshopId: string, articleId: string): Promise<string[]> {
-        const models = await WebshopUitpasNumber.select('uitpasNumber').where('webshopId', webshopId).andWhere('articleId', articleId).fetch();
-        return models.map(model => model.uitpasNumber);
+    static async areUitpasNumbersUsed(webshopId: string, articleId: string, uitpasNumbers: string[]): Promise<boolean> {
+        const hasBeenUsed = !!(await WebshopUitpasNumber.select('uitpasNumber').where('webshopId', webshopId).andWhere('articleId', articleId).andWhere('uitpasNumber', uitpasNumbers).first(false));
+        return hasBeenUsed;
     }
 }
