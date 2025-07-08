@@ -64,10 +64,6 @@ const open = async (event: MouseEvent) => {
         ],
     }, { padding: 25 });
 };
-
-function computed(arg0: () => any) {
-    throw new Error('Function not implemented.');
-}
 </script>
 
 <style lang="scss">
