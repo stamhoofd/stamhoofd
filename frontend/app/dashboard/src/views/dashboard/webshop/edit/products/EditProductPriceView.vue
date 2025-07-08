@@ -43,6 +43,7 @@ const props = defineProps<{
 }>();
 const errors = useErrors();
 const pop = usePop();
+const { deleteProductPrice } = useDeleteProductPrice();
 
 const { patch, hasChanges, patched, addPatch } = usePatch(props.product);
 
@@ -60,7 +61,7 @@ function save() {
 }
 
 async function deleteMe() {
-    const p = await useDeleteProductPrice(props.product, props.productPrice);
+    const p = await deleteProductPrice(props.product, props.productPrice);
     if (!p) {
         return;
     }
