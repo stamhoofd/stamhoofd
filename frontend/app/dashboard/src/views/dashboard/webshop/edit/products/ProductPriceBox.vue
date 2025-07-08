@@ -5,7 +5,10 @@
         </STInputBox>
 
         <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+            <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="false /* for official UiTPAS flow */ " />
+            <p v-if="false /* for official UiTPAS flow */ " class="style-description-small">
+                {{ $t('Jouw UiTPAS regio bepaalt het kansentarief op basis van je gekozen basisprijs.') }}
+            </p>
         </STInputBox>
 
         <STList>
