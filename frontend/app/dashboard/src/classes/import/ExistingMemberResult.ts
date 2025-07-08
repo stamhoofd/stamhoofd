@@ -1,5 +1,5 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, patchContainsChanges } from '@simonbackx/simple-encoding';
-import { MemberDetails, Organization, Parent, Platform, PlatformFamily, PlatformMember, RecordAnswer, Version } from '@stamhoofd/structures';
+import { Group, MemberDetails, Organization, Parent, Platform, PlatformFamily, PlatformMember, RecordAnswer, Version } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { ImportingRegistration } from './ImportMemberAccumulatedResult';
@@ -8,6 +8,7 @@ import { ImportMemberBase } from './ImportMemberBase';
 export class ImportMemberResult {
     private _patch: AutoEncoderPatchType<MemberDetails>;
     readonly existingMember: PlatformMember | null = null;
+    private _registeredPlatformMember: PlatformMember | null = null;
     readonly details: MemberDetails;
     readonly registration = new ImportingRegistration();
     readonly isExisting: boolean;
@@ -15,6 +16,13 @@ export class ImportMemberResult {
     readonly organization: Organization;
     private _newPlatformMember: PlatformMember | null = null;
     private _cachedDetails: MemberDetails | null = null;
+    private _isRegistrationImported = false;
+    private _isPaymentImported = false;
+    private _checkedOutGroup: Group | null = null;
+
+    get checkedOutGroup() {
+        return this._checkedOutGroup;
+    }
 
     get patchedDetails() {
         if (this._cachedDetails) {
@@ -29,6 +37,22 @@ export class ImportMemberResult {
 
     get newPlatformMember() {
         return this._newPlatformMember;
+    }
+
+    get isMemberImported() {
+        return this._registeredPlatformMember !== null;
+    }
+
+    get isRegistrationImported() {
+        return this._isRegistrationImported;
+    }
+
+    get isPaymentImported() {
+        return this._isPaymentImported;
+    }
+
+    get registeredPlatformMember() {
+        return this._registeredPlatformMember;
     }
 
     constructor(readonly row: number, {
@@ -54,6 +78,18 @@ export class ImportMemberResult {
         this._patch = MemberDetails.patch({});
 
         this.isExisting = existingMember !== null;
+    }
+
+    setRegisteredPlatformMember(platformMember: PlatformMember) {
+        this._registeredPlatformMember = platformMember;
+    }
+
+    markRegistrationImported() {
+        this._isRegistrationImported = true;
+    }
+
+    markPaymentImported() {
+        this._isPaymentImported = true;
     }
 
     hasChanges() {
@@ -148,6 +184,10 @@ export class ImportMemberResult {
         }
 
         throw new Error('No member found');
+    }
+
+    setCheckedOutGroup(group: Group | null): void {
+        this._checkedOutGroup = group;
     }
 }
 

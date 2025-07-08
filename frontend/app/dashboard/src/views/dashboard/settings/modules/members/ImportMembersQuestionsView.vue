@@ -166,10 +166,12 @@
 </template>
 
 <script lang="ts" setup>
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { Dropdown, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
-import { getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PlatformFamily, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
 import { ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
@@ -187,12 +189,13 @@ const platformFamilyManager = usePlatformFamilyManager();
 const navigate = useNavigationActions();
 const organization = useRequiredOrganization();
 const saving = ref(false);
-const paid = ref<boolean | null>(true);
+const paid = ref<boolean | null>(null);
 const isWaitingList = ref(false);
 const autoAssign = ref(true);
 const groups = props.period.groups;
 const defaultGroup = ref(groups[0]) as unknown as Ref<Group>;
 const multipleGroups = ref(calculateMultipleGroups(groups)) as unknown as Ref<Group[]>;
+const owner = useRequestOwner();
 
 watch([autoAssign, defaultGroup], () => {
     autoAssignMembers(props.importMemberResults);
@@ -236,7 +239,6 @@ function shouldAssignRegistrationToMember(m: ImportMemberResult) {
     }
 
     const activeRegistrations = m.existingMember?.member.registrations.filter(r => r.isActive) ?? [];
-    // todo: is this correct?
     const waitingGroups = m.existingMember?.member.registrations.filter(r => r.isActive && r.group.type === GroupType.WaitingList) ?? [];
 
     if (activeRegistrations.length > 0 && !isWaitingList.value) {
@@ -296,14 +298,12 @@ function autoAssignMembers(members: ImportMemberResult[]) {
         }
 
         if (!autoAssign.value) {
-            // TODO: use default group for all
             member.registration.autoAssignedGroup = defaultGroup.value;
             continue;
         }
 
         const g = member.patchedDetails.getMatchingGroups(groups);
         if (g.length === 0) {
-            // use default: todo
             member.registration.autoAssignedGroup = defaultGroup.value;
         }
         else if (g.length === 1) {
@@ -419,24 +419,20 @@ function openResultView() {
                 const group = groups.find(g => g.id === registration.group.id);
                 const groupName = (group?.settings.name ?? 'onbekende groep');
 
+                let suffix = '';
+
+                if (member.registration.paidPrice !== null) {
+                    suffix = ` (${Formatter.price(member.registration.paidPrice)} betaald)`;
+                }
+                else if (member.registration.paid || paid.value) {
+                    suffix = ` (reeds betaald)`;
+                }
+                else {
+                    suffix = ` (nog niet betaald)`;
+                }
+
                 if (member.existingMember) {
                     if (registration !== null) {
-                        let suffix = '';
-                        // todo
-                        // if (registration.pricePaid) {
-                        //     suffix += ' (' + Formatter.price(registration.pricePaid) + ' betaald)';
-                        // }
-                        const price = registration.groupPrice?.price.getPrice(member.patchedDetails.shouldApplyReducedPrice);
-                        // todo
-                        // if (registration.pricePaid !== price) {
-                        //     if (price === 0) {
-                        //         suffix += ' (gratis)';
-                        //     }
-                        //     else {
-                        //         suffix += ' (' + Formatter.price(registration.pricePaid) + ' totaal te betalen)';
-                        //     }
-                        // }
-
                         if (registration.group.type === GroupType.WaitingList) {
                             description.push('Wachtlijst plaatsen voor ' + groupName + suffix);
                         }
@@ -459,10 +455,10 @@ function openResultView() {
                 }
                 else {
                     if (registration.group.type === GroupType.WaitingList) {
-                        description.push('Toevoegen in het systeem en op wachtlijst plaatsen voor ' + groupName);
+                        description.push('Toevoegen in het systeem en op wachtlijst plaatsen voor ' + groupName + suffix);
                     }
                     else {
-                        description.push('Toevoegen in het systeem met inschrijving voor ' + groupName);
+                        description.push('Toevoegen in het systeem met inschrijving voor ' + groupName + suffix);
                     }
                 }
             }
@@ -636,10 +632,12 @@ function createCheckout(importMemberResults: ImportMemberResult[]): RegisterChec
 
         if (regsitrationData) {
             const registrationsToRemove = getOverrideRegistrations(regsitrationData, importResult);
+            const group = regsitrationData.group;
+            importResult.setCheckedOutGroup(group);
 
             const item = new RegisterItem({
                 member,
-                group: regsitrationData.group,
+                group,
                 organization,
                 customStartDate: regsitrationData?.customStartDate,
                 groupPrice: regsitrationData?.groupPrice ?? undefined,
@@ -650,23 +648,14 @@ function createCheckout(importMemberResults: ImportMemberResult[]): RegisterChec
                 checkout.removeRegistration(new RegistrationWithPlatformMember({ registration, member }), { calculate: false });
             }
 
-            // checkout.addBalanceItem(BalanceItemCartItem.create({
-            //     item: BalanceItem.create({
-            //         type: BalanceItemType.Registration,
-            //     }),
-            //     price: 0,
-            // }), { calculate: false });
             checkout.add(item, { calculate: false });
         }
     }
-
-    // todo: creat balance items to set price paid later
 
     return checkout;
 }
 
 function getGroupPrice(group: Group, matchPrice?: { priceValue?: number; priceName?: string; isReducedPrice: boolean }): GroupPrice {
-    // todo: is admin?
     const prices = group.settings.getFilteredPrices({ admin: true });
     let matchedOnName: GroupPrice[] = [];
     let matchedOnPrice: GroupPrice[] = [];
@@ -759,11 +748,9 @@ function getOverrideRegistrations(registration: RegistrationData, member: Import
 
     let list: Registration[] = [];
 
-    // TODO: delete more conflicting registrations (based on categories too!)
     const group = registration.group;
     const periodId = props.period.period.id;
 
-    // todo: is this correct?
     const parents = group.getParentCategories(props.period.availableCategories, false);
 
     for (const parent of parents) {
@@ -825,20 +812,48 @@ function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) 
     }
 }
 
-async function saveMembers(importMemberResults: ImportMemberResult[]) {
-    const allPlatformMembers = importMemberResults.map(m => m.getPatchedPlatformMember(platform.value));
+async function importResults(importMemberResults: ImportMemberResult[]) {
     if (importMemberResults.find(m => !m.isExisting && m.registration.group === null)) {
         throw new SimpleError({
             code: 'no_group',
             message: 'Er is een nieuw lid zonder groep.',
         });
     }
-    await platformFamilyManager.save(allPlatformMembers, true);
+
+    await importMembers(importMemberResults);
 
     // the backend will add users to the member -> the new members should be regrouped in families
     regroupNewMembersInFamilies(importMemberResults);
 
-    const checkout = createCheckout(importMemberResults);
+    await importRegistrations(importMemberResults);
+    await importPayments(importMemberResults);
+}
+
+async function importMembers(importMemberResults: ImportMemberResult[]) {
+    const notImportedMembers = importMemberResults.filter(m => !m.isMemberImported);
+    const allPlatformMembers: PlatformMember[] = [];
+    const registerCallbacksAfterSave: (() => void)[] = [];
+
+    for (const imporResult of notImportedMembers) {
+        const platformMember = imporResult.getPatchedPlatformMember(platform.value);
+        allPlatformMembers.push(platformMember);
+        registerCallbacksAfterSave.push(() => imporResult.setRegisteredPlatformMember(platformMember));
+    }
+
+    if (!allPlatformMembers.length) {
+        return;
+    }
+
+    await platformFamilyManager.save(allPlatformMembers, true);
+    registerCallbacksAfterSave.forEach(callback => callback());
+}
+
+async function importRegistrations(importMemberResults: ImportMemberResult[]) {
+    const notRegisteredMembers = importMemberResults.filter(m => !m.isRegistrationImported);
+    if (!notRegisteredMembers.length) {
+        return;
+    }
+    const checkout = createCheckout(notRegisteredMembers);
 
     if (checkout.cart.isEmpty) {
         return;
@@ -850,6 +865,137 @@ async function saveMembers(importMemberResults: ImportMemberResult[]) {
         context: context.value,
         admin: true,
     }, navigate);
+
+    notRegisteredMembers.forEach(m => m.markRegistrationImported());
+}
+
+async function importPayments(importMemberResults: ImportMemberResult[]) {
+    const membersWithoutImportedPayment = importMemberResults.filter(m => !m.isPaymentImported);
+    if (!membersWithoutImportedPayment.length) {
+        return;
+    }
+
+    const payments: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+
+    for (const importResult of membersWithoutImportedPayment) {
+        const checkedOutGroup = importResult.checkedOutGroup;
+        if (!checkedOutGroup) {
+            continue;
+        }
+
+        const registeredPlatformMember = importResult.registeredPlatformMember;
+        if (!registeredPlatformMember) {
+            continue;
+        }
+
+        const paidPrice = importResult.registration.paidPrice;
+
+        if (paidPrice !== null && paidPrice > 0) {
+            const balanceItems = await getBalanceItems(registeredPlatformMember, checkedOutGroup);
+
+            let priceLeft = paidPrice;
+
+            const balanceItemPayments: BalanceItemPaymentDetailed[] = [];
+
+            for (const balanceItem of balanceItems) {
+                if (priceLeft <= 0) {
+                    break;
+                }
+
+                const price = Math.min(priceLeft, balanceItem.priceOpen);
+
+                balanceItemPayments.push(BalanceItemPaymentDetailed.create({
+                    balanceItem,
+                    price,
+                }));
+
+                priceLeft -= price;
+            }
+
+            const payment = PaymentGeneral.create({
+                method: PaymentMethod.Unknown,
+                status: PaymentStatus.Succeeded,
+                type: PaymentType.Payment,
+                paidAt: new Date(),
+                customer: null,
+                balanceItemPayments,
+            });
+
+            payments.addPut(payment);
+        }
+        else {
+            let isPaid = false;
+
+            if (importResult.registration.paid !== null) {
+                isPaid = importResult.registration.paid;
+            }
+            else if (paid.value !== null) {
+                isPaid = paid.value;
+            }
+
+            if (isPaid) {
+                const balanceItems = await getBalanceItems(registeredPlatformMember, checkedOutGroup);
+                if (balanceItems.length) {
+                    const payment = PaymentGeneral.create({
+                        method: PaymentMethod.Unknown,
+                        status: PaymentStatus.Succeeded,
+                        type: PaymentType.Payment,
+                        paidAt: new Date(),
+                        customer: null,
+                        balanceItemPayments: balanceItems.map(balanceItem => BalanceItemPaymentDetailed.create({
+                            balanceItem,
+                            price: balanceItem.priceOpen,
+                        })),
+                    });
+
+                    payments.addPut(payment);
+                }
+            }
+        }
+    }
+
+    if (payments.getPuts().length === 0) {
+        return;
+    }
+
+    await context.value.authenticatedServer.request({
+        method: 'PATCH',
+        path: '/organization/payments',
+        body: payments,
+        decoder: new ArrayDecoder(PaymentGeneral),
+        shouldRetry: false,
+    });
+
+    membersWithoutImportedPayment.forEach(m => m.markPaymentImported());
+}
+
+async function getBalanceItems(platformMember: PlatformMember, group: Group): Promise<BalanceItem[]> {
+    const registrations = platformMember.filterRegistrations({ groups: [group] });
+
+    if (registrations.length === 1) {
+        const registration = registrations[0];
+
+        if (registration.groupPrice.price.price === 0) {
+            // not necesary to get balance items if price is 0
+            return [];
+        }
+
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: `/receivable-balances/${ReceivableBalanceType.registration}/${registration.id}`,
+            decoder: DetailedReceivableBalance as Decoder<DetailedReceivableBalance>,
+            owner,
+        });
+
+        const receivableBalance = response.data;
+
+        return receivableBalance.filteredBalanceItems;
+    }
+
+    throw new SimpleError({
+        code: 'no_registration',
+        message: `Geen registratie gevonden voor ${platformMember.member.name}`,
+    });
 }
 
 async function goNext() {
@@ -863,7 +1009,7 @@ async function goNext() {
 
     try {
         autoAssignMembers(props.importMemberResults);
-        await saveMembers(props.importMemberResults);
+        await importResults(props.importMemberResults);
         toast.hide();
 
         new Toast('Importeren voltooid', 'success green').show();
