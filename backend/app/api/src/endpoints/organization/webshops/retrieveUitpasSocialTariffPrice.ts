@@ -26,38 +26,37 @@ export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Bod
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        // uitpasEventID and uitpasNumber cannot be null at the same time
-        if (!request.body.uitpasEventId && !request.body.uitpasNumber) {
-            throw new SimpleError({
-                code: 'missing_uitpas_event_id_or_number',
-                message: 'Either uitpasEventId or uitpasNumber must be provided, or both.',
-                human: $t('Je moet minstens een UiTPAS evenement ID of een UiTPAS nummer opgeven.'),
-            });
-        }
-
         if (request.body.uitpasEventId) {
-            // OFFICIAL FLOW -> price is the base price
-            // const basePrice = request.body.price;
-
-            if (request.body.uitpasNumber) {
-                // both uitpasEventId and uitpasNumber are provided -> validate specific uitpas number
+            // OFFICIAL FLOW
+            if (!request.body.uitpasNumber) {
+                // STATIC CHECK
+                // request shouldn't include a reduced price
             }
             else {
-                // only uitpasEventId is provided -> do a static check up (independent of uitpas number)
+                // OFFICIAL FLOW with an UiTPAS number
+                // request should include a reduced price (estimate by the frontend)
             }
-
             throw new SimpleError({
                 code: 'not_implemented',
                 message: 'Official flow not yet implemented',
                 human: $t(`De officiële flow voor het valideren van een UiTPAS-nummer wordt nog niet ondersteund.`),
             });
         }
-        // NON-OFFICIAL FLOW -> price is the reduced price
-        const reducedPrice = request.body.price;
-        await UitpasNumberValidator.checkUitpasNumber(request.body.uitpasNumber as string);
-        const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
-            price: reducedPrice,
-        });
-        return new Response(uitpasPriceCheckResponse);
+        else {
+            // NON-OFFICIAL FLOW
+            // request should include reduced price AND base price
+            if (!request.body.reducedPrice) {
+                throw new SimpleError({
+                    code: 'missing_reduced_price',
+                    message: 'Reduced price must be provided for non-official flow.',
+                    human: $t('Je moet een verlaagd tarief opgeven voor de UiTPAS.'),
+                });
+            }
+            await UitpasNumberValidator.checkUitpasNumber(request.body.uitpasNumber);
+            const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
+                price: request.body.reducedPrice,
+            });
+            return new Response(uitpasPriceCheckResponse);
+        }
     }
 }
