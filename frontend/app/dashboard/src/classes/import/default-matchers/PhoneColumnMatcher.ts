@@ -3,10 +3,9 @@ import { I18nController } from '@stamhoofd/frontend-i18n';
 import { Country, countryCodes } from '@stamhoofd/structures';
 import { PhoneNumber } from 'libphonenumber-js';
 import XLSX from 'xlsx';
-
 import { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 

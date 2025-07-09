@@ -47,10 +47,10 @@ import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-a
 import { Checkbox, STList, STListItem } from '@stamhoofd/components';
 import { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { ExistingMemberResult } from '../../../../../classes/import/ExistingMemberResult';
+import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
 
 const props = defineProps<{
-    members: (ExistingMemberResult & { readonly existingMember: PlatformMember })[];
+    members: (FindExistingMemberResult & { readonly existingMember: PlatformMember })[];
     onVerified: (show: (options: PushOptions | ComponentWithProperties) => Promise<void>) => void;
 }>();
 
@@ -81,7 +81,7 @@ function uncheckAll() {
     }
 }
 
-function setEqual(member: ExistingMemberResult, value: boolean) {
+function setEqual(member: FindExistingMemberResult, value: boolean) {
     if (value) {
         member.markEqual();
     }

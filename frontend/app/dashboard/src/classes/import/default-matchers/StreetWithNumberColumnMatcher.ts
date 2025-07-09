@@ -3,7 +3,7 @@ import { Address } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 import { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class StreetWithNumberColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {

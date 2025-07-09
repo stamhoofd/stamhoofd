@@ -1,10 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import XLSX from 'xlsx';
-
 import { BaseColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ExistingMemberResult';
-import { ImportMemberBase } from '../ImportMemberBase';
+import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
@@ -112,7 +111,7 @@ export class FullNameColumnMatcher extends SharedMemberDetailsMatcher implements
         }
     }
 
-    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBaseResult): void {
         if (this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }

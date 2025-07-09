@@ -2,9 +2,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
-
 import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class GroupColumnMatcher implements ColumnMatcher {
@@ -59,7 +58,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
                 minErrorGroup = group;
             }
         }
-        importResult.registration.group = minErrorGroup;
+        importResult.importRegistrationResult.group = minErrorGroup;
 
         if (!minErrorGroup) {
             throw new SimpleError({

@@ -1,10 +1,9 @@
-import XLSX from 'xlsx';
-
 import { SimpleError } from '@simonbackx/simple-errors';
+import XLSX from 'xlsx';
 import { BaseColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ExistingMemberResult';
-import { ImportMemberBase } from '../ImportMemberBase';
+import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
@@ -48,7 +47,7 @@ export class LastNameColumnMatcher extends SharedMemberDetailsMatcher implements
         const value = ((cell.w ?? cell.v) + '').trim();
 
         if (!value) {
-            if (this.category === MemberDetailsMatcherCategory.Member) {
+            if (this.category === MemberDetailsMatcherCategory.Member as string) {
                 throw new SimpleError({
                     code: 'invalid_type',
                     message: 'Deze cel is leeg',
@@ -60,7 +59,7 @@ export class LastNameColumnMatcher extends SharedMemberDetailsMatcher implements
     }
 
     setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
-        if (!cell && this.category !== MemberDetailsMatcherCategory.Member) {
+        if (!cell && this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }
 
@@ -69,20 +68,20 @@ export class LastNameColumnMatcher extends SharedMemberDetailsMatcher implements
             return;
         }
 
-        if (this.category === MemberDetailsMatcherCategory.Member) {
+        if (this.category === MemberDetailsMatcherCategory.Member as string) {
             importResult.addPatch({
                 lastName: value,
             });
         }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 || this.category === MemberDetailsMatcherCategory.Parent2) {
-            ColumnMatcherHelper.patchParent(importResult, this.category, {
+        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+            ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 lastName: value,
             });
         }
     }
 
-    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
-        if (this.category !== MemberDetailsMatcherCategory.Member) {
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBaseResult): void {
+        if (this.category !== MemberDetailsMatcherCategory.Member as string) {
             return;
         }
 

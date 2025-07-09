@@ -22,7 +22,7 @@ import { StreetNumberColumnMatcher } from './default-matchers/StreetNumberColumn
 import { StreetWithNumberColumnMatcher } from './default-matchers/StreetWithNumberColumnMatcher';
 import { UitpasNumberColumnMatcher } from './default-matchers/UitpasNumberColumnMatcher';
 import { ZipColumnMatcher } from './default-matchers/ZipColumnMatcher';
-import { ImportMemberResult } from './ExistingMemberResult';
+import { ImportMemberResult } from './ImportMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from './TextColumnMatcher';
 
@@ -50,7 +50,7 @@ export const getMemberMatchers = (getGroups: () => Group[]) => [
         possibleMatch: ['Adres lid'],
         negativeMatch: ['ouder', 'parent', 'contact'],
         get: importResult => importResult.patchedDetails.address ?? undefined,
-        save: (address, importResult) => {
+        save: (address, importResult: ImportMemberResult) => {
             ColumnMatcherHelper.patchAddress(importResult, MemberDetailsMatcherCategory.Member, address);
         },
     }),
@@ -86,8 +86,8 @@ export const parentMatchers1 = [
         required: false,
         possibleMatch: ['Adres ouder', 'Adres'],
         negativeMatch: ['ouder 2'],
-        get: importResult => ColumnMatcherHelper.getAddress(importResult, MemberDetailsMatcherCategory.Parent1) ?? undefined,
-        save: (address, importResult) => {
+        get: (importResult: ImportMemberResult) => ColumnMatcherHelper.getAddress(importResult, MemberDetailsMatcherCategory.Parent1) ?? undefined,
+        save: (address, importResult: ImportMemberResult) => {
             ColumnMatcherHelper.patchAddress(importResult, MemberDetailsMatcherCategory.Parent1, address);
         },
     }),
@@ -111,8 +111,8 @@ export const parentMatchers2 = [
         category: MemberDetailsMatcherCategory.Parent2,
         required: false,
         possibleMatch: ['Adres ouder 2'],
-        get: importResult => ColumnMatcherHelper.getAddress(importResult, MemberDetailsMatcherCategory.Parent2) ?? undefined,
-        save: (address, importResult) => {
+        get: (importResult: ImportMemberResult) => ColumnMatcherHelper.getAddress(importResult, MemberDetailsMatcherCategory.Parent2) ?? undefined,
+        save: (address, importResult: ImportMemberResult) => {
             ColumnMatcherHelper.patchAddress(importResult, MemberDetailsMatcherCategory.Parent2, address);
         },
     }),

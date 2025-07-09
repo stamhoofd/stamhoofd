@@ -1,8 +1,7 @@
 import XLSX from 'xlsx';
-
 import { BaseColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ExistingMemberResult';
-import { ImportMemberBase } from '../ImportMemberBase';
+import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class MemberNumberColumnMatcher implements BaseColumnMatcher {
@@ -51,7 +50,7 @@ export class MemberNumberColumnMatcher implements BaseColumnMatcher {
         });
     }
 
-    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void {
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBaseResult): void {
         const value = this.getValueFromCell(cell);
         if (!value) {
             return;

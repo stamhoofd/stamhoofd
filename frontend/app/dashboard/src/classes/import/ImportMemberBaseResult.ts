@@ -1,4 +1,8 @@
-export class ImportMemberBase {
+/**
+ * The base data for a member that is gathered when the member is imported.
+ * This data is used for checking if the member already exists.
+ */
+export class ImportMemberBaseResult {
     private _firstName: string | null = null;
     private _lastName: string | null = null;
     private _birthDay: Date | null = null;

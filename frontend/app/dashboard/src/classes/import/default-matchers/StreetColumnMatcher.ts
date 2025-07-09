@@ -1,7 +1,7 @@
 import XLSX from 'xlsx';
 import { ColumnMatcher } from '../ColumnMatcher';
 import { ColumnMatcherHelper } from '../ColumnMatcherHelper';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class StreetColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {

@@ -1,9 +1,8 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Gender } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
-
 import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class GenderColumnMatcher implements ColumnMatcher {

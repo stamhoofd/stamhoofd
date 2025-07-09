@@ -1,8 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import XLSX from 'xlsx';
-
 import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class PaymentPriceColumnMatcher implements ColumnMatcher {
@@ -63,6 +62,6 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
             });
         }
 
-        importResult.registration.price = Math.floor(b * 100);
+        importResult.importRegistrationResult.price = Math.floor(b * 100);
     }
 }

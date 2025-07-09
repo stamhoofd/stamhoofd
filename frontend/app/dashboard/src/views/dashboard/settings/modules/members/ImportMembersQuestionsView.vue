@@ -174,7 +174,7 @@ import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
-import { ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
+import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
 
 const props = defineProps<{
@@ -202,11 +202,11 @@ watch([autoAssign, defaultGroup], () => {
 });
 
 const needsPaidStatus = computed(() => {
-    return !!membersWithNewRegistrations.value.find(m => m.registration.paid === null && m.registration.paidPrice === null);
+    return !!membersWithNewRegistrations.value.find(m => m.importRegistrationResult.paid === null && m.importRegistrationResult.paidPrice === null);
 });
 
 const somePaid = computed(() => {
-    return !!membersWithNewRegistrations.value.find(m => m.registration.paid !== null || m.registration.paidPrice !== null);
+    return !!membersWithNewRegistrations.value.find(m => m.importRegistrationResult.paid !== null || m.importRegistrationResult.paidPrice !== null);
 });
 
 const needsGroupAssignment = computed(() => membersNeedingAssignment.value.length > 0);
@@ -234,7 +234,7 @@ const deletedRegistrationsCount = computed(() => {
 });
 
 function shouldAssignRegistrationToMember(m: ImportMemberResult) {
-    if (m.registration.group !== null) {
+    if (m.importRegistrationResult.group !== null) {
         return false;
     }
 
@@ -274,7 +274,7 @@ function calculateMultipleGroups(groups: Group[]) {
     const multipleGroups = new Map<string, Group>();
 
     for (const member of props.importMemberResults) {
-        if (member.registration.group !== null) {
+        if (member.importRegistrationResult.group !== null) {
             continue;
         }
         const g = member.patchedDetails.getMatchingGroups(filteredGroups);
@@ -293,25 +293,25 @@ function calculateMultipleGroups(groups: Group[]) {
 function autoAssignMembers(members: ImportMemberResult[]) {
     for (const member of members) {
         if (!shouldAssignRegistrationToMember(member)) {
-            member.registration.autoAssignedGroup = null;
+            member.importRegistrationResult.autoAssignedGroup = null;
             continue;
         }
 
         if (!autoAssign.value) {
-            member.registration.autoAssignedGroup = defaultGroup.value;
+            member.importRegistrationResult.autoAssignedGroup = defaultGroup.value;
             continue;
         }
 
         const g = member.patchedDetails.getMatchingGroups(groups);
         if (g.length === 0) {
-            member.registration.autoAssignedGroup = defaultGroup.value;
+            member.importRegistrationResult.autoAssignedGroup = defaultGroup.value;
         }
         else if (g.length === 1) {
-            member.registration.autoAssignedGroup = g[0];
+            member.importRegistrationResult.autoAssignedGroup = g[0];
         }
         else {
             // Get group that is first in the priority queue (= multipleGroups)
-            member.registration.autoAssignedGroup = multipleGroups.value.find((group) => {
+            member.importRegistrationResult.autoAssignedGroup = multipleGroups.value.find((group) => {
                 return (g.includes(group));
             }) ?? defaultGroup.value;
         }
@@ -321,7 +321,7 @@ function autoAssignMembers(members: ImportMemberResult[]) {
 function getGroupAutoAssignCountForPriority(group: Group) {
     autoAssignMembers(membersWithMultipleGroups.value);
     return membersWithMultipleGroups.value.reduce((current, member) => {
-        if (member.registration.autoAssignedGroup && member.registration.autoAssignedGroup.id === group.id) {
+        if (member.importRegistrationResult.autoAssignedGroup && member.importRegistrationResult.autoAssignedGroup.id === group.id) {
             return current + 1;
         }
         return current;
@@ -334,13 +334,13 @@ function openAssignment() {
         title: 'Wijzigingen aan inschrijvingen',
         description: 'Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand',
         members: membersNeedingAssignment.value.flatMap((m) => {
-            if (m.registration.autoAssignedGroup === null) {
+            if (m.importRegistrationResult.autoAssignedGroup === null) {
                 return [];
             }
 
             return [{
                 name: m.patchedDetails.name,
-                description: m.registration.autoAssignedGroup.settings.name,
+                description: m.importRegistrationResult.autoAssignedGroup.settings.name,
             }];
         }),
     }).setDisplayStyle('popup')).catch(console.error);
@@ -351,11 +351,11 @@ function openPriorityAssignedToGroup(group: Group) {
         title: 'Leden die door prioriteit bij ' + group.settings.name + ' zullen worden ingeschreven',
         description: 'Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij ' + group.settings.name + ' zullen worden ingeschreven',
         members: membersWithMultipleGroups.value.flatMap((m) => {
-            if (m.registration.group !== null) {
+            if (m.importRegistrationResult.group !== null) {
                 return [];
             }
 
-            if (m.registration.autoAssignedGroup?.id === group.id) {
+            if (m.importRegistrationResult.autoAssignedGroup?.id === group.id) {
                 const matchingGroups = m.patchedDetails.getMatchingGroups(groups);
                 return [{
                     name: m.patchedDetails.name,
@@ -373,7 +373,7 @@ function openMultipleGroups() {
         title: 'Leden die in meerdere groepen passen',
         description: 'Dit zijn alle leden en de groepen waar ze in passen. Je kan beperken tot welke groepen ze horen door de instellingen van die groep te wijzigen.',
         members: membersWithMultipleGroups.value.flatMap((m) => {
-            if (m.registration.group !== null) {
+            if (m.importRegistrationResult.group !== null) {
                 return [];
             }
 
@@ -421,10 +421,10 @@ function openResultView() {
 
                 let suffix = '';
 
-                if (member.registration.paidPrice !== null) {
-                    suffix = ` (${Formatter.price(member.registration.paidPrice)} betaald)`;
+                if (member.importRegistrationResult.paidPrice !== null) {
+                    suffix = ` (${Formatter.price(member.importRegistrationResult.paidPrice)} betaald)`;
                 }
-                else if (member.registration.paid || paid.value) {
+                else if (member.importRegistrationResult.paid || paid.value) {
                     suffix = ` (reeds betaald)`;
                 }
                 else {
@@ -585,7 +585,7 @@ function openWithoutMatchingGroups() {
 }
 
 function hasNewRegistration(member: ImportMemberResult) {
-    const group = (member.registration.group ?? member.registration.autoAssignedGroup);
+    const group = (member.importRegistrationResult.group ?? member.importRegistrationResult.autoAssignedGroup);
 
     if (!group) {
         return false;
@@ -641,7 +641,7 @@ function createCheckout(importMemberResults: ImportMemberResult[]): RegisterChec
                 organization,
                 customStartDate: regsitrationData?.customStartDate,
                 groupPrice: regsitrationData?.groupPrice ?? undefined,
-                recordAnswers: importResult.registration.recordAnswers.size ? importResult.registration.recordAnswers : undefined,
+                recordAnswers: importResult.importRegistrationResult.recordAnswers.size ? importResult.importRegistrationResult.recordAnswers : undefined,
             });
 
             for (const registration of registrationsToRemove) {
@@ -710,7 +710,7 @@ function buildRegistration(member: ImportMemberResult): RegistrationData | null 
         return null;
     }
 
-    let group = (member.registration.group ?? member.registration.autoAssignedGroup);
+    let group = (member.importRegistrationResult.group ?? member.importRegistrationResult.autoAssignedGroup);
 
     if (!group) {
         return null;
@@ -726,8 +726,8 @@ function buildRegistration(member: ImportMemberResult): RegistrationData | null 
     else {
         const isReducedPrice = member.patchedDetails.shouldApplyReducedPrice;
         groupPrice = getGroupPrice(group, {
-            priceValue: member.registration.price === null ? undefined : member.registration.price,
-            priceName: member.registration.priceName === null ? undefined : member.registration.priceName,
+            priceValue: member.importRegistrationResult.price === null ? undefined : member.importRegistrationResult.price,
+            priceName: member.importRegistrationResult.priceName === null ? undefined : member.importRegistrationResult.priceName,
             isReducedPrice,
         });
     }
@@ -735,7 +735,7 @@ function buildRegistration(member: ImportMemberResult): RegistrationData | null 
     const registrationData: RegistrationData = {
         group,
         groupPrice,
-        customStartDate: member.registration.date ?? new Date(),
+        customStartDate: member.importRegistrationResult.date ?? new Date(),
     };
 
     return registrationData;
@@ -813,7 +813,7 @@ function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) 
 }
 
 async function importResults(importMemberResults: ImportMemberResult[]) {
-    if (importMemberResults.find(m => !m.isExisting && m.registration.group === null)) {
+    if (importMemberResults.find(m => !m.isExisting && m.importRegistrationResult.group === null)) {
         throw new SimpleError({
             code: 'no_group',
             message: 'Er is een nieuw lid zonder groep.',
@@ -833,7 +833,7 @@ async function importMembers(importMemberResults: ImportMemberResult[]) {
     for (const imporResult of notImportedMembers) {
         const platformMember = imporResult.getPatchedPlatformMember(platform.value);
         allPlatformMembers.push(platformMember);
-        registerCallbacksAfterSave.push(() => imporResult.setRegisteredPlatformMember(platformMember));
+        registerCallbacksAfterSave.push(() => imporResult.setImportedPlatformMember(platformMember));
     }
 
     if (!allPlatformMembers.length) {
@@ -887,7 +887,7 @@ async function importPayments(importMemberResults: ImportMemberResult[]) {
             continue;
         }
 
-        const paidPrice = importResult.registration.paidPrice;
+        const paidPrice = importResult.importRegistrationResult.paidPrice;
 
         if (paidPrice !== null && paidPrice > 0) {
             const balanceItems = await getBalanceItems(registeredPlatformMember, checkedOutGroup);
@@ -925,8 +925,8 @@ async function importPayments(importMemberResults: ImportMemberResult[]) {
         else {
             let isPaid = false;
 
-            if (importResult.registration.paid !== null) {
-                isPaid = importResult.registration.paid;
+            if (importResult.importRegistrationResult.paid !== null) {
+                isPaid = importResult.importRegistrationResult.paid;
             }
             else if (paid.value !== null) {
                 isPaid = paid.value;

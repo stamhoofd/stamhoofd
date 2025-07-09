@@ -109,10 +109,11 @@ import { AddressColumnMatcher } from '../../../../../classes/import/AddressColum
 import { ColumnMatcher } from '../../../../../classes/import/ColumnMatcher';
 import { DateColumnMatcher } from '../../../../../classes/import/DateColumnMatcher';
 import { getAllMatchers } from '../../../../../classes/import/defaultMatchers';
-import { ExistingMemberResult, ImportMemberResult } from '../../../../../classes/import/ExistingMemberResult';
+import { FindExistingMemberResult } from '../../../../../classes/import/FindExistingMemberResult';
 import { ImportError } from '../../../../../classes/import/ImportError';
-import { ImportMemberBase } from '../../../../../classes/import/ImportMemberBase';
-import { ImportMembersBaseResult, ImportMembersResult } from '../../../../../classes/import/ImportResult';
+import { ImportMemberBaseResult } from '../../../../../classes/import/ImportMemberBaseResult';
+import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
+import { ImportMembersBaseResultWithErrors, ImportMembersResultWithErrors } from '../../../../../classes/import/ImportResultWithErrors';
 import { MatchedColumn } from '../../../../../classes/import/MatchedColumn';
 import { MemberDetailsMatcherCategory } from '../../../../../classes/import/MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from '../../../../../classes/import/TextColumnMatcher';
@@ -151,7 +152,7 @@ const groupSpecificMatchers = computed(() => {
                         category: category.name.toString(),
                         required: false,
                         save(value: string, importResult: ImportMemberResult) {
-                            importResult.registration.recordAnswers.set(record.id, RecordTextAnswer.create({ settings: record, value }));
+                            importResult.importRegistrationResult.recordAnswers.set(record.id, RecordTextAnswer.create({ settings: record, value }));
                         },
                     }));
                     break;
@@ -162,7 +163,7 @@ const groupSpecificMatchers = computed(() => {
                         category: category.name.toString(),
                         required: false,
                         save(address: Address, importResult: ImportMemberResult) {
-                            importResult.registration.recordAnswers.set(record.id, RecordAddressAnswer.create({ settings: record, address }));
+                            importResult.importRegistrationResult.recordAnswers.set(record.id, RecordAddressAnswer.create({ settings: record, address }));
                         },
                     }));
                     break;
@@ -173,7 +174,7 @@ const groupSpecificMatchers = computed(() => {
                         category: category.name.toString(),
                         required: false,
                         save(dateValue: Date, importResult: ImportMemberResult) {
-                            importResult.registration.recordAnswers.set(record.id, RecordDateAnswer.create({ settings: record, dateValue }));
+                            importResult.importRegistrationResult.recordAnswers.set(record.id, RecordDateAnswer.create({ settings: record, dateValue }));
                         },
                     }));
                     break;
@@ -402,13 +403,13 @@ function importBaseData(sheet: XLSX.WorkSheet, columns: MatchedColumn[]) {
     }
 
     const range = XLSX.utils.decode_range(sheet['!ref']);
-    const result = new ImportMembersBaseResult();
+    const result = new ImportMembersBaseResultWithErrors();
 
     const filteredColumns = columns.filter(c => c.selected && c.isBaseMatcher);
 
     if (filteredColumns.length) {
         for (let row = range.s.r + 1; row <= range.e.r; row++) {
-            const importBase = new ImportMemberBase(row);
+            const importBase = new ImportMemberBaseResult(row);
             let allEmpty = true;
             const errorStack: ImportError[] = [];
 
@@ -454,7 +455,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
     const importMap = new Map(results.map(r => [r.row, r]));
 
     const range = XLSX.utils.decode_range(sheet['!ref']);
-    const result = new ImportMembersResult();
+    const result = new ImportMembersResultWithErrors();
 
     for (let row = range.s.r + 1; row <= range.e.r; row++) {
         let allEmpty = true;
@@ -531,12 +532,12 @@ async function fetchAllMembers() {
     return await fetchAll(initialRequest, memberFetcher);
 }
 
-async function findExistingMembers(data: ImportMemberBase[]) {
+async function findExistingMembers(data: ImportMemberBaseResult[]) {
     const allMembers = await fetchAllMembers();
-    return data.map(item => new ExistingMemberResult(item, allMembers, organization.value));
+    return data.map(item => new FindExistingMemberResult(item, allMembers, organization.value));
 }
 
-async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], existingMemberResults: ExistingMemberResult[], showCallback: (options: PushOptions | ComponentWithProperties) => Promise<void> = show) {
+async function startImport(sheet: XLSX.WorkSheet, columns: MatchedColumn[], existingMemberResults: FindExistingMemberResult[], showCallback: (options: PushOptions | ComponentWithProperties) => Promise<void> = show) {
     const importResults = existingMemberResults.map(m => m.toImportMemberResult());
     const result = await importData(sheet, columns, importResults);
 

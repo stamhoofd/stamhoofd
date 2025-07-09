@@ -7,7 +7,6 @@ export class MatchedColumn {
     examples: string[] = [];
     matcher: ColumnMatcher | null = null;
 
-    // todo: still necessary?
     // For vue bug only...
     matchersReference: ColumnMatcher[];
 

@@ -1,9 +1,8 @@
-import XLSX from 'xlsx';
-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { DataValidator } from '@stamhoofd/utility';
+import XLSX from 'xlsx';
 import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class UitpasNumberColumnMatcher implements ColumnMatcher {

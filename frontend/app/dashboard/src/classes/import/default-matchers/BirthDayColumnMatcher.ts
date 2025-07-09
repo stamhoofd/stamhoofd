@@ -1,7 +1,7 @@
 import { CellObject } from 'xlsx';
 import { BaseColumnMatcher } from '../ColumnMatcher';
 import { DateColumnMatcher } from '../DateColumnMatcher';
-import { ImportMemberBase } from '../ImportMemberBase';
+import { ImportMemberBaseResult } from '../ImportMemberBaseResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class BirthDayColumnMatcher extends DateColumnMatcher implements BaseColumnMatcher {
@@ -20,7 +20,7 @@ export class BirthDayColumnMatcher extends DateColumnMatcher implements BaseColu
         });
     }
 
-    setBaseValue(cell: CellObject | undefined, base: ImportMemberBase): void {
+    setBaseValue(cell: CellObject | undefined, base: ImportMemberBaseResult): void {
         const value = this.getValue(cell, undefined);
         if (value !== undefined) {
             base.setBirthDay(value);

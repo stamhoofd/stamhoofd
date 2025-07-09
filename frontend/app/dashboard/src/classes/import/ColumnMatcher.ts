@@ -1,6 +1,6 @@
 import XLSX from 'xlsx';
-import { ImportMemberResult } from './ExistingMemberResult';
-import { ImportMemberBase } from './ImportMemberBase';
+import { ImportMemberBaseResult } from './ImportMemberBaseResult';
+import { ImportMemberResult } from './ImportMemberResult';
 
 export interface ColumnMatcher {
     id: string;
@@ -13,5 +13,5 @@ export interface ColumnMatcher {
 }
 
 export interface BaseColumnMatcher extends ColumnMatcher {
-    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBase): void;
+    setBaseValue(cell: XLSX.CellObject | undefined, base: ImportMemberBaseResult): void;
 }

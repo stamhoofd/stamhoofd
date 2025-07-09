@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import XLSX from 'xlsx';
 import { ColumnMatcher } from '../ColumnMatcher';
-import { ImportMemberResult } from '../ExistingMemberResult';
+import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 
 export class PaidPriceColumnMatcher implements ColumnMatcher {
@@ -37,7 +37,7 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
 
     setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
         if (!cell) {
-            importResult.registration.paidPrice = 0;
+            importResult.importRegistrationResult.paidPrice = 0;
             return;
         }
 
@@ -51,6 +51,6 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
             });
         }
 
-        importResult.registration.paidPrice = Math.floor(b * 100);
+        importResult.importRegistrationResult.paidPrice = Math.floor(b * 100);
     }
 }

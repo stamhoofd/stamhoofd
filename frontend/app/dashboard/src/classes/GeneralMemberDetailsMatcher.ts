@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import XLSX from 'xlsx';
 
 import { ColumnMatcher } from './import/ColumnMatcher';
-import { ImportMemberResult } from './import/ExistingMemberResult';
+import { ImportMemberResult } from './import/FindExistingMemberResult';
 import { SharedMemberDetailsMatcher } from './import/SharedMemberDetailsMatcher';
 
 export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetailsMatcher implements ColumnMatcher {
