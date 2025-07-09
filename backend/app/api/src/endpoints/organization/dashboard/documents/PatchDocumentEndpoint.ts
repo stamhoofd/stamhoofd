@@ -1,8 +1,8 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Document, DocumentTemplate, Group, Member, Registration, Token } from '@stamhoofd/models';
-import { Document as DocumentStruct, DocumentStatus, DocumentTemplatePrivate, PermissionLevel } from '@stamhoofd/structures';
+import { Document, DocumentTemplate, Member, Registration } from '@stamhoofd/models';
+import { DocumentStatus, Document as DocumentStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 
