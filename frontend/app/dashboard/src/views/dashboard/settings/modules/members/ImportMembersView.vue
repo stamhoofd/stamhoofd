@@ -1,26 +1,26 @@
 <template>
     <SaveView :title="$t('Leden importeren')" :loading="saving" :disabled="!file || columns.length == 0 || rowCount === 0" :save-text="$t('Volgende')" @save="goNext">
-        <h1>Leden importeren</h1>
+        <h1>{{ $t('Leden importeren') }}</h1>
         <p>
-            Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.
+            {{ $t('Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.') }}
         </p>
 
         <p v-if="!hasMembers" class="warning-box">
-            <span>Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.
-                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">Meer info</a>
+            <span>{{ $t('Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.') }}
+                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
             </span>
         </p>
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
 
         <label class="upload-box">
-            <span v-if="!file" class="icon upload" />
-            <span v-else class="icon file-excel color-excel" />
+            <span v-if="!file" class="icon upload"/>
+            <span v-else class="icon file-excel color-excel"/>
             <div v-if="!file">
                 <h2 class="style-title-list">
-                    Kies een bestand
+                    {{ $t('Kies een bestand') }}
                 </h2>
                 <p class="style-description">
-                    Ondersteunde formaten zijn .xls, .xlsx of .csv
+                    {{ $t('Ondersteunde formaten zijn .xls, .xlsx of .csv') }}
                 </p>
             </div>
             <div v-else>
@@ -28,18 +28,18 @@
                     {{ file }}
                 </h2>
                 <p class="style-description">
-                    {{ rowCount }} rijen, {{ columnCount }} kolommen
+                    {{ rowCount }} rijen, {{ columnCount }} {{ $t('kolommen') }}
                 </p>
             </div>
             <input type="file" multiple style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
-            <span v-if="file" class="icon sync gray" />
+            <span v-if="file" class="icon sync gray"/>
         </label>
 
         <template v-if="sheetSelectionList.length > 1">
-            <STInputBox title="Werkblad" error-fields="sheet" :error-box="errors.errorBox">
+            <STInputBox error-fields="sheet" :error-box="errors.errorBox" :title="$t(`Werkblad`)">
                 <Dropdown v-model="sheetKey">
                     <option :value="null" disabled>
-                        Maak een keuze
+                        {{ $t('Maak een keuze') }}
                     </option>
                     <option v-for="key in sheetSelectionList" :key="key" :value="key">
                         {{ key }}
@@ -54,9 +54,9 @@
                 <thead>
                     <tr>
                         <th>
-                            Kolom uit jouw bestand
+                            {{ $t('Kolom uit jouw bestand') }}
                         </th>
-                        <th>Koppelen aan</th>
+                        <th>{{ $t('Koppelen aan') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,7 +74,7 @@
                         <td>
                             <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
                                 <option :value="null" disabled>
-                                    Maak een keuze
+                                    {{ $t('Maak een keuze') }}
                                 </option>
                                 <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
                                     <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
@@ -87,12 +87,12 @@
                 </tbody>
             </table>
             <p v-if="file && columns.length > 0" class="warning-box">
-                Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.
+                {{ $t('Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.') }}
             </p>
-            <STErrorsDefault :error-box="errors.errorBox" />
+            <STErrorsDefault :error-box="errors.errorBox"/>
             <hr>
             <STInputBox :title="$t('In welk werkjaar wil je de leden inschrijven?')" error-fields="period" :error-box="errors.errorBox">
-                <RegistrationPeriodSelector v-model="period" />
+                <RegistrationPeriodSelector v-model="period"/>
             </STInputBox>
         </template>
     </SaveView>

@@ -1,99 +1,106 @@
 <template>
     <SaveView :title="$t('Leden importeren')" :loading="saving" :save-text="`Importeer ${importMemberResults.length} leden`" @save="goNext">
-        <h1>Importeer instellingen</h1>
-        <p>We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.</p>
+        <h1>{{ $t('Importeer instellingen') }}</h1>
+        <p>{{ $t('We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.') }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!saving">
             <p v-if="existingCount > 0 && existingCount === importMemberResults.length" class="warning-box">
-                Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven. <template v-if="membersWithNewRegistrations.length">
-                    Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.
-                </template>Let goed op, je kan dit niet ongedaan maken.
+                {{ $t('Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven.') }} <template v-if="membersWithNewRegistrations.length">
+                    {{ $t('Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.') }}
+                </template>{{ $t('Let goed op, je kan dit niet ongedaan maken.') }}
             </p>
             <p v-else-if="existingCount > 0" class="warning-box">
-                {{ existingCount }} {{ existingCount == 1 ? 'lid' : 'leden' }} uit jouw bestand zitten al in het systeem ({{ importMemberResults.length }} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.
+                {{ $t('{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.', {
+                    existingCount,
+                    memberTranslation: existingCount == 1 ? $t('lid') : $t('leden'),
+                    total: importMemberResults.length
+                }) }}
             </p>
 
             <p v-if="deletedRegistrationsCount > 0" class="warning-box">
-                Stamhoofd zal {{ deletedRegistrationsCount }} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.
+                {{ $t('Stamhoofd zal {count} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.', {count: deletedRegistrationsCount}) }}
             </p>
             <p v-if="membersWithoutNewRegistrations.length" class="success-box">
-                {{ membersWithoutNewRegistrations.length }} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.
+                {{ $t('{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.', {count: membersWithoutNewRegistrations.length}) }}
             </p>
 
             <template v-if="membersWithNewRegistrations.length">
                 <hr>
-                <h2>Inschrijvingstatus</h2>
+                <h2>{{ $t('Inschrijvingstatus') }}</h2>
 
-                <STInputBox v-if="hasWaitingLists" title="Wil je deze leden op de wachtlijst zetten?" error-fields="waitingList" :error-box="errors.errorBox" class="max">
+                <STInputBox v-if="hasWaitingLists" error-fields="waitingList" :error-box="errors.errorBox" class="max" :title="$t(`Wil je deze leden op de wachtlijst zetten?`)">
                     <RadioGroup>
                         <Radio v-model="isWaitingList" :value="false">
-                            Nee
+                            {{ $t('Nee') }}
                         </Radio>
                         <Radio v-model="isWaitingList" :value="true">
-                            Ja, zet op wachtlijst
+                            {{ $t('Ja, zet op wachtlijst') }}
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
 
                 <template v-if="!isWaitingList">
-                    <STInputBox v-if="needsPaidStatus" :title="'Hebben deze leden al betaald?'" error-fields="paid" :error-box="errors.errorBox" class="max">
+                    <STInputBox v-if="needsPaidStatus" :title="$t(`Hebben deze leden al betaald?`)" error-fields="paid" :error-box="errors.errorBox" class="max">
                         <RadioGroup>
                             <Radio v-model="paid" :value="true">
-                                Al betaald
+                                {{ $t('Al betaald') }}
                             </Radio>
                             <Radio v-model="paid" :value="false">
-                                Niet betaald
+                                {{ $t('Niet betaald') }}
                             </Radio>
                             <Radio v-model="paid" :value="null">
-                                Sommigen wel, anderen niet
+                                {{ $t('Sommigen wel, anderen niet') }}
                             </Radio>
                         </RadioGroup>
                     </STInputBox>
                     <p v-if="!needsPaidStatus && somePaid" class="success-box">
-                        De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.
+                        {{ $t('De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.') }}
                     </p>
 
                     <p v-if="needsPaidStatus && somePaid" class="warning-box">
-                        Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.
+                        {{ $t('Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.') }}
                     </p>
 
                     <p v-if="needsPaidStatus && paid === null" class="warning-box">
-                        We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten.
+                        {{ $t("We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten.") }}
                     </p>
                 </template>
             </template>
 
             <template v-if="needsGroupAssignment">
                 <hr>
-                <h2>Inschrijvingsgroep</h2>
+                <h2>{{ $t('Inschrijvingsgroep') }}</h2>
 
                 <p class="warning-box">
-                    {{ membersNeedingAssignment.length }} leden uit jouw lijst hebben geen inschrijvingsgroep toegewezen gekregen (in een kolom). Kies hieronder hoe je deze wilt inschrijven in de juiste groep, of voeg een kolom in jouw bestand toe met de groep waar je elk lid wilt inschrijven.
+                    {{ membersNeedingAssignment.length }} {{ $t('leden uit jouw lijst hebben geen inschrijvingsgroep toegewezen gekregen (in een kolom). Kies hieronder hoe je deze wilt inschrijven in de juiste groep, of voeg een kolom in jouw bestand toe met de groep waar je elk lid wilt inschrijven.') }}
                 </p>
 
-                <STInputBox title="Leeftijdsgroep toewijzen" error-fields="group" :error-box="errors.errorBox" class="max">
+                <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`Leeftijdsgroep toewijzen`)">
                     <RadioGroup>
                         <Radio v-model="autoAssign" :value="true">
-                            Automatisch groep bepalen
+                            {{ $t('Automatisch groep bepalen') }}
                         </Radio>
                         <Radio v-model="autoAssign" :value="false">
-                            Allemaal in één groep inschrijven
+                            {{ $t('Allemaal in één groep inschrijven') }}
                         </Radio>
                     </RadioGroup>
 
                     <template #right>
                         <button class="button text" type="button" @click.stop="openAssignment">
                             <span class="icon help" />
-                            <span>Toon resultaat</span>
+                            <span>{{ $t('Toon resultaat') }}</span>
                         </button>
                     </template>
                 </STInputBox>
 
                 <template v-if="autoAssign">
-                    <STInputBox v-if="membersWithMultipleGroups.length > 0" title="Prioriteit van groepen" error-fields="group" :error-box="errors.errorBox" class="max">
+                    <STInputBox v-if="membersWithMultipleGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`Prioriteit van groepen`)">
                         <p class="info-box">
-                            {{ membersWithMultipleGroups.length }} {{ membersWithMultipleGroups.length == 1 ? 'lid past' : 'leden passen' }} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > inschrijvingsgroepen)
+                            {{ $t('{count} {memberTranslation} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > inschrijvingsgroepen)', {
+                                count: membersWithMultipleGroups.length,
+                                memberTranslation: membersWithMultipleGroups.length == 1 ? $t('lid past') : $t('leden passen')
+                            }) }}
                         </p>
 
                         <STList v-model="draggableGroups" :draggable="true">
@@ -113,14 +120,14 @@
                         <template #right>
                             <button type="button" class="button text" @click.stop="openMultipleGroups">
                                 <span class="icon help" />
-                                <span>Toon leden</span>
+                                <span>{{ $t('Toon leden') }}</span>
                             </button>
                         </template>
                     </STInputBox>
 
-                    <STInputBox v-if="membersWithoutMatchingGroups.length > 0" title="In welke groep wil je leden inschrijven die nergens in passen?" error-fields="group" :error-box="errors.errorBox" class="max">
+                    <STInputBox v-if="membersWithoutMatchingGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`In welke groep wil je leden inschrijven die nergens in passen?`)">
                         <p class="info-box">
-                            {{ membersWithoutMatchingGroups.length }} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.
+                            {{ $t('{count} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.', {count: membersWithoutMatchingGroups.length}) }}
                         </p>
 
                         <Dropdown v-model="defaultGroup">
@@ -132,13 +139,13 @@
                         <template #right>
                             <button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
                                 <span class="icon help" />
-                                <span>Toon leden</span>
+                                <span>{{ $t('Toon leden') }}</span>
                             </button>
                         </template>
                     </STInputBox>
                 </template>
                 <template v-else>
-                    <STInputBox title="In welke groep wil je deze leden inschrijven?" error-fields="group" :error-box="errors.errorBox" class="max">
+                    <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`In welke groep wil je deze leden inschrijven?`)">
                         <Dropdown v-model="defaultGroup">
                             <option v-for="group in groups" :key="group.id" :value="group">
                                 {{ group.settings.name }}

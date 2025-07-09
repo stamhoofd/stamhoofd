@@ -1,15 +1,15 @@
 <template>
     <SaveView :title="$t('Kijk deze fouten na')" :loading="saving" :save-text="$t('Nieuw bestand uploaden')" @save="goNext">
-        <h1>Kijk deze fouten na</h1>
-        <p>In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.</p>
+        <h1>{{ $t('Kijk deze fouten na') }}</h1>
+        <p>{{ $t('In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.') }}</p>
 
         <table class="data-table">
             <thead>
                 <tr>
                     <th>
-                        Fout
+                        {{ $t('Fout') }}
                     </th>
-                    <th>Cel</th>
+                    <th>{{ $t('Cel') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,7 +24,7 @@
             </tbody>
         </table>
 
-        <STErrorsDefault :error-box="errors.errorBox" />
+        <STErrorsDefault :error-box="errors.errorBox"/>
     </SaveView>
 </template>
 

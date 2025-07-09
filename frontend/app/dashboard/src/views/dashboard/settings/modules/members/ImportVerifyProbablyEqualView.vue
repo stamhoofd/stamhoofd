@@ -1,15 +1,15 @@
 <template>
     <SaveView :title="$t('Lijken op elkaar')" :save-text="$t('Volgende')" @save="goNext">
         <h1>
-            Vink de rijen aan als het om dezelfde personen gaat
+            {{ $t('Vink de rijen aan als het om dezelfde personen gaat') }}
         </h1>
-        <p>We zijn niet 100% zeker dat deze leden uit Stamhoofd en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Stamhoofd) overschrijven als je ze aanvinkt.</p>
+        <p>{{ $t('We zijn niet 100% zeker dat deze leden uit Stamhoofd en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Stamhoofd) overschrijven als je ze aanvinkt.') }}</p>
 
         <button v-if="!isCheckedAll" class="button text" type="button" @click="checkAll">
-            Alles aanvinken
+            {{ $t('Alles aanvinken') }}
         </button>
         <button v-else class="button text" type="button" @click="uncheckAll">
-            Alles uitvinken
+            {{ $t('Alles uitvinken') }}
         </button>
 
         <STList>
@@ -35,7 +35,7 @@
                 </template>
 
                 <template #left>
-                    <Checkbox :model-value="match.isEqual" @update:model-value="setEqual(match, $event)" />
+                    <Checkbox :model-value="match.isEqual" @update:model-value="setEqual(match, $event)"/>
                 </template>
             </STListItem>
         </STList>
