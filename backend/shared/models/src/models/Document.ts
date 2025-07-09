@@ -121,10 +121,6 @@ export class Document extends QueryableModel {
     }
 
     async updateData(): Promise<void> {
-        if (!this.registrationId) {
-            console.log('No registration id, skipping update');
-            return;
-        }
         const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
         const template = await DocumentTemplate.getByID(this.templateId);
         if (!template) {
@@ -133,14 +129,23 @@ export class Document extends QueryableModel {
         }
 
         if (!template.updatesEnabled) {
-            console.log('No updatesEnabled, skipping update');
+            console.log('No updates enabled when updating document', this.id);
+            // do update, without taking new data from the registration into account
+            await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
+            return;
+        }
+
+        if (!this.registrationId) {
+            console.log('No registration id when updating document', this.id);
+            await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
             return;
         }
 
         const Member = (await import('./Member')).Member;
         const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId]);
         if (!registration) {
-            console.log('No registration, skipping update');
+            console.log('No registration when updating document', this.id);
+            await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
             return;
         }
 
