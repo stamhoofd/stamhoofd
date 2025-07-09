@@ -25,20 +25,30 @@ export interface DiffChunk {
     endIndex: number;
 }
 
-export function getDiffChunks(filePath: string, options: GetGitChangesOptions = {}): DiffChunk[] {
+export function getDiffChunks(filePath: string, options: GetGitChangesOptions = {}): DiffChunk[] | null {
     const changes = getChanges(filePath, options);
     const firstChunkIndex = changes.findIndex(isDiffChunkHeader);
     if(firstChunkIndex === -1) {
         return [];
     }
 
-    return changes.slice(firstChunkIndex)
+    const result = changes.slice(firstChunkIndex)
         .filter(isDiffChunkHeader)
         .map(getStartAndEndIndexFromDifChunkHeader);
+
+        if(result.length === 1 && result[0].startIndex === -1) {
+            return null;
+        }
+
+        return result;
 }
 
-export function getChangedLines(filePath: string, options: GetGitChangesOptions = {}): Set<number> {
+export function getChangedLines(filePath: string, options: GetGitChangesOptions = {}): Set<number> | null {
     const diffChunks = getDiffChunks(filePath, options);
+    if(diffChunks === null) {
+        return null;
+    }
+
     const changedLines = new Set<number>();
 
     for(const diffChunk of diffChunks) {
@@ -108,6 +118,13 @@ function splitLines(text: string): string[] {
 export function addChangeMarkers(filePath: string, text: string, commitsToCompare?: [string, string]): string {
     const lines = splitLines(text);
     const changes = getDiffChunks(filePath, {compare: commitsToCompare});
+
+    if(changes === null) {
+        lines[0] =   startChangeMarker + lines[0];
+        lines[lines.length - 1] = lines[lines.length - 1] + endChangeMarker;
+        return lines.join(`
+`);
+    }
 
     for(const {startIndex, endIndex} of changes) {
         lines[startIndex] = startChangeMarker + lines[startIndex];
