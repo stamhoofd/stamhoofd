@@ -509,16 +509,18 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
 const memberFetcher = useMembersObjectFetcher();
 
 async function fetchAllMembers() {
+    const selectedPeriod = period.value.period;
+    // only get members for selected period + previous period
+    const periodIds = [selectedPeriod.id, selectedPeriod.previousPeriodId];
+
     const initialRequest: LimitedFilteredRequest = new LimitedFilteredRequest({
-        // todo: change filter?
         filter: {
             registrations: {
                 $elemMatch: {
                     organizationId: organization.value.id,
-                    // todo: only filter for selected period + previous period?
-                    // periodId: {
-                    //     $in: Formatter.uniqueArray(periodIds),
-                    // },
+                    periodId: {
+                        $in: periodIds,
+                    },
                 },
             },
         },
