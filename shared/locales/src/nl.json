@@ -2793,7 +2793,7 @@
   "0b44456e-1338-4468-ba71-5aabc171555f": "Ga naar vorige lid",
   "4b09d022-aac5-49da-80c2-9c2dcd2f642c": "Ga naar volgende lid",
   "f59ba68b-d007-40f2-9b87-fc5605ec55ea": "Krijg toegang tot de gegevens van {member}",
-  "9474f01d-e447-4a95-986e-247917765ecb": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.",
+  "9474f01d-e447-4a95-986e-247917765ecb": "{member} is al gekend in ons systeem, maar jouw e-mailadres is er nog niet mee gekoppeld. Om toegang te krijgen heb je de beveiligingscode nodig (die is uniek per lid).",
   "61b95651-a851-4a09-9850-9be0542b4c79": "Waar vind ik deze code?",
   "3292499d-c4db-4429-9f90-c6ce25713d2d": "Vraag de code aan jouw leiding",
   "0de51cb5-c474-4ec9-9218-4d6709628675": "Zoek de code onderaan een e-mail die je van ons kreeg",
