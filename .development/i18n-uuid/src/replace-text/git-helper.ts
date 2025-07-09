@@ -115,15 +115,12 @@ function splitLines(text: string): string[] {
     return text.split(/(\r|\n)/).filter(item => !/(\r|\n)/.test(item));
 }
 
-export function addChangeMarkers(filePath: string, text: string, commitsToCompare?: [string, string]): string {
+export function addChangeMarkers(filePath: string, text: string, commitsToCompare?: [string, string]): string | null {
     const lines = splitLines(text);
     const changes = getDiffChunks(filePath, {compare: commitsToCompare});
 
     if(changes === null) {
-        lines[0] =   startChangeMarker + lines[0];
-        lines[lines.length - 1] = lines[lines.length - 1] + endChangeMarker;
-        return lines.join(`
-`);
+        return null;
     }
 
     for(const {startIndex, endIndex} of changes) {
