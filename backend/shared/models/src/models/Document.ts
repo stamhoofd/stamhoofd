@@ -107,11 +107,13 @@ export class Document extends Model {
         }
 
         if (!template.updatesEnabled) {
-            console.log('No updatesEnabled, skipping update')
+            console.log('No updatesEnabled, only updating with existing data')
+            template.updateManualDocument(this)
             return
         }
 
         if (!this.registrationId) {
+            console.error('Registration not set for document ', this.id)
             template.updateManualDocument(this)
             return
         }
@@ -120,6 +122,7 @@ export class Document extends Model {
         const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId])
         if (!registration) {
             console.error('Registration not found for document ', this.id, this.registrationId)
+             template.updateManualDocument(this)
             return
         }
 
