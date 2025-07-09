@@ -20,13 +20,13 @@ export class WebshopUitpasNumber extends QueryableModel {
     webshopId: string;
 
     @column({ type: 'string' })
-    articleId: string;
+    productId: string;
 
     @column({ type: 'string' })
     orderId = '';
 
-    static async areUitpasNumbersUsed(webshopId: string, articleId: string, uitpasNumbers: string[]): Promise<boolean> {
-        const hasBeenUsed = !!(await WebshopUitpasNumber.select('uitpasNumber').where('webshopId', webshopId).andWhere('articleId', articleId).andWhere('uitpasNumber', uitpasNumbers).first(false));
+    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[]): Promise<boolean> {
+        const hasBeenUsed = !!(await WebshopUitpasNumber.select('uitpasNumber').where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
         return hasBeenUsed;
     }
 }
