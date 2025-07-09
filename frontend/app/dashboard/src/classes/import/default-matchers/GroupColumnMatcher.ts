@@ -36,7 +36,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Deze inschrijvingsgroep is leeg',
+                message: $t(`Deze inschrijvingsgroep is leeg`),
             });
         }
 
@@ -44,7 +44,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (cell.t !== 's' || typeof cell.v !== 'string' || !cell.v) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'De inschrijvingsgroep is leeg',
+                message: $t(`De inschrijvingsgroep is leeg`),
             });
         }
 
@@ -63,7 +63,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!minErrorGroup) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: "'" + value + "' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
+                message: $t(`'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.`, { group: value }),
             });
         }
     }

@@ -47,7 +47,7 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
         if (isNaN(b)) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: "'" + value + "' is geen geldig bedrag",
+                message: $t(`'{value}' is geen geldig bedrag`, { value }),
             });
         }
 

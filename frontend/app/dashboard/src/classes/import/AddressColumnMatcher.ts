@@ -16,7 +16,7 @@ export class AddressColumnMatcher extends GeneralMemberDetailsMatcher<Address> {
         if (split.length === 1) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: v + ' kon niet als een adres worden herkend. Controleer of het formaat "Straatnaam huisnummer, postcode stad" werd gevolgd.',
+                message: $t(`{address} kon niet als een adres worden herkend. Controleer of het formaat "Straatnaam huisnummer, postcode stad" werd gevolgd.`, { address: v }),
             });
         }
 
@@ -40,7 +40,7 @@ export class AddressColumnMatcher extends GeneralMemberDetailsMatcher<Address> {
         if (!country) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Onleesbaar adres, mogelijks onbekend land: ' + countryString,
+                message: $t(`Onleesbaar adres, mogelijks onbekend land`) + ': ' + countryString,
                 field: 'country',
             });
         }

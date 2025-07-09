@@ -58,7 +58,7 @@ export class StreetWithNumberColumnMatcher extends SharedMemberDetailsMatcher im
         if (!value) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Geen straat en huisnummer in deze cel',
+                message: $t(`Geen straat en huisnummer in deze cel`),
             });
         }
 

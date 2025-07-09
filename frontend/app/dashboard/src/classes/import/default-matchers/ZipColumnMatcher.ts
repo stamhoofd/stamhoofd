@@ -46,7 +46,7 @@ export class ZipColumnMatcher extends SharedMemberDetailsMatcher implements Colu
         if (postalCode.length === 0) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Geen tekst in deze cel',
+                message: $t(`Geen tekst in deze cel`),
             });
         }
 

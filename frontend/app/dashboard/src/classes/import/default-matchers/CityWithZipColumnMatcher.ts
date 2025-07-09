@@ -70,7 +70,7 @@ export class CityWithZipColumnMatcher extends SharedMemberDetailsMatcher impleme
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'City and zipcode expected',
-                    human: 'We verwachten zowel een postcode als een gemeente',
+                    human: $t(`We verwachten zowel een postcode als een gemeente`),
                 });
             }
             // TODO! order!

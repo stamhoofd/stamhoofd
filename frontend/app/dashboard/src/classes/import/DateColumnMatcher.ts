@@ -14,7 +14,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (!(cell.v instanceof Date) || !cell.v) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: 'Onverwachte datum in deze cel',
+                    message: $t(`Onverwachte datum in deze cel`),
                 });
             }
 
@@ -39,7 +39,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         else if (cell.t !== 's' || typeof cell.v !== 'string' || !cell.v) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Geen tekst in deze cel',
+                message: $t(`Geen tekst in deze cel`),
             });
         }
 
@@ -54,7 +54,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (parts.length !== 3) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Ongeldige datum. Probeer in de vorm zoals 20/08/1995',
+                message: $t(`Ongeldige datum. Probeer in de vorm zoals 20/08/1995`),
             });
         }
 
@@ -70,7 +70,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
                 if (hadMonth) {
                     throw new SimpleError({
                         code: 'invalid_type',
-                        message: 'Ongeldige datum. Probeer in de vorm zoals 20/08/1995',
+                        message: $t(`Ongeldige datum. Probeer in de vorm zoals 20/08/1995`),
                     });
                 }
                 hadMonth = true;
@@ -84,7 +84,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (numbersClean.length !== 3) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Ongeldige datum. Probeer in de vorm zoals 20/08/1995',
+                message: $t(`Ongeldige datum. Probeer in de vorm zoals 20/08/1995`),
             });
         }
 
@@ -101,19 +101,19 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (first < currentYear - maxAge || first > currentYear) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: "Ongeldig jaar. '" + first + "' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995",
+                    message: $t(`Ongeldig jaar. '{year}' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995`, { year: first }),
                 });
             }
             if (numbersClean[1] > 12 || numbersClean[1] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: "Ongeldige datum. '" + numbersClean[1] + "' is geen geldige maand. Probeer in de vorm zoals 20/08/1995",
+                    message: $t(`Ongeldige datum. '{date}' is geen geldige maand. Probeer in de vorm zoals 20/08/1995`, { date: numbersClean[1] }),
                 });
             }
             if (numbersClean[2] > 31 || numbersClean[2] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: "Ongeldige datum. '" + numbersClean[2] + "' is geen geldige dag. Probeer in de vorm zoals 20/08/1995",
+                    message: $t(`Ongeldige datum. '{date}' is geen geldige dag. Probeer in de vorm zoals 20/08/1995`, { date: numbersClean[2] }),
                 });
             }
             return new Date(numbersClean[0], numbersClean[1] - 1, numbersClean[2]);
@@ -125,7 +125,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (last < currentYear - maxAge || last > currentYear) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: "Ongeldig jaar. '" + last + "' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995",
+                    message: $t(`Ongeldig jaar. '{year}' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995`, { year: last }),
                 });
             }
 
@@ -140,13 +140,13 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (numbersClean[1] > 12 || numbersClean[1] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: "Ongeldige datum. '" + numbersClean[1] + "' is geen geldige maand. Probeer in de vorm zoals 20/08/1995",
+                    message: $t(`Ongeldige datum. '{date}' is geen geldige maand. Probeer in de vorm zoals 20/08/1995`, { date: numbersClean[1] }),
                 });
             }
             if (numbersClean[0] > 31 || numbersClean[0] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: "Ongeldige datum. '" + numbersClean[2] + "' is geen geldige dag. Probeer in de vorm zoals 20/08/1995",
+                    message: $t(`Ongeldige datum. '{date}' is geen geldige dag. Probeer in de vorm zoals 20/08/1995`, { date: numbersClean[2] }),
                 });
             }
             return new Date(numbersClean[2], numbersClean[1] - 1, numbersClean[0]);
@@ -156,7 +156,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (last > 99 || last < 0) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Ongeldig jaar. Probeer in de vorm zoals 20/08/1995',
+                message: $t(`Ongeldig jaar. Probeer in de vorm zoals 20/08/1995`),
             });
         }
 
@@ -172,13 +172,13 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (numbersClean[1] > 12 || numbersClean[1] < 1) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: "Ongeldige datum. '" + numbersClean[1] + "' is geen geldige maand. Probeer in de vorm zoals 20/08/1995",
+                message: $t(`Ongeldige datum. '{date}' is geen geldige maand. Probeer in de vorm zoals 20/08/1995`, { date: numbersClean[1] }),
             });
         }
         if (numbersClean[0] > 31 || numbersClean[0] < 1) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: "Ongeldige datum. '" + numbersClean[2] + "' is geen geldige dag. Probeer in de vorm zoals 20/08/1995",
+                message: $t(`Ongeldige datum. '{date}' is geen geldige dag. Probeer in de vorm zoals 20/08/1995`, { date: numbersClean[2] }),
             });
         }
 
@@ -219,7 +219,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
 
         throw new SimpleError({
             code: 'invalid_type',
-            message: "Ongeldige datum. Kon '" + str + "' niet omzetten in een geldige maand",
+            message: $t(`Ongeldige datum. Kon '{date}' niet omzetten in een geldige maand`, { date: str }),
         });
     }
 
@@ -239,7 +239,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
 
         throw new SimpleError({
             code: 'invalid_type',
-            message: 'Ongeldige datum. Probeer in de vorm zoals 20/08/1995',
+            message: $t(`Ongeldige datum. Probeer in de vorm zoals 20/08/1995`),
         });
     }
 }

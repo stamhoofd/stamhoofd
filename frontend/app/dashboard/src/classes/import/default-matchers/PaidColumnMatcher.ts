@@ -104,7 +104,7 @@ export class PaidColumnMatcher implements ColumnMatcher {
         if (b === null) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: "'" + value + "' is geen ja of nee. Probeer Ja of Nee, X, 0, 1 of leeg",
+                message: $t(`'{value}' is geen ja of nee. Probeer Ja of Nee, X, 0, 1 of leeg`, { value }),
             });
         }
 

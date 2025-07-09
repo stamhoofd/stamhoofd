@@ -70,7 +70,7 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
         if (!cell && this.required) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Deze cel is leeg',
+                message: $t(`Deze cel is leeg`),
             });
         }
 
@@ -84,7 +84,7 @@ export abstract class GeneralMemberDetailsMatcher<T> extends SharedMemberDetails
             if (this.required) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: 'Deze cel is leeg',
+                    message: $t(`Deze cel is leeg`),
                 });
             }
             return;

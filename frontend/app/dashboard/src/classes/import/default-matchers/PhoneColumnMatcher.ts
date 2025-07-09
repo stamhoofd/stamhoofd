@@ -60,7 +60,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
             throw new SimpleError({
                 code: 'invalid_field',
                 message: e.message || 'Invalid phone',
-                human: 'Ongeldig telefoonnummer',
+                human: $t(`Ongeldig telefoonnummer`),
                 field: 'phone',
             });
         }
@@ -86,7 +86,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: e.message || 'Invalid phone',
-                        human: 'Ongeldig telefoonnummer',
+                        human: $t(`Ongeldig telefoonnummer`),
                         field: 'phone',
                     });
                 }

@@ -472,7 +472,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
             }
 
             if (!column.matcher) {
-                throw new Error("Koppel de kolom '" + column.name + "' eerst aan een bijhorende waarde");
+                throw new Error($t(`Koppel de kolom '{column}' eerst aan een bijhorende waarde`, { column: column.name }));
             }
 
             const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject;

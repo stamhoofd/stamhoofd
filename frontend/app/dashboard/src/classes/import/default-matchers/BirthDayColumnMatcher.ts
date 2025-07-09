@@ -7,7 +7,7 @@ import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
 export class BirthDayColumnMatcher extends DateColumnMatcher implements BaseColumnMatcher {
     constructor() {
         super({
-            name: 'Geboortedatum',
+            name: $t(`Geboortedatum`),
             category: MemberDetailsMatcherCategory.Member,
             required: false,
             possibleMatch: ['geboortedatum', 'verjaardag', 'birth day'],

@@ -53,7 +53,7 @@ export class EmailColumnMatcher extends SharedMemberDetailsMatcher implements Co
         if (!DataValidator.isEmailValid(email)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Ongeldig e-mailadres',
+                message: $t(`Ongeldig e-mailadres`),
             });
         }
 

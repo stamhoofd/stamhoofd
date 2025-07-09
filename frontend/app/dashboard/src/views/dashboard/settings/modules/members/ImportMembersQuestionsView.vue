@@ -331,8 +331,8 @@ function getGroupAutoAssignCountForPriority(group: Group) {
 function openAssignment() {
     autoAssignMembers(props.importMemberResults);
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: 'Wijzigingen aan inschrijvingen',
-        description: 'Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand',
+        title: $t(`Wijzigingen aan inschrijvingen`),
+        description: $t(`Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand`),
         members: membersNeedingAssignment.value.flatMap((m) => {
             if (m.importRegistrationResult.autoAssignedGroup === null) {
                 return [];
@@ -348,8 +348,8 @@ function openAssignment() {
 
 function openPriorityAssignedToGroup(group: Group) {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: 'Leden die door prioriteit bij ' + group.settings.name + ' zullen worden ingeschreven',
-        description: 'Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij ' + group.settings.name + ' zullen worden ingeschreven',
+        title: $t(`Leden die door prioriteit bij {group} zullen worden ingeschreven`, { group: group.settings.name }),
+        description: $t(`Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij {group} zullen worden ingeschreven`, { group: group.settings.name }),
         members: membersWithMultipleGroups.value.flatMap((m) => {
             if (m.importRegistrationResult.group !== null) {
                 return [];
@@ -370,8 +370,8 @@ function openPriorityAssignedToGroup(group: Group) {
 
 function openMultipleGroups() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: 'Leden die in meerdere groepen passen',
-        description: 'Dit zijn alle leden en de groepen waar ze in passen. Je kan beperken tot welke groepen ze horen door de instellingen van die groep te wijzigen.',
+        title: $t(`Leden die in meerdere groepen passen`),
+        description: $t(`Dit zijn alle leden en de groepen waar ze in passen. Je kan beperken tot welke groepen ze horen door de instellingen van die groep te wijzigen.`),
         members: membersWithMultipleGroups.value.flatMap((m) => {
             if (m.importRegistrationResult.group !== null) {
                 return [];
@@ -393,77 +393,77 @@ function getParentDescription(parent: Parent) {
         description.push(type + ': ' + parent.name);
     }
     if (parent.phone) {
-        description.push(type + ' telefoonnummer: ' + parent.phone);
+        description.push(type + ' ' + $t(`telefoonnummer`) + ': ' + parent.phone);
     }
     if (parent.email) {
-        description.push(type + ' e-mail: ' + parent.email);
+        description.push(type + ' ' + $t(`e-mail`) + ': ' + parent.email);
     }
     if (parent.address) {
-        description.push(type + ' adres: ' + parent.address.toString());
+        description.push(type + ' ' + $t(`adres`) + ': ' + parent.address.toString());
     }
     if (parent.nationalRegisterNumber) {
-        description.push(type + ' rijksregisternummer: ' + parent.nationalRegisterNumber.toString());
+        description.push(type + ' ' + $t(`rijksregisternummer`) + ': ' + parent.nationalRegisterNumber.toString());
     }
     return description;
 }
 
 function openResultView() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: 'Wijzigingen',
-        description: 'Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.',
+        title: $t(`Wijzigingen`),
+        description: $t(`Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.`),
         members: props.importMemberResults.map((member) => {
             let description: string[] = [];
             const registration = buildRegistration(member);
 
             if (registration !== null) {
                 const group = groups.find(g => g.id === registration.group.id);
-                const groupName = (group?.settings.name ?? 'onbekende groep');
+                const groupName = (group?.settings.name ?? $t(`onbekende groep`));
 
                 let suffix = '';
 
                 if (member.importRegistrationResult.paidPrice !== null) {
-                    suffix = ` (${Formatter.price(member.importRegistrationResult.paidPrice)} betaald)`;
+                    suffix = ` (${$t('{price} betaald', { price: Formatter.price(member.importRegistrationResult.paidPrice) })})`;
                 }
                 else if (member.importRegistrationResult.paid || paid.value) {
-                    suffix = ` (reeds betaald)`;
+                    suffix = ` (${$t('reeds betaald')})`;
                 }
                 else {
-                    suffix = ` (nog niet betaald)`;
+                    suffix = ` (${$t('nog niet betaald')})`;
                 }
 
                 if (member.existingMember) {
                     if (registration !== null) {
                         if (registration.group.type === GroupType.WaitingList) {
-                            description.push('Wachtlijst plaatsen voor ' + groupName + suffix);
+                            description.push($t(`Wachtlijst plaatsen voor {group}`, { group: groupName }) + suffix);
                         }
                         else {
-                            description.push('Inschrijven voor ' + groupName + suffix);
+                            description.push($t(`Inschrijven voor {group}`, { group: groupName }) + suffix);
                         }
 
                         // Delete conflicting registrations (based on categories too!)
                         const deleteRegs = getOverrideRegistrations(registration, member);
                         for (const r of deleteRegs) {
-                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? 'onbekende groep');
+                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t(`onbekende groep`));
                             if (r.group.type === GroupType.WaitingList) {
-                                description.push('Verwijderen van wachtlijst van ' + groupName);
+                                description.push($t(`Verwijderen van wachtlijst van {group}`, { group: groupName }));
                             }
                             else {
-                                description.push('Verwijderen inschrijving voor ' + groupName);
+                                description.push($t(`Verwijderen inschrijving voor {group}`, { group: groupName }));
                             }
                         }
                     }
                 }
                 else {
                     if (registration.group.type === GroupType.WaitingList) {
-                        description.push('Toevoegen in het systeem en op wachtlijst plaatsen voor ' + groupName + suffix);
+                        description.push($t(`Toevoegen in het systeem en op wachtlijst plaatsen voor {group}`, { group: groupName }) + suffix);
                     }
                     else {
-                        description.push('Toevoegen in het systeem met inschrijving voor ' + groupName + suffix);
+                        description.push($t(`Toevoegen in het systeem met inschrijving voor {group}`, { group: groupName }) + suffix);
                     }
                 }
             }
             else if (member.isExisting) {
-                description.push('Geen wijziging aan inschrijvingen');
+                description.push($t(`Geen wijziging aan inschrijvingen`));
             }
 
             if (member.existingMember) {
@@ -471,34 +471,34 @@ function openResultView() {
                 const patched = member.patchedDetails;
 
                 if (patched.name !== undefined && existingDetails.name !== patched.name) {
-                    description.push('Naam wijzigen naar ' + patched.name);
+                    description.push($t(`Naam wijzigen naar {name}`, { name: patched.name }));
                 }
                 if (patched.nationalRegisterNumber && patched.nationalRegisterNumber !== existingDetails.nationalRegisterNumber) {
-                    description.push('Rijksregisternummer wijzigen naar ' + patched.nationalRegisterNumber.toString());
+                    description.push($t(`Rijksregisternummer wijzigen naar {nationalRegisterNumber}`, { nationalRegisterNumber: patched.nationalRegisterNumber.toString() }));
                 }
                 if (patched.gender !== undefined && existingDetails.gender !== patched.gender) {
-                    description.push('Geslacht wijzigen naar ' + getGenderName(patched.gender));
+                    description.push($t(`Geslacht wijzigen naar {gender}`, { gender: getGenderName(patched.gender) }));
                 }
                 if (patched.email !== undefined && patched.email && existingDetails.email !== patched.email) {
-                    description.push('E-mail wijzigen naar ' + patched.email);
+                    description.push($t(`E-mail wijzigen naar {email}`, { email: patched.email }));
                 }
                 if (patched.phone !== undefined && patched.phone && existingDetails.phone !== patched.phone) {
-                    description.push('Telefoonnummer wijzigen naar ' + patched.phone);
+                    description.push($t(`Telefoonnummer wijzigen naar {phone}`, { phone: patched.phone }));
                 }
                 if (patched.birthDay && (!existingDetails.birthDay || (Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(patched.birthDay)))) {
-                    description.push('Geboortedatum wijzigen naar ' + Formatter.date(patched.birthDay, true));
+                    description.push($t(`Geboortedatum wijzigen naar {birthDay}`, { birthDay: Formatter.date(patched.birthDay, true) }));
                 }
 
                 if (patched.address && patched.address.toString() !== existingDetails.address?.toString()) {
-                    description.push('Adres wijzigen naar ' + patched.address.toString());
+                    description.push($t(`Adres wijzigen naar {address}`, { address: patched.address.toString() }));
                 }
 
                 if (patched.memberNumber && patched.memberNumber !== existingDetails.memberNumber) {
-                    description.push('Lidnummer wijzigen naar ' + patched.memberNumber);
+                    description.push($t(`Lidnummer wijzigen naar {memberNumber}`, { memberNumber: patched.memberNumber }));
                 }
 
                 if (patched.uitpasNumber && patched.uitpasNumber !== existingDetails.uitpasNumber) {
-                    description.push('UiTPAS-nummer wijzigen naar ' + patched.uitpasNumber);
+                    description.push($t(`UiTPAS-nummer wijzigen naar {number}`, { number: patched.uitpasNumber }));
                 }
 
                 for (const parent of member.getChangedParents()) {
@@ -506,41 +506,41 @@ function openResultView() {
                 }
 
                 for (const answer of member.getChangedRecordAnswers()) {
-                    description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue);
+                    description.push($t('{key} wijzigen naar {value}', { key: answer.settings.name, value: answer.stringValue }));
                 }
             }
             else {
                 const patched = member.patchedDetails;
 
                 if (patched.name) {
-                    description.push('Naam: ' + patched.name);
+                    description.push($t(`Naam`) + ': ' + patched.name);
                 }
                 if (patched.nationalRegisterNumber) {
-                    description.push('Rijksregisternummer: ' + patched.nationalRegisterNumber.toString());
+                    description.push($t(`Rijksregisternummer`) + ': ' + patched.nationalRegisterNumber.toString());
                 }
                 if (patched.gender) {
-                    description.push('Geslacht: ' + getGenderName(patched.gender));
+                    description.push($t(`Geslacht`) + ': ' + getGenderName(patched.gender));
                 }
                 if (patched.email) {
-                    description.push('E-mail: ' + patched.email);
+                    description.push($t(`E-mail`) + ': ' + patched.email);
                 }
                 if (patched.phone) {
-                    description.push('Telefoonnummer: ' + patched.phone);
+                    description.push($t(`Telefoonnummer`) + ': ' + patched.phone);
                 }
                 if (patched.birthDay) {
-                    description.push('Geboortedatum: ' + Formatter.date(patched.birthDay, true));
+                    description.push($t(`Geboortedatum`) + ': ' + Formatter.date(patched.birthDay, true));
                 }
 
                 if (patched.address) {
-                    description.push('Adres: ' + patched.address.toString());
+                    description.push($t(`Adres`) + ': ' + patched.address.toString());
                 }
 
                 if (patched.memberNumber) {
-                    description.push('Lidnummer: ' + patched.memberNumber);
+                    description.push($t(`Lidnummer`) + ': ' + patched.memberNumber);
                 }
 
                 if (patched.uitpasNumber) {
-                    description.push('UiTPAS-nummer: ' + patched.uitpasNumber);
+                    description.push($t(`UiTPAS-nummer`) + ': ' + patched.uitpasNumber);
                 }
 
                 for (const parent of patched.parents) {
@@ -548,7 +548,7 @@ function openResultView() {
                 }
 
                 for (const answer of patched.recordAnswers.values()) {
-                    description.push(answer.settings.name + ' wijzigen naar ' + answer.stringValue);
+                    description.push($t('{key} wijzigen naar {value}', { key: answer.settings.name, value: answer.stringValue }));
                 }
             }
 
@@ -573,8 +573,8 @@ const draggableGroups = computed({
 
 function openWithoutMatchingGroups() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: 'Leden die in geen enkele groep passen',
-        description: 'Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.',
+        title: $t(`Leden die in geen enkele groep passen`),
+        description: $t(`Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.`),
         members: membersWithoutMatchingGroups.value.flatMap((m) => {
             return [{
                 name: m.patchedDetails.name,
@@ -816,7 +816,7 @@ async function importResults(importMemberResults: ImportMemberResult[]) {
     if (importMemberResults.find(m => !m.isExisting && m.importRegistrationResult.group === null)) {
         throw new SimpleError({
             code: 'no_group',
-            message: 'Er is een nieuw lid zonder groep.',
+            message: $t(`Er is een nieuw lid zonder groep.`),
         });
     }
 
@@ -1004,14 +1004,14 @@ async function goNext() {
 
     saving.value = true;
 
-    const toast = new Toast('Bezig met importeren...', 'spinner').setHide(null).show();
+    const toast = new Toast($t(`Bezig met importeren...`), 'spinner').setHide(null).show();
 
     try {
         autoAssignMembers(props.importMemberResults);
         await importResults(props.importMemberResults);
         toast.hide();
 
-        new Toast('Importeren voltooid', 'success green').show();
+        new Toast($t(`Importeren voltooid`), 'success green').show();
         navigate.dismiss({ force: true }).catch(console.error);
     }
     catch (e) {

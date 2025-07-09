@@ -41,7 +41,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: 'Deze cel is leeg',
+                message: $t(`Deze cel is leeg`),
             });
         }
 
@@ -51,7 +51,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
             if (this.category === MemberDetailsMatcherCategory.Member as string) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: 'Deze cel is leeg',
+                    message: $t(`Deze cel is leeg`),
                 });
             }
         }
