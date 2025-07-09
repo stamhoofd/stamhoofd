@@ -99,7 +99,7 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast } from '@stamhoofd/components';
+import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, CenteredMessage } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -231,7 +231,20 @@ const enableUitpasSocialTariff = computed({
             uitpasBaseProductPriceId.value = null;
             return;
         }
-        uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+        if (!uitpasBaseProductPriceId.value) {
+            // If no uitpas base product price is set, we set it to the first available one.
+            CenteredMessage.confirm($t('De toegepaste kortingen worden niet automatisch geregistreerd en doorgestuurd naar UiTPAS. Je ontvangt geen terugbetalingen van UiTPAS.'), $t('Ok'), undefined, $t('Annuleren'), false).then((isConfirmed: boolean) => {
+                if (isConfirmed) {
+                    uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+                }
+                else {
+                    uitpasBaseProductPriceId.value = null;
+                }
+            }).catch(() => {
+                // If the user cancels, we set the uitpasBaseProductPriceId to null.
+                uitpasBaseProductPriceId.value = null;
+            });
+        }
     },
 });
 

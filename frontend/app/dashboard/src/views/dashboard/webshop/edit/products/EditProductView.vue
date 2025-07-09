@@ -772,12 +772,16 @@ const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
     return patchedProduct.value.prices.filter(p => (p.uitpasBaseProductPriceId === null));
 });
 
-function addProductPrice(enableUitpasSocialTariff: boolean = false) {
+async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
     const price = ProductPrice.create({});
     if (enableUitpasSocialTariff) {
         if (productPricesAvailableForUitpasBaseProductPrice.value.length === 0) {
             // should not be possible
             Toast.error($t('Er zijn geen prijzen beschikbaar om een apart UiTPAS kansentarief aan toe te voegen.')).show();
+            return;
+        }
+        const isConfirmed = await CenteredMessage.confirm($t('De toegepaste kortingen worden niet automatisch geregistreerd en doorgestuurd naar UiTPAS. Je ontvangt geen terugbetalingen van UiTPAS.'), $t('Ok'), undefined, $t('Annuleren'), false);
+        if (!isConfirmed) {
             return;
         }
         price.uitpasBaseProductPriceId = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
