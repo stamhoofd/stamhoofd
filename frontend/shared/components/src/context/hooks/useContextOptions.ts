@@ -57,7 +57,7 @@ export function useContextOptions() {
         }
 
         // Always add membership organization (we'll check permissions in the loop)
-        if (platform.value.membershipOrganizationId) {
+        if (platform.value.membershipOrganizationId && !organizationIds.includes(platform.value.membershipOrganizationId)) {
             organizationIds.push(platform.value.membershipOrganizationId);
         }
 
