@@ -46,7 +46,7 @@ export class ProductPrice extends AutoEncoder {
      * In that case it refers to the base price on which the UiTPAS social tariff is applied.
      * If it is null, this is not an UiTPAS social tariff.
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 376 })
     uitpasBaseProductPriceId: string | null = null;
 
     get isSoldOut(): boolean {
@@ -114,7 +114,7 @@ export class OptionMenu extends AutoEncoder {
     /**
      * By default, we select the first option if multipleChoise is false.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 376 })
     autoSelectFirst = true;
 
     @field({ decoder: new ArrayDecoder(Option) })
