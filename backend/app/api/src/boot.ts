@@ -20,6 +20,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService'
 import { UniqueUserService } from './services/UniqueUserService';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { UitpasNumberService } from './services/UitpasNumbersService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -229,6 +230,7 @@ const start = async () => {
     PlatformMembershipService.listen();
     DocumentService.listen();
     SetupStepUpdater.listen();
+    UitpasNumberService.listen();
 
     startCrons();
     seeds().catch(console.error);
