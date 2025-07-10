@@ -26,7 +26,7 @@ export class WebshopUitpasNumber extends QueryableModel {
     orderId = '';
 
     static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[]): Promise<boolean> {
-        const hasBeenUsed = !!(await WebshopUitpasNumber.select('uitpasNumber').where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
+        const hasBeenUsed = !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
         return hasBeenUsed;
     }
 }
