@@ -134,7 +134,7 @@ const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
 const platform = usePlatform();
 const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
-const baseMatchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(platform.value, organization.value, () => period.value.groups));
+const baseMatchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(platform.value, organization.value, () => period.value.groups, () => period.value));
 
 const groupSpecificMatchers = computed(() => {
     const result: ColumnMatcher[] = [];

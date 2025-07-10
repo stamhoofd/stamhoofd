@@ -1,4 +1,5 @@
-import { Address, Group, Organization, Platform, RecordCategory, RecordType } from '@stamhoofd/structures';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Address, Group, Organization, OrganizationRegistrationPeriod, Platform, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';
 import { ColumnMatcherHelper } from './ColumnMatcherHelper';
 import { DateColumnMatcher } from './DateColumnMatcher';
@@ -27,7 +28,7 @@ import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
 import { TextColumnMatcher } from './TextColumnMatcher';
 
 // Always make sure fullname is before lastname!
-export const getMemberMatchers = (getGroups: () => Group[]) => [
+export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => OrganizationRegistrationPeriod) => [
     new MemberNumberColumnMatcher(),
     new FullNameColumnMatcher(MemberDetailsMatcherCategory.Member),
     new FirstNameColumnMatcher(MemberDetailsMatcherCategory.Member),
@@ -60,9 +61,18 @@ export const getMemberMatchers = (getGroups: () => Group[]) => [
         required: false,
         possibleMatch: ['datum', 'date'],
         negativeMatch: ['geboortedatum', 'verjaardag', 'birth day'],
-        get: importResult => importResult.registration.date ?? undefined,
-        save: (d, importResult) => {
-            importResult.registration.date = d;
+        get: (importResult: ImportMemberResult) => importResult.importRegistrationResult.date ?? undefined,
+        save: (d, importResult: ImportMemberResult) => {
+            const period = getPeriod();
+
+            if (d < period.period.startDate || d > period.period.endDate) {
+                throw new SimpleError({
+                    code: 'invalid_start_date',
+                    message: $t('De datum van inschrijving ligt buiten het geselecteerde werkjaar.'),
+                });
+            }
+
+            importResult.importRegistrationResult.date = d;
         },
     }),
     new UitpasNumberColumnMatcher(),
@@ -126,9 +136,9 @@ export const paymentMatchers = [
     new PaymentPriceColumnMatcher(),
 ];
 
-export const getAllMatchers = (platform: Platform, organization: Organization, getGroups: () => Group[]) => {
+export const getAllMatchers = (platform: Platform, organization: Organization, getGroups: () => Group[], getPeriod: () => OrganizationRegistrationPeriod) => {
     let matchers = [
-        ...getMemberMatchers(getGroups),
+        ...getMemberMatchers(getGroups, getPeriod),
         ...paymentMatchers,
         ...parentMatchers1,
         ...parentMatchers2,

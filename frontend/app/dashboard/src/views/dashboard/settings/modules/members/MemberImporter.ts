@@ -49,7 +49,7 @@ export class MemberImporter {
     }
 
     async importResults(importMemberResults: ImportMemberResult[], importContext: MemberImporterContext) {
-        if (importMemberResults.find(m => !m.isExisting && m.importRegistrationResult.group === null)) {
+        if (importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
             throw new SimpleError({
                 code: 'no_group',
                 message: $t(`Er is een nieuw lid zonder groep.`),
@@ -144,7 +144,7 @@ export class MemberImporter {
         const registrationData: RegistrationData = {
             group,
             groupPrice,
-            customStartDate: member.importRegistrationResult.date ?? new Date(),
+            customStartDate: member.importRegistrationResult.date,
         };
 
         return registrationData;
