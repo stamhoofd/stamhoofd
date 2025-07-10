@@ -208,4 +208,15 @@ export class Webshop extends QueryableModel {
         }
         await this.save();
     }
+
+    getHasProductsWithDuplicateNames() {
+        const names = new Set<string>();
+        for (const product of this.products) {
+            if (names.has(product.name)) {
+                return true;
+            }
+            names.add(product.name);
+        }
+        return false;
+    }
 }

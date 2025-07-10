@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethodType, OptionMenu, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, Product, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 
@@ -168,6 +168,7 @@ export class OrdersExcelExport {
                 $t(`e2c09edd-db1b-4196-9fd3-0a7d3c9f230e`),
                 $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
                 $t(`a9c436ef-31e9-43bd-83ea-742ac331380a`),
+                $t('Categorie'),
                 ...optionNames,
                 $t(`507ba771-0809-4dda-9b5f-9d7f992b329a`),
 
@@ -309,6 +310,7 @@ export class OrdersExcelExport {
                         format: '€0.00',
                     },
                     item.product.name,
+                    getProductCategory(webshop, item.product),
                     ...options,
                     item.seats.slice().sort(ReservedSeat.sort).map(s => s.getNameString(webshop, item.product)).join(', '),
                     checkoutType,
@@ -588,20 +590,21 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
+                $t('Categorie'),
                 $t(`a9c436ef-31e9-43bd-83ea-742ac331380a`),
                 $t(`be748ea7-badc-48b6-ae7a-8eca6341dc08`),
                 $t(`f085f874-242d-47cb-a404-96eab69662ec`),
             ],
         ];
 
-        const counter: Map<string, { amount: number; name: string; variant: string; grouping: string }> = new Map();
+        const counter: Map<string, { amount: number; name: string; category: string; variant: string; grouping: string }> = new Map();
 
         for (const order of orders) {
             for (const item of order.data.cart.items) {
                 const code = item.codeWithoutFields;
                 let existing = counter.get(code);
                 if (!existing) {
-                    existing = { amount: 0, name: item.product.name, variant: item.descriptionWithoutFields, grouping: cartItemGroupingString(item) };
+                    existing = { amount: 0, name: item.product.name, category: getProductCategory(webshop, item.product), variant: item.descriptionWithoutFields, grouping: cartItemGroupingString(item) };
                     counter.set(code, existing);
                 }
                 existing.amount += item.amount;
@@ -616,6 +619,7 @@ export class OrdersExcelExport {
         for (const item of arr) {
             hasVariant = hasVariant || item.grouping !== item.name;
             wsData.push([
+                item.category,
                 item.name,
                 item.variant,
                 {
@@ -641,7 +645,7 @@ export class OrdersExcelExport {
     static createOptions(webshop: Webshop, orders: PrivateOrder[]): XLSX.WorkSheet {
         const productPriceColumns = new Map<string, { name: string }>();
         const optionColumns = new Map<string, { name: string }>();
-        type ProductData = { amount: number; name: string; date: string; optionCounts: Map<string, number>; productPriceCounts: Map<string, number> };
+        type ProductData = { amount: number; category: string; name: string; date: string; optionCounts: Map<string, number>; productPriceCounts: Map<string, number> };
         const counter: Map<string, ProductData> = new Map();
 
         // First insert the products in order
@@ -651,7 +655,7 @@ export class OrdersExcelExport {
                 date = Formatter.capitalizeFirstLetter(product.dateRange.toString());
             }
             const code = Formatter.slug(product.name + date);
-            const productData = counter.get(code) ?? { amount: 0, name: product.name, date, optionCounts: new Map(), productPriceCounts: new Map() };
+            const productData = counter.get(code) ?? { amount: 0, category: getProductCategory(webshop, product), name: product.name, date, optionCounts: new Map(), productPriceCounts: new Map() };
             counter.set(code, productData);
 
             for (const price of product.prices) {
@@ -714,9 +718,10 @@ export class OrdersExcelExport {
         // Columns
         const wsData: RowValue[][] = [
             [
-                'Artikel',
-                'Datum',
-                'Totaal',
+                $t('Categorie'),
+                $t('Artikel'),
+                $t('Datum'),
+                $t('Totaal'),
                 ...productPriceColumnsArr.map(a => productPriceColumns.get(a)!.name),
                 ...optionColumnsArr.map(a => optionColumns.get(a)!.name),
             ],
@@ -730,7 +735,7 @@ export class OrdersExcelExport {
                 }
                 const code = Formatter.slug(item.product.name + date);
 
-                const productData = counter.get(code) ?? { amount: 0, name: item.product.name, date, optionCounts: new Map(), productPriceCounts: new Map() };
+                const productData = counter.get(code) ?? { amount: 0, category: getProductCategory(webshop, item.product), name: item.product.name, date, optionCounts: new Map(), productPriceCounts: new Map() };
                 counter.set(code, productData);
 
                 productData.amount += item.amount;
@@ -751,6 +756,7 @@ export class OrdersExcelExport {
 
         for (const item of arr) {
             wsData.push([
+                item.category,
                 item.name,
                 item.date,
                 {
@@ -809,4 +815,8 @@ export class OrdersExcelExport {
             XLSX.writeFile(wb, $t(`b0c46199-2c76-4d8c-9737-08838097e62f`));
         }
     }
+}
+
+function getProductCategory(webshop: Webshop, product: Product): string {
+    return webshop.categories.find(c => c.productIds.includes(product.id))?.name ?? '';
 }
