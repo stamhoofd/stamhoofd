@@ -173,16 +173,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { Dropdown, Radio, RadioGroup, startRegister, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
+import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { Dropdown, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, getGenderName, Group, GroupPrice, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { getGenderName, Group, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
 import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import ImportAutoAssignedView from './ImportAutoAssignedView.vue';
+import ImportMembersErrorReportView from './ImportMembersErrorReportView.vue';
+import { MemberImporter } from './MemberImporter';
 
 const props = defineProps<{
     period: OrganizationRegistrationPeriod;
@@ -203,6 +203,18 @@ const groups = props.period.groups;
 const defaultGroup = ref(groups[0]) as unknown as Ref<Group>;
 const multipleGroups = ref(calculateMultipleGroups(groups)) as unknown as Ref<Group[]>;
 const owner = useRequestOwner();
+const context = useContext();
+const show = useShow();
+const pop = usePop();
+
+const memberImporter = new MemberImporter({
+    platform: platform.value,
+    organization: organization.value,
+    period: props.period,
+    platformFamilyManager: platformFamilyManager,
+    context: context.value,
+    requestOwner: owner,
+});
 
 watch([autoAssign, defaultGroup], () => {
     autoAssignMembers(props.importMemberResults);
@@ -226,17 +238,17 @@ const membersNeedingAssignment = computed(() => {
     });
 });
 
-const membersWithNewRegistrations = computed(() => props.importMemberResults.filter(m => hasNewRegistration(m)));
+const membersWithNewRegistrations = computed(() => props.importMemberResults.filter(m => memberImporter.hasNewRegistration(m, isWaitingList.value)));
 
-const membersWithoutNewRegistrations = computed(() => props.importMemberResults.filter(m => !hasNewRegistration(m)));
+const membersWithoutNewRegistrations = computed(() => props.importMemberResults.filter(m => !memberImporter.hasNewRegistration(m, isWaitingList.value)));
 
 const deletedRegistrationsCount = computed(() => {
     return membersWithNewRegistrations.value.reduce((acc, m) => {
-        const registration = buildRegistration(m);
+        const registration = memberImporter.buildRegistration(m, isWaitingList.value);
         if (!registration) {
             return acc;
         }
-        return acc + getOverrideRegistrations(registration, m).length;
+        return acc + memberImporter.getOverrideRegistrations(registration, m).length;
     }, 0);
 });
 
@@ -274,8 +286,8 @@ const membersWithoutMatchingGroups = computed(() => {
 });
 
 /**
-     * Groups for which we need to set a priority, because some members fit in more than one of them
-     */
+ * Groups for which we need to set a priority, because some members fit in more than one of them
+ */
 function calculateMultipleGroups(groups: Group[]) {
     const filteredGroups = groups.filter(g => g.type === GroupType.Membership);
     const multipleGroups = new Map<string, Group>();
@@ -295,8 +307,8 @@ function calculateMultipleGroups(groups: Group[]) {
 }
 
 /**
-     * Map these members to their corresponding group (id), using priority, default etc
-     */
+ * Map these members to their corresponding group (id), using priority, default etc
+ */
 function autoAssignMembers(members: ImportMemberResult[]) {
     for (const member of members) {
         if (!shouldAssignRegistrationToMember(member)) {
@@ -420,7 +432,7 @@ function openResultView() {
         description: $t(`Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.`),
         members: props.importMemberResults.map((member) => {
             let description: string[] = [];
-            const registration = buildRegistration(member);
+            const registration = memberImporter.buildRegistration(member, isWaitingList.value);
 
             if (registration !== null) {
                 const group = groups.find(g => g.id === registration.group.id);
@@ -448,7 +460,7 @@ function openResultView() {
                         }
 
                         // Delete conflicting registrations (based on categories too!)
-                        const deleteRegs = getOverrideRegistrations(registration, member);
+                        const deleteRegs = memberImporter.getOverrideRegistrations(registration, member);
                         for (const r of deleteRegs) {
                             const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t(`onbekende groep`));
                             if (r.group.type === GroupType.WaitingList) {
@@ -591,419 +603,6 @@ function openWithoutMatchingGroups() {
     }).setDisplayStyle('popup')).catch(console.error);
 }
 
-function hasNewRegistration(member: ImportMemberResult) {
-    const group = (member.importRegistrationResult.group ?? member.importRegistrationResult.autoAssignedGroup);
-
-    if (!group) {
-        return false;
-    }
-
-    // Check if we are already registered for this group
-    if (member.existingMember) {
-        const periodId = props.period.period.id;
-        const existing = member.existingMember.filterRegistrations({ groups: [group], periodId });
-
-        if (existing.length && isWaitingList.value) {
-            return false;
-        }
-
-        if (existing.length && !isWaitingList.value && existing.find(e => !(e.group.type === GroupType.WaitingList))) {
-            // already registered
-            return false;
-        }
-    }
-
-    return true;
-}
-
-interface RegistrationData {
-    group: Group;
-    groupPrice: GroupPrice | null;
-    customStartDate: Date | null;
-}
-
-const context = useContext();
-
-function createCheckout(importMemberResults: ImportMemberResult[]): RegisterCheckout {
-    const checkout = new RegisterCheckout();
-    checkout.asOrganizationId = organization.value.id;
-
-    for (const importResult of importMemberResults) {
-        const member = importResult.getCheckoutMember();
-        member.family.checkout = checkout;
-        member.family.pendingRegisterItems = [];
-
-        const organization = importResult.organization;
-
-        const regsitrationData = buildRegistration(importResult);
-
-        if (regsitrationData) {
-            const registrationsToRemove = getOverrideRegistrations(regsitrationData, importResult);
-            const group = regsitrationData.group;
-            importResult.setCheckedOutGroup(group);
-
-            const item = new RegisterItem({
-                member,
-                group,
-                organization,
-                customStartDate: regsitrationData?.customStartDate,
-                groupPrice: regsitrationData?.groupPrice ?? undefined,
-                recordAnswers: importResult.importRegistrationResult.recordAnswers.size ? importResult.importRegistrationResult.recordAnswers : undefined,
-            });
-
-            for (const registration of registrationsToRemove) {
-                checkout.removeRegistration(new RegistrationWithPlatformMember({ registration, member }), { calculate: false });
-            }
-
-            checkout.add(item, { calculate: false });
-        }
-    }
-
-    return checkout;
-}
-
-function getGroupPrice(group: Group, matchPrice?: { priceValue?: number; priceName?: string; isReducedPrice: boolean }): GroupPrice {
-    const prices = group.settings.getFilteredPrices({ admin: true });
-    let matchedOnName: GroupPrice[] = [];
-    let matchedOnPrice: GroupPrice[] = [];
-
-    for (const price of prices) {
-        if (matchPrice !== undefined) {
-            const { priceValue, priceName, isReducedPrice } = matchPrice;
-
-            if (priceName !== undefined) {
-                if (price.name.toString() !== priceName) {
-                    continue;
-                }
-                matchedOnName.push(price);
-            }
-
-            if (priceValue !== undefined) {
-                if (isReducedPrice) {
-                    if (price.price.reducedPrice !== priceValue) {
-                        continue;
-                    }
-                }
-                else if (price.price.price !== priceValue) {
-                    continue;
-                }
-
-                matchedOnPrice.push(price);
-            }
-        }
-
-        const stock = price.getRemainingStock(group);
-        if (stock !== 0) {
-            return price;
-        }
-    }
-
-    // Probably all sold out
-    // Select the first one anyway
-
-    if (matchPrice?.priceName !== undefined && matchedOnName.length > 0) {
-        return matchedOnName[0];
-    }
-
-    if (matchPrice?.priceValue !== undefined && matchedOnPrice.length > 0) {
-        return matchedOnPrice[0];
-    }
-
-    return prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('83c99392-7efa-44d3-8531-1843c5fa7c4d')), id: '' });
-}
-
-function buildRegistration(member: ImportMemberResult): RegistrationData | null {
-    if (!hasNewRegistration(member)) {
-        return null;
-    }
-
-    let group = (member.importRegistrationResult.group ?? member.importRegistrationResult.autoAssignedGroup);
-
-    if (!group) {
-        return null;
-    }
-
-    let groupPrice: GroupPrice | null = null;
-
-    if (isWaitingList.value) {
-        if (group.waitingList) {
-            group = group.waitingList;
-        }
-    }
-    else {
-        const isReducedPrice = member.patchedDetails.shouldApplyReducedPrice;
-        groupPrice = getGroupPrice(group, {
-            priceValue: member.importRegistrationResult.price === null ? undefined : member.importRegistrationResult.price,
-            priceName: member.importRegistrationResult.priceName === null ? undefined : member.importRegistrationResult.priceName,
-            isReducedPrice,
-        });
-    }
-
-    const registrationData: RegistrationData = {
-        group,
-        groupPrice,
-        customStartDate: member.importRegistrationResult.date ?? new Date(),
-    };
-
-    return registrationData;
-}
-
-function getOverrideRegistrations(registration: RegistrationData, member: ImportMemberResult): Registration[] {
-    if (!member.existingMember) {
-        return [];
-    }
-
-    let list: Registration[] = [];
-
-    const group = registration.group;
-    const periodId = props.period.period.id;
-
-    const parents = group.getParentCategories(props.period.availableCategories, false);
-
-    for (const parent of parents) {
-        const groupsInParent = parent.groupIds.map(id => groups.find(g => g.id === id)).filter(g => !!g) as Group[];
-
-        if (parent.settings.maximumRegistrations === 1) {
-            // Delete all registrations for these groups
-            const existing = member.existingMember.filterRegistrations({ groups: groupsInParent, periodId });
-            for (const r of existing) {
-                if (list.find(l => l.id === r.id)) {
-                    continue;
-                }
-                list.push(r);
-            }
-        }
-    }
-    return list;
-}
-
-function getExistingFamilies(importMemberResults: ImportMemberResult[]) {
-    const result = new Map<string, PlatformFamily>();
-
-    for (const importResult of importMemberResults) {
-        if (importResult.existingMember) {
-            const existingFamily = importResult.existingMember.family;
-            const uuid = existingFamily.uuid;
-
-            if (result.has(uuid)) {
-                continue;
-            }
-            else {
-                result.set(uuid, existingFamily);
-            }
-        }
-    }
-
-    return [...result.values()];
-}
-
-function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) {
-    const existingFamilies = getExistingFamilies(importMemberResults);
-
-    for (const importResult of importMemberResults) {
-        const newPlatformMember = importResult.newPlatformMember;
-
-        if (newPlatformMember !== null) {
-            const family = existingFamilies.find(f => f.belongsToFamily(newPlatformMember.member));
-
-            if (family) {
-                family.add(newPlatformMember);
-            }
-            else {
-                const family = newPlatformMember.family;
-                if (!existingFamilies.includes(family)) {
-                    existingFamilies.push(family);
-                }
-            }
-        }
-    }
-}
-
-async function importResults(importMemberResults: ImportMemberResult[]) {
-    if (importMemberResults.find(m => !m.isExisting && m.importRegistrationResult.group === null)) {
-        throw new SimpleError({
-            code: 'no_group',
-            message: $t(`Er is een nieuw lid zonder groep.`),
-        });
-    }
-
-    await importMembers(importMemberResults);
-    await importRegistrations(importMemberResults);
-    await importPayments(importMemberResults);
-}
-
-async function importMembers(importMemberResults: ImportMemberResult[]) {
-    const notImportedMembers = importMemberResults.filter(m => !m.isMemberImported);
-    const allPlatformMembers: PlatformMember[] = [];
-    const registerCallbacksAfterSave: (() => void)[] = [];
-
-    for (const imporResult of notImportedMembers) {
-        const platformMember = imporResult.getPatchedPlatformMember(platform.value);
-        allPlatformMembers.push(platformMember);
-        registerCallbacksAfterSave.push(() => imporResult.setImportedPlatformMember(platformMember));
-    }
-
-    if (!allPlatformMembers.length) {
-        return;
-    }
-
-    await platformFamilyManager.save(allPlatformMembers, true);
-    // the backend will add users to the member -> the new members should be regrouped in families
-    regroupNewMembersInFamilies(importMemberResults);
-
-    registerCallbacksAfterSave.forEach(callback => callback());
-}
-
-async function importRegistrations(importMemberResults: ImportMemberResult[]) {
-    const notRegisteredMembers = importMemberResults.filter(m => !m.isRegistrationImported);
-    if (!notRegisteredMembers.length) {
-        return;
-    }
-    const checkout = createCheckout(notRegisteredMembers);
-
-    if (checkout.cart.isEmpty) {
-        return;
-    }
-
-    // add new registrations
-    await startRegister({
-        checkout,
-        context: context.value,
-        admin: true,
-    }, navigate);
-
-    notRegisteredMembers.forEach(m => m.markRegistrationImported());
-}
-
-async function importPayments(importMemberResults: ImportMemberResult[]) {
-    const membersWithoutImportedPayment = importMemberResults.filter(m => !m.isPaymentImported);
-    if (!membersWithoutImportedPayment.length) {
-        return;
-    }
-
-    const payments: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
-
-    for (const importResult of membersWithoutImportedPayment) {
-        const checkedOutGroup = importResult.checkedOutGroup;
-        if (!checkedOutGroup) {
-            continue;
-        }
-
-        const registeredPlatformMember = importResult.registeredPlatformMember;
-        if (!registeredPlatformMember) {
-            continue;
-        }
-
-        const paidPrice = importResult.importRegistrationResult.paidPrice;
-
-        if (paidPrice !== null && paidPrice > 0) {
-            const balanceItems = await getBalanceItems(registeredPlatformMember, checkedOutGroup);
-
-            let priceLeft = paidPrice;
-
-            const balanceItemPayments: BalanceItemPaymentDetailed[] = [];
-
-            for (const balanceItem of balanceItems) {
-                if (priceLeft <= 0) {
-                    break;
-                }
-
-                const price = Math.min(priceLeft, balanceItem.priceOpen);
-
-                balanceItemPayments.push(BalanceItemPaymentDetailed.create({
-                    balanceItem,
-                    price,
-                }));
-
-                priceLeft -= price;
-            }
-
-            const payment = PaymentGeneral.create({
-                method: PaymentMethod.Unknown,
-                status: PaymentStatus.Succeeded,
-                type: PaymentType.Payment,
-                paidAt: new Date(),
-                customer: null,
-                balanceItemPayments,
-            });
-
-            payments.addPut(payment);
-        }
-        else {
-            let isPaid = false;
-
-            if (importResult.importRegistrationResult.paid !== null) {
-                isPaid = importResult.importRegistrationResult.paid;
-            }
-            else if (paid.value !== null) {
-                isPaid = paid.value;
-            }
-
-            if (isPaid) {
-                const balanceItems = await getBalanceItems(registeredPlatformMember, checkedOutGroup);
-                if (balanceItems.length) {
-                    const payment = PaymentGeneral.create({
-                        method: PaymentMethod.Unknown,
-                        status: PaymentStatus.Succeeded,
-                        type: PaymentType.Payment,
-                        paidAt: new Date(),
-                        customer: null,
-                        balanceItemPayments: balanceItems.map(balanceItem => BalanceItemPaymentDetailed.create({
-                            balanceItem,
-                            price: balanceItem.priceOpen,
-                        })),
-                    });
-
-                    payments.addPut(payment);
-                }
-            }
-        }
-    }
-
-    if (payments.getPuts().length === 0) {
-        return;
-    }
-
-    await context.value.authenticatedServer.request({
-        method: 'PATCH',
-        path: '/organization/payments',
-        body: payments,
-        decoder: new ArrayDecoder(PaymentGeneral),
-        shouldRetry: false,
-    });
-
-    membersWithoutImportedPayment.forEach(m => m.markPaymentImported());
-}
-
-async function getBalanceItems(platformMember: PlatformMember, group: Group): Promise<BalanceItem[]> {
-    const registrations = platformMember.filterRegistrations({ groups: [group] });
-
-    if (registrations.length === 1) {
-        const registration = registrations[0];
-
-        if (registration.groupPrice.price.price === 0) {
-            // not necesary to get balance items if price is 0
-            return [];
-        }
-
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: `/receivable-balances/${ReceivableBalanceType.registration}/${registration.id}`,
-            decoder: DetailedReceivableBalance as Decoder<DetailedReceivableBalance>,
-            owner,
-        });
-
-        const receivableBalance = response.data;
-
-        return receivableBalance.filteredBalanceItems;
-    }
-
-    throw new SimpleError({
-        code: 'no_registration',
-        message: `Geen registratie gevonden voor ${platformMember.member.name}`,
-    });
-}
-
 async function goNext() {
     if (saving.value) {
         return;
@@ -1015,11 +614,25 @@ async function goNext() {
 
     try {
         autoAssignMembers(props.importMemberResults);
-        await importResults(props.importMemberResults);
+        const reports = await memberImporter.importResults(props.importMemberResults, {
+            isWaitingList: isWaitingList.value,
+            paid: paid.value,
+        });
+
         toast.hide();
 
-        new Toast($t(`Importeren voltooid`), 'success green').show();
-        navigate.dismiss({ force: true }).catch(console.error);
+        if (reports.some(r => r.hasError)) {
+            show(new ComponentWithProperties(ImportMembersErrorReportView, {
+                reports,
+                onNext: () => {
+                    pop()?.catch(console.error);
+                },
+            })).catch(console.error);
+        }
+        else {
+            new Toast($t(`Importeren voltooid`), 'success green').show();
+            navigate.dismiss({ force: true }).catch(console.error);
+        }
     }
     catch (e) {
         toast.hide();

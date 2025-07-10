@@ -33,6 +33,68 @@ export async function startRegister({ checkout, context, admin, members }: { che
     await register({ checkout, context, admin, members }, navigate);
 }
 
+export async function startSilentRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }) {
+    checkout.validate({});
+    await silentRegister({ checkout, context, admin, members });
+}
+
+/**
+ * Register without ui
+ * @param param0
+ * @param navigate
+ * @returns
+ */
+async function silentRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }) {
+    const organization = checkout.singleOrganization!;
+    const server = context.getAuthenticatedServerForOrganization(organization.id);
+
+    const idCheckout = checkout.convert();
+
+    if (!admin) {
+        idCheckout.redirectUrl = new URL(organization.registerUrl);
+        idCheckout.cancelUrl = new URL(organization.registerUrl);
+    }
+    else {
+        idCheckout.redirectUrl = new URL(window.location.href);
+        idCheckout.cancelUrl = new URL(window.location.href);
+    }
+
+    // Force https protocol (the app can use capacitor:// instead of https, so we need to swap)
+    idCheckout.redirectUrl.protocol = 'https:';
+    idCheckout.cancelUrl.protocol = 'https:';
+
+    const response = await server.request({
+        method: 'POST',
+        path: '/members/register',
+        body: idCheckout,
+        decoder: RegisterResponse as Decoder<RegisterResponse>,
+        shouldRetry: false,
+    });
+
+    const payment = response.data.payment;
+
+    // Copy data to members
+    PlatformFamily.updateFromBlob([...(members ?? []), ...checkout.cart.items.map(i => i.member)], response.data.members);
+    updateContextFromMembersBlob(context, response.data.members);
+
+    const clearAndEmit = () => {
+        if (checkout.cart.items.length > 0) {
+            GlobalEventBus.sendEvent('members-added', []).catch(console.error);
+        }
+        else if (checkout.cart.deleteRegistrations.length > 0) {
+            GlobalEventBus.sendEvent('members-deleted', []).catch(console.error);
+        }
+
+        checkout.clear();
+    };
+
+    if (payment) {
+        GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
+    }
+
+    clearAndEmit();
+}
+
 async function register({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
     const organization = checkout.singleOrganization!;
     const server = context.getAuthenticatedServerForOrganization(organization.id);
@@ -110,6 +172,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     }
     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
     clearAndEmit();
+
     await navigate.show({
         components: [
             new ComponentWithProperties(RegistrationSuccessView, {
