@@ -42,7 +42,7 @@ export class HtmlTranslator {
     private _currentMatchCount = 0;
     private totalMatchCount = 0;
     private static readonly PLACEHOLDER = '[[html-translator-placeholder]]';
-    private readonly shouldCheckChanges: boolean;
+    private shouldCheckChanges: boolean;
     private readonly fileProgressText: string;
     private _isDoubt = false;
 
@@ -74,7 +74,13 @@ export class HtmlTranslator {
         const originalHtml = html;
         if(this.shouldCheckChanges) {
             const {filePath, commitsToCompare} = this.options.replaceChangesOnly!;
-            html = addChangeMarkers(filePath, html, commitsToCompare);
+            const htmlWithChangeMarkers = addChangeMarkers(filePath, html, commitsToCompare);
+            if(htmlWithChangeMarkers === null) {
+                this.shouldCheckChanges = false;
+                this.areCurrentLinesChanged = true;
+            } else {
+                html = htmlWithChangeMarkers;
+            }
         } else {
             this.areCurrentLinesChanged = true;
         }

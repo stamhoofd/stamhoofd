@@ -12,7 +12,8 @@ export class QueryableModel extends Model {
             const d = (this as T).fromRow(row[this.table] as any) as InstanceType<T> | undefined;
 
             if (!d) {
-                throw new Error('EmailTemplate not found');
+                console.error('Could not transform row', row, 'into model', this.table, 'check if the primary key is returned in the query');
+                throw new Error('Missing data for model ' + this.table);
             }
 
             return d;

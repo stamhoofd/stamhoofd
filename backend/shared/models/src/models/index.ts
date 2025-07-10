@@ -41,6 +41,7 @@ export * from './Document';
 export * from './DocumentTemplate';
 
 export * from './WebshopDiscountCode';
+export * from './WebshopUitpasNumber';
 
 export * from './Platform';
 export * from './MemberResponsibilityRecord';

@@ -1,4 +1,4 @@
-import { colorGray, DefaultText, drawPageNumbers, H1, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions } from '@stamhoofd/frontend-pdf-builder';
+import { colorGray, DefaultText, drawPageNumbers, H1, metropolisMedium, mmToPoints, PdfDocWrapper, PdfItem, PdfRenderer, PdfTextOptions, Spacing } from '@stamhoofd/frontend-pdf-builder';
 import { Image, PlatformMember } from '@stamhoofd/structures';
 import { imageToDocumentLogo } from '../imageToDocumentLogo';
 import { SelectablePdfSheet } from '../SelectablePdfSheet';
@@ -49,6 +49,10 @@ export class MembersPdfDocument {
                 shouldHideEmptyDetails: true,
             });
             items.push(grid);
+        }
+
+        if (this.memberDetailsDocument.enabled && this.membersSummaryDocument.enabled) {
+            items.push(new Spacing(mmToPoints(5)));
         }
 
         // member summary
