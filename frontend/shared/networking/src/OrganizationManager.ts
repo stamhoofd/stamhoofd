@@ -95,7 +95,14 @@ export class OrganizationManager {
             return this.organization as any;
         }
 
-        const loaded = await LoginHelper.loadAdmins(this.$context, shouldRetry, owner);
+        const response = await this.$context.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/admins',
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>,
+            shouldRetry,
+            owner,
+        });
+        const loaded = response.data;
 
         if (this.organization.admins) {
             deepSetArray(this.organization.admins, loaded.users);

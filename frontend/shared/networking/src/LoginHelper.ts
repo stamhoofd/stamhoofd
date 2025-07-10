@@ -149,18 +149,6 @@ export class LoginHelper {
         return response.data.token;
     }
 
-    static async loadAdmins(session: SessionContext, shouldRetry = true, owner?: any): Promise<OrganizationAdmins> {
-        const response = await session.authenticatedServer.request({
-            method: 'GET',
-            path: '/organization/admins',
-            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>,
-            shouldRetry,
-            owner,
-        });
-
-        return response.data;
-    }
-
     static async changePassword(session: SessionContext, password: string, email?: string) {
         console.log('Change password. Start.');
 
