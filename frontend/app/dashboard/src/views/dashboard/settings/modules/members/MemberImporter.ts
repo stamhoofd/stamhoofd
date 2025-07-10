@@ -64,7 +64,7 @@ export class MemberImporter {
             try {
                 await this.importMember(importResult, importMemberResults);
                 await this.importRegistration(importResult, importContext);
-                await this.importPayments(importResult, importContext);
+                await this.importPayment(importResult, importContext);
             }
             catch (e: any) {
                 console.error(e);
@@ -241,7 +241,7 @@ export class MemberImporter {
         importResult.markRegistrationImported();
     }
 
-    private async importPayments(importResult: ImportMemberResult, importContext: MemberImporterContext) {
+    private async importPayment(importResult: ImportMemberResult, importContext: MemberImporterContext) {
         if (importResult.isPaymentImported) {
             return;
         }
@@ -262,8 +262,9 @@ export class MemberImporter {
 
         if (paidPrice !== null && paidPrice > 0) {
             const balanceItems = await this.getBalanceItems(registeredPlatformMember, checkedOutGroup);
+            const totalPricePaid = balanceItems.map(p => p.pricePaid).reduce((a, b) => a + b, 0);
 
-            let priceLeft = paidPrice;
+            let priceLeft = paidPrice - totalPricePaid;
 
             const balanceItemPayments: BalanceItemPaymentDetailed[] = [];
 
@@ -274,24 +275,28 @@ export class MemberImporter {
 
                 const price = Math.min(priceLeft, balanceItem.priceOpen);
 
-                balanceItemPayments.push(BalanceItemPaymentDetailed.create({
-                    balanceItem,
-                    price,
-                }));
+                if (price > 0) {
+                    balanceItemPayments.push(BalanceItemPaymentDetailed.create({
+                        balanceItem,
+                        price,
+                    }));
 
-                priceLeft -= price;
+                    priceLeft -= price;
+                }
             }
 
-            const payment = PaymentGeneral.create({
-                method: PaymentMethod.Unknown,
-                status: PaymentStatus.Succeeded,
-                type: PaymentType.Payment,
-                paidAt: new Date(),
-                customer: null,
-                balanceItemPayments,
-            });
+            if (balanceItemPayments.length) {
+                const payment = PaymentGeneral.create({
+                    method: PaymentMethod.Unknown,
+                    status: PaymentStatus.Succeeded,
+                    type: PaymentType.Payment,
+                    paidAt: new Date(),
+                    customer: null,
+                    balanceItemPayments,
+                });
 
-            payments.addPut(payment);
+                payments.addPut(payment);
+            }
         }
         else {
             let isPaid = false;
