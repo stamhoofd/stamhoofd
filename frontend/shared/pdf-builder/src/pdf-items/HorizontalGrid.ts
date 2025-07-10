@@ -80,7 +80,7 @@ export class HorizontalGrid implements PdfItem {
                 maxItemWidth = Math.ceil(width);
             }
 
-            if (item instanceof VerticalStack) {
+            if (item instanceof VerticalStack && item.isAllowedToSplit) {
                 totalItems += item.size;
             }
             else {
