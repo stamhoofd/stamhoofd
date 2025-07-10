@@ -108,6 +108,21 @@
                 <p v-if="stockText" class="style-description-smal" v-text="stockText" />
             </template>
 
+            <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
+                <hr><h2>{{ cartItem.amount < 2 ? $t('UiTPAS-nummer') : $t('UiTPAS-nummers') }}</h2>
+
+                <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="uitpas-number-input" :title="'UiTPAS-nummer' + (cartItem.amount < 2 ? '' : ` ${index + 1}`)">
+                    <input
+                        v-model="uitpasNumbers[index]"
+                        class="input"
+                        type="text"
+                        placeholder="Het nummer op de achterkant van je UiTPAS-kaart, onder de barcode."
+                    >
+                </STInputBox>
+
+                <p v-if="stockText" class="style-description-smal" v-text="stockText" />
+            </template>
+
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
                 <PriceBreakdownBox :price-breakdown="pricedCheckout.priceBreakown" />
             </div>
@@ -136,8 +151,9 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, Webshop } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Request } from '@simonbackx/simple-networking';
+import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, UitpasPriceCheckRequest, UitpasPriceCheckResponse, Webshop } from '@stamhoofd/structures';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { computed, onMounted, ref, Ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -153,6 +169,10 @@ import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { useContext } from '../hooks';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { Decoder } from '@simonbackx/simple-encoding';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -181,6 +201,7 @@ const cart = computed(() => props.checkout.cart);
 
 onMounted(() => {
     onChangeItem();
+    handleNewAmount(props.cartItem.amount);
 });
 
 // External changes should trigger a price update
@@ -210,7 +231,7 @@ function onChangeItem() {
 const formattedPriceWithDiscount = computed(() => pricedItem.value.getFormattedPriceWithDiscount());
 const formattedPriceWithoutDiscount = computed(() => pricedItem.value.getFormattedPriceWithoutDiscount());
 
-function validate() {
+async function validate() {
     try {
         const clonedCart = cart.value.clone();
 
@@ -226,6 +247,15 @@ function validate() {
             admin: props.admin,
             validateSeats: false,
         });
+
+        if (props.cartItem.productPrice.uitpasBaseProductPriceId !== null) {
+            // Validate UiTPAS numbers
+            await validateUitpasNumbers();
+        }
+        else {
+            // Clear uitpas numbers if this is not a UiTPAS product
+            props.cartItem.uitpasNumbers = [];
+        }
     }
     catch (e) {
         console.error(e);
@@ -236,8 +266,93 @@ function validate() {
     return true;
 }
 
-function addToCart() {
-    if (!validate()) {
+const context = useContext();
+
+async function validateUitpasNumbers() {
+    const baseProductPrice = props.cartItem.product.prices.find(p => p.id === props.cartItem.productPrice.uitpasBaseProductPriceId);
+    if (!baseProductPrice) {
+        return;
+    }
+
+    // verify the amount of UiTPAS numbers
+    if (props.cartItem.uitpasNumbers.length !== props.cartItem.amount) {
+        // should not happen as frontend displays correct amount of input fields
+        throw new SimpleError({
+            code: 'uitpas_numbers_does_not_match_amount',
+            message: 'UiTPAS numbers does not match ordered amount',
+            human: $t('Geef evenveel UiTPAS nummers in als het aantal dat je bestelt. besteld = ' + props.cartItem.amount + ', ingegeven = ' + props.cartItem.uitpasNumbers.length),
+        });
+    }
+
+    // verify UiTPAS numbers are non-empty
+    for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
+        const uitpasNumber = props.cartItem.uitpasNumbers[i];
+        if (uitpasNumber.trim() === '') {
+            throw new SimpleError({
+                code: 'empty_uitpas_number',
+                message: 'Empty UiTPAS number provided',
+                human: $t('Vul een geldig UiTPAS-nummer in.'),
+                field: 'uitpasNumbers.' + i,
+            });
+        }
+
+        // verify the UiTPAS numbers are valid (static check)
+        if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
+            throw new SimpleError({
+                code: 'uitpas_number_invalid',
+                message: `UiTPAS number invalid: ${uitpasNumber}`,
+                human: $t(
+                    `Het opgegeven UiTPAS-nummer is niet geldig. Controleer het nummer en probeer het opnieuw.`,
+                ),
+                field: 'uitpasNumbers.' + i,
+            });
+        }
+    }
+
+    // verify the UiTPAS numbers are unique (within the order)
+    if (props.cartItem.uitpasNumbers.length !== Formatter.uniqueArray(props.cartItem.uitpasNumbers).length) {
+        throw new SimpleError({
+            code: 'duplicate_uitpas_numbers_used',
+            message: 'Duplicate uitpas numbers used in order',
+            human: $t('Een UiTPAS-nummer kan niet meerdere keren gebruikt worden voor hetzelfde artikel.'),
+        });
+    }
+
+    // verify the UiTPAS numbers are valid for social tariff (call to backend)
+    try {
+        const response = await context.value.optionalAuthenticatedServer.request({
+            method: 'POST',
+            path: '/uitpas',
+            owner: useRequestOwner(),
+            shouldRetry: false,
+            body: UitpasPriceCheckRequest.create({
+                basePrice: baseProductPrice.price,
+                reducedPrice: props.cartItem.productPrice.price,
+                uitpasNumbers: props.cartItem.uitpasNumbers,
+                uitpasEventId: null,
+            }),
+            decoder: UitpasPriceCheckResponse as Decoder<UitpasPriceCheckResponse>,
+        }); // will throw if one of the uitpas numbers is invalid
+        const reducedPrices = response.data.prices;
+        if (reducedPrices.length !== props.cartItem.uitpasNumbers.length) {
+            // Should already be thrown by the backend
+            throw new SimpleError({
+                code: 'invalid_uitpas_numbers',
+                message: 'Not all uitpas numbers were valid',
+                human: $t('Niet alle opgegeven UiTPAS-nummers zijn geldig. Controleer de nummers en probeer het opnieuw.'),
+            });
+        }
+        // for now we don't do anything with the reduced prices
+    }
+    catch (e) {
+        if (!Request.isAbortError(e)) {
+            throw e;
+        }
+    }
+}
+
+async function addToCart() {
+    if (!(await validate())) {
         return;
     }
 
@@ -387,6 +502,30 @@ const canOrder = computed(() => {
 });
 
 const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple);
+
+const uitpasNumbers = ref(props.cartItem.uitpasNumbers);
+
+watch(() => props.cartItem.amount, handleNewAmount);
+
+function handleNewAmount(newAmount: number) {
+    if (newAmount > uitpasNumbers.value.length) {
+        // Add empty strings
+        uitpasNumbers.value.push(...(Array(newAmount - uitpasNumbers.value.length).fill('') as string[]));
+    }
+    else if (newAmount < uitpasNumbers.value.length) {
+        // start removing empty strings from the end
+        let index = uitpasNumbers.value.length - 1;
+        do {
+            if (uitpasNumbers.value[index] === '') {
+                uitpasNumbers.value.splice(index, 1);
+            }
+            index--;
+        } while (uitpasNumbers.value.length > newAmount && index >= 0);
+        // if there are no more empty strings, remove the last ones
+        uitpasNumbers.value.splice(newAmount);
+    }
+}
+
 </script>
 
 <style lang="scss">
