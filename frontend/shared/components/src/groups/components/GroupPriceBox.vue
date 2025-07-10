@@ -38,7 +38,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="!isSingle" :selectable="true" element-name="label">
+            <STListItem v-if="hasStartDate || !isSingle" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="hasStartDate" />
                 </template>
@@ -55,7 +55,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="!isSingle" :selectable="true" element-name="label">
+            <STListItem v-if="hasEndDate || !isSingle" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="hasEndDate" />
                 </template>

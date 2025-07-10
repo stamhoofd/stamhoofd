@@ -96,6 +96,9 @@
                                 {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
                             </p>
 
+                            <p v-if="price.startDate" class="style-description-small">{{ $t('Beschikbaar vanaf {date}', {date: formatDateTime(price.startDate)}) }}</p>
+                            <p v-if="price.endDate" class="style-description-small">{{ $t('Onbeschikbaar na {date}', {date: formatDateTime(price.endDate)}) }}</p>
+
                             <p v-for="[id, discount] of price.bundleDiscounts" :key="id" class="style-description-small">
                                 <span class="icon small label" /><span>{{ discount.name.toString() }}</span>
                             </p>
