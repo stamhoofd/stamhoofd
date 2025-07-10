@@ -502,6 +502,18 @@ export class CartItem extends AutoEncoder {
                 + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
             );
         }
+
+        if (this.uitpasNumbers.length) {
+            if (this.uitpasNumbers.length === 1) {
+                descriptions.push($t('UiTPAS-nummer') + ': ' + this.uitpasNumbers[0]);
+            }
+            else {
+                descriptions.push($t('UiTPAS-nummers') + ':');
+                for (const uitpasNumber of this.uitpasNumbers) {
+                    descriptions.push(' ' + uitpasNumber);
+                }
+            }
+        }
         return descriptions.filter(d => !!d).join('\n');
     }
 
