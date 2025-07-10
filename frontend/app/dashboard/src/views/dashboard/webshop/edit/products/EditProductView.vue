@@ -83,7 +83,7 @@
         </template>
 
         <hr><STList>
-            <STListItem v-if="!patchedProduct.prices.some(p => p.uitpasBaseProductPriceId !== null) && (productPricesAvailableForUitpasBaseProductPrice.length !== 0 /*should never be the case*/)" :selectable="true" element-name="button" @click="addProductPrice(true)">
+            <STListItem v-if="!patchedProduct.prices.some(p => p.uitpasBaseProductPriceId !== null) && uitpasBaseProductPriceAvailable" :selectable="true" element-name="button" @click="addProductPrice(true)">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -91,9 +91,6 @@
                 <h3 class="style-title-list">
                     {{ $t('Apart UiTPAS kansentarief') }}
                 </h3>
-                <!-- <p class="style-description-small">
-                    {{ $t('Voeg een UiTPAS kansentarief toe') }}
-                </p> -->
             </STListItem>
 
             <STListItem v-if="seatingPlan" :selectable="true" element-name="button" @click="chooseSeatingPlan">
@@ -772,10 +769,14 @@ const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
     return patchedProduct.value.prices.filter(p => (p.uitpasBaseProductPriceId === null));
 });
 
+const uitpasBaseProductPriceAvailable = computed(() => {
+    return productPricesAvailableForUitpasBaseProductPrice.value.length !== 0;
+});
+
 async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
     const price = ProductPrice.create({});
     if (enableUitpasSocialTariff) {
-        if (productPricesAvailableForUitpasBaseProductPrice.value.length === 0) {
+        if (!uitpasBaseProductPriceAvailable.value) {
             // should not be possible
             Toast.error($t('Er zijn geen prijzen beschikbaar om een apart UiTPAS kansentarief aan toe te voegen.')).show();
             return;
