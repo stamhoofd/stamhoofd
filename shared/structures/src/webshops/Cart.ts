@@ -22,6 +22,7 @@ export class Cart extends AutoEncoder {
             if (i.code === c && allowMerge) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
+                i.uitpasNumbers.push(...item.uitpasNumbers);
                 return;
             }
         }
@@ -47,6 +48,7 @@ export class Cart extends AutoEncoder {
             if (i.code === c && i.code !== oldCode) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
+                i.uitpasNumbers.push(...item.uitpasNumbers);
                 this.removeItem(old);
                 return;
             }
