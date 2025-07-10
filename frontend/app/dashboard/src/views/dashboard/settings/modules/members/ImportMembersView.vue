@@ -10,11 +10,11 @@
                 <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
             </span>
         </p>
-        <STErrorsDefault :error-box="errors.errorBox"/>
+        <STErrorsDefault :error-box="errors.errorBox" />
 
         <label class="upload-box">
-            <span v-if="!file" class="icon upload"/>
-            <span v-else class="icon file-excel color-excel"/>
+            <span v-if="!file" class="icon upload" />
+            <span v-else class="icon file-excel color-excel" />
             <div v-if="!file">
                 <h2 class="style-title-list">
                     {{ $t('Kies een bestand') }}
@@ -32,7 +32,7 @@
                 </p>
             </div>
             <input type="file" multiple style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
-            <span v-if="file" class="icon sync gray"/>
+            <span v-if="file" class="icon sync gray" />
         </label>
 
         <template v-if="sheetSelectionList.length > 1">
@@ -89,10 +89,10 @@
             <p v-if="file && columns.length > 0" class="warning-box">
                 {{ $t('Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.') }}
             </p>
-            <STErrorsDefault :error-box="errors.errorBox"/>
+            <STErrorsDefault :error-box="errors.errorBox" />
             <hr>
             <STInputBox :title="$t('In welk werkjaar wil je de leden inschrijven?')" error-fields="period" :error-box="errors.errorBox">
-                <RegistrationPeriodSelector v-model="period"/>
+                <RegistrationPeriodSelector v-model="period" :should-disable-locked-periods="true" />
             </STInputBox>
         </template>
     </SaveView>

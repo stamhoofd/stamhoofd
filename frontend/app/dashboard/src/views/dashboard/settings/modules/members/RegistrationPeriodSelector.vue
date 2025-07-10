@@ -4,7 +4,7 @@
             {{ $t('Huidige werkjaar') }}
         </option>
         <template v-else>
-            <option v-for="period in periods" :key="period.id" :value="period.id">
+            <option v-for="period in periods" :key="period.id" :value="period.id" :disabled="shouldDisableLockedPeriods && period.period.locked">
                 {{ period.period.name }}
             </option>
         </template>
@@ -17,7 +17,10 @@ import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
-const props = defineProps<{ modelValue: OrganizationRegistrationPeriod }>();
+const props = withDefaults(defineProps<{ modelValue: OrganizationRegistrationPeriod; shouldDisableLockedPeriods?: boolean }>(), {
+    shouldDisableLockedPeriods: false,
+});
+
 const emit = defineEmits<{ (e: 'update:modelValue', value: OrganizationRegistrationPeriod | null): void }>();
 
 const organizationManager = useOrganizationManager();
