@@ -1,5 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
+import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import { registrationInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
@@ -11,7 +12,6 @@ import { RegisterItemOption } from './checkout/RegisterItem.js';
 import { ObjectWithRecords, PatchAnswers } from './ObjectWithRecords.js';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { RecordSettings } from './records/RecordSettings.js';
-import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 
 export class Registration extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -179,6 +179,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
         }
 
         return descriptions.filter(d => !!d).join('\n');
+    }
+
+    get isActive() {
+        return this.deactivatedAt === null && (this.startDate === null || this.startDate <= new Date());
     }
 
     doesMatchFilter(filter: StamhoofdFilter) {
