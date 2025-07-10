@@ -6,6 +6,7 @@ import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSett
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
+import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
@@ -13,7 +14,6 @@ import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
-import { ReduceablePrice } from './ReduceablePrice.js';
 
 export class GroupPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -52,6 +52,12 @@ export class GroupPrice extends AutoEncoder {
      */
     @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), version: 374 })
     bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings> = new Map();
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    startDate: Date | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    endDate: Date | null = null;
 
     getUsedStock(group: Group) {
         const groupStockReservations = group.stockReservations;

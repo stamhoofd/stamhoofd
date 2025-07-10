@@ -4,6 +4,10 @@
 
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" />
 
+        <template v-if="!isSingle">
+            <hr><h2>{{ $t("Beschikbaarheid") }}</h2>
+        </template>
+
         <STList>
             <STListItem v-if="!isSingle || hidden" :selectable="true" element-name="label">
                 <template #left>
@@ -31,6 +35,40 @@
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
                         <NumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
                     </STInputBox>
+                </div>
+            </STListItem>
+
+            <STListItem v-if="!isSingle" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="hasStartDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Beschikbaar vanaf datum') }}
+                </h3>
+
+                <div v-if="hasStartDate" class="split-inputs option">
+                    <STInputBox title="" error-fields="startDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="startDate" />
+                    </STInputBox>
+                    <TimeInput v-model="startDate" title="" :validator="errors.validator" />
+                </div>
+            </STListItem>
+
+            <STListItem v-if="!isSingle" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="hasEndDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Onbeschikbaar na datum') }}
+                </h3>
+
+                <div v-if="hasEndDate" class="split-inputs option">
+                    <STInputBox title="" error-fields="endDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="endDate" />
+                    </STInputBox>
+                    <TimeInput v-model="endDate" title="" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -84,7 +122,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { BundleDiscountSettingsView, NumberInput, GroupPriceDiscountsInput } from '@stamhoofd/components';
+import { BundleDiscountSettingsView, DateSelection, GroupPriceDiscountsInput, NumberInput, STInputBox, TimeInput } from '@stamhoofd/components';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, Group, GroupPrice, GroupPriceDiscount, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';
@@ -134,6 +172,46 @@ const usedStock = computed(() => patched.value.getUsedStock(props.group) || 0);
 const useStock = computed({
     get: () => patched.value.stock !== null,
     set: useStock => addPatch({ stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null }),
+});
+
+const startDate = computed({
+    get: () => patched.value.startDate,
+    set: startDate => addPatch({ startDate }),
+});
+
+const hasStartDate = computed({
+    get: () => patched.value.startDate !== null,
+    set: (value) => {
+        if (value === hasStartDate.value) {
+            return;
+        }
+        if (value) {
+            addPatch({ startDate: startDate.value ?? new Date() });
+        }
+        else {
+            addPatch({ startDate: null });
+        }
+    },
+});
+
+const endDate = computed({
+    get: () => patched.value.endDate,
+    set: endDate => addPatch({ endDate }),
+});
+
+const hasEndDate = computed({
+    get: () => patched.value.endDate !== null,
+    set: (value) => {
+        if (value === hasEndDate.value) {
+            return;
+        }
+        if (value) {
+            addPatch({ endDate: endDate.value ?? new Date() });
+        }
+        else {
+            addPatch({ endDate: null });
+        }
+    },
 });
 
 function getBundleDiscountSelected(bundleDiscount: BundleDiscount) {
