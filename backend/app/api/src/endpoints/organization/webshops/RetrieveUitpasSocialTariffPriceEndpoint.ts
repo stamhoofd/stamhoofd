@@ -65,7 +65,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
             }
             catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
-                    e.addNamespace('uitpasNumber');
+                    e.addNamespace('uitpasNumbers');
                 }
                 throw e;
             }
