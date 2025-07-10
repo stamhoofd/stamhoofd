@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 
 export class UitpasPriceCheckRequest extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -14,11 +14,11 @@ export class UitpasPriceCheckRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     uitpasEventId: string | null;
 
-    @field({ decoder: StringDecoder, nullable: true })
-    uitpasNumber: string | null;
+    @field({ decoder: new ArrayDecoder(StringDecoder), nullable: true })
+    uitpasNumbers: string[] | null;
 }
 
 export class UitpasPriceCheckResponse extends AutoEncoder {
-    @field({ decoder: IntegerDecoder })
-    price: number;
+    @field({ decoder: new ArrayDecoder(IntegerDecoder) })
+    prices: number[];
 }

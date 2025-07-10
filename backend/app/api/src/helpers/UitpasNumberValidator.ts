@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { UitpasTokenRepository } from './UitpasTokenRepository';
 import { DataValidator } from '@stamhoofd/utility';
 
@@ -151,6 +151,34 @@ export class UitpasNumberValidatorStatic {
             });
         }
         // no errors -> the uitpas number is valid and social tariff is applicable
+    }
+
+    /**
+     * Checks multiple uitpas numbers
+     * If any of the uitpas numbers is invalid, it will throw a SimpleErrors instance with all errors.
+     * The field of the error will be the index of the uitpas number in the array.
+     * @param uitpasNumbers The uitpas numbers to check
+     */
+    async checkUitpasNumbers(uitpasNumbers: string[]) {
+        const simpleErrors = new SimpleErrors();
+        for (let i = 0; i < uitpasNumbers.length; i++) {
+            const uitpasNumber = uitpasNumbers[i];
+            try {
+                await this.checkUitpasNumber(uitpasNumber); // Throws if invalid
+            }
+            catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace(i.toString());
+                    simpleErrors.addError(e);
+                }
+                else {
+                    throw e;
+                }
+            }
+        }
+        if (simpleErrors.errors.length > 0) {
+            throw simpleErrors;
+        }
     }
 }
 

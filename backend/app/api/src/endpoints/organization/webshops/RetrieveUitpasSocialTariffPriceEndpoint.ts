@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 
 import { UitpasNumberValidator } from '../../../helpers/UitpasNumberValidator';
@@ -9,7 +9,7 @@ type Query = undefined;
 type Body = UitpasPriceCheckRequest;
 type ResponseBody = UitpasPriceCheckResponse;
 
-export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Body, ResponseBody> {
+export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = UitpasPriceCheckRequest as Decoder<UitpasPriceCheckRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -28,7 +28,7 @@ export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Bod
     async handle(request: DecodedRequest<Params, Query, Body>) {
         if (request.body.uitpasEventId) {
             // OFFICIAL FLOW
-            if (!request.body.uitpasNumber) {
+            if (!request.body.uitpasNumbers) {
                 // STATIC CHECK
                 // request shouldn't include a reduced price
             }
@@ -44,7 +44,7 @@ export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Bod
         }
         else {
             // NON-OFFICIAL FLOW
-            // request should include UiTPAS-number, reduced price AND base price
+            // request should include UiTPAS-numbers, reduced price AND base price
             if (!request.body.reducedPrice) {
                 throw new SimpleError({
                     code: 'missing_reduced_price',
@@ -52,16 +52,25 @@ export class retrieveUitpasSocialTariffPrice extends Endpoint<Params, Query, Bod
                     human: $t('Je moet een verlaagd tarief opgeven voor de UiTPAS.'),
                 });
             }
-            if (!request.body.uitpasNumber) {
+            const reducedPrice = request.body.reducedPrice;
+            if (!request.body.uitpasNumbers) {
                 throw new SimpleError({
-                    code: 'missing_uitpas_number',
-                    message: 'Uitpas number must be provided for non-official flow.',
-                    human: $t('Je moet een UiTPAS-nummer opgeven.'),
+                    code: 'missing_uitpas_numbers',
+                    message: 'Uitpas numbers must be provided for non-official flow.',
+                    human: $t('Je moet UiTPAS-nummers opgeven.'),
                 });
             }
-            await UitpasNumberValidator.checkUitpasNumber(request.body.uitpasNumber);
+            try {
+                await UitpasNumberValidator.checkUitpasNumbers(request.body.uitpasNumbers); // Throws if invalid
+            }
+            catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    e.addNamespace('uitpasNumbers');
+                }
+                throw e;
+            }
             const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
-                price: request.body.reducedPrice,
+                prices: request.body.uitpasNumbers.map(_ => reducedPrice), // All reduced prices are the same in this non-official flow
             });
             return new Response(uitpasPriceCheckResponse);
         }
