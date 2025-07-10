@@ -16,7 +16,7 @@ function mapUitpasNumbersToProducts(order: Order): Map<string, string[]> {
             a.push(...item.uitpasNumbers);
         }
         else {
-            productIdToUitpasNumbers[item.product.id] = [...item.uitpasNumbers]; // make a copy
+            productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers]); // make a copy
         }
     }
     return productIdToUitpasNumbers;
@@ -65,9 +65,7 @@ export class UitpasNumberService {
             'productId',
             'uitpasNumber',
         );
-        const ar = Object.entries(mappedUitpasNumbers);
-        console.log('ar:', ar);
-        const rows = ar.flatMap(([productId, uitpasNumbers]) => {
+        const rows = [...mappedUitpasNumbers].flatMap(([productId, uitpasNumbers]) => {
             console.log(`Creating uitpas numbers for product ${productId} with uitpas numbers`, uitpasNumbers);
             return uitpasNumbers.map(uitpasNumber => [
                 uuidv4(),
