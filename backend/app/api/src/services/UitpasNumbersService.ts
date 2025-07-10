@@ -55,7 +55,6 @@ export class UitpasNumberService {
 
     static async createUitpasNumbers(order: Order) {
         const mappedUitpasNumbers = mapUitpasNumbersToProducts(order); // productId -> Set of uitpas numbers
-        console.log('Creating uitpas numbers for order', order.id, 'with uitpas numbers', mappedUitpasNumbers);
         // add to DB
         const insert = WebshopUitpasNumber.insert();
         insert.columns(
@@ -66,7 +65,6 @@ export class UitpasNumberService {
             'uitpasNumber',
         );
         const rows = [...mappedUitpasNumbers].flatMap(([productId, uitpasNumbers]) => {
-            console.log(`Creating uitpas numbers for product ${productId} with uitpas numbers`, uitpasNumbers);
             return uitpasNumbers.map(uitpasNumber => [
                 uuidv4(),
                 order.webshopId,
@@ -75,8 +73,10 @@ export class UitpasNumberService {
                 uitpasNumber,
             ]);
         });
-        console.log(`Inserting ${rows.length} uitpas numbers for order ${order.id}`);
-        console.log(rows);
+        if (rows.length === 0) {
+            // No uitpas numbers to insert, skipping
+            return;
+        }
         insert.values(...rows);
         await insert.insert();
     }
