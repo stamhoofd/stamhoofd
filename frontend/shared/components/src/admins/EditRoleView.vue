@@ -214,7 +214,7 @@ const title = computed(() => {
     return props.isNew ? $t(`db4cb26a-c23f-4f29-b4c3-233cd0f08f38`) : props.role.name;
 });
 
-const { sortedAdmins, loading, getPermissions, getUnloadedPermissions } = useAdmins();
+const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
 const organization = useOrganization();
 const platform = usePlatform();
 const { patched, addPatch, hasChanges, patch } = usePatch(props.role);
@@ -314,30 +314,6 @@ const basePermission = computed({
     get: () => maximumPermissionlevel(lockedMinimumLevel.value, patched.value.level),
     set: level => addPatch({ level }),
 });
-
-const createWebshops = useAccessRightSetter(AccessRight.OrganizationCreateWebshops);
-const financeDirector = useAccessRightSetter(AccessRight.OrganizationFinanceDirector);
-const managePayments = useAccessRightSetter(AccessRight.OrganizationManagePayments);
-
-const readFinancialData = useAccessRightSetter(AccessRight.MemberReadFinancialData);
-const writeFinancialData = useAccessRightSetter(AccessRight.MemberWriteFinancialData);
-
-function useAccessRightSetter(accessRight: AccessRight) {
-    return computed({
-        get: () => patched.value.hasAccessRight(accessRight),
-        set: (value) => {
-            const patch = PermissionRoleDetailed.patch({});
-
-            // Always delete to prevent duplicate insertions
-            patch.accessRights.addDelete(accessRight);
-            if (value) {
-                patch.accessRights.addPut(accessRight);
-            }
-
-            addPatch(patch);
-        },
-    });
-}
 
 const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
