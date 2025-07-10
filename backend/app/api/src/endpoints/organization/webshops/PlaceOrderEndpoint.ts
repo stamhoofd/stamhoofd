@@ -1,9 +1,9 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -12,6 +12,7 @@ import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { AuditLogService } from '../../../services/AuditLogService';
+import { UitpasNumberValidator } from '../../../helpers/UitpasNumberValidator';
 
 type Params = { id: string };
 type Query = undefined;
@@ -131,6 +132,54 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
             request.body.validate(webshopStruct, organization.meta, request.i18n, false, Context.user?.getStructure());
             request.body.update(webshopStruct);
+
+            // UiTPAS numbers validation
+            const articlesWithUitpasSocialTariff = request.body.cart.items.filter(item => item.productPrice.uitpasBaseProductPriceId !== null);
+            for (const item of articlesWithUitpasSocialTariff) {
+                const uitpasNumbers = item.uitpasNumbers;
+
+                // verify the amount of UiTPAS numbers
+                if (uitpasNumbers.length !== item.amount) {
+                    throw new SimpleError({
+                        code: 'amount_of_uitpas_numbers_mismatch',
+                        message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
+                        human: $t('Het aantal ingegeven UiTPAS-nummers moet overeenkomen met het aantal artikels met UiTPAS kansentarief.'),
+                        field: 'cart.items.uitpasNumbers',
+                    });
+                }
+
+                // verify the UiTPAS numbers are unique (within the order)
+                if (uitpasNumbers.length !== Formatter.uniqueArray(uitpasNumbers).length) {
+                    throw new SimpleError({
+                        code: 'duplicate_uitpas_numbers',
+                        message: 'Duplicate uitpas numbers used',
+                        human: $t('Eenzelfde UiTPAS-nummer kan niet meerdere keren gebruikt worden.'),
+                        field: 'cart.items.uitpasNumbers',
+                    });
+                }
+
+                // verify the UiTPAS numbers are not already used for this product
+                const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshop.id, item.product.id, uitpasNumbers);
+                if (hasBeenUsed) {
+                    throw new SimpleError({
+                        code: 'uitpas_number_already_used',
+                        message: 'One or more uitpas numbers are already used',
+                        human: $t('Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit artikel.'),
+                        field: 'cart.items.uitpasNumbers',
+                    });
+                }
+
+                // verify the UiTPAS numbers are valid for social tariff (static check + API call to UiTPAS)
+                try {
+                    await UitpasNumberValidator.checkUitpasNumbers(uitpasNumbers); // Throws if invalid
+                }
+                catch (e) {
+                    if (isSimpleError(e) || isSimpleErrors(e)) {
+                        e.addNamespace('uitpasNumbers');
+                    }
+                    throw e;
+                }
+            }
 
             const order = new Order().setRelation(Order.webshop, webshop);
             order.data = request.body; // TODO: validate
