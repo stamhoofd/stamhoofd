@@ -9,7 +9,7 @@ type Query = undefined;
 type Body = UitpasPriceCheckRequest;
 type ResponseBody = UitpasPriceCheckResponse;
 
-export class retrieveUitpasSocialTariffPrices extends Endpoint<Params, Query, Body, ResponseBody> {
+export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = UitpasPriceCheckRequest as Decoder<UitpasPriceCheckRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
