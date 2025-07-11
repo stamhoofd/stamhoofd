@@ -490,7 +490,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
+import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders, useValidation } from '@stamhoofd/components';
 import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, TranslatedString, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
@@ -608,6 +608,22 @@ const inheritedRecordsConfiguration = computed(() => {
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
+
+useValidation(errors.validator, () => {
+    for (const group of patchedPeriod.value.groups) {
+        if (group.id === props.groupId) {
+            try {
+                group.settings.validatePrices();
+            }
+            catch (e) {
+                errors.errorBox = new ErrorBox(e);
+                return false;
+            }
+        }
+    }
+
+    return true;
+});
 
 const pop = usePop();
 const { priceName: reducedPriceName } = useFinancialSupportSettings({
