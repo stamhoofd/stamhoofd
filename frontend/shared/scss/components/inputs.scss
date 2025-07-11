@@ -261,6 +261,10 @@ select.input {
         padding-left: 10px;
         flex-shrink: 0;
     }
+
+    + .st-list {
+        margin-top: 15px;
+    }
 }
 
 .textarea-container {

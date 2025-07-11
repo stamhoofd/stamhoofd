@@ -24,45 +24,7 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('8f75871d-17d9-49b1-aaf2-c7054e058372') }}</h2>
-                <p>{{ $t('ee16437e-ecc8-42c5-91ef-e2546c71ba12') }}</p>
-
-                <p v-if="sortedMembers.length === 0" class="info-box">
-                    {{ $t('4d9168af-27ed-438e-acd9-756474dd6f5e') }}
-                </p>
-                <STList v-else>
-                    <STListItem v-for="member in sortedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
-                        <template #left>
-                            <span v-if="memberHasFullAccess(member)" class="icon layered" :v-tooltip="$t('06e0f25f-f601-4359-a95d-b72fd79ecbdd')">
-                                <span class="icon user-admin-layer-1" />
-                                <span class="icon user-admin-layer-2 yellow" />
-                            </span>
-                            <span v-else-if="memberHasNoRoles(member)" class="icon layered" :v-tooltip="$t('3bb4e938-ca4e-4318-a86d-002ba6035fd0')">
-                                <span class="icon user-blocked-layer-1" />
-                                <span class="icon user-blocked-layer-2 red" />
-                            </span>
-                            <span v-else class="icon user" />
-                        </template>
-
-                        <h2 class="style-title-list">
-                            <span>{{ member.name }}</span>
-                        </h2>
-                        <p class="style-description-small">
-                            {{ member.users.map(u => u.email).join(', ') }}
-                        </p>
-                        <p class="style-description-small">
-                            {{ Formatter.joinLast(member.getResponsibilities(organization), ', ', ' en ') }}
-                        </p>
-
-                        <template #right>
-                            <span v-if="member.id === me?.memberId" class="style-tag">
-                                {{ $t('50f1bd97-6ff4-44cb-a44d-45672218b7f8') }}
-                            </span>
-                            <span v-else-if="!member.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('0e7858e2-873b-4d49-9b5b-d9b15ea5f97f')" />
-                            <span><span class="icon gray edit" /></span>
-                        </template>
-                    </STListItem>
-                </STList>
+                <InternalAdminsBox />
 
                 <hr><h2 class="style-with-button">
                     <div>{{ $t('f5404d3b-f49b-489d-9cb8-05ba668ca0cc') }}</div>
@@ -125,15 +87,15 @@
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditResponsibilitiesView, LoadingViewTransition, MemberSegmentedView, PromiseView, useMembersObjectFetcher, useOrganization, useUser } from '@stamhoofd/components';
 import { LimitedFilteredRequest, MemberAdmin, PermissionLevel, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions } from 'vue';
 import EditAdminView from './EditAdminView.vue';
 import RolesView from './RolesView.vue';
 import { useAdmins } from './hooks/useAdmins';
+import InternalAdminsBox from './InternalAdminsBox.vue';
 
 const me = useUser();
 const organization = useOrganization();
-const { memberHasFullAccess, memberHasNoRoles, sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions, getUnloadedPermissions, reload } = useAdmins();
+const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions, getUnloadedPermissions, reload } = useAdmins();
 reload(true);
 
 enum Routes {
@@ -246,34 +208,4 @@ const permissionList = (user: User) => {
     }
     return list.join(', ');
 };
-
-const objectFetcher = useMembersObjectFetcher({});
-const present = usePresent();
-
-async function editMember(memberAdmin: MemberAdmin) {
-    const component = new ComponentWithProperties(PromiseView, {
-        promise: async () => {
-            const { results } = await objectFetcher.fetch(new LimitedFilteredRequest({
-                filter: {
-                    id: memberAdmin.id,
-                },
-                limit: 1,
-            }));
-            if (!results.length) {
-                return;
-            }
-            const member = results[0] as PlatformMember;
-            return new ComponentWithProperties(NavigationController, {
-                root: new ComponentWithProperties(MemberSegmentedView, {
-                    member,
-                }),
-            });
-        },
-    });
-
-    await present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
 </script>
