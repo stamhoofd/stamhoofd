@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDe
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
@@ -778,6 +779,47 @@ export class GroupSettings extends AutoEncoder {
     get isFree() {
         return !this.prices.find(p => p.price.price > 0) && !this.optionMenus.find(o => o.options.find(p => p.price.price > 0));
     }
+
+    validatePrices() {
+        const isForever = coversForever(this.prices);
+        if (!isForever) {
+            throw new SimpleError({
+                code: 'prices_period_gap',
+                message: $t('Er is niet voor elke datum een tarief.'),
+            });
+        }
+    }
+}
+
+type Period = {
+    startDate: Date | null;
+    endDate: Date | null;
+};
+
+function coversForever(periods: Period[]): boolean {
+    const normalized = periods
+        .map(({ startDate, endDate }) => ({
+            startDate: startDate ? startDate.getTime() : -Infinity,
+            endDate: endDate ? endDate.getTime() : Infinity,
+        }))
+        .filter(p => p.startDate < p.endDate) // Skip empty periods
+        .sort((a, b) => a.startDate - b.startDate);
+
+    if (normalized.length === 0) return false;
+
+    const currentStart = normalized[0].startDate;
+    let currentEnd = normalized[0].endDate;
+
+    for (let i = 1; i < normalized.length; i++) {
+        const { startDate, endDate } = normalized[i];
+        if (startDate > currentEnd) {
+            // Gap found
+            return false;
+        }
+        currentEnd = Math.max(currentEnd, endDate);
+    }
+
+    return currentStart === -Infinity && currentEnd === Infinity;
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType();
