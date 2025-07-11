@@ -134,7 +134,7 @@ export class CartItem extends AutoEncoder {
      * In case this product is a UiTPAS social tarrif, we hold a list of UiTPAS numbers (length is equal to amount).
      * In case this is not a UiTPAS social tarrif, this will be an empty array.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 377 })
     uitpasNumbers: string[] = [];
 
     /**
