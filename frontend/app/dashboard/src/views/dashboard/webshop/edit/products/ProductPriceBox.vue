@@ -68,7 +68,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="!isSingle || enableUitpasSocialTariff /* useUitpasSocialTariff=true, should not be possible */" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
+            <STListItem v-if="uitpasFeature && (!isSingle || enableUitpasSocialTariff)" :selectable="true" element-name="label" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0">
                 <template #left>
                     <Checkbox v-model="enableUitpasSocialTariff" :disabled="productPricesAvailableForUitpasBaseProductPrice.length === 0" />
                 </template>
@@ -99,7 +99,7 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, CenteredMessage } from '@stamhoofd/components';
+import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, CenteredMessage, useFeatureFlag } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -110,6 +110,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void }>();
+const uitpasFeature = useFeatureFlag()('uitpas');
 
 const patchedProductPrice = computed(() => props.productPrice);
 

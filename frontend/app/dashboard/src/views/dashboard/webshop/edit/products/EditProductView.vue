@@ -83,7 +83,7 @@
         </template>
 
         <hr><STList>
-            <STListItem v-if="!patchedProduct.prices.some(p => p.uitpasBaseProductPriceId !== null) && uitpasBaseProductPriceAvailable" :selectable="true" element-name="button" @click="addProductPrice(true)">
+            <STListItem v-if="uitpasFeature && !patchedProduct.prices.some(p => p.uitpasBaseProductPriceId !== null) && uitpasBaseProductPriceAvailable" :selectable="true" element-name="button" @click="addProductPrice(true)">
                 <template #left>
                     <span class="icon add gray" />
                 </template>
@@ -348,7 +348,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, DateSelection, Dropdown, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, DateSelection, Dropdown, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, usePatch } from '@stamhoofd/components';
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
 import { computed, onBeforeUnmount, onMounted } from 'vue';
@@ -374,6 +374,7 @@ const props = defineProps<{
 const errors = useErrors();
 const present = usePresent();
 const pop = usePop();
+const uitpasFeature = useFeatureFlag()('uitpas');
 
 /// For now only used to update locations and times of other products that are shared
 const { patch: patchWebshop, patched: patchedWebshop, addPatch: addWebshopPatch, hasChanges: hasWebshopChanges } = usePatch(props.webshop);

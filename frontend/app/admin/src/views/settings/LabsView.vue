@@ -52,6 +52,10 @@
             Broer en zuskorting (bundelkortingen)
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
+            UiTPAS-kansentarief op webshops (onvolledig)
+        </Checkbox>
+
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
             {{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}
         </Checkbox>
