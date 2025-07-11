@@ -96,6 +96,18 @@ export class GroupPrice extends AutoEncoder {
         }
         return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group));
     }
+
+    isInPeriod(date: Date): boolean {
+        if (this.startDate !== null && this.startDate > date) {
+            return false;
+        }
+
+        if (this.endDate !== null && this.endDate < date) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 export class GroupOption extends AutoEncoder {
@@ -761,11 +773,16 @@ export class GroupSettings extends AutoEncoder {
         return Formatter.firstLetters(this.name, maxLength);
     }
 
-    getFilteredPrices(options?: { admin?: boolean }) {
+    getFilteredPrices(options?: { admin?: boolean; date?: Date }) {
         return this.prices.filter((p) => {
             if (p.hidden && !options?.admin) {
                 return false;
             }
+
+            if (options?.date && !p.isInPeriod(options.date)) {
+                return false;
+            }
+
             return true;
         });
     }
