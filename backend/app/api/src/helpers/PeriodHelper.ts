@@ -144,7 +144,12 @@ export class PeriodHelper {
                 );
 
                 for (const organization of organizations) {
-                    await this.moveOrganizationToPeriod(organization, period);
+                    try {
+                        await this.moveOrganizationToPeriod(organization, period);
+                    }
+                    catch (error) {
+                        console.error('Error moving organization to period', organization.id, error);
+                    }
                     lastId = organization.id;
                 }
 

@@ -324,7 +324,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         for (const s of struct.groups) {
             s.settings.registeredMembers = 0;
             s.settings.reservedMembers = 0;
-            await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
+            try {
+                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
+            }
+            catch (e) {
+                // Can happen when a group is no longer valid anymore when duplicating a period
+                console.error('Error creating group', s.id, e);
+            }
         }
         const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
 
