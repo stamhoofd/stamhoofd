@@ -786,6 +786,7 @@ export async function presentEditResponsibilities({ member, present }: { member:
                 component: markRaw(EditMemberResponsibilitiesBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
                     await dismiss({ force: true });
+                    GlobalEventBus.sendEvent('members-responsibilities-changed', [member]).catch(console.error);
                 },
             }),
         ],

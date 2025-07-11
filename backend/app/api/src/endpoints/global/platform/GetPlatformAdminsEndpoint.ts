@@ -1,13 +1,13 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { User } from '@stamhoofd/models';
-import { User as UserStruct } from '@stamhoofd/structures';
+import { OrganizationAdmins } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
-type ResponseBody = UserStruct[];
+type ResponseBody = OrganizationAdmins;
 
 export class GetPlatformAdminsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -35,7 +35,9 @@ export class GetPlatformAdminsEndpoint extends Endpoint<Params, Query, Body, Res
         const admins = await User.getPlatformAdmins();
 
         return new Response(
-            await AuthenticatedStructures.usersWithMembers(admins),
+            OrganizationAdmins.create({
+                users: admins.map(user => user.getStructure()),
+            }),
         );
     }
 }

@@ -45,20 +45,20 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            <span>{{ member.patchedMember.name }}</span>
+                            <span>{{ member.name }}</span>
                         </h2>
                         <p class="style-description-small">
-                            {{ member.patchedMember.users.filter(u => u.memberId === member.id).map(u => u.email).join(', ') }}
+                            {{ member.users.map(u => u.email).join(', ') }}
                         </p>
                         <p class="style-description-small">
-                            {{ Formatter.joinLast(member.getResponsibilities({organization}).map(l => l.getName(member, false)), ', ', ' en ') }}
+                            {{ Formatter.joinLast(member.getResponsibilities(organization), ', ', ' en ') }}
                         </p>
 
                         <template #right>
                             <span v-if="member.id === me?.memberId" class="style-tag">
                                 {{ $t('50f1bd97-6ff4-44cb-a44d-45672218b7f8') }}
                             </span>
-                            <span v-else-if="!member.patchedMember.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('0e7858e2-873b-4d49-9b5b-d9b15ea5f97f')" />
+                            <span v-else-if="!member.users.find(u => u.hasAccount)" class="icon email gray" :v-tooltip="$t('0e7858e2-873b-4d49-9b5b-d9b15ea5f97f')" />
                             <span><span class="icon gray edit" /></span>
                         </template>
                     </STListItem>
@@ -122,19 +122,19 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EditResponsibilitiesView, LoadingViewTransition, useOrganization, useUser } from '@stamhoofd/components';
-import { PermissionLevel, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { EditResponsibilitiesView, LoadingViewTransition, MemberSegmentedView, PromiseView, useMembersObjectFetcher, useOrganization, useUser } from '@stamhoofd/components';
+import { LimitedFilteredRequest, MemberAdmin, PermissionLevel, Permissions, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions } from 'vue';
-import { useMemberActions } from '../members/classes/MemberActionBuilder';
 import EditAdminView from './EditAdminView.vue';
 import RolesView from './RolesView.vue';
 import { useAdmins } from './hooks/useAdmins';
 
 const me = useUser();
 const organization = useOrganization();
-const { sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions, getUnloadedPermissions } = useAdmins();
+const { memberHasFullAccess, memberHasNoRoles, sortedAdmins, sortedMembers, loading, reloadPromise, getPermissions, getUnloadedPermissions, reload } = useAdmins();
+reload(true);
 
 enum Routes {
     Roles = 'rollen',
@@ -226,9 +226,6 @@ const editAdmin = async (user: User) => {
 const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
 const hasEmptyAccess = (user: User) => getPermissions(user)?.isEmpty ?? true;
 
-const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u));
-const memberHasNoRoles = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasEmptyAccess(u));
-
 const permissionList = (user: User) => {
     const list: string[] = [];
     const permissions = getPermissions(user);
@@ -250,9 +247,33 @@ const permissionList = (user: User) => {
     return list.join(', ');
 };
 
-const actionBuilder = useMemberActions();
+const objectFetcher = useMembersObjectFetcher({});
+const present = usePresent();
 
-async function editMember(member: PlatformMember) {
-    await actionBuilder().showMember(member);
+async function editMember(memberAdmin: MemberAdmin) {
+    const component = new ComponentWithProperties(PromiseView, {
+        promise: async () => {
+            const { results } = await objectFetcher.fetch(new LimitedFilteredRequest({
+                filter: {
+                    id: memberAdmin.id,
+                },
+                limit: 1,
+            }));
+            if (!results.length) {
+                return;
+            }
+            const member = results[0] as PlatformMember;
+            return new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(MemberSegmentedView, {
+                    member,
+                }),
+            });
+        },
+    });
+
+    await present({
+        components: [component],
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>

@@ -1,16 +1,16 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { GlobalEventBus, useOrganization, usePlatform } from '@stamhoofd/components';
-import { ContextPermissions, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { ApiUser, GroupType, LoadedPermissions, PermissionLevel, Permissions, PlatformFamily, PlatformMember, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { GlobalEventBus, useGlobalEventListener, useOrganization, usePlatform } from '@stamhoofd/components';
+import { ContextPermissions, useRequestOwner } from '@stamhoofd/networking';
+import { ApiUser, LoadedPermissions, MemberAdmin, Permissions, User, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onActivated, shallowRef } from 'vue';
 import { useReloadAdmins } from './useReloadAdmins';
 
-export function useAdmins() {
+export function useAdmins(load = true) {
     const organization = useOrganization();
-    const platformManager = usePlatformManager();
     const platform = usePlatform();
     const { reload, reloadPromise } = useReloadAdmins();
+    let lastLoaded = new Date();
 
     const loading = computed(() => {
         if (organization.value) {
@@ -18,17 +18,28 @@ export function useAdmins() {
         }
 
         // Platform scope
-        return platformManager.value.$platform.admins === undefined || platformManager.value.$platform.admins === null;
+        return platform.value.admins === undefined || platform.value.admins === null;
     });
 
-    if (loading.value) {
-        reload();
+    if (loading.value && load) {
+        void reload(false);
     }
 
-    onActivated(() => {
+    onActivated(async () => {
+        if (load && lastLoaded < new Date(Date.now() - 1000 * 60 * 5)) {
+            lastLoaded = new Date();
+            await reload(true);
+        }
+
         // Reload admins
-        reload();
         clearPermissionCache();
+    });
+
+    useGlobalEventListener('members-responsibilities-changed', async () => {
+        if (load) {
+            lastLoaded = new Date();
+            void reload(true);
+        }
     });
 
     // Listen for updates that require the permission to get recalculated
@@ -52,7 +63,7 @@ export function useAdmins() {
         }
 
         // Platform scope
-        return platformManager.value.$platform.admins ?? [];
+        return platform.value.admins ?? [];
     });
 
     const permissionContextCache = shallowRef(new WeakMap<User, ContextPermissions>());
@@ -68,7 +79,7 @@ export function useAdmins() {
             const cacheEntry = cache.get(user);
             if (!cacheEntry) {
                 const c = {
-                    permissions: organization.value ? (user.permissions?.forOrganization(organization.value, null) ?? null) : (user.permissions?.forPlatform(platformManager.value.$platform) ?? null),
+                    permissions: organization.value ? (user.permissions?.forOrganization(organization.value, null) ?? null) : (user.permissions?.forPlatform(platform.value) ?? null),
                     unloadedPermissions: organization.value ? (user.permissions?.organizationPermissions.get(organization.value.id) ?? null) : (user.permissions?.globalPermissions ?? null),
                 };
                 cache.set(user, c);
@@ -78,7 +89,7 @@ export function useAdmins() {
         }
         const cache = permissionContextCache.value;
         if (!cache.has(user)) {
-            cache.set(user, new ContextPermissions(UserWithMembers.create(user), organization, platformManager.value.$platform, { allowInheritingPermissions: false }));
+            cache.set(user, new ContextPermissions(UserWithMembers.create(user), organization, platform.value, { allowInheritingPermissions: false }));
         }
         return cache.get(user)!;
     };
@@ -107,36 +118,11 @@ export function useAdmins() {
         return user.permissions!.convertPlatformPatch(patch);
     };
 
-    function isExternalUser(a: UserWithMembers) {
-        if (!a.memberId) {
-            return true;
+    function isExternalUser(a: User) {
+        if (!organization.value) {
+            return !a.permissions?.globalPermissions?.responsibilities.length;
         }
-        const member = a.members.members.find(m => m.id === a.memberId!);
-        if (!member) {
-            return true;
-        }
-        const registrations = organization.value ? member.registrations.filter(r => r.organizationId === organization.value?.id) : member.registrations;
-        const hasRegistrations = registrations.find(r =>
-            r.registeredAt !== null && r.deactivatedAt === null && r.group.type === GroupType.Membership
-            && r.group.periodId === (organization.value?.period.period.id ?? platform.value.period.id),
-        );
-
-        if (!hasRegistrations) {
-            return true;
-        }
-
-        // Check received a manual role
-        const unloaded = getUnloadedPermissions(a);
-        if (unloaded) {
-            if (unloaded.roles.length > 0) {
-                return true;
-            }
-            if (unloaded.level !== PermissionLevel.None) {
-                return true;
-            }
-        }
-
-        return false;
+        return !a.permissions?.organizationPermissions.get(organization.value.id)?.responsibilities.length;
     }
 
     const sortedAdmins = computed(() => {
@@ -148,29 +134,28 @@ export function useAdmins() {
             ));
     });
     const hasFullAccess = (user: User) => getPermissions(user)?.hasFullAccess() ?? false;
-    const memberHasFullAccess = (member: PlatformMember) => !!member.patchedMember.users.find(u => u.memberId === member.id && hasFullAccess(u));
+    const hasEmptyAccess = (user: User) => getPermissions(user)?.isEmpty ?? true;
+    const memberHasFullAccess = (member: MemberAdmin) => !!member.users.find(u => hasFullAccess(u));
+    const memberHasNoRoles = (member: MemberAdmin) => member.users.every(u => hasEmptyAccess(u));
 
     const sortedMembers = computed(() => {
-        const members = new Map<string, PlatformMember>();
+        const members = new Map<string, MemberAdmin>();
         for (const admin of admins.value) {
-            const adminMembers = PlatformFamily.createSingles(admin.members, {
-                contextOrganization: organization.value,
-                platform: platform.value,
-            });
-
-            for (const m of adminMembers) {
-                if (m.getResponsibilities({ organization: organization.value }).length === 0) {
-                    continue;
-                }
-                if (!members.has(m.id)) {
-                    members.set(m.id, m);
-                }
+            if (!admin.memberId) {
+                continue; // Skip admins that are not members
             }
+
+            if (!members.has(admin.memberId)) {
+                members.set(admin.memberId, new MemberAdmin({ users: [] }));
+            }
+
+            const memberAdmins = members.get(admin.memberId)!;
+            memberAdmins.users.push(admin);
         }
 
         return [...members.values()].sort((a, b) => Sorter.stack(
             Sorter.byBooleanValue(memberHasFullAccess(a), memberHasFullAccess(b)),
-            Sorter.byStringValue(a.patchedMember.name, b.patchedMember.name),
+            Sorter.byStringValue(a.name, b.name),
         ));
     });
 
@@ -182,7 +167,7 @@ export function useAdmins() {
         }
 
         // Platform scope
-        return platformManager.value.$platform.admins?.push(user);
+        return platform.value.admins?.push(user);
     };
 
     const dropFromMemory = (user: UserWithMembers) => {
@@ -196,12 +181,12 @@ export function useAdmins() {
         }
 
         // Platform scope
-        const index = platformManager.value.$platform.admins?.findIndex(u => u.id == user.id);
+        const index = platform.value.admins?.findIndex(u => u.id == user.id);
 
         if (index !== undefined && index !== -1) {
-            platformManager.value.$platform.admins?.splice(index, 1);
+            platform.value.admins?.splice(index, 1);
         }
     };
 
-    return { loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getUnloadedPermissions, getPermissionsPatch, pushInMemory, dropFromMemory, clearPermissionCache };
+    return { hasEmptyAccess, reload, memberHasFullAccess, memberHasNoRoles, loading, admins, reloadPromise, sortedAdmins, sortedMembers, getPermissions, getUnloadedPermissions, getPermissionsPatch, pushInMemory, dropFromMemory, clearPermissionCache };
 }

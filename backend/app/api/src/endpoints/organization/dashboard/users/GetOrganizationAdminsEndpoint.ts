@@ -2,7 +2,6 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { User } from '@stamhoofd/models';
 import { OrganizationAdmins } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
@@ -35,8 +34,10 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         // Get all admins
         const admins = await User.getAdmins(organization.id);
 
-        return new Response(OrganizationAdmins.create({
-            users: await AuthenticatedStructures.usersWithMembers(admins),
-        }));
+        return new Response(
+            OrganizationAdmins.create({
+                users: admins.map(user => user.getStructure()),
+            }),
+        );
     }
 }

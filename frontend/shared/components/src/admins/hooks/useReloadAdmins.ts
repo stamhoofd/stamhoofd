@@ -3,6 +3,8 @@ import { Toast, useContext, useOrganization } from '@stamhoofd/components';
 import { OrganizationManager, usePlatformManager } from '@stamhoofd/networking';
 import { getCurrentInstance } from 'vue';
 
+const reloadPromises = new Map<null | string, Promise<unknown>>();
+
 export function useReloadAdmins() {
     const organization = useOrganization();
     const platformManager = usePlatformManager();
@@ -10,23 +12,45 @@ export function useReloadAdmins() {
     const instance = getCurrentInstance();
     const pop = usePop();
 
-    let reloadPromise: Promise<unknown> | undefined = undefined;
+    function getReloadPromise() {
+        const id = organization.value?.id ?? null;
+        return reloadPromises.get(id) ?? null;
+    }
 
-    function reload() {
+    function setReloadPromise(p: Promise<unknown>) {
+        const id = organization.value?.id ?? null;
+        reloadPromises.set(id, p);
+        p.catch(console.error).finally(() => {
+            reloadPromises.delete(id);
+        });
+        return p;
+    }
+
+    function reload(force = true) {
+        const p = getReloadPromise();
+        if (p) {
+            return p;
+        }
         if (organization.value) {
             const manager = new OrganizationManager($context.value!);
-            reloadPromise = manager.loadAdmins(true, true, instance?.proxy).catch((e) => {
-                Toast.fromError(e).show();
-                pop({ force: true })?.catch(console.error);
-            });
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            setReloadPromise(
+                manager.loadAdmins(force, true, instance?.proxy).catch((e) => {
+                    Toast.fromError(e).show();
+                    pop({ force: true })?.catch(console.error);
+                }),
+            );
         }
         else {
-            reloadPromise = platformManager.value.loadAdmins(true, true, instance?.proxy).catch((e) => {
-                Toast.fromError(e).show();
-                pop({ force: true })?.catch(console.error);
-            });
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            setReloadPromise(
+                platformManager.value.loadAdmins(force, true, instance?.proxy).catch((e) => {
+                    Toast.fromError(e).show();
+                    pop({ force: true })?.catch(console.error);
+                }),
+            );
         }
     }
 
-    return { reload, reloadPromise: () => reloadPromise };
+    return { reload, reloadPromise: () => getReloadPromise() };
 }

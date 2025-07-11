@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { RequestResult } from '@simonbackx/simple-networking';
-import { CreateOrganization, NewUser, Organization, OrganizationAdmins, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
+import { CreateOrganization, NewUser, Organization, PollEmailVerificationRequest, PollEmailVerificationResponse, SignupResponse, Token, User, VerifyEmailRequest, Version } from '@stamhoofd/structures';
 
 import { NetworkManager } from './NetworkManager';
 import { SessionContext } from './SessionContext';

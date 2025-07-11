@@ -6,16 +6,16 @@ import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
 import { EventNotificationType } from './EventNotificationType.js';
 import { Image } from './files/Image.js';
-import { ReduceablePrice } from './ReduceablePrice.js';
 import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
 import { OrganizationLevelRecordsConfiguration } from './OrganizationLevelRecordsConfiguration.js';
 import { PermissionRoleDetailed } from './PermissionRole.js';
+import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
-import { UserWithMembers } from './UserWithMembers.js';
+import { User } from './User.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -518,7 +518,7 @@ export class Platform extends AutoEncoder {
     /**
      * Keep admins accessible and in memory
      */
-    admins?: UserWithMembers[] | null;
+    admins?: User[] | null;
 
     /**
      * Keep admins accessible and in memory

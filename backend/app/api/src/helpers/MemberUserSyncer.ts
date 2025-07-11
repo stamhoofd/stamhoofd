@@ -157,7 +157,6 @@ export class MemberUserSyncerStatic {
 
     async updateInheritedPermissions(user: User) {
         // Fetch all members for this user
-        
         const responsibilities = user.memberId ? (await this.getResponsibilitiesForMembers([user.memberId])) : [];
 
         // Check if the member has active registrations

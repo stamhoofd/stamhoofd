@@ -1,8 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
-
-import { UserWithMembers } from '../UserWithMembers.js';
+import { User } from '../User';
 
 export class OrganizationAdmins extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(UserWithMembers) })
-    users: UserWithMembers[] = [];
+    @field({ decoder: new ArrayDecoder(User) })
+    users: User[] = [];
 }

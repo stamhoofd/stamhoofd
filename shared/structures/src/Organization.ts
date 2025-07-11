@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDe
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from './addresses/Address.js';
+import { appToUri } from './AppType.js';
 import { compileToInMemoryFilter } from './filters/InMemoryFilter.js';
 import { organizationItemInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
@@ -13,9 +14,8 @@ import { RecordSettings } from './members/records/RecordSettings.js';
 import { OrganizationMetaData } from './OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
-import { UserWithMembers } from './UserWithMembers.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
-import { appToUri } from './AppType.js';
+import { User } from './User.js';
 
 export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -202,7 +202,7 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     /**
      * Only available for patching. Also available with lazy loading OrganizationAdmins
      */
-    admins?: UserWithMembers[] | null = null;
+    admins?: User[] | null = null;
 
     /**
      * Keep admins accessible and in memory

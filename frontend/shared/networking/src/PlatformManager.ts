@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ColorHelper, GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
-import { AppType, LimitedFilteredRequest, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, UserWithMembers, Version } from '@stamhoofd/structures';
+import { AppType, LimitedFilteredRequest, OrganizationAdmins, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, UserWithMembers, Version } from '@stamhoofd/structures';
 import { inject, reactive, Ref, toRef } from 'vue';
 
 export function usePlatformManager(): Ref<PlatformManager> {
@@ -138,16 +138,16 @@ export class PlatformManager {
         const response = await this.$context.authenticatedServer.request({
             method: 'GET',
             path: '/platform/admins',
-            decoder: new ArrayDecoder(UserWithMembers as Decoder<UserWithMembers>),
+            decoder: OrganizationAdmins as Decoder<OrganizationAdmins>,
             shouldRetry: shouldRetry ?? false,
             owner,
         });
 
         if (this.$platform.admins) {
-            deepSetArray(this.$platform.admins, response.data);
+            deepSetArray(this.$platform.admins, response.data.users);
         }
         else {
-            this.$platform.admins = response.data;
+            this.$platform.admins = response.data.users;
         }
     }
 

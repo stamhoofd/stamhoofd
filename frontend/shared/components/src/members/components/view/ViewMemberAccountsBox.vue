@@ -16,9 +16,10 @@
                 <template v-else #left>
                     <span class="icon email small" :v-tooltip="$t('d900b182-3fd8-4607-824f-b4a1f4a60e6c')" />
                 </template>
-                <template v-if="(user.firstName || user.lastName) && (user.name !== member.patchedMember.name)">
+                <template v-if="(user.firstName || user.lastName)">
                     <h3 v-if="user.firstName || user.lastName" class="style-title-list">
-                        {{ user.firstName }} {{ user.lastName }}
+                        <span>{{ user.firstName }} {{ user.lastName }}</span>
+                        <span v-if="user.memberId === member.id" v-tooltip="$t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName})" class="icon dot small primary" />
                     </h3>
                     <p class="style-description-small">
                         {{ user.email }}
@@ -27,17 +28,8 @@
                 <h3 v-else class="style-title-list">
                     {{ user.email }}
                 </h3>
-                <p v-if="!user.hasAccount" class="style-description-small">
-                    {{ $t('5c0fc25a-cd75-4a2b-8870-941d85458f46') }}
-                </p>
-                <p v-else-if="!user.verified" class="style-description-small">
-                    {{ $t('34025f30-1ef4-43db-8a15-902c681dd791') }}
-                </p>
-                <p v-if="user.memberId === member.id" class="style-description-small">
-                    {{ $t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName}) }}
-                </p>
-                <p v-if="user.permissions && app !== 'registration'" class="style-description-small">
-                    {{ $t('50f0a76c-4b6c-47cb-8f95-e11c179c4e6a') }}
+                <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
+                    {{ $t('Beheerder') }}
                 </p>
                 <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
                     <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
@@ -58,6 +50,7 @@ import { useAppContext } from '../../../context/appContext';
 import { useAuth } from '../../../hooks';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
+import { useAdmins } from '../../../admins/hooks/useAdmins';
 
 defineOptions({
     inheritAttrs: false,
@@ -70,6 +63,7 @@ const app = useAppContext();
 const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, PermissionLevel.Write));
 const deletingUsers = ref(new Set<string>());
 const platformFamilyManager = usePlatformFamilyManager();
+const { hasEmptyAccess } = useAdmins(false);
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {
