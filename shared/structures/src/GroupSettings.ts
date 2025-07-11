@@ -774,8 +774,12 @@ export class GroupSettings extends AutoEncoder {
     }
 
     getFilteredPrices(options?: { admin?: boolean; date?: Date }) {
+        if (options?.admin) {
+            return [...this.prices];
+        }
+
         return this.prices.filter((p) => {
-            if (p.hidden && !options?.admin) {
+            if (p.hidden) {
                 return false;
             }
 
