@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerD
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
+import { BalanceItem } from '../../BalanceItem.js';
 import { compileToInMemoryFilter } from '../../filters/InMemoryFilter.js';
 import { registerItemInMemoryFilterCompilers } from '../../filters/inMemoryFilterDefinitions.js';
 import { StamhoofdFilter } from '../../filters/StamhoofdFilter.js';
@@ -19,10 +20,9 @@ import { RecordAnswer, RecordAnswerDecoder } from '../records/RecordAnswer.js';
 import { RecordCategory } from '../records/RecordCategory.js';
 import { RecordSettings } from '../records/RecordSettings.js';
 import { type Registration } from '../Registration.js';
+import { type RegisterCart } from './RegisterCart.js';
 import { type RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
-import { type RegisterCart } from './RegisterCart.js';
-import { BalanceItem } from '../../BalanceItem.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -149,6 +149,9 @@ export class RegisterItem implements ObjectWithRecords {
         this.id = data.id ?? uuidv4();
         this.member = data.member;
         this.group = data.group;
+        if (data.customStartDate !== undefined) {
+            this.customStartDate = data.customStartDate;
+        }
 
         if (!data.groupPrice) {
             const prices = this.getFilteredPrices();
@@ -234,10 +237,6 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (data.trial === undefined) {
             this.trial = this.canHaveTrial;
-        }
-
-        if (data.customStartDate !== undefined) {
-            this.customStartDate = data.customStartDate;
         }
     }
 
@@ -457,7 +456,7 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     getFilteredPrices() {
-        const base = this.group.settings.getFilteredPrices({ admin: this.checkout.isAdminFromSameOrganization });
+        const base = this.group.settings.getFilteredPrices({ admin: this.checkout.isAdminFromSameOrganization, date: this.calculatedStartDate });
 
         if (this.groupPrice && !base.some(b => b.id === this.groupPrice.id)) {
             return [this.groupPrice, ...base];
@@ -1236,6 +1235,15 @@ export class RegisterItem implements ObjectWithRecords {
                         });
                     }
                 }
+            }
+
+            if (!this.groupPrice.isInPeriod(this.calculatedStartDate)) {
+                throw new SimpleError({
+                    code: 'invalid_price',
+                    message: 'GroupPrice is not valid for this date',
+                    human: $t(`Het gekozen tarief is niet toepasbaar voor deze datum.`),
+                    meta: { recoverable: true },
+                });
             }
 
             if (reachedMaximum && !this.group.waitingList) {
