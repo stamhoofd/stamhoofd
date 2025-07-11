@@ -780,12 +780,13 @@ export class GroupSettings extends AutoEncoder {
         return !this.prices.find(p => p.price.price > 0) && !this.optionMenus.find(o => o.options.find(p => p.price.price > 0));
     }
 
-    validatePrices() {
+    throwIfInvalidPrices() {
         const isForever = coversForever(this.prices);
         if (!isForever) {
             throw new SimpleError({
                 code: 'prices_period_gap',
-                message: $t('Er is niet voor elke datum een tarief.'),
+                message: 'Not every date has a price.',
+                human: $t('Er is niet voor elke datum een tarief.'),
             });
         }
     }
