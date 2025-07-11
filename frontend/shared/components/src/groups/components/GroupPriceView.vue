@@ -5,7 +5,7 @@
         </h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <GroupPriceBox :period="patchedPeriod" :price="patched" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :show-name-always="showNameAlways" @patch:period="addPeriodPatch" @patch:price="addPatch" />
+        <GroupPriceBox :period="patchedPeriod" :price="patched" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :show-name-always="showNameAlways" :validator="errors.validator" @patch:period="addPeriodPatch" @patch:price="addPatch" />
     </SaveView>
 </template>
 

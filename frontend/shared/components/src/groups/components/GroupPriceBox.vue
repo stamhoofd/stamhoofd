@@ -1,8 +1,14 @@
 <template>
     <div class="container">
+        <STErrorsDefault :error-box="errors.errorBox" />
+
         <TInput v-if="!isSingle" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" :placeholder="$t(`8435ecfa-0baa-486d-a3fd-b9dafded1cab`)" />
 
-        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" />
+        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" />
+
+        <template v-if="!isSingle">
+            <hr><h2>{{ $t("Beschikbaarheid") }}</h2>
+        </template>
 
         <STList>
             <STListItem v-if="!isSingle || hidden" :selectable="true" element-name="label">
@@ -31,6 +37,40 @@
                     <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
                         <NumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
                     </STInputBox>
+                </div>
+            </STListItem>
+
+            <STListItem v-if="hasStartDate || !isSingle" :selectable="true" :element-name="hasStartDate ? 'div' : 'label'">
+                <template #left>
+                    <Checkbox v-model="hasStartDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Beschikbaar vanaf datum') }}
+                </h3>
+
+                <div v-if="hasStartDate" class="split-inputs option">
+                    <STInputBox title="" error-fields="startDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="startDate" />
+                    </STInputBox>
+                    <TimeInput v-model="startDate" title="" :validator="errors.validator" />
+                </div>
+            </STListItem>
+
+            <STListItem v-if="hasEndDate || !isSingle" :selectable="true" :element-name="hasEndDate ? 'div' : 'label'">
+                <template #left>
+                    <Checkbox v-model="hasEndDate" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Onbeschikbaar na datum') }}
+                </h3>
+
+                <div v-if="hasEndDate" class="split-inputs option">
+                    <STInputBox title="" error-fields="endDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="endDate" />
+                    </STInputBox>
+                    <TimeInput v-model="endDate" title="" :validator="errors.validator" />
                 </div>
             </STListItem>
         </STList>
@@ -83,8 +123,9 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { BundleDiscountSettingsView, NumberInput, GroupPriceDiscountsInput } from '@stamhoofd/components';
+import { BundleDiscountSettingsView, DateSelection, ErrorBox, GroupPriceDiscountsInput, NumberInput, STInputBox, TimeInput, useValidation, Validator } from '@stamhoofd/components';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, Group, GroupPrice, GroupPriceDiscount, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';
@@ -98,15 +139,31 @@ const props = withDefaults(defineProps<{
     errors: ReturnType<typeof useErrors>;
     defaultMembershipTypeId?: string | null;
     showNameAlways?: boolean;
+    validator?: Validator | null;
 }>(), {
     defaultMembershipTypeId: null,
     showNameAlways: false,
+    validator: null,
 });
 
 const emit = defineEmits(['patch:price']);
 const { patched, addPatch } = useEmitPatch<GroupPrice>(props, emit, 'price');
 const { addPatch: addPeriodPatch } = useEmitPatch<OrganizationRegistrationPeriod>(props, emit, 'period');
 const present = usePresent();
+const errors = useErrors({ validator: props.validator });
+
+useValidation(errors.validator, () => {
+    if (startDate.value && endDate.value && startDate.value >= endDate.value) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'start_date_after_end_date',
+            message: $t(`De "onbeschikbaar na datum" moet na de "beschikbaar vanaf datum" zijn.`),
+        }));
+
+        return false;
+    }
+
+    return true;
+});
 
 const isSingle = computed(() => !props.showNameAlways && props.group.settings.prices.length <= 1);
 
@@ -134,6 +191,46 @@ const usedStock = computed(() => patched.value.getUsedStock(props.group) || 0);
 const useStock = computed({
     get: () => patched.value.stock !== null,
     set: useStock => addPatch({ stock: useStock ? (patched.value.getUsedStock(props.group) || 10) : null }),
+});
+
+const startDate = computed({
+    get: () => patched.value.startDate,
+    set: startDate => addPatch({ startDate }),
+});
+
+const hasStartDate = computed({
+    get: () => patched.value.startDate !== null,
+    set: (value) => {
+        if (value === hasStartDate.value) {
+            return;
+        }
+        if (value) {
+            addPatch({ startDate: startDate.value ?? new Date() });
+        }
+        else {
+            addPatch({ startDate: null });
+        }
+    },
+});
+
+const endDate = computed({
+    get: () => patched.value.endDate,
+    set: endDate => addPatch({ endDate }),
+});
+
+const hasEndDate = computed({
+    get: () => patched.value.endDate !== null,
+    set: (value) => {
+        if (value === hasEndDate.value) {
+            return;
+        }
+        if (value) {
+            addPatch({ endDate: endDate.value ?? new Date() });
+        }
+        else {
+            addPatch({ endDate: null });
+        }
+    },
 });
 
 function getBundleDiscountSelected(bundleDiscount: BundleDiscount) {

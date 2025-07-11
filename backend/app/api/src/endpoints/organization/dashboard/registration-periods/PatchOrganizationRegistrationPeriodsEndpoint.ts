@@ -212,6 +212,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             for (const groupPut of patch.groups.getPuts()) {
                 shouldUpdateSetupSteps = true;
+                groupPut.put.settings.throwIfInvalidPrices();
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
                 deleteUnreachable = true;
                 forceGroupIds.push(group.id);
@@ -479,6 +480,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
         }
 
+        model.settings.throwIfInvalidPrices();
         await model.updateOccupancy();
         await model.save();
 

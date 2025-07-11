@@ -40,6 +40,7 @@ const props = withDefaults(
         group?: Group | null;
         title?: string;
         defaultMembershipTypeId?: string | null;
+        startDate?: Date;
     }>(),
     {
         errorBox: null,
@@ -47,6 +48,7 @@ const props = withDefaults(
         title: () => $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
         group: null,
         defaultMembershipTypeId: null,
+        startDate: () => new Date(0),
     },
 );
 const model = defineModel<ReduceablePrice>({ required: true });
@@ -59,11 +61,22 @@ const organization = useOrganization();
 
 const showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
 
-const platformMembershipReducedPrice = computed(() => getPlatformMembershipPrice(true, new Date(0)));
-const platformMembershipPrice = computed(() => getPlatformMembershipPrice(false, new Date(0)));
+const now = computed(() => {
+    const date = new Date();
 
-const platformMembershipReducedPriceNow = computed(() => getPlatformMembershipPrice(true, new Date()));
-const platformMembershipPriceNow = computed(() => getPlatformMembershipPrice(false, new Date()));
+    // now should not be before start date
+    if (props.startDate && props.startDate > date) {
+        return props.startDate;
+    }
+
+    return date;
+});
+
+const platformMembershipReducedPrice = computed(() => getPlatformMembershipPrice(true, props.startDate));
+const platformMembershipPrice = computed(() => getPlatformMembershipPrice(false, props.startDate));
+
+const platformMembershipReducedPriceNow = computed(() => getPlatformMembershipPrice(true, now.value));
+const platformMembershipPriceNow = computed(() => getPlatformMembershipPrice(false, now.value));
 
 const minPriceDifference = computed(() =>
     Math.max(0,
