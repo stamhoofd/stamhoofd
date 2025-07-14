@@ -113,7 +113,7 @@ export class ResourcePermissions extends AutoEncoder {
 
         for (const [type, resources] of map) {
             const all = resources.get('');
-            let allDescription: string | null = null;
+            let allDescription: string | null = null;
 
             if (all && !all.isEmpty) {
                 const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
