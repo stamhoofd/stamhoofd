@@ -55,6 +55,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     clone(): this {
         const c = new SQLSelect(...this._columns);
         Object.assign(c, this);
+        this._where = this._where ? this._where.clone() : null;
         return c as any;
     }
 

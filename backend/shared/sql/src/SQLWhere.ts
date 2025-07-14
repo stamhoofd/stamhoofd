@@ -138,6 +138,8 @@ export abstract class SQLWhere implements SQLExpression {
     getJoins(): SQLJoin[] {
         return [];
     }
+
+    abstract clone(): this;
 }
 
 export class SQLEmptyWhere extends SQLWhere {
@@ -167,6 +169,10 @@ export class SQLEmptyWhere extends SQLWhere {
 
     get isAlways() {
         return true;
+    }
+
+    clone(): this {
+        return new SQLEmptyWhere() as this;
     }
 }
 
@@ -529,6 +535,12 @@ export class SQLWhereJoin extends SQLWhere {
         }
         return [this.join, ...this.where.getJoins()];
     }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.join, this.where.clone())) as this;
+        c.doesRelationAlwaysExist = this.doesRelationAlwaysExist;
+        return c;
+    }
 }
 
 export class SQLWhereAnd extends SQLWhere {
@@ -587,6 +599,11 @@ export class SQLWhereAnd extends SQLWhere {
     inverted(): SQLWhereOr {
         // NOT (A AND B) is the same as (NOT A OR NOT B)
         return new SQLWhereOr(this.children.map(c => new SQLWhereNot(c)));
+    }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.children.map(child => child.clone()))) as this;
+        return c;
     }
 }
 
@@ -648,6 +665,11 @@ export class SQLWhereOr extends SQLWhere {
         // NOT (A OR B) is the same as (NOT A AND NOT B)
         return new SQLWhereAnd(this.children.map(c => new SQLWhereNot(c)));
     }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.children.map(child => child.clone()))) as this;
+        return c;
+    }
 }
 
 export class SQLWhereNot extends SQLWhere {
@@ -693,5 +715,10 @@ export class SQLWhereNot extends SQLWhere {
 
     inverted(): SQLWhere {
         return this.a; // NOT NOT A is just A
+    }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.a.clone())) as this;
+        return c;
     }
 }

@@ -206,6 +206,11 @@ export class SQLJsonContains extends SQLWhere {
             ')',
         ]);
     }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.target, this.candidate, this.path)) as this;
+        return c;
+    }
 }
 
 /**
@@ -229,6 +234,11 @@ export class SQLJsonOverlaps extends SQLWhere {
             this.jsonDoc2.getSQL(options),
             ')',
         ]);
+    }
+
+    clone(): this {
+        const c = (new (this.constructor as any)(this.jsonDoc1, this.jsonDoc2)) as this;
+        return c;
     }
 }
 
