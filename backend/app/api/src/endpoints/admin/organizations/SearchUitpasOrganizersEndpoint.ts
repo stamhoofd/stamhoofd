@@ -1,0 +1,35 @@
+import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import { UitpasService } from '../../../services/UitpasService';
+import { UitpasOrganizersResponse } from '@stamhoofd/structures';
+import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+
+type Params = Record<string, never>;
+class Query extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    name: string;
+}
+type Body = undefined;
+type ResponseBody = UitpasOrganizersResponse;
+
+export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    queryDecoder = Query as Decoder<Query>;
+    
+    protected doesMatch(request: Request): [true, Params] | [false] {
+        if (request.method !== 'GET') {
+            return [false];
+        }
+
+        const params = Endpoint.parseParameters(request.url, '/organizations/searchUitpasOrganizer', {});
+
+        if (params) {
+            return [true, params as Params];
+        }
+        return [false];
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        const uitpasOrganizersResponse = await UitpasService.searchUitpasOrganizers(request.query.name, request.request.getVersion());
+
+        return new Response(uitpasOrganizersResponse);
+    }
+}

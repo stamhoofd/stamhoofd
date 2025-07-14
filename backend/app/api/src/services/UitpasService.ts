@@ -1,10 +1,12 @@
 import { Model } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
-import { OrderStatus } from '@stamhoofd/structures';
+import { OrderStatus, UitpasOrganizersResponse, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { UitpasTokenRepository } from '../helpers/UitpasTokenRepository';
 import { DataValidator } from '@stamhoofd/utility';
+import { ObjectData } from '@simonbackx/simple-encoding';
+
 
 function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
@@ -208,9 +210,56 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
     }
 
-    static async searchUitpasOrganizers() {
+    static async searchUitpasOrganizers(name: string, version: number): Promise<UitpasOrganizersResponse> {
         // uses platform credentials
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
+        if (name === '') {
+            throw new SimpleError({
+                code: 'empty_uitpas_organizer_name',
+                message: `Empty name when searching for UiTPAS organizers`,
+                human: $t(`Je moet een naam opgeven om UiTPAS-organisaties te zoeken.`),
+            });
+        }
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
+        const baseUrl = 'https://api-test.uitpas.be/organizers';
+        const params = new URLSearchParams()
+        params.append('name', name);
+        const url = `${baseUrl}?${params.toString()}`;
+        console.log(`Searching for UiTPAS organizers with name: ${name}, version: ${version}`);
+        //const url = `${baseUrl}?name=${encodeURIComponent(name)}&start=${start}`;
+        const myHeaders = new Headers();
+        myHeaders.append('Authorization', 'Bearer ' + access_token);
+        myHeaders.append('Accept', 'application/json');
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+        const response = await fetch(url, requestOptions).catch(() => {
+            // Handle network errors
+            throw new SimpleError({
+                code: 'uitpas_unreachable_searching_organizers',
+                message: `Network issue when searching for UiTPAS organizers`,
+                human: $t(
+                    `We konden UiTPAS niet bereiken om UiTPAS-organisaties op te zoeken. Probeer het later opnieuw.`,
+                ),
+            });
+        });
+        if (!response.ok) {
+            // throw
+        }
+        const json = await response.json().catch(() => {
+            // Handle JSON parsing errors
+            throw new SimpleError({
+                code: 'invalid_json_searching_uitpas_organizers',
+                message: `Invalid json when searching for UiTPAS organizers`,
+                human: $t(
+                    `Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`,
+                ),
+            });
+        });
+        
+        const data = new ObjectData(json, { version: version });
+        return UitpasOrganizersResponse.decode(data);
     }
 
     static async checkPermissions() {
