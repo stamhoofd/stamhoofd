@@ -364,7 +364,6 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationPartiallyAccepted:
                 return $t('a4658017-52e9-4732-8570-2c60e5d6a5cd');
         }
-
     }
 
     static allowPlatformLevel(type: EmailTemplateType): boolean {

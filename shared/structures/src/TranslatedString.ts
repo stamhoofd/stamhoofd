@@ -360,7 +360,6 @@ export class TranslatedStringDecoderStatic implements Decoder<TranslatedString> 
 
         const dictionary: { [key in Language]?: string } = {};
         for (const key in data.value) {
-            // eslint-disable-next-line no-prototype-builtins
             if (Object.prototype.hasOwnProperty.call(data.value, key)) {
                 const language = new EnumDecoder(Language).decode(new ObjectData(key, data.context, data.addToCurrentField(key)));
                 const str = data.field(key).string;

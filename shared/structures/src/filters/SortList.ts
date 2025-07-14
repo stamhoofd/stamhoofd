@@ -39,10 +39,10 @@ export class SortListDecoder {
             const direction = sub.length === 1
                 ? SortItemDirection.ASC
                 : data.clone({
-                    data: sub[1],
-                    context: data.context,
-                    field: data.addToCurrentField(index),
-                }).enum(SortItemDirection);
+                        data: sub[1],
+                        context: data.context,
+                        field: data.addToCurrentField(index),
+                    }).enum(SortItemDirection);
 
             const key = sub[0].trim();
             list.push({

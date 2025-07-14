@@ -190,10 +190,10 @@ export class SeatingPlanSection extends AutoEncoder {
     correctSizeConfig(config: SeatingSizeConfiguration) {
         const minWidth = this.calculateMinimumWidth();
         if (config.seatWidth < minWidth) {
-            config.seatWidth = minWidth
+            config.seatWidth = minWidth;
         }
         if (config.seatHeight < config.seatWidth) {
-            config.seatHeight = config.seatWidth
+            config.seatHeight = config.seatWidth;
         }
     }
 
