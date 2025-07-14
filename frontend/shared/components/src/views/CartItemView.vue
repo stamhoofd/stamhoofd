@@ -111,7 +111,7 @@
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
                 <hr><h2>{{ cartItem.amount < 2 ? $t('UiTPAS-nummer') : $t('UiTPAS-nummers') }}</h2>
 
-                <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="uitpas-number-input">
+                <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="max uitpas-number-input">
                     <input
                         v-model="uitpasNumbers[index]"
                         class="input"
@@ -119,8 +119,6 @@
                         :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
                     >
                 </STInputBox>
-
-                <p v-if="stockText" class="style-description-smal" v-text="stockText" />
             </template>
 
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
@@ -280,7 +278,7 @@ async function validateUitpasNumbers() {
         throw new SimpleError({
             code: 'uitpas_numbers_does_not_match_amount',
             message: 'UiTPAS numbers does not match ordered amount',
-            human: $t('Geef evenveel UiTPAS nummers in als het aantal dat je bestelt. besteld = ' + props.cartItem.amount + ', ingegeven = ' + props.cartItem.uitpasNumbers.length),
+            human: $t('Geef evenveel UiTPAS nummers in als het aantal dat je bestelt.'),
         });
     }
 
