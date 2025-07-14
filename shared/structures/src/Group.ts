@@ -311,20 +311,34 @@ export class Group extends AutoEncoder {
                 const requirePlatformMembershipOn = this.settings.requirePlatformMembershipOn;
 
                 filter.push({
-                    platformMemberships: {
-                        $elemMatch: {
-                            startDate: {
-                                $lte: requirePlatformMembershipOn,
+                    $or: [
+                        {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    startDate: {
+                                        $lte: requirePlatformMembershipOn,
+                                    },
+                                    endDate: {
+                                        $gt: requirePlatformMembershipOn,
+                                    },
+                                },
                             },
-                            endDate: {
-                                $gt: requirePlatformMembershipOn,
+                        }, {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    startDate: {
+                                        $lte: { $: '$now' },
+                                    },
+                                    endDate: {
+                                        $gt: { $: '$now' },
+                                    },
+                                },
                             },
                         },
-                    },
+                    ],
                 });
             }
-
-            if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
+            else if (this.settings.requirePlatformMembershipOnRegistrationDate !== null) {
                 filter.push({
                     platformMemberships: {
                         $elemMatch: {

@@ -537,6 +537,7 @@ export class GroupSettings extends AutoEncoder {
 
     /**
      * The member should have a platform membership for the provided date before being able to register
+     * OR on the date of the registration
      */
     @field({ decoder: DateDecoder, nullable: true, version: 297 })
     requirePlatformMembershipOn: Date | null = null;

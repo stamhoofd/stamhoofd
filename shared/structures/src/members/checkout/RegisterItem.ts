@@ -696,7 +696,8 @@ export class RegisterItem implements ObjectWithRecords {
     doesMeetRequirePlatformMembershipOn() {
         if (this.group.settings.requirePlatformMembershipOn !== null) {
             const requirePlatformMembershipOn = this.group.settings.requirePlatformMembershipOn;
-            return !!this.member.patchedMember.platformMemberships.find(m => m.isActive(requirePlatformMembershipOn));
+            const now = new Date();
+            return !!this.member.patchedMember.platformMemberships.find(m => m.isActive(requirePlatformMembershipOn)) || !!this.member.patchedMember.platformMemberships.find(m => m.isActive(now));
         }
         return true;
     }
