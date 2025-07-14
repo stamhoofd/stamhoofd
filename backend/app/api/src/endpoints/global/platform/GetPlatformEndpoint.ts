@@ -24,6 +24,7 @@ export class GetPlatformEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
+        await Context.setOptionalOrganizationScope({ willAuthenticate: false });
         await Context.optionalAuthenticate({ allowWithoutAccount: false });
 
         if (Context.optionalAuth?.hasSomePlatformAccess()) {

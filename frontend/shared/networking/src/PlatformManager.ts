@@ -45,6 +45,9 @@ export class PlatformManager {
 
         // Users with global permissions need the private data to reliably calculate permissions, even for specific organizations when not using the admin panel
         requirePrivateConfig = requirePrivateConfig || $context.user?.permissions?.globalPermissions?.isEmpty === false;
+        if ($context.user?.organizationId) {
+            requirePrivateConfig = false;
+        }
 
         if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
             const manager = new PlatformManager($context, reactive(fromStorage as any) as Platform, app);
