@@ -14,6 +14,9 @@
       "@simonbackx/simple-encoding"
     ]
   },
+  "engines": {
+    "node": "^22"
+  },
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev:watch-env": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ignore './shared/build-development-env/esm/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev || exit 0'",
