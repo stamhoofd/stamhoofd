@@ -12,6 +12,7 @@ import { Document as DocumentStruct } from '../Document.js';
 import { Platform } from '../Platform.js';
 import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
+import { type PropertyFilter } from '../filters/PropertyFilter.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import { EmergencyContact } from './EmergencyContact.js';
@@ -689,7 +690,7 @@ export class PlatformMember implements ObjectWithRecords {
                 continue;
             }
 
-            const def = recordsConfiguration[property];
+            const def = recordsConfiguration[property] as PropertyFilter | null;
             if (def === null) {
                 continue;
             }

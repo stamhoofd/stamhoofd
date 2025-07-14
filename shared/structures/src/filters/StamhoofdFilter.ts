@@ -109,7 +109,7 @@ export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): Stamho
     if (typeof wrap === 'object' && wrap !== null) {
         const o = {};
         for (const key in wrap) {
-            (o as any)[key] = wrapFilter(filter, (wrap as any)[key]);
+            (o as any)[key] = wrapFilter(filter, (wrap as any)[key] as WrapperFilter);
         }
         return o;
     }
@@ -305,7 +305,7 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | n
         if (first >= filter.length) {
             return null;
         }
-        return unwrapFilterByPath((filter as any)[first], keyPath.slice(1));
+        return unwrapFilterByPath((filter as any)[first] as StamhoofdFilter, keyPath.slice(1));
     }
 
     if (!(typeof filter === 'object')) {
@@ -317,7 +317,7 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | n
     }
 
     if (first in filter) {
-        return unwrapFilterByPath((filter as any)[first], keyPath.slice(1));
+        return unwrapFilterByPath((filter as any)[first] as StamhoofdFilter, keyPath.slice(1));
     }
 
     return null;

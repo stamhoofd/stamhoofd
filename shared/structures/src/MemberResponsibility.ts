@@ -59,7 +59,7 @@ export class MemberResponsibility extends AutoEncoder {
 
     createDefaultPermissions(group: Group | null) {
         return PermissionRoleForResponsibility.create({
-            name: this.name + (group ? ` van ${group.settings.name}` : ''),
+            name: this.name + (group ? ` van ${group.settings.name.toString()}` : ''),
             responsibilityId: this.id,
             responsibilityGroupId: group?.id ?? null,
         });
