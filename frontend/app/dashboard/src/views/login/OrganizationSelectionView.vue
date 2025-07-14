@@ -1,8 +1,8 @@
 <template>
     <div>
-        <STGradientBackground v-if="!platform.config.horizontalLogo" />
+        <STGradientBackground v-if="$isStamhoofd" />
 
-        <div class="st-view">
+        <div class="st-view" :class="{ transparent: $isStamhoofd }">
             <STNavigationBar :large="!isNative" class="transparent" :title="$t(`5eb72046-9ec6-4072-89ff-5c123636afbe`)">
                 <template #left>
                     <PlatformLogo />
