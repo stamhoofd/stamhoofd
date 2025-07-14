@@ -905,8 +905,8 @@ export class SessionContext implements RequestMiddleware {
                             this.setLoadingError(e);
                             await this.unsetToken(true);
                             throw new SimpleError({
-                                code: '',
-                                message: '',
+                                code: 'invalid_refresh_token',
+                                message: 'Invalid refresh token',
                                 human: $t(`6628730c-e78a-4430-a3b6-646999ec821b`),
                             });
                         }
