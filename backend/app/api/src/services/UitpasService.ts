@@ -1,6 +1,52 @@
+import { Model } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { UitpasTokenRepository } from './UitpasTokenRepository';
+import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
+import { OrderStatus } from '@stamhoofd/structures';
+import { v4 as uuidv4 } from 'uuid';
+import { UitpasTokenRepository } from '../helpers/UitpasTokenRepository';
 import { DataValidator } from '@stamhoofd/utility';
+
+function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
+    return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
+}
+
+function mapUitpasNumbersToProducts(order: Order): Map<string, string[]> {
+    const items = order.data.cart.items;
+    const productIdToUitpasNumbers: Map<string, string[]> = new Map();
+    for (const item of items) {
+        const a = productIdToUitpasNumbers.get(item.product.id);
+        if (a) {
+            a.push(...item.uitpasNumbers);
+        }
+        else {
+            productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers]); // make a copy
+        }
+    }
+    return productIdToUitpasNumbers;
+}
+
+function areUitpasNumbersChanged(oldOrder: Order, newOrder: Order): boolean {
+    const oldMap = mapUitpasNumbersToProducts(oldOrder);
+    const newMap = mapUitpasNumbersToProducts(newOrder);
+    if (oldMap.size !== newMap.size) {
+        return true;
+    }
+    for (const [productId, uitpasNumbers] of oldMap.entries()) {
+        const newUitpasNumbers = newMap.get(productId);
+        if (!newUitpasNumbers) {
+            return true;
+        }
+        if (newUitpasNumbers.length !== uitpasNumbers.length) {
+            return true;
+        }
+        for (const uitpasNumber of uitpasNumbers) {
+            if (!newUitpasNumbers.includes(uitpasNumber)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 type UitpasNumberSuccessfulResponse = {
     socialTariff: {
@@ -54,8 +100,125 @@ function isUitpasNumberErrorResponse(
         );
 }
 
-export class UitpasNumberValidatorStatic {
-    async checkUitpasNumber(uitpasNumber: string) {
+export class UitpasService {
+    static listening = false;
+
+    static async updateUitpasNumbers(order: Order) {
+        await this.deleteUitpasNumbers(order);
+        await this.createUitpasNumbers(order);
+    }
+
+    static async createUitpasNumbers(order: Order) {
+        const mappedUitpasNumbers = mapUitpasNumbersToProducts(order); // productId -> Set of uitpas numbers
+        // add to DB
+        const insert = WebshopUitpasNumber.insert();
+        insert.columns(
+            'id',
+            'webshopId',
+            'orderId',
+            'productId',
+            'uitpasNumber',
+        );
+        const rows = [...mappedUitpasNumbers].flatMap(([productId, uitpasNumbers]) => {
+            return uitpasNumbers.map(uitpasNumber => [
+                uuidv4(),
+                order.webshopId,
+                order.id,
+                productId,
+                uitpasNumber,
+            ]);
+        });
+        if (rows.length === 0) {
+            // No uitpas numbers to insert, skipping
+            return;
+        }
+        insert.values(...rows);
+        await insert.insert();
+    }
+
+    static async deleteUitpasNumbers(order: Order) {
+        await WebshopUitpasNumber.delete().where('webshopId', order.webshopId)
+            .andWhere('orderId', order.id);
+    }
+
+    static listen() {
+        if (this.listening) {
+            return;
+        }
+        this.listening = true;
+        Model.modelEventBus.addListener(this, async (event) => {
+            try {
+                if (event.model instanceof Order) {
+                    // event.type ==='deteled' -> not needed as foreign key will delete the order
+                    if (event.type === 'created' && shouldReserveUitpasNumbers(event.model.status)) {
+                        await this.createUitpasNumbers(event.model);
+                        return;
+                    }
+                    if (event.type === 'updated') {
+                        if (event.changedFields.status) {
+                            const statusBefore = event.originalFields.status as OrderStatus;
+                            const statusAfter = event.changedFields.status as OrderStatus;
+                            const shouldReserveAfter = shouldReserveUitpasNumbers(statusAfter);
+                            if (shouldReserveUitpasNumbers(statusBefore) !== shouldReserveAfter) {
+                                if (shouldReserveAfter) {
+                                    await this.createUitpasNumbers(event.model);
+                                    return;
+                                }
+                                await this.deleteUitpasNumbers(event.model);
+                                return;
+                            }
+                        }
+                        if (event.changedFields.data) {
+                            const oldOrder = event.getOldModel() as Order;
+                            if (areUitpasNumbersChanged(oldOrder, event.model)) {
+                                await this.updateUitpasNumbers(event.model);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (e) {
+                console.error('Failed to update UiTPAS-numbers after order update', e);
+            }
+        });
+    }
+
+    static async getSocialTariffForUitpasNumber(uitpasNumber: string, uitpasEventId: string) {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
+    }
+
+    static async getSocialTariffForEvent(basePrice: number, uitpasEventId: string) {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
+    }
+
+    static async registerTicketSales() {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/create-a-ticket-sale
+    }
+
+    static async cancelTicketSale() {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
+    }
+
+    static async getTicketSales() {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-ticket-sales
+    }
+
+    static async searchUitpasEvents() {
+        // input = client credentials of organization & uitpasOrganizerId
+        // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
+    }
+
+    static async searchUitpasOrganizers() {
+        // uses platform credentials
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
+    }
+
+    static async checkPermissions() {
+        // verify the permissions of the client credentials of the organization
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-permissions
+    }
+
+    static async checkUitpasNumber(uitpasNumber: string) {
         // static check (using regex)
         if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
             throw new SimpleError({
@@ -159,7 +322,7 @@ export class UitpasNumberValidatorStatic {
      * The field of the error will be the index of the uitpas number in the array.
      * @param uitpasNumbers The uitpas numbers to check
      */
-    async checkUitpasNumbers(uitpasNumbers: string[]) {
+    static async checkUitpasNumbers(uitpasNumbers: string[]) {
         const simpleErrors = new SimpleErrors();
         for (let i = 0; i < uitpasNumbers.length; i++) {
             const uitpasNumber = uitpasNumbers[i];
@@ -180,6 +343,4 @@ export class UitpasNumberValidatorStatic {
             throw simpleErrors;
         }
     }
-}
-
-export const UitpasNumberValidator = new UitpasNumberValidatorStatic();
+};

@@ -12,7 +12,7 @@ import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { AuditLogService } from '../../../services/AuditLogService';
-import { UitpasNumberValidator } from '../../../helpers/UitpasNumberValidator';
+import { UitpasService } from '../../../services/UitpasService';
 
 type Params = { id: string };
 type Query = undefined;
@@ -171,7 +171,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
                 // verify the UiTPAS numbers are valid for social tariff (static check + API call to UiTPAS)
                 try {
-                    await UitpasNumberValidator.checkUitpasNumbers(uitpasNumbers); // Throws if invalid
+                    await UitpasService.checkUitpasNumbers(uitpasNumbers); // Throws if invalid
                 }
                 catch (e) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
