@@ -3,7 +3,21 @@
         <STGradientBackground v-if="!platform.config.horizontalLogo" />
 
         <div class="st-view">
-            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`5eb72046-9ec6-4072-89ff-5c123636afbe`)" />
+            <STNavigationBar :large="!isNative" class="transparent" :title="$t(`5eb72046-9ec6-4072-89ff-5c123636afbe`)">
+                <template #left>
+                    <PlatformLogo />
+                </template>
+                <template v-if="!isNative" #right>
+                    <a class="button text only-icon-smartphone" :href="'https://'+$domains.marketing+''" rel="noopener">
+                        <span class="icon external" />
+                        <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
+                    </a>
+
+                    <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate(Routes.Join)">
+                        {{ $t("2cd40bd9-b158-42e3-81e2-c02c560ab2e5") }}
+                    </a>
+                </template>
+            </STNavigationBar>
 
             <main class="flex center small organization-selection-view">
                 <h1>
@@ -48,7 +62,7 @@
                 </p>
 
                 <footer v-if="!isPlatform">
-                    <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate('join')">
+                    <a v-if="!isNative" href="/aansluiten" class="button text full selected" @click.prevent="$navigate(Routes.Join)">
                         <span class="icon add" />
                         <span>{{ $t('5b3e65b1-9444-4b65-a032-e184ed7c2471') }}</span>
                     </a>
@@ -69,11 +83,11 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, Option, PlatformFooter, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
+import { ContextLogo, Option, PlatformFooter, PlatformLogo, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import { computed, getCurrentInstance, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
+import { computed, onMounted, reactive, Ref, ref, shallowRef, watch } from 'vue';
 
 const isNative = ref(AppManager.shared.isNative);
 const loadingResults = ref(false);
@@ -222,10 +236,14 @@ const startUpdateResults = async () => {
 
 watch(query, startUpdateResults);
 
+enum Routes {
+    Join = 'join',
+}
+
 defineRoutes([
     {
         url: 'aansluiten',
-        name: 'join',
+        name: Routes.Join,
         component: async () => (await import('../signup/SignupGeneralView.vue')).default as any,
         paramsToProps(_, query) {
             const code = query?.get('code');
