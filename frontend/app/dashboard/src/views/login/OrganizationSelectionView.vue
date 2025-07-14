@@ -83,7 +83,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ContextLogo, Option, PlatformFooter, PlatformLogo, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
+import { CenteredMessage, ContextLogo, Option, PlatformFooter, PlatformLogo, Spinner, STGradientBackground, Toast, useAppData, useContextOptions, usePlatform, VersionFooter } from '@stamhoofd/components';
 import { AppManager, NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
@@ -121,7 +121,22 @@ let lastQuery = '';
 let counter = 0;
 
 const help = () => {
-    // todo
+    if (isNative.value) {
+        new CenteredMessage(
+            $t('Vereniging niet gevonden'),
+            $t('In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.'),
+        )
+            .addCloseButton()
+            .show();
+    }
+    else {
+        new CenteredMessage(
+            $t('Vereniging niet gevonden'),
+            $t("In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan."),
+        )
+            .addCloseButton()
+            .show();
+    }
 };
 
 const showVersionFooter = computed(() => {
