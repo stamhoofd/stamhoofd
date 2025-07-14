@@ -757,7 +757,7 @@ export class SessionContext implements RequestMiddleware {
                 // = we don't need to block the UI for this ;)
                 this.updateData(true, false, false).catch((e) => {
                     // Ignore network errors
-                    console.error(e);
+                    console.error('Background session update error', e);
                 });
             }
         }
@@ -826,24 +826,29 @@ export class SessionContext implements RequestMiddleware {
         }
     }
 
+    private async doUnsetToken(updateUIForLogout = true) {
+        console.log('Unset token');
+        if (!this.token) {
+            return;
+        }
+        this.token.onChange = () => {
+            // emtpy
+        };
+        this.token = null;
+        this.user = null; // force refetch in the future
+        await this.deleteFromStorage();
+
+        if (updateUIForLogout) {
+            await this.onTokenChanged();
+        }
+    }
+
     /**
      * Clears the token from memory and storage
      */
     private async unsetToken(updateUIForLogout = true) {
         await QueueHandler.schedule('session-context-token', async () => {
-            if (!this.token) {
-                return;
-            }
-            this.token.onChange = () => {
-                // emtpy
-            };
-            this.token = null;
-            this.user = null; // force refetch in the future
-            await this.deleteFromStorage();
-
-            if (updateUIForLogout) {
-                await this.onTokenChanged();
-            }
+            await this.doUnsetToken(updateUIForLogout);
         });
     }
 
@@ -903,7 +908,7 @@ export class SessionContext implements RequestMiddleware {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         if (e.hasCode('invalid_refresh_token')) {
                             this.setLoadingError(e);
-                            await this.unsetToken(true);
+                            await this.doUnsetToken(true);
                             throw new SimpleError({
                                 code: 'invalid_refresh_token',
                                 message: 'Invalid refresh token',
@@ -972,7 +977,7 @@ export class SessionContext implements RequestMiddleware {
                         if (e.hasCode('invalid_refresh_token')) {
                             console.log(this.requestPrefix(request) + 'Refresh token is invalid');
                             this.setLoadingError(e);
-                            await this.unsetToken(true);
+                            await this.doUnsetToken(true);
                             return false;
                         }
                     }
@@ -994,7 +999,7 @@ export class SessionContext implements RequestMiddleware {
                 }
                 else {
                     if (error.hasCode('invalid_access_token')) {
-                        await this.unsetToken(true);
+                        await this.doUnsetToken(true);
                     }
                     else {
                         this.setLoadingError(error);
