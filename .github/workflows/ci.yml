@@ -162,7 +162,7 @@ jobs:
       - name: Linting
         run: cd shared/structures && yarn lint --quiet
       - name: Run tests
-        run: yarn test --bail
+        run: cd shared/structures && yarn test --bail
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
         if: ${{ failure() }}
