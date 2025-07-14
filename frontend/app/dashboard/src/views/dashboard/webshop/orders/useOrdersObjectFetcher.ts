@@ -63,7 +63,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
         async fetch(data: LimitedFilteredRequest) {
             const arrayBuffer: PrivateOrderWithTickets[] = [];
-
             const filters = [data.filter];
 
             const searchFilter = searchToFilter(data.search);

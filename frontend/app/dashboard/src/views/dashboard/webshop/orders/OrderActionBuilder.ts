@@ -268,7 +268,7 @@ export class OrderActionBuilder {
         if (selection.markedRows.size > 0) {
             name = $t(`e2e87cbb-445c-4b39-85cf-c8488f95598d`);
         }
-        else if (!OrderRequiredFilterHelper.isDefault(selection.filter.filter)) {
+        else if (!OrderRequiredFilterHelper.isDefault(this.webshopManager.preview.id, selection.filter.filter)) {
             name = $t(`df092e1d-f238-4ddc-9d75-96498df32115`);
         }
 

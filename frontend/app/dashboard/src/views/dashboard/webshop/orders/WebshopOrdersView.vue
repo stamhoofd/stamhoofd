@@ -38,7 +38,7 @@ const title = 'Bestellingen';
 const configurationId = 'orders';
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
-    requiredFilter: OrderRequiredFilterHelper.getDefault(),
+    requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
 });
 const tableObjectFetcher = useTableObjectFetcher<PrivateOrderWithTickets>(objectFetcher);
 const filterBuilders: UIFilterBuilders = getWebshopOrderUIFilterBuilders(props.webshopManager.webshop ?? props.webshopManager.preview);

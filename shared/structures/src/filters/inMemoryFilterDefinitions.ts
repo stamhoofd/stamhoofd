@@ -108,6 +108,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     id: createInMemoryFilterCompiler('id'),
     timeSlotEndTime: createInMemoryFilterCompiler('data.timeSlot.endTime'),
     timeSlotStartTime: createInMemoryFilterCompiler('data.timeSlot.startTime'),
+    webshopId: createInMemoryFilterCompiler('webshopId'),
 
     // The following fields are required for sorting
     // Make sure to implement all sorters here, for proper pagination

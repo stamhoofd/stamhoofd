@@ -1,16 +1,17 @@
 import { OrderStatus, StamhoofdFilter } from '@stamhoofd/structures';
 
 export class OrderRequiredFilterHelper {
-    static getDefault(): StamhoofdFilter {
+    static getDefault(webshopId: string): StamhoofdFilter {
         return {
+            webshopId,
             status: {
                 $neq: OrderStatus.Deleted,
             },
         };
     }
 
-    static isDefault(filter: StamhoofdFilter): boolean {
-        const defaultFilter = OrderRequiredFilterHelper.getDefault();
+    static isDefault(webshopId: string, filter: StamhoofdFilter): boolean {
+        const defaultFilter = OrderRequiredFilterHelper.getDefault(webshopId);
         return JSON.stringify(defaultFilter) === JSON.stringify(filter);
     }
 }
