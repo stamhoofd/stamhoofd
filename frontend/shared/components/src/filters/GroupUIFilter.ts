@@ -169,17 +169,14 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
             filter = result.markerValue ?? [];
         }
 
-        let allowSelf = false;
         let mode = GroupUIFilterMode.And;
         if (typeof filter === 'object' && filter !== null && ('$and' in filter)) {
             filter = filter.$and;
-            allowSelf = true;
             mode = GroupUIFilterMode.And;
         }
 
         if (typeof filter === 'object' && filter !== null && ('$or' in filter)) {
             filter = filter.$or;
-            allowSelf = true;
             mode = GroupUIFilterMode.Or;
         }
 
@@ -196,7 +193,8 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
             }
 
             for (const builder of [...this.builders, new UnknownFilterBuilder()]) {
-                if (builder === this && !allowSelf) {
+                if (builder === this && f === filter) {
+                    // would cause recursion
                     continue;
                 }
                 const decoded = builder.fromFilter(f);
