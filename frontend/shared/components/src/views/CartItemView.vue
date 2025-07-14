@@ -111,12 +111,12 @@
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
                 <hr><h2>{{ cartItem.amount < 2 ? $t('UiTPAS-nummer') : $t('UiTPAS-nummers') }}</h2>
 
-                <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="uitpas-number-input" :title="'UiTPAS-nummer' + (cartItem.amount < 2 ? '' : ` ${index + 1}`)">
+                <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="uitpas-number-input">
                     <input
                         v-model="uitpasNumbers[index]"
                         class="input"
                         type="text"
-                        placeholder="Het nummer op de achterkant van je UiTPAS-kaart, onder de barcode."
+                        :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
                     >
                 </STInputBox>
 
