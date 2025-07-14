@@ -1,6 +1,11 @@
 // Loop all locales
 import { promises as fs } from 'fs';
-import { countries, languages } from './dist/index.js';
+import { languages } from './dist/index.js';
+
+const validLocales = {
+    ['BE']: ['nl', 'fr', 'en'],
+    ['NL']: ['nl'],
+};
 
 async function fileExists(file) {
     try {
@@ -101,19 +106,20 @@ const fallbackLanguages = ['en', 'nl'];
 function runReplacements(json) {
     const replacements = json.replacements;
     if (replacements) {
+        const keys = Object.keys(replacements);
+
+        // Sort keys from longest to shortest, then from caps to no caps, then alphabetically
+        keys.sort((a, b) => {
+            if (a.length !== b.length) {
+                return b.length - a.length; // longer keys first
+            }
+            return a.localeCompare(b, undefined, { caseFirst: 'upper' }); // alphabetically
+        });
+
         replaceValues(json, (value) => {
             if (typeof value !== 'string') {
                 return value;
             }
-            const keys = Object.keys(replacements);
-
-            // Sort keys from longest to shortest, then from caps to no caps, then alphabetically
-            keys.sort((a, b) => {
-                if (a.length !== b.length) {
-                    return b.length - a.length; // longer keys first
-                }
-                return a.localeCompare(b, undefined, { caseFirst: 'upper' }); // alphabetically
-            });
 
             for (const r of keys) {
                 value = value.replaceAll(new RegExp(`${r}+(?![^{]*})`, 'g'), replacements[r]);
@@ -217,9 +223,9 @@ async function build(country, language, namespace, skipFallbackLanguages, skipNa
     return json;
 }
 
-for (const country of countries) {
+for (const country of Object.keys(validLocales)) {
     // Build country defaults
-    for (const language of languages) {
+    for (const language of validLocales[country]) {
         const locale = language + '-' + country;
 
         for (const namespace of namespaces) {
