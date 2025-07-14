@@ -508,10 +508,7 @@ export class CartItem extends AutoEncoder {
                 descriptions.push($t('UiTPAS-nummer') + ': ' + this.uitpasNumbers[0]);
             }
             else {
-                descriptions.push($t('UiTPAS-nummers') + ':');
-                for (const uitpasNumber of this.uitpasNumbers) {
-                    descriptions.push(' ' + uitpasNumber);
-                }
+                descriptions.push($t('UiTPAS-nummers') + ': ' + this.uitpasNumbers.join(', '));
             }
         }
         return descriptions.filter(d => !!d).join('\n');
