@@ -61,23 +61,36 @@ export class LoginHelper {
     }
 
     static async verifyEmail(session: SessionContext, code: string, token: string) {
-        const response = await session.server.request({
-            method: 'POST',
-            path: '/verify-email',
-            body: VerifyEmailRequest.create({
-                code,
-                token,
-            }),
-            decoder: Token as Decoder<Token>,
-        });
-
         try {
-            session.preventComplete = true;
-            await session.setToken(response.data);
-            await SessionManager.prepareSessionForUsage(session, false);
+            const response = await session.server.request({
+                method: 'POST',
+                path: '/verify-email',
+                body: VerifyEmailRequest.create({
+                    code,
+                    token,
+                }),
+                decoder: Token as Decoder<Token>,
+            });
+            try {
+                session.preventComplete = true;
+                await session.setToken(response.data);
+                await SessionManager.prepareSessionForUsage(session, false);
+            }
+            finally {
+                session.preventComplete = false;
+            }
         }
-        finally {
-            session.preventComplete = false;
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                if (e.hasCode('invalid_code')) {
+                    // Check if we are now logged in (link might have been opened in a new tab)
+                    await session.loadFromStorage();
+                    await SessionManager.prepareSessionForUsage(session, false);
+                    if (session.user && session.user.verified && session.canGetCompleted()) {
+                        return;
+                    }
+                }
+            }
         }
     }
 

@@ -80,7 +80,6 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
     startTime = new Date();
 
     mounted() {
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval
         this.timer = setTimeout(this.poll.bind(this), 10000);
     }
 
@@ -136,6 +135,12 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
         this.polling = true;
 
         try {
+            if (this.$context && this.$context.user && this.$context.user.verified) {
+                // User is already verified, stop polling
+                this.stopPolling();
+                this.dismiss({ force: true });
+                return;
+            }
             const stop = await LoginHelper.pollEmail(this.$context, this.token);
             if (stop) {
                 this.dismiss({ force: true });
@@ -152,7 +157,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
             // Stop after 12 minutes
             return;
         }
-        // eslint-disable-next-line @typescript-eslint/no-implied-eval
+
         this.timer = setTimeout(this.poll.bind(this), Math.max(this.pollCount * 1000, 5 * 1000));
     }
 
