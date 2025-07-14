@@ -32,19 +32,27 @@ export function useContextOptions() {
         };
     };
 
+    const hasAdminOption = () => {
+        if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
+            if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty === false) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     const getDefaultOptions = () => {
         const opts: Option[] = [];
 
-        if ($user.value && $user.value.organizationId === null && $user.value.permissions && $user.value.permissions.globalPermissions !== null) {
-            if ($user.value.permissions?.forPlatform(platform.value)?.isEmpty === false) {
-                const context = new SessionContext(null);
-                opts.push({
-                    id: 'admin',
-                    organization: null,
-                    app: 'admin',
-                    context,
-                });
-            }
+        // Platform level users (present on all platforms)
+        if (hasAdminOption()) {
+            const context = new SessionContext(null);
+            opts.push({
+                id: 'admin',
+                organization: null,
+                app: 'admin',
+                context,
+            });
         }
 
         if (STAMHOOFD.userMode === 'platform') {
@@ -79,7 +87,44 @@ export function useContextOptions() {
         return opts;
     };
 
-    const getOptionForOrganization = async (organization: Organization) => {
+    /**
+     * Only for organization level platforms, where we need to load extra organizations from storage.
+     */
+    const getAllOptions = async () => {
+        const options = getDefaultOptions();
+
+        if (STAMHOOFD.userMode === 'organization') {
+            // On organization level platforms, we also list all organizations that have an active token stored
+            const manager = await SessionManager.getSessionStorage(true);
+
+            for (const organization of manager.organizations) {
+                if (options.length > 20) {
+                    break;
+                }
+
+                if (options.find(o => o.organization?.id === organization.id)) {
+                    continue; // Already added this organization
+                }
+                const context = new SessionContext(organization);
+                await context.loadFromStorage();
+                if (context.canGetCompleted()) {
+                    options.push(
+                        {
+                            id: 'org-' + organization.id,
+                            organization,
+                            app: 'auto',
+                            context,
+                            userDescription: context.user && (!$user.value || context.user.id !== $user.value.id) ? context.user.email : undefined,
+                        },
+                    );
+                }
+            }
+        }
+
+        return options;
+    };
+
+    const getOptionForOrganization = async (organization: Organization): Promise<Option> => {
         const context = new SessionContext(organization);
 
         return {
@@ -150,7 +195,9 @@ export function useContextOptions() {
     };
 
     return {
+        hasAdminOption,
         getDefaultOptions,
+        getAllOptions,
         getRegistrationOption,
         getOptionForOrganization,
         buildRootForOption,

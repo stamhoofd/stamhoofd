@@ -32,11 +32,11 @@ const organization = useOrganization();
 const app = useAppContext();
 const { presentPositionableSheet } = usePositionableSheet();
 const { getAppTitle, getAppDescription } = useAppData();
-const { getDefaultOptions } = useContextOptions();
+const { hasAdminOption, getDefaultOptions } = useContextOptions();
 
 const options = getDefaultOptions();
-const hasAdmin = options.some(o => o.app === 'admin');
-const canSwitch = options.length > 1 || ((STAMHOOFD.userMode !== 'platform' || hasAdmin) && !STAMHOOFD.singleOrganization);
+const hasAdmin = hasAdminOption();
+const canSwitch = options.length > 1 || (STAMHOOFD.userMode !== 'platform' || hasAdmin);
 
 withDefaults(
     defineProps<{

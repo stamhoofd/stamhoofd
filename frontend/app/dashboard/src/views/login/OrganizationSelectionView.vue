@@ -85,17 +85,23 @@ const input = ref<HTMLInputElement | null>(null);
 const resultElements = reactive<HTMLElement[]>([]);
 const visibleOptions = computed(() => query.value.length === 0 ? defaultOptions.value : results.value);
 const isPlatform = STAMHOOFD.userMode === 'platform';
-const instance = getCurrentInstance();
 const platform = usePlatform();
 const { getAppTitle, getAppDescription } = useAppData();
 
-onMounted(() => {
-    console.info('Mounted OrganizationSelectionView', instance);
-});
-
-const { getDefaultOptions, selectOption, getOptionForOrganization } = useContextOptions();
+const { getAllOptions, getDefaultOptions, selectOption, getOptionForOrganization } = useContextOptions();
 
 defaultOptions.value = getDefaultOptions();
+const $navigate = useNavigate();
+
+onMounted(async () => {
+    // Update options when the default options change
+    try {
+        defaultOptions.value = await getAllOptions();
+    }
+    catch (e) {
+        console.error('Failed to load organization options:', e);
+    }
+});
 
 let lastQuery = '';
 let counter = 0;
@@ -243,9 +249,6 @@ defineRoutes([
         present: 'popup',
     },
 ]);
-
-const $navigate = useNavigate();
-
 </script>
 
 <style lang="scss">

@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import { usePopup } from '@simonbackx/vue-app-navigation';
-import { computed, Ref, shallowRef } from 'vue';
+import { computed, onMounted, Ref, shallowRef } from 'vue';
 
 import { SessionManager } from '@stamhoofd/networking';
 import { PromiseComponent } from '../containers/AsyncComponent';
@@ -80,9 +80,19 @@ import { Option, useContextOptions } from './hooks/useContextOptions';
 
 const popup = usePopup();
 
-const { getDefaultOptions, selectOption, isCurrent } = useContextOptions();
+const { getAllOptions, getDefaultOptions, selectOption, isCurrent } = useContextOptions();
 const { getAppTitle, getAppDescription } = useAppData();
 const options: Ref<Option[]> = shallowRef(getDefaultOptions());
+
+onMounted(async () => {
+    // Update options when the default options change
+    try {
+        options.value = await getAllOptions();
+    }
+    catch (e) {
+        console.error('Failed to load organization options:', e);
+    }
+});
 
 const currentOptions = computed(() => {
     const list = options.value.filter(o => o.app !== 'auto');
