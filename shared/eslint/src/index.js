@@ -2,6 +2,7 @@
 import tseslint from 'typescript-eslint';
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin'
+import importPlugin from 'eslint-plugin-import';
 
 // Configs
 import frontend from './configs/frontend.js';
@@ -12,6 +13,14 @@ import jest from 'eslint-plugin-jest'
 const baseRules = [
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,  
+    {
+        plugins: {
+            'import': importPlugin
+        },
+        rules: {
+            'import/no-cycle': 'error'
+        }
+    },
     stylistic.configs.customize({
         // the following options are the default values
         indent: 4,
