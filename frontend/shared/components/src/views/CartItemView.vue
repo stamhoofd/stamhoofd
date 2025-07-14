@@ -193,6 +193,7 @@ const canDismiss = useCanDismiss();
 const pricedItem = ref(props.cartItem) as Ref<CartItem>;
 const pricedCheckout = ref(props.checkout) as Ref<Checkout>;
 const errors = useErrors();
+const owner = useRequestOwner();
 
 const willNeedSeats = computed(() => withSeats.value);
 const cart = computed(() => props.checkout.cart);
@@ -321,7 +322,7 @@ async function validateUitpasNumbers() {
         const response = await context.value.optionalAuthenticatedServer.request({
             method: 'POST',
             path: '/uitpas',
-            owner: useRequestOwner(),
+            owner: owner,
             shouldRetry: false,
             body: UitpasPriceCheckRequest.create({
                 basePrice: baseProductPrice.price,
