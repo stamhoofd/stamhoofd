@@ -28,6 +28,7 @@ export function build(service: Service): any {
         platformName: 'keeo',
         fixedCountry: 'BE',
         DB_DATABASE: 'stamhoofd-keeo',
+        FEEDBACK_URL: 'https://feedback.fos.be',
 
         // Enable member numbers
         MEMBER_NUMBER_ALGORITHM: 'Incremental',

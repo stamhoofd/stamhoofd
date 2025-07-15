@@ -414,6 +414,19 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
             }),
         );
     }
+    else if (STAMHOOFD.FEEDBACK_URL) {
+        sharedMoreItems.push(
+            new TabBarItem({
+                id: 'feedback',
+                icon: 'feedback',
+                name: $t(`630ab37a-85c8-4bbd-a281-b87e82a976d5`),
+                action: async function () {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    window.open(STAMHOOFD.FEEDBACK_URL!, '_blank');
+                },
+            }),
+        );
+    }
 
     return wrapContext(reactiveSession, 'dashboard',
         ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {

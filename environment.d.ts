@@ -232,6 +232,7 @@ declare global {
         readonly PORT?: number // Only used in development
         readonly VERSION: string
         readonly NOLT_URL?: string
+        readonly FEEDBACK_URL?: string
         readonly MOLLIE_CLIENT_ID: string
         readonly APP_UPDATE_SERVER_URL?: string
 
