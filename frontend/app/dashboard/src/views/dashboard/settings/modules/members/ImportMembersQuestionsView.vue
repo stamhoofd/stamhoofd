@@ -253,7 +253,7 @@ const deletedRegistrationsCount = computed(() => {
 });
 
 function isValidRegistration(registration: Registration) {
-    return registration.deactivatedAt === null && registration.registeredAt !== null && (registration.startDate === null || registration.startDate <= new Date());
+    return registration.deactivatedAt === null && registration.registeredAt !== null;
 }
 
 function shouldAssignRegistrationToMember(m: ImportMemberResult) {
