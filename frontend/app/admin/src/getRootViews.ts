@@ -3,11 +3,11 @@ import { AsyncComponent, AuditLogsView, AuthenticatedView, ManageEventsView, man
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
+import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
-import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';
-import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -144,11 +144,7 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                         if (reactiveSession.auth.hasFullAccess()) {
                             moreTab.items.push(settingsTab);
                             moreTab.items.push(financesTab);
-
-                            if (manualFeatureFlag('audit-logs', reactiveSession)) {
-                                // Feature is still in development so not visible for everyone
-                                moreTab.items.push(auditLogsTab);
-                            }
+                            moreTab.items.push(auditLogsTab);
                         }
 
                         if (manualFeatureFlag('event-notifications', reactiveSession) && reactiveSession.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {

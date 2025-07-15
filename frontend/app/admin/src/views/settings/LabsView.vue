@@ -20,10 +20,6 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <Checkbox :model-value="getFeatureFlag('audit-logs')" @update:model-value="setFeatureFlag('audit-logs', !!$event)">
-            {{ $t('1b5413cd-5858-4a73-872b-5b6b26345039') }}
-        </Checkbox>
-
         <Checkbox :model-value="!getFeatureFlag('disable-events')" @update:model-value="setFeatureFlag('disable-events', !$event)">
             {{ $t('d9b4472a-a395-4877-82fd-da6cb0140594') }}
         </Checkbox>
