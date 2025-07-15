@@ -7,6 +7,7 @@ import { SessionContext } from './SessionContext';
 import { Storage } from './Storage';
 import { isReactive } from 'vue';
 import { I18nController } from '@stamhoofd/frontend-i18n';
+import { Toast } from '@stamhoofd/components';
 
 class SessionStorage extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(Organization) })
@@ -67,6 +68,11 @@ export class SessionManagerStatic {
     }
 
     async addOrganizationToStorage(organization: Organization, options: { updateOnly?: boolean } = {}) {
+        if (organization.active === false) {
+            // Don't add inactive organizations to storage
+            return;
+        }
+
         const storage = await this.getSessionStorage(false);
         const index = storage.organizations.findIndex(o => o.id === organization.id);
 
@@ -160,9 +166,30 @@ export class SessionManagerStatic {
             // Already complete
             // Initiate a slow background update without retry
             // = we don't need to block the UI for this ;)
-            session.updateData(true, false, false, true).catch((e) => {
+            session.updateData(true, false, false, true).catch(async (e) => {
                 // Ignore network errors
                 console.error('Background fetch session error', e, session);
+
+                if (isSimpleErrors(e) || isSimpleError(e)) {
+                    if (e.hasCode('invalid_organization')) {
+                        // Clear from session storage
+                        if (session.organization) {
+                            session.organization.active = false;
+                            await this.removeOrganizationFromStorage(session.organization.id).catch(console.error);
+                        }
+                        const error = new SimpleError({
+                            code: 'invalid_organization',
+                            message: e.message,
+                            human: $t(`67221175-c027-47be-bb1b-2a535cb9fc5f`),
+                        });
+                        Toast.fromError(error).show();
+                        session.setLoadingError(error);
+                        session.preventComplete = true;
+                        return;
+                        // window.location.reload();
+                    }
+                }
+
                 session.callListeners('preventComplete');
 
                 if (!session.isComplete()) {
