@@ -16,10 +16,6 @@
                     {{ $t('72810aaa-d33f-414f-bab1-6c33aca18823') }}
                 </p>
 
-                <p v-if="!enabled" class="info-box">
-                    {{ $t('5284a37b-479f-4a7c-bd4e-5b7a15a22291') }}
-                </p>
-
                 <STList>
                     <STListItem v-for="template of templates" :key="template.id" :selectable="true" class="right-stack" @click="openTemplate(template)">
                         <h2 class="style-title-list">
@@ -36,7 +32,7 @@
                     </STListItem>
                 </STList>
 
-                <p v-if="enabled" class="style-button-bar">
+                <p class="style-button-bar">
                     <button type="button" class="button text" @click="addDocument">
                         <span class="icon add" />
                         <span class="text">{{ $t('6e1522d7-e084-4ec1-a4dc-47b93a88f4c8') }}</span>
@@ -66,8 +62,6 @@ const organization = useRequiredOrganization();
 const requestOwner = useRequestOwner();
 const context = useContext();
 const present = usePresent();
-
-const enabled = useFeatureFlag()('documents');
 
 onMounted(() => {
     loadTemplates().catch(console.error);
