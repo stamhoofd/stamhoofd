@@ -2,6 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { UitpasService } from '../../../services/UitpasService';
 import { UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { Context } from '../../../helpers/Context';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {
@@ -28,6 +29,12 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const organization = await Context.setOrganizationScope();
+        await Context.authenticate();
+
+        if (!await Context.auth.hasFullAccess(organization.id)) {
+            throw Context.auth.error();
+        }
         const uitpasOrganizersResponse = await UitpasService.searchUitpasOrganizers(request.query.name, request.request.getVersion());
 
         return new Response(uitpasOrganizersResponse);
