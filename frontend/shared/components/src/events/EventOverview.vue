@@ -401,13 +401,12 @@ async function prepareOrganizationPeriod(group: Group) {
     const periodId = group.periodId;
 
     // Request data
-    const response = await context.value.authenticatedServer.request({
+    const response = await context.value.getAuthenticatedServerForOrganization(organizationId).request({
         method: 'GET',
         path: '/organization/registration-periods',
         query: new LimitedFilteredRequest({
             filter: {
                 periodId: periodId,
-                organizationId: organizationId,
             },
             limit: 1,
             sort: [
