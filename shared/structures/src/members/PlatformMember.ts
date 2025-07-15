@@ -431,6 +431,18 @@ export class PlatformFamily {
     setDocuments(documents: DocumentStruct[]) {
         this.documents = documents;
     }
+
+    belongsToFamily(member: MemberWithRegistrationsBlob): boolean {
+        const allUserIds = new Set(this.members.flatMap(m => m.member.users.map(u => u.id)));
+
+        for (const user of member.users) {
+            if (allUserIds.has(user.id)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 export class PlatformRegistration extends Registration {

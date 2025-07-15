@@ -48,6 +48,10 @@
             {{ $t('f0815834-0750-41d6-aa93-26203b2aedb6') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
+            {{ $t('Leden importeren') }}
+        </Checkbox>
+
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
 
         <STList>
