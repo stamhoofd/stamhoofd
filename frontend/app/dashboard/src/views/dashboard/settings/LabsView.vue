@@ -100,10 +100,6 @@
                 {{ $t('47e866d9-5349-4318-b779-161da61c2250') }}
             </Checkbox>
 
-            <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
-                {{ $t('Leden importeren') }}
-            </Checkbox>
-
             <hr><button class="button text" type="button" @click="applyDiscountCode">
                 <span class="icon gift" /><span>{{ $t('5a58b689-5269-40a0-907e-c977b293c2fa') }}</span>
             </button>
