@@ -102,6 +102,35 @@ function isUitpasNumberErrorResponse(
         );
 }
 
+type OrganizersResponse = {
+    totalItems: number;
+    member: Array<{
+        id: string;
+        name: string;
+    }>;
+}
+
+function assertIsOrganizersResponse(json: unknown): asserts json is OrganizersResponse {
+    if (
+        typeof json !== 'object'
+        || json === null
+        || !('totalItems' in json)
+        || typeof json.totalItems !== 'number'
+        || !('member' in json)
+        || !Array.isArray(json.member)
+        || !json.member.every(
+            (member: unknown) => typeof member === 'object' && member !== null && 'id' in member && typeof member.id === 'string' && 'name' in member && typeof member.name === 'string',
+        )
+    ) {
+        console.error('Invalid response when searching for UiTPAS organizers:', json);
+        throw new SimpleError({
+            code: 'invalid_response_searching_uitpas_organizers',
+            message: `Invalid response when searching for UiTPAS organizers`,
+            human: $t(`Er is een fout opgetreden bij het zoeken naar UiTPAS-organisaties. Probeer het later opnieuw.`),
+        });
+    }
+}
+
 export class UitpasService {
     static listening = false;
 
@@ -210,7 +239,7 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
     }
 
-    static async searchUitpasOrganizers(name: string, version: number): Promise<UitpasOrganizersResponse> {
+    static async searchUitpasOrganizers(name: string): Promise<UitpasOrganizersResponse> {
         // uses platform credentials
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
         if (name === '') {
@@ -225,8 +254,6 @@ export class UitpasService {
         const params = new URLSearchParams()
         params.append('name', name);
         const url = `${baseUrl}?${params.toString()}`;
-        console.log(`Searching for UiTPAS organizers with name: ${name}, version: ${version}`);
-        //const url = `${baseUrl}?name=${encodeURIComponent(name)}&start=${start}`;
         const myHeaders = new Headers();
         myHeaders.append('Authorization', 'Bearer ' + access_token);
         myHeaders.append('Accept', 'application/json');
@@ -245,7 +272,11 @@ export class UitpasService {
             });
         });
         if (!response.ok) {
-            // throw
+            throw new SimpleError({
+                code: 'unsuccessful_response_searching_uitpas_organizers',
+                message: `Unsuccessful response when searching for UiTPAS organizers`,
+                human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+            });
         }
         const json = await response.json().catch(() => {
             // Handle JSON parsing errors
@@ -258,11 +289,24 @@ export class UitpasService {
             });
         });
         
-        const data = new ObjectData(json, { version: version });
-        return UitpasOrganizersResponse.decode(data);
+        assertIsOrganizersResponse(json);
+        const organizersResponse = new UitpasOrganizersResponse();
+        organizersResponse.totalItems = json.totalItems;
+        organizersResponse.member = json.member.map((member) => {
+            const organizer = new UitpasOrganizerResponse();
+            organizer.id = member.id;
+            organizer.name = member.name;
+            return organizer;
+        });
+        return organizersResponse;
     }
 
-    static async checkPermissions() {
+    /**
+     * Checks if the access token has sufficient permissions (for either organization or platform calls). If not it will throw an error.
+     * @param organizationId null for platform
+     * @param uitpasOrganizerId the id of the uitpas organizer to check permissions for
+     */
+    static async checkPermissions(organizationId: string | null, uitpasOrganizerId: string) {
         // verify the permissions of the client credentials of the organization
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-permissions
     }

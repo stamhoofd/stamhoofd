@@ -35,7 +35,7 @@ export class SearchUitpasOrganizersEndpoint extends Endpoint<Params, Query, Body
         if (!await Context.auth.hasFullAccess(organization.id)) {
             throw Context.auth.error();
         }
-        const uitpasOrganizersResponse = await UitpasService.searchUitpasOrganizers(request.query.name, request.request.getVersion());
+        const uitpasOrganizersResponse = await UitpasService.searchUitpasOrganizers(request.query.name);
 
         return new Response(uitpasOrganizersResponse);
     }
