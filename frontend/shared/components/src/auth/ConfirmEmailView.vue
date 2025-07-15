@@ -135,7 +135,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
         this.polling = true;
 
         try {
-            if (this.$context && this.$context.user && this.$context.user.verified) {
+            if (this.$context && this.$context.user && this.$context.user.verified && this.$context.user.email === this.email) {
                 // User is already verified, stop polling
                 this.stopPolling();
                 this.dismiss({ force: true });
