@@ -335,7 +335,7 @@ export class EmailVerificationCode extends Model {
         } else {
             verificationCode = verificationCodes[0]
 
-            if (verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) || verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
+            if (verificationCode.email !== email || verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) || verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
                 // Expired: also update the token
                 await verificationCode.generateCode()
             }
