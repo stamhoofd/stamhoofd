@@ -23,10 +23,8 @@
                             {{ $t('c5d8db0b-e901-436d-b292-5dbd6b1df48e', {user: option.userDescription}) }}
                         </p>
 
-                        <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
-                            <span v-if="isCurrent(option)" class="icon success primary floating" />
-                            <span v-else-if="option.userDescription" class="icon gray sync" />
-                            <span v-else-if="option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
+                        <template v-if="isCurrent(option)" #right>
+                            <span class="icon success primary floating" />
                         </template>
                     </STListItem>
                 </STList>
@@ -49,10 +47,8 @@
                         {{ $t('2dfdd151-6245-4f46-ba42-695a09b74607') }} {{ option.userDescription }}
                     </p>
 
-                    <template v-if="isCurrent(option) || option.userDescription || (option.context.hasPermissions() && option.app === 'auto')" #right>
-                        <span v-if="isCurrent(option)" class="icon success primary floating" />
-                        <span v-else-if="option.userDescription" class="icon gray sync" />
-                        <span v-else-if="option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
+                    <template v-if="isCurrent(option)" #right>
+                        <span class="icon success primary floating" />
                     </template>
                 </STListItem>
             </STList>

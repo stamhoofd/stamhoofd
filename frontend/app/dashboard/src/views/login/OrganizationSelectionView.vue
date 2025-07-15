@@ -50,9 +50,7 @@
                                 {{ $t('2dfdd151-6245-4f46-ba42-695a09b74607') }} {{ option.userDescription }}
                             </p>
 
-                            <span v-if="option.userDescription" class="icon gray sync floating" />
-                            <span v-if="!isPlatform && option.context.canGetCompleted()" class="icon success primary floating" />
-                            <span v-if="isPlatform && option.context.hasPermissions() && option.app === 'auto'" class="icon privacy gray floating" />
+                            <span v-if="option.userDescription" class="icon success primary floating" />
                         </div>
                     </button>
                 </template>
