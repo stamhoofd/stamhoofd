@@ -1,7 +1,7 @@
 import { Model } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
-import { OrderStatus, UitpasOrganizersResponse, Version } from '@stamhoofd/structures';
+import { OrderStatus, UitpasOrganizerResponse, UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { UitpasTokenRepository } from '../helpers/UitpasTokenRepository';
 import { DataValidator } from '@stamhoofd/utility';
