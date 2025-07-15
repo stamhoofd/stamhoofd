@@ -225,11 +225,11 @@
 </template>
 
 <script setup lang="ts">
-import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, CheckboxListItem, DateSelection, Dropdown, EditGroupView, ErrorBox, GlobalEventBus, ImageComponent, NavigationActions, OrganizationAvatar, SearchOrganizationView, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
-import { AccessRight, Event, EventLocation, EventMeta, Group, GroupSettings, GroupStatus, Organization, ResolutionRequest, TranslatedString } from '@stamhoofd/structures';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { AddressInput, CenteredMessage, CheckboxListItem, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AccessRight, Event, EventLocation, EventMeta, Group, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -238,9 +238,8 @@ import { useAuth, useContext, useOrganization, usePatch, usePlatform } from '../
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import DeleteView from '../views/DeleteView.vue';
-import { useEventPermissions } from './composables/useEventPermissions';
-import { GroupType } from '@stamhoofd/structures';
 import { useCreateEventGroup } from './composables/createEventGroup';
+import { useEventPermissions } from './composables/useEventPermissions';
 
 const props = withDefaults(
     defineProps<{
@@ -346,7 +345,7 @@ const startDate = computed({
     },
 });
 
-const createEventGroup = useCreateEventGroup()
+const createEventGroup = useCreateEventGroup();
 const hasGroup = computed({
     get: () => patched.value.group !== null,
     set: (enabled) => {
@@ -368,7 +367,7 @@ const hasGroup = computed({
                     });
                 }).catch(e => () => {
                     Toast.fromError(e).show();
-                })
+                });
             }
         }
         else {
@@ -478,7 +477,7 @@ const locationAddress = computed({
 });
 
 const auth = useAuth();
-const canSetNationalActivity = computed(() => auth.platformPermissions?.hasAccessRight(AccessRight.EventWrite));
+const canSetNationalActivity = computed(() => auth.platformPermissions?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.EventWrite));
 const isNationalActivity = computed({
     get: () => patched.value.organizationId === null,
     set: (isNationalActivity) => {
