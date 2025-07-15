@@ -2,14 +2,14 @@
     <LoadingViewTransition>
         <form v-if="!loadingSession" key="form" class="forgot-password-reset-view st-view" @submit.prevent="submit">
             <STNavigationBar :title="title" />
-            <main>
+            <main class="center small">
                 <h1>{{ title }}</h1>
 
                 <p>{{ description }}</p>
 
                 <STErrorsDefault :error-box="errorBox" />
 
-                <STInputBox v-if="!hasAccount" error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
+                <STInputBox v-if="allowNameChange" error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                     <div class="input-group">
                         <div>
                             <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
@@ -50,7 +50,7 @@
 
 <script lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationMixin, PushOptions } from '@simonbackx/vue-app-navigation';
 import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
 import { Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingButton, LoadingViewTransition, PasswordStrength, ReplaceRootEventBus, Spinner, STErrorsDefault, STFloatingFooter, STInputBox, STNavigationBar, Toast, Validator } from '@stamhoofd/components';
 import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
@@ -102,6 +102,10 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
 
     get title() {
         return this.hasAccount ? $t(`a7c42cd2-eeca-4286-9ac9-1a9bc951f86f`) : $t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`);
+    }
+
+    get allowNameChange() {
+        return !this.hasAccount || (this.session && this.session.user && this.session.user.permissions !== null);
     }
 
     get description() {
@@ -170,7 +174,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (!this.hasAccount) {
+        if (this.allowNameChange) {
             try {
                 const errors = new SimpleErrors();
                 if (this.firstName.length < 2) {
@@ -224,7 +228,7 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
 
         // Request the key constants
         try {
-            const patch = this.hasAccount
+            const patch = !this.allowNameChange
                 ? NewUser.patch({
                         id: this.session.user!.id,
                         password: this.password,
@@ -246,9 +250,17 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             // todo: switch current $context to session
 
             // If email has been changed or needs verification
+            let initialPresents: PushOptions[] = [];
             if (verificationToken) {
                 // Present instead of show, because the confirm is only needed to change the email address
-                this.present(new ComponentWithProperties(ConfirmEmailView, { token: verificationToken, email: this.email }).setDisplayStyle('sheet'));
+                initialPresents = [
+                    {
+                        components: [
+                            new ComponentWithProperties(ConfirmEmailView, { token: verificationToken, email: this.email }),
+                        ],
+                        modalDisplayStyle: 'sheet',
+                    },
+                ];
             }
 
             if (this.hasAccount) {
@@ -261,7 +273,10 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
             }
 
             const dashboard = await import('@stamhoofd/dashboard');
-            const root = await dashboard.getScopedAutoRoot(this.session);
+            const root = await dashboard.getScopedAutoRoot(this.session, {
+                initialPresents,
+            });
+
             await ReplaceRootEventBus.sendEvent('replace', root);
 
             this.dismiss({ force: true });
