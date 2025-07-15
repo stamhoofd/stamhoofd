@@ -375,6 +375,20 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
             console.error(e);
             this.errorBox = new ErrorBox(e);
             plausible('signupGeneralError');
+
+            if (STAMHOOFD.environment === 'development' && this.name.length === 0) {
+                console.log('Autofill for development mode enabled. Filling in default values...');
+                // Autofill all
+                this.name = 'Testvereniging ' + Math.floor(Math.random() * 100000);
+                this.address = Address.create({
+                    street: 'Teststraat',
+                    number: '1',
+                    postalCode: '9000',
+                    city: 'Gent',
+                    country: Country.Belgium,
+                });
+                this.type = OrganizationType.Other;
+            }
             return;
         }
     }

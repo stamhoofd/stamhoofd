@@ -81,7 +81,7 @@ import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingBu
 import { LoginHelper, SessionContext, SessionManager, Storage } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 
-import { getScopedAutoRoot, getScopedDashboardRoot } from '../../getRootViews';
+import { getScopedAutoRoot } from '../../getRootViews';
 
 @Component({
     components: {
@@ -232,6 +232,19 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             console.error(e);
             this.errorBox = new ErrorBox(e);
             plausible('signupAccountError');
+
+            if (STAMHOOFD.environment === 'development' && this.email.length === 0) {
+                console.log('Autofill for development mode enabled. Filling in default values...');
+                // Autofill all
+                this.email = 'simon@stamhoofd.be';
+                this.password = 'stamhoofd';
+                this.passwordRepeat = 'stamhoofd';
+                this.firstName = 'Test';
+                this.lastName = 'Gebruiker';
+                this.acceptPrivacy = true;
+                this.acceptTerms = true;
+                this.acceptDataAgreement = true;
+            }
             return;
         }
     }
