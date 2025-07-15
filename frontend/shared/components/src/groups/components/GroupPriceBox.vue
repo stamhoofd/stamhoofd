@@ -35,7 +35,7 @@
             </STListItem>
         </STList>
 
-        <div v-if="$feature('bundle-discounts')" class="container">
+        <div class="container">
             <hr>
             <h2>{{ $t('98237c41-e107-4997-a645-cc4c16bb5b9a') }}</h2>
             <p>{{ $t('3ca1233b-86ba-4291-b0a2-68b0d96031dd') }}</p>

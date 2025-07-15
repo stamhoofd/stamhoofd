@@ -160,7 +160,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="$feature('bundle-discounts')" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.BundleDiscounts)">
+                    <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.BundleDiscounts)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/discount.svg">
                         </template>

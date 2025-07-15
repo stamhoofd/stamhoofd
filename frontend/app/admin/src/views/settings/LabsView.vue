@@ -36,10 +36,6 @@
             {{ $t('331da9e3-2c97-4c70-a3d5-aa0ddb9625ad') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('bundle-discounts')" @update:model-value="setFeatureFlag('bundle-discounts', !!$event)">
-            Broer en zuskorting (bundelkortingen)
-        </Checkbox>
-
         <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
             UiTPAS-kansentarief op webshops (onvolledig)
         </Checkbox>
