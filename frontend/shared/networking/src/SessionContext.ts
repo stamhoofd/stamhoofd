@@ -235,12 +235,12 @@ export class SessionContext implements RequestMiddleware {
                             this.usedPlatformStorage ? 'platform' : (this.organization!.id)
                         ));
 
-                if (suffix == 'platform' && this.organization) {
+                if (suffix === 'platform' && this.organization) {
                     await Storage.secure.removeItem('token-' + this.organization.id);
                     await Storage.secure.removeItem('user-' + this.organization.id);
                 }
 
-                if (suffix !== 'platform') {
+                if (suffix !== 'platform' && (this.usedPlatformStorage || STAMHOOFD.userMode === 'platform')) {
                     await Storage.secure.removeItem('token-platform');
                     await Storage.secure.removeItem('user-platform');
                 }
@@ -254,6 +254,9 @@ export class SessionContext implements RequestMiddleware {
                     await Storage.secure.removeItem('user-' + suffix);
                 }
 
+                if (suffix === 'platform') {
+                    this.usedPlatformStorage = true;
+                }
                 console.log('[SessionContext] Saved token to storage, suffix: ' + suffix);
             }
         }
