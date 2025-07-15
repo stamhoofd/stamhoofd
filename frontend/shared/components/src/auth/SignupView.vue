@@ -7,7 +7,7 @@
                 {{ $t('Account aanmaken bij {organization}', {organization: $context.organization.name}) }}
             </h1>
             <h1 v-else>
-                <h1>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</h1>
+                {{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}
             </h1>
 
             <p v-if="!lock">
