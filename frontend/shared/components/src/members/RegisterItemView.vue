@@ -307,11 +307,11 @@ function getPeriodString(groupPrice: GroupPrice): string | null {
     }
 
     if (startDate) {
-        return $t(`Beschikbaar vanaf {date}`, { date: Formatter.dateTime(startDate) });
+        return $t(`Beschikbaar vanaf {date}`, { date: Formatter.startDate(startDate) });
     }
 
     if (endDate) {
-        return $t(`Onbeschikbaar na {date}`, { date: Formatter.dateTime(endDate) });
+        return $t(`Onbeschikbaar na {date}`, { date: Formatter.endDate(endDate) });
     }
 
     return null;
