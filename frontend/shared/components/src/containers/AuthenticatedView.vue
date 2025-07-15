@@ -74,13 +74,6 @@ export default class AuthenticatedView extends VueComponent {
             this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
         }
         this.preventComplete = ((this as any).$context as SessionContext).preventComplete ?? false;
-        console.log('AuthenticatedView changed', {
-            loggedIn: this.loggedIn,
-            hasToken: this.hasToken,
-            showPermissionsRoot: this.showPermissionsRoot,
-            userId: this.userId,
-            errorBox: this.errorBox,
-        });
     }
 
     onVisibilityChange() {
