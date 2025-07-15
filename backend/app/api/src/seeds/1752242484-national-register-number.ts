@@ -1,12 +1,15 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member, Organization } from '@stamhoofd/models';
 import { Parent, ParentType, PropertyFilter, RecordCategory, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { DataValidator, Formatter } from '@stamhoofd/utility';
+import { DataValidator } from '@stamhoofd/utility';
 
-type CategoryAndRecord = {
-    category: RecordCategory;
-    record: RecordSettings;
-};
+// type CategoryAndRecord = {
+//     category: RecordCategory;
+//     record: RecordSettings;
+// };
+
+let okCount = 0;
+let errorCount = 0;
 
 enum RnType {
     Member,
@@ -17,12 +20,55 @@ enum RnType {
     Father,
 }
 
+type CategoryPathAndRecord = {
+    categoryPath: string[];
+    record: RecordSettings;
+    category: RecordCategory;
+};
+
+type CategoryPathJoinedAndRecord = {
+    categoryPath: string;
+    record: RecordSettings;
+    category: RecordCategory;
+};
+
+function getRnRecordsWithCategoryPath(organization: Organization): CategoryPathJoinedAndRecord[] {
+    const categories = organization.meta.recordsConfiguration.recordCategories;
+
+    return categories.flatMap(category => getRnRecordsWithCategoryPathHelper(category).map((r) => {
+        return {
+            ...r,
+            categoryPath: r.categoryPath.join(', '),
+        };
+    }));
+}
+
+function getRnRecordsWithCategoryPathHelper(category: RecordCategory): CategoryPathAndRecord[] {
+    const results: CategoryPathAndRecord[] = [];
+
+    if (category.childCategories) {
+        results.push(...category.childCategories.flatMap((childCategory) => {
+            const childResults = getRnRecordsWithCategoryPathHelper(childCategory);
+            if (childResults.length === 0) {
+                return [];
+            }
+            return childResults.map((childResult) => {
+                return {
+                    categoryPath: [category.name.toString(), ...childResult.categoryPath],
+                    record: childResult.record,
+                    category: childResult.category,
+                };
+            });
+        }));
+    }
+
+    results.push(...category.records.filter(r => r.type === RecordType.Text && r.name.toString().toLocaleLowerCase().includes('rijksregisternummer')).map(record => ({ categoryPath: [category.name.toString()], record, category })));
+    return results;
+}
+
 async function startMigrateRnNumbers() {
     for await (const organization of Organization.select().all()) {
-        const nationalRegisterNumberRecords: CategoryAndRecord[] = organization.meta.recordsConfiguration.recordCategories.flatMap((category) => {
-            const records = category.getAllRecords().filter(r => r.type === RecordType.Text && r.name.toString().toLocaleLowerCase().includes('rijksregisternummer'));
-            return records.map(record => ({ category, record }));
-        });
+        const nationalRegisterNumberRecords: CategoryPathJoinedAndRecord[] = getRnRecordsWithCategoryPath(organization);
 
         if (!nationalRegisterNumberRecords.length) {
             continue;
@@ -36,25 +82,26 @@ async function startMigrateRnNumbers() {
         for await (const member of Member.select()
             .where('organizationId', organization.id)
             .all()) {
-            await handleMember(member, nationalRegisterNumberRecords);
+            await handleMember(member, nationalRegisterNumberRecords, organization);
         }
     }
 }
 
-function getRnType(value: string): RnType {
-    const normalized = value.toLowerCase();
+function getRnType(categoryAndRecord: CategoryPathJoinedAndRecord): RnType {
+    const normalizedRecordName = categoryAndRecord.record.name.toString().toLowerCase();
+    const normalizedCategoryName = categoryAndRecord.categoryPath.toLowerCase();
 
-    if (['ouder', 'voogd', 'mama', 'papa', 'schuldenaar', 'ontvanger'].some(x => normalized.includes(x))) {
-        if (['1', 'eerste'].some(x => normalized.includes(x))) {
+    if (['ouder', 'voogd', 'mama', 'papa', 'schuldenaar', 'ontvanger'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
+        if (['1', 'eerste'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
             return RnType.Parent1;
         }
-        if (['2', 'tweede'].some(x => normalized.includes(x))) {
+        if (['2', 'tweede'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
             return RnType.Parent2;
         }
-        if (['mama'].some(x => normalized.includes(x))) {
+        if (['mama'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
             return RnType.Mother;
         }
-        if (['papa'].some(x => normalized.includes(x))) {
+        if (['papa'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
             return RnType.Father;
         }
         return RnType.ParentUnknown;
@@ -63,12 +110,12 @@ function getRnType(value: string): RnType {
     return RnType.Member;
 }
 
-function getParentByRecordCategory(member: Member, category: RecordCategory): Parent | null {
+function getParentByRecordCategory(member: Member, categoryPathAndRecord: CategoryPathJoinedAndRecord): Parent | null {
     if (member.details.parents.length === 1) {
         return member.details.parents[0];
     }
 
-    const possibleNameRecords = category.getAllRecords().filter((r) => {
+    const possibleNameRecords = categoryPathAndRecord.category.getAllRecords().filter((r) => {
         const normalizedRecordName = r.name.toLowerCase();
         return ['naam '].some(x => normalizedRecordName.includes(x));
     }).map((record) => {
@@ -101,7 +148,14 @@ function getParentByRecordCategory(member: Member, category: RecordCategory): Pa
     return null;
 }
 
-async function handleMember(member: Member, categoryAndRecords: CategoryAndRecord[]) {
+// todo: remove, temporary for testing
+function cleanMember(member: Member) {
+    member.details.nationalRegisterNumber = null;
+    member.details.parents.forEach(p => p.nationalRegisterNumber = null);
+}
+
+async function handleMember(member: Member, categoryAndRecords: CategoryPathJoinedAndRecord[], organization: Organization) {
+    cleanMember(member);
     // hardcoded exception for member: the member has no parents but has a sibling with parents
     if (member.id === '1e31c769-c6be-4e36-8159-c95e5b522f9f') {
         const sibling = await Member.getByID('c9116cc7-9648-4a5d-8968-ae6a0da086b5');
@@ -115,7 +169,8 @@ async function handleMember(member: Member, categoryAndRecords: CategoryAndRecor
     const recordAnswers = member.details.recordAnswers;
     let parentsRn: string | null = null;
 
-    for (const { record, category } of categoryAndRecords) {
+    for (const categoryAndRecord of categoryAndRecords) {
+        const { record } = categoryAndRecord;
         const recordAnswer = recordAnswers.get(record.id);
         if (recordAnswer instanceof RecordTextAnswer) {
             let value = recordAnswer.value;
@@ -127,19 +182,23 @@ async function handleMember(member: Member, categoryAndRecords: CategoryAndRecor
 
                 value = DataValidator.formatBelgianNationalNumber(value);
 
-                const type = getRnType(recordAnswer.settings.name.toString());
+                const type = getRnType(categoryAndRecord);
 
                 if (type === RnType.Member) {
                     if (member.details.birthDay !== null && !DataValidator.doesMatchBelgianNationalNumber(value, member.details.birthDay)) {
-                        console.error(`Invalid national register number: ${value} does not match birth day: ${Formatter.date(member.details.birthDay)}`);
+                        errorCount++;
+                        // todo: add to notes?
+                        // console.error(`Invalid national register number: ${value} does not match birth day: ${Formatter.date(member.details.birthDay)}`);
+                        // console.error(categoryAndRecord.categoryPath, ' (record name: ', record.name.toString(), ')');
                         continue;
                     }
+                    okCount++;
                     if (member.details.nationalRegisterNumber === null) {
                         member.details.nationalRegisterNumber = value;
                     }
                 }
                 else {
-                    const parent = getParentByRecordCategory(member, category);
+                    const parent = getParentByRecordCategory(member, categoryAndRecord);
                     if (parent) {
                         if (parent.nationalRegisterNumber === null) {
                             parent.nationalRegisterNumber = value;
@@ -276,4 +335,6 @@ export default new Migration(async () => {
     }
 
     await startMigrateRnNumbers();
+    console.log('ok count: ', okCount);
+    console.log('error count: ', errorCount);
 });
