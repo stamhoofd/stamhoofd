@@ -181,10 +181,6 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
         return descriptions.filter(d => !!d).join('\n');
     }
 
-    get isActive() {
-        return this.deactivatedAt === null && (this.startDate === null || this.startDate <= new Date());
-    }
-
     doesMatchFilter(filter: StamhoofdFilter) {
         try {
             const compiledFilter = compileToInMemoryFilter(filter, registrationInMemoryFilterCompilers);

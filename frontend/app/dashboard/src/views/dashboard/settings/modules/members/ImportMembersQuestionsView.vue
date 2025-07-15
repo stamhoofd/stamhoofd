@@ -176,7 +176,7 @@
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { Dropdown, Radio, RadioGroup, STErrorsDefault, STInputBox, STList, STListItem, Toast, useContext, useErrors, useNavigationActions, usePlatform, usePlatformFamilyManager, useRequiredOrganization } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { getGenderName, Group, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper } from '@stamhoofd/structures';
+import { getGenderName, Group, GroupType, OrganizationRegistrationPeriod, Parent, ParentTypeHelper, Registration } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
 import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
@@ -252,13 +252,17 @@ const deletedRegistrationsCount = computed(() => {
     }, 0);
 });
 
+function isValidRegistration(registration: Registration) {
+    return registration.deactivatedAt === null && registration.registeredAt !== null && (registration.startDate === null || registration.startDate <= new Date());
+}
+
 function shouldAssignRegistrationToMember(m: ImportMemberResult) {
     if (m.importRegistrationResult.group !== null) {
         return false;
     }
 
-    const activeRegistrations = m.existingMember?.member.registrations.filter(r => r.isActive) ?? [];
-    const waitingGroups = m.existingMember?.member.registrations.filter(r => r.isActive && r.group.type === GroupType.WaitingList) ?? [];
+    const activeRegistrations = m.existingMember?.member.registrations.filter(r => isValidRegistration(r)) ?? [];
+    const waitingGroups = m.existingMember?.member.registrations.filter(r => isValidRegistration(r) && r.group.type === GroupType.WaitingList) ?? [];
 
     if (activeRegistrations.length > 0 && !isWaitingList.value) {
         return false;

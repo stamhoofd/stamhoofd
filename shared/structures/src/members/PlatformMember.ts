@@ -96,22 +96,6 @@ export class PlatformFamily {
         return family;
     }
 
-    add(platformMember: PlatformMember) {
-        if (!this.belongsToFamily(platformMember.member)) {
-            console.error('PlatformMember does not belong to this family');
-            return;
-        }
-
-        const existing = this.members.find(m => m.id === platformMember.id);
-        if (!existing) {
-            this.members.push(platformMember);
-        }
-
-        if (platformMember.family !== this) {
-            platformMember.family = this;
-        }
-    }
-
     insertFromBlob(blob: MembersBlob, removeMissing = false) {
         for (const organization of blob.organizations) {
             this.insertOrganization(organization);
