@@ -105,6 +105,11 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
     }
 
     get description() {
+        if (this.$organization) {
+            return this.hasAccount
+                ? $t(`Stel een nieuw wachtwoord in voor jouw account bij {organizationName}.`, { organizationName: this.$organization.name })
+                : $t(`Kies een wachtwoord voor jouw nieuwe account bij {organizationName}.`, { organizationName: this.$organization.name });
+        }
         return this.hasAccount ? $t(`81bbd6ba-ad08-4e3c-bade-d1cfd23949d9`) : $t(`0576b8e6-baa7-4cb9-978a-806f81144427`);
     }
 
@@ -221,17 +226,17 @@ export default class ForgotPasswordResetView extends Mixins(NavigationMixin) {
         try {
             const patch = this.hasAccount
                 ? NewUser.patch({
-                    id: this.session.user!.id,
-                    password: this.password,
-                    email: this.email,
-                })
+                        id: this.session.user!.id,
+                        password: this.password,
+                        email: this.email,
+                    })
                 : NewUser.patch({
-                    id: this.session.user!.id,
-                    password: this.password,
-                    email: this.email,
-                    firstName: this.firstName,
-                    lastName: this.lastName,
-                });
+                        id: this.session.user!.id,
+                        password: this.password,
+                        email: this.email,
+                        firstName: this.firstName,
+                        lastName: this.lastName,
+                    });
 
             // Also change the email if it has been changed
             const { verificationToken } = await LoginHelper.patchUser(this.session, patch);

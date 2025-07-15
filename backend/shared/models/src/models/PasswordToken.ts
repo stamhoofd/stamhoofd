@@ -120,7 +120,10 @@ export class PasswordToken extends QueryableModel {
         let host: string;
         if (user.permissions || !organization || STAMHOOFD.userMode === 'platform') {
             host = 'https://' + (STAMHOOFD.domains.dashboard) + '/' + i18n.locale;
-            return host + '/reset-password' + ((user.organizationId || organization) ? ('/' + encodeURIComponent(user.organizationId ?? organization!.id)) : '') + '?token=' + encodeURIComponent(token.token);
+            if (user.organizationId && organization) {
+                host += '/auto/' + encodeURIComponent(organization.uri);
+            }
+            return host + '/reset-password?token=' + encodeURIComponent(token.token);
         }
 
         host = 'https://' + organization.getHost(i18n);

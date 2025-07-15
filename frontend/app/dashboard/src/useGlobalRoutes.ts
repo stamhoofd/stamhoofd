@@ -1,4 +1,4 @@
-import { ComponentWithProperties, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, onCheckRoutes, UrlHelper, useModalStackComponent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ForgotPasswordResetView, GlobalEventBus, NavigationActions, PaymentPendingView, RegistrationSuccessView, useContext } from '@stamhoofd/components';
 import { PaymentGeneral, PaymentStatus } from '@stamhoofd/structures';
 
@@ -6,6 +6,30 @@ let didCheckGlobalRoutes = false;
 export function useGlobalRoutes() {
     const modalStackComponent = useModalStackComponent();
     const context = useContext();
+
+    defineRoutes([
+        {
+            url: 'reset-password',
+            component: ForgotPasswordResetView,
+            present: 'popup',
+            paramsToProps(_params, query?: URLSearchParams) {
+                return {
+                    token: query?.get('token') || '',
+                };
+            },
+            propsToParams(props: any) {
+                const query = new URLSearchParams();
+                if (props.token) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    query.set('token', (props as any).token);
+                }
+                return {
+                    params: {},
+                    query,
+                };
+            },
+        },
+    ]);
 
     const present = async (component: ComponentWithProperties) => {
         const currentPath = UrlHelper.shared.getPath({ removeLocale: true });
@@ -80,20 +104,6 @@ export function useGlobalRoutes() {
                     },
                 }));
             }
-        }
-
-        if (parts.length > 0 && parts[0] === 'reset-password') {
-            // Clear initial url before pushing to history, because else, when closing the popup, we'll get the original url...
-
-            const token = queryString.get('token');
-            const organizationId = parts[1] ? parts[1] : null;
-
-            if (STAMHOOFD.userMode !== 'platform' && (organizationId && context.value.organization?.id !== organizationId)) {
-                console.log('Ignored reset password route because organization is not the same');
-                return;
-            }
-
-            await present(new ComponentWithProperties(ForgotPasswordResetView, { token }));
         }
     });
 }
