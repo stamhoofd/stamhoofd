@@ -149,6 +149,11 @@ export default class CodeInput extends VueComponent {
                 return;
             }
         }
+        if (!this.$refs || !this.$refs.numberInput || !this.$refs.numberInput[index]) {
+            console.warn('CodeInput: No input found for index', index);
+            return;
+        }
+
         (this.$refs.numberInput[index] as HTMLInputElement).focus();
 
         if ((this.$refs.numberInput[index] as HTMLInputElement).value.length > 0) {
