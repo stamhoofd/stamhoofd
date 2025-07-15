@@ -1,4 +1,4 @@
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
@@ -12,48 +12,48 @@ export function sleep(ms: number) {
 }
 
 export class NetworkManagerStatic implements RequestMiddleware {
-    networkErrorToast: Toast | null = null
-    platformLatestVersion: number | null = null
+    networkErrorToast: Toast | null = null;
+    platformLatestVersion: number | null = null;
 
     /**
      * Total request with a network error that are being retried
      */
-    retryingRequestsCount = 0
+    retryingRequestsCount = 0;
 
     /**
      * Normal, non authenticated requests
      */
     get server() {
-        const server = new Server("https://"+STAMHOOFD.domains.api)
-        server.middlewares.push(this)
+        const server = new Server('https://' + STAMHOOFD.domains.api);
+        server.middlewares.push(this);
 
         // Set the version in which we decode the responses
-        server.setVersionHeaders(['X-Version'])
-        return server
+        server.setVersionHeaders(['X-Version']);
+        return server;
     }
 
     /**
      * Normal, non authenticated requests
      */
     get rendererServer() {
-        const server = new Server("https://"+STAMHOOFD.domains.rendererApi)
-        server.middlewares.push(this)
+        const server = new Server('https://' + STAMHOOFD.domains.rendererApi);
+        server.middlewares.push(this);
 
         // Set the version in which we decode the responses
-        server.setVersionHeaders(['X-Version'])
-        return server
+        server.setVersionHeaders(['X-Version']);
+        return server;
     }
 
     onBeforeRequest(request: Request<any>): Promise<void> {
         request.version = Version;
-        (request as any).retryCount = ((request as any).retryCount ?? 0) + 1
+        (request as any).retryCount = ((request as any).retryCount ?? 0) + 1;
 
-        request.headers["X-Platform"] = AppManager.shared.platform
+        request.headers['X-Platform'] = AppManager.shared.platform;
 
         if (I18nController.shared) {
-            request.headers["X-Locale"] = I18nController.shared.locale
+            request.headers['X-Locale'] = I18nController.shared.locale;
         }
-        return Promise.resolve()
+        return Promise.resolve();
     }
 
     /**
@@ -61,74 +61,77 @@ export class NetworkManagerStatic implements RequestMiddleware {
      */
     networkOnlinePromise(timeout = 10000): Promise<void> {
         return new Promise((resolve) => {
-            let resolved = false
-            const listener = function() { 
+            let resolved = false;
+            const listener = function () {
                 if (resolved) {
-                    return
+                    return;
                 }
-                resolved = true
+                resolved = true;
 
                 // Self reference to always remote the listener
-                window.removeEventListener('online', listener)
-                resolve()
-            }
-            window.addEventListener('online', listener)
-            setTimeout(listener, timeout)
-        })
+                window.removeEventListener('online', listener);
+                resolve();
+            };
+            window.addEventListener('online', listener);
+            setTimeout(listener, timeout);
+        });
     }
 
     async shouldRetryNetworkError(request: Request<any>, error: Error): Promise<boolean> {
-        console.error("network error", error)
+        console.error('network error', error);
         if (!(request as any).isRetrying) {
-            (request as any).isRetrying = true
-            this.retryingRequestsCount++
+            (request as any).isRetrying = true;
+            this.retryingRequestsCount++;
         }
 
         if ((request as any).retryCount > 1 && !this.networkErrorToast) {
             // Only on second try
-            this.networkErrorToast = new Toast($t(`d24616fc-5633-4d01-90c8-cbe686cfdecc`), "spinner").setHide(null).show()
+            this.networkErrorToast = new Toast($t(`d24616fc-5633-4d01-90c8-cbe686cfdecc`), 'spinner').setHide(null).show();
         }
 
         if (navigator.onLine) {
             // Normal timeout behaviour: browser probably doesn't know about network issues, so we need to 'poll'
             await sleep(Math.min(((request as any).retryCount ?? 0) * 1000, 10 * 1000));
             return Promise.resolve(true);
-        } else {
+        }
+        else {
             // Wait for network or 10 seconds (the fastest one)
-            await this.networkOnlinePromise(10000)
+            await this.networkOnlinePromise(10000);
             return Promise.resolve(true);
         }
     }
 
     async shouldRetryServerError(request: Request<any>, response: XMLHttpRequest, error: Error): Promise<boolean> {
-        console.error("server error", error)
-        console.error(error)
-        console.error(response)
+        console.error('server error', error);
+        console.error(error);
+        console.error(response);
         return Promise.resolve(false);
     }
 
     async shouldRetryError(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean> {
-        console.error("response error")
-        console.error(error)
+        console.error('response error');
+        console.error(error);
 
         try {
-            if (error.hasCode("client_update_required")) {
-                Toast.fromError(error).show()
+            if (error.hasCode('client_update_required')) {
+                Toast.fromError(error).show();
 
-                if (!AppManager.shared.isNative && !UrlHelper.initial.getSearchParams().has("forceClientUpdate")) {
+                if (!AppManager.shared.isNative && !UrlHelper.initial.getSearchParams().has('forceClientUpdate')) {
                     const url = new URL(window.location.href);
-                    url.searchParams.set("forceClientUpdate", new Date().getTime()+"")
-                    window.location.href = url.toString()
-                } else {
+                    url.searchParams.set('forceClientUpdate', new Date().getTime() + '');
+                    window.location.href = url.toString();
+                }
+                else {
                     AppManager.shared.checkUpdates({
                         visibleCheck: 'text',
                         visibleDownload: true,
-                        installAutomatically: true
-                    }).catch(console.error)
+                        installAutomatically: true,
+                    }).catch(console.error);
                 }
             }
-        } catch (e) {
-            console.error(e)
+        }
+        catch (e) {
+            console.error(e);
         }
 
         return Promise.resolve(false);
@@ -136,49 +139,50 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
     onFatalNetworkError(request: Request<any>, error: Error) {
         if ((request as any).isRetrying) {
-            (request as any).isRetrying = false
-            this.retryingRequestsCount--
+            (request as any).isRetrying = false;
+            this.retryingRequestsCount--;
         }
 
         if (this.networkErrorToast && this.retryingRequestsCount == 0) {
-            this.networkErrorToast.hide()
+            this.networkErrorToast.hide();
             this.networkErrorToast = null;
         }
     }
 
     onNetworkResponse(request: Request<any>, response: XMLHttpRequest) {
         if ((request as any).isRetrying) {
-            (request as any).isRetrying = false
-            this.retryingRequestsCount--
+            (request as any).isRetrying = false;
+            this.retryingRequestsCount--;
         }
 
         if (this.networkErrorToast && this.retryingRequestsCount == 0) {
-            this.networkErrorToast.hide()
+            this.networkErrorToast.hide();
             this.networkErrorToast = null;
         }
 
         // Check headers
-        const str = response.getResponseHeader("X-Platform-Latest-Version")
+        const str = response.getResponseHeader('X-Platform-Latest-Version');
         if (str) {
             const latestVersion = parseInt(str);
             if (!this.platformLatestVersion || this.platformLatestVersion < latestVersion) {
-                console.log("Latest platform version is "+latestVersion)
-                this.platformLatestVersion = latestVersion
+                console.log('Latest platform version is ' + latestVersion);
+                this.platformLatestVersion = latestVersion;
 
                 if (this.platformLatestVersion > Version) {
                     if (AppManager.shared.isNative) {
-                        new Toast($t(`88a2165a-f8f1-4cb0-bcda-8bd3f4cffffa`), "yellow download").setHide(null).show()
+                        new Toast($t(`88a2165a-f8f1-4cb0-bcda-8bd3f4cffffa`), 'yellow download').setHide(null).show();
                         AppManager.shared.checkUpdates({
-                            checkTimeout: 20 * 1000
-                        }).catch(console.error)
-                    } else {
-                        console.info('Received latest version: ', latestVersion, 'got', Version)
-                        new Toast($t(`1e883f17-305c-4755-a201-df4ced3faf1d`), "yellow download").setHide(null).show()
+                            checkTimeout: 20 * 1000,
+                        }).catch(console.error);
+                    }
+                    else {
+                        console.info('Received latest version: ', latestVersion, 'got', Version);
+                        new Toast($t(`1e883f17-305c-4755-a201-df4ced3faf1d`), 'yellow download').setHide(null).show();
                     }
                 }
-            }  
+            }
         }
     }
 }
 
-export const NetworkManager = new NetworkManagerStatic()
+export const NetworkManager = new NetworkManagerStatic();
