@@ -286,7 +286,13 @@ AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: strin
             });
         }
         else {
-            await FileOpener.open({ url });
+            if (data instanceof URL) {
+                // Open in browser
+                window.open(data.href, '_blank');
+            }
+            else {
+                await FileOpener.open({ url });
+            }
         }
     }
     catch (e) {
