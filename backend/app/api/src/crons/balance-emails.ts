@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { CachedBalance, Email, EmailRecipient, Organization, Platform, User } from '@stamhoofd/models';
+import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamhoofd/models';
 import { IterableSQLSelect, readDynamicSQLExpression, SQL, SQLCalculation, SQLPlusSign } from '@stamhoofd/sql';
 import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailTemplateType, OrganizationEmail, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context';
@@ -31,11 +31,6 @@ async function balanceEmails() {
         savedIterator = Organization.select().limit(10).all();
     }
 
-    const platform = await Platform.getSharedPrivateStruct();
-
-    if (!platform.config.featureFlags.includes('balance-emails')) {
-        return;
-    }
     const systemUser = await User.getSystem();
 
     for await (const organization of savedIterator.maxQueries(5)) {

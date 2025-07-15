@@ -69,7 +69,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="item.amountOpen > 0 && $feature('balance-emails')">
+                <STListItem v-if="item.amountOpen > 0">
                     <h3 class="style-definition-label">
                         {{ $t('a8bf2d7d-3208-4c18-bac3-2cc97b629ad1') }}
                     </h3>
@@ -110,7 +110,6 @@ const props = withDefaults(
     {
         member: null,
     });
-
 
 const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props);
 const title = computed(() => {

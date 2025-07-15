@@ -28,10 +28,6 @@
             {{ $t('8273e002-e243-4d43-9085-c0a1e7c2c301') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('balance-emails')" @update:model-value="setFeatureFlag('balance-emails', !!$event)">
-            {{ $t('4539b2ba-71f8-4839-aee8-60da1189b520') }}
-        </Checkbox>
-
         <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
             {{ $t('caf486c6-818a-4d2b-9fdb-728c6af71481') }}
         </Checkbox>

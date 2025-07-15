@@ -243,7 +243,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="$feature('balance-emails')" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
+                <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.BalanceNotifications)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/notifications.svg">
                     </template>
@@ -416,11 +416,6 @@ defineRoutes([
         paramsToProps() {
             return {
                 types: [...Object.values(EmailTemplateType)].filter((t) => {
-                    if (!platform.value.config.featureFlags.includes('balance-emails')
-                        && [EmailTemplateType.UserBalanceIncreaseNotification, EmailTemplateType.UserBalanceReminder].includes(t)) {
-                        return false;
-                    }
-
                     // Do not show balance reminder email templates for organizations if disabled
                     if (!$organizationManager.value.organization.privateMeta?.featureFlags.includes('organization-receivable-balances')
                         && [EmailTemplateType.OrganizationBalanceIncreaseNotification, EmailTemplateType.OrganizationBalanceReminder].includes(t)) {
