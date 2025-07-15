@@ -81,7 +81,7 @@ import { BackButton, Checkbox, ConfirmEmailView, EmailInput, ErrorBox, LoadingBu
 import { LoginHelper, SessionContext, SessionManager, Storage } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 
-import { getScopedDashboardRoot } from '../../getRootViews';
+import { getScopedAutoRoot, getScopedDashboardRoot } from '../../getRootViews';
 
 @Component({
     components: {
@@ -212,7 +212,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
 
             const session = new SessionContext(this.organization);
             await SessionManager.prepareSessionForUsage(session, true);
-            const dashboardContext = await getScopedDashboardRoot(session, {
+            const dashboardContext = await getScopedAutoRoot(session, {
                 initialPresents: [
                     {
                         components: [
