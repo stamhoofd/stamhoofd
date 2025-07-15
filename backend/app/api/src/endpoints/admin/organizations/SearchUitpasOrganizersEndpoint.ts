@@ -12,7 +12,7 @@ class Query extends AutoEncoder {
 type Body = undefined;
 type ResponseBody = UitpasOrganizersResponse;
 
-export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class SearchUitpasOrganizersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
     
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -20,7 +20,7 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organizations/searchUitpasOrganizer', {});
+        const params = Endpoint.parseParameters(request.url, '/organizations/search-uitpas-organizers', {});
 
         if (params) {
             return [true, params as Params];
