@@ -119,6 +119,31 @@ export function useContextOptions() {
                     );
                 }
             }
+
+            // Append recent unauthenticated organizations
+            if (options.length < 20) {
+                for (const organization of manager.organizations) {
+                    if (options.length > 20) {
+                        break;
+                    }
+
+                    if (options.find(o => o.organization?.id === organization.id)) {
+                        continue; // Already added this organization
+                    }
+                    const context = new SessionContext(organization);
+                    await context.loadFromStorage();
+                    if (!context.canGetCompleted()) {
+                        options.push(
+                            {
+                                id: 'org-' + organization.id,
+                                organization,
+                                app: 'auto',
+                                context,
+                            },
+                        );
+                    }
+                }
+            }
         }
 
         return options;
