@@ -3,7 +3,13 @@
         <STNavigationBar :title="$t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`)" />
 
         <main class="center">
-            <h1>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</h1>
+            <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
+                {{ $t('Account aanmaken bij {organization}', {organization: $context.organization.name}) }}
+            </h1>
+            <h1 v-else>
+                <h1>{{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}</h1>
+            </h1>
+
             <p v-if="!lock">
                 {{ $t('24183997-792a-47c5-b43d-53ba713f80f1') }}
             </p>
