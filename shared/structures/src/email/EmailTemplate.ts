@@ -527,6 +527,7 @@ export class EmailTemplate extends AutoEncoder {
 
         if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
             return [
+                ...ExampleReplacements.default,
                 // Name not available
                 ExampleReplacements.all.email,
             ];
