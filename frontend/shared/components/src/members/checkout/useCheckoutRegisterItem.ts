@@ -104,8 +104,11 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         new RegisterItemStep(item, { willStartCheckoutFlow: startCheckoutFlow ?? false }),
     ];
 
-    if (!admin) {
-        steps.push(...getAllMemberSteps(member, item));
+    if (!member.family.checkout.isAdminFromSameOrganization) {
+        // For admins: skip filled steps, because we won't mark anything reviewed here
+        // (we only do when members are filling things in)
+        // Otherwise admins will have to review all the steps every time.
+        steps.push(...getAllMemberSteps(member, item, admin ? { outdatedTime: null } : undefined));
     }
 
     const manager = new MemberStepManager(context, member, steps, async (navigate) => {

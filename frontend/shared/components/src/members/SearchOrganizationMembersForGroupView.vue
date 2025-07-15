@@ -170,6 +170,9 @@ function blurFocus() {
 }
 
 const canSelectAll = computed(() => {
+    if (!props.checkout.isAdminFromSameOrganization) {
+        return false;
+    }
     if (fetcher.hasMoreObjects || !props.checkout.singleOrganization || fetcher.objects.length === 0) {
         return false;
     }

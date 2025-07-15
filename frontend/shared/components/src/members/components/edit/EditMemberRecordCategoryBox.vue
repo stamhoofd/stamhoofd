@@ -1,5 +1,5 @@
 <template>
-    <FillRecordCategoryBox :is-admin="isAdmin" :parent-error-box="parentErrorBox" :category="category" :value="member" :validator="validator" :level="level" :all-optional="allOptional" :title-suffix="titleSuffix" @patch="addPatch" />
+    <FillRecordCategoryBox :force-mark-reviewed="willMarkReviewed" :is-admin="isAdmin" :parent-error-box="parentErrorBox" :category="category" :value="member" :validator="validator" :level="level" :all-optional="allOptional" :title-suffix="titleSuffix" @patch="addPatch" />
 </template>
 
 <script setup lang="ts">
@@ -21,10 +21,12 @@ const props = withDefaults(defineProps<{
     parentErrorBox?: ErrorBox | null;
     isAdmin?: boolean | null;
     level?: number;
+    willMarkReviewed?: boolean | null;
 }>(), {
     level: 1,
     parentErrorBox: null,
     isAdmin: null,
+    willMarkReviewed: null,
 });
 
 defineOptions({

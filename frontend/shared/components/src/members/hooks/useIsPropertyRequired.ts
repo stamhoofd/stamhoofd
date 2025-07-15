@@ -43,9 +43,12 @@ export function useIsAllOptional(member: Ref<PlatformMember | PlatformMember[]>)
     return computed(() => {
         const members = Array.isArray(member.value) ? member.value : [member.value];
         return members.some((m) => {
-            if (auth.canAccessPlatformMember(m, PermissionLevel.Write) && app !== 'registration') {
-                return true;
+            if (m.family.checkout.isAdminFromSameOrganization) {
+                if (auth.canAccessPlatformMember(m, PermissionLevel.Write) && app !== 'registration') {
+                    return true;
+                }
             }
+
             return false;
         });
     });
