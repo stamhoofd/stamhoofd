@@ -2,9 +2,11 @@
     <!-- This div is not really needed, but causes bugs if we remove it from the DOM. Probably something Vue.js related (e.g. user keeps logged out, even if loggedIn = true and force reload is used) -->
     <div class="authenticated-view">
         <LoadingViewTransition :error-box="errorBox">
-            <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
-            <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
-            <ComponentWithPropertiesInstance v-else-if="!hasToken" :key="loginRoot.key" :component="loginRoot" />
+            <template v-if="!preventComplete">
+                <ComponentWithPropertiesInstance v-if="loggedIn" :key="root.key" :component="root" />
+                <ComponentWithPropertiesInstance v-else-if="noPermissionsRoot && showPermissionsRoot" :key="noPermissionsRoot.key" :component="noPermissionsRoot" />
+                <ComponentWithPropertiesInstance v-else-if="!hasToken" :key="loginRoot.key" :component="loginRoot" />
+            </template>
         </LoadingViewTransition>
     </div>
 </template>
@@ -42,6 +44,7 @@ export default class AuthenticatedView extends VueComponent {
     showPermissionsRoot = false;
     lastOrganizationFetch = new Date();
     errorBox: ErrorBox | null = null;
+    preventComplete = false;
 
     created() {
         // We need to check data already before loading any component!
@@ -58,18 +61,26 @@ export default class AuthenticatedView extends VueComponent {
     changed() {
         if (this.noPermissionsRoot) {
             this.loggedIn = (((this as any).$context as SessionContext).isComplete() ?? false) && !!((this as any).$context as SessionContext).auth.permissions && !((this as any).$context as SessionContext).auth.permissions?.isEmpty;
-            this.hasToken = ((this as any).$context as SessionContext).hasToken() ?? false;
+            this.hasToken = (((this as any).$context as SessionContext).hasToken() ?? false);
             this.showPermissionsRoot = ((this as any).$context as SessionContext).isComplete() ?? false;
             this.userId = ((this as any).$context as SessionContext).user?.id ?? null;
             this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
         }
         else {
             this.loggedIn = ((this as any).$context as SessionContext).isComplete() ?? false;
-            this.hasToken = ((this as any).$context as SessionContext).hasToken() ?? false;
+            this.hasToken = (((this as any).$context as SessionContext).hasToken() ?? false);
             this.showPermissionsRoot = false;
             this.userId = ((this as any).$context as SessionContext).user?.id ?? null;
             this.errorBox = ((this as any).$context as SessionContext).loadingError ? new ErrorBox(((this as any).$context as SessionContext).loadingError) : null;
         }
+        this.preventComplete = ((this as any).$context as SessionContext).preventComplete ?? false;
+        console.log('AuthenticatedView changed', {
+            loggedIn: this.loggedIn,
+            hasToken: this.hasToken,
+            showPermissionsRoot: this.showPermissionsRoot,
+            userId: this.userId,
+            errorBox: this.errorBox,
+        });
     }
 
     onVisibilityChange() {
