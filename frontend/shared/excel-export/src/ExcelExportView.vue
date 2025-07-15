@@ -130,7 +130,9 @@ async function doExport() {
             new Toast($t('Jouw bestand is klaar, download het hier'), 'download')
                 .setButton(
                     new ToastButton($t('Downloaden'), () => {
-                        void AppManager.shared.downloadFile(url, filename);
+                        AppManager.shared.downloadFile(url, filename).catch((e) => {
+                            Toast.fromError(e).setHide(15_000).show();
+                        });
                     }),
                 )
                 .setHide(null)
