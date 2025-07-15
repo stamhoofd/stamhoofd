@@ -127,9 +127,9 @@ async function doExport() {
         if (response.data.url) {
             const url = new URL(response.data.url);
             const filename = Formatter.fileSlug(props.type) + '.xlsx';
-            new Toast('Jouw bestand is klaar, download het hier', 'download')
+            new Toast($t('Jouw bestand is klaar, download het hier'), 'download')
                 .setButton(
-                    new ToastButton('Downloaden', () => {
+                    new ToastButton($t('Downloaden'), () => {
                         void AppManager.shared.downloadFile(url, filename);
                     }),
                 )
