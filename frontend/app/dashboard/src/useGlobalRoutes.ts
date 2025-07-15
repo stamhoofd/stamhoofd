@@ -11,7 +11,6 @@ export function useGlobalRoutes() {
         {
             url: 'reset-password',
             component: ForgotPasswordResetView,
-            present: 'popup',
             paramsToProps(_params, query?: URLSearchParams) {
                 return {
                     token: query?.get('token') || '',
