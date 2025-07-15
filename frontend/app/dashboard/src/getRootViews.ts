@@ -3,8 +3,8 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Pus
 import { AccountSwitcher, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, manualFeatureFlag, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { AppType, AccessRight, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
-import { computed, markRaw, reactive, ref } from 'vue';
+import { AccessRight, AppType, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
+import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import RedirectView from '@stamhoofd/components/src/auth/RedirectView.vue';
@@ -54,6 +54,14 @@ export async function wrapContext(context: SessionContext, app: AppType | 'auto'
             root: component,
             hooks: () => {
                 useGlobalRoutes();
+                // Since we mounted, clear the inititial presents
+                onUnmounted(() => {
+                    // Clear the initial presents again, so that we don't keep them in memory
+                    if (options?.initialPresents) {
+                        console.log('Clearing initial presents', options.initialPresents);
+                        options?.initialPresents?.splice(0);
+                    }
+                });
             },
         }), options?.initialPresents),
     });
@@ -234,6 +242,7 @@ export async function getScopedAutoRoot(session: SessionContext, options: { init
                 }),
                 loginRoot: wrapWithModalStack(getLoginRoot()),
             }),
+            options,
         );
     }
 
