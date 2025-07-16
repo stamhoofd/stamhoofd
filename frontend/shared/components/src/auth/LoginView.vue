@@ -6,7 +6,7 @@
             <div class="st-view-vertical-center">
                 <div class="container">
                     <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
-                        {{ $t('Inloggen bij {organization}', {organization: $context.organization.name}) }}
+                        {{ $t('c85603b9-d395-46d0-8df4-2b4522d08a43', {organization: $context.organization.name}) }}
                     </h1>
                     <h1 v-else>
                         {{ $t('d54c9b23-2d3c-49cd-b1fc-7e821d36fd41') }}

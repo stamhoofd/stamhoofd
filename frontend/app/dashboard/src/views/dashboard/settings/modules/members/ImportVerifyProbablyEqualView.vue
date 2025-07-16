@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="$t('Lijken op elkaar')" :save-text="$t('Volgende')" @save="goNext">
+    <SaveView :title="$t('d3cab6d1-af72-4d4c-b70b-6862d9843b37')" :save-text="$t('a3ea7b14-204b-44b9-abb5-8ced5fc847d1')" @save="goNext">
         <h1>
-            {{ $t('Vink de rijen aan als het om dezelfde personen gaat') }}
+            {{ $t('860735a0-eb27-44ba-9364-4d52f0ce6698') }}
         </h1>
-        <p>{{ $t('We zijn niet 100% zeker dat deze leden uit Stamhoofd en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Stamhoofd) overschrijven als je ze aanvinkt.') }}</p>
+        <p>{{ $t('83877c6a-5330-4299-af39-fdbac4501dff') }}</p>
 
         <button v-if="!isCheckedAll" class="button text" type="button" @click="checkAll">
-            {{ $t('Alles aanvinken') }}
+            {{ $t('6efc88ed-1512-4e17-91cd-b974ac298ddd') }}
         </button>
         <button v-else class="button text" type="button" @click="uncheckAll">
-            {{ $t('Alles uitvinken') }}
+            {{ $t('38443a1a-edf6-4edd-b736-301bcb70cd9f') }}
         </button>
 
         <STList>

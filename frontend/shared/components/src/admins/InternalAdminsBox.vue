@@ -15,7 +15,7 @@
         {{ $t('4d9168af-27ed-438e-acd9-756474dd6f5e') }}
     </p>
     <p v-if="filteredMembers.length === 0" class="info-box">
-        {{ $t('Geen zoekresultaten') }}
+        {{ $t('34416687-b59a-4637-92a0-fac711d7d231') }}
     </p>
     <STList v-else>
         <STListItem v-for="member in filteredLimitedMembers" :key="member.id" :selectable="true" class="right-stack" @click="editMember(member)">
@@ -53,7 +53,7 @@
 
     <p v-if="shouldShowMoreButton" class="style-button-bar">
         <button type="button" class="button text" @click="showAll = true">
-            {{ $t('Nog {count} beheerders weergeven', {count: showMoreCount}) }}
+            {{ $t('96140ac1-d193-4ad1-9f33-f5241f00d176', {count: showMoreCount}) }}
         </button>
     </p>
 </template>

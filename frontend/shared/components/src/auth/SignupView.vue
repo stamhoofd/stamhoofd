@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1 v-if="STAMHOOFD.userMode === 'organization' && $context.organization">
-                {{ $t('Account aanmaken bij {organization}', {organization: $context.organization.name}) }}
+                {{ $t('975e20dd-d5c2-4377-ad4f-359a332b9687', {organization: $context.organization.name}) }}
             </h1>
             <h1 v-else>
                 {{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}

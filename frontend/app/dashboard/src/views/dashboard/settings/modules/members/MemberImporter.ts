@@ -52,7 +52,7 @@ export class MemberImporter {
         if (importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
             throw new SimpleError({
                 code: 'no_group',
-                message: $t(`Er is een nieuw lid zonder groep.`),
+                message: $t(`dfbb830d-922c-42e7-a77a-f37e86e86998`),
             });
         }
 
@@ -71,13 +71,13 @@ export class MemberImporter {
                 let base: string;
 
                 if (importResult.isRegistrationImported) {
-                    base = $t('Fout bij het registreren van de betaling voor het lid.');
+                    base = $t('e2057717-8967-4f81-a717-6bdf9caebc01');
                 }
                 else if (importResult.isMemberImported) {
-                    base = $t('Fout bij het inschrijven van het lid.');
+                    base = $t('c51416d6-e3b2-4666-83ad-dcf8fc5f40e6');
                 }
                 else {
-                    base = $t('Fout bij het importeren van het lid.');
+                    base = $t('bd42c95e-8f61-4c5a-a66b-b86b6b7130ba');
                 }
 
                 report.setErrorMessage(`${base} ${this.getErrorMessage(e)}`);
@@ -206,7 +206,7 @@ export class MemberImporter {
             return error.message;
         }
 
-        return $t('Onbekende fout.');
+        return $t('8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8');
     }
 
     private async importMember(importResult: ImportMemberResult, importMemberResults: ImportMemberResult[]) {
@@ -455,7 +455,7 @@ export class MemberImporter {
 
         throw new SimpleError({
             code: 'no_registration',
-            message: $t(`Geen registratie gevonden voor {name}`, { name: platformMember.member.name }),
+            message: $t(`97f24d1b-9730-45bb-9ebc-33d50bc3ddc1`, { name: platformMember.member.name }),
         });
     }
 }

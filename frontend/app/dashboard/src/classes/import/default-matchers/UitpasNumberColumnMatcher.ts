@@ -10,7 +10,7 @@ export class UitpasNumberColumnMatcher implements ColumnMatcher {
     readonly id = 'UiTPAS-nummer';
 
     getName(): string {
-        return $t('UiTPAS-nummer');
+        return $t('e330f60b-d331-49a2-a437-cddc31a878de');
     }
 
     doesMatch(columnName: string, _examples: string[]): boolean {
@@ -42,7 +42,7 @@ export class UitpasNumberColumnMatcher implements ColumnMatcher {
         if (!DataValidator.isUitpasNumberValid(value)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('Dit is geen geldig UiTPAS-nummer'),
+                message: $t('a717759d-4b62-40b2-bf8a-55e42565030b'),
             });
         }
 

@@ -39,7 +39,7 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`Deze cel is leeg`),
+                message: $t(`48f95d88-4cd4-414e-8236-e8ec8b921bfa`),
             });
         }
 
@@ -51,14 +51,14 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
         if (isNaN(b)) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`'{value}' is geen geldig bedrag`, { value }),
+                message: $t(`b9965b22-27c6-428d-a184-634da7345eae`, { value }),
             });
         }
 
         if (Math.floor(b * 100) !== b * 100) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`'{value}' bevat te veel cijfers na de komma`, { value }),
+                message: $t(`f78dea7f-d99d-4a0b-8557-0ff17d082dbb`, { value }),
             });
         }
 

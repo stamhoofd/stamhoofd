@@ -109,7 +109,7 @@
             </template>
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
-                <hr><h2>{{ cartItem.amount < 2 ? $t('UiTPAS-nummer') : $t('UiTPAS-nummers') }}</h2>
+                <hr><h2>{{ cartItem.amount < 2 ? $t('e330f60b-d331-49a2-a437-cddc31a878de') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
 
                 <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="max uitpas-number-input">
                     <input
@@ -279,7 +279,7 @@ async function validateUitpasNumbers() {
         throw new SimpleError({
             code: 'uitpas_numbers_does_not_match_amount',
             message: 'UiTPAS numbers does not match ordered amount',
-            human: $t('Geef evenveel UiTPAS nummers in als het aantal dat je bestelt.'),
+            human: $t('b54c138c-e72f-435b-822b-601d4a529124'),
         });
     }
 
@@ -290,7 +290,7 @@ async function validateUitpasNumbers() {
             throw new SimpleError({
                 code: 'empty_uitpas_number',
                 message: 'Empty UiTPAS number provided',
-                human: $t('Vul een geldig UiTPAS-nummer in.'),
+                human: $t('060b1af6-155c-468a-9657-6fcb10dfb133'),
                 field: 'uitpasNumbers.' + i,
             });
         }
@@ -313,7 +313,7 @@ async function validateUitpasNumbers() {
         throw new SimpleError({
             code: 'duplicate_uitpas_numbers_used',
             message: 'Duplicate uitpas numbers used in order',
-            human: $t('Een UiTPAS-nummer kan niet meerdere keren gebruikt worden voor hetzelfde artikel.'),
+            human: $t('b5192292-d520-49fa-8a9b-c9763bfdc91a'),
         });
     }
 
@@ -338,7 +338,7 @@ async function validateUitpasNumbers() {
             throw new SimpleError({
                 code: 'invalid_uitpas_numbers',
                 message: 'Not all uitpas numbers were valid',
-                human: $t('Niet alle opgegeven UiTPAS-nummers zijn geldig. Controleer de nummers en probeer het opnieuw.'),
+                human: $t('4bc1cd70-a8ea-45c0-b9c6-c95a4d766990'),
             });
         }
         // for now we don't do anything with the reduced prices

@@ -505,10 +505,10 @@ export class CartItem extends AutoEncoder {
 
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
-                descriptions.push($t('UiTPAS-nummer') + ': ' + this.uitpasNumbers[0]);
+                descriptions.push($t('e330f60b-d331-49a2-a437-cddc31a878de') + ': ' + this.uitpasNumbers[0]);
             }
             else {
-                descriptions.push($t('UiTPAS-nummers') + ': ' + this.uitpasNumbers.join(', '));
+                descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.join(', '));
             }
         }
         return descriptions.filter(d => !!d).join('\n');
@@ -621,7 +621,7 @@ export class CartItem extends AutoEncoder {
                         new SimpleError({
                             code: 'missing_menu',
                             message: 'Missing menu',
-                            human: $t(`Maak een keuze voor '{option_menu_name}'`, { option_menu_name: remaining.name }),
+                            human: $t(`60021a05-e01f-4fda-b12e-8aa8046a2f07`, { option_menu_name: remaining.name }),
                             field: 'optionMenus.' + remaining.id,
                             meta: { recoverable: true },
                         }),

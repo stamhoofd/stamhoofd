@@ -29,7 +29,7 @@
                     {{ user.email }}
                 </h3>
                 <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
-                    {{ $t('Beheerder') }}
+                    {{ $t('d5be56ba-2189-47b0-a32f-ef92cac0c2f8') }}
                 </p>
                 <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
                     <LoadingButton :loading="isDeletingUser(user)" class="hover-show">

@@ -49,11 +49,11 @@
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
-            {{ $t('Leden importeren') }} (beta)
+            {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
         </Checkbox>
 
         <Checkbox :model-value="getFeatureFlag('event-webshops')" @update:model-value="setFeatureFlag('event-webshops', !!$event)">
-            {{ $t('Webshops koppelen aan activiteiten') }}
+            {{ $t('c22cb870-b859-4de9-9540-1d2d796a50f3') }}
         </Checkbox>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>

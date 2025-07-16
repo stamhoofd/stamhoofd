@@ -1,5 +1,5 @@
 <template>
-    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('Doorgaan')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`809b158a-2a1f-459f-a60c-4ae5c69fbe8e`)" @save="goToCheckout">
+    <SaveView :save-text="checkout.isAdminFromSameOrganization ? $t('7de2e636-dcec-44b1-a681-daeb9cd85316') : $t('a2ca0160-2d94-45f8-a96a-3e02a43b17d8')" main-class="flex" :save-badge="cartLength" :disabled="cartLength === 0" :loading="saving" :title="$t(`809b158a-2a1f-459f-a60c-4ae5c69fbe8e`)" @save="goToCheckout">
         <p v-if="!checkout.isAdminFromSameOrganization && checkout.singleOrganization" class="style-title-prefix">
             {{ checkout.singleOrganization.name }}
         </p>

@@ -32,7 +32,7 @@
         </p>
 
         <p v-if="event.webshopId && app !== 'registration'" class="style-description-small">
-            {{ $t('Gekoppelde webshop') }}
+            {{ $t('3c38f59d-07f9-49f5-9223-d074b9eda853') }}
         </p>
 
         <template #right>

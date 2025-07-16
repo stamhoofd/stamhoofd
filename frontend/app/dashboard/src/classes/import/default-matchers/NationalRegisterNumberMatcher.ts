@@ -11,7 +11,7 @@ import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 // should come after birthday
 export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatcher implements BaseColumnMatcher {
     getName(): string {
-        return $t('Rijksregisternummer');
+        return $t('ff818d9d-658a-42cd-924e-75fc839aa9ea');
     }
 
     get id() {
@@ -61,7 +61,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
         if (!DataValidator.verifyBelgianNationalNumber(value)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('Ongeldig rijksregisternummer'),
+                message: $t('1072ba5d-292b-4546-b2ea-646f0bf56931'),
             });
         }
 
@@ -101,7 +101,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
         if (!DataValidator.verifyBelgianNationalNumber(value)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('Ongeldig rijksregisternummer'),
+                message: $t('1072ba5d-292b-4546-b2ea-646f0bf56931'),
             });
         }
 

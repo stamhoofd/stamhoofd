@@ -2,7 +2,7 @@
     <div v-if="view" class="st-view loading-view-container">
         <STNavigationBar />
         <main v-if="errorBox">
-            <h1>{{ $t('Oeps, er ging iets mis') }}</h1>
+            <h1>{{ $t('a20a141f-0a94-412e-b731-7b5bde03cd9b') }}</h1>
             <STErrorsDefault :error-box="errorBox" />
         </main>
         <div v-else-if="show" class="loading-view">

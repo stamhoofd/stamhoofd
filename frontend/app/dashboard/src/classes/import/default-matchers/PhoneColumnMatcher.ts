@@ -11,7 +11,7 @@ import { SharedMemberDetailsMatcher } from '../SharedMemberDetailsMatcher';
 
 export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements ColumnMatcher {
     getName(): string {
-        return $t('GSM-nummer');
+        return $t('3174ba16-f035-4afd-a69f-74865e64ef34');
     }
 
     get id() {
@@ -60,7 +60,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
             throw new SimpleError({
                 code: 'invalid_field',
                 message: e.message || 'Invalid phone',
-                human: $t(`Ongeldig telefoonnummer`),
+                human: $t(`16c76c49-48f8-4532-91ae-97867c2ad668`),
                 field: 'phone',
             });
         }
@@ -86,7 +86,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: e.message || 'Invalid phone',
-                        human: $t(`Ongeldig telefoonnummer`),
+                        human: $t(`16c76c49-48f8-4532-91ae-97867c2ad668`),
                         field: 'phone',
                     });
                 }

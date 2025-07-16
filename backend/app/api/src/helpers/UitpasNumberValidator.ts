@@ -37,7 +37,7 @@ function assertIsUitpasNumberSuccessfulResponse(
         throw new SimpleError({
             code: 'invalid_response_retrieving_pass_by_uitpas_number',
             message: `Invalid response when retrieving pass by UiTPAS  number`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`),
+            human: $t(`13731c1d-a519-442f-bc06-2e610fa2889d`),
         });
     }
 }
@@ -113,7 +113,7 @@ export class UitpasNumberValidatorStatic {
             throw new SimpleError({
                 code: 'unsuccessful_and_unexpected_response_retrieving_pass_by_uitpas_number',
                 message: `Unsuccesful response without message when retrieving pass by UiTPAS number`,
-                human: $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`),
+                human: $t(`13731c1d-a519-442f-bc06-2e610fa2889d`),
             });
         }
 

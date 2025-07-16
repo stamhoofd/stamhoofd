@@ -121,16 +121,16 @@ let counter = 0;
 const help = () => {
     if (isNative.value) {
         new CenteredMessage(
-            $t('Vereniging niet gevonden'),
-            $t('In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.'),
+            $t('4c7b94c4-1f14-4a8f-881a-a643b3591144'),
+            $t('77a3f842-960f-43fa-a9f2-fcac7d3ecc88'),
         )
             .addCloseButton()
             .show();
     }
     else {
         new CenteredMessage(
-            $t('Vereniging niet gevonden'),
-            $t("In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan."),
+            $t('4c7b94c4-1f14-4a8f-881a-a643b3591144'),
+            $t("ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5"),
         )
             .addCloseButton()
             .show();

@@ -1,105 +1,105 @@
 <template>
-    <SaveView :title="$t('Leden importeren')" :loading="saving" :save-text="`Importeer ${importMemberResults.length} leden`" @save="goNext">
-        <h1>{{ $t('Importeer instellingen') }}</h1>
-        <p>{{ $t('We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.') }}</p>
+    <SaveView :title="$t('c67f13a2-08cb-4c30-a39d-d07679430672')" :loading="saving" :save-text="`Importeer ${importMemberResults.length} leden`" @save="goNext">
+        <h1>{{ $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}</h1>
+        <p>{{ $t('122da7ee-3e58-416c-a0b7-ee84fbd39a2e') }}</p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!saving">
             <p v-if="existingCount > 0 && existingCount === importMemberResults.length" class="warning-box">
-                {{ $t('Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven.') }} <template v-if="membersWithNewRegistrations.length">
-                    {{ $t('Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.') }}
-                </template>{{ $t('Let goed op, je kan dit niet ongedaan maken.') }}
+                {{ $t('56e63fc2-5364-40db-bc51-f4446725bfd9') }} <template v-if="membersWithNewRegistrations.length">
+                    {{ $t('ca9fbe8b-0857-4b86-ba53-77b5bb14ee5d') }}
+                </template>{{ $t('20dd247f-c26d-4fc2-b6a6-de345d5a270b') }}
             </p>
             <p v-else-if="existingCount > 0" class="warning-box">
-                {{ $t('{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.', {
+                {{ $t('be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8', {
                     existingCount,
-                    memberTranslation: existingCount == 1 ? $t('lid') : $t('leden'),
+                    memberTranslation: existingCount == 1 ? $t('bd4f2ee1-ffd5-4f8b-97d5-49627c55e147') : $t('ad919b4f-2896-4a75-ab97-3916cf6e7796'),
                     total: importMemberResults.length
                 }) }}
             </p>
 
             <p v-if="deletedRegistrationsCount > 0" class="warning-box">
-                {{ $t('Stamhoofd zal {count} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.', {count: deletedRegistrationsCount}) }}
+                {{ $t('b7838e09-f22e-441d-a36b-9e78599ca2e9', {count: deletedRegistrationsCount}) }}
             </p>
             <p v-if="membersWithoutNewRegistrations.length" class="success-box">
-                {{ $t('{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.', {count: membersWithoutNewRegistrations.length}) }}
+                {{ $t('abd71533-048e-45c7-baf8-78769e5287de', {count: membersWithoutNewRegistrations.length}) }}
             </p>
 
             <template v-if="membersWithNewRegistrations.length">
                 <hr>
-                <h2>{{ $t('Inschrijvingstatus') }}</h2>
+                <h2>{{ $t('40b335d7-93c8-48a9-90ec-bb088b6e59e9') }}</h2>
 
-                <STInputBox v-if="hasWaitingLists" error-fields="waitingList" :error-box="errors.errorBox" class="max" :title="$t(`Wil je deze leden op de wachtlijst zetten?`)">
+                <STInputBox v-if="hasWaitingLists" error-fields="waitingList" :error-box="errors.errorBox" class="max" :title="$t(`063a8e6f-8639-4089-87a6-f58da1dfda17`)">
                     <RadioGroup>
                         <Radio v-model="isWaitingList" :value="false">
-                            {{ $t('Nee') }}
+                            {{ $t('08dd4181-69c6-4888-b32a-07224f1c4349') }}
                         </Radio>
                         <Radio v-model="isWaitingList" :value="true">
-                            {{ $t('Ja, zet op wachtlijst') }}
+                            {{ $t('22f85f39-c9bc-4134-beca-bd08518c3fbc') }}
                         </Radio>
                     </RadioGroup>
                 </STInputBox>
 
                 <template v-if="!isWaitingList">
-                    <STInputBox v-if="needsPaidStatus" :title="$t(`Hebben deze leden al betaald?`)" error-fields="paid" :error-box="errors.errorBox" class="max">
+                    <STInputBox v-if="needsPaidStatus" :title="$t(`80728515-caad-488b-a3d6-0f634b908766`)" error-fields="paid" :error-box="errors.errorBox" class="max">
                         <RadioGroup>
                             <Radio v-model="paid" :value="true">
-                                {{ $t('Al betaald') }}
+                                {{ $t('816a862c-c87c-4ab8-9d88-bc847bf364e4') }}
                             </Radio>
                             <Radio v-model="paid" :value="false">
-                                {{ $t('Niet betaald') }}
+                                {{ $t('14806378-4cc0-4b16-bd94-82bec5a9572d') }}
                             </Radio>
                             <Radio v-model="paid" :value="null">
-                                {{ $t('Sommigen wel, anderen niet') }}
+                                {{ $t('fa61e548-6b55-4a19-884f-01bca675064c') }}
                             </Radio>
                         </RadioGroup>
                     </STInputBox>
                     <p v-if="!needsPaidStatus && somePaid" class="success-box">
-                        {{ $t('De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.') }}
+                        {{ $t('03518587-e43b-4ec4-9cf8-8e2c30037252') }}
                     </p>
 
                     <p v-if="needsPaidStatus && somePaid" class="warning-box">
-                        {{ $t('Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.') }}
+                        {{ $t('5f451950-7d73-4a4e-a2c7-3155e6611a26') }}
                     </p>
 
                     <p v-if="needsPaidStatus && paid === null" class="warning-box">
-                        {{ $t("We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten.") }}
+                        {{ $t("6efbbc87-a346-49cd-bf60-0323befdc468") }}
                     </p>
                 </template>
             </template>
 
             <template v-if="needsGroupAssignment">
                 <hr>
-                <h2>{{ $t('Inschrijvingsgroep') }}</h2>
+                <h2>{{ $t('e47b2390-af43-40a0-a7e3-5cd98b247c40') }}</h2>
 
                 <p class="warning-box">
-                    {{ membersNeedingAssignment.length }} {{ $t('leden uit jouw lijst hebben geen inschrijvingsgroep toegewezen gekregen (in een kolom). Kies hieronder hoe je deze wilt inschrijven in de juiste groep, of voeg een kolom in jouw bestand toe met de groep waar je elk lid wilt inschrijven.') }}
+                    {{ membersNeedingAssignment.length }} {{ $t('4e90f074-fbc4-40d3-aca6-db901e15cbc9') }}
                 </p>
 
-                <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`Leeftijdsgroep toewijzen`)">
+                <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`898c44be-3635-4509-920a-956a9c0a332c`)">
                     <RadioGroup>
                         <Radio v-model="autoAssign" :value="true">
-                            {{ $t('Automatisch groep bepalen') }}
+                            {{ $t('69bc8583-a0ea-4396-9e65-ce69840e80ea') }}
                         </Radio>
                         <Radio v-model="autoAssign" :value="false">
-                            {{ $t('Allemaal in één groep inschrijven') }}
+                            {{ $t('acc349b9-d5d5-479d-81c0-e06fe0badafd') }}
                         </Radio>
                     </RadioGroup>
 
                     <template #right>
                         <button class="button text" type="button" @click.stop="openAssignment">
                             <span class="icon help" />
-                            <span>{{ $t('Toon resultaat') }}</span>
+                            <span>{{ $t('be6836a1-b867-48df-9b2e-5372e5c1cdd6') }}</span>
                         </button>
                     </template>
                 </STInputBox>
 
                 <template v-if="autoAssign">
-                    <STInputBox v-if="membersWithMultipleGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`Prioriteit van groepen`)">
+                    <STInputBox v-if="membersWithMultipleGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`8685578a-1994-4435-ac7f-d6aabb01ffa4`)">
                         <p class="info-box">
-                            {{ $t('{count} {memberTranslation} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > inschrijvingsgroepen)', {
+                            {{ $t('175681a6-9e67-4b72-9295-df864d6d4032', {
                                 count: membersWithMultipleGroups.length,
-                                memberTranslation: membersWithMultipleGroups.length == 1 ? $t('lid past') : $t('leden passen')
+                                memberTranslation: membersWithMultipleGroups.length == 1 ? $t('7edb3d38-4eaf-4314-867e-9621b5fb826e') : $t('23884766-9223-4d27-a5d9-ad5e85066cd9')
                             }) }}
                         </p>
 
@@ -120,14 +120,14 @@
                         <template #right>
                             <button type="button" class="button text" @click.stop="openMultipleGroups">
                                 <span class="icon help" />
-                                <span>{{ $t('Toon leden') }}</span>
+                                <span>{{ $t('72d6dd0c-ff03-402c-8efc-a29fb7dbf12f') }}</span>
                             </button>
                         </template>
                     </STInputBox>
 
-                    <STInputBox v-if="membersWithoutMatchingGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`In welke groep wil je leden inschrijven die nergens in passen?`)">
+                    <STInputBox v-if="membersWithoutMatchingGroups.length > 0" error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`d6b5d4d9-533f-444c-8cfb-154efcd6b63b`)">
                         <p class="info-box">
-                            {{ $t('{count} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.', {count: membersWithoutMatchingGroups.length}) }}
+                            {{ $t('0b31be9d-7681-44a4-8389-f5212167541e', {count: membersWithoutMatchingGroups.length}) }}
                         </p>
 
                         <Dropdown v-model="defaultGroup">
@@ -139,13 +139,13 @@
                         <template #right>
                             <button type="button" class="button text" @click.stop="openWithoutMatchingGroups">
                                 <span class="icon help" />
-                                <span>{{ $t('Toon leden') }}</span>
+                                <span>{{ $t('72d6dd0c-ff03-402c-8efc-a29fb7dbf12f') }}</span>
                             </button>
                         </template>
                     </STInputBox>
                 </template>
                 <template v-else>
-                    <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`In welke groep wil je deze leden inschrijven?`)">
+                    <STInputBox error-fields="group" :error-box="errors.errorBox" class="max" :title="$t(`96acfe84-33fa-4fa2-b31a-098108100ffb`)">
                         <Dropdown v-model="defaultGroup">
                             <option v-for="group in groups" :key="group.id" :value="group">
                                 {{ group.settings.name }}
@@ -165,7 +165,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Toon wijzigingen') }}
+                    {{ $t('394a37e4-8b91-433b-9808-d1b482ffc07f') }}
                 </h3>
             </STListItem>
         </STList>
@@ -354,8 +354,8 @@ function getGroupAutoAssignCountForPriority(group: Group) {
 function openAssignment() {
     autoAssignMembers(props.importMemberResults);
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: $t(`Wijzigingen aan inschrijvingen`),
-        description: $t(`Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand`),
+        title: $t(`3a70601b-aa96-4c63-bd47-8d9927483433`),
+        description: $t(`7eb4f64b-68be-4cb4-8fcb-255093af9037`),
         members: membersNeedingAssignment.value.flatMap((m) => {
             if (m.importRegistrationResult.autoAssignedGroup === null) {
                 return [];
@@ -371,8 +371,8 @@ function openAssignment() {
 
 function openPriorityAssignedToGroup(group: Group) {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: $t(`Leden die door prioriteit bij {group} zullen worden ingeschreven`, { group: group.settings.name }),
-        description: $t(`Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij {group} zullen worden ingeschreven`, { group: group.settings.name }),
+        title: $t(`a45744c8-fa0e-4300-bd1a-502321266aca`, { group: group.settings.name }),
+        description: $t(`a28ab93c-ac3a-4422-bcaf-170d28161604`, { group: group.settings.name }),
         members: membersWithMultipleGroups.value.flatMap((m) => {
             if (m.importRegistrationResult.group !== null) {
                 return [];
@@ -393,8 +393,8 @@ function openPriorityAssignedToGroup(group: Group) {
 
 function openMultipleGroups() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: $t(`Leden die in meerdere groepen passen`),
-        description: $t(`Dit zijn alle leden en de groepen waar ze in passen. Je kan beperken tot welke groepen ze horen door de instellingen van die groep te wijzigen.`),
+        title: $t(`0b5df66c-39eb-45b9-bc54-5013752bd8f1`),
+        description: $t(`85c892af-972f-4a52-8769-4452ebbcdf8d`),
         members: membersWithMultipleGroups.value.flatMap((m) => {
             if (m.importRegistrationResult.group !== null) {
                 return [];
@@ -416,77 +416,77 @@ function getParentDescription(parent: Parent) {
         description.push(type + ': ' + parent.name);
     }
     if (parent.phone) {
-        description.push(type + ' ' + $t(`telefoonnummer`) + ': ' + parent.phone);
+        description.push(type + ' ' + $t(`f956eedf-ca2e-4d8c-925d-434bf3adfd24`) + ': ' + parent.phone);
     }
     if (parent.email) {
-        description.push(type + ' ' + $t(`e-mail`) + ': ' + parent.email);
+        description.push(type + ' ' + $t(`9755e27e-7128-4682-af6e-e3a2a5d95a42`) + ': ' + parent.email);
     }
     if (parent.address) {
-        description.push(type + ' ' + $t(`adres`) + ': ' + parent.address.toString());
+        description.push(type + ' ' + $t(`38f3e042-b8a7-4bba-bf2a-d7c391f23268`) + ': ' + parent.address.toString());
     }
     if (parent.nationalRegisterNumber) {
-        description.push(type + ' ' + $t(`rijksregisternummer`) + ': ' + parent.nationalRegisterNumber.toString());
+        description.push(type + ' ' + $t(`cd5d00db-1fcc-4079-bbe3-36dc001e93d4`) + ': ' + parent.nationalRegisterNumber.toString());
     }
     return description;
 }
 
 function openResultView() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: $t(`Wijzigingen`),
-        description: $t(`Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.`),
+        title: $t(`85a193ca-cd6a-498d-957d-c627cc2b27f5`),
+        description: $t(`cc4f9269-8e85-4b69-809e-cc466bdfe9cd`),
         members: props.importMemberResults.map((member) => {
             let description: string[] = [];
             const registration = memberImporter.buildRegistration(member, isWaitingList.value);
 
             if (registration !== null) {
                 const group = groups.find(g => g.id === registration.group.id);
-                const groupName = (group?.settings.name ?? $t(`onbekende groep`));
+                const groupName = (group?.settings.name ?? $t(`b979d1ed-d909-4c9f-9235-669be553af2b`));
 
                 let suffix = '';
 
                 if (member.importRegistrationResult.paidPrice !== null) {
-                    suffix = ` (${$t('{price} betaald', { price: Formatter.price(member.importRegistrationResult.paidPrice) })})`;
+                    suffix = ` (${$t('b53eb56b-1380-4bc5-bc07-9e813c435e69', { price: Formatter.price(member.importRegistrationResult.paidPrice) })})`;
                 }
                 else if (member.importRegistrationResult.paid || paid.value) {
-                    suffix = ` (${$t('reeds betaald')})`;
+                    suffix = ` (${$t('a56aa092-fd87-40b9-9a8c-7822796e6927')})`;
                 }
                 else {
-                    suffix = ` (${$t('nog niet betaald')})`;
+                    suffix = ` (${$t('d6c8c3d5-a969-4b2f-ade9-dfc797e98772')})`;
                 }
 
                 if (member.existingMember) {
                     if (registration !== null) {
                         if (registration.group.type === GroupType.WaitingList) {
-                            description.push($t(`Wachtlijst plaatsen voor {group}`, { group: groupName }) + suffix);
+                            description.push($t(`f6e9cb12-9107-49d1-922a-fef46dc6e25e`, { group: groupName }) + suffix);
                         }
                         else {
-                            description.push($t(`Inschrijven voor {group}`, { group: groupName }) + suffix);
+                            description.push($t(`6258cf03-8bad-4ed3-869b-5771bcd797f6`, { group: groupName }) + suffix);
                         }
 
                         // Delete conflicting registrations (based on categories too!)
                         const deleteRegs = memberImporter.getOverrideRegistrations(registration, member);
                         for (const r of deleteRegs) {
-                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t(`onbekende groep`));
+                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t(`b979d1ed-d909-4c9f-9235-669be553af2b`));
                             if (r.group.type === GroupType.WaitingList) {
-                                description.push($t(`Verwijderen van wachtlijst van {group}`, { group: groupName }));
+                                description.push($t(`237dcb63-7ff6-4bb2-83c5-b3e961c6e1f1`, { group: groupName }));
                             }
                             else {
-                                description.push($t(`Verwijderen inschrijving voor {group}`, { group: groupName }));
+                                description.push($t(`fc2d09ad-9c8d-4867-95f4-2ef7e82c655c`, { group: groupName }));
                             }
                         }
                     }
                 }
                 else {
                     if (registration.group.type === GroupType.WaitingList) {
-                        description.push($t(`Toevoegen in het systeem en op wachtlijst plaatsen voor {group}`, { group: groupName }) + suffix);
+                        description.push($t(`04e10934-24e2-42af-ab40-6352cbde6a30`, { group: groupName }) + suffix);
                     }
                     else {
-                        description.push($t(`Toevoegen in het systeem met inschrijving voor {group}`, { group: groupName }) + suffix);
+                        description.push($t(`c3031fda-2cfb-46b7-8cb6-b31ad49034e8`, { group: groupName }) + suffix);
                     }
                 }
             }
             else if (member.isExisting) {
-                description.push($t(`Geen wijziging aan inschrijvingen`));
+                description.push($t(`fd679ae9-a363-40cf-86c0-1434f6fd9b7f`));
             }
 
             if (member.existingMember) {
@@ -494,34 +494,34 @@ function openResultView() {
                 const patched = member.patchedDetails;
 
                 if (patched.name !== undefined && existingDetails.name !== patched.name) {
-                    description.push($t(`Naam wijzigen naar {name}`, { name: patched.name }));
+                    description.push($t(`d95eeb45-400f-4e6f-8e18-6fd174b9eecb`, { name: patched.name }));
                 }
                 if (patched.nationalRegisterNumber && patched.nationalRegisterNumber !== existingDetails.nationalRegisterNumber) {
-                    description.push($t(`Rijksregisternummer wijzigen naar {nationalRegisterNumber}`, { nationalRegisterNumber: patched.nationalRegisterNumber.toString() }));
+                    description.push($t(`80e82f78-0e15-4e6a-82c0-d4ee613683f8`, { nationalRegisterNumber: patched.nationalRegisterNumber.toString() }));
                 }
                 if (patched.gender !== undefined && existingDetails.gender !== patched.gender) {
-                    description.push($t(`Geslacht wijzigen naar {gender}`, { gender: getGenderName(patched.gender) }));
+                    description.push($t(`a68feeef-07a3-4406-86ef-e5ab1a168513`, { gender: getGenderName(patched.gender) }));
                 }
                 if (patched.email !== undefined && patched.email && existingDetails.email !== patched.email) {
-                    description.push($t(`E-mail wijzigen naar {email}`, { email: patched.email }));
+                    description.push($t(`d63b416e-cb04-46d3-ad4c-a2837b9c7b3b`, { email: patched.email }));
                 }
                 if (patched.phone !== undefined && patched.phone && existingDetails.phone !== patched.phone) {
-                    description.push($t(`Telefoonnummer wijzigen naar {phone}`, { phone: patched.phone }));
+                    description.push($t(`c8c3af57-4b8b-4283-9279-3e5f1de35bde`, { phone: patched.phone }));
                 }
                 if (patched.birthDay && (!existingDetails.birthDay || (Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(patched.birthDay)))) {
-                    description.push($t(`Geboortedatum wijzigen naar {birthDay}`, { birthDay: Formatter.date(patched.birthDay, true) }));
+                    description.push($t(`f674fdec-5cb4-421a-b53d-1a3f43c65649`, { birthDay: Formatter.date(patched.birthDay, true) }));
                 }
 
                 if (patched.address && patched.address.toString() !== existingDetails.address?.toString()) {
-                    description.push($t(`Adres wijzigen naar {address}`, { address: patched.address.toString() }));
+                    description.push($t(`5f314eb9-f2f2-4048-aad8-3f16e9bb7ad1`, { address: patched.address.toString() }));
                 }
 
                 if (patched.memberNumber && patched.memberNumber !== existingDetails.memberNumber) {
-                    description.push($t(`Lidnummer wijzigen naar {memberNumber}`, { memberNumber: patched.memberNumber }));
+                    description.push($t(`083a34cb-26f4-4467-978e-3dc19897befb`, { memberNumber: patched.memberNumber }));
                 }
 
                 if (patched.uitpasNumber && patched.uitpasNumber !== existingDetails.uitpasNumber) {
-                    description.push($t(`UiTPAS-nummer wijzigen naar {number}`, { number: patched.uitpasNumber }));
+                    description.push($t(`e08cef03-c352-41cd-8e7b-3ef632b69ee4`, { number: patched.uitpasNumber }));
                 }
 
                 for (const parent of member.getChangedParents()) {
@@ -529,41 +529,41 @@ function openResultView() {
                 }
 
                 for (const answer of member.getChangedRecordAnswers()) {
-                    description.push($t('{key} wijzigen naar {value}', { key: answer.settings.name, value: answer.stringValue }));
+                    description.push($t('9d96814a-e44a-4f9f-b98b-d36838963c39', { key: answer.settings.name, value: answer.stringValue }));
                 }
             }
             else {
                 const patched = member.patchedDetails;
 
                 if (patched.name) {
-                    description.push($t(`Naam`) + ': ' + patched.name);
+                    description.push($t(`1afb49be-fbdc-4388-9b5a-50a1c7f67b82`) + ': ' + patched.name);
                 }
                 if (patched.nationalRegisterNumber) {
-                    description.push($t(`Rijksregisternummer`) + ': ' + patched.nationalRegisterNumber.toString());
+                    description.push($t(`ff818d9d-658a-42cd-924e-75fc839aa9ea`) + ': ' + patched.nationalRegisterNumber.toString());
                 }
                 if (patched.gender) {
-                    description.push($t(`Geslacht`) + ': ' + getGenderName(patched.gender));
+                    description.push($t(`08ef39ff-3431-4975-8c46-8fb68c946432`) + ': ' + getGenderName(patched.gender));
                 }
                 if (patched.email) {
-                    description.push($t(`E-mail`) + ': ' + patched.email);
+                    description.push($t(`4f483ae0-74b5-4b48-94c0-d4c4f807009a`) + ': ' + patched.email);
                 }
                 if (patched.phone) {
-                    description.push($t(`Telefoonnummer`) + ': ' + patched.phone);
+                    description.push($t(`e8cc0b81-c481-4c74-bac0-2e110685cd20`) + ': ' + patched.phone);
                 }
                 if (patched.birthDay) {
-                    description.push($t(`Geboortedatum`) + ': ' + Formatter.date(patched.birthDay, true));
+                    description.push($t(`50e0222d-8de4-43c4-8489-7879c2f681af`) + ': ' + Formatter.date(patched.birthDay, true));
                 }
 
                 if (patched.address) {
-                    description.push($t(`Adres`) + ': ' + patched.address.toString());
+                    description.push($t(`e98ef894-3461-4c12-b38a-80f8c62db915`) + ': ' + patched.address.toString());
                 }
 
                 if (patched.memberNumber) {
-                    description.push($t(`Lidnummer`) + ': ' + patched.memberNumber);
+                    description.push($t(`123be534-a0be-4a6e-b03f-021659e1d8ba`) + ': ' + patched.memberNumber);
                 }
 
                 if (patched.uitpasNumber) {
-                    description.push($t(`UiTPAS-nummer`) + ': ' + patched.uitpasNumber);
+                    description.push($t(`e330f60b-d331-49a2-a437-cddc31a878de`) + ': ' + patched.uitpasNumber);
                 }
 
                 for (const parent of patched.parents) {
@@ -571,7 +571,7 @@ function openResultView() {
                 }
 
                 for (const answer of patched.recordAnswers.values()) {
-                    description.push($t('{key} wijzigen naar {value}', { key: answer.settings.name, value: answer.stringValue }));
+                    description.push($t('9d96814a-e44a-4f9f-b98b-d36838963c39', { key: answer.settings.name, value: answer.stringValue }));
                 }
             }
 
@@ -596,8 +596,8 @@ const draggableGroups = computed({
 
 function openWithoutMatchingGroups() {
     present(new ComponentWithProperties(ImportAutoAssignedView, {
-        title: $t(`Leden die in geen enkele groep passen`),
-        description: $t(`Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.`),
+        title: $t(`4c531fed-ac16-4b22-9ff1-975875934d13`),
+        description: $t(`9a1ec903-87bd-4776-9436-007caf94bcf3`),
         members: membersWithoutMatchingGroups.value.flatMap((m) => {
             return [{
                 name: m.patchedDetails.name,
@@ -614,7 +614,7 @@ async function goNext() {
 
     saving.value = true;
 
-    const toast = new Toast($t(`Bezig met importeren...`), 'spinner').setHide(null).show();
+    const toast = new Toast($t(`06543b84-87c5-416b-8880-6ad24c91b478`), 'spinner').setHide(null).show();
 
     try {
         autoAssignMembers(props.importMemberResults);
@@ -634,7 +634,7 @@ async function goNext() {
             })).catch(console.error);
         }
         else {
-            new Toast($t(`Importeren voltooid`), 'success green').show();
+            new Toast($t(`49c9b8ee-ab37-45e7-84e1-ef11d78fb9ac`), 'success green').show();
             navigate.dismiss({ force: true }).catch(console.error);
         }
     }

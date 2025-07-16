@@ -7,7 +7,7 @@
         <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)">
             <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="false /* for official UiTPAS flow */ " />
             <p v-if="false /* for official UiTPAS flow */ " class="style-description-small">
-                {{ $t('Jouw UiTPAS regio bepaalt het kansentarief op basis van je gekozen basisprijs.') }}
+                {{ $t('3028ddfe-f756-4b75-b3d2-e9281dd75c63') }}
             </p>
         </STInputBox>
 
@@ -74,14 +74,14 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Verplicht het invullen van een UiTPAS-nummer met kansentarief') }}
+                    {{ $t('c6cc8722-303d-4f0e-89c8-e1a0cf2630ca') }}
                 </h3>
 
                 <p v-if="productPricesAvailableForUitpasBaseProductPrice.length === 0" class="style-description-small">
-                    {{ props.product.prices.some(p => p.uitpasBaseProductPriceId === props.productPrice.id) ? $t('Deze prijs is reeds een basisprijs voor een ander UiTPAS kansentarief') : $t('Een UiTPAS kansentarief, heeft een basisprijs nodig.') }}
+                    {{ props.product.prices.some(p => p.uitpasBaseProductPriceId === props.productPrice.id) ? $t('cc1c85a2-123b-43e4-ba4e-ef7dfe3b06f1') : $t('797519d9-a3f3-404f-a66d-b8e488b40547') }}
                 </p>
 
-                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('Basisprijs')">
+                <STInputBox v-if="uitpasBaseProductPriceId" error-fields="uitpasBaseProductPriceId" :error-box="errorBox" :title="$t('86c059de-74eb-44b4-90dc-a11d0d93f332')">
                     <Dropdown v-model="uitpasBaseProductPriceId">
                         <option v-for="item in productPricesAvailableForUitpasBaseProductPrice" :key="item.id" :value="item.id">
                             {{ item.name ? item.name + ' (' + formatPrice(item.price) + ')' : formatPrice(item.price) }}
@@ -89,7 +89,7 @@
                     </Dropdown>
 
                     <p class="style-description-small">
-                        {{ $t('Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.') }}
+                        {{ $t('0b6cd837-f090-4f2e-964a-2a1346c02dbf') }}
                     </p>
                 </STInputBox>
             </STListItem>
@@ -227,14 +227,14 @@ const enableUitpasSocialTariff = computed({
         }
         if (productPricesAvailableForUitpasBaseProductPrice.value.length === 0) {
             // This should never be possible
-            Toast.error($t('Géén enkele andere prijs is beschikbaar als basisprijs')).show();
+            Toast.error($t('bdb5fc84-6f70-4e6c-a69c-9b625c9951d0')).show();
             console.error('No uitpas base product price available, setting to null');
             uitpasBaseProductPriceId.value = null;
             return;
         }
         if (!uitpasBaseProductPriceId.value) {
             // If no uitpas base product price is set, we set it to the first available one.
-            CenteredMessage.confirm($t('De toegepaste kortingen worden niet automatisch geregistreerd en doorgestuurd naar UiTPAS. Je ontvangt geen terugbetalingen van UiTPAS.'), $t('Ok'), undefined, $t('Annuleren'), false).then((isConfirmed: boolean) => {
+            CenteredMessage.confirm($t('eb05aa2d-65c0-4ead-961e-3b110439550e'), $t('613363e2-39ae-46c1-a31e-ace703ddfdd4'), undefined, $t('088a8928-cdae-4886-9f02-bb0510a9c59b'), false).then((isConfirmed: boolean) => {
                 if (isConfirmed) {
                     uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
                 }

@@ -213,10 +213,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/import-excel.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Leden importeren') }}
+                            {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Importeer leden vanaf een Excel of CSV bestand') }}
+                            {{ $t('cc545de8-cbf3-4bfe-8bf7-188ef3f7680e') }}
                         </p>
 
                         <template #right>

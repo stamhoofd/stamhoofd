@@ -1,13 +1,13 @@
 <template>
-    <SaveView :title="$t('Leden importeren')" :loading="saving" :disabled="!file || columns.length == 0 || rowCount === 0" :save-text="$t('Volgende')" @save="goNext">
-        <h1>{{ $t('Leden importeren') }}</h1>
+    <SaveView :title="$t('c67f13a2-08cb-4c30-a39d-d07679430672')" :loading="saving" :disabled="!file || columns.length == 0 || rowCount === 0" :save-text="$t('a3ea7b14-204b-44b9-abb5-8ced5fc847d1')" @save="goNext">
+        <h1>{{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }}</h1>
         <p>
-            {{ $t('Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.') }}
+            {{ $t('3fd23349-ffba-4291-be68-2d0c844e5754') }}
         </p>
 
         <p v-if="!hasMembers" class="warning-box">
-            <span>{{ $t('Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.') }}
-                <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">{{ $t('Meer info') }}</a>
+            <span>{{ $t('7a7e4a56-9d39-42cf-b4fa-930e43330756') }}
+                <a :href="'https://'+ $t('5766cbb7-e737-474e-a377-213e1d9f6fe5') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
             </span>
         </p>
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -17,10 +17,10 @@
             <span v-else class="icon file-excel color-excel" />
             <div v-if="!file">
                 <h2 class="style-title-list">
-                    {{ $t('Kies een bestand') }}
+                    {{ $t('83271a7d-c9c1-4424-92cb-cf059d6a63f5') }}
                 </h2>
                 <p class="style-description">
-                    {{ $t('Ondersteunde formaten zijn .xls, .xlsx of .csv') }}
+                    {{ $t('f21f4f50-f541-4be6-9377-b573d641c227') }}
                 </p>
             </div>
             <div v-else>
@@ -28,7 +28,7 @@
                     {{ file }}
                 </h2>
                 <p class="style-description">
-                    {{ rowCount }} rijen, {{ columnCount }} {{ $t('kolommen') }}
+                    {{ rowCount }} rijen, {{ columnCount }} {{ $t('dc2128b0-ec7b-463e-abbc-6039d205ec4b') }}
                 </p>
             </div>
             <input type="file" multiple style="display: none;" accept=".xlsx, .xls, .csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" @change="changedFile">
@@ -36,10 +36,10 @@
         </label>
 
         <template v-if="sheetSelectionList.length > 1">
-            <STInputBox error-fields="sheet" :error-box="errors.errorBox" :title="$t(`Werkblad`)">
+            <STInputBox error-fields="sheet" :error-box="errors.errorBox" :title="$t(`1716d997-8d09-4a95-8950-d9dff3b91cbb`)">
                 <Dropdown v-model="sheetKey">
                     <option :value="null" disabled>
-                        {{ $t('Maak een keuze') }}
+                        {{ $t('e93fa1c0-31bc-4086-b45f-0198b629b207') }}
                     </option>
                     <option v-for="key in sheetSelectionList" :key="key" :value="key">
                         {{ key }}
@@ -54,9 +54,9 @@
                 <thead>
                     <tr>
                         <th>
-                            {{ $t('Kolom uit jouw bestand') }}
+                            {{ $t('93043ff4-588f-4a1f-a9de-1142379ec2a3') }}
                         </th>
-                        <th>{{ $t('Koppelen aan') }}</th>
+                        <th>{{ $t('edb1ddbe-37ad-4448-b133-d4578167e780') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,7 +74,7 @@
                         <td>
                             <Dropdown v-model="column.matcherCode" @change="didChangeColumn(column)">
                                 <option :value="null" disabled>
-                                    {{ $t('Maak een keuze') }}
+                                    {{ $t('e93fa1c0-31bc-4086-b45f-0198b629b207') }}
                                 </option>
                                 <optgroup v-for="cat in matcherCategories" :key="cat.name" :label="cat.name">
                                     <option v-for="(matcher, index) in cat.matchers" :key="index" :value="matcher.id">
@@ -87,11 +87,11 @@
                 </tbody>
             </table>
             <p v-if="file && columns.length > 0" class="warning-box">
-                {{ $t('Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.') }}
+                {{ $t('efcf2c9f-68c9-409e-8e0f-b11f73152d6b') }}
             </p>
             <STErrorsDefault :error-box="errors.errorBox" />
             <hr>
-            <STInputBox :title="$t('In welk werkjaar wil je de leden inschrijven?')" error-fields="period" :error-box="errors.errorBox">
+            <STInputBox :title="$t('8b70623b-ba97-468f-90aa-b1c149393cea')" error-fields="period" :error-box="errors.errorBox">
                 <RegistrationPeriodSelector v-model="period" :should-disable-locked-periods="true" />
             </STInputBox>
         </template>
@@ -271,7 +271,7 @@ function changedFile(event: any) {
     const reader = new FileReader();
     reader.onload = (e: any) => {
         if (!e.target || !e.target.result) {
-            new CenteredMessage($t(`Inlezen mislukt, kijk na of dit wel een geldig bestand is`)).addCloseButton().show();
+            new CenteredMessage($t(`efec4f91-0618-4509-88a4-a8af49f5e04f`)).addCloseButton().show();
             return;
         }
 
@@ -281,7 +281,7 @@ function changedFile(event: any) {
         /* DO SOMETHING WITH workbook HERE */
         const keys = Object.keys(workbook.Sheets);
         if (keys.length === 0) {
-            new CenteredMessage($t('Dit bestand heeft geen werkbladen')).addCloseButton().show();
+            new CenteredMessage($t('152a7321-7b48-448d-9ac2-70c37d3effef')).addCloseButton().show();
             return;
         }
         sheets.value = workbook.Sheets;
@@ -472,7 +472,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
             }
 
             if (!column.matcher) {
-                throw new Error($t(`Koppel de kolom '{column}' eerst aan een bijhorende waarde`, { column: column.name }));
+                throw new Error($t(`d298a037-1da1-4435-a78b-f56b949e9dad`, { column: column.name }));
             }
 
             const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject;
@@ -603,7 +603,7 @@ async function shouldNavigateAway() {
     if (!file.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
+    return await CenteredMessage.confirm($t('334d8433-5ba2-443f-84f7-7a88b06f610b'), $t('6f1154ce-274d-476a-b658-f0d7e82cb9b4'));
 }
 
 defineExpose({

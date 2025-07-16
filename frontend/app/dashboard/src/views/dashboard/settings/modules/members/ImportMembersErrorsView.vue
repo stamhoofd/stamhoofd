@@ -1,15 +1,15 @@
 <template>
-    <SaveView :title="$t('Kijk deze fouten na')" :loading="saving" :save-text="$t('Nieuw bestand uploaden')" @save="goNext">
-        <h1>{{ $t('Kijk deze fouten na') }}</h1>
-        <p>{{ $t('In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.') }}</p>
+    <SaveView :title="$t('f9fec81d-9d00-4748-b92e-bb8526106c34')" :loading="saving" :save-text="$t('486a0b94-bed0-48d6-9055-3fe3923f8054')" @save="goNext">
+        <h1>{{ $t('f9fec81d-9d00-4748-b92e-bb8526106c34') }}</h1>
+        <p>{{ $t('a774b263-1900-4097-9b01-3b44577e9b35') }}</p>
 
         <table class="data-table">
             <thead>
                 <tr>
                     <th>
-                        {{ $t('Fout') }}
+                        {{ $t('9b327bf4-9928-4ad0-b9c5-71dee8631c8a') }}
                     </th>
-                    <th>{{ $t('Cel') }}</th>
+                    <th>{{ $t('488b30da-0ba0-4bd1-b568-19404f2def34') }}</th>
                 </tr>
             </thead>
             <tbody>

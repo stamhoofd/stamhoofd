@@ -21,7 +21,7 @@ function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasToken
         throw new SimpleError({
             code: 'invalid_response_fetching_uitpas_token',
             message: `Invalid response when fetching UiTPAS token`,
-            human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`8f217db0-c672-46f0-a8f7-6eba6f080947`),
         });
     }
 }
@@ -50,7 +50,7 @@ export class UitpasTokenRepository {
                     throw new SimpleError({
                         code: 'uitpas_api_not_configured_for_platform',
                         message: 'UiTPAS api is not configured for the platform',
-                        human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
+                        human: $t('e0b65e04-6cef-41e1-9b45-6b6c56e5356a'),
                     });
                 }
                 uitpasClientCredential = new UitpasClientCredential();
@@ -62,7 +62,7 @@ export class UitpasTokenRepository {
                 throw new SimpleError({
                     code: 'uitpas_api_not_configured_for_this_organization',
                     message: `UiTPAS api not configured for organization with id ${organizationId}`,
-                    human: $t(`De UiTPAS integratie is niet compleet, contacteer de beheerder.`),
+                    human: $t(`f74aa987-0f92-4701-861d-2512efc5dda1`),
                 });
             }
         }
@@ -90,7 +90,7 @@ export class UitpasTokenRepository {
             throw new SimpleError({
                 code: 'uitpas_unreachable_fetching_uitpas_token',
                 message: `Network issue when fetching UiTPAS  token`,
-                human: $t(`We konden UiTPAS niet bereiken. Probeer het later opnieuw.`),
+                human: $t(`6483c4c6-2fe8-456d-9110-f565952b6822`),
             });
         });
         if (!response.ok) {
@@ -98,7 +98,7 @@ export class UitpasTokenRepository {
             throw new SimpleError({
                 code: 'unsuccessful_response_fetching_uitpas_token',
                 message: `Unsuccesful response when fetching UiTPAS token`,
-                human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+                human: $t(`dd9b30ca-860f-47aa-8cb1-527fd156d9ca`),
             });
         }
         const json: unknown = await response.json().catch(() => {
@@ -106,7 +106,7 @@ export class UitpasTokenRepository {
             throw new SimpleError({
                 code: 'invalid_json_fetching_uitpas_token',
                 message: `Invalid json when fetching UiTPAS token`,
-                human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
+                human: $t(`8f217db0-c672-46f0-a8f7-6eba6f080947`),
             });
         });
         assertIsUitpasTokenResponse(json);

@@ -24,7 +24,7 @@
         {{ $t('ffc7f682-f284-4188-a6fe-fe859bb3f18d') }}
     </p>
     <p v-if="filteredAdmins.length === 0 && sortedAdmins.length > 0" class="info-box">
-        {{ $t('Geen zoekresultaten') }}
+        {{ $t('34416687-b59a-4637-92a0-fac711d7d231') }}
     </p>
 
     <STList v-else-if="filteredAdmins.length > 0">
@@ -66,7 +66,7 @@
 
     <p v-if="shouldShowMoreButton" class="style-button-bar">
         <button type="button" class="button text" @click="showAll = true">
-            {{ $t('Nog {count} beheerders weergeven', {count: showMoreCount}) }}
+            {{ $t('96140ac1-d193-4ad1-9f33-f5241f00d176', {count: showMoreCount}) }}
         </button>
     </p>
 </template>

@@ -34,9 +34,9 @@
                     <hr><p class="style-button-bar right-align">
                         <a class="button primary" :disabled="!!differentOrganization" :href="'https://' + webshop.getUrl(groupOrganization)" target="_blank">
                             <span v-if="webshop.hasTickets" class="icon ticket" />
-                            <span v-if="webshop.hasTickets">{{ $t('Tickets') }}</span>
+                            <span v-if="webshop.hasTickets">{{ $t('6585a0cd-eb4c-448d-802c-dfcb27e5c7b8') }}</span>
                             <template v-else>
-                                <span>{{ $t('Webshop') }}</span>
+                                <span>{{ $t('52aadb14-e175-4efe-bdf9-b88a632b6926') }}</span>
                                 <span class="icon arrow-right" />
                             </template>
                         </a>
@@ -57,9 +57,9 @@
                 <template #right>
                     <a class="button primary" :disabled="!!differentOrganization" :href="'https://' + webshop.getUrl(groupOrganization)" target="_blank">
                         <span v-if="webshop.hasTickets" class="icon ticket" />
-                        <span v-if="webshop.hasTickets">{{ $t('Tickets') }}</span>
+                        <span v-if="webshop.hasTickets">{{ $t('6585a0cd-eb4c-448d-802c-dfcb27e5c7b8') }}</span>
                         <template v-else>
-                            <span>{{ $t('Webshop') }}</span>
+                            <span>{{ $t('52aadb14-e175-4efe-bdf9-b88a632b6926') }}</span>
                             <span class="icon arrow-right" />
                         </template>
                     </a>

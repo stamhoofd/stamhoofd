@@ -143,7 +143,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'amount_of_uitpas_numbers_mismatch',
                         message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
-                        human: $t('Het aantal ingegeven UiTPAS-nummers moet overeenkomen met het aantal artikels met UiTPAS kansentarief.'),
+                        human: $t('6140c642-69b2-43d6-80ba-2af4915c5837'),
                         field: 'cart.items.uitpasNumbers',
                     });
                 }
@@ -153,7 +153,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'duplicate_uitpas_numbers',
                         message: 'Duplicate uitpas numbers used',
-                        human: $t('Eenzelfde UiTPAS-nummer kan niet meerdere keren gebruikt worden.'),
+                        human: $t('d9ec27f3-dafa-41e8-bcfb-9da564a4a675'),
                         field: 'cart.items.uitpasNumbers',
                     });
                 }
@@ -164,7 +164,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'uitpas_number_already_used',
                         message: 'One or more uitpas numbers are already used',
-                        human: $t('Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit artikel.'),
+                        human: $t('1ef059c2-e758-4cfa-bc2b-16a581029450'),
                         field: 'cart.items.uitpasNumbers',
                     });
                 }

@@ -313,7 +313,7 @@ export class ContextInstance {
                 throw new SimpleError({
                     code: 'archived',
                     message: 'Full access is required to view inactive organizations',
-                    human: $t('Je moet een hoofdbeheerder zijn om inactieve verenigingen te bekijken'),
+                    human: $t('31bc55e4-1cf3-495a-8b35-686a4cc25f69'),
                     statusCode: 401,
                 });
             }

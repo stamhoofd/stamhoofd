@@ -324,7 +324,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         });
                     }
                     if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
-                        throw Context.auth.error($t('Je hebt geen toegang tot deze webshop en kan deze dus ook niet koppelen aan een activiteit.'));
+                        throw Context.auth.error($t('2ee1d364-8747-430d-8a33-094e01df465e'));
                     }
                     event.webshopId = webshop.id;
                 }

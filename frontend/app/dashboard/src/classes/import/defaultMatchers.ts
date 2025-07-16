@@ -68,7 +68,7 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
             if (d < period.period.startDate || d > period.period.endDate) {
                 throw new SimpleError({
                     code: 'invalid_start_date',
-                    message: $t('De datum van inschrijving ligt buiten het geselecteerde werkjaar.'),
+                    message: $t('dbcf7fbb-376c-4712-a854-1781ca8f6c82'),
                 });
             }
 

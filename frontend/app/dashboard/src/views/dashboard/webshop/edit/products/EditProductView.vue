@@ -89,7 +89,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Apart UiTPAS kansentarief') }}
+                    {{ $t('29159e0f-2709-48e7-870c-27fb8c002465') }}
                 </h3>
             </STListItem>
 
@@ -779,10 +779,10 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
     if (enableUitpasSocialTariff) {
         if (!uitpasBaseProductPriceAvailable.value) {
             // should not be possible
-            Toast.error($t('Er zijn geen prijzen beschikbaar om een apart UiTPAS kansentarief aan toe te voegen.')).show();
+            Toast.error($t('f6291892-674b-4c66-8855-4937f4d15b86')).show();
             return;
         }
-        const isConfirmed = await CenteredMessage.confirm($t('De toegepaste kortingen worden niet automatisch geregistreerd en doorgestuurd naar UiTPAS. Je ontvangt geen terugbetalingen van UiTPAS.'), $t('Ok'), undefined, $t('Annuleren'), false);
+        const isConfirmed = await CenteredMessage.confirm($t('eb05aa2d-65c0-4ead-961e-3b110439550e'), $t('613363e2-39ae-46c1-a31e-ace703ddfdd4'), undefined, $t('088a8928-cdae-4886-9f02-bb0510a9c59b'), false);
         if (!isConfirmed) {
             return;
         }

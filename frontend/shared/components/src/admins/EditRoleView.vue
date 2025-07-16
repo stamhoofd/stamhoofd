@@ -88,7 +88,7 @@
 
                 <STList>
                     <AccessRightPermissionRow :access-right="AccessRight.OrganizationCreateWebshops" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
-                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('Alle webshops'), type: PermissionsResourceType.Webshops }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
+                    <ResourcePermissionRow :role="patched" :inherited-roles="inheritedRoles" :resource="{id: '', name: $t('3ab7a167-91be-4ac4-af06-f7b4cd7d18f0'), type: PermissionsResourceType.Webshops }" :configurable-access-rights="[]" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="webshop in webshops" :key="webshop.id" :role="patched" :inherited-roles="inheritedRoles" :resource="{id: webshop.id, name: webshop.meta.name, type: PermissionsResourceType.Webshops }" :configurable-access-rights="webshop.hasTickets ? [AccessRight.WebshopScanTickets] : []" type="resource" @patch:role="addPatch" />
                     <ResourcePermissionRow v-for="resource in getUnlistedResources(PermissionsResourceType.Webshops, patched, webshops)" :key="resource.id" :role="patched" :inherited-roles="inheritedRoles" :resource="resource" :configurable-access-rights="[AccessRight.WebshopScanTickets]" type="resource" :unlisted="true" @patch:role="addPatch" />
                 </STList>

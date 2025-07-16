@@ -278,10 +278,10 @@
                             <Checkbox v-model="sendConfirmationEmailForManualRegistrations" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Automatische bevestigingsmail naar leden versturen voor groepsinschrijvingen') }}
+                            {{ $t('1383a10a-2804-4102-b583-ba13d35f3ca4') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Werkt enkel als er ook een sjabloon staat ingesteld.') }}
+                            {{ $t('027bed5e-9c4b-43d2-85d4-06925be61a12') }}
                         </p>
                     </STListItem>
 

@@ -31,7 +31,7 @@ export class GenderColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`Deze cel is leeg`),
+                message: $t(`48f95d88-4cd4-414e-8236-e8ec8b921bfa`),
             });
         }
 
@@ -51,7 +51,7 @@ export class GenderColumnMatcher implements ColumnMatcher {
         else if (value !== '') {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`'{gender}' is geen geslacht dat we kunnen herkennen. Probeer M of V, Man, Vrouw, Jongen, Meisje... Laat leeg voor onbekend.`, { gender: value }),
+                message: $t(`2d500310-cfb7-4286-85b8-9704eea1b5c5`, { gender: value }),
             });
         }
 

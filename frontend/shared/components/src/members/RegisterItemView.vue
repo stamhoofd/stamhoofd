@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : (willStartCheckoutFlow ? $t('Bevestigen') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
+    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : (willStartCheckoutFlow ? $t('9639fa42-022e-483f-9969-b893ae79affc') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
             {{ item.organization.name }}
         </p>

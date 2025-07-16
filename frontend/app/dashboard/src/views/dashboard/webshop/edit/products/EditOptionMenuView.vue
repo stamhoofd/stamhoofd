@@ -30,10 +30,10 @@
                     <Checkbox v-model="autoSelectFirst" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Selecteer standaard alvast de eerste optie') }}
+                    {{ $t('65a30e80-e452-4334-84b8-d584e710fa0c') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t("In sommige situaties wil je toch dat er manueel een keuze moet worden gemaakt om te verhinderen dat bestellers per ongeluk doorklikken zonder alles goed nagekeken te hebben. We raden aan om dit enkel uit te schakelen als je veel of lange keuzemenu's hebt.") }}
+                    {{ $t("4c310fdf-ac9b-46cb-9ac6-05b96728296b") }}
                 </p>
             </STListItem>
         </STList>

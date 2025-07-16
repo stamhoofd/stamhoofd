@@ -49,7 +49,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 throw new SimpleError({
                     code: 'missing_reduced_price',
                     message: 'Reduced price must be provided for non-official flow.',
-                    human: $t('Je moet een verlaagd tarief opgeven voor de UiTPAS.'),
+                    human: $t('c66d114d-2ef3-476f-ad00-98fbe3195365'),
                 });
             }
             const reducedPrice = request.body.reducedPrice;
@@ -57,7 +57,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 throw new SimpleError({
                     code: 'missing_uitpas_numbers',
                     message: 'Uitpas numbers must be provided for non-official flow.',
-                    human: $t('Je moet UiTPAS-nummers opgeven.'),
+                    human: $t('f792eda7-03b9-465d-807d-3d08ba148c8b'),
                 });
             }
             try {

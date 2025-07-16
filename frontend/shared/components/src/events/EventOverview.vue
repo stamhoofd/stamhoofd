@@ -112,16 +112,16 @@
                                     <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                                 </template>
                                 <h2 v-if="webshop.meta.name === event.name" class="style-title-list">
-                                    {{ $t('Webshop instellingen') }}
+                                    {{ $t('9d7bf734-ef1e-421b-ae0f-3dec3040a360') }}
                                 </h2>
                                 <h2 v-else class="style-title-list">
-                                    {{ webshop.meta.name ?? $t('Onbekend') }}
+                                    {{ webshop.meta.name ?? $t('adb2856b-67d7-4dbf-bf16-e4478250a05d') }}
                                 </h2>
                                 <p class="style-description-small">
-                                    {{ $t('Bekijk de bestellingen en pas de instellingen van de bijhorende webshop aan.') }}
+                                    {{ $t('485a1995-f06e-4c04-a9cb-8f38a043cf98') }}
                                 </p>
                                 <template #right>
-                                    <button v-if="canWriteEvent" v-tooltip="$t('Loskoppelen')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
+                                    <button v-if="canWriteEvent" v-tooltip="$t('5ac02b3f-f412-43de-bd15-45b9679635b4')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
                                     <span class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
@@ -144,7 +144,7 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Inschrijvingen activeren via het ledenportaal (enkel voor leden)') }}
+                                {{ $t('0c4eaa6c-d6c6-411f-af6d-aa73233cf2c0') }}
                             </h2>
                             <p class="style-description-small">
                                 {{ $t('004bab40-945f-4f6d-8316-b0a8f2748f7a') }}
@@ -163,10 +163,10 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Webshop, openbaar inschrijvingsformulier of ticketverkoop koppelen') }}
+                                {{ $t('dac9e7f1-a040-4eb3-8a2b-95d10815814d') }}
                             </h2>
                             <p class="style-description-small">
-                                {{ $t('Wil je (ook) niet-leden laten inschrijven (bv. familie), of als je iets wilt verkopen, gebruik dan een webshop. Een webshop is openbaar en vereist geen login.') }}
+                                {{ $t('d24fec9e-48d1-46ad-a02b-27d81f2eee6e') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -511,7 +511,7 @@ const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();
 const present = usePresent();
 async function createWebshop() {
     if (!auth.hasAccessRight(AccessRight.OrganizationCreateWebshops)) {
-        Toast.warning($t('Je hebt geen rechten om een webshop aan te maken. Vraag een hoofdbeheerder om je toegang te geven.')).show();
+        Toast.warning($t('59920662-aed6-44f6-92f5-d7a72806f405')).show();
         return;
     }
 
@@ -534,7 +534,7 @@ async function createWebshop() {
                                 webshopId: webshop.id,
                             }),
                         );
-                        Toast.success($t('Webshop succesvol aangemaakt en gekoppeld aan je activiteit')).show();
+                        Toast.success($t('e42ea38b-dfc2-4af2-bd91-be24934b7a75')).show();
                         await nextTick();
                         await $navigate(
                             Routes.Webshop,
@@ -549,9 +549,9 @@ async function createWebshop() {
 
 async function unlinkWebshop() {
     if (!await CenteredMessage.confirm(
-        $t('Webshop loskoppelen?'),
-        $t('Ja, loskoppelen'),
-        $t('De webshop blijft bestaan maar zal niet langer gekoppeld zijn aan deze activiteit.'),
+        $t('0062b0f9-02e8-4c27-a0bd-addf7823ee8b'),
+        $t('be506b1b-2d5e-45fc-990b-f833e2d3ee24'),
+        $t('524263ab-0ec7-41da-84cd-d5ca9da243bd'),
     )) {
         return;
     }
@@ -593,7 +593,7 @@ async function linkWebshop(event: MouseEvent) {
                                         webshopId: webshop.id,
                                     }),
                                 );
-                                Toast.success($t('Webshop succesvol gekoppeld aan je activiteit')).show();
+                                Toast.success($t('9be3a9ea-451a-4d71-b32e-ac7aa2bee4e6')).show();
                             }
                             catch (e) {
                                 Toast.fromError(e).show();
@@ -610,7 +610,7 @@ async function linkWebshop(event: MouseEvent) {
                                         webshopId: webshop.id,
                                     }),
                                 );
-                                Toast.success($t('Webshop succesvol gekoppeld aan je activiteit')).show();
+                                Toast.success($t('9be3a9ea-451a-4d71-b32e-ac7aa2bee4e6')).show();
                             }
                             catch (e) {
                                 Toast.fromError(e).show();
