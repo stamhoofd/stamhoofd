@@ -226,7 +226,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
+import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, appToUri, EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, PrivateWebshop, SortItemDirection, Webshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, nextTick, Ref, ref, watch } from 'vue';
@@ -506,53 +506,8 @@ defineRoutes([
     },
 ]);
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
+const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();
 
-async function prepareOrganizationPeriod(group: Group) {
-    const organizationId = group.organizationId;
-    const periodId = group.periodId;
-
-    // Request data
-    const response = await context.value.getAuthenticatedServerForOrganization(organizationId).request({
-        method: 'GET',
-        path: '/organization/registration-periods',
-        query: new LimitedFilteredRequest({
-            filter: {
-                periodId: periodId,
-            },
-            limit: 1,
-            sort: [
-                {
-                    key: 'id',
-                    order: SortItemDirection.ASC,
-                },
-            ],
-        }),
-        decoder: new PaginatedResponseDecoder(
-            new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
-            LimitedFilteredRequest,
-        ),
-        owner,
-        shouldRetry: true,
-    });
-
-    if (!response.data.results[0]) {
-        throw new SimpleError({
-            code: 'missing-organization-period',
-            message: 'Missing organization period',
-            human: $t('cd37a13c-6779-49fa-a97f-1eddb6b61ebb'),
-        });
-    }
-
-    const period = response.data.results[0];
-
-    // Assert the group inside the period (since it is an event, it won't be included)
-    if (!period.groups.some(g => g.id === group.id)) {
-        // Add the group to the period
-        period.groups.push(group);
-    }
-
-    return period;
-}
 const present = usePresent();
 async function createWebshop() {
     if (!auth.hasAccessRight(AccessRight.OrganizationCreateWebshops)) {
