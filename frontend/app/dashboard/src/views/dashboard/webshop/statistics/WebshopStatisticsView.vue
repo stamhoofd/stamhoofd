@@ -2,7 +2,7 @@
     <div class="st-view webshop-statistics-view background">
         <STNavigationBar />
 
-        <main>
+        <main class="center">
             <h1>
                 {{ $t('121c350e-012c-4bf7-a2bc-2c07b7c433c8') }}
             </h1>

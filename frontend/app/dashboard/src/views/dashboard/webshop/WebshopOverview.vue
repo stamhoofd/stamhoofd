@@ -2,7 +2,7 @@
     <div id="webshop-overview" class="st-view background">
         <STNavigationBar :title="title" />
 
-        <main>
+        <main class="center">
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
 
