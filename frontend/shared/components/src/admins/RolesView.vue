@@ -1,7 +1,7 @@
 <template>
     <SaveView :loading-view="loading" :error-box="errors.errorBox" class="st-view background" :loading="saving" :disabled="!hasChanges" :title="$t(`83ce9418-2abf-4d9b-a6b4-312df7ac4837`)" @save="save">
         <template #buttons>
-            <button class="button icon add navigation" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
+            <button class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="addRole" />
         </template>
 
         <h1>{{ $t('697d96d8-17dc-4e98-8571-87153985f3a1') }}</h1>

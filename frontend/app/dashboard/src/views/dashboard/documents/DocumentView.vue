@@ -2,9 +2,9 @@
     <div class="st-view document-view">
         <STNavigationBar :title="$t(`9464cf2b-10a9-4690-8ab6-2e3d2f3e9b9d`)">
             <template #right>
-                <button v-if="hasPrevious || hasNext" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('09874d23-8023-402b-b464-8fa59460a509')" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('516c5273-3f27-41e2-9b2b-0ffb94501ca1')" @click="goForward" />
-                <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+                <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('09874d23-8023-402b-b464-8fa59460a509')" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('516c5273-3f27-41e2-9b2b-0ffb94501ca1')" @click="goForward" />
+                <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>

@@ -2,8 +2,8 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="$t('1dd3e934-a69f-4a24-ba03-b945162e4c38')" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="$t('9b500fcb-d4a2-4147-8422-c474a1297b5f')" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('1dd3e934-a69f-4a24-ba03-b945162e4c38')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('9b500fcb-d4a2-4147-8422-c474a1297b5f')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
         </STNavigationBar>
 

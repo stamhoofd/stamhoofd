@@ -15,8 +15,7 @@
                     accept=".pdf, .docx, .xlsx, .png, .jpeg, .jpg, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, image/jpeg, image/png, image/gif"
                     @change="appendAttachment($event)"
                 >
-                    <span v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button text">
-                        <span class="icon attachment" />
+                    <span v-tooltip="$t('d76495d1-251b-4cf1-9ca1-7e7ac33a046f')" class="button icon attachment">
                         <span v-if="$isMobile && patchedEmail.attachments.length > 0" class="bubble">{{ patchedEmail.attachments.length }}</span>
                     </span>
                 </UploadFileButton>
@@ -63,9 +62,7 @@
                     </div>
 
                     <template v-if="auth.hasFullAccess()" #right>
-                        <button class="button text" type="button" @click="manageEmails">
-                            <span class="icon settings" />
-                        </button>
+                        <button class="button icon settings" type="button" @click="manageEmails" />
                     </template>
                 </STListItem>
             </template>

@@ -2,7 +2,7 @@
     <div class="st-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="isReviewer" v-long-press="(e: any) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+                <button v-if="isReviewer" v-long-press="(e: any) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
 

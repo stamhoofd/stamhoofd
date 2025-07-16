@@ -2,7 +2,7 @@
     <div class="st-menu st-view">
         <STNavigationBar :title="$t(`edfc89fe-a16e-4789-bda9-1529f8a97f7c`)">
             <template #right>
-                <button v-if="hasFullAccess" class="navigation button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
+                <button v-if="hasFullAccess" class="button icon settings" type="button" @click="hasFullAccess && navigate(Routes.Tags)" />
             </template>
         </STNavigationBar>
 

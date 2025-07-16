@@ -2,7 +2,7 @@
     <div class="modern st-view table-view background">
         <STNavigationBar :add-shadow="wrapColumns" :title="title" :disable-pop="true">
             <template #left>
-                <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon navigation close" @click="setShowSelection(false)" />
+                <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon close" @click="setShowSelection(false)" />
                 <button v-else-if="canLeaveSelectionMode && showSelection && isIOS" type="button" class="button navigation" @click="isAllSelected = !isAllSelected">
                     <template v-if="isAllSelected">
                         {{ $t('e1efdf4c-de0b-4c12-ba87-dec739b2186f') }}
@@ -17,7 +17,7 @@
             </template>
             <template #right>
                 <template v-if="!(isIOS && showSelection)">
-                    <button v-for="(action, index) of filteredActions" :key="index" type="button" :class="'button icon navigation '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" :v-tooltip="action.tooltip" @click="handleAction(action, $event)" />
+                    <button v-for="(action, index) of filteredActions" :key="index" type="button" :class="'button icon '+action.icon" :disabled="action.needsSelection && ((showSelection && isMobile) || !action.allowAutoSelectAll) && !hasSelection" :v-tooltip="action.tooltip" @click="handleAction(action, $event)" />
                 </template>
 
                 <template v-if="showSelection && isIOS && canLeaveSelectionMode">
@@ -28,7 +28,7 @@
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     {{ $t('bbc1d7b9-1b97-426f-b8a6-df946bd50d4d') }}
                 </button>
-                <button v-else key="actions" v-long-press="(e: any) => showActions(true, e)" type="button" class="button icon more navigation" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
+                <button v-else key="actions" v-long-press="(e: any) => showActions(true, e)" type="button" class="button icon more" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 

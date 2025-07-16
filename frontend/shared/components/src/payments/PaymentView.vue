@@ -2,8 +2,8 @@
     <div class="st-view payment-view">
         <STNavigationBar :title="title">
             <template #right>
-                <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button navigation icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
-                <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button navigation icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
+                <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
             </template>
         </STNavigationBar>
 

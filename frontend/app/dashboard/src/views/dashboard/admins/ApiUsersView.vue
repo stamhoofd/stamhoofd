@@ -3,7 +3,7 @@
         <div v-if="!loading" class="st-view background">
             <STNavigationBar :title="$t(`05dff2a6-72fa-4054-ab7f-8e04dc7c7ed9`)">
                 <template #right>
-                    <button class="button navigation icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
+                    <button class="button icon add" aria-label="Nieuwe beheerder" type="button" @click="createUser" />
                 </template>
             </STNavigationBar>
 

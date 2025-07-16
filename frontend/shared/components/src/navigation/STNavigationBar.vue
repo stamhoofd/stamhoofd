@@ -6,7 +6,7 @@
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
             <div v-if="hasLeft || hasRight" class="left">
                 <BackButton v-if="canPop && !disablePop" @click="pop()" />
-                <button v-else-if="canDismiss && !disableDismiss && $isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
+                <button v-else-if="canDismiss && !disableDismiss && $isAndroid" class="button icon close" type="button" @click="dismiss()" />
                 <slot name="left" />
             </div>
 
@@ -21,7 +21,7 @@
                 <button v-if="canDismiss && !disableDismiss && $isIOS" class="button navigation" type="button" @click="dismiss()">
                     {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
                 </button>
-                <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button navigation icon close" type="button" @click="dismiss()" />
+                <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button icon close" type="button" @click="dismiss()" />
             </div>
         </div>
     </header>

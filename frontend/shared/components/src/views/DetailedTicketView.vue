@@ -5,7 +5,7 @@
                 <OrganizationLogo v-if="logo" :organization="organization" />
             </template>
             <template v-if="canShare" #right>
-                <button class="button icon share navigation" type="button" @click="share" />
+                <button class="button icon share" type="button" @click="share" />
             </template>
         </STNavigationBar>
         <main>
@@ -185,7 +185,7 @@ async function download() {
     const TicketBuilder = (await import(
         /* webpackChunkName: "TicketBuilder" */
         /* webpackPrefetch: true */
-        '@stamhoofd/ticket-builder'
+        '@stamhoofd/ticket-builder',
     )).TicketBuilder;
 
     const builder = new TicketBuilder([props.ticket], props.webshop, props.organization, props.order ?? undefined);

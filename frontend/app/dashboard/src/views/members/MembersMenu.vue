@@ -2,7 +2,7 @@
     <div class="st-menu st-view members-menu">
         <STNavigationBar :title="$t(`6e958518-8f12-4e1b-b3af-c7d7cd0afbb6`)">
             <template #right>
-                <button v-if="$canEdit" class="navigation button icon settings" type="button" @click="editMe" />
+                <button v-if="$canEdit" class="button icon settings" type="button" @click="editMe" />
             </template>
         </STNavigationBar>
 

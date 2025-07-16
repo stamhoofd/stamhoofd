@@ -4,7 +4,7 @@
             <STNavigationBar :title="title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
-                    <button v-else-if="$isAndroid" class="button navigation icon close" type="button" @click="pop()" />
+                    <button v-else-if="$isAndroid" class="button icon close" type="button" @click="pop()" />
                     <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
@@ -15,7 +15,7 @@
                         <slot name="buttons" />
                     </template>
                     <LoadingButton v-if="canDelete" :loading="deleting">
-                        <button class="button icon trash navigation" type="button" :disabled="deleting" @click="$emit('delete')" />
+                        <button class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
                         <button class="button navigation highlight" :disabled="disabled" type="submit">
@@ -23,7 +23,7 @@
                         </button>
                     </LoadingButton>
                     <template v-else-if="canDismiss && !(!preferLargeButton && ($isMobile || $isIOS || $isAndroid))">
-                        <button v-if="!$isIOS" class="button navigation icon close" type="button" @click="dismiss()" />
+                        <button v-if="!$isIOS" class="button icon close" type="button" @click="dismiss()" />
                         <button v-else class="button text selected unbold" type="button" @click="dismiss()">
                             {{ cancelText }}
                         </button>

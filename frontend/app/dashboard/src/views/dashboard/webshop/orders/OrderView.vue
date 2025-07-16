@@ -2,9 +2,9 @@
     <div class="st-view order-view">
         <STNavigationBar :title="$t(`e0f1bd7f-332f-4c99-adab-35a7e7481cf9`) + order.number">
             <template #right>
-                <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button navigation icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('bd66e295-2748-40da-a8e9-0e6e48584033')" @click="goBack" />
-                <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button navigation icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('4428ee36-a994-468c-b8a1-22ed6e8bde58')" @click="goNext" />
-                <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon navigation more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
+                <button v-if="hasPreviousOrder || hasNextOrder" type="button" class="button icon arrow-up" :disabled="!hasPreviousOrder" :v-tooltip="$t('bd66e295-2748-40da-a8e9-0e6e48584033')" @click="goBack" />
+                <button v-if="hasNextOrder || hasPreviousOrder" type="button" class="button icon arrow-down" :disabled="!hasNextOrder" :v-tooltip="$t('4428ee36-a994-468c-b8a1-22ed6e8bde58')" @click="goNext" />
+                <button v-long-press="(e: MouseEvent) => showContextMenu(e)" class="button icon more" type="button" @click.prevent="showContextMenu" @contextmenu.prevent="showContextMenu" />
             </template>
         </STNavigationBar>
         <main>

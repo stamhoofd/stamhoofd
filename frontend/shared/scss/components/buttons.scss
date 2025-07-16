@@ -395,7 +395,7 @@
                     opacity: 1;
                 }
             }
-    }
+        }
 
         &:active {
             opacity: 0.15;
@@ -431,9 +431,18 @@
         color: $color-gray-4;
         transition: opacity 0.2s ease-out, color 0.2s ;
         overflow: visible; // fix for breakout region
+        position: relative;
 
         &.selected {
             color: $color-primary;
+        }
+
+        body.native-iOS .st-navigation-bar &, body.web-iOS .st-navigation-bar & {
+            color: $color-primary;
+        }
+
+        body.native-android .st-navigation-bar &, body.web-android .st-navigation-bar & {
+            color: $color-dark;
         }
 
         &.red {
@@ -446,7 +455,7 @@
             cursor: not-allowed;
         }
 
-        &:after {
+        &::after {
             // Breakout region
             // Increase touch area by 15pixels
             content: '';
@@ -457,26 +466,93 @@
             bottom: -10px;
         }
 
-        &.navigation:last-child:after {
-            right: -20px;
-        }
-
-        &.navigation:first-child:after {
-            left: -20px;
-        }
-
-        &:active {
-            opacity: 0.15;
-            transition: opacity 0s, color 0.2s;
-        }
 
         position: relative;
+
+        &:is(a), &:is(button), label & {
+            @media (pointer: coarse) {
+                &:before {
+                    transition: opacity 0.2s ease-out;
+                }
+
+                &:active {
+                    &:before {
+                        opacity: 0.15;
+                        transition: opacity 0s;
+                    }
+                }
+            }
+
+            @media (pointer: fine) {
+                position: relative;
+                opacity: 1;
+
+                &:after {
+                    content: "";
+                    position: absolute;
+                    left: 50% !important;
+                    right: auto !important;
+                    width: 34px;
+                    height: 34px;
+                    top: 50% !important;
+                    bottom: auto !important;
+                    background-color: $color-background-shade;
+                    border-radius: $border-radius;
+                    transform: translate(-50%, -50%);
+                    z-index: 0;
+                    will-change: opacity;
+                    opacity: 0;
+                    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                }
+
+                &:before {
+                    transition: color 0.2s ease-out;
+                }
+
+                &:active {
+                    &:before {
+                        color: $color-dark;
+                        transition: color 0s;
+                    }
+                }
+
+                &.small {
+                    &:after {
+                        width: 30px;
+                        height: 30px;
+                    }
+                }
+
+                &:before {
+                    z-index: 1;
+                }
+
+                &.active, &:hover, &:active {
+                    &:after {
+
+                        opacity: 1;
+                        transform: translate(-50%, -50%);
+
+                        transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                    }
+                }
+
+                &:active {
+                    &:after {
+                        background-color: $color-gray-3;
+                    }
+                }
+                
+            }
+        }
 
         body.web-android &, body.native-android & {
             transition: none;
             &:active {
+                &:before {
                 opacity: 1;
                 transition: none;
+                }
             }
 
             &:after {
