@@ -43,6 +43,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
         <div v-if="admin" class="container">
+            <SendConfirmationEmailBox v-if="willStartCheckoutFlow" :checkout="checkout" :group="item.group" :group-organization="item.organization" :validator="errors.validator" />
+
             <STInputBox :title="$t('a1ae6e8f-dbcd-4a53-a67c-0244d28ccb74')" error-fields="customStartDate" :error-box="errors.errorBox">
                 <DateSelection v-model="customStartDate" :required="false" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
             </STInputBox>
@@ -146,6 +148,7 @@ import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, PriceBreakdown, 
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
+import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
 
 const props = defineProps<{
     item: RegisterItem;

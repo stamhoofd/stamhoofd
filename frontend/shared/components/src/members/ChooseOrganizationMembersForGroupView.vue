@@ -23,6 +23,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <SendConfirmationEmailBox v-if="checkout.cart.items.length" :checkout="checkout" :group="group" :group-organization="props.groupOrganization" :validator="errors.validator" />
+
         <STList>
             <DeleteRegistrationRow v-for="registration in checkout.cart.deleteRegistrations" :key="registration.registration.id" class="right-stack" :registration="registration" :checkout="checkout" />
             <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
@@ -77,6 +79,7 @@ import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vu
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
 import SearchOrganizationMembersForGroupView from './SearchOrganizationMembersForGroupView.vue';
+import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
 
 const props = defineProps<{
     checkout: RegisterCheckout; // we should auto assign this checkout to all search results and newly created members
@@ -198,6 +201,11 @@ async function goToCheckout() {
 
     saving.value = true;
     try {
+        const ok = await errors.validator.validate();
+        if (!ok) {
+            saving.value = false;
+            return; // Errors, don't continue
+        }
         await startCheckout({
             admin: true,
             checkout: props.checkout,

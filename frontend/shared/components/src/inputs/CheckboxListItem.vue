@@ -1,5 +1,5 @@
 <template>
-    <STListItem :selectable="!disabled" element-name="label">
+    <STListItem :selectable="!disabled" :disabled="disabled" element-name="label">
         <template #left>
             <Checkbox v-model="model" :disabled="disabled" />
         </template>

@@ -345,6 +345,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.pricePaid = 0;
             registration.payingOrganizationId = null;
 
+            if (checkout.isAdminFromSameOrganization) {
+                registration.sendConfirmationEmail = checkout.sendConfirmationEmail;
+            }
+            else {
+                registration.sendConfirmationEmail = true;
+                if (checkout.asOrganizationId) {
+                    // use group default
+                    registration.sendConfirmationEmail = group.privateSettings.sendConfirmationEmailForManualRegistrations;
+                }
+            }
+
             // NOTE: we don't reset deactivatedAt - registeredAt, because those will get reset when markValid is called later on (while keeping the original registeredAt date)
             // registration.deactivatedAt = null;
             // registration.registeredAt = null; // this is required to trigger platform membership updates

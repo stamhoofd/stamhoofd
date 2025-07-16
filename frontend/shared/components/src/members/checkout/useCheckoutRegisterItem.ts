@@ -110,6 +110,9 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         // Otherwise admins will have to review all the steps every time.
         steps.push(...getAllMemberSteps(member, item, admin ? { outdatedTime: null } : undefined));
     }
+    else {
+        member.family.checkout.sendConfirmationEmail = item.group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
+    }
 
     const manager = new MemberStepManager(context, member, steps, async (navigate) => {
         // Clear errors
@@ -342,6 +345,10 @@ export async function openOrganizationCart({ organization, checkout, context, na
     }
     else {
         checkout.asOrganizationId = context.organization.id;
+    }
+
+    if (checkout.isAdminFromSameOrganization && group) {
+        checkout.sendConfirmationEmail = group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
     }
 
     checkout.updatePrices();

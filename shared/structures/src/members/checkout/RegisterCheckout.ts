@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
@@ -65,6 +65,9 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     totalPrice: number | null = null;
 
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    sendConfirmationEmail: boolean = false;
+
     get organizationId() {
         return this.cart.organizationId;
     }
@@ -78,6 +81,7 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.asOrganizationId = this.asOrganizationId;
         checkout.customer = this.customer;
         checkout.cancellationFeePercentage = this.cancellationFeePercentage;
+        checkout.sendConfirmationEmail = this.sendConfirmationEmail;
 
         if (context.organizations[0] && !checkout.cart.isEmpty && checkout.defaultOrganization === null) {
             const preferredId = checkout.singleOrganizationId;
@@ -108,6 +112,11 @@ export class RegisterCheckout {
     paymentMethod: PaymentMethod | null = null;
     customer: PaymentCustomer | null = null;
     asOrganizationId: string | null = null;
+
+    /**
+     * Only allowed to be changed when isAdminFromSameOrganization
+     */
+    sendConfirmationEmail = false; // Whether to send a confirmation email to the user after registration
 
     // Default hint for empty carts to know the organization to use
     defaultOrganization: Organization | null = null;
@@ -142,6 +151,7 @@ export class RegisterCheckout {
             cancellationFeePercentage: this.cancellationFeePercentage,
             asOrganizationId: this.asOrganizationId,
             customer: this.customer,
+            sendConfirmationEmail: this.sendConfirmationEmail,
         });
     }
 

@@ -117,6 +117,9 @@ export class Registration extends QueryableModel {
     @column({ type: 'boolean' })
     canRegister = false;
 
+    @column({ type: 'boolean' })
+    sendConfirmationEmail = true;
+
     @column({ type: 'datetime', nullable: true })
     deactivatedAt: Date | null = null;
 

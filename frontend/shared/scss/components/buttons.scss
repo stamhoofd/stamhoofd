@@ -449,6 +449,31 @@
             color: $color-error;
         }
 
+        &.enabled {
+            &:after {
+                content: "";
+                position: absolute;
+                left: 50% !important;
+                right: auto !important;
+                width: 34px;
+                height: 34px;
+                top: 50% !important;
+                bottom: auto !important;
+                background-color: $color-background-shade;
+                border-radius: $border-radius;
+                transform: translate(-50%, -50%);
+                z-index: 0;
+                will-change: opacity;
+                opacity: 1;
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+            }
+
+            &:before {
+                color: $color-primary;
+                transition: color 0s;
+            }
+        }
+
         &:disabled,
         &.disabled {
             color: $color-gray-2;

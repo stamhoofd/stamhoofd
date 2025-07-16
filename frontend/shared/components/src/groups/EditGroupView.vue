@@ -273,6 +273,18 @@
                             {{ $t('9dc28ec0-750c-464e-95f1-fa55b7cf3390') }}
                         </p>
                     </STListItem>
+                    <STListItem v-if="showAllowRegistrationsByOrganization && allowRegistrationsByOrganization" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="sendConfirmationEmailForManualRegistrations" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('Automatische bevestigingsmail naar leden versturen voor groepsinschrijvingen') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Werkt enkel als er ook een sjabloon staat ingesteld.') }}
+                        </p>
+                    </STListItem>
+
                     <STListItem v-if="showEnableMaxMembers" :selectable="true" element-name="label">
                         <template #left>
                             <Checkbox v-model="enableMaxMembers" />
@@ -484,7 +496,7 @@
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
-import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, TranslatedString, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
+import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, TranslatedString, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -788,6 +800,15 @@ const allowRegistrationsByOrganization = computed({
     set: allowRegistrationsByOrganization => addGroupPatch({
         settings: GroupSettings.patch({
             allowRegistrationsByOrganization,
+        }),
+    }),
+});
+
+const sendConfirmationEmailForManualRegistrations = computed({
+    get: () => patchedGroup.value.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false,
+    set: sendConfirmationEmailForManualRegistrations => addGroupPatch({
+        privateSettings: GroupPrivateSettings.patch({
+            sendConfirmationEmailForManualRegistrations,
         }),
     }),
 });

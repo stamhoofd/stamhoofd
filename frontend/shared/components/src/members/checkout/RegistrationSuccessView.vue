@@ -17,7 +17,7 @@
                     {{ $t('8ff9d707-c8f8-4d37-85d1-fc578ef31f50') }}
                 </p>
             </template>
-            <p v-else>
+            <p v-else-if="checkout.sendConfirmationEmail">
                 {{ $t('4bb7718d-8198-41c6-b480-d71cd2eeae8b') }}
             </p>
         </main>

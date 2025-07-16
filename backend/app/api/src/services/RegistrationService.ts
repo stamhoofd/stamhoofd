@@ -6,7 +6,7 @@ import { GroupService } from './GroupService';
 import { PlatformMembershipService } from './PlatformMembershipService';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
-import { encodeObject, patchContainsChanges } from '@simonbackx/simple-encoding';
+import { encodeObject } from '@simonbackx/simple-encoding';
 
 export const RegistrationService = {
     async markValid(registrationId: string) {
@@ -28,9 +28,11 @@ export const RegistrationService = {
 
         await PlatformMembershipService.updateMembershipsForId(registration.memberId);
 
-        await registration.sendEmailTemplate({
-            type: EmailTemplateType.RegistrationConfirmation,
-        });
+        if (registration.sendConfirmationEmail) {
+            await registration.sendEmailTemplate({
+                type: EmailTemplateType.RegistrationConfirmation,
+            });
+        }
 
         const member = await Member.getByID(registration.memberId);
         if (member) {
