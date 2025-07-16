@@ -31,6 +31,10 @@
             <span v-if="event.group.getMemberCount() !== null">{{ capitalizeFirstLetter(pluralText(event.group.getMemberCount() ?? 0, 'inschrijving', 'inschrijvingen')) }}</span>
         </p>
 
+        <p v-if="event.webshopId && app !== 'registration'" class="style-description-small">
+            {{ $t('Gekoppelde webshop') }}
+        </p>
+
         <template #right>
             <span v-if="!event.meta.visible" class="icon gray eye-off" :v-tooltip="$t('6276d07c-bd0d-4117-b46c-e3f7b0dbb1e5')" />
             <span v-if="event.id" class="icon arrow-right-small gray" />

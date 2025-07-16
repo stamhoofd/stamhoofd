@@ -24,6 +24,9 @@ export class Event extends QueryableModel {
     @column({ type: 'string', nullable: true })
     groupId: string | null = null;
 
+    @column({ type: 'string', nullable: true })
+    webshopId: string | null = null;
+
     @column({ type: 'datetime' })
     startDate: Date;
 

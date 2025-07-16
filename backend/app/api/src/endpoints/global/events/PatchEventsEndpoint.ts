@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Event, Group, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject } from '@stamhoofd/structures';
+import { Event, Group, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, PermissionLevel } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -307,6 +307,27 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             if (type.isLocationRequired === true) {
                 PatchEventsEndpoint.throwIfAddressIsMissing(event);
+            }
+
+            if (patch.webshopId !== undefined) {
+                if (patch.webshopId === null) {
+                    event.webshopId = null;
+                }
+                else {
+                    const webshop = await Webshop.getByID(patch.webshopId);
+                    if (!webshop || webshop.organizationId !== event.organizationId) {
+                        throw new SimpleError({
+                            code: 'not_found',
+                            message: 'Webshop not found',
+                            human: $t(`c5f3d2c3-9d7a-473d-ba91-63ce104a2de5`),
+                            field: 'webshopId',
+                        });
+                    }
+                    if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
+                        throw Context.auth.error($t('Je hebt geen toegang tot deze webshop en kan deze dus ook niet koppelen aan een activiteit.'));
+                    }
+                    event.webshopId = webshop.id;
+                }
             }
 
             await event.save();

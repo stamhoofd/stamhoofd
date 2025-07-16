@@ -29,6 +29,19 @@
                         </button>
                     </p>
                 </template>
+
+                <template v-if="!$isMobile && webshop && groupOrganization && !webshop.isClosed()">
+                    <hr><p class="style-button-bar right-align">
+                        <a class="button primary" :disabled="!!differentOrganization" :href="'https://' + webshop.getUrl(groupOrganization)" target="_blank">
+                            <span v-if="webshop.hasTickets" class="icon ticket" />
+                            <span v-if="webshop.hasTickets">{{ $t('Tickets') }}</span>
+                            <template v-else>
+                                <span>{{ $t('Webshop') }}</span>
+                                <span class="icon arrow-right" />
+                            </template>
+                        </a>
+                    </p>
+                </template>
             </main>
 
             <STToolbar v-if="$isMobile && event.group && !event.group.closed">
@@ -39,14 +52,28 @@
                     </button>
                 </template>
             </STToolbar>
+
+            <STToolbar v-if="$isMobile && webshop && groupOrganization && !webshop.isClosed()">
+                <template #right>
+                    <a class="button primary" :disabled="!!differentOrganization" :href="'https://' + webshop.getUrl(groupOrganization)" target="_blank">
+                        <span v-if="webshop.hasTickets" class="icon ticket" />
+                        <span v-if="webshop.hasTickets">{{ $t('Tickets') }}</span>
+                        <template v-else>
+                            <span>{{ $t('Webshop') }}</span>
+                            <span class="icon arrow-right" />
+                        </template>
+                    </a>
+                </template>
+            </STToolbar>
         </div>
     </ExternalOrganizationContainer>
 </template>
 
 <script setup lang="ts">
-import { EventInfoTable, ExternalOrganizationContainer, ImageComponent, useChooseFamilyMembersForGroup, usePlatform } from '@stamhoofd/components';
-import { useMemberManager } from '@stamhoofd/networking';
-import { Event, Organization } from '@stamhoofd/structures';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { EventInfoTable, ExternalOrganizationContainer, ImageComponent, useChooseFamilyMembersForGroup, useContext, usePlatform } from '@stamhoofd/components';
+import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
+import { Event, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 
@@ -59,9 +86,55 @@ const title = computed(() => props.event.name);
 const memberManager = useMemberManager();
 const groupOrganization = ref<Organization | null>(null);
 const differentOrganization = computed(() => props.event.group && !memberManager.family.checkout.cart.isEmpty && memberManager.family.checkout.singleOrganization?.id !== props.event.group.organizationId);
+const loadedWebshop = ref<Webshop | WebshopPreview | null>(null);
+const context = useContext();
+let didLoadWebshop = false;
+const loadingWebshop = ref(false);
+const owner = useRequestOwner();
 
 function setOrganization(o: Organization) {
     groupOrganization.value = o as any;
+    loadWebshop().catch(console.error);
+}
+
+const webshop = computed(() => {
+    if (!props.event.webshopId) {
+        return null;
+    }
+    return loadedWebshop.value;
+});
+
+async function loadWebshop() {
+    if (!props.event.webshopId) {
+        return;
+    }
+    if (didLoadWebshop) {
+        return;
+    }
+    // @ts-ignore
+    let loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
+    if (loaded) {
+        loadedWebshop.value = loaded;
+        return;
+    }
+    didLoadWebshop = true;
+    loadingWebshop.value = true;
+
+    // Fetch webshop by id
+    try {
+        const response = await context.value.getAuthenticatedServerForOrganization(props.event.organizationId).request({
+            method: 'GET',
+            path: '/webshop/' + props.event.webshopId,
+            decoder: Webshop as Decoder<Webshop>,
+            shouldRetry: true,
+            owner,
+        });
+        loadedWebshop.value = response.data;
+    }
+    catch (e) {
+        console.error('Failed to load webshop', e);
+    }
+    loadingWebshop.value = false;
 }
 
 const levelPrefix = computed(() => {

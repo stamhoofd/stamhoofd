@@ -107,6 +107,25 @@
                                 </template>
                             </STListItem>
 
+                            <STListItem v-if="event.webshopId && webshop" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Webshop)">
+                                <template #left>
+                                    <img src="@stamhoofd/assets/images/illustrations/cart.svg">
+                                </template>
+                                <h2 v-if="webshop.meta.name === event.name" class="style-title-list">
+                                    {{ $t('Webshop instellingen') }}
+                                </h2>
+                                <h2 v-else class="style-title-list">
+                                    {{ webshop.meta.name ?? $t('Onbekend') }}
+                                </h2>
+                                <p class="style-description-small">
+                                    {{ $t('Bekijk de bestellingen en pas de instellingen van de bijhorende webshop aan.') }}
+                                </p>
+                                <template #right>
+                                    <button v-if="canWriteEvent" v-tooltip="$t('Loskoppelen')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
+                                    <span class="icon arrow-right-small gray" />
+                                </template>
+                            </STListItem>
+
                             <template v-if="eventOrganization">
                                 <EventNotificationRow v-for="type of event.eventNotificationTypes" :key="type.id" class="container" :type="type" :event="event" :organization="eventOrganization" />
                             </template>
@@ -116,7 +135,7 @@
                     <hr>
                     <h2>{{ $t('28d8fecc-3639-467b-90d5-1ac8e82240df') }}</h2>
                     <STList>
-                        <STListItem v-if="!event.group && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
+                        <STListItem v-if="!event.group && !event.webshopId && canWriteEvent" :selectable="true" class="left-center" @click="createGroup">
                             <template #left>
                                 <IconContainer icon="group" class="success">
                                     <template #aside>
@@ -125,10 +144,29 @@
                                 </IconContainer>
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('26667b28-4e39-4218-9f9b-131bf3bae6ab') }}
+                                {{ $t('Inschrijvingen activeren via het ledenportaal (enkel voor leden)') }}
                             </h2>
                             <p class="style-description-small">
                                 {{ $t('004bab40-945f-4f6d-8316-b0a8f2748f7a') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-if="!event.group && !event.webshopId && canWriteEvent && $feature('event-webshops')" :selectable="true" class="left-center" @click="linkWebshop">
+                            <template #left>
+                                <IconContainer icon="basket" class="success">
+                                    <template #aside>
+                                        <span class="icon success stroke small" />
+                                    </template>
+                                </IconContainer>
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('Webshop, openbaar inschrijvingsformulier of ticketverkoop koppelen') }}
+                            </h2>
+                            <p class="style-description-small">
+                                {{ $t('Wil je (ook) niet-leden laten inschrijven (bv. familie), of als je iets wilt verkopen, gebruik dan een webshop. Een webshop is openbaar en vereist geen login.') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />
@@ -187,11 +225,12 @@
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { defineRoutes, useNavigate, usePop } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
-import { appToUri, EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
+import { AccessRight, appToUri, EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, PrivateWebshop, SortItemDirection, Webshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, Ref, ref } from 'vue';
+import { ComponentOptions, computed, nextTick, Ref, ref, watch } from 'vue';
+import { LoadComponent } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
@@ -199,6 +238,7 @@ import { useAuth, useContext, useFeatureFlag, useGlobalEventListener, useOrganiz
 import IconContainer from '../icons/IconContainer.vue';
 import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
 import { CenteredMessage } from '../overlays/CenteredMessage';
+import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
 import ImageComponent from '../views/ImageComponent.vue';
@@ -221,9 +261,64 @@ const auth = useAuth();
 const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
 const owner = useRequestOwner();
+const webshop = computed(() => {
+    if (!props.event.webshopId) {
+        return null;
+    }
+    if (loadedWebshop.value) {
+        return loadedWebshop.value;
+    }
+    // @ts-ignore
+    return (eventOrganization.value?.webshops.find(w => w.id === props.event.webshopId) as WebshopPreview | undefined) ?? null;
+});
+const loadedWebshop = ref<WebshopPreview | null>(null);
+let didLoadWebshop = false;
+const loadingWebshop = ref(false);
 
 function setOrganization(o: Organization) {
     eventOrganization.value = o;
+    loadWebshop().catch(console.error);
+}
+
+watch(() => props.event.webshopId, () => {
+    // Reset webshop when the event's webshopId changes
+    loadedWebshop.value = null;
+    didLoadWebshop = false;
+    loadingWebshop.value = false;
+    loadWebshop().catch(console.error);
+});
+
+async function loadWebshop() {
+    if (!props.event.webshopId) {
+        return;
+    }
+    if (didLoadWebshop) {
+        return;
+    }
+    let loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
+    if (loaded) {
+        loadedWebshop.value = loaded;
+        return;
+    }
+
+    didLoadWebshop = true;
+    loadingWebshop.value = true;
+
+    // Fetch webshop by id
+    try {
+        const response = await context.value.getAuthenticatedServerForOrganization(props.event.organizationId).request({
+            method: 'GET',
+            path: '/webshop/' + props.event.webshopId,
+            decoder: WebshopPreview as Decoder<WebshopPreview>,
+            shouldRetry: true,
+            owner,
+        });
+        loadedWebshop.value = response.data;
+    }
+    catch (e) {
+        console.error('Failed to load webshop', e);
+    }
+    loadingWebshop.value = false;
 }
 
 const groupOrganization: Ref<Organization | null> = ref(null);
@@ -276,6 +371,7 @@ enum Routes {
     Edit = 'instellingen',
     EditGroup = 'inschrijvingsinstellingen',
     EditEmails = 'emails',
+    Webshop = 'webshop',
 }
 
 const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
@@ -393,6 +489,21 @@ defineRoutes([
             };
         },
     },
+    {
+        url: Routes.Webshop,
+        component: async () => {
+            return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
+        },
+        paramsToProps: ({ slug }: { slug: string }) => {
+            if (!webshop.value) {
+                throw new Error('Webshop not found');
+            }
+
+            return {
+                preview: webshop.value,
+            };
+        },
+    },
 ]);
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 
@@ -442,6 +553,141 @@ async function prepareOrganizationPeriod(group: Group) {
 
     return period;
 }
+const present = usePresent();
+async function createWebshop() {
+    if (!auth.hasAccessRight(AccessRight.OrganizationCreateWebshops)) {
+        Toast.warning($t('Je hebt geen rechten om een webshop aan te maken. Vraag een hoofdbeheerder om je toegang te geven.')).show();
+        return;
+    }
+
+    await present({
+        components: [
+            await LoadComponent(
+                () => import('@stamhoofd/dashboard/src/views/dashboard/webshop/edit/EditWebshopGeneralView.vue'),
+                {
+                    initialWebshop: PrivateWebshop.create({
+                        meta: WebshopMetaData.create({
+                            name: props.event.name,
+                            description: props.event.meta.description,
+                            coverPhoto: props.event.meta.coverPhoto,
+                        }),
+                    }),
+                    savedHandler: async (webshop: PrivateWebshop) => {
+                        await directPatch(
+                            Event.patch({
+                                id: props.event.id,
+                                webshopId: webshop.id,
+                            }),
+                        );
+                        Toast.success($t('Webshop succesvol aangemaakt en gekoppeld aan je activiteit')).show();
+                        await nextTick();
+                        await $navigate(
+                            Routes.Webshop,
+                        );
+                    },
+                },
+            ),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function unlinkWebshop() {
+    if (!await CenteredMessage.confirm(
+        $t('Webshop loskoppelen?'),
+        $t('Ja, loskoppelen'),
+        $t('De webshop blijft bestaan maar zal niet langer gekoppeld zijn aan deze activiteit.'),
+    )) {
+        return;
+    }
+
+    try {
+        await directPatch(
+            Event.patch({
+                id: props.event.id,
+                webshopId: null,
+            }),
+        );
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+async function linkWebshop(event: MouseEvent) {
+    const contextMenu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                icon: 'add',
+                name: 'Nieuwe webshop',
+                action: async () => {
+                    await createWebshop();
+                },
+            }),
+            new ContextMenuItem({
+                name: 'Bestaande webshop koppelen',
+                disabled: !eventOrganization.value || eventOrganization.value.webshops.length === 0,
+                childMenu: new ContextMenu([
+                    eventOrganization.value!.webshops.filter(w => w.meta.status !== WebshopStatus.Archived).map(webshop => new ContextMenuItem({
+                        name: webshop.meta.name,
+                        action: async () => {
+                            try {
+                                await directPatch(
+                                    Event.patch({
+                                        id: props.event.id,
+                                        webshopId: webshop.id,
+                                    }),
+                                );
+                                Toast.success($t('Webshop succesvol gekoppeld aan je activiteit')).show();
+                            }
+                            catch (e) {
+                                Toast.fromError(e).show();
+                            }
+                        },
+                    })),
+                    eventOrganization.value!.webshops.filter(w => w.meta.status === WebshopStatus.Archived).map(webshop => new ContextMenuItem({
+                        name: webshop.meta.name,
+                        action: async () => {
+                            try {
+                                await directPatch(
+                                    Event.patch({
+                                        id: props.event.id,
+                                        webshopId: webshop.id,
+                                    }),
+                                );
+                                Toast.success($t('Webshop succesvol gekoppeld aan je activiteit')).show();
+                            }
+                            catch (e) {
+                                Toast.fromError(e).show();
+                            }
+                        },
+                    })),
+                ]),
+            }),
+        ],
+    ]);
+    await contextMenu.show({
+        button: event.currentTarget as HTMLElement,
+        xPlacement: 'left',
+    });
+}
+
+async function directPatch(patch: AutoEncoderPatchType<Event>) {
+    patch.id = props.event.id;
+
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+    arr.addPatch(patch);
+
+    const response = await context.value.authenticatedServer.request({
+        method: 'PATCH',
+        path: '/events',
+        body: arr,
+        decoder: new ArrayDecoder(Event as Decoder<Event>),
+    });
+
+    // Make sure original event is patched
+    deepSetArray([props.event], response.data);
+}
 
 async function createGroup() {
     if (!await CenteredMessage.confirm(
@@ -462,18 +708,7 @@ async function createGroup() {
                 group: group,
             });
 
-            const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
-            arr.addPatch(patch);
-
-            const response = await context.value.authenticatedServer.request({
-                method: 'PATCH',
-                path: '/events',
-                body: arr,
-                decoder: new ArrayDecoder(Event as Decoder<Event>),
-            });
-
-            // Make sure original event is patched
-            deepSetArray([props.event], response.data);
+            await directPatch(patch);
 
             // Navigate to the new group settings
             // $navigate(Routes.EditGroup).catch(console.error);
