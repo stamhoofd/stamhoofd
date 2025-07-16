@@ -71,6 +71,13 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 // Save updated organization to cache
                 organizationManager.value.save().catch(console.error);
 
+                // Check if we have in memory full access to the webshop (we should)
+                // if not, we need to reload the user
+                if (!context.value.auth.canAccessWebshop(preview, PermissionLevel.Full)) {
+                    await context.value.fetchUser();
+                }
+
+
                 // Save to database
                 const manager = new WebshopManager(context.value, preview);
                 await manager.storeWebshop(response.data);
