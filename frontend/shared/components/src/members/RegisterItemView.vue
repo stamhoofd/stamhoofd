@@ -1,5 +1,5 @@
 <template>
-    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87')" :save-icon="isInCart ? 'edit' : 'basket'" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
+    <SaveView class="st-view register-item-view" main-class="flex" :loading="saving" :save-text="isInCart ? $t('112de4a4-afa3-4ad7-bbb6-003d435a6426') : (willStartCheckoutFlow ? $t('Bevestigen') : $t('36ba68cb-2159-4179-8ded-89e73d47cd87'))" :save-icon="isInCart ? 'edit' : (willStartCheckoutFlow ? 'success' : 'basket')" :title="item.group.settings.name" v-on="isInCart ? {delete: deleteMe} : {}" @save="addToCart">
         <p class="style-title-prefix">
             {{ item.organization.name }}
         </p>
@@ -157,7 +157,7 @@ const checkout = computed(() => props.item.member.family.checkout);
 const errors = useErrors();
 const saving = ref(false);
 const navigationActions = useNavigationActions();
-const isInCart = computed(() => checkout.value.cart.contains(props.item));
+const isInCart = checkout.value.cart.contains(props.item); // only check on mount to avoid rendering change on save
 const pop = usePop();
 const admin = computed(() => checkout.value.isAdminFromSameOrganization);
 const validationWarning = ref(null) as Ref<string | null>;
