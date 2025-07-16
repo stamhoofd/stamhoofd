@@ -274,6 +274,7 @@ async function addEvent(template?: Event) {
                 isNew: true,
                 callback: () => {
                     fetcher.reset();
+                    onClickEvent(event).catch(console.error);
                 },
             }),
         ],
