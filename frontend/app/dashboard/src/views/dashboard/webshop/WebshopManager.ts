@@ -100,7 +100,7 @@ export class WebshopManager {
 
     updateWebshop(webshop: PrivateWebshop) {
         if (this.webshop) {
-            this.webshop.set(webshop);
+            this.webshop.deepSet(webshop);
         }
         else {
             this.webshop = webshop;
@@ -108,7 +108,7 @@ export class WebshopManager {
 
         // Clone data and keep references
         this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop);
-        this.preview.set(webshop);
+        this.preview.deepSet(webshop);
         new OrganizationManager(this.context).save().catch(console.error);
 
         // Save async (could fail in some unsupported browsers)
