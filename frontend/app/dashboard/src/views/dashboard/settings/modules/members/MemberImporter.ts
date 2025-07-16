@@ -490,7 +490,8 @@ function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) 
             const family = existingFamilies.find(f => f.belongsToFamily(newPlatformMember.member));
 
             if (family) {
-                family.add(newPlatformMember);
+                throw new Error('Not implemented');
+                // family.add(newPlatformMember);
             }
             else {
                 const family = newPlatformMember.family;
