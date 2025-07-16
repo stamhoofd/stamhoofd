@@ -11,7 +11,7 @@
             <STList v-if="visibleWebshops.length > 0">
                 <STListItem
                     v-for="webshop in visibleWebshops" :key="webshop.id" element-name="button" :selectable="true" :class="{
-                        selected: isSelected('webshop-' + webshop.id),
+                        selected: isSelected(webshop),
                     }" @click="openWebshop(webshop)"
                 >
                     <h2 class="style-title-list">
@@ -23,16 +23,15 @@
                 </STListItem>
             </STList>
 
-            <!-- other -->
             <template
                 v-if="
                     enableWebshopModule &&
                         ((fullAccess && hasWebshopArchive) || canCreateWebshops)
                 "
             >
-                <hr><STList>
-                    <!-- archive -->
-                    <STListItem v-if="fullAccess && hasWebshopArchive" element-name="button" :selectable="true" :class="{ selected: isSelected(Button.Archive) }" @click="$navigate(Routes.Archive)">
+                <hr>
+                <STList>
+                    <STListItem v-if="fullAccess && hasWebshopArchive" element-name="button" :selectable="true" :class="{ selected: checkRoute(Routes.Archive) }" @click="$navigate(Routes.Archive)">
                         <template #left>
                             <span class="icon archive" />
                         </template>
@@ -56,36 +55,22 @@
 </template>
 
 <script setup lang="ts">
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
+import { defineRoutes, useCheckRoute, useNavigate } from '@simonbackx/vue-app-navigation';
 import { useAuth, useOrganization } from '@stamhoofd/components';
 import {
     AccessRight,
+    PrivateWebshop,
     WebshopPreview,
     WebshopStatus,
 } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
-// #region composables
 const $organization = useOrganization();
 const $navigate = useNavigate();
 const auth = useAuth();
-// #endregion
+const checkRoute = useCheckRoute();
 
-// #region refs
-const selectedWebshop = ref<string | null>(null);
-const currentlySelected = ref<string | null>(null); // todo: avoid this pattern - there is a built in pattern for this that is much simpler
-// #endregion
-
-// #region enums
-enum Button {
-    AddWebshop = 'add-webshop',
-    Archive = 'webshop-archive',
-    Signup = 'signup',
-}
-// #endregion
-
-// #region computed
 const enableWebshopModule = computed(
     () => $organization.value?.meta.packages.useWebshops ?? false,
 );
@@ -118,26 +103,18 @@ const hasWebshopArchive = computed(() =>
     ),
 );
 
-function selectButton(button: Button | string) {
-    currentlySelected.value = button;
-}
-
-function isSelected(button: Button | string) {
-    return currentlySelected.value === button;
-}
-
 async function addWebshop() {
     await $navigate(Routes.AddWebshop);
 }
 
-async function openWebshop(webshop: WebshopPreview) {
-    await $navigate(Routes.Webshop, { properties: { preview: webshop } });
+function isSelected(webshop: WebshopPreview) {
+    return checkRoute(Routes.Webshop, {
+        properties: { preview: webshop },
+    });
 }
 
-function selectWebshop(webshop: WebshopPreview) {
-    const id = webshop.id;
-    selectedWebshop.value = id;
-    selectButton('webshop-' + id);
+async function openWebshop(webshop: WebshopPreview) {
+    await $navigate(Routes.Webshop, { properties: { preview: webshop } });
 }
 
 function isWebshopOpen(webshop: WebshopPreview) {
@@ -171,8 +148,6 @@ defineRoutes([
                 throw new Error('Webshop not found');
             }
 
-            selectWebshop(webshop);
-
             return {
                 preview: webshop,
             };
@@ -183,8 +158,6 @@ defineRoutes([
             if (!webshop) {
                 throw new Error('Missing preview (webshop)');
             }
-
-            selectWebshop(webshop);
 
             const slug = Formatter.slug(webshop.id);
 
@@ -209,8 +182,15 @@ defineRoutes([
             (await import('../dashboard/webshop/edit/EditWebshopGeneralView.vue'))
                 .default,
         paramsToProps: () => {
-            selectButton(Button.AddWebshop);
-            return {};
+            return {
+                savedHandler: async (webshop: PrivateWebshop) => {
+                    await $navigate(Routes.Webshop, {
+                        properties: {
+                            preview: webshop,
+                        },
+                    });
+                },
+            };
         },
     },
     {
@@ -220,10 +200,6 @@ defineRoutes([
         component: async () =>
             (await import('../dashboard/webshop/WebshopArchiveView.vue'))
                 .default,
-        paramsToProps: () => {
-            selectButton(Button.Archive);
-            return {};
-        },
     },
 ]);
 </script>
