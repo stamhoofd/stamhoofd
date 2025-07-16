@@ -90,10 +90,6 @@ body.modern.web-iOS {
                     --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2);
                     --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2));     
 
-                    .split-view-controller > .detail & {
-                        --st-view-center-padding: calc((var(--vw, 1vw)*100 - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2);
-                        --st-view-center-padding: max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--split-view-width, 320px) - var(--st-view-max-width, 800px)) / 2));     
-                    }
                 }
             }
 
@@ -108,7 +104,7 @@ body.modern.web-iOS {
                 }
             }
 
-            .popup &, .sheet & {
+            .popup &, .sheet &, .split-view-controller > .detail & {
                 --st-view-center-padding: 0px;
                 --st-horizontal-padding: var(--st-view-horizontal-padding);
             }
