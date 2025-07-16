@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, GlobalEventBus, Toast, useContext, useErrors, usePatch } from '@stamhoofd/components';
 import { useOrganizationManager } from '@stamhoofd/networking';
-import { PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import { computed, readonly, Ref, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 
@@ -24,7 +24,8 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
     const organizationManager = useOrganizationManager();
     const dismiss = useDismiss();
 
-    const isNew = computed(() => getProps().webshopManager === undefined);
+    const webshopManager = ref(getProps().webshopManager);
+    const isNew = computed(() => webshopManager.value === undefined);
     const saving = ref(false);
 
     const originalWebshop: PrivateWebshop = getProps().webshopManager?.webshop ?? getProps().initialWebshop ?? PrivateWebshop.create({});
@@ -61,10 +62,6 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                     await afterSave();
                 }
 
-                if (props.savedHandler) {
-                    await props.savedHandler(response.data);
-                }
-
                 const preview = WebshopPreview.create(response.data);
                 organizationManager.value.organization.webshops.push(preview);
 
@@ -77,6 +74,15 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                     await context.value.fetchUser();
                 }
 
+                let afterThrow: Error | undefined;
+                if (props.savedHandler) {
+                    try {
+                        await props.savedHandler(response.data);
+                    }
+                    catch (e) {
+                        afterThrow = e as Error;
+                    }
+                }
 
                 // Save to database
                 const manager = new WebshopManager(context.value, preview);
@@ -90,22 +96,43 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                         ? $t(`2ce11748-a9c0-439c-af8b-8115243568eb`)
                         : $t(`878cc081-df24-46b7-a56b-fb91feb631ff`)
                     , 'success green').show();
+
+                if (afterThrow) {
+                    webshopManager.value = manager;
+
+                    // Clear the patch
+                    reset();
+                    originalWebshop.deepSet(response.data);
+                    throw afterThrow;
+                }
             }
             else {
-                await props.webshopManager!.patchWebshop(patch.value);
+                await webshopManager.value!.patchWebshop(patch.value);
 
                 if (afterSave) {
                     await afterSave();
                 }
 
-                if (props.savedHandler && props.webshopManager!.webshop) {
-                    await props.savedHandler(props.webshopManager!.webshop);
+                let afterThrow: Error | undefined;
+                if (props.savedHandler && webshopManager.value!.webshop) {
+                    try {
+                        await props.savedHandler(webshopManager.value!.webshop as PrivateWebshop);
+                    }
+                    catch (e) {
+                        afterThrow = e as Error;
+                    }
                 }
 
                 new Toast($t(`482f0710-b031-4d4d-90b9-41c6e6ea89a2`), 'success green').show();
 
                 // Clear the patch
                 reset();
+                if (webshopManager.value!.webshop) {
+                    originalWebshop.deepSet(webshopManager.value!.webshop! as PrivateWebshop);
+                }
+                if (afterThrow) {
+                    throw afterThrow;
+                }
             }
 
             const dis = shouldDismiss ? await shouldDismiss() : true;
