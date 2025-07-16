@@ -20,8 +20,8 @@
     "translation": "Parents"
   },
   "004bab40-945f-4f6d-8316-b0a8f2748f7a": {
-    "original": "Manueel inschrijvingen bijhouden of leden online laten inschrijven.",
-    "translation": "Tenir à jour manuellement les inscriptions ou laisser les membres s'inscrire en ligne."
+    "original": "Manueel inschrijvingen bijhouden of leden online laten inschrijven. Hiervoor moet elk ingeschreven lid of ouder een account hebben en alle persoonlijke gegevens aanvullen.",
+    "translation": "Garder les inscriptions à jour manuellement ou laisser les membres s'inscrire en ligne. Pour cela, chaque membre ou parent doit avoir un compte et compléter toutes les informations personnelles."
   },
   "005c5e2d-8185-46e7-b1a0-4e4eaaf60d41": {
     "original": "het privacybeleid",
@@ -30,6 +30,10 @@
   "005e0815-0491-4097-8a08-3da585dcd24e": {
     "original": "Je vindt",
     "translation": "Vous trouverez"
+  },
+  "0062b0f9-02e8-4c27-a0bd-addf7823ee8b": {
+    "original": "Webshop loskoppelen?",
+    "translation": "Dissocier la boutique en ligne ?"
   },
   "00650ac3-eb78-4c8b-b7ec-d892772837a1": {
     "original": "Geboortedatum",
@@ -195,6 +199,10 @@
     "original": "Nationaal niveau",
     "translation": "Niveau national"
   },
+  "0247f358-5758-4dae-a59e-0d4695adba0b": {
+    "original": "Als je dit inschakelt ontvangen deze leden een e-mail met een bevestiging van hun inschrijving.",
+    "translation": "Si vous activez cette option, ces membres recevront un e-mail de confirmation de leur inscription."
+  },
   "025be814-a557-46be-be79-a1cc5406a5ed": {
     "original": "Vul de gegevens hieronder aan voor je de kampmelding indient.",
     "translation": "Veuillez compléter les informations ci-dessous avant de soumettre la notification de camp."
@@ -210,6 +218,10 @@
   "02754274-677a-4911-9a32-8422a8d9f827": {
     "original": "Transactiekosten",
     "translation": "Frais de transaction"
+  },
+  "027bed5e-9c4b-43d2-85d4-06925be61a12": {
+    "original": "Werkt enkel als er ook een sjabloon staat ingesteld.",
+    "translation": "Fonctionne seulement si un modèle est également défini."
   },
   "027d88ac-a3a4-4193-bc1b-8e671bbc6637": {
     "original": "Betalingen aan {organization}",
@@ -290,6 +302,10 @@
   "034eed1e-a6b2-41ee-8ca1-b6bdacbd0d9c": {
     "original": "Ben je zeker dat je wilt uitloggen?",
     "translation": "Êtes-vous sûr de vouloir vous déconnecter ?"
+  },
+  "03518587-e43b-4ec4-9cf8-8e2c30037252": {
+    "original": "De betaalstatus uit jouw Excel-bestand zal worden gebruikt om de inschrijvingen met het juiste bedrag aan te maken.",
+    "translation": "Le statut de paiement dans votre fichier Excel sera utilisé pour créer les inscriptions avec le bon montant."
   },
   "03602f85-5e57-4365-b491-f6fdb66ce3bd": {
     "original": "Opnieuw instellen",
@@ -423,6 +439,10 @@
     "original": "Kaarthouder",
     "translation": "Titulaire de la carte"
   },
+  "04e10934-24e2-42af-ab40-6352cbde6a30": {
+    "original": "Toevoegen in het systeem en op wachtlijst plaatsen voor {group}",
+    "translation": "Ajouter au système et placer sur la liste d’attente pour {group}"
+  },
   "04e77650-18ef-40a1-942f-bf755e1ca4dc": {
     "original": "Geen vertaling",
     "translation": "Aucune traduction"
@@ -515,17 +535,33 @@
     "original": "Betaling ID",
     "translation": "ID de paiement"
   },
+  "060b1af6-155c-468a-9657-6fcb10dfb133": {
+    "original": "Vul een geldig UiTPAS-nummer in.",
+    "translation": "Veuillez saisir un numéro UiTPAS valide."
+  },
   "060bd617-bccb-48c3-b140-06440eaf6186": {
     "original": "Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.",
     "translation": "Vous ne pouvez pas encore traiter les paiements car vous devez d’abord compléter des données."
+  },
+  "060e319c-16cb-4ff6-aafe-e2beec83e2fc": {
+    "original": "De inschrijvingsgroep is leeg",
+    "translation": "Le groupe d'inscription est vide"
   },
   "0637e394-fbd7-42ea-9a1b-5acdcc86419a": {
     "original": "Er zijn geen openstaande bedragen",
     "translation": "Il n'y a pas de montants dus"
   },
+  "063a8e6f-8639-4089-87a6-f58da1dfda17": {
+    "original": "Wil je deze leden op de wachtlijst zetten?",
+    "translation": "Souhaitez-vous placer ces membres sur la liste d'attente ?"
+  },
   "06466432-eca6-41d0-a3d6-f262f8d6d2ac": {
     "original": "Vrouw",
     "translation": "Femme"
+  },
+  "06543b84-87c5-416b-8880-6ad24c91b478": {
+    "original": "Bezig met importeren...",
+    "translation": "Importation en cours..."
   },
   "0671f7d3-7089-4cde-b28b-79acb10bea28": {
     "original": "Prullenmand",
@@ -703,6 +739,10 @@
     "original": "Unieke leden",
     "translation": "Membres uniques"
   },
+  "083a34cb-26f4-4467-978e-3dc19897befb": {
+    "original": "Lidnummer wijzigen naar {memberNumber}",
+    "translation": "Modifier le numéro de membre en {memberNumber}"
+  },
   "084a7b59-d7d6-4352-8fe7-8f9e98ba1483": {
     "original": "Naam contactpersoon",
     "translation": "Nom de la personne de contact"
@@ -710,6 +750,10 @@
   "086196b7-52df-4110-955a-b437ed924aa0": {
     "original": "Geen automatische aansluiting of verzekeringen (!)",
     "translation": "Pas de connexion ou d'assurances automatiques (!)"
+  },
+  "088a8928-cdae-4886-9f02-bb0510a9c59b": {
+    "original": "Annuleren",
+    "translation": "Annuler"
   },
   "089baffa-1456-48a4-ab5b-8994143c011b": {
     "original": "Footer",
@@ -731,6 +775,10 @@
     "original": "Toestemming publicatie foto's",
     "translation": "Autorisation publication photos"
   },
+  "08dd4181-69c6-4888-b32a-07224f1c4349": {
+    "original": "Nee",
+    "translation": "Non"
+  },
   "08de825e-af69-4243-93a4-9056121ad884": {
     "original": "De e-mail als bevestiging als iemand aanvraagt om hun account te verwijderen.",
     "translation": "L'e-mail de confirmation lorsqu'une personne demande la suppression de son compte."
@@ -742,6 +790,10 @@
   "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
     "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je vereniging een ondernemingsnummer heeft.",
     "translation": "Pour activer les paiements en ligne, vous devez d'abord fournir divers documents (toutes les instructions via le bouton ci-dessous), l'activation prend environ 1 à 3 semaines. Vous pouvez ainsi activer les paiements via Bancontact, Payconiq, iDEAL et carte de crédit. La carte de crédit n'est possible que si votre association a un numéro d'entreprise."
+  },
+  "08ef39ff-3431-4975-8c46-8fb68c946432": {
+    "original": "Geslacht",
+    "translation": "Sexe"
   },
   "08f883bb-cdc7-4d50-a35e-e2fbeaf6f284": {
     "original": "Er ging iets mis bij het starten van de betaling. Herlaad de pagina en probeer het opnieuw.",
@@ -855,6 +907,10 @@
     "original": "alle",
     "translation": "tous"
   },
+  "0a4b61e6-37fb-4c69-97a8-a77f61ad9ac3": {
+    "original": "Ongeldig jaar. '{year}' is geen geldig jaar. Probeer in de vorm zoals 20/08/1995",
+    "translation": "Année invalide. '{year}' n’est pas une année valide. Utilise le format 20/08/1995"
+  },
   "0a54d0a3-e963-447a-81ac-6982a7508649": {
     "original": "Onbekende inschrijvingsgroep",
     "translation": "Groupe d'inscription inconnu"
@@ -927,6 +983,10 @@
     "original": "bevat niet",
     "translation": "ne contient pas"
   },
+  "0b31be9d-7681-44a4-8389-f5212167541e": {
+    "original": "{count} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.",
+    "translation": "{count} membres n'appartiennent à aucun groupe. Choisissez ci-dessous le groupe dans lequel vous souhaitez néanmoins les inscrire."
+  },
   "0b44456e-1338-4468-ba71-5aabc171555f": {
     "original": "Ga naar vorige lid",
     "translation": "Aller au membre précédent"
@@ -934,6 +994,10 @@
   "0b4ece85-60f0-46b8-a6fc-09eb605b4138": {
     "original": "naam van je vereniging",
     "translation": "nom de votre association"
+  },
+  "0b5df66c-39eb-45b9-bc54-5013752bd8f1": {
+    "original": "Leden die in meerdere groepen passen",
+    "translation": "Membres en adéquation avec plusieurs groupes"
   },
   "0b6247ef-b8bb-4ed7-b403-b0a58ddebaf5": {
     "original": "Issuer",
@@ -950,6 +1014,10 @@
   "0b6949f6-80b7-4d48-9e1e-16bfb826014a": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de vereniging) als een kampmelding wordt afgekeurd",
     "translation": "E-mail envoyé au soumetteur (et aux personnes de contact définies de l’association) lorsqu’une notification de camp est refusée"
+  },
+  "0b6cd837-f090-4f2e-964a-2a1346c02dbf": {
+    "original": "Elk UiTPAS-kansentarief moet een basisprijs hebben, dit is de prijs die men zou betalen zonder kansentarief.",
+    "translation": "Chaque tarif social UiTPAS doit avoir un prix de base, c'est le montant que l'on paierait sans tarif social."
   },
   "0b70b194-296a-457e-804b-abe800bd5b4c": {
     "original": "Je kan je eigen volledige toegang tot deze webshop niet verwijderen (algemeen > toegangsbeheer). Vraag aan een hoofdbeheerder om jouw toegang te verwijderen.",
@@ -1026,6 +1094,10 @@
   "0c427a9d-2485-498f-bb88-a420843745f4": {
     "original": "Nieuwe beveiligingscode gegenereerd",
     "translation": "Nouveau code de sécurité généré"
+  },
+  "0c4eaa6c-d6c6-411f-af6d-aa73233cf2c0": {
+    "original": "Inschrijvingen activeren via het ledenportaal (enkel voor leden)",
+    "translation": "Activer les inscriptions via le portail des membres (réservé aux membres)"
   },
   "0c57da32-95ac-4e64-a61a-0a7fa104294a": {
     "original": "Keuzemenu (kies één)",
@@ -1131,6 +1203,10 @@
     "original": "Voer de overschrijving meteen uit. Vermeld zeker “{description}” in je overschrijving.",
     "translation": "Effectuez le virement immédiatement. Mentionnez impérativement « {description} » dans votre virement."
   },
+  "0dfb335e-6f91-4d1d-b790-6a730644635c": {
+    "original": "Kies een wachtwoord voor jouw nieuwe account bij {organizationName}.",
+    "translation": "Choisissez un mot de passe pour votre nouveau compte chez {organizationName}."
+  },
   "0e17f20e-e0a6-4fa0-8ec4-378e4325bea5": {
     "original": "Website (optioneel)",
     "translation": "Site web (facultatif)"
@@ -1206,6 +1282,10 @@
   "0ef2bbb3-0b3c-411a-8901-a454cff1f839": {
     "original": "Standaard leeftijdsgroep",
     "translation": "Tranche d'âge standard"
+  },
+  "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
+    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
+    "translation": "'{group}' n’est pas un groupe d’inscription valide (il n’existe pas dans Stamhoofd). Vérifie qu’il correspond aux noms utilisés dans Stamhoofd."
   },
   "0f0113ca-2269-49c3-b5f2-423005f71afc": {
     "original": "Huidige e-mail opslaan",
@@ -1318,6 +1398,10 @@
   "106b3169-6336-48b8-8544-4512d42c4fd6": {
     "original": "Niet opslaan",
     "translation": "Ne pas enregistrer"
+  },
+  "1072ba5d-292b-4546-b2ea-646f0bf56931": {
+    "original": "Ongeldig rijksregisternummer",
+    "translation": "Numéro de registre national invalide"
   },
   "1089afa3-5103-44de-a7e5-9501f058b26e": {
     "original": "deze week",
@@ -1447,6 +1531,14 @@
     "original": "Sport, spel en sociale omgang",
     "translation": "Sport, jeu et interaction sociale"
   },
+  "122da7ee-3e58-416c-a0b7-ee84fbd39a2e": {
+    "original": "We hebben nog wat aanvullende vragen over hoe we de leden moeten importeren.",
+    "translation": "Nous avons encore quelques questions supplémentaires sur la manière d'importer les membres."
+  },
+  "123be534-a0be-4a6e-b03f-021659e1d8ba": {
+    "original": "Lidnummer",
+    "translation": "Numéro de membre"
+  },
   "12472cd2-4c67-4e54-81dc-cba8fd6c1c91": {
     "original": "Overgeschreven via",
     "translation": "Virement via"
@@ -1567,6 +1659,10 @@
     "original": "Mededeling",
     "translation": "Communication"
   },
+  "13731c1d-a519-442f-bc06-2e610fa2889d": {
+    "original": "Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?",
+    "translation": "Une erreur s’est produite lors de la récupération de ton UiTPAS. Peux-tu vérifier le numéro ?"
+  },
   "13817881-e45b-4aba-a0c8-9cf886fc2de9": {
     "original": "Vul jouw ondernemingsnummer hier in",
     "translation": "Saisissez votre numéro d'entreprise ici"
@@ -1574,6 +1670,10 @@
   "13839d7e-2260-4ded-945f-02e4479ef0d5": {
     "original": "Als er een wachtlijst is ingesteld kunnen de leden op de wachtlijst inschrijven als de groep volzet is.",
     "translation": "Si une liste d'attente est configurée, les membres sur liste d'attente peuvent s'inscrire si le groupe est complet."
+  },
+  "1383a10a-2804-4102-b583-ba13d35f3ca4": {
+    "original": "Automatische bevestigingsmail naar leden versturen voor groepsinschrijvingen",
+    "translation": "Envoyer automatiquement un e-mail de confirmation aux membres pour les inscriptions de groupe"
   },
   "1394c960-ea6f-44e9-8278-2019623d15bc": {
     "original": "Als {name} geen Belgische nationaliteit heeft, <button>klik dan hier</button>",
@@ -1659,6 +1759,10 @@
     "original": "Betaalinstructies met overschrijving",
     "translation": "Instructions de paiement par virement bancaire"
   },
+  "14806378-4cc0-4b16-bd94-82bec5a9572d": {
+    "original": "Niet betaald",
+    "translation": "Non payé"
+  },
   "14875409-7141-445f-b172-05762077d1dc": {
     "original": "Productaanbod",
     "translation": "Gamme de produits"
@@ -1734,6 +1838,10 @@
   "1529d78d-800f-415a-8e56-b756a8bc6449": {
     "original": "Herladen",
     "translation": "Recharger"
+  },
+  "152a7321-7b48-448d-9ac2-70c37d3effef": {
+    "original": "Dit bestand heeft geen werkbladen",
+    "translation": "Ce fichier ne contient pas de feuilles de calcul"
   },
   "152f1003-ba4e-4ae0-acef-475bef27e4a5": {
     "original": "Gebruik automatische tekstvervangingen in de mededeling via",
@@ -1863,6 +1971,10 @@
     "original": "Demovereniging",
     "translation": "Association de démonstration"
   },
+  "16c76c49-48f8-4532-91ae-97867c2ad668": {
+    "original": "Ongeldig telefoonnummer",
+    "translation": "Numéro de téléphone non valide"
+  },
   "16c87ee7-27b1-4b87-93e3-221d35038e6a": {
     "original": "Ingediend op",
     "translation": "Soumis le"
@@ -1891,6 +2003,10 @@
     "original": "De wijzigingen zijn opgeslagen",
     "translation": "Les modifications ont été enregistrées"
   },
+  "1716d997-8d09-4a95-8950-d9dff3b91cbb": {
+    "original": "Werkblad",
+    "translation": "Feuille de calcul"
+  },
   "171766ac-2f5d-44dd-aa7b-aebe964c7916": {
     "original": "Neem vertaling over",
     "translation": "Reprendre la traduction"
@@ -1914,6 +2030,10 @@
   "174038c4-9ee3-413f-8831-370eb9a12413": {
     "original": "Bij elke inschrijving moeten ze opnieuw worden ingegeven:",
     "translation": "Elles doivent être saisies à nouveau pour chaque inscription :"
+  },
+  "175681a6-9e67-4b72-9295-df864d6d4032": {
+    "original": "{count} {memberTranslation} in meer dan één groep. Je kan hieronder een prioriteit instellen. Dan schrijven we elk lid in bij één van groepen waar hij in past die de hoogste prioriteit heeft. Als je wilt kan je de leeftijd of geslacht van elke leeftijdsgroep (tijdelijk) beperken om op die manier automatisch de juiste leeftijdsgroep te kiezen (dat doe je bij instellingen > inschrijvingsgroepen)",
+    "translation": "{count} {memberTranslation} figurent dans plusieurs groupes. Vous pouvez définir ici une priorité. Chaque membre sera alors inscrit dans le groupe prioritaire qui lui correspond. Si vous le souhaitez, vous pouvez restreindre (temporairement) l'âge ou le sexe de chaque groupe d'âge pour faciliter un choix automatique du bon groupe d'âge (ça se règle dans paramètres > groupes d'inscription)."
   },
   "1769b160-721b-41cc-98fa-869045abba79": {
     "original": "Er zijn geen acties beschikbaar voor deze inschrijving",
@@ -2187,6 +2307,10 @@
     "original": "Jouw webshop is bereikbaar via",
     "translation": "Votre boutique en ligne est accessible via"
   },
+  "1adf1842-a0c1-4428-92d8-a8c760e79cf1": {
+    "original": "Downloaden",
+    "translation": "Télécharger"
+  },
   "1adf61de-d2d5-45bd-a322-304107173992": {
     "original": "Wijzig bundelkortingen",
     "translation": "Modifier les réductions pour plusieurs inscriptions"
@@ -2198,6 +2322,10 @@
   "1af084bf-42d6-4a59-a7da-d1e87c6dba8e": {
     "original": "Dit lid is niet langer aangesloten bij KSA Nationaal, en de verzekering loopt binnenkort af",
     "translation": "Ce membre n’est plus affilié à KSA National et l’assurance expire bientôt"
+  },
+  "1afb49be-fbdc-4388-9b5a-50a1c7f67b82": {
+    "original": "Naam",
+    "translation": "Nom"
   },
   "1b0436fb-8c06-4bfc-95c0-391563172a39": {
     "original": "Beperk het maximaal aantal stuks per bestelling",
@@ -2371,6 +2499,10 @@
     "original": "Ouder",
     "translation": "Parent"
   },
+  "1dc43852-ac65-4407-ae3f-1575f521b243": {
+    "original": "De volgende keer zullen we deze keuze onthouden en een automatische bevestigingsmail versturen.",
+    "translation": "La prochaine fois, nous retiendrons ce choix et enverrons automatiquement un e-mail de confirmation."
+  },
   "1dd3e934-a69f-4a24-ba03-b945162e4c38": {
     "original": "Ga naar vorige",
     "translation": "Aller au précédent"
@@ -2439,6 +2571,10 @@
     "original": "is leeg",
     "translation": "est vide"
   },
+  "1e6945c2-caa1-419f-8b83-46562d57b6ae": {
+    "original": "Ongeldige datum. '{date}' is geen geldige dag. Probeer in de vorm zoals 20/08/1995",
+    "translation": "Date invalide. '{date}' n’est pas un jour valide. Utilise le format 20/08/1995"
+  },
   "1e69f4ff-0496-4d23-a2f4-0a116b9c35f0": {
     "original": "Verstuurder",
     "translation": "Expéditeur"
@@ -2486,6 +2622,10 @@
   "1ee738ae-a91d-474e-a495-996bf431126a": {
     "original": "Bevestig dat alle functies zijn toegekend",
     "translation": "Confirmez que toutes les fonctions ont été attribuées"
+  },
+  "1ef059c2-e758-4cfa-bc2b-16a581029450": {
+    "original": "Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit artikel.",
+    "translation": "Un ou plusieurs numéros UiTPAS ont déjà été utilisés pour cet article."
   },
   "1f1d657d-bc73-4cae-9025-b3ec67a705e7": {
     "original": "Je kan geen aansluitingen meer verwijderen in dit werkjaar",
@@ -2614,6 +2754,10 @@
   "20d0f420-edec-4c9f-9584-990258dcf1bf": {
     "original": "Verenigingseigenfuncties",
     "translation": "Fonctions propres à l'association"
+  },
+  "20dd247f-c26d-4fc2-b6a6-de345d5a270b": {
+    "original": "Let goed op, je kan dit niet ongedaan maken.",
+    "translation": "Attention, cette action est irréversible."
   },
   "20e536a4-be51-42f4-92ec-ce64b3af3c7f": {
     "original": "Beter voor grotere schermen.",
@@ -2783,6 +2927,10 @@
     "original": "Geen leden ingeschreven",
     "translation": "Aucun membre inscrit"
   },
+  "22f85f39-c9bc-4134-beca-bd08518c3fbc": {
+    "original": "Ja, zet op wachtlijst",
+    "translation": "Oui, placer sur la liste d'attente"
+  },
   "2300284a-a015-4c97-8ad1-6c9f2bbde174": {
     "original": "Log in als een beheerder van deze vereniging en beheer de leden, activiteiten en instellingen.",
     "translation": "Connectez-vous en tant qu'administrateur de cette association et gérez les membres, les activités et les paramètres."
@@ -2823,9 +2971,17 @@
     "original": "Leden die je inschrijft in een leeftijdsgroep die je koppelt aan een standaard leeftijdsgroep van KSA Nationaal worden automatisch aangesloten. Voor andere leden kan je hier een aansluiting manueel aanvragen.",
     "translation": "Les membres que vous inscrivez dans un groupe d'âge que vous liez à un groupe d'âge standard de KSA National sont automatiquement affiliés. Pour les autres membres, vous pouvez demander une affiliation manuellement ici."
   },
+  "237dcb63-7ff6-4bb2-83c5-b3e961c6e1f1": {
+    "original": "Verwijderen van wachtlijst van {group}",
+    "translation": "Retirer de la liste d’attente de {group}"
+  },
   "2384baa0-50ca-4003-8d3a-af0beb18fec2": {
     "original": "Er is een fout opgetreden bij het ophalen van de betaalaccounts",
     "translation": "Une erreur s'est produite lors de la récupération des comptes de paiement"
+  },
+  "23884766-9223-4d27-a5d9-ad5e85066cd9": {
+    "original": "leden passen",
+    "translation": "les membres correspondent"
   },
   "23911c89-12b5-403a-a355-20f3c986c76f": {
     "original": "Noodcontact",
@@ -2982,6 +3138,10 @@
   "25e9cef3-fd10-41bf-abf0-90bbcd6f5fd4": {
     "original": "Je kan zelf nog open vragen stellen (bv. 'naam lid') op bestelniveau (je kan dat ook doen per artikel, maar daarvoor moet je het artikel bewerken). Kies dus verstandig of je het bij een artikel ofwel op bestelniveau toevoegt! Op bestelniveau wordt het maar één keer gevraagd voor de volledige bestelling.",
     "translation": "Vous pouvez vous-même poser des questions ouvertes (p. ex. « nom du membre ») au niveau de la commande (vous pouvez également le faire par article, mais vous devez pour cela modifier l'article). Choisissez donc judicieusement si vous l'ajoutez au niveau d'un article ou au niveau de la commande ! Au niveau de la commande, il n'est demandé qu'une seule fois pour la commande entière."
+  },
+  "25ea785b-2fc8-49fa-a54f-9c812e3bd910": {
+    "original": "Stel een nieuw wachtwoord in voor jouw account bij {organizationName}.",
+    "translation": "Définissez un nouveau mot de passe pour votre compte chez {organizationName}."
   },
   "25f4a491-db39-43e0-9424-96217321efc7": {
     "original": "Je gebruikt Google om in te loggen op jouw account. Je kan inloggen met Google deactiveren voor jouw account.",
@@ -3331,6 +3491,10 @@
     "original": "Je kan dit enkel wijzigen als je alle bestellingen verwijdert.",
     "translation": "Vous ne pouvez modifier cela que si vous supprimez toutes les commandes."
   },
+  "29159e0f-2709-48e7-870c-27fb8c002465": {
+    "original": "Apart UiTPAS kansentarief",
+    "translation": "Tarif spécial UiTPAS séparé"
+  },
   "2916b5d4-0ccd-4031-b03d-53db31bf6076": {
     "original": "Ticketverkoop voor groepen",
     "translation": "Vente de billets pour les groupes"
@@ -3651,6 +3815,10 @@
     "original": "Met deze knop kan de ontvanger zich uitschrijven voor alle e-mails.",
     "translation": "Ce bouton permet au destinataire de se désinscrire de tous les e-mails."
   },
+  "2d500310-cfb7-4286-85b8-9704eea1b5c5": {
+    "original": "'{gender}' is geen geslacht dat we kunnen herkennen. Probeer M of V, Man, Vrouw, Jongen, Meisje... Laat leeg voor onbekend.",
+    "translation": "'{gender}' n’est pas un genre que nous pouvons reconnaître. Essaie M ou F, Homme, Femme, Garçon, Fille… Laisse vide si inconnu."
+  },
   "2d5e0e5a-3fbe-4c75-ac6e-0fe8fb534716": {
     "original": "Je moet inloggen om een bestelling te kunnen plaatsen.",
     "translation": "Vous devez vous connecter pour pouvoir passer une commande."
@@ -3758,6 +3926,10 @@
   "2ec07f88-b979-41a0-a948-63675a8dbcd6": {
     "original": "Andere / geen",
     "translation": "Autre / aucun"
+  },
+  "2ee1d364-8747-430d-8a33-094e01df465e": {
+    "original": "Je hebt geen toegang tot deze webshop en kan deze dus ook niet koppelen aan een activiteit.",
+    "translation": "Tu n’as pas accès à cette boutique en ligne et tu ne peux donc pas la lier à une activité."
   },
   "2eed292c-1a52-4432-8195-c4ea8a951358": {
     "original": "Toestemming gegevensverzameling",
@@ -3867,6 +4039,10 @@
     "original": "Aansluitingen aanrekenen",
     "translation": "Calcul des connexions"
   },
+  "3028ddfe-f756-4b75-b3d2-e9281dd75c63": {
+    "original": "Jouw UiTPAS regio bepaalt het kansentarief op basis van je gekozen basisprijs.",
+    "translation": "Votre région UiTPAS détermine le tarif social sur la base du prix de base sélectionné."
+  },
   "304410b8-459c-4c76-9832-17a2836fad58": {
     "original": "Als iemand een wachtwoord probeert te resetten, maar er geen account is met dat e-mailadres",
     "translation": "Si quelqu'un tente de réinitialiser un mot de passe, mais qu'il n'existe aucun compte avec cette adresse e-mail"
@@ -3882,6 +4058,10 @@
   "305840c7-8dc6-4f40-84c3-ca03be30f46a": {
     "original": "Dit is geen geldig rijksregisternummer. Je kan dit nummer vinden op de achterkant van de identiteitskaart, in de vorm van JJ.MM.DD-XXX.XX. Kijk na op typefouten.",
     "translation": "Ce n'est pas un numéro national valide. Vous pouvez trouver ce numéro au verso de la carte d'identité, sous la forme JJ.MM.DD-XXX.XX. Vérifiez les fautes de frappe."
+  },
+  "306cb08e-ed29-4bbc-acba-ee7a322e58dd": {
+    "original": "Jouw bestand is klaar, download het hier",
+    "translation": "Votre fichier est prêt, téléchargez-le ici"
   },
   "3073cc35-f434-4c2c-8347-34db10fc9940": {
     "original": "We kunnen het e-mailadres van deze gebruiker niet instellen naar {email}, omdat die al in gebruik is. Waarschijnlijk heb je meerdere accounts. Probeer met dat e-mailadres in te loggen of contacteer ons ({contactEmail}) als we de gebruikers moeten combineren tot één gebruiker.",
@@ -3971,6 +4151,10 @@
     "original": "Ander e-mailadres",
     "translation": "Autre adresse e-mail"
   },
+  "3174ba16-f035-4afd-a69f-74865e64ef34": {
+    "original": "GSM-nummer",
+    "translation": "Numéro GSM"
+  },
   "31757907-4cdd-4f0e-bb9d-cba9c1d997e4": {
     "original": "Deze vereniging bestaat niet",
     "translation": "Cette association n'existe pas"
@@ -4002,6 +4186,10 @@
   "31bacb3a-2920-4bf3-9e68-d7887ef17fe4": {
     "original": "zijn",
     "translation": "sont"
+  },
+  "31bc55e4-1cf3-495a-8b35-686a4cc25f69": {
+    "original": "Je moet een hoofdbeheerder zijn om inactieve verenigingen te bekijken",
+    "translation": "Tu dois être administrateur principal pour consulter les associations inactives."
   },
   "31bdee85-c1f4-4561-8f45-33e5527fc151": {
     "original": "Een lid kan naast deze opties altijd 0 euro aanduiden (dat is standaard geselecteerd) of zelf een bedrag ingeven.",
@@ -4151,6 +4339,10 @@
     "original": "Ja, resetten",
     "translation": "Oui, réinitialiser"
   },
+  "334d8433-5ba2-443f-84f7-7a88b06f610b": {
+    "original": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
+    "translation": "Êtes-vous sûr de vouloir fermer sans enregistrer ?"
+  },
   "33557539-2f23-4243-9b81-20065d19e9d8": {
     "original": "Pleegouder",
     "translation": "Parent adoptif"
@@ -4210,6 +4402,10 @@
   "3433bd78-f07f-4661-ba9e-28b76c468d58": {
     "original": "Geen limiet",
     "translation": "Pas de limite"
+  },
+  "34416687-b59a-4637-92a0-fac711d7d231": {
+    "original": "Geen zoekresultaten",
+    "translation": "Aucun résultat de recherche"
   },
   "3446a6ac-5bda-4564-a268-5c7a66d74ff9": {
     "original": "Naam van deze tag",
@@ -4535,6 +4731,10 @@
     "original": "Document publiceren",
     "translation": "Publier le document"
   },
+  "38443a1a-edf6-4edd-b736-301bcb70cd9f": {
+    "original": "Alles uitvinken",
+    "translation": "Tout décocher"
+  },
   "384b21d8-9ecc-419b-afea-a473a2b8ea0a": {
     "original": "Verifieer e-mailadres zonder code",
     "translation": "Vérifier l'adresse e-mail sans code"
@@ -4571,6 +4771,10 @@
     "original": "Voorbeeld",
     "translation": "Exemple"
   },
+  "38f3e042-b8a7-4bba-bf2a-d7c391f23268": {
+    "original": "adres",
+    "translation": "adresse"
+  },
   "38ff3cca-3877-4202-9c71-9437a12fb876": {
     "original": "Terug te betalen",
     "translation": "À rembourser"
@@ -4594,6 +4798,10 @@
   "3946d93e-f7ed-4dd9-9176-171e133d3558": {
     "original": "Zone toevoegen",
     "translation": "Ajouter une zone"
+  },
+  "394a37e4-8b91-433b-9808-d1b482ffc07f": {
+    "original": "Toon wijzigingen",
+    "translation": "Afficher les modifications"
   },
   "394aafa1-811b-4ed4-bfc6-c12ae59ff9b6": {
     "original": "Naam activiteit",
@@ -4663,6 +4871,10 @@
     "original": "Toch niet betaald",
     "translation": "Pas payé"
   },
+  "3a70601b-aa96-4c63-bd47-8d9927483433": {
+    "original": "Wijzigingen aan inschrijvingen",
+    "translation": "Modifications des inscriptions"
+  },
   "3a75616e-f4ef-4dbd-8e35-8fe74571e442": {
     "original": "Beperk leeftijdsgroepen",
     "translation": "Limiter les groupes d'âge"
@@ -4678,6 +4890,10 @@
   "3ab07939-121b-47f9-956f-a573c57ec008": {
     "original": "Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Stamhoofd automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via het ledenportaal of manueel betaling te registreren).",
     "translation": "Vous pouvez également inscrire des membres à cette activité. Votre groupe paie alors directement le prix à l’organisateur, après quoi Stamhoofd crée automatiquement un ou plusieurs montants en suspens des membres inscrits à votre groupe (à payer via le portail des membres ou à enregistrer manuellement le paiement)."
+  },
+  "3ab7a167-91be-4ac4-af06-f7b4cd7d18f0": {
+    "original": "Alle webshops",
+    "translation": "Toutes les boutiques en ligne"
   },
   "3abb6fe0-18cc-492b-9221-0a7825ecc9a2": {
     "original": "Oeps, deze website is enkel voor beheerders van",
@@ -4754,6 +4970,10 @@
   "3c283583-6a2d-497e-abe4-0e67852497b7": {
     "original": "Verplicht ingeschakeld voor alle leden ingeschreven bij minstens één standaard leeftijdsgroep",
     "translation": "Obligatoirement activé pour tous les membres inscrits à au moins un groupe d'âge standard"
+  },
+  "3c38f59d-07f9-49f5-9223-d074b9eda853": {
+    "original": "Gekoppelde webshop",
+    "translation": "Boutique en ligne liée"
   },
   "3c390322-a9dd-43c7-9f2a-3d766d021169": {
     "original": "oktober",
@@ -5027,6 +5247,10 @@
     "original": "Toegang tot gegevens van leden",
     "translation": "Accès aux données des membres"
   },
+  "3fd23349-ffba-4291-be68-2d0c844e5754": {
+    "original": "Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Stamhoofd.",
+    "translation": "Chargez un fichier Excel ou CSV contenant les membres à importer. Nous recommandons d'utiliser un fichier Excel car les CSV peuvent parfois créer des problèmes de formatage. Assurez-vous de nommer chaque colonne et associez-en une valeur à Stamhoofd ci-dessous."
+  },
   "3fd57fae-8af6-4ca4-b551-7b5dbefd1547": {
     "original": "Voeg tekstvak toe indien aangevinkt",
     "translation": "Ajouter un champ de texte si coché"
@@ -5090,6 +5314,10 @@
   "40b31f32-5a02-488d-beb3-d987ea5c9315": {
     "original": "De link naar deze activiteit in het ledenportaal. Deel deze link met leden.",
     "translation": "Le lien vers cette activité sur le portail des membres. Partagez ce lien avec les membres."
+  },
+  "40b335d7-93c8-48a9-90ec-bb088b6e59e9": {
+    "original": "Inschrijvingstatus",
+    "translation": "Statut d'inscription"
   },
   "40b3b89e-4d82-4d6c-b49d-1e084802ee2e": {
     "original": "Vraag toevoegen",
@@ -5371,6 +5599,10 @@
     "original": "Terugbetaling via overschrijving",
     "translation": "Remboursement par virement"
   },
+  "4493ecc0-2b42-43c0-a978-73e6666350bc": {
+    "original": "Geen tekst in deze cel",
+    "translation": "Aucun texte dans cette cellule"
+  },
   "44a86a23-a189-421b-b53a-8f922c17ab78": {
     "original": "download",
     "translation": "télécharger"
@@ -5587,6 +5819,10 @@
     "original": "({age} jaar)",
     "translation": "({age} ans)"
   },
+  "471f8c80-a354-4004-a9d0-437d9f90feb4": {
+    "original": "Keuze onthouden voor toekomstige inschrijvingen bij deze groep",
+    "translation": "Mémoriser ce choix pour les prochaines inscriptions de ce groupe"
+  },
   "472a987d-498d-46b0-b925-3963f729492b": {
     "original": "Bundelkorting",
     "translation": "Réduction pour plusieurs inscriptions"
@@ -5703,9 +5939,21 @@
     "original": "Cijfers exporteren",
     "translation": "Exporter les chiffres"
   },
+  "485a1995-f06e-4c04-a9cb-8f38a043cf98": {
+    "original": "Bekijk de bestellingen en pas de instellingen van de bijhorende webshop aan.",
+    "translation": "Consultez les commandes et modifiez les paramètres de la boutique en ligne associée."
+  },
+  "486a0b94-bed0-48d6-9055-3fe3923f8054": {
+    "original": "Nieuw bestand uploaden",
+    "translation": "Télécharger un nouveau fichier"
+  },
   "4881e4b6-2160-4f29-8e09-1fde96d8240a": {
     "original": "Voeg kortingen toe aan je webshop.",
     "translation": "Ajoutez des réductions à votre boutique en ligne."
+  },
+  "488b30da-0ba0-4bd1-b568-19404f2def34": {
+    "original": "Cel",
+    "translation": "Cellule"
   },
   "48b16d15-edcd-423a-abc3-a203a9c5d09e": {
     "original": "Ja, uitschrijven",
@@ -5722,6 +5970,10 @@
   "48f7fb2e-28fc-433d-8834-37c9fcfbe862": {
     "original": "vrouwen geboren in",
     "translation": "femmes nées en"
+  },
+  "48f95d88-4cd4-414e-8236-e8ec8b921bfa": {
+    "original": "Deze cel is leeg",
+    "translation": "Cette cellule est vide"
   },
   "49030aa4-f77c-4db5-b976-2125675aae66": {
     "original": "Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.",
@@ -5810,6 +6062,10 @@
   "49b896d1-9e3c-4a5b-bb35-88cdf9febbf3": {
     "original": "Alle emaildomeinnamen zijn toegestaan",
     "translation": "Tous les noms de domaine e-mail sont autorisés"
+  },
+  "49c9b8ee-ab37-45e7-84e1-ef11d78fb9ac": {
+    "original": "Importeren voltooid",
+    "translation": "Importation terminée"
   },
   "49d8a87b-542f-4522-b054-3a374ab7df1f": {
     "original": "Algemene vraag",
@@ -5968,12 +6224,16 @@
     "translation": "Vous ne pouvez injecter du code que si vous avez défini un nom de domaine personnalisé pour votre boutique en ligne."
   },
   "4bb7718d-8198-41c6-b480-d71cd2eeae8b": {
-    "original": "Er werden mogelijks automatische e-mails uitgestuurd als die ingesteld stonden.",
-    "translation": "Des e-mails automatiques ont peut-être été envoyés s’ils étaient configurés."
+    "original": "Er werden automatische e-mails uitgestuurd als die ingesteld stonden.",
+    "translation": "Des e-mails automatiques ont été envoyés si cela était paramétré."
   },
   "4bbc8b26-74b8-43e2-95e7-86fa00ca517b": {
     "original": "Ben je 100% zeker dat je jouw account wilt verwijderen? Vul dan je huidige e-mailadres in ter bevestiging. Al jouw gegevens gaan verloren. Je kan dit niet ongedaan maken.",
     "translation": "Êtes-vous sûr à 100% de vouloir supprimer votre compte? Veuillez alors entrer votre adresse e-mail actuelle pour confirmation. Toutes vos données seront perdues. Vous ne pourrez pas annuler cette action."
+  },
+  "4bc1cd70-a8ea-45c0-b9c6-c95a4d766990": {
+    "original": "Niet alle opgegeven UiTPAS-nummers zijn geldig. Controleer de nummers en probeer het opnieuw.",
+    "translation": "Tous les numéros UiTPAS saisis ne sont pas valides. Veuillez vérifier les numéros et réessayer."
   },
   "4bc9a5fd-a1d5-47cd-8e25-2ce20b21a656": {
     "original": "Verwijder vertaling",
@@ -5995,6 +6255,10 @@
     "original": "Ik heb nog niet betaald",
     "translation": "Je n’ai pas encore payé"
   },
+  "4c310fdf-ac9b-46cb-9ac6-05b96728296b": {
+    "original": "In sommige situaties wil je toch dat er manueel een keuze moet worden gemaakt om te verhinderen dat bestellers per ongeluk doorklikken zonder alles goed nagekeken te hebben. We raden aan om dit enkel uit te schakelen als je veel of lange keuzemenu's hebt.",
+    "translation": "Dans certains cas, il est préférable qu'un choix soit fait manuellement pour éviter que les responsables ne valident par inadvertance sans tout vérifier. Nous conseillons de ne désactiver cette option que si vous avez beaucoup ou de longs menus à choix."
+  },
   "4c3149b3-e02a-4071-bf21-941711e0238d": {
     "original": "Geen feedback gegeven",
     "translation": "Aucun feedback donné"
@@ -6002,6 +6266,10 @@
   "4c4f6571-f7b5-469d-a16f-b1547b43a610": {
     "original": "Geen openstaand bedrag",
     "translation": "Aucun montant dû"
+  },
+  "4c531fed-ac16-4b22-9ff1-975875934d13": {
+    "original": "Leden die in geen enkele groep passen",
+    "translation": "Membres qui ne correspondent à aucun groupe"
   },
   "4c53555c-93aa-41f8-a1ae-96c25c4c9425": {
     "original": "documentatie hierover",
@@ -6014,6 +6282,14 @@
   "4c66b760-cef1-47bc-899a-1ec5ec363560": {
     "original": ", kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt",
     "translation": ", vérifiez si vous ne devez pas en supprimer ou si vous n'en avez pas créé plusieurs par erreur"
+  },
+  "4c795a2e-9675-4151-8cba-6222ed2ec3b5": {
+    "original": "Importeer instellingen",
+    "translation": "Importer les paramètres"
+  },
+  "4c7b94c4-1f14-4a8f-881a-a643b3591144": {
+    "original": "Vereniging niet gevonden",
+    "translation": "Association introuvable"
   },
   "4c8b6dd3-e058-45f7-8da8-1e1a6014a7a7": {
     "original": "bv. https://www.domein.be/privacy",
@@ -6171,6 +6447,10 @@
     "original": "Wacht op verificatie",
     "translation": "En attente de vérification"
   },
+  "4e90f074-fbc4-40d3-aca6-db901e15cbc9": {
+    "original": "leden uit jouw lijst hebben geen inschrijvingsgroep toegewezen gekregen (in een kolom). Kies hieronder hoe je deze wilt inschrijven in de juiste groep, of voeg een kolom in jouw bestand toe met de groep waar je elk lid wilt inschrijven.",
+    "translation": "Certains membres de votre liste n'ont pas de groupe d'inscription attribué (dans une colonne). Choisissez ci-dessous comment inscrire ces membres dans le bon groupe, ou ajoutez une colonne à votre fichier indiquant le groupe pour chaque membre."
+  },
   "4e95caa9-bc2d-4772-80b2-624c42216c90": {
     "original": "E-mailadres ontvanger",
     "translation": "Adresse e-mail du destinataire"
@@ -6182,6 +6462,10 @@
   "4ea84d3f-63f5-4ab0-bab2-a5c72fa0111d": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving  (verplichte inschrijving in regio).",
     "translation": "{member} peut s’inscrire uniquement avec une inscription active valide (inscription obligatoire dans la région)."
+  },
+  "4ec0ed62-c861-4a57-b9f7-0bd94da61729": {
+    "original": "Ongeldig e-mailadres",
+    "translation": "Adresse e-mail invalide"
   },
   "4ec1c92b-1a1f-48d3-b680-9781b4a7c4fe": {
     "original": "Halal dieet",
@@ -6234,6 +6518,10 @@
   "4f42fede-70b7-46cd-9749-fbefdb744567": {
     "original": "Prijskeuze bewerken",
     "translation": "Modifier un choix de prix"
+  },
+  "4f483ae0-74b5-4b48-94c0-d4c4f807009a": {
+    "original": "E-mail",
+    "translation": "E-mail"
   },
   "4f4e52b6-288d-4893-a82b-15be8d07acbc": {
     "original": "Je kan geen inschrijvingsgroep maken zonder dat je zelf volledige toegang hebt tot de nieuwe groep",
@@ -6411,6 +6699,10 @@
     "original": "De activiteit is verwijderd",
     "translation": "L’activité a été supprimée"
   },
+  "50e0222d-8de4-43c4-8489-7879c2f681af": {
+    "original": "Geboortedatum",
+    "translation": "Date de naissance"
+  },
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Vereniging",
     "translation": "Association"
@@ -6507,6 +6799,14 @@
     "original": "Maak dit document terug onzichtbaar voor alle leden.",
     "translation": "Rendre ce document à nouveau invisible pour tous les membres."
   },
+  "524263ab-0ec7-41da-84cd-d5ca9da243bd": {
+    "original": "De webshop blijft bestaan maar zal niet langer gekoppeld zijn aan deze activiteit.",
+    "translation": "La boutique en ligne continuera d'exister mais ne sera plus liée à cette activité."
+  },
+  "524de240-27b9-4fe3-9249-b2e49f1872bd": {
+    "original": "Deze inschrijvingsgroep is leeg",
+    "translation": "Ce groupe d'inscription est vide"
+  },
   "525747e4-48df-4f20-979e-3c18142e64a5": {
     "original": "Het bedrag zal achteraf door KSA Nationaal aan {name} worden gefactureerd",
     "translation": "Le montant sera facturé ultérieurement par KSA National à {name}"
@@ -6538,6 +6838,10 @@
   "52a60393-2b13-474b-a20c-80e61f9b8ff1": {
     "original": "Maar je moet nog even geduld hebben voor deze kan gebruikt worden.",
     "translation": "Mais vous devez encore patienter un peu avant de pouvoir l'utiliser."
+  },
+  "52aadb14-e175-4efe-bdf9-b88a632b6926": {
+    "original": "Webshop",
+    "translation": "Boutique en ligne"
   },
   "52ab641f-5864-4fac-8c52-0df00ad7e0a9": {
     "original": "Geldig tot",
@@ -6863,6 +7167,10 @@
     "original": "E-mail die wordt verzonden naar de indieners als de kampmelding voorlopig wordt goedgekeurd",
     "translation": "E-mail envoyé aux soumetteurs lorsque le signalement de camp est approuvé provisoirement"
   },
+  "56e63fc2-5364-40db-bc51-f4446725bfd9": {
+    "original": "Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Stamhoofd overschrijven.",
+    "translation": "Tous les membres de votre fichier se trouvent déjà dans le système. Si vous avez des colonnes avec des champs de données, elles viendront écraser les informations existantes dans Stamhoofd."
+  },
   "56f0799b-17fa-4b08-aaa3-82b2b74afef8": {
     "original": "Herinnering verlopen proefperiode pakket ledenadministratie",
     "translation": "Rappel échéance de la période d'essai du forfait administration des membres"
@@ -7063,6 +7371,10 @@
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit werkjaar is nog niet aangemaakt in het systeem.",
     "translation": "Oups, vous ne pouvez pas encore créer d'événements avec inscriptions pendant cette période. Cette année associative n'est pas encore créée dans le système."
   },
+  "59920662-aed6-44f6-92f5-d7a72806f405": {
+    "original": "Je hebt geen rechten om een webshop aan te maken. Vraag een hoofdbeheerder om je toegang te geven.",
+    "translation": "Vous n'avez pas les droits pour créer une boutique en ligne. Demandez à un administrateur principal de vous donner l'accès."
+  },
   "599ce864-4059-48eb-82f8-9191e9507050": {
     "original": "stuk",
     "translation": "pièce"
@@ -7082,6 +7394,10 @@
   "59ecd638-c6a3-45b1-80bb-96c4e3bdde05": {
     "original": "is ingeschreven op de wachtlijst",
     "translation": "est inscrit sur la liste d'attente"
+  },
+  "5a03dd6d-df95-4ec0-98b0-ac5ac337d424": {
+    "original": "Ongeldige datum. Probeer in de vorm zoals 20/08/1995",
+    "translation": "Date invalide. Utilise le format 20/08/1995"
   },
   "5a1dedb6-6d67-4538-9719-e0a511fca6dd": {
     "original": "Ingediend op",
@@ -7127,6 +7443,10 @@
     "original": "Je bent al uitgeschreven",
     "translation": "Vous êtes déjà désinscrit"
   },
+  "5ac02b3f-f412-43de-bd15-45b9679635b4": {
+    "original": "Loskoppelen",
+    "translation": "Dissocier"
+  },
   "5ac7a958-ec4d-4e37-b2c0-35b2ada59044": {
     "original": "Uitschrijven",
     "translation": "Se désinscrire"
@@ -7151,6 +7471,10 @@
     "original": "Zaaloverzicht",
     "translation": "Vue d'ensemble de la salle"
   },
+  "5b38f7dc-d818-4298-8ef6-eb7fd6934c63": {
+    "original": "Meer info",
+    "translation": "Plus d'informations"
+  },
   "5b3e65b1-9444-4b65-a032-e184ed7c2471": {
     "original": "Mijn vereniging aansluiten",
     "translation": "Affilier mon association"
@@ -7170,6 +7494,10 @@
   "5b822590-b76a-43d4-a2c9-78825f98c4e7": {
     "original": "Vak I niet van toepassing",
     "translation": "Case I non applicable"
+  },
+  "5b9b209e-e78d-46be-ae67-a55c90df4933": {
+    "original": "Je hebt nog geen e-mailsjabloon ingesteld voor de bevestigingsmails.",
+    "translation": "Aucun modèle d'e-mail n'a encore été défini pour les e-mails de confirmation."
   },
   "5ba065ed-884a-4bea-aa3b-839550938146": {
     "original": "Document verwijderd",
@@ -7194,6 +7522,10 @@
   "5bb88d15-fd82-4d5d-8efc-43e2443d912d": {
     "original": "Rij toevoegen met categorienaam",
     "translation": "Ajouter une ligne avec le nom de la catégorie"
+  },
+  "5bce80ec-00ee-4c66-b1f4-24408ef61c29": {
+    "original": "Onverwachte datum in deze cel",
+    "translation": "Date inattendue dans cette cellule"
   },
   "5bd19019-212a-4c0a-9f22-4eb38b3699df": {
     "original": "Deze keuze wordt onzichtbaar op de webshop en is enkel te bestellen door manueel een bestelling in te geven als beheerder.",
@@ -7531,9 +7863,17 @@
     "original": "Naam betalende groep",
     "translation": "Nom du groupe payant"
   },
+  "5f314eb9-f2f2-4048-aad8-3f16e9bb7ad1": {
+    "original": "Adres wijzigen naar {address}",
+    "translation": "Modifier l’adresse en {address}"
+  },
   "5f37ed88-8822-44bb-8f06-7f527c5d00fe": {
     "original": "Verenigingseigenfuncties",
     "translation": "Fonctions propres à l'association"
+  },
+  "5f451950-7d73-4a4e-a2c7-3155e6611a26": {
+    "original": "Van sommige leden hebben we in het bestand wel al de nodige betaalinformatie gevonden, bij hen wordt die informatie gebruikt en het bovenstaande genegeerd.",
+    "translation": "Pour certains membres, nous avons déjà trouvé les informations de paiement requises dans le fichier ; ces données seront utilisées et ce qui précède sera ignoré."
   },
   "5f5561e5-1d01-4ba0-8b17-5ae69377b391": {
     "original": "Meer informatie",
@@ -7591,6 +7931,10 @@
     "original": "Beperk welke verenigingen hun leden kunnen aansluiten met deze aansluiting.",
     "translation": "Limiter les associations qui peuvent affilier leurs membres avec cette affiliation."
   },
+  "60021a05-e01f-4fda-b12e-8aa8046a2f07": {
+    "original": "Maak een keuze voor '{option_menu_name}'",
+    "translation": "Faites un choix pour '{option_menu_name}'"
+  },
   "600685cc-2cb6-4a99-a0e0-2ca271b89fcb": {
     "original": "Stel een datum in waarop ze moeten openen, of open de inschrijvingen manueel via de knoppen onderaan.",
     "translation": "Définissez une date à laquelle elles doivent ouvrir, ou ouvrez les inscriptions manuellement via les boutons en bas."
@@ -7618,6 +7962,10 @@
   "6030bf67-f3ec-48f1-8c00-be3e3f745351": {
     "original": "Openstaand bij {organization}",
     "translation": "En suspens chez {organization}"
+  },
+  "606e7afd-d6b3-4054-81ec-1d641a271852": {
+    "original": "We zullen deze keuze niet onthouden voor de volgende keer, standaard sturen we een automatische bevestigingsmail.",
+    "translation": "Nous ne retiendrons pas ce choix pour la prochaine fois ; un e-mail de confirmation sera envoyé automatiquement par défaut."
   },
   "607105b3-ba57-4818-9523-72923e3cdc8b": {
     "original": "Welkom op het administratieportaal. Hier kan je alle leden of groepen opzoeken of nationale/regionale activiteiten aanmaken.",
@@ -7691,9 +8039,17 @@
     "original": "De DNS-instellingen van de domeinnaam van een vereniging zijn correct ingesteld.",
     "translation": "Les paramètres DNS du nom de domaine d'une association sont correctement configurés."
   },
+  "613363e2-39ae-46c1-a31e-ace703ddfdd4": {
+    "original": "Ok",
+    "translation": "Ok"
+  },
   "6137567d-3cd1-4b89-bfcb-7cbebb60e43a": {
     "original": "Automatische actie veroorzaakt door",
     "translation": "Action automatique causée par"
+  },
+  "6140c642-69b2-43d6-80ba-2af4915c5837": {
+    "original": "Het aantal ingegeven UiTPAS-nummers moet overeenkomen met het aantal artikels met UiTPAS kansentarief.",
+    "translation": "Le nombre de numéros UiTPAS saisis doit correspondre au nombre d’articles au tarif UiTPAS préférentiel."
   },
   "6149c3a0-74ee-476d-835f-94a4ac59ba34": {
     "original": "Groepsnaam",
@@ -7706,6 +8062,10 @@
   "6180b5ee-b9c1-401d-89c1-c18d8ab77d74": {
     "original": "Je kan deze inlogmethode niet gebruiken",
     "translation": "Vous ne pouvez pas utiliser cette méthode de connexion"
+  },
+  "619645fe-f8a1-41aa-afcd-08612362ed36": {
+    "original": "lid op rij {row}",
+    "translation": "membre à la ligne {row}"
   },
   "619d07b4-4512-4ca5-933c-93203421ac54": {
     "original": "Functie",
@@ -7786,6 +8146,10 @@
   "62536e62-9d62-429f-97d4-2605e738fc92": {
     "original": "Alle leiding en leden verliezen hun functies en moet je opnieuw instellen",
     "translation": "Tous les responsables et membres perdent leurs fonctions et vous devez les reconfigurer."
+  },
+  "6258cf03-8bad-4ed3-869b-5771bcd797f6": {
+    "original": "Inschrijven voor {group}",
+    "translation": "Inscrire pour {group}"
   },
   "6260efe1-ecdb-4a22-a046-7ce84233d11b": {
     "original": "Je kan dit niet ongedaan maken.",
@@ -7951,6 +8315,10 @@
     "original": "Of maak een nieuw account aan als je nog geen account hebt. Gebruik bij voorkeur een e-mailadres waarnaar we je al e-mails sturen.",
     "translation": "Ou créez un nouveau compte si vous n'en avez pas encore un. Utilisez de préférence une adresse e-mail à laquelle nous vous envoyons déjà des e-mails."
   },
+  "6483c4c6-2fe8-456d-9110-f565952b6822": {
+    "original": "We konden UiTPAS niet bereiken. Probeer het later opnieuw.",
+    "translation": "Nous n’avons pas pu atteindre UiTPAS. Réessaie plus tard."
+  },
   "648708e0-b2f1-4336-979a-3ec3ca9cb8fd": {
     "original": "Deze webshop bestaat niet (meer)",
     "translation": "Cette boutique en ligne n'existe plus (ou n'a jamais existé)"
@@ -8015,6 +8383,10 @@
     "original": "Er is momenteel een aanrekening bezig. Wacht tot deze is afgelopen.",
     "translation": "Une facturation est en cours. Veuillez patienter jusqu'à la fin de celle-ci."
   },
+  "6585a0cd-eb4c-448d-802c-dfcb27e5c7b8": {
+    "original": "Tickets",
+    "translation": "Tickets"
+  },
   "65893f5f-e4f6-487a-b0ea-077fe620cb31": {
     "original": "Niet zichtbaar",
     "translation": "Invisible"
@@ -8022,6 +8394,10 @@
   "659cbbac-a470-4ab6-803d-b45ac580ea68": {
     "original": "De keuze wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
     "translation": "Le choix ne sera réellement supprimé que si vous continuez et enregistrez toutes les modifications."
+  },
+  "65a30e80-e452-4334-84b8-d584e710fa0c": {
+    "original": "Selecteer standaard alvast de eerste optie",
+    "translation": "Pré-sélectionnez l'option la première par défaut"
   },
   "65a518fa-c5f3-4e6b-92b5-871ae31c87ce": {
     "original": "Optionele prijs",
@@ -8295,6 +8671,10 @@
     "original": "Uitschrijven",
     "translation": "Se désinscrire"
   },
+  "69bc8583-a0ea-4396-9e65-ce69840e80ea": {
+    "original": "Automatisch groep bepalen",
+    "translation": "Déterminer le groupe automatiquement"
+  },
   "69c9daf1-0d59-424d-a2fe-7301b312bc1a": {
     "original": "Andere inlichtingen",
     "translation": "Autres informations"
@@ -8502,6 +8882,10 @@
   "6c2068f6-73c6-4e88-b104-15f95832838f": {
     "original": "bestellers",
     "translation": "les clients"
+  },
+  "6c42ae73-6653-43e6-9d99-cfee321d23f4": {
+    "original": "{address} kon niet als een adres worden herkend. Controleer of het formaat \"Straatnaam huisnummer, postcode stad\" werd gevolgd.",
+    "translation": "{address} n’a pas pu être reconnu comme une adresse. Vérifie que le format \"Nom de rue numéro, code postal ville\" est respecté."
   },
   "6c4c2f13-07ce-4ac6-950b-5d28971a753d": {
     "original": "vrouwen geboren in of voor",
@@ -8727,6 +9111,14 @@
     "original": "Er ging iets mis. Je hebt geen toegang tot deze vereniging.",
     "translation": "Quelque chose s'est mal passé. Vous n'avez pas accès à cette association."
   },
+  "6efbbc87-a346-49cd-bf60-0323befdc468": {
+    "original": "We zetten de betaalstatus van alle leden op 'niet betaald'. Jij moet achteraf dan aanduiden wie al betaald heeft. Als je dat niet wilt doen, kan je de betaalstatus opnemen in jouw bestand door een extra kolom 'Betaald' toe te voegen en daar ja/nee in te zetten.",
+    "translation": "Nous définirons le statut de paiement de tous les membres sur 'non payé'. Par la suite, tu devras indiquer toi-même qui a déjà payé. Si tu ne veux pas faire cela, tu peux ajouter une colonne 'Payé' à ton fichier, avec oui/non."
+  },
+  "6efc88ed-1512-4e17-91cd-b974ac298ddd": {
+    "original": "Alles aanvinken",
+    "translation": "Tout cocher"
+  },
   "6efffec1-322e-479d-b411-abbcbc4daf09": {
     "original": "Gegevens van de vereniging",
     "translation": "Coordonnées de l'association"
@@ -8738,6 +9130,10 @@
   "6f09d81f-abca-4051-9911-3e880b70c022": {
     "original": "Ander dieet",
     "translation": "Autre régime"
+  },
+  "6f1154ce-274d-476a-b658-f0d7e82cb9b4": {
+    "original": "Niet opslaan",
+    "translation": "Ne pas enregistrer"
   },
   "6f196b46-8ac6-4565-a954-5f68cb6c56f5": {
     "original": "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.",
@@ -9046,6 +9442,10 @@
   "72d62e2a-b6e3-4d86-9d40-a316dd8386a1": {
     "original": "is vergund, erkend, gesubsidieerd of gecontroleerd door of onder toezicht staat van of een kwaliteitslabel heeft ontvangen van Kind en Gezin / Opgroeien regie, het ‘Office de la Naissance et de l’Enfance’ of de regering van de Duitstalige Gemeenschap",
     "translation": "est agréé, reconnu, subventionné ou contrôlé par ou sous la supervision de ou a reçu un label de qualité de One Chance / Opgroeien, de l’Office de la Naissance et de l’Enfance ou du gouvernement de la Communauté germanophone"
+  },
+  "72d6dd0c-ff03-402c-8efc-a29fb7dbf12f": {
+    "original": "Toon leden",
+    "translation": "Afficher les membres"
   },
   "72e5e374-ecd9-40e5-ae80-d14553faab50": {
     "original": "die betalen met een app. Voorzie dus zelf geen eigen vervangingen zoals",
@@ -9439,6 +9839,10 @@
     "original": "E-mailadressen",
     "translation": "Adresses e-mail"
   },
+  "7768f0f4-3202-4da2-a65b-7b96bfa721c9": {
+    "original": "Deze prijs verwijderen?",
+    "translation": "Supprimer ce prix ?"
+  },
   "776a9bda-a078-4fe8-afa8-3285b5f5c794": {
     "original": "Ja, versturen",
     "translation": "Oui, envoyer"
@@ -9458,6 +9862,10 @@
   "779c7d08-6db2-400c-95f8-af0f327109f8": {
     "original": "om het e-mailadres te verifiëren. Zodra dat is gebeurd, wordt het e-mailadres gewijzigd.",
     "translation": "pour vérifier l'adresse e-mail. Une fois cela fait, l'adresse e-mail sera modifiée."
+  },
+  "77a3f842-960f-43fa-a9f2-fcac7d3ecc88": {
+    "original": "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Een vereniging moet eerst aansluiten voor je kan inloggen.",
+    "translation": "Ce récapitulatif affiche uniquement les associations déjà affiliées à Stamhoofd. Une association doit d'abord s'affilier avant que vous puissiez vous connecter."
   },
   "77c43ee8-46bb-43a7-b175-bd6fa9a64ae6": {
     "original": "Bedankt voor de warme bijdrage! 🙌",
@@ -9611,6 +10019,10 @@
     "original": "Met waarschuwing vanaf",
     "translation": "Avec avertissement à partir de"
   },
+  "797519d9-a3f3-404f-a66d-b8e488b40547": {
+    "original": "Een UiTPAS kansentarief, heeft een basisprijs nodig.",
+    "translation": "Un tarif social UiTPAS nécessite un prix de base."
+  },
   "79b7a72d-a624-43dd-9650-854cbca7e4b3": {
     "original": "Bevestiging account verwijderen",
     "translation": "Confirmation de suppression de compte"
@@ -9626,6 +10038,10 @@
   "79e3b4c3-e117-4907-942b-a0e06e01a573": {
     "original": "bv. Toestemming publicatie foto’s",
     "translation": "par ex. Autorisation de publication de photos"
+  },
+  "79f4c175-0429-42fa-918e-6815ac830f5c": {
+    "original": "We zullen deze keuze niet onthouden voor de volgende keer, standaard versturen we geen automatische bevestigingsmail.",
+    "translation": "Nous ne retiendrons pas ce choix la prochaine fois ; par défaut, aucun e-mail de confirmation ne sera envoyé automatiquement."
   },
   "7a010291-3eac-4690-b6d8-2972d3ab8e58": {
     "original": "Gratis per lokale groep",
@@ -9662,6 +10078,10 @@
   "7a6a379d-97fb-4874-bdcf-48be82a76087": {
     "original": "inschrijving voor",
     "translation": "inscription pour"
+  },
+  "7a7e4a56-9d39-42cf-b4fa-930e43330756": {
+    "original": "Start je in het begin van jouw werkjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.",
+    "translation": "Commencez-vous en début d'année associative et les membres doivent-ils tous obligatoirement (ré)s'inscrire ? Dans ce cas, importer tous les membres d'abord n'est pas recommandé."
   },
   "7a8c848b-8ffe-488f-9635-43a2c2b10a9f": {
     "original": "Naam, type en beschikbaarheid.",
@@ -9943,6 +10363,14 @@
     "original": "Jullie ledenportaal zal bereikbaar zijn op {usedRegisterDomain} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{mailDomain}.",
     "translation": "Votre portail des membres sera accessible sur {usedRegisterDomain} une fois la configuration terminée. Vous pourrez alors également envoyer des e-mails à partir de @{mailDomain}."
   },
+  "7eb4f64b-68be-4cb4-8fcb-255093af9037": {
+    "original": "Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand",
+    "translation": "Voici le groupe où chaque membre sera inscrit, selon tes paramètres et ton fichier."
+  },
+  "7edb3d38-4eaf-4314-867e-9621b5fb826e": {
+    "original": "lid past",
+    "translation": "le membre correspond"
+  },
   "7eec15d0-4d60-423f-b860-4f3824271578": {
     "original": "Locatie",
     "translation": "Emplacement"
@@ -10007,6 +10435,10 @@
     "original": "Er ging iets mis bij het nummeren van de documenten (ben je zeker dat je geen documenten hebt verwijderd of toegevoegd sinds de vorige export?). Als je de export nog niet hebt gebruikt in Belcotax kan je de nummering resetten en de export opnieuw proberen.",
     "translation": "Une erreur s'est produite lors de la numérotation des documents (êtes-vous sûr de n'avoir ni supprimé ni ajouté de documents depuis la dernière exportation ?). Si vous n'avez pas encore utilisé l'exportation dans Belcotax, vous pouvez réinitialiser la numérotation et réessayer l'exportation."
   },
+  "7fe1877c-a6b9-4d1d-b9c0-778f354d42c1": {
+    "original": "Ongeldige datum. '{date}' is geen geldige maand. Probeer in de vorm zoals 20/08/1995",
+    "translation": "Date invalide. '{date}' n’est pas un mois valide. Utilise le format 20/08/1995"
+  },
   "7fe874c2-4d8c-45f8-8c84-c78422a55ab4": {
     "original": "Relatie",
     "translation": "Relation"
@@ -10047,6 +10479,10 @@
     "original": "Annuleren",
     "translation": "Annuler"
   },
+  "80728515-caad-488b-a3d6-0f634b908766": {
+    "original": "Hebben deze leden al betaald?",
+    "translation": "Ces membres ont-ils déjà payé ?"
+  },
   "8076e99d-cac2-4fb6-84e0-d893d9b3c205": {
     "original": "Betaalstatus gewijzigd",
     "translation": "Statut de paiement modifié"
@@ -10079,6 +10515,10 @@
     "original": "E-mailadres van ouder",
     "translation": "Adresse e-mail du parent"
   },
+  "80e82f78-0e15-4e6a-82c0-d4ee613683f8": {
+    "original": "Rijksregisternummer wijzigen naar {nationalRegisterNumber}",
+    "translation": "Modifier le numéro de registre national en {nationalRegisterNumber}"
+  },
   "81082354-9a9a-4a23-aa02-3273d4906652": {
     "original": "E-mailadres ouder",
     "translation": "Adresse e-mail du parent"
@@ -10094,6 +10534,10 @@
   "815dc19b-7cd0-48e4-9b84-3004f92ad36a": {
     "original": "Voeg de gemeenten, provincies en landen toe waarin je wilt leveren.",
     "translation": "Ajoutez les communes, provinces et pays dans lesquels vous souhaitez livrer."
+  },
+  "816a862c-c87c-4ab8-9d88-bc847bf364e4": {
+    "original": "Al betaald",
+    "translation": "Déjà payé"
   },
   "8177904b-bbd1-4755-a877-1739e4ce9bfd": {
     "original": "Eén stuk gratis",
@@ -10187,6 +10631,10 @@
     "original": "Je hebt geen toegangsrechten om een activiteit te beheren voor deze groep(en).",
     "translation": "Vous n'avez pas les droits d'accès nécessaires pour gérer une activité pour ce(s) groupe(s)."
   },
+  "82d2825a-998b-4c0d-b109-f78ccc8d376f": {
+    "original": "Huidige werkjaar",
+    "translation": "Année associative en cours"
+  },
   "82d8ac16-2b4e-430f-8322-2c4610f93cad": {
     "original": "alles bewerken",
     "translation": "tout modifier"
@@ -10202,6 +10650,10 @@
   "8301bf8b-569b-4a66-8985-455392098279": {
     "original": "Instellingen voor {periodName}",
     "translation": "Paramètres pour {periodName}"
+  },
+  "83271a7d-c9c1-4424-92cb-cf059d6a63f5": {
+    "original": "Kies een bestand",
+    "translation": "Choisir un fichier"
   },
   "836b4de1-ca21-4e0c-8798-b582dae5607e": {
     "original": "De webshop is gesloten. Je kan niet langer bestellen.",
@@ -10222,6 +10674,10 @@
   "8387199f-9705-4f77-8440-3ea0a697af2a": {
     "original": "Configureer login via Google",
     "translation": "Configurer la connexion via Google"
+  },
+  "83877c6a-5330-4299-af39-fdbac4501dff": {
+    "original": "We zijn niet 100% zeker dat deze leden uit Stamhoofd en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Stamhoofd) overschrijven als je ze aanvinkt.",
+    "translation": "Nous ne sommes pas certains à 100% que ces membres de Stamhoofd et de votre fichier désignent la même personne (par exemple à cause d'une faute de frappe ou d'une erreur de date de naissance). Pouvez-vous vérifier cela manuellement ? Les données à gauche de votre fichier écraseront celles de droite (de Stamhoofd) si vous les sélectionnez."
   },
   "8387966c-a43b-44ec-bcf5-f144a82078b5": {
     "original": "Welke?",
@@ -10270,6 +10726,10 @@
   "83e663a6-e62d-4dac-a2df-d7a9a90774d2": {
     "original": "Vereist toestemming voor gegevensverzameling",
     "translation": "Nécessite une autorisation pour la collecte de données"
+  },
+  "83eca88a-9820-4b6e-8849-9d59ec3e4a3b": {
+    "original": "UiTPAS-nummers",
+    "translation": "Numéros UiTPAS"
   },
   "83f622e4-0ef5-4965-8d6d-10860df30a87": {
     "original": "De inschrijvingen voor {group} zijn volzet. Je kan wel nog inschrijven voor de wachtlijst",
@@ -10415,6 +10875,14 @@
     "original": "Voeg betaalmethode toe",
     "translation": "Ajouter une méthode de paiement"
   },
+  "85a193ca-cd6a-498d-957d-c627cc2b27f5": {
+    "original": "Wijzigingen",
+    "translation": "Modifications"
+  },
+  "85c892af-972f-4a52-8769-4452ebbcdf8d": {
+    "original": "Dit zijn alle leden en de groepen waar ze in passen. Je kan beperken tot welke groepen ze horen door de instellingen van die groep te wijzigen.",
+    "translation": "Voici tous les membres et les groupes qui leur correspondent. Tu peux limiter les groupes auxquels ils appartiennent en modifiant les paramètres de ces groupes."
+  },
   "85cf8f92-6092-4546-a43e-f86319e80aa1": {
     "original": "Vervolledig gegevens",
     "translation": "Compléter les données"
@@ -10438,6 +10906,10 @@
   "85f5de69-bc8a-4f8d-be68-e6b05f6affce": {
     "original": "Voor algemene e-mails of voor antwoorden op automatische e-mails als domeinnaam niet ingesteld is (bv. als antwoord op bestelbevestiging).",
     "translation": "Pour les e-mails généraux ou pour les réponses aux e-mails automatiques si le nom de domaine n'est pas défini (par ex. en réponse à une confirmation de commande)."
+  },
+  "860735a0-eb27-44ba-9364-4d52f0ce6698": {
+    "original": "Vink de rijen aan als het om dezelfde personen gaat",
+    "translation": "Cochez les lignes si cela concerne la même personne"
   },
   "86161523-8879-4092-a332-567bf55e0f52": {
     "original": "Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens).",
@@ -10471,6 +10943,10 @@
     "original": "Betaal jouw openstaand bedrag aan",
     "translation": "Payer votre montant dû à"
   },
+  "8685578a-1994-4435-ac7f-d6aabb01ffa4": {
+    "original": "Prioriteit van groepen",
+    "translation": "Priorité des groupes"
+  },
   "868620be-ca3d-47f5-a56b-cd3741a97b75": {
     "original": "Ledenadministratie, per lid",
     "translation": "Administration des membres, par membre"
@@ -10494,6 +10970,10 @@
   "86b4a41f-1353-44c9-a2dc-7d6f5ccc371a": {
     "original": "Deze groep staat in een categorie die enkel zichtbaar is voor beheerders of leden met een functie",
     "translation": "Ce groupe se trouve dans une catégorie qui n'est visible que pour les administrateurs ou les membres ayant une fonction"
+  },
+  "86c059de-74eb-44b4-90dc-a11d0d93f332": {
+    "original": "Basisprijs",
+    "translation": "Prix de base"
   },
   "86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73": {
     "original": "Oeps, je hebt geen betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw.",
@@ -10727,6 +11207,10 @@
     "original": "Leveringstijdstip",
     "translation": "Heure de livraison"
   },
+  "898c44be-3635-4509-920a-956a9c0a332c": {
+    "original": "Leeftijdsgroep toewijzen",
+    "translation": "Attribuer un groupe d'âge"
+  },
   "8997d560-a0c6-422b-a988-6186e8ed64be": {
     "original": "Je kan dit niet ongedaan maken. Er gaat mogelijks informatie verloren over alle gekoppelde inschrijvingsgroepen.",
     "translation": "Vous ne pouvez pas annuler cette opération. Des informations sur tous les groupes d'inscription liés risquent d'être perdues."
@@ -10799,6 +11283,10 @@
     "original": "Een afrekening (= de schuld) wijzigen die al gebruikt werd in een aangemaakte betaling (= hoe de schuld betaald werd) zal enkel het openstaande bedrag wijzigen. Een betaling is niet meer aanpasbaar na het aanmaken ervan. Indien je het bedrag van een betaling wilt wijzigen moet je ofwel een extra betaling aanmaken voor het verschil of de betaling annuleren en opnieuw aanmaken.",
     "translation": "Modifier un décompte (= la dette) déjà utilisé dans un paiement créé (= comment la dette a été payée) ne modifiera que le montant dû. Un paiement n'est plus modifiable après sa création. Si vous souhaitez modifier le montant d'un paiement, vous devez soit créer un paiement supplémentaire pour la différence, soit annuler le paiement et le recréer."
   },
+  "8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8": {
+    "original": "Onbekende fout.",
+    "translation": "Erreur inconnue."
+  },
   "8a5dfcff-bbe3-4b8f-8b6d-85df4d35dc94": {
     "original": "ouders",
     "translation": "parents"
@@ -10866,6 +11354,10 @@
   "8b54b2c4-e7bb-4efe-8e7e-a02a2fa6667e": {
     "original": "Deze webshop bestaat niet",
     "translation": "Cette boutique en ligne n'existe pas"
+  },
+  "8b70623b-ba97-468f-90aa-b1c149393cea": {
+    "original": "In welk werkjaar wil je de leden inschrijven?",
+    "translation": "Pour quelle année associative voulez-vous inscrire les membres ?"
   },
   "8b7c18d3-3588-4f07-a269-391283e4c2cc": {
     "original": "Aanvinktekst",
@@ -11239,6 +11731,10 @@
     "original": "Ben je zeker dat je deze functie wilt verwijderen?",
     "translation": "Êtes-vous sûr de vouloir supprimer cette fonction ?"
   },
+  "8f217db0-c672-46f0-a8f7-6eba6f080947": {
+    "original": "Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.",
+    "translation": "Une erreur s’est produite lors de la communication avec UiTPAS. Réessaie plus tard."
+  },
   "8f236ffd-4cf4-49e7-9056-78105932ea83": {
     "original": "Sponsor bewerken",
     "translation": "Modifier un sponsor"
@@ -11527,6 +12023,10 @@
     "original": "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.",
     "translation": "Facultatif. Donnez une explication quand ce type d’activité doit être utilisé."
   },
+  "93043ff4-588f-4a1f-a9de-1142379ec2a3": {
+    "original": "Kolom uit jouw bestand",
+    "translation": "Colonne de votre fichier"
+  },
   "9305016a-babf-4606-af6c-e8ef9f2ba91e": {
     "original": "Weet je zeker dat je {total} wilt aanrekenen aan {count} groep(en)?",
     "translation": "Êtes-vous sûr de vouloir facturer {total} à {count} groupe(s) ?"
@@ -11628,8 +12128,8 @@
     "translation": "Modifier le tarif"
   },
   "9474f01d-e447-4a95-986e-247917765ecb": {
-    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.",
-    "translation": "{member} est déjà connu dans notre système, mais pas votre adresse e-mail. Pour accéder, vous avez besoin du code de sécurité."
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres is er nog niet mee gekoppeld. Om toegang te krijgen heb je de beveiligingscode nodig (die is uniek per lid).",
+    "translation": "{member} est déjà connu dans notre système, mais ton adresse e-mail n’y est pas encore liée. Pour accéder au compte, il te faut le code de sécurité (qui est unique pour chaque membre)."
   },
   "947eb845-90da-43e5-a3bb-78903f7edd72": {
     "original": "Maximum bereikt",
@@ -11739,6 +12239,10 @@
     "original": "Bouw hieronder een balans op zodat het totaalbedrag 0 euro bedraagt.",
     "translation": "Construisez un bilan ci-dessous afin que le montant total soit de 0 euro."
   },
+  "96140ac1-d193-4ad1-9f33-f5241f00d176": {
+    "original": "Nog {count} beheerders weergeven",
+    "translation": "Afficher encore {count} administrateurs"
+  },
   "9628bc15-d020-4001-881d-1759bd3cb6f2": {
     "original": "Herinnering verlopen proefperiode pakket webshops",
     "translation": "Rappel échéance de la période d'essai du forfait boutiques en ligne"
@@ -11746,6 +12250,10 @@
   "9631f5ce-dbb9-4463-b565-618446657ea2": {
     "original": "Geactiveerd",
     "translation": "Activé"
+  },
+  "9639fa42-022e-483f-9969-b893ae79affc": {
+    "original": "Bevestigen",
+    "translation": "Confirmer"
   },
   "967a1b0b-88cd-4b95-9008-f0610ed64b24": {
     "original": "Inschrijving van Klaas en Piet",
@@ -11758,6 +12266,10 @@
   "969ae056-dd8b-49ba-aeb5-ca810c65f599": {
     "original": "Nieuwe tag",
     "translation": "Nouvelle balise"
+  },
+  "96acfe84-33fa-4fa2-b31a-098108100ffb": {
+    "original": "In welke groep wil je deze leden inschrijven?",
+    "translation": "Dans quel groupe souhaitez-vous inscrire ces membres ?"
   },
   "96b60f72-2bc6-479d-b317-616e23056e5c": {
     "original": "De keuzemogelijkheid {name} is uitverkocht",
@@ -11790,6 +12302,14 @@
   "97475ade-4e97-4989-b2f4-fecd534db3c4": {
     "original": "Actief",
     "translation": "Actif"
+  },
+  "9755e27e-7128-4682-af6e-e3a2a5d95a42": {
+    "original": "e-mail",
+    "translation": "e-mail"
+  },
+  "975e20dd-d5c2-4377-ad4f-359a332b9687": {
+    "original": "Account aanmaken bij {organization}",
+    "translation": "Créer un compte chez {organization}"
   },
   "97616151-90c3-4644-8854-e228c4f355f5": {
     "original": "Dit werkjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode",
@@ -11834,6 +12354,10 @@
   "97ea7ffc-c5a0-4bb8-a2c5-ec1ae003a371": {
     "original": "Reken eerst jouw huidige winkelmandje af. Je kan de huidige inhoud van jouw winkelmandje niet samen afrekenen met de inschrijving voor deze activiteit.",
     "translation": "Réglez d'abord votre panier actuel. Vous ne pouvez pas régler le contenu actuel de votre panier avec l'inscription à cette activité."
+  },
+  "97f24d1b-9730-45bb-9ebc-33d50bc3ddc1": {
+    "original": "Geen registratie gevonden voor {name}",
+    "translation": "Aucun enregistrement trouvé pour {name}"
   },
   "97f33d05-54af-4568-a932-4dac4530417f": {
     "original": "overschrijvingen",
@@ -11983,6 +12507,10 @@
     "original": "Nieuw lid toevoegen",
     "translation": "Ajouter un nouveau membre"
   },
+  "9a1ec903-87bd-4776-9436-007caf94bcf3": {
+    "original": "Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.",
+    "translation": "Voici la liste des membres pour lesquels aucun groupe d’âge n’a été trouvé, probablement parce qu’ils sont trop jeunes ou trop âgés. Au besoin, ajuste les paramètres de tes groupes d’inscription."
+  },
   "9a384a73-d222-49f8-9203-76b8e525f1ab": {
     "original": "Ja, verplaatsen",
     "translation": "Oui, déplacer"
@@ -12063,6 +12591,10 @@
     "original": "Deze functie moet gekoppeld worden aan een specifieke inschrijvingsgroep van een lokale groep. Hier kan je die lokale leeftijdsgroepen beperken tot een aantal standaard leeftijdsgroepen.",
     "translation": "Cette fonction doit être liée à un groupe d'inscription spécifique d'un groupe local. Ici, vous pouvez limiter ces groupes d'âge locaux à un certain nombre de groupes d'âge standard."
   },
+  "9b327bf4-9928-4ad0-b9c5-71dee8631c8a": {
+    "original": "Fout",
+    "translation": "Erreur"
+  },
   "9b357a68-47d7-410f-a2a1-b9a0c3df7eee": {
     "original": "Als iemand probeert een account aan te maken, maar er al een account bestaat met dat e-mailadres",
     "translation": "Si quelqu'un tente de créer un compte, mais qu'un compte existe déjà avec cette adresse e-mail"
@@ -12126,6 +12658,10 @@
   "9bd792a4-fb4a-4275-8308-e316285be890": {
     "original": "Niet opslaan",
     "translation": "Ne pas enregistrer"
+  },
+  "9be3a9ea-451a-4d71-b32e-ac7aa2bee4e6": {
+    "original": "Webshop succesvol gekoppeld aan je activiteit",
+    "translation": "Boutique en ligne liée avec succès à votre activité"
   },
   "9be57c4c-f9e2-40c2-932b-99b0a330365c": {
     "original": "Externe beheerder bewerken",
@@ -12255,6 +12791,10 @@
     "original": "Jongens en meisjes",
     "translation": "Garçons et filles"
   },
+  "9d7bf734-ef1e-421b-ae0f-3dec3040a360": {
+    "original": "Webshop instellingen",
+    "translation": "Paramètres de la boutique en ligne"
+  },
   "9d8a368d-1e0a-4011-b415-402f0c8071f8": {
     "original": "Facturen",
     "translation": "Factures"
@@ -12262,6 +12802,10 @@
   "9d928561-b64b-46c2-a2c9-c6997384a451": {
     "original": "Verplaatsen naar",
     "translation": "Déplacer vers"
+  },
+  "9d96814a-e44a-4f9f-b98b-d36838963c39": {
+    "original": "{key} wijzigen naar {value}",
+    "translation": "Modifier {key} en {value}"
   },
   "9d9a920b-4ab2-4ba2-9c17-58dc2d7fff2b": {
     "original": "De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.",
@@ -12659,6 +13203,10 @@
     "original": "Bestellen",
     "translation": "Commander"
   },
+  "a20a141f-0a94-412e-b731-7b5bde03cd9b": {
+    "original": "Oeps, er ging iets mis",
+    "translation": "Oups, quelque chose s'est mal passé"
+  },
   "a20a78e9-60c4-425b-a416-5874d0ec4b11": {
     "original": "De beschrijving is zichtbaar als leden doorklikken om in te schrijven voor de activiteit.",
     "translation": "La description est visible lorsque les membres cliquent pour s'inscrire à l'activité."
@@ -12679,6 +13227,10 @@
     "original": "Weekends",
     "translation": "Week-ends"
   },
+  "a28ab93c-ac3a-4422-bcaf-170d28161604": {
+    "original": "Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij {group} zullen worden ingeschreven",
+    "translation": "Ces membres correspondent à plusieurs groupes, mais seront inscrits dans {group} selon votre priorité."
+  },
   "a2afb95e-1dc5-452d-a919-70720fd4e8a6": {
     "original": "Je hebt geen toegang om deze emailtemplate te maken",
     "translation": "Vous n'avez pas l'autorisation de créer ce modèle d'e-mail"
@@ -12686,6 +13238,10 @@
   "a2b0ea80-7e65-4951-bdbf-c61f6995338e": {
     "original": "Verenigd Koninkrijk",
     "translation": "Royaume-Uni"
+  },
+  "a2ca0160-2d94-45f8-a96a-3e02a43b17d8": {
+    "original": "Doorgaan",
+    "translation": "Continuer"
   },
   "a2d46fc7-a82b-49ba-a2c8-98fe91a1c4d9": {
     "original": "Klik op \"starten\" om te beginnen.",
@@ -12755,6 +13311,10 @@
     "original": "Takken",
     "translation": "Branches"
   },
+  "a3ea7b14-204b-44b9-abb5-8ced5fc847d1": {
+    "original": "Volgende",
+    "translation": "Suivant"
+  },
   "a3face2a-de93-4388-bd47-675901902508": {
     "original": "Inloggen met wachtwoord",
     "translation": "Connexion avec mot de passe"
@@ -12778,6 +13338,10 @@
   "a44d9f94-a83a-49b9-9a89-833b7873fc74": {
     "original": "Openstaand",
     "translation": "En suspens"
+  },
+  "a45744c8-fa0e-4300-bd1a-502321266aca": {
+    "original": "Leden die door prioriteit bij {group} zullen worden ingeschreven",
+    "translation": "Membres inscrits dans {group} en fonction de la priorité"
   },
   "a4626cf2-9306-4505-ba49-4398f6cbf4ba": {
     "original": "Deze inschrijvingsgroepen werden gearchiveerd. Je kan ze altijd nog bekijken en hun gegevens blijven behouden tot je ze manueel verwijdert. Hier kan je dus afgelopen activiteiten in bewaren.",
@@ -12834,6 +13398,10 @@
   "a562ecf9-00ae-48b7-8568-4e762b11e1f3": {
     "original": "Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.",
     "translation": "Ces données de facturation ne sont pas complètes. Modifiez-les et vérifiez-les avant de continuer."
+  },
+  "a56aa092-fd87-40b9-9a8c-7822796e6927": {
+    "original": "reeds betaald",
+    "translation": "déjà payé"
   },
   "a56bcf08-214d-421b-9cc0-336d2b5ab0ea": {
     "original": "Wachtlijst",
@@ -12979,6 +13547,10 @@
     "original": "Dit website adres is ongeldig. Kijk goed na of het geen ongeldige karakters bevat zoals spaties of speciale tekens.",
     "translation": "Cette adresse de site web est non valide. Vérifiez bien qu’elle ne contient pas de caractères non valides tels que des espaces ou des caractères spéciaux."
   },
+  "a68feeef-07a3-4406-86ef-e5ab1a168513": {
+    "original": "Geslacht wijzigen naar {gender}",
+    "translation": "Modifier le sexe en {gender}"
+  },
   "a69c9d5b-7191-49d8-b21a-f196547dfc0e": {
     "original": "Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.",
     "translation": "Ou ouvrez vous-même une autre application. Vous pouvez facilement copier les données ci-dessus en cliquant dessus."
@@ -13011,6 +13583,10 @@
     "original": "Enkel voor beheerders",
     "translation": "Uniquement pour les administrateurs"
   },
+  "a717759d-4b62-40b2-bf8a-55e42565030b": {
+    "original": "Dit is geen geldig UiTPAS-nummer",
+    "translation": "Ce numéro UiTPAS n'est pas valide"
+  },
   "a72d08ad-b23c-4079-b375-1dd569da140a": {
     "original": "Breid het aantal persoonsgegevens zelf nog uit. Vervolgens kan je per inschrijvingsgroep (of gewoon voor alle leden) de persoonsgegevens inschakelen.",
     "translation": "Étendez vous-même le nombre de données personnelles. Ensuite, vous pouvez activer les données personnelles par groupe d'inscription (ou simplement pour tous les membres)."
@@ -13034,6 +13610,10 @@
   "a76c1371-da18-4998-970d-ec4f443d5664": {
     "original": "We konden geen verbinding maken met internet. Kijk jouw internetverbinding na en probeer opnieuw.",
     "translation": "Nous n'avons pas pu établir de connexion Internet. Vérifiez votre connexion Internet et réessayez."
+  },
+  "a774b263-1900-4097-9b01-3b44577e9b35": {
+    "original": "In sommige rijen hebben we gegevens gevonden die we niet 100% goed konden interpreteren. Kijk hieronder na waar je nog wijzigingen moet aanbrengen en pas het aan in jouw bestand.",
+    "translation": "Nous avons trouvé, dans certaines lignes, des données difficiles à interpréter. Vérifiez ci-dessous où vous devez effectuer des modifications et adaptez-les dans votre fichier."
   },
   "a776afc7-1137-4a80-9144-d65660e8d1b5": {
     "original": "Synoniem",
@@ -13239,6 +13819,10 @@
     "original": "voorbeeld.com",
     "translation": "exemple.com"
   },
+  "aa752f68-29f0-4f3b-b73f-9a7b363b277b": {
+    "original": "Geen straat en huisnummer in deze cel",
+    "translation": "Aucune rue et numéro dans cette cellule"
+  },
   "aa80abe5-2f1a-448d-b98c-0c38ece581d6": {
     "original": "Je kan een leeftijdsgroep meerdere namen geven. Het is niet nodig om dus zelf een opsomming te voorzien, dat gebeurt automatisch.",
     "translation": "Vous pouvez donner plusieurs noms à un groupe d'âge. Il n'est donc pas nécessaire de fournir vous-même une liste, cela se fait automatiquement."
@@ -13311,6 +13895,10 @@
     "original": "Jouw vereniging bevindt zich in een ander werkjaar dan KSA Nationaal.",
     "translation": "Votre association se trouve dans une autre année associative que KSA National."
   },
+  "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
+    "original": "In dit overzicht staan enkel verenigingen die al aangesloten zijn bij Stamhoofd. Je kan zelf een nieuwe vereniging aansluiten via de knop 'Aansluiten' bovenaan.",
+    "translation": "Ce récapitulatif affiche uniquement les associations déjà affiliées à Stamhoofd. Vous pouvez vous-même affilier une nouvelle association grâce au bouton 'S'affilier' en haut."
+  },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)",
     "translation": "Pour Mollie, vous avez besoin d’une ASBL. Une association de fait ne suffit pas (non acceptée)"
@@ -13366,6 +13954,10 @@
   "abba46da-6bb8-40cb-88f0-186c2409a0a5": {
     "original": "Leveren",
     "translation": "Livraison"
+  },
+  "abd71533-048e-45c7-baf8-78769e5287de": {
+    "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.",
+    "translation": "{count} membres de votre liste sont déjà inscrits. Leur(s) inscription(s) actuelle(s) ne seront pas modifiées et aucune nouvelle inscription ne sera ajoutée. Les autres informations de votre fichier seront toutefois importées dans Stamhoofd."
   },
   "abde66eb-7ff2-4b18-894b-6b4061683b1d": {
     "original": "Enkel toestemming voor groepsfoto's",
@@ -13435,6 +14027,10 @@
     "original": "onvolledig document kan niet gedownload worden",
     "translation": "document incomplet ne peut pas être téléchargé"
   },
+  "acc349b9-d5d5-479d-81c0-e06fe0badafd": {
+    "original": "Allemaal in één groep inschrijven",
+    "translation": "Tout inscrire dans un seul groupe"
+  },
   "acc4cfd1-42ad-45a2-bb1e-841b52f7c4e6": {
     "original": "Voor je een uitnodiging opnieuw kan versturen moet je alle wijzigingen opslaan of annuleren.",
     "translation": "Avant de pouvoir renvoyer une invitation, vous devez enregistrer ou annuler toutes les modifications."
@@ -13483,6 +14079,10 @@
     "original": "Het is niet mogelijk om een negatief openstaand bedrag toe te voegen in de toekomst",
     "translation": "Il n'est pas possible d'ajouter un montant négatif en souffrance dans le futur"
   },
+  "ad919b4f-2896-4a75-ab97-3916cf6e7796": {
+    "original": "leden",
+    "translation": "membres"
+  },
   "adabf246-d27a-4a35-9881-d86860213b24": {
     "original": "Betaal openstaand bedrag aan",
     "translation": "Payer le montant dû à"
@@ -13490,6 +14090,10 @@
   "adb0e7c8-aed7-43f5-bfcc-a350f03aaabe": {
     "original": "Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.",
     "translation": "Une mise à jour nécessaire est disponible. Rechargez la page et, si nécessaire, effacez le cache de votre navigateur."
+  },
+  "adb2856b-67d7-4dbf-bf16-e4478250a05d": {
+    "original": "Onbekend",
+    "translation": "Inconnu"
   },
   "adbc415b-8253-4ecc-bfc9-5d2045eb7e7e": {
     "original": "Behalve voor keuzes met",
@@ -14115,6 +14719,10 @@
     "original": "Voor grotere schermen. In donkere modus.",
     "translation": "Pour les grands écrans. En mode sombre."
   },
+  "b5192292-d520-49fa-8a9b-c9763bfdc91a": {
+    "original": "Een UiTPAS-nummer kan niet meerdere keren gebruikt worden voor hetzelfde artikel.",
+    "translation": "Un même numéro UiTPAS ne peut pas être utilisé plusieurs fois pour le même article."
+  },
   "b51dbba5-8e12-4835-bdd7-b9fb7e306d8d": {
     "original": "per dag",
     "translation": "par jour"
@@ -14127,6 +14735,10 @@
     "original": "Billing",
     "translation": "Facturation"
   },
+  "b53eb56b-1380-4bc5-bc07-9e813c435e69": {
+    "original": "{price} betaald",
+    "translation": "{price} payé"
+  },
   "b541ddfb-cce5-4194-b6a5-3de523b27fa8": {
     "original": "Bankrekeningnummer",
     "translation": "Numéro de compte bancaire"
@@ -14134,6 +14746,10 @@
   "b54b9706-4c0c-46a6-9027-37052eb76b28": {
     "original": "Man",
     "translation": "Homme"
+  },
+  "b54c138c-e72f-435b-822b-601d4a529124": {
+    "original": "Geef evenveel UiTPAS nummers in als het aantal dat je bestelt.",
+    "translation": "Indiquez autant de numéros UiTPAS que le nombre que vous commandez."
   },
   "b557c22d-d44e-43ad-9f05-de74d956c413": {
     "original": "Annulatiekost",
@@ -14146,6 +14762,10 @@
   "b567999b-ea60-41e8-b3a8-abf4247ab0f5": {
     "original": "Rollen bewerken",
     "translation": "Modifier les rôles"
+  },
+  "b56e5d51-3269-47c2-8586-5dec2873f67b": {
+    "original": "We verwachten zowel een postcode als een gemeente",
+    "translation": "Nous attendons à la fois un code postal et une commune"
   },
   "b56f4d0f-93c0-4f22-9597-735ee03cc9e2": {
     "original": "Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).",
@@ -14303,6 +14923,10 @@
     "original": "Kampmelding nakijken",
     "translation": "Vérifier la notification de camp"
   },
+  "b7838e09-f22e-441d-a36b-9e78599ca2e9": {
+    "original": "Stamhoofd zal {count} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.",
+    "translation": "Stamhoofd déplacera {count} inscriptions ou inscriptions sur liste d'attente pour les membres existants selon votre fichier."
+  },
   "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
     "original": "Unieke verenigingen",
     "translation": "Associations uniques"
@@ -14455,9 +15079,17 @@
     "original": "jouw tickets",
     "translation": "vos tickets"
   },
+  "b979d1ed-d909-4c9f-9235-669be553af2b": {
+    "original": "onbekende groep",
+    "translation": "groupe inconnu"
+  },
   "b9912181-cf0a-4c85-bb9a-fc9ee7fa54f5": {
     "original": "Er was een internetprobleem bij het uploaden van het bestand. Controleer je internetverbinding en probeer het opnieuw.",
     "translation": "Un problème Internet est survenu lors du téléchargement du fichier. Vérifiez votre connexion Internet et réessayez."
+  },
+  "b9965b22-27c6-428d-a184-634da7345eae": {
+    "original": "'{value}' is geen geldig bedrag",
+    "translation": "'${value}' n'est pas un montant valide"
   },
   "b99b7736-bf57-490b-ad09-425f1b89346e": {
     "original": "Tekst en links die onderaan in de footer zichtbaar zijn",
@@ -14783,6 +15415,10 @@
     "original": "E-mail die wordt verzonden naar de reviewer van een kampmelding als die wordt ingediend",
     "translation": "E-mail envoyé au vérificateur d’une notification de camp lors de sa soumission"
   },
+  "bd42c95e-8f61-4c5a-a66b-b86b6b7130ba": {
+    "original": "Fout bij het importeren van het lid.",
+    "translation": "Une erreur est survenue lors de l'import du membre."
+  },
   "bd4ad024-9855-4623-9ef4-db5162466f53": {
     "original": "Publiceer",
     "translation": "Publier"
@@ -14790,6 +15426,10 @@
   "bd4b350e-d06a-44aa-a2d6-a5ae140373ca": {
     "original": "Maak alle documenten toegankelijk voor alle leden.",
     "translation": "Rendez tous les documents accessibles à tous les membres."
+  },
+  "bd4f2ee1-ffd5-4f8b-97d5-49627c55e147": {
+    "original": "lid",
+    "translation": "membre"
   },
   "bd5418b3-5d06-43da-a0e6-4ced20644825": {
     "original": "Je zal e-mails kunnen versturen vanaf @{mailDomain} nadat je het instellen hebt voltooid.",
@@ -14835,6 +15475,10 @@
     "original": "Meldingen",
     "translation": "Notifications"
   },
+  "bdb5fc84-6f70-4e6c-a69c-9b625c9951d0": {
+    "original": "Géén enkele andere prijs is beschikbaar als basisprijs",
+    "translation": "Aucun autre prix n'est disponible comme prix de base"
+  },
   "bdbe9ec5-11f1-4c79-9c36-ca1f8c434fb9": {
     "original": "Stop bestellingen op",
     "translation": "Arrêter les commandes le"
@@ -14871,9 +15515,17 @@
     "original": "De huidige inhoud van je e-mail gaat verloren",
     "translation": "Le contenu actuel de votre e-mail sera perdu"
   },
+  "be506b1b-2d5e-45fc-990b-f833e2d3ee24": {
+    "original": "Ja, loskoppelen",
+    "translation": "Oui, dissocier"
+  },
   "be51c431-f45c-48a5-bca8-14cfd9616027": {
     "original": "Afdelingen",
     "translation": "Sections"
+  },
+  "be6836a1-b867-48df-9b2e-5372e5c1cdd6": {
+    "original": "Toon resultaat",
+    "translation": "Afficher le résultat"
   },
   "be6cb896-09ec-4066-a4bd-c16eafd0fa67": {
     "original": "Naam van uitnodiger",
@@ -14886,6 +15538,10 @@
   "be7d7286-9c3f-41f9-9378-b028754c8533": {
     "original": "Je kan geen aansluiting verwijderen die vergrendeld is",
     "translation": "Vous ne pouvez pas supprimer une connexion verrouillée"
+  },
+  "be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8": {
+    "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Stamhoofd overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
+    "translation": "{existingCount} {memberTranslation} de votre fichier sont déjà présents dans le système ({total} au total). Les informations de ces membres dans Stamhoofd seront remplacées par celles de votre fichier. Attention, cette action est irréversible."
   },
   "be88b0da-348e-4394-b36c-1136af8aef7d": {
     "original": "Met actieve proefperiode",
@@ -14930,6 +15586,10 @@
   "becc82f0-4195-4a17-b3f5-03f305582e4a": {
     "original": "Een feitelijke vereniging is niet geregistreerd en heeft geen ondernemingsnummer",
     "translation": "Une association de fait n'est pas enregistrée et n'a pas de numéro d'entreprise"
+  },
+  "becf7e84-6ea6-4dc9-b6cd-f2c5c56c47ac": {
+    "original": "Fouten bij het importeren",
+    "translation": "Erreurs lors de l'importation"
   },
   "bedb1bf7-9b38-4ef4-a1f3-53ade0f56352": {
     "original": "Nu te betalen",
@@ -15006,6 +15666,10 @@
   "bfa4c1b3-9613-49c1-ad3d-360f533a4086": {
     "original": "annuleringskost voor keuzeoptie bij",
     "translation": "frais d'annulation pour l'option de choix chez"
+  },
+  "bfbc0e34-10ac-45d8-9a2f-fbdf87bf3cbc": {
+    "original": "Automatische bevestigingsmail versturen",
+    "translation": "Envoyer automatiquement l'e-mail de confirmation"
   },
   "bfbdccd4-c432-4098-8980-a83ac6f6a76c": {
     "original": "Op {index}e inschrijving",
@@ -15195,6 +15859,10 @@
     "original": "gescand",
     "translation": "scanné"
   },
+  "c22cb870-b859-4de9-9540-1d2d796a50f3": {
+    "original": "Webshops koppelen aan activiteiten",
+    "translation": "Lier des boutiques en ligne à des activités"
+  },
   "c244a546-ac11-4aee-be3e-99b0b6079703": {
     "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).",
     "translation": "Remplissez ci-dessus le code couleur HEX de votre couleur principale. Laissez vide pour conserver la couleur de votre association (dans paramètres généraux > personnalisation)."
@@ -15254,6 +15922,10 @@
   "c2fe9ab5-f728-4898-a36c-18ba68ea7057": {
     "original": "Deelname of inschrijvingsbewijs",
     "translation": "Attestation de participation ou d'inscription"
+  },
+  "c3031fda-2cfb-46b7-8cb6-b31ad49034e8": {
+    "original": "Toevoegen in het systeem met inschrijving voor {group}",
+    "translation": "Ajouter au système avec inscription pour {group}"
   },
   "c3158561-e0dc-4dd5-8581-d2d861238946": {
     "original": "Leden",
@@ -15363,6 +16035,10 @@
     "original": "De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen.",
     "translation": "Le groupe auquel vous essayez d’inscrire un membre semble ne plus exister. Il est préférable de recharger la page pour réessayer."
   },
+  "c4b433cc-d7c1-4113-97f1-056724681acc": {
+    "original": "'{value}' is geen ja of nee. Probeer Ja of Nee, X, 0, 1 of leeg",
+    "translation": "'${value}' n'est ni oui ni non. Essayez Oui ou Non, X, 0, 1 ou vide"
+  },
   "c4c91c69-3b09-4db5-b83f-170475a509f7": {
     "original": "Nieuwe keuze",
     "translation": "Nouveau choix"
@@ -15386,6 +16062,10 @@
   "c4fe92c5-851c-422a-842b-da21e56e6f4c": {
     "original": "Contactpersonen",
     "translation": "Personnes de contact"
+  },
+  "c51416d6-e3b2-4666-83ad-dcf8fc5f40e6": {
+    "original": "Fout bij het inschrijven van het lid.",
+    "translation": "Une erreur est survenue lors de l'inscription du membre."
   },
   "c51b35d1-228b-4ce3-8b27-312b5620b662": {
     "original": "Archief",
@@ -15422,6 +16102,10 @@
   "c5b0dabc-db2d-4a17-b805-1f1db9a5aa0f": {
     "original": "Login methode configuratie ({method})",
     "translation": "Configuration de la méthode de connexion ({method})"
+  },
+  "c5c49d2a-99dd-404d-9a6e-829857e1971f": {
+    "original": "Ongeldige datum. Kon '{date}' niet omzetten in een geldige maand",
+    "translation": "Date invalide. Impossible de convertir '{date}' en un mois valide."
   },
   "c5d21881-b70a-489e-bce9-5bb3d24b6f76": {
     "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe werkjaar, of schrijf je zelf opnieuw in",
@@ -15467,6 +16151,10 @@
     "original": "Huisstijl",
     "translation": "Charte graphique"
   },
+  "c66d114d-2ef3-476f-ad00-98fbe3195365": {
+    "original": "Je moet een verlaagd tarief opgeven voor de UiTPAS.",
+    "translation": "Tu dois indiquer un tarif réduit pour l’UiTPAS."
+  },
   "c66e68e3-1a62-4218-97a8-bbb7b4f46fc1": {
     "original": "Er werd te veel betaald voor de bestelling (waarschijnlijk gewijzigd na betaling). Er is een terugbetaling nodig.",
     "translation": "Il y a eu un trop-payé pour la commande (probablement modifié après le paiement). Un remboursement est nécessaire."
@@ -15474,6 +16162,10 @@
   "c67c604b-31ed-4f5a-93b4-a792e76609f5": {
     "original": "De gemeente mag geen cijfers bevatten.",
     "translation": "La commune ne peut pas contenir de chiffres."
+  },
+  "c67f13a2-08cb-4c30-a39d-d07679430672": {
+    "original": "Leden importeren",
+    "translation": "Importer des membres"
   },
   "c6898362-6352-4fe2-94d6-900e4ac10d3f": {
     "original": "Hoog-risicogroep voor coronavirus",
@@ -15506,6 +16198,10 @@
   "c6c8e406-3d1f-41c4-b3df-d0b1e8661040": {
     "original": "Vereisten",
     "translation": "Exigences"
+  },
+  "c6cc8722-303d-4f0e-89c8-e1a0cf2630ca": {
+    "original": "Verplicht het invullen van een UiTPAS-nummer met kansentarief",
+    "translation": "Obliger l'encodage d'un numéro UiTPAS avec tarif social"
   },
   "c6cdb321-3eb3-4689-aaed-0626e7ea0844": {
     "original": "Je moet de overschrijvingsdetails invullen",
@@ -15579,6 +16275,10 @@
     "original": "één persoon",
     "translation": "une personne"
   },
+  "c7fc63b2-81d2-4946-bd69-fc283d99cd95": {
+    "original": "Sluiten",
+    "translation": "Fermer"
+  },
   "c803096c-c719-4dd8-bebd-a108c514bb5d": {
     "original": "Rij",
     "translation": "Rangée"
@@ -15594,6 +16294,10 @@
   "c853c26c-5f80-4605-be1d-117d38c5755c": {
     "original": "Zetelcategorie toevoegen",
     "translation": "Ajouter une catégorie de sièges"
+  },
+  "c85603b9-d395-46d0-8df4-2b4522d08a43": {
+    "original": "Inloggen bij {organization}",
+    "translation": "Se connecter chez {organization}"
   },
   "c87a5b7b-f01e-4fe2-91c7-0e9848112562": {
     "original": "overschrijving",
@@ -15622,6 +16326,10 @@
   "c8b8fb4b-3a2b-4de7-85a1-f1b963a739e7": {
     "original": "Omhoog verplaatsen",
     "translation": "Déplacer vers le haut"
+  },
+  "c8c3af57-4b8b-4283-9279-3e5f1de35bde": {
+    "original": "Telefoonnummer wijzigen naar {phone}",
+    "translation": "Modifier le numéro de téléphone en {phone}"
   },
   "c8e499c2-8d90-480c-a15e-d9da5291b40e": {
     "original": "Je hebt niet voldoende rechten om de custom code aan te passen.",
@@ -15783,6 +16491,10 @@
     "original": "Scannen",
     "translation": "Scanner"
   },
+  "ca9fbe8b-0857-4b86-ba53-77b5bb14ee5d": {
+    "original": "Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.",
+    "translation": "De nouvelles inscriptions seront également ajoutées pour ces membres existants."
+  },
   "caa4e548-ffa0-4878-a046-c359479423ad": {
     "original": "Functie toevoegen",
     "translation": "Ajouter une fonction"
@@ -15919,6 +16631,10 @@
     "original": "Wachtwoord wijzigen",
     "translation": "Modifier le mot de passe"
   },
+  "cc1c85a2-123b-43e4-ba4e-ef7dfe3b06f1": {
+    "original": "Deze prijs is reeds een basisprijs voor een ander UiTPAS kansentarief",
+    "translation": "Ce prix est déjà un prix de base pour un autre tarif social UiTPAS"
+  },
   "cc1cf4a7-0bd2-4fa7-8ff2-0a12470a738d": {
     "original": "Nummer",
     "translation": "Numéro"
@@ -15955,9 +16671,17 @@
     "original": "Voor een API-key die heel regelmatig de API moet aanroepen. Risico op overbelasting als de API niet correct is geimplementeerd en zware requests op korte tijd afvuurt.",
     "translation": "Pour une clé API qui doit appeler très régulièrement l'API. Risque de surcharge si l'API n'est pas correctement implémentée et envoie des requêtes lourdes en peu de temps."
   },
+  "cc4f9269-8e85-4b69-809e-cc466bdfe9cd": {
+    "original": "Dit is een overzicht van alle wijzigingen die we gaan doorvoeren als je verder gaat met deze import.",
+    "translation": "Voici un aperçu des modifications qui seront appliquées si tu poursuis l'importation."
+  },
   "cc528c3f-aed3-4eb6-9db1-70aae5261a28": {
     "original": "Verlopen",
     "translation": "Expiré"
+  },
+  "cc545de8-cbf3-4bfe-8bf7-188ef3f7680e": {
+    "original": "Importeer leden vanaf een Excel of CSV bestand",
+    "translation": "Importer des membres depuis un fichier Excel ou CSV"
   },
   "cc614c08-fcbd-40bd-a852-1cb1b116a764": {
     "original": "Excel export mislukt",
@@ -16046,6 +16770,10 @@
   "cd539f63-31c0-46f3-a0b5-a3826796a9d0": {
     "original": "Kies je afhaalmethode",
     "translation": "Choisissez votre méthode de retrait"
+  },
+  "cd5d00db-1fcc-4079-bbe3-36dc001e93d4": {
+    "original": "rijksregisternummer",
+    "translation": "numéro de registre national"
   },
   "cd5ee584-5b0c-4acb-af75-7b21ad37cead": {
     "original": "Het antwoord is niet gekend (werd nog nooit ingevuld in Stamhoofd). Er worden geen lagere tarieven automatisch toegepast.",
@@ -16471,6 +17199,10 @@
     "original": "Je hebt geen toegang tot dit lid of het bestaat niet",
     "translation": "Vous n’avez pas accès à ce membre ou il n’existe pas."
   },
+  "d24fec9e-48d1-46ad-a02b-27d81f2eee6e": {
+    "original": "Wil je (ook) niet-leden laten inschrijven (bv. familie), of als je iets wilt verkopen, gebruik dan een webshop. Een webshop is openbaar en vereist geen login.",
+    "translation": "Si vous souhaitez permettre l'inscription de non-membres (par exemple la famille), ou vendre un produit, utilisez une boutique en ligne. Une boutique en ligne est publique et ne nécessite pas de connexion."
+  },
   "d25a949b-5fd1-4da9-82d0-7d82fd4bb482": {
     "original": "Oeps, deze website is enkel voor beheerders van {organization}. Ga naar het ledenportaal als je je wilt inschrijven als lid.",
     "translation": "Oups, ce site web est uniquement pour les administrateurs de {organization}. Allez au portail des membres si vous souhaitez vous inscrire comme membre."
@@ -16490,6 +17222,10 @@
   "d2749916-b99a-47af-9bc4-300648fe77a7": {
     "original": "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd",
     "translation": "Vous devez contrôler chaque paiement vous-même et le marquer comme payé dans Stamhoofd"
+  },
+  "d298a037-1da1-4435-a78b-f56b949e9dad": {
+    "original": "Koppel de kolom '{column}' eerst aan een bijhorende waarde",
+    "translation": "Associez d'abord la colonne '{column}' à une valeur correspondante"
   },
   "d2b84fdd-035b-4307-a897-000081aa814f": {
     "original": "Er is al een aanrekening bezig, even geduld.",
@@ -16558,6 +17294,10 @@
   "d3c56d05-d038-4aad-b796-445ddce980b9": {
     "original": "Overal in het systeem krijg je nu de optie om een 2de prijs in te vullen voor personen met deze financiële ondersteuning. Je kan deze prijs daar een naam geven.",
     "translation": "Dans tout le système, vous avez désormais la possibilité de saisir un deuxième prix pour les personnes bénéficiant de ce soutien financier. Vous pouvez donner un nom à ce prix."
+  },
+  "d3cab6d1-af72-4d4c-b70b-6862d9843b37": {
+    "original": "Lijken op elkaar",
+    "translation": "Se ressemblent"
   },
   "d3e021e4-a9eb-4f7e-a538-8d2dbc27341c": {
     "original": "Download",
@@ -16711,6 +17451,10 @@
     "original": "Meldingen",
     "translation": "Notifications"
   },
+  "d5be56ba-2189-47b0-a32f-ef92cac0c2f8": {
+    "original": "Beheerder",
+    "translation": "Administrateur"
+  },
   "d5c41a61-1870-4dff-9422-726f8e2a1227": {
     "original": "volledige toegang",
     "translation": "accès complet"
@@ -16742,6 +17486,10 @@
   "d6386cef-8e84-4107-920a-03db17372613": {
     "original": "Lees onze gids",
     "translation": "Consultez notre guide"
+  },
+  "d63b416e-cb04-46d3-ad4c-a2837b9c7b3b": {
+    "original": "E-mail wijzigen naar {email}",
+    "translation": "Modifier l’e-mail en {email}"
   },
   "d64c7018-f8f5-4532-88b4-a1a29490a49c": {
     "original": "Er zijn geen groepen die aan deze bundelkorting gekoppeld zijn. Je kan activiteiten en groepen koppelen via de instellingen van elke activiteit of groep.",
@@ -16782,6 +17530,14 @@
   "d6a29b4f-4eb8-4e30-ad63-df2e60276081": {
     "original": "Verwijderd op",
     "translation": "Supprimé le"
+  },
+  "d6b5d4d9-533f-444c-8cfb-154efcd6b63b": {
+    "original": "In welke groep wil je leden inschrijven die nergens in passen?",
+    "translation": "Dans quel groupe souhaitez-vous inscrire les membres qui ne correspondent à aucun groupe ?"
+  },
+  "d6c8c3d5-a969-4b2f-ade9-dfc797e98772": {
+    "original": "nog niet betaald",
+    "translation": "pas encore payé"
   },
   "d6d1b68b-b130-4210-ada4-967ad218f291": {
     "original": "Het is verboden om als begeleid(st)er, behalve EHBO, op eigen initiatief medische handelingen uit te voeren. Ook het verstrekken van lichte pijnstillende en koortswerende medicatie zoals Perdolan, Dafalgan of Aspirine is, zonder toelating van de ouders, voorbehouden aan een arts. Daarom is het noodzakelijk om via deze steekkaart vooraf toestemming van ouders te hebben voor het eventueel toedienen van dergelijke hulp.",
@@ -16924,8 +17680,8 @@
     "translation": "Adresses"
   },
   "d87cd793-80a1-4e57-8086-64abdd8e88f3": {
-    "original": "Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief.",
-    "translation": "Consultez le montant exact payé ou dû par un membre et vérifiez si le membre a droit à un tarif réduit."
+    "original": "Bekijk hoeveel een lid precies heeft betaald of nog moet betalen, en bekijk of het lid recht heeft op een verlaagd tarief. Hiermee kan je ook het UiTPAS-nummer bekijken indien dit werd ingesteld.",
+    "translation": "Consulte combien un membre a déjà payé ou doit encore payer, et vérifie s’il a droit à un tarif réduit. Tu peux également y voir le numéro UiTPAS si celui-ci est renseigné."
   },
   "d87cdb56-c8a6-4466-a6fd-f32fe59561f5": {
     "original": "Aangevinkt",
@@ -17015,6 +17771,10 @@
     "original": "Er worden geen plaatsen aan tickets gekoppeld.",
     "translation": "Aucun siège n'est associé aux tickets."
   },
+  "d95eeb45-400f-4e6f-8e18-6fd174b9eecb": {
+    "original": "Naam wijzigen naar {name}",
+    "translation": "Modifier le nom en {name}"
+  },
   "d9858110-37d9-4b4a-8bfb-d76b3cc5ef27": {
     "original": "Verlopen",
     "translation": "Expiré"
@@ -17042,6 +17802,10 @@
   "d9e58e49-d5d5-4a89-9e6a-1bd8eaf0cb1e": {
     "original": "Deze betaling werd nog niet betaald",
     "translation": "Ce paiement n'a pas encore été effectué"
+  },
+  "d9ec27f3-dafa-41e8-bcfb-9da564a4a675": {
+    "original": "Eenzelfde UiTPAS-nummer kan niet meerdere keren gebruikt worden.",
+    "translation": "Un même numéro UiTPAS ne peut pas être utilisé plusieurs fois."
   },
   "d9f16258-ce87-41ad-a5d4-a66ad6bd514d": {
     "original": "Mijn naam",
@@ -17159,6 +17923,10 @@
     "original": "Saldo herinnering",
     "translation": "Rappel de solde"
   },
+  "dac9e7f1-a040-4eb3-8a2b-95d10815814d": {
+    "original": "Webshop, openbaar inschrijvingsformulier of ticketverkoop koppelen",
+    "translation": "Lier la boutique en ligne, le formulaire d'inscription public ou la vente de tickets"
+  },
   "dacb0698-1ea9-4ee8-b8ce-a2cb4e3ff01c": {
     "original": "Deze tekst wijzigt afhankelijk van de situatie: als de ontvanger nog geen account heeft, vertelt het op welk e-mailadres de ontvanger kan registreren. In het andere geval op welk e-mailadres de ontvanger kan inloggen.",
     "translation": "Ce texte change en fonction de la situation : si le destinataire n'a pas encore de compte, il indique à quelle adresse e-mail le destinataire peut s'inscrire. Sinon, il indique à quelle adresse e-mail le destinataire peut se connecter."
@@ -17271,6 +18039,10 @@
     "original": "Als de vereiste artikels meerdere keren aanwezig zijn, dan wordt de korting meerdere keren toegepast. Bijvoorbeeld als je korting op één artikel geeft op voorwaarde dat je eerst een ander artikel erbij bestelt.",
     "translation": "Si les articles requis sont présents plusieurs fois, la réduction est appliquée plusieurs fois. Par exemple, si vous appliquez une réduction sur un article à condition d'en commander d'abord un autre."
   },
+  "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
+    "original": "De datum van inschrijving ligt buiten het geselecteerde werkjaar.",
+    "translation": "La date d'inscription se situe en dehors de l'année associative sélectionnée."
+  },
   "dbf164b2-e1d2-4c80-8011-a5d5ce3b2221": {
     "original": "Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.",
     "translation": "Vous ne pouvez pas combiner les groupes avec les catégories au même niveau. Déplacez ces groupes vers une catégorie ou supprimez-les."
@@ -17294,6 +18066,10 @@
   "dc1ffb07-49de-475c-9d96-6940d0cbbc09": {
     "original": "Geen basistoegang",
     "translation": "Aucun accès de base"
+  },
+  "dc2128b0-ec7b-463e-abbc-6039d205ec4b": {
+    "original": "kolommen",
+    "translation": "colonnes"
   },
   "dc5db5f5-4027-42fa-a998-1535e2c3a82a": {
     "original": "Te veel leden geselecteerd",
@@ -17463,6 +18239,10 @@
     "original": "Kopieer in app",
     "translation": "Copier dans l'application"
   },
+  "dd9b30ca-860f-47aa-8cb1-527fd156d9ca": {
+    "original": "Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.",
+    "translation": "Une erreur s’est produite lors de la connexion à UiTPAS. Réessaie plus tard."
+  },
   "dd9d20ea-cf50-46be-8eb3-5c85bc5f30c8": {
     "original": "Er is geen lokale groep verantwoordelijk voor de aanrekening van aansluitingen geconfigureerd",
     "translation": "Aucun groupe local responsable de la facturation des connexions n'est configuré"
@@ -17615,6 +18395,10 @@
     "original": "Met deze knop kunnen ontvangers betalen.",
     "translation": "Ce bouton permet aux destinataires de payer."
   },
+  "dfbb830d-922c-42e7-a77a-f37e86e86998": {
+    "original": "Er is een nieuw lid zonder groep.",
+    "translation": "Un nouveau membre n'a pas de groupe."
+  },
   "dfbecccd-b964-4e8b-83e4-553b49d9fcc0": {
     "original": "Ben je 100% zeker dat je {name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. De volledige geschiedenis gaat verloren. Probeer dit absoluut te vermijden en enkel voor uitzonderingen te gebruiken.",
     "translation": "Êtes-vous sûr à 100% de vouloir supprimer {name}? Veuillez alors entrer le nom complet du membre pour confirmation.  Tout l’historique sera perdu. Veuillez éviter de faire cela et ne l’utiliser qu’en cas d’exception."
@@ -17715,9 +18499,17 @@
     "original": "Voldoet aan de voorwaarden vermeld in puntje 2 van de document opmerkingen.",
     "translation": "Satisfait aux conditions mentionnées au point 2 des remarques du document."
   },
+  "e08cef03-c352-41cd-8e7b-3ef632b69ee4": {
+    "original": "UiTPAS-nummer wijzigen naar {number}",
+    "translation": "Modifier le numéro UiTPAS en {number}"
+  },
   "e09c97db-85d7-40b0-8043-65fa24a09a01": {
     "original": "Te ontvangen bedragen",
     "translation": "Montants à recevoir"
+  },
+  "e0b65e04-6cef-41e1-9b45-6b6c56e5356a": {
+    "original": "UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.",
+    "translation": "UiTPAS n’est pas complètement configuré, contacte l’administrateur de la plateforme."
   },
   "e0c68f8b-ccb1-4622-8570-08abc7f5705a": {
     "original": "Versturen",
@@ -17807,6 +18599,10 @@
     "original": "Er ontbreekt data. Probeer het opnieuw of neem contact op met de webshop eigenaar om dit te melden.",
     "translation": "Des données sont manquantes. Veuillez réessayer ou contacter le propriétaire de la boutique en ligne pour signaler ce problème."
   },
+  "e2057717-8967-4f81-a717-6bdf9caebc01": {
+    "original": "Fout bij het registreren van de betaling voor het lid.",
+    "translation": "Une erreur est survenue lors de l'enregistrement du paiement pour le membre."
+  },
   "e2130593-e64d-4f3a-bb16-75ba4ed7604e": {
     "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig werkjaar van gelijk welke inschrijvingsgroep.",
     "translation": "Les membres sont considérés comme existants s'ils sont inscrits pour une année associative précédente de n'importe quel groupe d'inscription."
@@ -17878,6 +18674,10 @@
   "e32f1f4e-e834-47a1-a7cb-a807170b6871": {
     "original": "bv. Gemeentelijke feestzaal",
     "translation": "par exemple Salle des fêtes communale"
+  },
+  "e330f60b-d331-49a2-a437-cddc31a878de": {
+    "original": "UiTPAS-nummer",
+    "translation": "Numéro UiTPAS"
   },
   "e3398474-26b0-49d4-9f64-bae38495fb4f": {
     "original": "Uitloggen",
@@ -17979,6 +18779,10 @@
     "original": "Oeps! De prijs is gewijzigd terwijl je aan het afrekenen was (naar {total}). Herlaad de pagina even om ervoor te zorgen dat je alle aangepaste prijzen ziet. Contacteer de webmaster als je dit probleem blijft ondervinden na het te herladen.",
     "translation": "Oups ! Le prix a été modifié pendant votre paiement (à {total}). Rechargez la page pour vous assurer que vous voyez tous les prix modifiés. Contactez l’administrateur du site Web si vous rencontrez toujours ce problème après avoir rechargé la page."
   },
+  "e42ea38b-dfc2-4af2-bd91-be24934b7a75": {
+    "original": "Webshop succesvol aangemaakt en gekoppeld aan je activiteit",
+    "translation": "Boutique en ligne créée avec succès et associée à votre activité"
+  },
   "e43ca9ec-8495-48af-a6df-8327e6f33d85": {
     "original": "adres van je vereniging",
     "translation": "adresse de votre association"
@@ -17994,6 +18798,10 @@
   "e46f34cd-f166-421e-be97-28ccecdf9c73": {
     "original": "Enkel een platform hoofdbeheerder kan een groep (in)actief maken",
     "translation": "Seul un administrateur principal de la plateforme peut activer ou désactiver un groupe"
+  },
+  "e47b2390-af43-40a0-a7e3-5cd98b247c40": {
+    "original": "Inschrijvingsgroep",
+    "translation": "Groupe d'inscription"
   },
   "e48fd329-0701-47d6-998e-7598691b0200": {
     "original": "Ben je zeker dat je deze vragenlijst wilt verplaatsen?",
@@ -18367,6 +19175,10 @@
     "original": "Jouw bericht is te groot. Grote bijlages verstuur je beter niet via e-mail, je plaatst dan best een link naar de locatie in bv. Google Drive. De maximale grootte van een e-mail is 10MB, inclusief het bericht. Als je grote bestanden verstuurt kan je ze ook proberen te verkleinen.",
     "translation": "Votre message est trop volumineux. Il est préférable de ne pas envoyer de grandes pièces jointes par e-mail ; il est préférable de placer un lien vers l'emplacement dans Google Drive, par exemple. La taille maximale d'un e-mail est de 10 Mo, message inclus. Si vous envoyez de gros fichiers, vous pouvez également essayer de les réduire."
   },
+  "e8cc0b81-c481-4c74-bac0-2e110685cd20": {
+    "original": "Telefoonnummer",
+    "translation": "Numéro de téléphone"
+  },
   "e8d02ca3-9828-405b-a885-53982c54f6e8": {
     "original": "Uitgeschreven op",
     "translation": "Désinscrit le"
@@ -18395,6 +19207,10 @@
     "original": "Wijzig de status terug naar 'wacht op betaling'.",
     "translation": "Remettre le statut à 'en attente de paiement'."
   },
+  "e93fa1c0-31bc-4086-b45f-0198b629b207": {
+    "original": "Maak een keuze",
+    "translation": "Faites un choix"
+  },
   "e942f245-9e13-427b-960e-5500a2711a05": {
     "original": "Standaardtarief",
     "translation": "Tarif standard"
@@ -18422,6 +19238,10 @@
   "e97dabba-7c7f-4705-b5be-fa4ea9f701ed": {
     "original": "Je kan geen webshops maken, vraag aan de hoofdbeheerders om jou toegang te geven.",
     "translation": "Vous ne pouvez pas créer de boutiques en ligne, demandez aux administrateurs principaux de vous donner l'accès."
+  },
+  "e98ef894-3461-4c12-b38a-80f8c62db915": {
+    "original": "Adres",
+    "translation": "Adresse"
   },
   "e98f3227-23ff-4db5-9326-10bc43548738": {
     "original": "Vrije invoervelden",
@@ -18539,6 +19359,10 @@
     "original": "Openstaand bedrag",
     "translation": "Montant dû"
   },
+  "eb05aa2d-65c0-4ead-961e-3b110439550e": {
+    "original": "De toegepaste kortingen worden niet automatisch geregistreerd en doorgestuurd naar UiTPAS. Je ontvangt geen terugbetalingen van UiTPAS.",
+    "translation": "Les réductions appliquées ne sont pas automatiquement enregistrées ni transmises à UiTPAS. Vous ne recevrez pas de remboursements d'UiTPAS."
+  },
   "eb1bf015-9263-4f25-a7e4-f57b07342fb8": {
     "original": "Ouder toevoegen",
     "translation": "Ajouter un parent"
@@ -18643,6 +19467,10 @@
     "original": "Tetanusvaccinatie (klem)",
     "translation": "Vaccination antitétanique (tétanos)"
   },
+  "ec34d0df-2286-4a9c-a92f-8be39b219c52": {
+    "original": "Ongeldig jaar. Probeer in de vorm zoals 20/08/1995",
+    "translation": "Année invalide. Utilise le format 20/08/1995"
+  },
   "ec4ad440-8365-4f9e-b8f1-6fb4f50197b8": {
     "original": "Afhankelijk van de noodzaak van het deelnameattest moet je soms nog extra zaken vermelden voor bijvoorbeeld de mutualiteit. Dat kan je hier ingeven.",
     "translation": "En fonction de la nécessité de l'attestation de participation, vous devrez parfois mentionner des éléments supplémentaires pour, par exemple, la mutualité. Vous pouvez les saisir ici."
@@ -18670,6 +19498,10 @@
   "ecacb29b-6be5-4581-a0bd-5c0824b27cb9": {
     "original": "Te ontvangen bedragen",
     "translation": "Montants à recevoir"
+  },
+  "ecbacec8-3dc2-4b87-942d-e9ec2d35752e": {
+    "original": "Onleesbaar adres, mogelijks onbekend land",
+    "translation": "Adresse illisible, pays éventuellement inconnu"
   },
   "ecbe0afb-6a6c-4b67-8b11-3a75a182c344": {
     "original": "Documenten automatisch wijzigen",
@@ -18743,6 +19575,10 @@
     "original": "Dit document is nog een kladversie. Nu kan je alles nog wijzigen, maar ze is nog niet zichtbaar voor leden. Publiceer het document via de knop onderaan nadat je alles hebt nagekeken.",
     "translation": "Ce document est encore une ébauche. Vous pouvez encore tout modifier, mais il n'est pas encore visible pour les membres. Publiez le document via le bouton en bas après avoir tout vérifié."
   },
+  "edb1ddbe-37ad-4448-b133-d4578167e780": {
+    "original": "Koppelen aan",
+    "translation": "Associer à"
+  },
   "edcbd633-f0f9-4e7f-97bc-e91a6eb1fff0": {
     "original": "Onvolledig",
     "translation": "Incomplet"
@@ -18778,6 +19614,10 @@
   "ee16437e-ecc8-42c5-91ef-e2546c71ba12": {
     "original": "Om een beheerder toe te voegen, schrijf je een (nieuw) lid in en ken je dat lid de juiste functies toe.",
     "translation": "Pour ajouter un administrateur, inscrivez un (nouveau) membre et attribuez à ce membre les fonctions appropriées."
+  },
+  "ee25893a-c254-46fe-b441-5560c6aff841": {
+    "original": "De volgende keer zullen we deze keuze onthouden en geen automatische bevestigingsmail versturen.",
+    "translation": "La prochaine fois, nous retiendrons ce choix et ne transmettrons pas automatiquement d'e-mail de confirmation."
   },
   "ee2852cb-6458-4127-8ad0-3281cc286884": {
     "original": "Voorbeeld bekijken",
@@ -18883,6 +19723,10 @@
     "original": "Voornaam",
     "translation": "Prénom"
   },
+  "efcf2c9f-68c9-409e-8e0f-b11f73152d6b": {
+    "original": "Het is aan te bevelen om ook de geboortedatum van leden toe te voegen. Op die manier kunnen we met zekerheid detecteren of een lid al bestaat in het systeem, en dan kunnen we de informatie met elkaar combineren i.p.v. een nieuw lid aan te maken.",
+    "translation": "Il est conseillé d'ajouter également la date de naissance des membres. Cela nous permet d'identifier avec certitude si un membre existe déjà dans le système, et de fusionner les informations plutôt que de créer un nouveau membre."
+  },
   "efd71f7c-05d3-4bdc-ae46-13024d6527f0": {
     "original": "Naamloos",
     "translation": "Sans nom"
@@ -18890,6 +19734,10 @@
   "efe60194-1a71-45d2-9e12-f6965c266306": {
     "original": "Webshop geassocieerd aan dit item",
     "translation": "Boutique en ligne associée à cet élément"
+  },
+  "efec4f91-0618-4509-88a4-a8af49f5e04f": {
+    "original": "Inlezen mislukt, kijk na of dit wel een geldig bestand is",
+    "translation": "Échec de l'import, vérifiez que le fichier est valide"
   },
   "efeed776-7b4a-4f06-b755-04b1c615ff2d": {
     "original": "Leeftijdsgroepen",
@@ -19094,6 +19942,10 @@
   "f21f351e-d844-440c-9118-7a395459a5f1": {
     "original": "Tekstveld (één lijn)",
     "translation": "Champ de texte (une ligne)"
+  },
+  "f21f4f50-f541-4be6-9377-b573d641c227": {
+    "original": "Ondersteunde formaten zijn .xls, .xlsx of .csv",
+    "translation": "Les formats pris en charge sont .xls, .xlsx ou .csv"
   },
   "f22ff741-6a05-4b15-aa6a-16e3a197ac99": {
     "original": "Gestructureerde mededeling",
@@ -19443,6 +20295,10 @@
     "original": "Instellen",
     "translation": "Paramètres"
   },
+  "f6291892-674b-4c66-8855-4937f4d15b86": {
+    "original": "Er zijn geen prijzen beschikbaar om een apart UiTPAS kansentarief aan toe te voegen.",
+    "translation": "Aucun tarif disponible pour ajouter un tarif spécial UiTPAS séparé."
+  },
   "f6360ada-86e7-4ec8-86fb-fe9e750c4926": {
     "original": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
     "translation": "Vous ne pouvez pas vous inscrire à {group} car cette année est close."
@@ -19466,6 +20322,10 @@
   "f664f209-fa11-4816-a8e9-4ff7f7277158": {
     "original": "Gelijk aan...",
     "translation": "Égal à..."
+  },
+  "f674fdec-5cb4-421a-b53d-1a3f43c65649": {
+    "original": "Geboortedatum wijzigen naar {birthDay}",
+    "translation": "Modifier la date de naissance en {birthDay}"
   },
   "f675d723-b1b9-4abd-9e7c-0459c24e474b": {
     "original": "Deze activiteit is enkel zichtbaar voor leden die inschreven zijn bij deze vereniging.",
@@ -19511,6 +20371,10 @@
     "original": "Jouw vereniging betaalt {price} aan Stamhoofd, maar voor latere aansluitingen bedraagt het nu {priceReduced}.",
     "translation": "Votre association paie {price} à Stamhoofd, mais pour des affiliations ultérieures, le tarif est désormais de {priceReduced}."
   },
+  "f6e9cb12-9107-49d1-922a-fef46dc6e25e": {
+    "original": "Wachtlijst plaatsen voor {group}",
+    "translation": "Placer sur la liste d'attente pour {group}"
+  },
   "f6f77de7-7691-4512-bf95-e07d12e9a43c": {
     "original": "Tijdstip",
     "translation": "Heure"
@@ -19543,6 +20407,10 @@
     "original": "Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid.",
     "translation": "Utilisez ceci si vous souhaitez mettre le même document dans différentes versions à disposition du même membre."
   },
+  "f74aa987-0f92-4701-861d-2512efc5dda1": {
+    "original": "De UiTPAS integratie is niet compleet, contacteer de beheerder.",
+    "translation": "L’intégration UiTPAS n’est pas complète, contacte l’administrateur."
+  },
   "f768ec1f-c743-474a-b6c1-e05271c58a3c": {
     "original": "Jeugd",
     "translation": "Jeunesse"
@@ -19562,6 +20430,14 @@
   "f7821d11-0b71-4503-a8cb-18b2036611f1": {
     "original": "telefoonnummer van je vereniging",
     "translation": "numéro de téléphone de votre association"
+  },
+  "f78dea7f-d99d-4a0b-8557-0ff17d082dbb": {
+    "original": "'{value}' bevat te veel cijfers na de komma",
+    "translation": "'${value}' comporte trop de chiffres après la virgule"
+  },
+  "f792eda7-03b9-465d-807d-3d08ba148c8b": {
+    "original": "Je moet UiTPAS-nummers opgeven.",
+    "translation": "Tu dois renseigner les numéros UiTPAS."
   },
   "f79934ca-a26c-4728-9a5f-c9cec74d6b90": {
     "original": "Ben je zeker dat je deze bundelkorting wilt verwijderen?",
@@ -19719,6 +20595,10 @@
     "original": "annuleringskost voor inschrijving bij",
     "translation": "frais d'annulation pour l'inscription chez"
   },
+  "f956eedf-ca2e-4d8c-925d-434bf3adfd24": {
+    "original": "telefoonnummer",
+    "translation": "numéro de téléphone"
+  },
   "f957f196-7656-4e0a-9b33-7b18ced4f493": {
     "original": "Op naam van",
     "translation": "Au nom de"
@@ -19767,6 +20647,10 @@
     "original": "Is gelijk aan...",
     "translation": "Est égal à..."
   },
+  "f9fec81d-9d00-4748-b92e-bb8526106c34": {
+    "original": "Kijk deze fouten na",
+    "translation": "Vérifiez ces erreurs"
+  },
   "fa02d08e-aa63-41f0-b9d4-360011c0690d": {
     "original": "Beschrijving naast aankruisvakje",
     "translation": "Description à côté de la case à cocher"
@@ -19799,9 +20683,17 @@
     "original": "Je hebt niet voldoende rechten om deze aansluiting aan te passen",
     "translation": "Vous n'avez pas les droits suffisants pour modifier cette connexion"
   },
+  "fa61e548-6b55-4a19-884f-01bca675064c": {
+    "original": "Sommigen wel, anderen niet",
+    "translation": "Certains oui, d'autres non"
+  },
   "fa6ad9cc-81c6-4aab-857d-13168b0efeba": {
     "original": "Allergisch voor geneesmiddelen",
     "translation": "Allergies aux médicaments"
+  },
+  "fa6b77cc-0591-4611-a4f8-27a33f2eff1d": {
+    "original": "Deze prijs kan niet verwijderd worden omdat deze gebruikt wordt als basisprijs voor een UiTPAS kansentarief.",
+    "translation": "Ce prix ne peut pas être supprimé car il est utilisé comme prix de base pour un tarif social UiTPAS."
   },
   "fa6ca066-51cf-479f-be0a-adf42b328983": {
     "original": "Verplaats naar beneden",
@@ -19987,6 +20879,10 @@
     "original": "Bestellingen",
     "translation": "Commandes"
   },
+  "fc2d09ad-9c8d-4867-95f4-2ef7e82c655c": {
+    "original": "Verwijderen inschrijving voor {group}",
+    "translation": "Supprimer l'inscription pour {group}"
+  },
   "fc34f24a-1821-4ebc-a770-bf3368a98275": {
     "original": "Niet aangevinkt",
     "translation": "Non coché"
@@ -20047,9 +20943,17 @@
     "original": "Geen verenigingen beschikbaar in dit werkjaar",
     "translation": "Aucune association disponible pour cette année associative"
   },
+  "fd5d1976-55d5-4b6d-80d8-3d847772599e": {
+    "original": "Verwijderen",
+    "translation": "Supprimer"
+  },
   "fd5e3142-7a0e-4305-8a49-35f2f4d89083": {
     "original": "bv. 'Geen toestemming om foto's te maken'",
     "translation": "p. ex. « Aucune autorisation de prendre des photos »"
+  },
+  "fd679ae9-a363-40cf-86c0-1434f6fd9b7f": {
+    "original": "Geen wijziging aan inschrijvingen",
+    "translation": "Aucune modification aux inscriptions"
   },
   "fd68e1a7-6059-47fc-b7ad-fdfe4924a67d": {
     "original": "Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
@@ -20206,6 +21110,10 @@
   "ff791e99-3fe7-4f02-8219-32bcbeef2ab0": {
     "original": "Aangevinkt",
     "translation": "Coché"
+  },
+  "ff818d9d-658a-42cd-924e-75fc839aa9ea": {
+    "original": "Rijksregisternummer",
+    "translation": "Numéro de registre national"
   },
   "ff993893-62e4-459c-88e2-54b5bf760c13": {
     "original": "Registratie domein",
