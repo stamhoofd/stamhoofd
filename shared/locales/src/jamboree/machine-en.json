@@ -235,6 +235,10 @@
     "original": "Je kan een beheerder volledige toegang geven tot alle eenheden (en dus ook de leden van die eenheid), of per tag de toegang regelen.",
     "translation": "You can give an administrator full access to all units (and therefore also the members of that unit), or manage access per tag."
   },
+  "31bc55e4-1cf3-495a-8b35-686a4cc25f69": {
+    "original": "Je moet een hoofdbeheerder zijn om inactieve eenheden te bekijken",
+    "translation": "You need to be a lead administrator to view inactive units."
+  },
   "31e91d3b-16e5-4608-9390-75e61d4d090d": {
     "original": "Je kan het huidig scoutsjaar hier wijzigen. Zorg dat je voor dit scoutsjaar alle aansluitingen hebt ingesteld. Ga daarvoor naar 'aansluitingen en verzekeringen' en voeg het scoutsjaar toe en stel de nieuwe prijzen en periodes correct in.",
     "translation": "You can change the current scout year here. Make sure you have set up all affiliations for this scout year. Go to 'affiliations and insurance' and add the scout year and set the new prices and periods correctly."
@@ -294,6 +298,10 @@
   "3f4666f9-59b5-4a24-b1a7-9f820275c042": {
     "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Jamboree, maar dat is misschien niet altijd mogelijk.",
     "translation": "Here you can register members for an activity as an administrator. The most practical way is for each member to register themselves via Jamboree, but that may not always be possible."
+  },
+  "3fd23349-ffba-4291-be68-2d0c844e5754": {
+    "original": "Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Jamboree.",
+    "translation": "Upload an Excel or CSV file with the members you want to import. An Excel file is recommended, as CSV files can sometimes cause formatting issues. Make sure to name all columns, and link each column below to a field in Jamboree."
   },
   "40670ad7-7db1-4ec9-84df-68b32642042e": {
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar is afgesloten.",
@@ -371,6 +379,10 @@
     "original": "Eenheidsnummer",
     "translation": "Unit number"
   },
+  "4c7b94c4-1f14-4a8f-881a-a643b3591144": {
+    "original": "Eenheid niet gevonden",
+    "translation": "Unit not found"
+  },
   "4d995169-f792-40f5-addf-60d8aed00362": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Jamboree-API.",
     "translation": "Create API keys to access the Jamboree API."
@@ -410,6 +422,10 @@
   "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
     "original": "Gebruik de boekhoudmodule van deze eenheid om een zicht te krijgen op alle betalingen.",
     "translation": "Use the accounting module of this unit to get an overview of all payments."
+  },
+  "56e63fc2-5364-40db-bc51-f4446725bfd9": {
+    "original": "Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Jamboree overschrijven.",
+    "translation": "All members from your file already exist in the system. If you include columns with data fields, these will overwrite the data in Jamboree."
   },
   "57491b1b-a306-479e-9bc0-f0d4839a7f5c": {
     "original": "Stappenplan opstart scoutsjaar",
@@ -635,6 +651,10 @@
     "original": "Stel in welke soorten lokalen eenheden kunnen toevoegen",
     "translation": "Set which types of premises units can add"
   },
+  "77a3f842-960f-43fa-a9f2-fcac7d3ecc88": {
+    "original": "In dit overzicht staan enkel eenheden die al aangesloten zijn bij Jamboree. Een eenheid moet eerst aansluiten voor je kan inloggen.",
+    "translation": "This overview only shows units already affiliated with Jamboree. A unit must be affiliated first before you can log in."
+  },
   "78a012a9-3caa-405f-851d-429610138852": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een eenheid).",
     "translation": "{member} can only register with a valid and active registration (required registration with a unit)."
@@ -650,6 +670,10 @@
   "7a44f6f1-bb2f-4e46-93c2-afcae9db3f80": {
     "original": "Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Jamboree link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.",
     "translation": "Note: if you change the link to your webshop, some links in already sent emails may no longer work. The only exception is if you switch from a standard Jamboree link to your own domain name (then old links will continue to work). Only do this at the beginning of a sale."
+  },
+  "7a7e4a56-9d39-42cf-b4fa-930e43330756": {
+    "original": "Start je in het begin van jouw scoutsjaar en moeten leden sowieso allemaal (her)inschrijven? Dan raden we af om eerst alle leden te importeren.",
+    "translation": "Are you starting at the beginning of your scouts year and do all members need to (re)register anyway? Then we recommend not importing all members first."
   },
   "7b181446-ef56-4957-ad13-54644e6d0987": {
     "original": "Dit is een ongeldige situatie. Een schuld moet tussen verschillende eenheden zijn.",
@@ -683,6 +707,14 @@
     "original": "Je kan geen aansluitingen aanpassen in een ongeldig scoutsjaar",
     "translation": "You cannot change affiliations in an invalid scout year"
   },
+  "82d2825a-998b-4c0d-b109-f78ccc8d376f": {
+    "original": "Huidige scoutsjaar",
+    "translation": "Current scouts year"
+  },
+  "83877c6a-5330-4299-af39-fdbac4501dff": {
+    "original": "We zijn niet 100% zeker dat deze leden uit Jamboree en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Jamboree) overschrijven als je ze aanvinkt.",
+    "translation": "We are not 100% certain these members from Jamboree and your file refer to the same person (e.g. due to a typo or an error in the date of birth). Can you check this manually? The data from your file on the left will overwrite the data from Jamboree on the right if you select them."
+  },
   "840ac72d-d4b3-40ea-afb4-b0109e88c640": {
     "original": "Naam van je eenheid (kort)",
     "translation": "Name of your unit (short)"
@@ -710,6 +742,10 @@
   "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
     "original": "Naam eenheid",
     "translation": "Unit name"
+  },
+  "8b70623b-ba97-468f-90aa-b1c149393cea": {
+    "original": "In welk scoutsjaar wil je de leden inschrijven?",
+    "translation": "For which scouts year do you want to register the members?"
   },
   "8b9ef669-554d-4ee2-b3bd-2ea12f85fa26": {
     "original": "Bepaal wie een e-mail krijgt als notificatie van een kampmelding op niveau van een eenheid, naast de indiener van de melding.",
@@ -879,9 +915,17 @@
     "original": "Jouw groep bevindt zich in een ander scoutsjaar",
     "translation": "Your group is in a different scout year"
   },
+  "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
+    "original": "In dit overzicht staan enkel eenheden die al aangesloten zijn bij Jamboree. Je kan zelf een nieuwe eenheid aansluiten via de knop 'Aansluiten' bovenaan.",
+    "translation": "This overview only shows units already affiliated with Jamboree. You can connect a new unit yourself via the 'Affiliation' button at the top."
+  },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke eenheid is niet voldoende (wordt niet geaccepteerd)",
     "translation": "For Mollie you need a non-profit organisation. An actual unit is not sufficient (not accepted)"
+  },
+  "abd71533-048e-45c7-baf8-78769e5287de": {
+    "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Jamboree worden overgenomen.",
+    "translation": "{count} members on your list are already registered. Their current registration(s) will not be changed, and they won't receive new registrations. However, other data from your file will still be updated in Jamboree."
   },
   "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": {
     "original": "Beheer hier alle personen die toegang hebben tot Jamboree, en wijzig hun toegangsrechten.",
@@ -959,6 +1003,10 @@
     "original": "Naam van de eenheid of van het platform",
     "translation": "Name of the unit or platform"
   },
+  "b7838e09-f22e-441d-a36b-9e78599ca2e9": {
+    "original": "Jamboree zal {count} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.",
+    "translation": "Jamboree will move {count} registrations or waiting list registrations for existing members based on your file."
+  },
   "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
     "original": "Unieke eenheden",
     "translation": "Unique units"
@@ -982,6 +1030,10 @@
   "bc89861d-a799-4100-b06c-29d6808ba8d2": {
     "original": "Als je een betaling uitvoert in naam van je eenheid, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
     "translation": "If you make a payment in the name of your unit, it is necessary to fill in billing data with company details."
+  },
+  "be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8": {
+    "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Jamboree overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
+    "translation": "{existingCount} {memberTranslation} from your file are already in the system ({total} in total). You will overwrite information in Jamboree with data from your file for these members. Please note, this action cannot be undone."
   },
   "becc82f0-4195-4a17-b3f5-03f305582e4a": {
     "original": "Een feitelijke eenheid is niet geregistreerd en heeft geen ondernemingsnummer",
@@ -1162,6 +1214,10 @@
   "daf8a992-77cd-4c20-8bca-5c692fd1e431": {
     "original": "bv. https://www.eenheid.be/privacy",
     "translation": "e.g. https://www.unit.be/privacy"
+  },
+  "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
+    "original": "De datum van inschrijving ligt buiten het geselecteerde scoutsjaar.",
+    "translation": "The registration date is outside the selected scouts year."
   },
   "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": {
     "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",

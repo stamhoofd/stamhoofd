@@ -59,6 +59,10 @@
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de groep) als een kampmelding wordt afgekeurd",
     "translation": "E-mail envoyé au déposant (et aux personnes de contact du groupe configurées) lorsqu'une déclaration de camp est refusée"
   },
+  "0c4eaa6c-d6c6-411f-af6d-aa73233cf2c0": {
+    "original": "Inschrijvingen activeren via ‘Mijn account’ (enkel voor leden)",
+    "translation": "Activer les inscriptions via 'Mon compte' (réservé aux membres)"
+  },
   "0c827ab2-42af-4b19-9160-a69475039314": {
     "original": "Niet alle gegevens van jouw groep werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Toutes les données de votre groupe n'ont pas été saisies dans le tableau de bord Stripe. Vérifiez si tout a été saisi. Les éléments suivants pourraient manquer :"
@@ -70,6 +74,10 @@
   "0e392740-3dd9-4454-b33f-320465f1a52c": {
     "original": "Optioneel. Indien niet ingevuld worden automatisch geschikte instructies getoond.",
     "translation": "Optionnel. Si non rempli, des instructions appropriées seront affichées automatiquement."
+  },
+  "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
+    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Ravot). Zorg dat deze overeenkomt met de namen in Ravot.",
+    "translation": "'${group}' n’est pas un groupe d'inscription valide (il n’existe pas dans Ravot). Vérifie qu’il correspond aux noms utilisés dans Ravot."
   },
   "0fa660da-1e74-4940-af88-eafafb1094b6": {
     "original": "De URI van de groep is te kort",
@@ -251,6 +259,10 @@
     "original": "Je kan een beheerder volledige toegang geven tot alle groepen (en dus ook de leden van die groep), of per tag de toegang regelen.",
     "translation": "Vous pouvez donner à un administrateur un accès complet à tous les groupes (et donc aussi aux membres de ce groupe), ou gérer l'accès par balise."
   },
+  "31bc55e4-1cf3-495a-8b35-686a4cc25f69": {
+    "original": "Je moet een hoofdbeheerder zijn om inactieve groepen te bekijken",
+    "translation": "Vous devez être administrateur principal pour consulter les groupes inactifs."
+  },
   "34aff020-6017-4c23-85b1-44a692988ee6": {
     "original": "Kies een groep",
     "translation": "Choisissez un groupe"
@@ -298,6 +310,10 @@
   "3f4666f9-59b5-4a24-b1a7-9f820275c042": {
     "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Ravot, maar dat is misschien niet altijd mogelijk.",
     "translation": "Ici, en tant qu'administrateur, vous pouvez inscrire des membres à une activité. Le plus pratique est que chaque membre s'inscrive lui-même via Ravot, mais ce n'est peut-être pas toujours possible."
+  },
+  "3fd23349-ffba-4291-be68-2d0c844e5754": {
+    "original": "Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Ravot.",
+    "translation": "Chargez un fichier Excel ou CSV contenant les membres à importer. Nous recommandons d'utiliser un fichier Excel car les CSV peuvent parfois créer des problèmes de formatage. Assurez-vous de nommer chaque colonne et d'associer chaque colonne à une valeur dans Ravot ci-dessous."
   },
   "405a811e-ebb1-4948-84cd-8fb5860104e6": {
     "original": "Ravot",
@@ -379,6 +395,10 @@
     "original": "Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.",
     "translation": "Chaque groupe local doit lier un groupe d'inscription standard à chaque groupe d'âge. Cela permet de relier le nom du groupe à l'appellation générale de la fédération."
   },
+  "4c7b94c4-1f14-4a8f-881a-a643b3591144": {
+    "original": "Groep niet gevonden",
+    "translation": "Groupe non trouvé."
+  },
   "4d995169-f792-40f5-addf-60d8aed00362": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Ravot-API.",
     "translation": "Créez des clés API pour accéder à l'API Ravot."
@@ -422,6 +442,10 @@
   "5690126d-651e-475d-9503-cfe6825a9735": {
     "original": "Betaling mislukt",
     "translation": "Paiement échoué"
+  },
+  "56e63fc2-5364-40db-bc51-f4446725bfd9": {
+    "original": "Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Ravot overschrijven.",
+    "translation": "Tous les membres de votre fichier se trouvent déjà dans le système. Si vous avez des colonnes avec des champs de données, elles viendront écraser les informations existantes dans Ravot."
   },
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
@@ -643,6 +667,10 @@
     "original": "Bekijk de aangepaste overeenkomsten",
     "translation": "Consultez les accords modifiés"
   },
+  "77a3f842-960f-43fa-a9f2-fcac7d3ecc88": {
+    "original": "In dit overzicht staan enkel groepen die al aangesloten zijn bij Ravot. Een groep moet eerst aansluiten voor je kan inloggen.",
+    "translation": "Ce récapitulatif affiche uniquement les groupes déjà affiliés à Ravot. Un groupe doit d'abord s'affilier avant que vous puissiez vous connecter."
+  },
   "78a012a9-3caa-405f-851d-429610138852": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een lokale groep).",
     "translation": "{member} ne peut s'inscrire qu'avec une inscription active et valable (inscription obligatoire dans un groupe local)."
@@ -663,6 +691,10 @@
     "original": "Dit is een ongeldige situatie. Een schuld moet tussen verschillende groepen zijn.",
     "translation": "Ceci est une situation invalide. Une dette doit exister entre différents groupes."
   },
+  "7b374a35-4472-4e2f-aa48-74f42e5e8a41": {
+    "original": "Portaal voor beroepsmedewerkers",
+    "translation": "Portail pour les employés professionnels"
+  },
   "8012abfe-4a7e-4864-88e5-fcf02f851705": {
     "original": "De link naar de website van jouw groep.",
     "translation": "Le lien vers le site web de votre groupe."
@@ -670,6 +702,10 @@
   "81c91169-db1e-4819-8716-5382ffbaa43b": {
     "original": "Het groepsnummer is een unieke code voor deze groep. Deze wordt in de URL-balk van de browser gebruikt.",
     "translation": "Le numéro de groupe est un code unique pour ce groupe. Il est utilisé dans la barre d'URL du navigateur."
+  },
+  "83877c6a-5330-4299-af39-fdbac4501dff": {
+    "original": "We zijn niet 100% zeker dat deze leden uit Ravot en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Ravot) overschrijven als je ze aanvinkt.",
+    "translation": "Nous ne sommes pas certains à 100 % que ces membres de Ravot et de votre fichier désignent la même personne (par exemple à cause d'une faute de frappe ou d'une erreur dans la date de naissance). Pouvez-vous vérifier cela manuellement ? Les données à gauche de votre fichier écraseront celles de droite (de Ravot) si vous les sélectionnez."
   },
   "840ac72d-d4b3-40ea-afb4-b0109e88c640": {
     "original": "Naam van je groep (kort)",
@@ -903,6 +939,10 @@
     "original": "Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.",
     "translation": "Votre groupe se trouve dans un exercice différent de celui de KSA National."
   },
+  "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
+    "original": "In dit overzicht staan enkel groepen die al aangesloten zijn bij Ravot. Je kan zelf een nieuwe groep aansluiten via de knop 'Aansluiten' bovenaan.",
+    "translation": "Ce récapitulatif affiche uniquement les groupes déjà affiliés à Ravot. Vous pouvez vous-même affilier un nouveau groupe grâce au bouton 'S'affilier' en haut."
+  },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke groep is niet voldoende (wordt niet geaccepteerd)",
     "translation": "Pour Mollie, vous avez besoin d'une ASBL. Un groupe de fait ne suffit pas (n'est pas accepté)"
@@ -910,6 +950,10 @@
   "ab858fd6-4451-4d88-869e-be425a661169": {
     "original": "Laag",
     "translation": "Bas"
+  },
+  "abd71533-048e-45c7-baf8-78769e5287de": {
+    "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Ravot worden overgenomen.",
+    "translation": "{count} membres de votre liste sont déjà inscrits. Leur(s) inscription(s) actuelle(s) ne seront pas modifiées, et ils ne recevront pas de nouvelles inscriptions. Les autres informations de votre fichier seront toutefois importées dans Ravot."
   },
   "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": {
     "original": "Beheer hier alle personen die toegang hebben tot Ravot, en wijzig hun toegangsrechten.",
@@ -979,6 +1023,10 @@
     "original": "Naam van de groep of van het platform",
     "translation": "Nom du groupe ou de la plateforme"
   },
+  "b7838e09-f22e-441d-a36b-9e78599ca2e9": {
+    "original": "Ravot zal {count} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.",
+    "translation": "Ravot déplacera {count} inscriptions ou inscriptions sur liste d'attente pour les membres existants selon votre fichier."
+  },
   "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
     "original": "Unieke groepen",
     "translation": "Groupes uniques"
@@ -1006,6 +1054,10 @@
   "bc89861d-a799-4100-b06c-29d6808ba8d2": {
     "original": "Als je een betaling uitvoert in naam van je groep, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
     "translation": "Si vous effectuez un paiement au nom de votre groupe, il est nécessaire de saisir des données de facturation avec des données d'entreprise."
+  },
+  "be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8": {
+    "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Ravot overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
+    "translation": "{existingCount} {memberTranslation} de votre fichier sont déjà présents dans le système ({total} au total). Les informations concernant ces membres dans Ravot seront remplacées par celles de votre fichier. Attention, cette action est irréversible."
   },
   "be918896-7e92-4ac7-9cbe-fba5afdd8120": {
     "original": "Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag",

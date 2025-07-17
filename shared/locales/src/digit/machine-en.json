@@ -51,6 +51,10 @@
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de groep) als een kampmelding wordt afgekeurd",
     "translation": "Email sent to the petitioner (and the group's configured contact persons) when a camp notification is rejected"
   },
+  "0c4eaa6c-d6c6-411f-af6d-aa73233cf2c0": {
+    "original": "Inschrijvingen activeren via ‘Mijn account’ (enkel voor leden)",
+    "translation": "Enable registrations via 'My account' (members only)"
+  },
   "0c827ab2-42af-4b19-9160-a69475039314": {
     "original": "Niet alle gegevens van jouw groep werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Not all your group's data was filled in the Stripe dashboard. Check if everything was filled in. The following items may be missing:"
@@ -58,6 +62,10 @@
   "0d7ce596-ad47-490d-b619-0cb1f1ae84ec": {
     "original": "Leden kunnen hun openstaand bedrag betalen door naar ‘Mijn account’ te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar ‘Mijn account’ te gaan).",
     "translation": "Members can pay their outstanding amount by going to ‘My account’. At the top, under 'quick actions', they will see a button with which they can pay their outstanding amount (you can send an email with a login button to go to ‘My account’)."
+  },
+  "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
+    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Ravot). Zorg dat deze overeenkomt met de namen in Ravot.",
+    "translation": "'{group}' is not a valid registration group (it does not exist in Ravot). Make sure it matches the group names in Ravot."
   },
   "0fa660da-1e74-4940-af88-eafafb1094b6": {
     "original": "De URI van de groep is te kort",
@@ -199,6 +207,10 @@
     "original": "Je kan een beheerder volledige toegang geven tot alle groepen (en dus ook de leden van die groep), of per tag de toegang regelen.",
     "translation": "You can give an administrator full access to all groups (and therefore also the members of that group), or control access per tag."
   },
+  "31bc55e4-1cf3-495a-8b35-686a4cc25f69": {
+    "original": "Je moet een hoofdbeheerder zijn om inactieve groepen te bekijken",
+    "translation": "You need to be a main administrator to view inactive groups."
+  },
   "34aff020-6017-4c23-85b1-44a692988ee6": {
     "original": "Kies een groep",
     "translation": "Choose a group"
@@ -238,6 +250,10 @@
   "3f4666f9-59b5-4a24-b1a7-9f820275c042": {
     "original": "Hier kan je als beheerder leden inschrijven voor een activiteit. Het meest praktische is dat elk lid zichtzelf inschrijft via Ravot, maar dat is misschien niet altijd mogelijk.",
     "translation": "Here you can register members for an activity as an administrator. The most practical thing is that each member registers themselves via Ravot, but that may not always be possible."
+  },
+  "3fd23349-ffba-4291-be68-2d0c844e5754": {
+    "original": "Upload een Excel of CSV-bestand met de leden die je wilt importeren. Een Excel-bestand is aan te bevelen aangezien CSV-bestanden soms voor formateringsproblemen zorgen. Zorg dat je alle kolommen een naam geeft en koppel hieronder de kolom met een waarde in Ravot.",
+    "translation": "Upload an Excel or CSV file with the members you want to import. An Excel file is recommended, as CSV files can sometimes cause formatting issues. Make sure to name all columns, and link each column below to a field in Ravot."
   },
   "405a811e-ebb1-4948-84cd-8fb5860104e6": {
     "original": "Ravot",
@@ -303,6 +319,10 @@
     "original": "Elke lokale groep moet per inschrijvingsgroep een standaard leeftijdsgroep koppelen. Op die manier kan de benaming van de groep gekoppeld worden aan de algemene benaming van de koepel.",
     "translation": "Each local group must link a default age group to every registration group. This way, the group's naming can be matched to the general naming used by the national organization."
   },
+  "4c7b94c4-1f14-4a8f-881a-a643b3591144": {
+    "original": "Groep niet gevonden",
+    "translation": "Group not found."
+  },
   "4d995169-f792-40f5-addf-60d8aed00362": {
     "original": "Maak API-keys aan om toegang te krijgen tot de Ravot-API.",
     "translation": "Create API keys to access the Ravot API."
@@ -338,6 +358,10 @@
   "550e876b-f397-44a5-9e0a-fb5ce6df3a40": {
     "original": "Gebruik de boekhoudmodule van deze groep om een zicht te krijgen op alle betalingen.",
     "translation": "Use this group's bookkeeping module to get an overview of all payments."
+  },
+  "56e63fc2-5364-40db-bc51-f4446725bfd9": {
+    "original": "Alle leden uit jouw bestand zitten al in het systeem. Als je kolommen hebt met gegevensvelden gaan die de gegevens in Ravot overschrijven.",
+    "translation": "All members from your file already exist in the system. If you include columns with data fields, these will overwrite the data in Ravot."
   },
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
@@ -531,6 +555,10 @@
     "original": "Stel in welke soorten lokalen groepen kunnen toevoegen",
     "translation": "Choose which types of premises groups can add"
   },
+  "77a3f842-960f-43fa-a9f2-fcac7d3ecc88": {
+    "original": "In dit overzicht staan enkel groepen die al aangesloten zijn bij Ravot. Een groep moet eerst aansluiten voor je kan inloggen.",
+    "translation": "This overview only shows groups already affiliated with Ravot. A group must be affiliated before you can log in."
+  },
   "78a012a9-3caa-405f-851d-429610138852": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een lokale groep).",
     "translation": "{member} can only register with a valid and active registration (registration with a local group is required)."
@@ -551,6 +579,10 @@
     "original": "Dit is een ongeldige situatie. Een schuld moet tussen verschillende groepen zijn.",
     "translation": "This is an invalid situation. A debt must be between different groups."
   },
+  "7b374a35-4472-4e2f-aa48-74f42e5e8a41": {
+    "original": "Portaal voor beroepsmedewerkers",
+    "translation": "Portal for staff members"
+  },
   "8012abfe-4a7e-4864-88e5-fcf02f851705": {
     "original": "De link naar de website van jouw groep.",
     "translation": "The link to your group's website."
@@ -558,6 +590,10 @@
   "81c91169-db1e-4819-8716-5382ffbaa43b": {
     "original": "Het groepsnummer is een unieke code voor deze groep. Deze wordt in de URL-balk van de browser gebruikt.",
     "translation": "The group number is a unique code for this group. This is used in the URL bar of the browser."
+  },
+  "83877c6a-5330-4299-af39-fdbac4501dff": {
+    "original": "We zijn niet 100% zeker dat deze leden uit Ravot en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Ravot) overschrijven als je ze aanvinkt.",
+    "translation": "We are not 100% certain these members from Ravot and your file are the same person (e.g. due to a typo or an error in the date of birth). Can you verify this manually? The data from your file on the left will overwrite the data from Ravot on the right if you select them."
   },
   "840ac72d-d4b3-40ea-afb4-b0109e88c640": {
     "original": "Naam van je groep (kort)",
@@ -751,9 +787,17 @@
     "original": "Jouw groep bevindt zich in een ander werkjaar dan KSA Nationaal.",
     "translation": "Your group is in a different work year than KSA National."
   },
+  "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
+    "original": "In dit overzicht staan enkel groepen die al aangesloten zijn bij Ravot. Je kan zelf een nieuwe groep aansluiten via de knop 'Aansluiten' bovenaan.",
+    "translation": "This overview only shows groups already affiliated with Ravot. You can connect a new group yourself via the 'Affiliation' button at the top."
+  },
   "ab21ae18-0181-44ea-b41d-ff61c9358858": {
     "original": "Voor Mollie heb je een VZW nodig. Een feitelijke groep is niet voldoende (wordt niet geaccepteerd)",
     "translation": "For Mollie you need a non-profit organisation. An actual group is not sufficient (not accepted)"
+  },
+  "abd71533-048e-45c7-baf8-78769e5287de": {
+    "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Ravot worden overgenomen.",
+    "translation": "{count} members on your list are already registered. Their current registration(s) will not be changed, and they won't receive new registrations. However, other data from your file will be updated in Ravot."
   },
   "ac3b2a14-e029-404c-9fe1-2aab4279a3ac": {
     "original": "Beheer hier alle personen die toegang hebben tot Ravot, en wijzig hun toegangsrechten.",
@@ -811,6 +855,10 @@
     "original": "Naam van de groep of van het platform",
     "translation": "Name of the group or platform"
   },
+  "b7838e09-f22e-441d-a36b-9e78599ca2e9": {
+    "original": "Ravot zal {count} inschrijvingen of wachtlijst inschrijvingen verplaatsen voor bestaande leden op basis van jouw bestand.",
+    "translation": "Ravot will move {count} registrations or waiting list registrations for existing members based on your file."
+  },
   "b789017f-58d2-438b-b73a-2a4d075e3c5b": {
     "original": "Unieke groepen",
     "translation": "Unique groups"
@@ -830,6 +878,10 @@
   "bc89861d-a799-4100-b06c-29d6808ba8d2": {
     "original": "Als je een betaling uitvoert in naam van je groep, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
     "translation": "If you make a payment in the name of your group, it is necessary to fill in billing data with company details."
+  },
+  "be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8": {
+    "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Ravot overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
+    "translation": "{existingCount} {memberTranslation} from your file are already in the system ({total} in total). You will overwrite information in Ravot with data from your file for these members. Please note, this action cannot be undone."
   },
   "becc82f0-4195-4a17-b3f5-03f305582e4a": {
     "original": "Een feitelijke groep is niet geregistreerd en heeft geen ondernemingsnummer",
