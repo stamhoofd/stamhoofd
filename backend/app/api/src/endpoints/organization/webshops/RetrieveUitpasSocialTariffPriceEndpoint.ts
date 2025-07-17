@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 
-import { UitpasNumberValidator } from '../../../helpers/UitpasNumberValidator';
 import { Decoder } from '@simonbackx/simple-encoding';
+import { UitpasService } from '../../../services/UitpasService';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UitpasPriceCheckRequest;
@@ -61,7 +61,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 });
             }
             try {
-                await UitpasNumberValidator.checkUitpasNumbers(request.body.uitpasNumbers); // Throws if invalid
+                await UitpasService.checkUitpasNumbers(request.body.uitpasNumbers); // Throws if invalid
             }
             catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
