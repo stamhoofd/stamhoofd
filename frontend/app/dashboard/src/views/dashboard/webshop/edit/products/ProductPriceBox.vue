@@ -5,8 +5,9 @@
         </STInputBox>
 
         <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)">
-            <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="false /* for official UiTPAS flow */ " />
-            <p v-if="false /* for official UiTPAS flow */ " class="style-description-small">
+            <PriceInput v-model="price" :v-if="!uitpasSocialTariffLoading" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="!!product.uitpasEventId" />
+            <STInputBox :v-if="uitpasSocialTariffLoading" :placeholder="$t('Aan het berekenen...')" :disabled="true" />
+            <p v-if="!!product.uitpasEventId" class="style-description-small">
                 {{ $t('3028ddfe-f756-4b75-b3d2-e9281dd75c63') }}
             </p>
         </STInputBox>
@@ -101,7 +102,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, CenteredMessage, useFeatureFlag } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     errorBox: ErrorBox | null;
@@ -113,6 +114,8 @@ const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): 
 const uitpasFeature = useFeatureFlag()('uitpas');
 
 const patchedProductPrice = computed(() => props.productPrice);
+
+const uitpasSocialTariffLoading = ref(false);
 
 const name = computed({
     get: () => patchedProductPrice.value.name,
@@ -215,6 +218,15 @@ const uitpasBaseProductPriceId = computed({
         }
         */
         addPricePatch(ProductPrice.patch({ uitpasBaseProductPriceId: value }));
+        if (!!props.product.uitpasEventId && value) {
+            // call to backend to get the social tariff given this base price
+            uitpasSocialTariffLoading.value = true;
+            price.value = 10.00;
+            // wait 50ms
+            setTimeout(() => {
+                uitpasSocialTariffLoading.value = false;
+            }, 50);
+        }
     },
 });
 
@@ -233,10 +245,13 @@ const enableUitpasSocialTariff = computed({
             return;
         }
         if (!uitpasBaseProductPriceId.value) {
-            // If no uitpas base product price is set, we set it to the first available one.
+            // If no uitpas base product price is already set, we set it to the first available one.
             CenteredMessage.confirm($t('eb05aa2d-65c0-4ead-961e-3b110439550e'), $t('613363e2-39ae-46c1-a31e-ace703ddfdd4'), undefined, $t('088a8928-cdae-4886-9f02-bb0510a9c59b'), false).then((isConfirmed: boolean) => {
                 if (isConfirmed) {
                     uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+                    if (props.product.uitpasEventId) {
+                        // call to backend to get the social tariff with this base price
+                    }
                 }
                 else {
                     uitpasBaseProductPriceId.value = null;

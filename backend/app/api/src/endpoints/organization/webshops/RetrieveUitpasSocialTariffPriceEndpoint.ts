@@ -4,6 +4,7 @@ import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/st
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { UitpasService } from '../../../services/uitpas/UitpasService';
+import { Context } from '../../../helpers/Context';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UitpasPriceCheckRequest;
@@ -31,6 +32,20 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
             if (!request.body.uitpasNumbers) {
                 // STATIC CHECK
                 // request shouldn't include a reduced price
+
+                // this call should be authenticated, as it is done from the webshop settings
+                const organization = await Context.setOrganizationScope();
+                await Context.authenticate();
+
+                const reducedPrice = await UitpasService.getSocialTariffForEvent(
+                    organization.id,
+                    request.body.basePrice,
+                    request.body.uitpasEventId,
+                );
+                const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
+                    prices: [reducedPrice],
+                });
+                return new Response(uitpasPriceCheckResponse);
             }
             else {
                 // OFFICIAL FLOW with an UiTPAS number
