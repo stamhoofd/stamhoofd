@@ -97,6 +97,7 @@ export * from './src/GroupPriceDiscount.js';
 export * from './src/members/MembershipStatus.js';
 export * from './src/AppliedRegistrationDiscount.js';
 export * from './src/MemberAdmin.js';
+export * from './src/UitpasClientCredentialsStatus.js';
 
 export * from './src/LoadedPermissions.js';
 
@@ -129,6 +130,8 @@ export * from './src/endpoints/VerifyEmailRequest.js';
 export * from './src/endpoints/WebshopUriAvailabilityResponse.js';
 export * from './src/endpoints/UitpasPriceCheckRequest.js';
 export * from './src/endpoints/UitpasOrganizersResponse.js';
+export * from './src/endpoints/UitpasClientIdAndSecret.js';
+export * from './src/endpoints/UitpasSetClientCredentialsResponse.js';
 
 // email
 export * from './src/email/EditorSmartButton.js';
