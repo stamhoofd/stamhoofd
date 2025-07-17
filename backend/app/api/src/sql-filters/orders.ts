@@ -1,6 +1,6 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLModernFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 
-export const orderFilterCompilers: SQLModernFilterDefinitions = {
+export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     // only backend (not useful to filter on these in the frontend)
     organizationId: createColumnFilter({

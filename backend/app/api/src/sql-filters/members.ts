@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLModernFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
@@ -11,7 +11,7 @@ const membersTable = SQL.table(Member.table);
 /**
  * Defines how to filter members in the database from StamhoofdFilter objects
  */
-export const memberFilterCompilers: SQLModernFilterDefinitions = {
+export const memberFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     'id': createColumnFilter({
         expression: SQL.column(membersTable, 'id'),

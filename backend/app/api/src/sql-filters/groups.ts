@@ -1,6 +1,6 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
-export const groupFilterCompilers: SQLModernFilterDefinitions = {
+export const groupFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),

@@ -1,9 +1,9 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLModernFilterDefinitions, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLFilterDefinitions, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test } from '../utils';
 
 describe('Wildcards', () => {
-    const filters: SQLModernFilterDefinitions = {
+    const filters: SQLFilterDefinitions = {
         ...baseModernSQLFilterCompilers,
         name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
         age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),

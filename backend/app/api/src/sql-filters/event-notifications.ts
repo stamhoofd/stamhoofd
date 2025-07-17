@@ -1,10 +1,10 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 import { eventFilterCompilers } from './events';
 import { organizationFilterCompilers } from './organizations';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
 
-export const eventNotificationsFilterCompilers: SQLModernFilterDefinitions = {
+export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),

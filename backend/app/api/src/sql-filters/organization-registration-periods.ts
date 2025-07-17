@@ -1,6 +1,6 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
-export const organizationRegistrationPeriodFilterCompilers: SQLModernFilterDefinitions = {
+export const organizationRegistrationPeriodFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),

@@ -4,7 +4,7 @@ import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods';
 import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods';
 
@@ -13,7 +13,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<RegistrationPeriodStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLModernFilterDefinitions = registrationPeriodFilterCompilers;
+const filterCompilers: SQLFilterDefinitions = registrationPeriodFilterCompilers;
 const sorters: SQLSortDefinitions<RegistrationPeriod> = registrationPeriodSorters;
 
 export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {

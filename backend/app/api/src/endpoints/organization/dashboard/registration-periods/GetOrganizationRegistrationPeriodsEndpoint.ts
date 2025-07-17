@@ -4,7 +4,7 @@ import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { organizationRegistrationPeriodFilterCompilers } from '../../../../sql-filters/organization-registration-periods';
@@ -15,7 +15,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<OrganizationRegistrationPeriodStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLModernFilterDefinitions = organizationRegistrationPeriodFilterCompilers;
+const filterCompilers: SQLFilterDefinitions = organizationRegistrationPeriodFilterCompilers;
 const sorters: SQLSortDefinitions<OrganizationRegistrationPeriod> = organizationRegistrationPeriodSorters;
 
 export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {

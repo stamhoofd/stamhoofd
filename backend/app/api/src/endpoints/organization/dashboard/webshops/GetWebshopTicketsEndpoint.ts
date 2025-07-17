@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Ticket } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, TicketPrivate } from '@stamhoofd/structures';
 
-import { applySQLSorter, compileToModernSQLFilter, SQL, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -15,7 +15,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<TicketPrivate[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLModernFilterDefinitions = ticketFilterCompilers;
+const filterCompilers: SQLFilterDefinitions = ticketFilterCompilers;
 const sorters: SQLSortDefinitions<Ticket> = ticketSorters;
 
 export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {

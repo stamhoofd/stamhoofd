@@ -1,7 +1,7 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLModernFilterDefinitions, SQLValueType, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
 import { SetupStepType } from '@stamhoofd/structures';
 
-export const organizationFilterCompilers: SQLModernFilterDefinitions = {
+export const organizationFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('organizations', 'id'),

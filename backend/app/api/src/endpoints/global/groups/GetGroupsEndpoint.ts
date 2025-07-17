@@ -4,7 +4,7 @@ import { assertSort, CountFilteredRequest, getSortFilter, Group as GroupStruct, 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { groupFilterCompilers } from '../../../sql-filters/groups';
@@ -15,7 +15,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<GroupStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLModernFilterDefinitions = groupFilterCompilers;
+const filterCompilers: SQLFilterDefinitions = groupFilterCompilers;
 const sorters: SQLSortDefinitions<Group> = groupSorters;
 
 export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {

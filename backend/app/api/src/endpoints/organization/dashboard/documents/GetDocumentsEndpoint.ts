@@ -3,7 +3,7 @@ import { Document } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { applySQLSorter, compileToModernSQLFilter, SQL, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -15,7 +15,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<DocumentStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLModernFilterDefinitions = documentFilterCompilers;
+const filterCompilers: SQLFilterDefinitions = documentFilterCompilers;
 const sorters: SQLSortDefinitions<Document> = documentSorters;
 
 /**

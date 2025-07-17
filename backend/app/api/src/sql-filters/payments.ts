@@ -1,10 +1,10 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLModernFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments';
 
 /**
  * Defines how to filter payments in the database from StamhoofdFilter objects
  */
-export const paymentFilterCompilers: SQLModernFilterDefinitions = {
+export const paymentFilterCompilers: SQLFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),

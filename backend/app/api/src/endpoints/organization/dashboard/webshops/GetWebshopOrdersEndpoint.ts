@@ -2,7 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Order } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQL, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
@@ -17,7 +17,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLModernFilterDefinitions = orderFilterCompilers;
+const filterCompilers: SQLFilterDefinitions = orderFilterCompilers;
 const sorters: SQLSortDefinitions<Order> = orderSorters;
 
 export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
