@@ -74,7 +74,7 @@ jobs:
         run: cd backend/app/api && yarn build && yarn test --bail
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
-        if: ${{ failure() }}
+        if: ${{ failure() }} && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -125,7 +125,7 @@ jobs:
         run: cd backend/shared/models && yarn build && yarn test --bail
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
-        if: ${{ failure() }}
+        if: ${{ failure() }} && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -169,7 +169,7 @@ jobs:
         run: cd shared/structures && yarn test --bail
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
-        if: ${{ failure() }}
+        if: ${{ failure() }} && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -226,7 +226,7 @@ jobs:
         run: NODE_ENV=test bash test/boot/boot-test.sh
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
-        if: ${{ failure() }}
+        if: ${{ failure() }} && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -268,7 +268,7 @@ jobs:
         run: yarn -s frontend:types
       - name: Notify Slack of failure
         uses: slackapi/slack-github-action@v2.0.0
-        if: ${{ failure() }}
+        if: ${{ failure() }} && github.event_name != 'pull_request'
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
