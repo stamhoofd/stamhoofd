@@ -42,6 +42,10 @@
                     </RadioGroup>
                 </STInputBox>
 
+                <p v-if="waitingListWarning" class="warning-box">
+                    {{ waitingListWarning }}
+                </p>
+
                 <template v-if="!isWaitingList">
                     <STInputBox v-if="needsPaidStatus" :title="$t(`80728515-caad-488b-a3d6-0f634b908766`)" error-fields="paid" :error-box="errors.errorBox" class="max">
                         <RadioGroup>
@@ -238,6 +242,31 @@ const membersNeedingAssignment = computed(() => {
     return props.importMemberResults.filter((m) => {
         return shouldAssignRegistrationToMember(m);
     });
+});
+
+const waitingListWarning = computed(() => {
+    if (!isWaitingList.value) {
+        return null;
+    }
+
+    const groupMap = new Map<string, Group>();
+
+    for (const member of props.importMemberResults) {
+        const registrationData = memberImporter.buildRegistration(member, isWaitingList.value);
+
+        if (registrationData && registrationData.group.type !== GroupType.WaitingList) {
+            if (groupMap.has(registrationData.group.id)) {
+                continue;
+            }
+            groupMap.set(registrationData.group.id, registrationData.group);
+        }
+    }
+
+    if (!groupMap.size) {
+        return null;
+    }
+
+    return $t('Sommige leden hebben een groep zonder wachtlijst. Deze zullen meteen voor de groep worden ingeschreven en niet voor een wachtlijst. Deze groepen hebben geen wachtlijst: {groups}.', { groups: Formatter.joinLast(Array.from(groupMap.values()).map(g => g.settings.name.toString()), ', ', ' ' + $t('en') + ' ') });
 });
 
 const membersWithNewRegistrations = computed(() => props.importMemberResults.filter(m => memberImporter.hasNewRegistration(m, isWaitingList.value)));
@@ -459,7 +488,7 @@ function openResultView() {
                 if (member.existingMember) {
                     if (registration !== null) {
                         if (registration.group.type === GroupType.WaitingList) {
-                            description.push($t(`f6e9cb12-9107-49d1-922a-fef46dc6e25e`, { group: groupName }) + suffix);
+                            description.push($t(`Inschrijven voor wachtlijst '{group}'`, { group: groupName }) + suffix);
                         }
                         else {
                             description.push($t(`6258cf03-8bad-4ed3-869b-5771bcd797f6`, { group: groupName }) + suffix);
@@ -480,7 +509,7 @@ function openResultView() {
                 }
                 else {
                     if (registration.group.type === GroupType.WaitingList) {
-                        description.push($t(`04e10934-24e2-42af-ab40-6352cbde6a30`, { group: groupName }) + suffix);
+                        description.push($t(`Toevoegen in het systeem met inschrijving voor wachtlijst '{group}'`, { group: groupName }) + suffix);
                     }
                     else {
                         description.push($t(`c3031fda-2cfb-46b7-8cb6-b31ad49034e8`, { group: groupName }) + suffix);
