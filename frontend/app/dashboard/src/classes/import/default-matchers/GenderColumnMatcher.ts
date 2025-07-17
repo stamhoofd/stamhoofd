@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Gender } from '@stamhoofd/structures';
+import { Gender, getGenderName } from '@stamhoofd/structures';
 import XLSX from 'xlsx';
 import { ColumnMatcher } from '../ColumnMatcher';
 import { ImportMemberResult } from '../ImportMemberResult';
@@ -39,13 +39,13 @@ export class GenderColumnMatcher implements ColumnMatcher {
         const value = ((cell.w ?? cell.v) + '').toLowerCase().trim();
         let gender = Gender.Other;
 
-        if (value.includes('jongen') || value.includes('boy') || (value.startsWith('m') && !value.includes('meisje'))) {
+        if (value === getGenderName(Gender.Male).toLowerCase() || value.includes('jongen') || value.includes('boy') || (value.startsWith('m') && !value.includes('meisje'))) {
             gender = Gender.Male;
         }
-        else if (value.startsWith('v') || value.startsWith('f') || value.includes('meisje') || value.includes('girl')) {
+        else if (value === getGenderName(Gender.Female).toLowerCase() || value.startsWith('v') || value.startsWith('f') || value.includes('meisje') || value.includes('girl')) {
             gender = Gender.Female;
         }
-        else if (value === 'x') {
+        else if (value === getGenderName(Gender.Other).toLowerCase() || value === 'x') {
             gender = Gender.Other;
         }
         else if (value !== '') {
