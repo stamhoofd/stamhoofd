@@ -35,43 +35,65 @@ export class UitpasTokenRepository {
         this.uitpasClientCredential = uitpasClientCredential;
     }
 
+    static async handleInQueue<T>(organizationId: string | null, handler: () => Promise<T>): Promise<T> {
+        return await QueueHandler.schedule('uitpas/token-' + (organizationId ?? 'platform'), handler);
+    }
+
+    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<boolean> {
+        if (!clientId || !clientSecret) { // empty strings
+            return false; // not valid
+        }
+        let model = new UitpasClientCredential();
+        model.organizationId = organizationId; model.clientId = clientId; model.clientSecret = clientSecret;
+        return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
+            let repo = new UitpasTokenRepository(model);
+            try {
+                await repo.getNewAccessToken();
+            }
+            catch (e) {
+                return false; // not valid
+            }
+            // valid -> store
+            model = await UitpasTokenRepository.setModelInDb(organizationId, model);
+            repo.uitpasClientCredential = model; // update the uitpasClientCredential in the repo
+            repo = UitpasTokenRepository.setRepoInMemory(organizationId, repo);
+            return true;
+        });
+    }
+
     /**
      * organizationId (null means platform) -> UitpasTokenRepository
      */
     static knownTokens: Map<string | null, UitpasTokenRepository> = new Map();
 
-    private static async createRepoFromDb(organizationId: string | null): Promise<UitpasTokenRepository> {
-        // query db
-        let uitpasClientCredential = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
-        if (!uitpasClientCredential) {
-            // temporary solution, because platform client id and secret are not yet in the database
-            if (organizationId === null) {
-                if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
-                    throw new SimpleError({
-                        code: 'uitpas_api_not_configured_for_platform',
-                        message: 'UiTPAS api is not configured for the platform',
-                        human: $t('e0b65e04-6cef-41e1-9b45-6b6c56e5356a'),
-                    });
-                }
-                uitpasClientCredential = new UitpasClientCredential();
-                uitpasClientCredential.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
-                uitpasClientCredential.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
-                uitpasClientCredential.organizationId = null; // null means platform
-            }
-            else {
-                throw new SimpleError({
-                    code: 'uitpas_api_not_configured_for_this_organization',
-                    message: `UiTPAS api not configured for organization with id ${organizationId}`,
-                    human: $t(`f74aa987-0f92-4701-861d-2512efc5dda1`),
-                });
-            }
-        }
-        const newRepo = new UitpasTokenRepository(uitpasClientCredential);
-        this.knownTokens.set(organizationId, newRepo);
-        return newRepo;
+    private static getRepoFromMemory(organizationId: string | null): UitpasTokenRepository | null {
+        return UitpasTokenRepository.knownTokens.get(organizationId) ?? null;
     }
 
-    private async getNewAccessToken(): Promise<string> {
+    private static async getModelFromDb(organizationId: string | null) {
+        let model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
+        if (model) {
+            return model; // found in database
+        }
+        if (organizationId === null) {
+            // platform client id and secret are not yet in the database, but should be configured in the environment variables
+            if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
+                throw new SimpleError({
+                    code: 'uitpas_api_not_configured_for_platform',
+                    message: 'UiTPAS api is not configured for the platform',
+                    human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
+                });
+            }
+            model = new UitpasClientCredential();
+            model.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
+            model.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
+            model.organizationId = null; // null means platform
+            return model;
+        }
+        return null; // not found in database
+    }
+
+    private async getNewAccessToken() {
         const url = 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token';
         const myHeaders = new Headers();
         myHeaders.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -94,6 +116,14 @@ export class UitpasTokenRepository {
             });
         });
         if (!response.ok) {
+            if (response.status === 401) {
+                // Unauthorized, credentials are invalid
+                throw new SimpleError({
+                    code: 'invalid_uitpas_client_credentials',
+                    message: `Invalid UiTPAS client credentials`,
+                    human: $t(`De opgegeven UiTPAS client credentials zijn ongeldig. Controleer ze en probeer opnieuw.`),
+                });
+            }
             console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`, response.statusText);
             throw new SimpleError({
                 code: 'unsuccessful_response_fetching_uitpas_token',
@@ -115,6 +145,25 @@ export class UitpasTokenRepository {
         return this.accessToken;
     }
 
+    private static setRepoInMemory(organizationId: string | null, repo: UitpasTokenRepository) {
+        UitpasTokenRepository.knownTokens.set(organizationId, repo);
+        return repo;
+    }
+
+    private static async setModelInDb(organizationId: string | null, model: UitpasClientCredential) {
+        const oldModel = await UitpasTokenRepository.getModelFromDb(organizationId);
+        if (oldModel) {
+            // update
+            oldModel.clientId = model.clientId;
+            oldModel.clientSecret = model.clientSecret;
+            await oldModel.save();
+            return oldModel; // return updated model
+        }
+        // create
+        await model.save();
+        return model; // return new model
+    }
+
     /**
      * Get the access token for the organization or platform.
      * @param organizationId the organization ID for which to get the access token. If null, it means the platform.
@@ -123,24 +172,63 @@ export class UitpasTokenRepository {
      * @throws SimpleError if the token cannot be obtained or the API is not configured
      */
     static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<string> {
-        let repo = UitpasTokenRepository.knownTokens.get(organizationId);
+        let repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
         if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
             return repo.accessToken;
         }
 
         // Prevent multiple concurrent requests for the same organization, asking for an access token to the UiTPAS API.
         // The queue can only run one at a time for the same organizationId
-        return await QueueHandler.schedule('uitpas/token-' + (organizationId ?? 'platform'), async () => {
+        return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
             // we re-search for the repo, as another call to this funcion might have added while we we're waiting in the queue
-            repo = UitpasTokenRepository.knownTokens.get(organizationId);
+            repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
             if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
                 return repo.accessToken;
             }
             if (!repo) {
-                repo = await UitpasTokenRepository.createRepoFromDb(organizationId);
+                const model = await UitpasTokenRepository.getModelFromDb(organizationId);
+                if (!model) {
+                    throw new SimpleError({
+                        code: 'uitpas_api_not_configured_for_this_organization',
+                        message: `UiTPAS api not configured for organization with id ${organizationId}`,
+                        human: $t('UiTPAS is nog niet volledig geconfigureerd voor deze organisatie.'),
+                    });
+                }
+                repo = UitpasTokenRepository.setRepoInMemory(organizationId, new UitpasTokenRepository(model)); // store in memory
             }
             // ask for a new access token
-            return repo.getNewAccessToken(); ;
+            return repo.getNewAccessToken();
+        });
+    }
+
+    static async getClientIdFor(organisationId: string | null): Promise<string> {
+        const repo = await UitpasTokenRepository.getRepoFromMemory(organisationId);
+        if (!repo) {
+            const model = await UitpasClientCredential.select().where('organizationId', organisationId).first(false);
+            if (!model) {
+                return ''; // no client ID and secret configured
+            }
+            return model.clientId; // client ID configured, but not in memory
+        }
+        return repo.uitpasClientCredential.clientId; // client ID configured and in memory
+    }
+
+    static async clearClientCredentialsFor(organizationId: string | null): Promise<boolean> {
+        return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
+            const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
+            if (repo) {
+                // in memory, thus also in db
+                await repo.uitpasClientCredential.delete(); // remove from db
+                UitpasTokenRepository.knownTokens.delete(organizationId); // remove from memory
+                return true;
+            }
+            // not in memory, maybe in db
+            const model = await UitpasTokenRepository.getModelFromDb(organizationId);
+            if (model) {
+                await model.delete(); // remove from database
+                return true;
+            }
+            return false; // nothing to clear
         });
     }
 }
