@@ -3,7 +3,7 @@ import { Document } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { applySQLSorter, compileToModernSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -49,20 +49,20 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
             .where('organizationId', organization.id);
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getDocumentSearchFilter(q.search);
 
             if (searchFilter) {
-                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

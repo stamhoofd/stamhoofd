@@ -4,7 +4,7 @@ import { assertSort, CountFilteredRequest, getSortFilter, Group as GroupStruct, 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { groupFilterCompilers } from '../../../sql-filters/groups';
@@ -47,11 +47,11 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const query = Group.select();
 
         if (scopeFilter) {
-            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -62,13 +62,13 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             };
 
             if (searchFilter) {
-                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

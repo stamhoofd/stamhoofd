@@ -2,7 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Order } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
@@ -45,7 +45,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         const query = SQL
             .select(SQL.wildcard(ordersTable))
             .from(SQL.table(ordersTable))
-            .where(await compileToModernSQLFilter({
+            .where(await compileToSQLFilter({
                 organizationId: organization.id,
                 number: {
                     $neq: null,
@@ -53,20 +53,20 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             }, filterCompilers));
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
 
             if (searchFilter) {
-                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

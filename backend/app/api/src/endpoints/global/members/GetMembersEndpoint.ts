@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform } from '@stamhoofd/models';
-import { SQL, applySQLSorter, compileToModernSQLFilter } from '@stamhoofd/sql';
+import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, Country, CountryCode, GroupType, LimitedFilteredRequest, MembersBlob, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 
@@ -136,22 +136,22 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             );
 
         if (scopeFilter) {
-            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         const searchFilter = GetMembersEndpoint.buildSearchFilter(q.search);
 
         if (searchFilter) {
-            query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
+            query.where(await compileToSQLFilter(searchFilter, filterCompilers));
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

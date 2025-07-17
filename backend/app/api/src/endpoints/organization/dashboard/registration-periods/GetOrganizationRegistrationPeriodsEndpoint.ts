@@ -4,7 +4,7 @@ import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { organizationRegistrationPeriodFilterCompilers } from '../../../../sql-filters/organization-registration-periods';
@@ -47,11 +47,11 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
         const query = OrganizationRegistrationPeriod.select();
 
         if (scopeFilter) {
-            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -62,13 +62,13 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
             };
 
             if (searchFilter) {
-                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

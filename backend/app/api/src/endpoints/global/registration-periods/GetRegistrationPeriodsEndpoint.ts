@@ -4,7 +4,7 @@ import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
-import { applySQLSorter, compileToModernSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods';
 import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods';
 
@@ -37,11 +37,11 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
         const query = RegistrationPeriod.select();
 
         if (scopeFilter) {
-            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -52,13 +52,13 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
             };
 
             if (searchFilter) {
-                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

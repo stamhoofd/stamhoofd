@@ -138,7 +138,7 @@ export function createJoinedRelationFilter(join: SQLJoin, definitions: SQLFilter
         }
 
         return async (_: SQLCurrentColumn) => {
-            const w = await compileToModernSQLFilter(filter, definitions);
+            const w = await compileToSQLFilter(filter, definitions);
             return new SQLWhereJoin(join, w, {
                 doesRelationAlwaysExist: options.doesRelationAlwaysExist,
             });
@@ -226,7 +226,7 @@ export function compileToSQLRunner(filter: StamhoofdFilter, definitions: SQLFilt
     return runner;
 };
 
-export async function compileToModernSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
+export async function compileToSQLFilter(filter: StamhoofdFilter, filters: SQLFilterDefinitions): Promise<SQLWhere> {
     const runner = compileToSQLRunner(filter, filters);
     return await runner({
         expression: SQLRootExpression,

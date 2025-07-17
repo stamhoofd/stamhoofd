@@ -2,7 +2,7 @@ import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { PlainObject } from '@simonbackx/simple-encoding';
 import { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { compileToModernSQLFilter, SQLFilterDefinitions } from '../../src/filters/modern/SQLModernFilter';
+import { compileToSQLFilter, SQLFilterDefinitions } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression';
 import { SQLScalarValue } from '../../src/SQLExpressions';
@@ -10,7 +10,7 @@ import { SQLWhereAnd } from '../../src/SQLWhere';
 
 export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; error: string }) {
     await expect(
-        compileToModernSQLFilter(filter, filters),
+        compileToSQLFilter(filter, filters),
     ).rejects.toThrow(error);
 }
 
@@ -18,7 +18,7 @@ export async function testError({ filter, filters, error }: { filter: StamhoofdF
  * Only compares the WHERE clause of the query.
  */
 export async function test({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
-    const where = await compileToModernSQLFilter(filter, filters);
+    const where = await compileToSQLFilter(filter, filters);
     if (where.isAlways === false) {
         doesQueryMatch('', query);
         return;
@@ -40,7 +40,7 @@ export async function test({ filter, filters, query }: { filter: StamhoofdFilter
  * Use to also test joins. This will use `test_table` as the table name in your query.
  */
 export async function testSelect({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
-    const where = await compileToModernSQLFilter(filter, filters);
+    const where = await compileToSQLFilter(filter, filters);
 
     if (where.isAlways === false) {
         doesQueryMatch('', query);
@@ -168,7 +168,7 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
     // Run queries
     try {
         for (const filter of doMatch ?? []) {
-            const where = await compileToModernSQLFilter(filter, filters);
+            const where = await compileToSQLFilter(filter, filters);
             const select = SQL.select().from(tableName).where(where);
 
             let results: SQLResultNamespacedRow[];
@@ -191,7 +191,7 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
         }
 
         for (const filter of doNotMatch ?? []) {
-            const where = await compileToModernSQLFilter(filter, filters);
+            const where = await compileToSQLFilter(filter, filters);
             const select = SQL.select().from(tableName).where(where);
 
             let results: SQLResultNamespacedRow[];

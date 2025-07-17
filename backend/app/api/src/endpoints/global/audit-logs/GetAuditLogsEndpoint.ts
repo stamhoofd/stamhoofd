@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog } from '@stamhoofd/models';
-import { SQL, SQLSortDefinitions, applySQLSorter, compileToModernSQLFilter } from '@stamhoofd/sql';
+import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { AuditLog as AuditLogStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -70,11 +70,11 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
             );
 
         if (scopeFilter) {
-            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -87,7 +87,7 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
