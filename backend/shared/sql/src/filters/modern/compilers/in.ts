@@ -3,7 +3,7 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLArray } from '../../../SQLExpressions';
 import { SQLJsonOverlaps } from '../../../SQLJsonExpressions';
 import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 import { $equalsSQLFilterCompiler } from './equals';
 

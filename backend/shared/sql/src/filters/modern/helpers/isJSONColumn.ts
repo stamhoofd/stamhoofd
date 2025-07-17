@@ -1,4 +1,4 @@
-import { SQLCurrentColumn, SQLValueType } from '../SQLModernFilter';
+import { SQLCurrentColumn, SQLValueType } from '../SQLFilter';
 
 export function isJSONColumn({ type }: SQLCurrentColumn): boolean {
     return isJSONType(type);

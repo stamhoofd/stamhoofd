@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLFilterDefinitions, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQLFilterDefinitions, SQLValueType } from '../../src/filters/modern/SQLFilter';
 import { SQL } from '../../src/SQL';
 import { test } from '../utils';
 

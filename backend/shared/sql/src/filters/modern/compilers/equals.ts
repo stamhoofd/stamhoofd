@@ -2,7 +2,7 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../../SQLExpressions';
 import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../../SQLJsonExpressions';
 import { SQLWhere, SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLFilter';
 import { isJSONColumn } from '../helpers/isJSONColumn';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 

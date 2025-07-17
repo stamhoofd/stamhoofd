@@ -1,7 +1,7 @@
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { scalarToSQLExpression } from '../../../SQLExpressions';
 import { SQLWhereEqual, SQLWhereSign } from '../../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
 export function $lessThanSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {

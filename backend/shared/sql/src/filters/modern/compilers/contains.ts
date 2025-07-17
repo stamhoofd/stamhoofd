@@ -3,7 +3,7 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../../SQLExpressions';
 import { SQLJsonSearch } from '../../../SQLJsonExpressions';
 import { SQLWhereEqual, SQLWhereLike, SQLWhereSign } from '../../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
 export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
