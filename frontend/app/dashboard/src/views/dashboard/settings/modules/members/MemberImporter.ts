@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { PlatformFamilyManager, startSilentRegister } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, Group, GroupPrice, GroupType, Organization, OrganizationRegistrationPeriod, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, Platform, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
@@ -186,6 +186,7 @@ export class MemberImporter {
     }
 
     private getErrorMessage(error: any) {
+        console.error('get error message');
         if (error instanceof SimpleError) {
             if (error.code === 'invalid_field') {
                 if (error.field) {
@@ -198,14 +199,18 @@ export class MemberImporter {
                     for (const category of recordCategories) {
                         for (const record of category.getAllRecords()) {
                             if (error.field.includes(record.id)) {
-                                return `${error.message} (${record.name.toString()})`;
+                                return `${error.human ?? error.message} (${record.name.toString()})`;
                             }
                         }
                     }
                 }
             }
 
-            return error.message;
+            return error.human ?? error.message;
+        }
+        else if (error instanceof SimpleErrors) {
+            const messages = error.errors.map(e => this.getErrorMessage(e));
+            return messages.join(' ');
         }
 
         if (typeof error.message === 'string') {
