@@ -186,7 +186,6 @@ export class MemberImporter {
     }
 
     private getErrorMessage(error: any) {
-        console.error('get error message');
         if (error instanceof SimpleError) {
             if (error.code === 'invalid_field') {
                 if (error.field) {
