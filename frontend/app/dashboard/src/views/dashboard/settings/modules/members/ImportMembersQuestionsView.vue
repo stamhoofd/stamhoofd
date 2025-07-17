@@ -1,7 +1,9 @@
 <template>
     <SaveView :title="$t('c67f13a2-08cb-4c30-a39d-d07679430672')" :loading="saving" :save-text="`Importeer ${importMemberResults.length} leden`" @save="goNext">
-        <h1>{{ $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}</h1>
-        <p>{{ $t('122da7ee-3e58-416c-a0b7-ee84fbd39a2e') }}</p>
+        <h1>{{ saving ? $t('Bezig met importeren') : $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}</h1>
+        <p v-if="!saving">
+            {{ $t('122da7ee-3e58-416c-a0b7-ee84fbd39a2e') }}
+        </p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="!saving">
@@ -154,21 +156,21 @@
                     </STInputBox>
                 </template>
             </template>
+
+            <hr>
+
+            <STList>
+                <STListItem :selectable="true" @click.prevent="openResultView">
+                    <template #left>
+                        <span class="icon eye" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ $t('394a37e4-8b91-433b-9808-d1b482ffc07f') }}
+                    </h3>
+                </STListItem>
+            </STList>
         </template>
-
-        <hr>
-
-        <STList>
-            <STListItem :selectable="true" @click.prevent="openResultView">
-                <template #left>
-                    <span class="icon eye" />
-                </template>
-
-                <h3 class="style-title-list">
-                    {{ $t('394a37e4-8b91-433b-9808-d1b482ffc07f') }}
-                </h3>
-            </STListItem>
-        </STList>
     </SaveView>
 </template>
 
@@ -621,7 +623,7 @@ async function goNext() {
         const reports = await memberImporter.importResults(props.importMemberResults, {
             isWaitingList: isWaitingList.value,
             paid: paid.value,
-        });
+        }, progress => toast.setProgress(progress));
 
         toast.hide();
 

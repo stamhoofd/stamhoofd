@@ -48,7 +48,7 @@ export class MemberImporter {
         this.requestOwner = requestOwner;
     }
 
-    async importResults(importMemberResults: ImportMemberResult[], importContext: MemberImporterContext) {
+    async importResults(importMemberResults: ImportMemberResult[], importContext: MemberImporterContext, onProgress?: (progress: number) => void) {
         if (importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
             throw new SimpleError({
                 code: 'no_group',
@@ -58,7 +58,8 @@ export class MemberImporter {
 
         const reports: MemberImportReport[] = [];
 
-        for (const importResult of importMemberResults) {
+        for (let i = 0; i < importMemberResults.length; i++) {
+            const importResult = importMemberResults[i];
             const report = new MemberImportReport(importResult);
 
             try {
@@ -84,6 +85,11 @@ export class MemberImporter {
             }
 
             reports.push(report);
+
+            if (onProgress) {
+                const progress = ((i + 1) / importMemberResults.length);
+                onProgress(progress);
+            }
         }
 
         return reports;
