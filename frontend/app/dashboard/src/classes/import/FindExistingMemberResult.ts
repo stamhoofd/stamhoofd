@@ -77,11 +77,23 @@ function isMemberEqual(member: PlatformMember, { birthDay, firstName, lastName, 
         return memberDetails.memberNumber === memberNumber;
     }
 
-    if (!birthDay || memberDetails.birthDay === null || birthDay.getTime() !== memberDetails.birthDay.getTime()) {
+    if (!birthDay || memberDetails.birthDay === null || !isEqualBirthDay(birthDay, memberDetails.birthDay)) {
         return false;
     }
 
     return StringCompare.typoCount(memberDetails.firstName + ' ' + memberDetails.lastName, firstName + ' ' + lastName) === 0 && StringCompare.typoCount(Formatter.dateNumber(memberDetails.birthDay), Formatter.dateNumber(memberDetails.birthDay)) === 0;
+}
+
+function isEqualBirthDay(a: Date, b: Date): boolean {
+    if (a.getFullYear() !== b.getFullYear()) {
+        return false;
+    }
+
+    if (a.getMonth() !== b.getMonth()) {
+        return false;
+    }
+
+    return a.getDate() === b.getDate();
 }
 
 function isMemberProbablyEqual(member: PlatformMember, { birthDay, firstName, lastName, memberNumber, nationalRegisterNumber }: { birthDay: Date | null | undefined; firstName: string; lastName: string; memberNumber?: string | null; nationalRegisterNumber?: string | null }): boolean {
