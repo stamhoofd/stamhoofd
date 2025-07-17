@@ -20,7 +20,7 @@ export class SearchUitpasOrganizersEndpoint extends Endpoint<Params, Query, Body
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organizations/search-uitpas-organizers', {});
+        const params = Endpoint.parseParameters(request.url, '/organization/search-uitpas-organizers', {});
 
         if (params) {
             return [true, params as Params];
