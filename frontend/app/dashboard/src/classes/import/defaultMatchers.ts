@@ -18,6 +18,7 @@ import { PaidColumnMatcher } from './default-matchers/PaidColumnMatcher';
 import { PaidPriceColumnMatcher } from './default-matchers/PaidPriceColumnMatcher';
 import { PaymentPriceColumnMatcher } from './default-matchers/PaymentPriceColumnMatcher';
 import { PhoneColumnMatcher } from './default-matchers/PhoneColumnMatcher';
+import { SecurityCodeColumnMatcher } from './default-matchers/SecurityCodeColumnMatcher';
 import { StreetColumnMatcher } from './default-matchers/StreetColumnMatcher';
 import { StreetNumberColumnMatcher } from './default-matchers/StreetNumberColumnMatcher';
 import { StreetWithNumberColumnMatcher } from './default-matchers/StreetWithNumberColumnMatcher';
@@ -77,6 +78,7 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
     }),
     new UitpasNumberColumnMatcher(),
     new NationalRegisterNumberColumnMatcher(MemberDetailsMatcherCategory.Member),
+    new SecurityCodeColumnMatcher(),
 ];
 
 export const parentMatchers1 = [
