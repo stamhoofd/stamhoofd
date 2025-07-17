@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { UitpasService } from '../../../services/UitpasService';
+import { UitpasService } from '../../../services/uitpas/UitpasService';
 import { UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Context } from '../../../helpers/Context';
@@ -14,7 +14,7 @@ type ResponseBody = UitpasOrganizersResponse;
 
 export class SearchUitpasOrganizersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = Query as Decoder<Query>;
-    
+
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
