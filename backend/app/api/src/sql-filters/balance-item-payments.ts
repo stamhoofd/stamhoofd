@@ -1,7 +1,7 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('balance_item_payments', 'id'),
         type: SQLValueType.String,
@@ -13,7 +13,7 @@ export const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     balanceItem: {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         id: createColumnFilter({
             expression: SQL.column('balance_items', 'id'),
             type: SQLValueType.String,

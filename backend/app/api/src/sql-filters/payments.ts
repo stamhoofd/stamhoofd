@@ -1,11 +1,11 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments';
 
 /**
  * Defines how to filter payments in the database from StamhoofdFilter objects
  */
 export const paymentFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
@@ -57,7 +57,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     customer: {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         email: createColumnFilter({
             expression: SQL.jsonValue(SQL.column('customer'), '$.value.email'),
             type: SQLValueType.JSONString,
@@ -86,7 +86,7 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
             nullable: true,
         }),
         company: {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.name'),
                 type: SQLValueType.JSONString,

@@ -1,7 +1,7 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const ticketFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,

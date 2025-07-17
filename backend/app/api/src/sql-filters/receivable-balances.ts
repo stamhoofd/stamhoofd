@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members';
 import { organizationFilterCompilers } from './organizations';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers';
@@ -7,7 +7,7 @@ import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompil
  * Defines how to filter cached balance items in the database from StamhoofdFilter objects
  */
 export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
@@ -99,7 +99,7 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'user'),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({
                 expression: new SQLConcat(
                     SQL.column('firstName'),

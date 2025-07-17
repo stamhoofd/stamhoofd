@@ -1,7 +1,7 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const groupFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
@@ -39,7 +39,7 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
             nullable: true,
         }),
         (key: string) => ({
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}.name`, true),
                 type: SQLValueType.JSONArray,

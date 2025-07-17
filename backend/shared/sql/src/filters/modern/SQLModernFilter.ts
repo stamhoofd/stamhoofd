@@ -66,7 +66,7 @@ export type SQLCurrentColumn = {
 
 export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: SQLFilterDefinitions): SQLFilterCompiler {
     return (filter: StamhoofdFilter) => {
-        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
+        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
         return async (_: SQLCurrentColumn) => {
@@ -83,7 +83,7 @@ export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: 
 
 export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLFilterDefinitions): SQLFilterCompiler {
     const wildcardCompiler = (filter: StamhoofdFilter, _, key: string) => {
-        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
+        const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
         return async (_: SQLCurrentColumn) => {
@@ -187,7 +187,7 @@ function invertFilterCompiler(compiler: SQLRequiredFilterCompiler): SQLRequiredF
     };
 }
 
-export const baseModernSQLFilterCompilers: SQLFilterDefinitions = {
+export const baseSQLFilterCompilers: SQLFilterDefinitions = {
     $and: $andSQLFilterCompiler,
     $or: $orSQLFilterCompiler,
     $not: $notSQLFilterCompiler,

@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
@@ -12,7 +12,7 @@ const membersTable = SQL.table(Member.table);
  * Defines how to filter members in the database from StamhoofdFilter objects
  */
 export const memberFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     'id': createColumnFilter({
         expression: SQL.column(membersTable, 'id'),
         type: SQLValueType.String,
@@ -104,7 +104,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     'details.parents[0]': {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         name: createColumnFilter({
             expression: new SQLCast(
                 new SQLConcat(
@@ -118,7 +118,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         }),
     },
     'details.parents[1]': {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         name: createColumnFilter({
             expression: new SQLCast(
                 new SQLConcat(
@@ -142,7 +142,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     'details.address': {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         city: createColumnFilter({
             expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.city'),
             type: SQLValueType.JSONString,
@@ -165,7 +165,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         }),
     },
     'details.parents[*].address': {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         city: createColumnFilter({
             expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.city'),
             type: SQLValueType.JSONArray,
@@ -258,7 +258,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('members', 'id'),
             ),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             // Alias for responsibilityId
             id: createColumnFilter({
                 expression: SQL.column('member_responsibility_records', 'responsibilityId'),
@@ -286,7 +286,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 nullable: true,
             }),
             group: {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({
                     expression: SQL.column('groups', 'id'),
                     type: SQLValueType.String,
@@ -315,7 +315,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 null,
             ),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             id: createColumnFilter({
                 expression: SQL.column('member_platform_memberships', 'id'),
                 type: SQLValueType.String,

@@ -1,11 +1,11 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test, testError } from '../utils';
 
 describe('Special filter cases', () => {
     it('Can combine $and with $or', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
@@ -44,7 +44,7 @@ describe('Special filter cases', () => {
 
     it('Cannot filter on unknown columns', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
         };
 
         await testError({
@@ -58,7 +58,7 @@ describe('Special filter cases', () => {
 
     it('Cannot stack column filters', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
@@ -77,7 +77,7 @@ describe('Special filter cases', () => {
     describe('Empty filters', () => {
         it('an empty object filter is always true', async () => {
             const filters = {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
             };
 
             await test({
@@ -92,7 +92,7 @@ describe('Special filter cases', () => {
 
         it('an empty array filter is always true', async () => {
             const filters = {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
             };
 
             await test({
@@ -107,7 +107,7 @@ describe('Special filter cases', () => {
 
         it('a null filter is always true', async () => {
             const filters = {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
             };
 
             await test({

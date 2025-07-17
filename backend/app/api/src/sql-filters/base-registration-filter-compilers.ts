@@ -1,8 +1,8 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 import { organizationFilterCompilers } from './organizations';
 
 export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
@@ -55,7 +55,7 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     group: {
-        ...baseModernSQLFilterCompilers,
+        ...baseSQLFilterCompilers,
         id: createColumnFilter({
             expression: SQL.column('groupId'),
             type: SQLValueType.String,

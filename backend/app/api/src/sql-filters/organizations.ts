@@ -1,8 +1,8 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
 import { SetupStepType } from '@stamhoofd/structures';
 
 export const organizationFilterCompilers: SQLFilterDefinitions = {
-    ...baseModernSQLFilterCompilers,
+    ...baseSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('organizations', 'id'),
         type: SQLValueType.String,
@@ -66,7 +66,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('organizations', 'id'),
             ),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             periodId: createColumnFilter({
                 expression: SQL.column('organization_registration_periods', 'periodId'),
                 type: SQLValueType.String,
@@ -78,7 +78,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                         return [
                             setupStep,
                             {
-                                ...baseModernSQLFilterCompilers,
+                                ...baseSQLFilterCompilers,
                                 reviewedAt: createColumnFilter({
                                     expression: SQL.jsonValue(
                                         SQL.column('organization_registration_periods', 'setupSteps'),
@@ -138,7 +138,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 ]),
             ),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             type: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('meta'), '$.value.type'),
                 type: SQLValueType.JSONString,
@@ -160,7 +160,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('organizations', 'id'),
             ),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({
                 expression: new SQLConcat(
                     SQL.column('firstName'),

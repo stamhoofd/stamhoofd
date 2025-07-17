@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const EmailRelationFilterCompilers = {
     emails: createExistsFilter(
@@ -9,7 +9,7 @@ export const EmailRelationFilterCompilers = {
                 SQL.column('id'), // Parent table id
             ),
         {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             emailType: createColumnFilter({
                 expression: SQL.column('emailType'),
                 type: SQLValueType.String,

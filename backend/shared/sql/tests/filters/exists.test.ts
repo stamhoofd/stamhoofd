@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { testSelect } from '../utils';
 
@@ -24,7 +24,7 @@ describe('Exists relations', () => {
 
     it('Added when used', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organizations: createExistsFilter(
                 SQL.select()
@@ -34,7 +34,7 @@ describe('Exists relations', () => {
                         SQL.column('id'),
                     ),
                 {
-                    ...baseModernSQLFilterCompilers,
+                    ...baseSQLFilterCompilers,
                     id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
                 }),
         };
@@ -59,7 +59,7 @@ describe('Exists relations', () => {
 
     it('Also added when always true', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organizations: createExistsFilter(
                 SQL.select()
@@ -69,7 +69,7 @@ describe('Exists relations', () => {
                         SQL.column('id'),
                     ),
                 {
-                    ...baseModernSQLFilterCompilers,
+                    ...baseSQLFilterCompilers,
                     id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
                 }),
         };
@@ -96,7 +96,7 @@ describe('Exists relations', () => {
 
     it('Not added when always false', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organizations: createExistsFilter(
                 SQL.select()
@@ -106,7 +106,7 @@ describe('Exists relations', () => {
                         SQL.column('id'),
                     ),
                 {
-                    ...baseModernSQLFilterCompilers,
+                    ...baseSQLFilterCompilers,
                     id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
                 }),
         };

@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { testSelect } from '../utils';
 
@@ -24,10 +24,10 @@ describe('Joined relations', () => {
 
     it('Joins when used', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organization: createJoinedRelationFilter(organizationJoin, {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
             }),
         };
@@ -50,10 +50,10 @@ describe('Joined relations', () => {
 
     it('Joins only once when used twice', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organization: createJoinedRelationFilter(organizationJoin, {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
             }),
         };
@@ -81,10 +81,10 @@ describe('Joined relations', () => {
 
     it('Does not left join when always true', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organization: createJoinedRelationFilter(organizationJoin, {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
             }),
         };
@@ -105,10 +105,10 @@ describe('Joined relations', () => {
 
     it('Does inner join when always true and relationAlwaysExist is false', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organization: createJoinedRelationFilter(organizationInnerJoin, {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
             }, { doesRelationAlwaysExist: false }),
         };
@@ -133,10 +133,10 @@ describe('Joined relations', () => {
 
     it('Does inner join when always true and relationAlwaysExist is true', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organization: createJoinedRelationFilter(organizationInnerJoin, {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
             }, { doesRelationAlwaysExist: true }),
         };
@@ -161,10 +161,10 @@ describe('Joined relations', () => {
 
     it('Does not join when unused', async () => {
         const filters = {
-            ...baseModernSQLFilterCompilers,
+            ...baseSQLFilterCompilers,
             name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             organization: createJoinedRelationFilter(organizationJoin, {
-                ...baseModernSQLFilterCompilers,
+                ...baseSQLFilterCompilers,
                 id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
             }),
         };
