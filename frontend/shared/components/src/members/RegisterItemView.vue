@@ -93,10 +93,6 @@
             </STList>
         </div>
 
-        <p v-if="admin && !item.groupPrice.isInPeriod(defaultStartDate)" class="warning-box">
-            {{ $t('Het geslecteerde tarief is normaal niet toepasbaar voor deze startdatum. Enkel beheerders kunnen dit tarief kiezen.') }}
-        </p>
-
         <div v-for="menu in item.getFilteredOptionMenus()" :key="menu.id" class="container">
             <hr><h2>{{ menu.name }}</h2>
             <p v-if="menu.description" class="pre-wrap style-description-block">
@@ -186,6 +182,8 @@ function validate() {
     props.item.validate();
     validationWarning.value = props.item.cartError ? null : props.item.validationWarning;
 }
+
+watch(() => props.item.groupPrice, () => validate(), { immediate: true });
 
 onMounted(() => {
     errors.errorBox = null;
