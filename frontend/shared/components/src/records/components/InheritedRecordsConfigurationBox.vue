@@ -70,7 +70,7 @@ import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigat
 import { NavigationActions, PropertyFilterView, Toast, propertyFilterToString, useEmitPatch, useFinancialSupportSettings, useOrganization } from '@stamhoofd/components';
 import { BooleanStatus, MemberDetails, MemberPropertyWithFilter, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, PatchAnswers, Platform, PlatformFamily, PlatformMember, PropertyFilter, RecordCategory } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
-import { getMemberWithRegistrationsBlobUIFilterBuilders } from '../../filters/filter-builders/members';
+import { getMemberFilterBuildersForInheritedRecords } from '../../filters/filter-builders/members';
 import FillRecordCategoryView from '../FillRecordCategoryView.vue';
 import { RecordEditorSettings, RecordEditorType } from '../RecordEditorSettings';
 
@@ -94,8 +94,8 @@ const { patched, addPatch } = useEmitPatch<OrganizationRecordsConfiguration>(pro
 const baseOrg = useOrganization();
 const organization = computed(() => props.overrideOrganization ?? baseOrg.value);
 const present = usePresent();
-const memberWithRegistrationsBlobUIFilterBuilders = getMemberWithRegistrationsBlobUIFilterBuilders();
-const filterBuilder = memberWithRegistrationsBlobUIFilterBuilders[0];
+const filterBuilders = getMemberFilterBuildersForInheritedRecords();
+const filterBuilder = filterBuilders[0];
 const { financialSupportSettings } = useFinancialSupportSettings();
 
 const family = new PlatformFamily({
@@ -108,7 +108,7 @@ const settings = new RecordEditorSettings({
     dataPermission: true,
     toggleDefaultEnabled: !props.inheritedRecordsConfiguration,
     filterBuilder: (categories: RecordCategory[]) => {
-        return memberWithRegistrationsBlobUIFilterBuilders[0];
+        return filterBuilder;
     },
     exampleValue: new PlatformMember({
         member: MemberWithRegistrationsBlob.create({

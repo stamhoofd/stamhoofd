@@ -56,9 +56,12 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         });
     };
 
-    const all = [
-        ...getMemberWithRegistrationsBlobUIFilterBuilders().slice(1),
-    ];
+    const all = getMemberBaseFilters(
+        OrganizationRecordsConfiguration.build({
+            platform,
+            organization: organization.value,
+        }),
+    );
 
     if (user?.permissions?.platform !== null) {
         all.push(
@@ -916,17 +919,14 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
     };
 }
 
-// This one should match memberWithRegistrationsBlobInMemoryFilterCompilers
-export const getMemberWithRegistrationsBlobUIFilterBuilders: () => UIFilterBuilders = () => {
+/**
+ * These are used for the inherited records configuration (don't include filters for record answers)
+ * These filters are only used in memory - should not really be supported in our sql filters, but should be in-memory.
+ * Should match memberWithRegistrationsBlobInMemoryFilterCompilers
+ */
+export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
-        new NumberFilterBuilder({
-            name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
-            key: 'age',
-        }),
-        new DateFilterBuilder({
-            name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
-            key: 'birthDay',
-        }),
+        ...getMemberBaseFilters(),
         new MultipleChoiceFilterBuilder({
             name: $t(`8e92e034-b745-4d0f-8ac1-4363101f9603`),
             options: [
@@ -946,19 +946,6 @@ export const getMemberWithRegistrationsBlobUIFilterBuilders: () => UIFilterBuild
                 },
             },
         }),
-        new MultipleChoiceFilterBuilder({
-            name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
-            options: [
-                new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
-                new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
-                new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
-            ],
-            wrapper: {
-                gender: {
-                    $in: FilterWrapperMarker,
-                },
-            },
-        }),
     ];
 
     builders.unshift(
@@ -970,37 +957,46 @@ export const getMemberWithRegistrationsBlobUIFilterBuilders: () => UIFilterBuild
     return builders;
 };
 
+export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration) {
+    const all: UIFilterBuilders = [];
+
+    if (!recordConfiguration || recordConfiguration.birthDay) {
+        all.push(new DateFilterBuilder({
+            name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
+            key: 'birthDay',
+        }));
+
+        all.push(new NumberFilterBuilder({
+            name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
+            key: 'age',
+        }));
+    }
+
+    if (!recordConfiguration || recordConfiguration.gender) {
+        all.push(new MultipleChoiceFilterBuilder({
+            name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
+            options: [
+                new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
+                new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
+                new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
+            ],
+            wrapper: {
+                gender: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }));
+    }
+    return all;
+}
+
+/**
+ * These filters are only used in memory - should not really be supported in our sql filters, but should be in-memory.
+ * Should match memberWithRegistrationsBlobInMemoryFilterCompilers
+ */
 export function useMemberWithRegistrationsBlobFilterBuilders() {
     return (recordConfiguration: OrganizationRecordsConfiguration) => {
-        const all: UIFilterBuilders = [];
-
-        if (recordConfiguration.birthDay) {
-            all.push(new DateFilterBuilder({
-                name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
-                key: 'birthDay',
-            }));
-
-            all.push(new NumberFilterBuilder({
-                name: $t(`e96d9ea7-f8cc-42c6-b23d-f46e1a56e043`),
-                key: 'age',
-            }));
-        }
-
-        if (recordConfiguration.gender) {
-            all.push(new MultipleChoiceFilterBuilder({
-                name: $t(`fd3fea4f-73c7-4c8d-90cd-80ea90e53b98`),
-                options: [
-                    new MultipleChoiceUIFilterOption($t(`06466432-eca6-41d0-a3d6-f262f8d6d2ac`), Gender.Female),
-                    new MultipleChoiceUIFilterOption($t(`b54b9706-4c0c-46a6-9027-37052eb76b28`), Gender.Male),
-                    new MultipleChoiceUIFilterOption($t(`8f7475aa-c110-49b2-8017-1a6dd0fe72f9`), Gender.Other),
-                ],
-                wrapper: {
-                    gender: {
-                        $in: FilterWrapperMarker,
-                    },
-                },
-            }));
-        }
+        const all: UIFilterBuilders = getMemberBaseFilters(recordConfiguration);
 
         all.push(new MultipleChoiceFilterBuilder({
             name: $t(`8e92e034-b745-4d0f-8ac1-4363101f9603`),
