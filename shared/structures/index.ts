@@ -97,8 +97,8 @@ export * from './src/GroupPriceDiscount.js';
 export * from './src/members/MembershipStatus.js';
 export * from './src/AppliedRegistrationDiscount.js';
 export * from './src/MemberAdmin.js';
-
 export * from './src/LoadedPermissions.js';
+export * from './src/UitpasClientCredentialsStatus.js';
 
 // UserPermissions
 export * from './src/UserPermissions.js';

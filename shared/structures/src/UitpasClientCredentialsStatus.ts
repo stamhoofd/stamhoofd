@@ -1,6 +1,6 @@
 export enum UitpasClientCredentialsStatus {
     NOT_CHECKED = 'NOT_CHECKED',
-    NOT_CONFIGURED = 'NOT_CONFIGURED',  
+    NOT_CONFIGURED = 'NOT_CONFIGURED',
     NO_PERMISSIONS = 'NO_PERMISSIONS',
     MISSING_PERMISSIONS = 'MISSING_PERMISSIONS',
     OK = 'OK',
@@ -24,7 +24,7 @@ export class UitpasClientCredentialsStatusHelper {
             case UitpasClientCredentialsStatus.NO_PERMISSIONS: return 'warning';
             case UitpasClientCredentialsStatus.MISSING_PERMISSIONS: return 'warning';
             case UitpasClientCredentialsStatus.OK: return 'success';
-        }   
+        }
     }
 
     static getIcon(status: UitpasClientCredentialsStatus): string {
