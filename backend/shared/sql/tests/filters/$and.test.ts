@@ -33,6 +33,39 @@ describe('$and', () => {
         });
     });
 
+    /**
+     * Regression:
+     * when using $lte on a nullable field, it sometimes didn't group the OR
+     * and caused:
+     * (birthday >= x) AND birthday <= x OR birthday is null
+     * instead of
+     * birthday >= x AND (birthday <= x OR birthday is null)
+     *
+     * This was caused by incorrect WhereNot.isSingle logic ($lte and $gte uses not $gt and not $lt under the hood)
+     */
+    it('Grouping nullable $lte and $gte correctly inside $and', async () => {
+        const filters = {
+            ...baseModernSQLFilterCompilers,
+            birthDay: createColumnFilter({ expression: SQL.column('birthDay'), type: SQLModernValueType.Datetime, nullable: true }),
+        };
+
+        await test({
+            filter: {
+                birthDay: {
+                    $and: {
+                        $gte: new Date(200),
+                        $lte: new Date(500),
+                    },
+                },
+            },
+            filters,
+            query: {
+                query: '`default`.`birthDay` >= ? AND (`default`.`birthDay` <= ? OR `default`.`birthDay` IS NULL)',
+                params: [new Date(200), new Date(500)],
+            },
+        });
+    });
+
     it('An empty $and is always true', async () => {
         const filters = {
             ...baseModernSQLFilterCompilers,

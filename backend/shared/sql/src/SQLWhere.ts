@@ -681,6 +681,10 @@ export class SQLWhereNot extends SQLWhere {
     }
 
     get isSingle(): boolean {
+        if (this.a instanceof SQLWhereEqual || this.a instanceof SQLWhereAnd || this.a instanceof SQLWhereOr || this.a instanceof SQLWhereNot) {
+            return this.a.inverted().isSingle;
+        }
+
         return this.a.isSingle;
     }
 
