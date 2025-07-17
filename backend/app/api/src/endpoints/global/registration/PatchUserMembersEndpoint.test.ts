@@ -1,11 +1,11 @@
+import { Database } from '@simonbackx/simple-database';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString } from '@stamhoofd/structures';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchUserMembersEndpoint } from './PatchUserMembersEndpoint';
-import { Database } from '@simonbackx/simple-database';
-import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 const baseUrl = `/members`;
 const endpoint = new PatchUserMembersEndpoint();
@@ -69,11 +69,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const token = await Token.createToken(user);
 
             const arr: Body = new PatchableArray();
+            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
             const put = MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
                     firstName,
                     lastName,
-                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    birthDay: newBirthDay,
                     email: 'anewemail@example.com',
                 }),
             });
@@ -92,7 +93,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const member = response.body.members[0];
             expect(member.details.firstName).toBe(firstName);
             expect(member.details.lastName).toBe(lastName);
-            expect(member.details.birthDay).toEqual(existingMember.details.birthDay);
+            expect(member.details.birthDay).toEqual(newBirthDay);
             expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
             expect(member.details.alternativeEmails).toHaveLength(0);
         });
@@ -129,11 +130,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const token = await Token.createToken(user);
 
             const arr: Body = new PatchableArray();
+            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
             const put = MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
                     firstName,
                     lastName,
-                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    birthDay: newBirthDay,
                     securityCode: existingMember.details.securityCode,
                     email: 'anewemail@example.com',
                 }),
@@ -153,9 +155,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const member = response.body.members[0];
             expect(member.details.firstName).toBe(firstName);
             expect(member.details.lastName).toBe(lastName);
-            expect(member.details.birthDay).toEqual(existingMember.details.birthDay);
-            expect(member.details.email).toBe('original@example.com'); // this has been merged
-            expect(member.details.alternativeEmails).toEqual(['anewemail@example.com']); // this has been merged
+            expect(member.details.birthDay).toEqual(newBirthDay);
+            expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
+            expect(member.details.alternativeEmails).toEqual(['original@example.com']); // this has been merged
 
             // Check the registration is still there
             expect(member.registrations.length).toBe(1);
