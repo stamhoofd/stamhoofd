@@ -78,6 +78,7 @@ export class AutoTranslator {
                 "Translation of other namespaces is skipped because the default namespace is not translated completely yet.";
             console.log(chalk.red(message));
             promptLogger.error(message);
+            console.log('Locales', otherLocales.join(', '));
             return;
         }
 
@@ -112,6 +113,7 @@ export class AutoTranslator {
             });
 
             if (Object.keys(missingTranslations).length > 0) {
+                console.log('missingTranslations', missingTranslations);
                 return false;
             }
         }
