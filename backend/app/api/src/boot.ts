@@ -20,7 +20,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService'
 import { UniqueUserService } from './services/UniqueUserService';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { UitpasService } from './services/UitpasService';
+import { UitpasService } from './services/uitpas/UitpasService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');

@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { UitpasService } from '../../../services/UitpasService';
+import { UitpasService } from '../../../services/uitpas/UitpasService';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UitpasPriceCheckRequest;
