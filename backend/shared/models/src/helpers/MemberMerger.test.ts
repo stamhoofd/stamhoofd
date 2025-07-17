@@ -600,39 +600,39 @@ describe('member merge', () => {
 
             // assert
             test('firstName', () => {
-                expect(d1.firstName).toBe(d1Old.firstName);
+                expect(d1.firstName).toBe(d2Old.firstName);
             });
 
             test('lastName', () => {
-                expect(d1.lastName).toBe(d1Old.lastName);
+                expect(d1.lastName).toBe(d2Old.lastName);
             });
 
             test('memberNumber', () => {
-                expect(d1.memberNumber).toBe(d1Old.memberNumber);
+                expect(d1.memberNumber).toBe(d2Old.memberNumber);
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumber).toBe(d1Old.uitpasNumber);
+                expect(d1.uitpasNumber).toBe(d2Old.uitpasNumber);
             });
 
             test('email', () => {
-                expect(d1.email).toBe(d1Old.email);
-                expect(d1.alternativeEmails).toContain(d2Old.email);
-                expect(d1.unverifiedEmails).not.toContain(d2Old.email);
+                expect(d1.email).toBe(d2Old.email);
+                expect(d1.alternativeEmails).toContain(d1Old.email);
+                expect(d1.unverifiedEmails).not.toContain(d1Old.email);
             });
 
             test('phone', () => {
-                expect(d1.phone).toBe(d1Old.phone);
-                expect(d1.unverifiedPhones).toContain(d2Old.phone);
+                expect(d1.phone).toBe(d2Old.phone);
+                expect(d1.unverifiedPhones).toContain(d1Old.phone);
             });
 
             test('gender', () => {
-                expect(d1.gender).toBe(d1Old.gender);
+                expect(d1.gender).toBe(d2Old.gender);
             });
 
             test('birthDay', () => {
                 expect(d1.birthDay?.getTime() ?? -1).toBe(
-                    d1Old.birthDay?.getTime() ?? -1,
+                    d2Old.birthDay?.getTime() ?? -1,
                 );
             });
 
@@ -649,9 +649,9 @@ describe('member merge', () => {
             });
 
             test('address', () => {
-                expect(d1.address?.id).toBe(d1Old.address?.id);
+                expect(d1.address?.id).toBe(d2Old.address?.id);
                 expect(d1.unverifiedAddresses.map(a => a.id)).toContain(
-                    d2Old.address?.id,
+                    d1Old.address?.id,
                 );
             });
 
@@ -659,11 +659,11 @@ describe('member merge', () => {
                 expect(d1.parents.length).toBe(2);
                 expect(parent1.firstName).toBe(parent1Alt.firstName);
                 expect(parent1.lastName).toBe(parent1Alt.lastName);
-                expect(parent1.email).toBe(oldParent1.email);
-                expect(parent1.phone).toBe(oldParent1.phone);
+                expect(parent1.email).toBe(parent1Alt.email?.toLowerCase());
+                expect(parent1.phone).toBe(parent1Alt.phone);
                 expect(parent1.address?.id).toBe(parent1Alt.address?.id);
-                expect(d1.unverifiedPhones).toContain(parent1Alt.phone);
-                expect(parent1.alternativeEmails).toContain(parent1Alt.email!.toLocaleLowerCase());
+                expect(d1.unverifiedPhones).toContain(oldParent1.phone);
+                expect(parent1.alternativeEmails).toContain(oldParent1.email!.toLocaleLowerCase());
             });
 
             test('emergency contacts', () => {
@@ -696,7 +696,7 @@ describe('member merge', () => {
                 // Should be combination of unverified addresses + address of the second member (which coulnd't be merged)
                 const addressIds = d1.unverifiedAddresses.map(a => a.id);
                 expect(addressIds.sort()).toEqual([
-                    d2Old.address!.id,
+                    d1Old.address!.id,
                     d1Old.unverifiedAddresses[0].id,
                     d2Old.unverifiedAddresses[0].id,
                 ].sort());

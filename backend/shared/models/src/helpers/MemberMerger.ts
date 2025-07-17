@@ -217,11 +217,11 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     otherDetails.cleanData();
 
     // string details
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'firstName');
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'lastName');
+    mergeString(baseDetails, otherDetails, 'firstName');
+    mergeString(baseDetails, otherDetails, 'lastName');
 
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'memberNumber');
-    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'uitpasNumber');
+    mergeString(baseDetails, otherDetails, 'memberNumber');
+    mergeString(baseDetails, otherDetails, 'uitpasNumber');
 
     // email
     mergeEmail(baseDetails, otherDetails);
@@ -230,7 +230,7 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     mergePhone(baseDetails, otherDetails, baseDetails);
 
     // gender
-    if (baseDetails.gender === Gender.Other) {
+    if (otherDetails.gender !== Gender.Other) {
         baseDetails.gender = otherDetails.gender;
     }
 
@@ -238,7 +238,7 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     mergeNotes(baseDetails, otherDetails);
 
     // date
-    mergeIfBaseNotSet(baseDetails, otherDetails, 'birthDay');
+    merge(baseDetails, otherDetails, 'birthDay');
 
     // boolean status
     mergeBooleanStatusIfBaseNotSet(
@@ -335,14 +335,12 @@ function mergeAnswers(base: MemberDetails, other: MemberDetails) {
 }
 
 function mergeNotes(base: MemberDetails, other: MemberDetails) {
-    if (base.notes && other.notes) {
+    if (base.notes && other.notes && base.notes !== other.notes) {
         base.notes = `${base.notes}\n${other.notes}`;
     }
-    else if (base.notes) {
-        return;
-    }
-    else {
+    else if (other.notes) {
         base.notes = other.notes;
+        return;
     }
 }
 
@@ -371,11 +369,11 @@ function mergeParents(base: MemberDetails, other: MemberDetails) {
 }
 
 function mergeParent(base: Parent, other: Parent, baseDetails: MemberDetails) {
-    if (base.type === ParentType.Other) {
+    if (other.type !== ParentType.Other) {
         base.type = other.type;
     }
-    mergeStringIfBaseNotSet(base, other, 'firstName');
-    mergeStringIfBaseNotSet(base, other, 'lastName');
+    mergeString(base, other, 'firstName');
+    mergeString(base, other, 'lastName');
     // add other emails to alternative emails
     mergeEmail(base, other);
     mergePhone(base, other, baseDetails);
@@ -387,7 +385,7 @@ function mergeEmail(
     other: { email: string | null; alternativeEmails: string[] },
 ) {
     const allEmails = Formatter.uniqueArray(
-        [base.email, ...base.alternativeEmails, other.email, ...other.alternativeEmails]
+        [other.email, ...other.alternativeEmails, base.email, ...base.alternativeEmails]
             .filter(f => f !== null)
             .filter(f => !isNullOrEmpty(f)),
     );
@@ -400,13 +398,13 @@ function mergePhone(
     other: { phone: string | null | undefined },
     baseDetails: MemberDetails,
 ) {
-    const isPhoneMerged = mergeStringIfBaseNotSet(base, other, 'phone');
-    const otherPhone = other.phone;
-    if (!isPhoneMerged && !isNullOrEmpty(otherPhone)) {
+    const originalPhone = base.phone;
+    const isPhoneMerged = mergeString(base, other, 'phone');
+    if (isPhoneMerged && !isNullOrEmpty(originalPhone)) {
         if (
-            !baseDetails.unverifiedPhones.some(phone => phone === otherPhone)
+            !baseDetails.unverifiedPhones.some(phone => phone === originalPhone)
         ) {
-            baseDetails.unverifiedPhones.push(otherPhone!);
+            baseDetails.unverifiedPhones.push(originalPhone!);
         }
     }
 }
@@ -419,30 +417,29 @@ function mergeAddress(
     const baseAddress = base.address;
     const otherAddress = other.address;
 
-    if (!baseAddress) {
-        base.address = otherAddress;
+    if (!otherAddress) {
+        return;
     }
-    else if (otherAddress && baseAddress.id !== otherAddress.id) {
-        // add other address to unverified addresses
+
+    base.address = otherAddress;
+
+    if (baseAddress && baseAddress.id !== otherAddress.id) {
+        // add base address to unverified addresses
         if (
             !baseDetails.unverifiedAddresses.some(
-                address => address.id === otherAddress.id,
+                address => address.id === baseAddress.id,
             )
         ) {
-            baseDetails.unverifiedAddresses.push(otherAddress);
+            baseDetails.unverifiedAddresses.push(baseAddress);
         }
     }
 }
 
-function mergeStringIfBaseNotSet<T, K extends keyof T>(
+function mergeString<T, K extends keyof T>(
     base: T,
     other: T,
     key: K & (T[K] extends string | null | undefined ? K : never),
 ): boolean {
-    const baseValue = base[key] as string | null | undefined;
-    if (!isNullOrEmpty(baseValue)) {
-        return false;
-    }
     const otherValue = other[key] as string | null | undefined;
     if (isNullOrEmpty(otherValue)) {
         return false;
@@ -453,14 +450,12 @@ function mergeStringIfBaseNotSet<T, K extends keyof T>(
     return true;
 }
 
-function mergeIfBaseNotSet<T, K extends keyof T>(
+function merge<T, K extends keyof T>(
     base: T,
     other: T,
     key: K &
         (T[K] extends number | Date | boolean | null | undefined ? K : never),
 ): boolean {
-    const baseValue = base[key] as number | Date | boolean | null | undefined;
-    if (!(baseValue === null || baseValue === undefined)) return false;
     const otherValue = other[key] as number | Date | boolean | null | undefined;
     if (otherValue === null || otherValue === undefined) return false;
     (base[key] as number | Date | boolean | null | undefined) = otherValue;
@@ -474,17 +469,19 @@ function mergeBooleanStatusIfBaseNotSet<T, K extends keyof T>(
 ): boolean {
     const otherValue = other[key] as BooleanStatus | null | undefined;
     if (otherValue === null || otherValue === undefined) return false;
+
     const baseValue = base[key] as BooleanStatus | null | undefined;
-    if (!(baseValue === null || baseValue === undefined)) {
-        if (baseValue.date < otherValue.date) {
-            (base[key] as BooleanStatus | null | undefined) = otherValue;
-            return true;
-        }
-        return false;
+    if (baseValue === undefined || baseValue === null) {
+        (base[key] as BooleanStatus | null | undefined) = otherValue;
+        return true;
     }
 
-    (base[key] as BooleanStatus | null | undefined) = otherValue;
-    return true;
+    if (baseValue.date < otherValue.date) {
+        (base[key] as BooleanStatus | null | undefined) = otherValue;
+        return true;
+    }
+
+    return false;
 }
 
 /**
