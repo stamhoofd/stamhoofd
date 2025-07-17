@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/modern/SQLFilter';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/SQLFilter';
 import { SQL } from '../../src/SQL';
 import { testSelect } from '../utils';
 
