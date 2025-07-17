@@ -5,9 +5,9 @@
             {{ $t('3fd23349-ffba-4291-be68-2d0c844e5754') }}
         </p>
 
-        <p v-if="!hasMembers" class="warning-box">
+        <p v-if="!hasMembers && $isStamhoofd" class="warning-box">
             <span>{{ $t('7a7e4a56-9d39-42cf-b4fa-930e43330756') }}
-                <a :href="'https://'+ $t('5766cbb7-e737-474e-a377-213e1d9f6fe5') +'/docs/waarom-je-leden-beter-niet-importeert/'" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
+                <a :href="LocalizedDomains.getDocs('waarom-je-leden-beter-niet-importeert')" class="inline-link" target="_blank">{{ $t('5b38f7dc-d818-4298-8ef6-eb7fd6934c63') }}</a>
             </span>
         </p>
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -121,6 +121,7 @@ import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
 import RegistrationPeriodSelector from './RegistrationPeriodSelector.vue';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 
 const errors = useErrors();
 const saving = ref(false);
