@@ -233,6 +233,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     async count(): Promise<number> {
+        if (this._where && this._where.isAlways === false) {
+            return 0;
+        }
+
         this._columns = [
             new SQLSelectAs(
                 new SQLCount(),
@@ -264,6 +268,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     async sum(expression: SQLExpression): Promise<number> {
+        if (this._where && this._where.isAlways === false) {
+            return 0;
+        }
+
         this._columns = [
             new SQLSelectAs(
                 new SQLSum(expression),
