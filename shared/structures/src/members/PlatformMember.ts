@@ -443,6 +443,17 @@ export class PlatformFamily {
 
         return false;
     }
+
+    add(platformMember: PlatformMember) {
+        const existing = this.members.find(m => m.id === platformMember.id);
+        if (!existing) {
+            this.members.push(platformMember);
+        }
+
+        if (platformMember.family !== this) {
+            platformMember.family = this;
+        }
+    }
 }
 
 export class PlatformRegistration extends Registration {
