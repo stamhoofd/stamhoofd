@@ -337,20 +337,27 @@ describe('$eq', () => {
             createdAt: createColumnFilter({ expression: SQL.column('createdAt'), type: SQLValueType.Datetime, nullable: false }),
         };
 
-        await test({
-            filter: {
-                createdAt: {
-                    $: '$now',
+        jest.useFakeTimers().setSystemTime(new Date());
+
+        try {
+            await test({
+                filter: {
+                    createdAt: {
+                        $: '$now',
+                    },
                 },
-            },
-            filters,
-            query: {
-                query: '`default`.`createdAt` = ?',
-                params: [
-                    new Date(),
-                ],
-            },
-        });
+                filters,
+                query: {
+                    query: '`default`.`createdAt` = ?',
+                    params: [
+                        new Date(),
+                    ],
+                },
+            });
+        }
+        finally {
+            jest.useRealTimers();
+        }
     });
 
     describe('JSON', () => {
