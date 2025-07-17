@@ -43,7 +43,8 @@ export function useIsAllOptional(member: Ref<PlatformMember | PlatformMember[]>)
     return computed(() => {
         const members = Array.isArray(member.value) ? member.value : [member.value];
         return members.some((m) => {
-            if (m.family.checkout.isAdminFromSameOrganization) {
+            if (m.family.checkout.isAdminFromSameOrganization || !m.family.checkout.asOrganizationId) {
+                // In the dashboard, don't make everything optional if we are registaring a member for a different organization (during the flow)
                 if (auth.canAccessPlatformMember(m, PermissionLevel.Write) && app !== 'registration') {
                     return true;
                 }
