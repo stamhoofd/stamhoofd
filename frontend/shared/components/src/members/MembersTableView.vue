@@ -175,6 +175,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
                     periodId: {
                         $in: Formatter.uniqueArray(periodIds),
                     },
+                    group: {
+                        // Do not show members that are only registered for a waiting list or event
+                        type: GroupType.Membership,
+                    },
                 },
             },
         });
