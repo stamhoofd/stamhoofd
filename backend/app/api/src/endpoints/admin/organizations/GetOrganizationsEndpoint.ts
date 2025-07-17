@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
-import { SQL, compileToSQLFilter, applySQLSorter } from '@stamhoofd/sql';
+import { SQL, applySQLSorter, compileToModernSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -62,11 +62,11 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             );
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -80,13 +80,13 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             };
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

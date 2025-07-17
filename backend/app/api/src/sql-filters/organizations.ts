@@ -1,112 +1,107 @@
-import {
-    SQL,
-    SQLConcat,
-    SQLExpressionOptions,
-    SQLFilterDefinitions,
-    SQLNow,
-    SQLNull,
-    SQLQuery,
-    SQLScalar,
-    SQLValueType,
-    SQLWhereEqual,
-    SQLWhereOr,
-    SQLWhereSign,
-    baseSQLFilterCompilers,
-    createSQLColumnFilterCompiler,
-    createSQLExpressionFilterCompiler,
-    createSQLFilterNamespace,
-    createSQLRelationFilterCompiler,
-} from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLModernFilterDefinitions, SQLModernValueType, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
 import { SetupStepType } from '@stamhoofd/structures';
 
-export const organizationFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLExpressionFilterCompiler(SQL.column('organizations', 'id')),
-    uriPadded: createSQLExpressionFilterCompiler(SQL.lpad(SQL.column('organizations', 'uri'), 10, '0')),
-    uri: createSQLExpressionFilterCompiler(SQL.column('organizations', 'uri')),
-    name: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'name'),
-    ),
-    active: createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'active'),
-    ),
-    city: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    postalCode: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.postalCode'),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    country: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(
-            SQL.column('organizations', 'address'),
-            '$.value.country',
-        ),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    umbrellaOrganization: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(
-            SQL.column('organizations', 'meta'),
-            '$.value.umbrellaOrganization',
-        ),
-        { isJSONValue: true },
-    ),
-    type: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
-        { isJSONValue: true },
-    ),
-    tags: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
-        { isJSONValue: true, isJSONObject: true },
-    ),
-    setupSteps: createSQLRelationFilterCompiler(
+export const organizationFilterCompilers: SQLModernFilterDefinitions = {
+    ...baseModernSQLFilterCompilers,
+    id: createColumnFilter({
+        expression: SQL.column('organizations', 'id'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    uriPadded: createColumnFilter({
+        expression: SQL.lpad(SQL.column('organizations', 'uri'), 10, '0'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    uri: createColumnFilter({
+        expression: SQL.column('organizations', 'uri'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    name: createColumnFilter({
+        expression: SQL.column('organizations', 'name'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    active: createColumnFilter({
+        expression: SQL.column('organizations', 'active'),
+        type: SQLModernValueType.Boolean,
+        nullable: false,
+    }),
+    city: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    postalCode: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.postalCode'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    country: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.country'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    umbrellaOrganization: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
+    }),
+    type: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    tags: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
+        type: SQLModernValueType.JSONArray,
+        nullable: false,
+    }),
+    setupSteps: createExistsFilter(
         SQL.select()
             .from(SQL.table('organization_registration_periods'))
             .where(
-                SQL.column(
-                    'organization_registration_periods',
-                    'organizationId',
-                ),
+                SQL.column('organization_registration_periods', 'organizationId'),
                 SQL.column('organizations', 'id'),
             ),
         {
-            ...baseSQLFilterCompilers,
-            periodId: createSQLColumnFilterCompiler(
-                SQL.column('organization_registration_periods', 'periodId'),
-            ),
+            ...baseModernSQLFilterCompilers,
+            periodId: createColumnFilter({
+                expression: SQL.column('organization_registration_periods', 'periodId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
             ...Object.fromEntries(
                 Object.values(SetupStepType)
                     .map((setupStep) => {
                         return [
                             setupStep,
-                            createSQLFilterNamespace({
-                                reviewedAt: createSQLExpressionFilterCompiler(
-                                    SQL.jsonValue(
-                                        SQL.column(
-                                            'organization_registration_periods',
-                                            'setupSteps',
-                                        ),
+                            {
+                                ...baseModernSQLFilterCompilers,
+                                reviewedAt: createColumnFilter({
+                                    expression: SQL.jsonValue(
+                                        SQL.column('organization_registration_periods', 'setupSteps'),
                                         `$.value.steps.${setupStep}.review.date`,
                                     ),
-                                    { isJSONValue: true, isJSONObject: false },
-                                ),
-                                complete: createSQLExpressionFilterCompiler(
-                                    {
-                                        getSQL: (
-                                            _options?: SQLExpressionOptions,
-                                        ): SQLQuery =>
+                                    type: SQLModernValueType.JSONString,
+                                    nullable: true,
+                                }),
+                                complete: createColumnFilter({
+                                    expression: {
+                                        getSQL: () =>
                                             `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.totalSteps")) AS unsigned) then 1 else 0 end`,
                                     },
-                                    { isJSONValue: false, isJSONObject: false },
-                                ),
-                            }),
+                                    type: SQLModernValueType.Boolean,
+                                    nullable: false,
+                                }),
+                            },
                         ];
                     }),
             ),
         },
     ),
-    packages: createSQLRelationFilterCompiler(
+    packages: createExistsFilter(
         SQL.select()
             .from(SQL.table('stamhoofd_packages'))
             .where(
@@ -142,18 +137,16 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                     ),
                 ]),
             ),
-
-        // const pack1 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: { sign: ">", value: new Date() }})
-        // const pack2 = await STPackage.where({ organizationId, validAt: { sign: "!=", value: null }, removeAt: null })
         {
-            ...baseSQLFilterCompilers,
-            type: createSQLExpressionFilterCompiler(
-                SQL.jsonValue(SQL.column('meta'), '$.value.type'),
-                { isJSONValue: true },
-            ),
+            ...baseModernSQLFilterCompilers,
+            type: createColumnFilter({
+                expression: SQL.jsonValue(SQL.column('meta'), '$.value.type'),
+                type: SQLModernValueType.JSONString,
+                nullable: false,
+            }),
         },
     ),
-    members: createSQLRelationFilterCompiler(
+    members: createExistsFilter(
         SQL.select()
             .from(SQL.table('members'))
             .join(
@@ -166,19 +159,32 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('registrations', 'organizationId'),
                 SQL.column('organizations', 'id'),
             ),
-
         {
-            ...baseSQLFilterCompilers,
-            name: createSQLExpressionFilterCompiler(
-                new SQLConcat(
+            ...baseModernSQLFilterCompilers,
+            name: createColumnFilter({
+                expression: new SQLConcat(
                     SQL.column('firstName'),
                     new SQLScalar(' '),
                     SQL.column('lastName'),
                 ),
-            ),
-            firstName: createSQLColumnFilterCompiler('firstName'),
-            lastName: createSQLColumnFilterCompiler('lastName'),
-            email: createSQLColumnFilterCompiler('email'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            firstName: createColumnFilter({
+                expression: SQL.column('firstName'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            lastName: createColumnFilter({
+                expression: SQL.column('lastName'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            email: createColumnFilter({
+                expression: SQL.jsonValue(SQL.column('details'), '$.value.email'),
+                type: SQLModernValueType.JSONString,
+                nullable: true,
+            }),
         },
     ),
 };

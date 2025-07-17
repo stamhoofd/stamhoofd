@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Ticket } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, TicketPrivate } from '@stamhoofd/structures';
 
-import { compileToSQLFilter, applySQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQL, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -15,7 +15,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<TicketPrivate[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = ticketFilterCompilers;
+const filterCompilers: SQLModernFilterDefinitions = ticketFilterCompilers;
 const sorters: SQLSortDefinitions<Ticket> = ticketSorters;
 
 export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -42,12 +42,12 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         const query = SQL
             .select(SQL.wildcard(ticketsTable))
             .from(SQL.table(ticketsTable))
-            .where(await Promise.resolve(compileToSQLFilter({
+            .where(await Promise.resolve(compileToModernSQLFilter({
                 organizationId: organization.id,
             }, filterCompilers)));
 
         if (q.filter) {
-            query.where(await Promise.resolve(compileToSQLFilter(q.filter, filterCompilers)));
+            query.where(await Promise.resolve(compileToModernSQLFilter(q.filter, filterCompilers)));
         }
 
         // currently no search supported, probably not needed?
@@ -56,7 +56,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await Promise.resolve(compileToSQLFilter(q.pageFilter, filterCompilers)));
+                query.where(await Promise.resolve(compileToModernSQLFilter(q.pageFilter, filterCompilers)));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

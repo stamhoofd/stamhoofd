@@ -1,9 +1,10 @@
-import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Order } from '@stamhoofd/models';
-import { compileToSQLFilter, applySQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQL, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+
+import { Decoder } from '@simonbackx/simple-encoding';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
@@ -16,7 +17,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = orderFilterCompilers;
+const filterCompilers: SQLModernFilterDefinitions = orderFilterCompilers;
 const sorters: SQLSortDefinitions<Order> = orderSorters;
 
 export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -44,7 +45,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         const query = SQL
             .select(SQL.wildcard(ordersTable))
             .from(SQL.table(ordersTable))
-            .where(await compileToSQLFilter({
+            .where(await compileToModernSQLFilter({
                 organizationId: organization.id,
                 number: {
                     $neq: null,
@@ -52,20 +53,20 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             }, filterCompilers));
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

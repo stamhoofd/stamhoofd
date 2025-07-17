@@ -69,8 +69,11 @@ export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: 
         const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
-        return (_: SQLCurrentColumn) => {
-            return runner({
+        return async (_: SQLCurrentColumn) => {
+            if (column.checkPermission) {
+                await column.checkPermission();
+            }
+            return await runner({
                 nullable: false,
                 ...column,
             });
@@ -83,10 +86,14 @@ export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurren
         const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseModernSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
-        return (_: SQLCurrentColumn) => {
-            return runner({
+        return async (_: SQLCurrentColumn) => {
+            const column = getColumn(key);
+            if (column.checkPermission) {
+                await column.checkPermission();
+            }
+            return await runner({
                 nullable: false,
-                ...getColumn(key),
+                ...column,
             });
         };
     };

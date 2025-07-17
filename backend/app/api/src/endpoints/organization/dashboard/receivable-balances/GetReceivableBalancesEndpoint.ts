@@ -2,14 +2,13 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance } from '@stamhoofd/models';
-import { compileToSQLFilter, applySQLSorter } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter } from '@stamhoofd/sql';
 import { assertSort, CountFilteredRequest, DetailedReceivableBalance, getSortFilter, LimitedFilteredRequest, PaginatedResponse, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { receivableBalanceFilterCompilers } from '../../../../sql-filters/receivable-balances';
 import { receivableBalanceSorters } from '../../../../sql-sorters/receivable-balances';
-import { BalanceItemService } from '../../../../services/BalanceItemService';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -55,11 +54,11 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             .select();
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -91,13 +90,13 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             };
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

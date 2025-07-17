@@ -1,4 +1,4 @@
-import { SQL, SQLConcat, SQLFilterDefinitions, SQLScalar, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLModernFilterDefinitions, SQLModernValueType, SQLScalar } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members';
 import { organizationFilterCompilers } from './organizations';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers';
@@ -6,25 +6,58 @@ import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompil
 /**
  * Defines how to filter cached balance items in the database from StamhoofdFilter objects
  */
-export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
-    objectType: createSQLColumnFilterCompiler('objectType'),
-    amountOpen: createSQLColumnFilterCompiler('amountOpen'),
-    amountPending: createSQLColumnFilterCompiler('amountPending'),
-    nextDueAt: createSQLColumnFilterCompiler('nextDueAt'),
-    lastReminderEmail: createSQLColumnFilterCompiler('lastReminderEmail'),
-    reminderEmailCount: createSQLColumnFilterCompiler('reminderEmailCount'),
-    reminderAmountIncreased: createSQLExpressionFilterCompiler(
-        SQL.if(
+export const receivableBalanceFilterCompilers: SQLModernFilterDefinitions = {
+    ...baseModernSQLFilterCompilers,
+    id: createColumnFilter({
+        expression: SQL.column('id'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    organizationId: createColumnFilter({
+        expression: SQL.column('organizationId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    objectType: createColumnFilter({
+        expression: SQL.column('objectType'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    amountOpen: createColumnFilter({
+        expression: SQL.column('amountOpen'),
+        type: SQLModernValueType.Number,
+        nullable: false,
+    }),
+    amountPending: createColumnFilter({
+        expression: SQL.column('amountPending'),
+        type: SQLModernValueType.Number,
+        nullable: false,
+    }),
+    nextDueAt: createColumnFilter({
+        expression: SQL.column('nextDueAt'),
+        type: SQLModernValueType.Datetime,
+        nullable: true,
+    }),
+    lastReminderEmail: createColumnFilter({
+        expression: SQL.column('lastReminderEmail'),
+        type: SQLModernValueType.Datetime,
+        nullable: true,
+    }),
+    reminderEmailCount: createColumnFilter({
+        expression: SQL.column('reminderEmailCount'),
+        type: SQLModernValueType.Number,
+        nullable: false,
+    }),
+    reminderAmountIncreased: createColumnFilter({
+        expression: SQL.if(
             SQL.column('amountOpen'),
             '>',
             SQL.column('lastReminderAmountOpen'),
         ).then(1).else(0),
-        { isJSONValue: false, isJSONObject: false },
-    ),
-    organizations: createSQLRelationFilterCompiler(
+        type: SQLModernValueType.Boolean,
+        nullable: false,
+    }),
+    organizations: createExistsFilter(
         SQL.select()
             .from(SQL.table('organizations'))
             .where(
@@ -36,9 +69,10 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
             ).where(
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'organization'),
+
         organizationFilterCompilers,
     ),
-    members: createSQLRelationFilterCompiler(
+    members: createExistsFilter(
         SQL.select()
             .from(SQL.table('members'))
             .where(
@@ -52,7 +86,7 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 'member'),
         memberFilterCompilers,
     ),
-    users: createSQLRelationFilterCompiler(
+    users: createExistsFilter(
         SQL.select()
             .from(SQL.table('users'))
             .where(
@@ -65,13 +99,16 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'user'),
         {
-            name: createSQLExpressionFilterCompiler(
-                new SQLConcat(
+            ...baseModernSQLFilterCompilers,
+            name: createColumnFilter({
+                expression: new SQLConcat(
                     SQL.column('firstName'),
                     new SQLScalar(' '),
                     SQL.column('lastName'),
                 ),
-            ),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
         },
     ),
 

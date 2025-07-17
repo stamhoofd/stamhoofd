@@ -1,14 +1,14 @@
 import { Member, Registration } from '@stamhoofd/models';
-import { baseSQLFilterCompilers, createSQLJoinedRelationFilterCompiler, SQL, SQLFilterDefinitions } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createJoinedRelationFilter, SQL, SQLModernFilterDefinitions } from '@stamhoofd/sql';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
 import { memberFilterCompilers } from './members';
 
 export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 
-export const registrationFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
+export const registrationFilterCompilers: SQLModernFilterDefinitions = {
+    ...baseModernSQLFilterCompilers,
     ...baseRegistrationFilterCompilers,
-    member: createSQLJoinedRelationFilterCompiler(
+    member: createJoinedRelationFilter(
         memberJoin,
         memberFilterCompilers,
     ),

@@ -1,19 +1,19 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, RegistrationPeriod as RegistrationPeriodStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, RegistrationPeriod as RegistrationPeriodStruct, StamhoofdFilter } from '@stamhoofd/structures';
 
+import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
-import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods';
 import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods';
-import { Decoder } from '@simonbackx/simple-encoding';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<RegistrationPeriodStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = registrationPeriodFilterCompilers;
+const filterCompilers: SQLModernFilterDefinitions = registrationPeriodFilterCompilers;
 const sorters: SQLSortDefinitions<RegistrationPeriod> = registrationPeriodSorters;
 
 export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -37,11 +37,11 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
         const query = RegistrationPeriod.select();
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -52,13 +52,13 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
             };
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

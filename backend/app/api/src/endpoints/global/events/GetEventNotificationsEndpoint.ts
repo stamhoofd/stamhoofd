@@ -2,21 +2,21 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification } from '@stamhoofd/models';
-import { SQL, SQLFilterDefinitions, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { SQL, SQLSortDefinitions, applySQLSorter, compileToModernSQLFilter } from '@stamhoofd/sql';
 import { AccessRight, CountFilteredRequest, EventNotification as EventNotificationStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
+import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { eventNotificationsFilterCompilers } from '../../../sql-filters/event-notifications';
 import { eventNotificationsSorters } from '../../../sql-sorters/event-notifications';
-import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<EventNotificationStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = eventNotificationsFilterCompilers;
+const filterCompilers = eventNotificationsFilterCompilers;
 const sorters: SQLSortDefinitions<SQLResultNamespacedRow> = eventNotificationsSorters;
 
 export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -76,11 +76,11 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             );
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -97,13 +97,13 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             };
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

@@ -1,61 +1,109 @@
-import { baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLModernFilterDefinitions, SQLModernValueType, SQLScalar } from '@stamhoofd/sql';
 
-export const orderFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
+export const orderFilterCompilers: SQLModernFilterDefinitions = {
+    ...baseModernSQLFilterCompilers,
     // only backend (not useful to filter on these in the frontend)
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
-    updatedAt: createSQLColumnFilterCompiler('updatedAt'),
+    organizationId: createColumnFilter({
+        expression: SQL.column('organizationId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    updatedAt: createColumnFilter({
+        expression: SQL.column('updatedAt'),
+        type: SQLModernValueType.Datetime,
+        nullable: false,
+    }),
 
     // frontend and backend
-    webshopId: createSQLColumnFilterCompiler('webshopId'),
-    id: createSQLColumnFilterCompiler('id'),
-    timeSlotEndTime: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
-        // todo: type?
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    timeSlotStartTime: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.startTime'),
-        // todo: type?
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    createdAt: createSQLColumnFilterCompiler('createdAt'),
-    number: createSQLColumnFilterCompiler('number'),
-    status: createSQLColumnFilterCompiler('status'),
-    paymentMethod: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.paymentMethod'),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    checkoutMethod: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    timeSlotDate: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.date'),
-        // todo: type?
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    validAt: createSQLColumnFilterCompiler('validAt'),
-    name: createSQLExpressionFilterCompiler(
-        new SQLCast(
+    webshopId: createColumnFilter({
+        expression: SQL.column('webshopId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    id: createColumnFilter({
+        expression: SQL.column('id'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    timeSlotEndTime: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
+    }),
+    timeSlotStartTime: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.startTime'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
+    }),
+    createdAt: createColumnFilter({
+        expression: SQL.column('createdAt'),
+        type: SQLModernValueType.Datetime,
+        nullable: false,
+    }),
+    number: createColumnFilter({
+        expression: SQL.column('number'),
+        type: SQLModernValueType.Number,
+        nullable: true,
+    }),
+    status: createColumnFilter({
+        expression: SQL.column('status'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    paymentMethod: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.paymentMethod'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    checkoutMethod: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
+    }),
+    timeSlotDate: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.date'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
+    }),
+    validAt: createColumnFilter({
+        expression: SQL.column('validAt'),
+        type: SQLModernValueType.Datetime,
+        nullable: true,
+    }),
+    name: createColumnFilter({
+        expression: new SQLCast(
             new SQLConcat(
                 new SQLJsonUnquote(SQL.jsonValue(SQL.column('data'), '$.value.customer.firstName')),
                 new SQLScalar(' '),
                 new SQLJsonUnquote(SQL.jsonValue(SQL.column('data'), '$.value.customer.lastName')),
             ),
             'CHAR'),
-    ),
-    email: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.customer.email'),
-        // todo: type?
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    phone: createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column('data'), '$.value.customer.phone'),
-        // todo: type?
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    totalPrice: createSQLColumnFilterCompiler('totalPrice'),
-    amount: createSQLColumnFilterCompiler('amount'),
-    timeSlotTime: createSQLColumnFilterCompiler('timeSlotTime'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    email: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.customer.email'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    phone: createColumnFilter({
+        expression: SQL.jsonValue(SQL.column('data'), '$.value.customer.phone'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    totalPrice: createColumnFilter({
+        expression: SQL.column('totalPrice'),
+        type: SQLModernValueType.Number,
+        nullable: false,
+    }),
+    amount: createColumnFilter({
+        expression: SQL.column('amount'),
+        type: SQLModernValueType.Number,
+        nullable: false,
+    }),
+    timeSlotTime: createColumnFilter({
+        expression: SQL.column('timeSlotTime'),
+        type: SQLModernValueType.Datetime,
+        nullable: true,
+    }),
 };
