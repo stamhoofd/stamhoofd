@@ -183,9 +183,16 @@ function validate() {
     validationWarning.value = props.item.cartError ? null : props.item.validationWarning;
 }
 
-watch(() => props.item.groupPrice, () => validate(), { immediate: true });
+const customStartDate = computed({
+    get: () => props.item.customStartDate,
+    set: (value: Date | null) => props.item.customStartDate = value,
+});
 
-onMounted(() => {
+watch(() => [props.item.groupPrice, customStartDate.value], () => {
+    updateErrorAndWarning();
+});
+
+function updateErrorAndWarning() {
     errors.errorBox = null;
     try {
         validate();
@@ -193,19 +200,16 @@ onMounted(() => {
     catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
+}
+
+onMounted(() => {
+    updateErrorAndWarning();
 });
 
 const trial = computed({
     get: () => props.item.trial,
     set: (value: boolean) => props.item.trial = value,
 });
-
-const customStartDate = computed({
-    get: () => props.item.customStartDate,
-    set: (value: Date | null) => props.item.customStartDate = value,
-});
-
-const defaultStartDate = computed(() => customStartDate.value ?? props.item.calculatedStartDate);
 
 async function addToCart() {
     if (saving.value) {
