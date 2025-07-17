@@ -3,7 +3,7 @@ import { Document } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { compileToSQLFilter, applySQLSorter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQL, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
@@ -15,7 +15,7 @@ type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<DocumentStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = documentFilterCompilers;
+const filterCompilers: SQLModernFilterDefinitions = documentFilterCompilers;
 const sorters: SQLSortDefinitions<Document> = documentSorters;
 
 /**
@@ -46,25 +46,23 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
         const query = SQL
             .select(SQL.wildcard(documentTable))
             .from(SQL.table(documentTable))
-            .where(await compileToSQLFilter({
-                organizationId: organization.id,
-            }, filterCompilers));
+            .where('organizationId', organization.id);
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
             const searchFilter: StamhoofdFilter | null = getDocumentSearchFilter(q.search);
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
@@ -151,7 +149,6 @@ function getDocumentSearchFilter(search: string | null): StamhoofdFilter | null 
                     $contains: search,
                 },
             },
-        ]
-        ,
+        ],
     };
 }

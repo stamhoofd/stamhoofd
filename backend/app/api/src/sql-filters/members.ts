@@ -1,8 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import { SQL, SQLAge, SQLConcat, SQLFilterDefinitions, SQLScalar, SQLValueType, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLExpressionFilterCompiler, createSQLFilterNamespace, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLModernFilterDefinitions, SQLModernValueType, SQLScalar } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../helpers/Context';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
 import { organizationFilterCompilers } from './organizations';
@@ -12,44 +11,73 @@ const membersTable = SQL.table(Member.table);
 /**
  * Defines how to filter members in the database from StamhoofdFilter objects
  */
-export const memberFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    'id': createSQLColumnFilterCompiler(SQL.column(membersTable, 'id')),
-    'memberNumber': createSQLColumnFilterCompiler(SQL.column(membersTable, 'memberNumber')),
-    'firstName': createSQLColumnFilterCompiler(SQL.column(membersTable, 'firstName')),
-    'lastName': createSQLColumnFilterCompiler(SQL.column(membersTable, 'lastName')),
-    'name': createSQLExpressionFilterCompiler(
-        new SQLConcat(
+export const memberFilterCompilers: SQLModernFilterDefinitions = {
+    ...baseModernSQLFilterCompilers,
+    'id': createColumnFilter({
+        expression: SQL.column(membersTable, 'id'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    'memberNumber': createColumnFilter({
+        expression: SQL.column(membersTable, 'memberNumber'),
+        type: SQLModernValueType.Number,
+        nullable: true,
+    }),
+    'firstName': createColumnFilter({
+        expression: SQL.column(membersTable, 'firstName'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    'lastName': createColumnFilter({
+        expression: SQL.column(membersTable, 'lastName'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    'name': createColumnFilter({
+        expression: new SQLConcat(
             SQL.column(membersTable, 'firstName'),
             new SQLScalar(' '),
             SQL.column(membersTable, 'lastName'),
         ),
-    ),
-    'age': createSQLExpressionFilterCompiler(
-        new SQLAge(SQL.column(membersTable, 'birthDay')),
-        { nullable: true },
-    ),
-    'gender': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.gender'),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    'birthDay': createSQLColumnFilterCompiler(SQL.column(membersTable, 'birthDay'), {
-        normalizeValue: (d) => {
-            if (typeof d === 'number') {
-                const date = new Date(d);
-                return Formatter.dateIso(date);
-            }
-            return d;
-        },
+        type: SQLModernValueType.String,
+        nullable: false,
     }),
-    'organizationName': createSQLExpressionFilterCompiler(
-        SQL.column('organizations', 'name'),
-    ),
-    'details.requiresFinancialSupport': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.requiresFinancialSupport.value'),
-        { isJSONValue: true, type: SQLValueType.JSONBoolean, checkPermission: async () => {
+    'age': createColumnFilter({
+        expression: new SQLAge(SQL.column(membersTable, 'birthDay')),
+        type: SQLModernValueType.Number,
+        nullable: true,
+    }),
+    'gender': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.gender'),
+        type: SQLModernValueType.JSONString,
+        nullable: false,
+    }),
+    'birthDay': createColumnFilter({
+        // todo: check normalization of date
+        expression: SQL.column(membersTable, 'birthDay'),
+        type: SQLModernValueType.Datetime,
+        nullable: true,
+    }),
+    'organizationName': createColumnFilter({
+        expression: SQL.column('organizations', 'name'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    'details.requiresFinancialSupport': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.requiresFinancialSupport.value'),
+        type: SQLModernValueType.JSONBoolean,
+        nullable: true,
+        checkPermission: async () => {
             const organization = Context.organization;
             if (!organization) {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'No permissions for financial support filter.',
+                        human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
+                        statusCode: 400,
+                    });
+                }
                 return;
             }
 
@@ -63,89 +91,113 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                     statusCode: 400,
                 });
             }
-        } },
-    ),
-    'email': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.email'),
-        { isJSONValue: true, type: SQLValueType.JSONString },
-    ),
-    'parentEmail': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].email'),
-        { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
-    ),
-    'details.parents[0]': createSQLFilterNamespace({
-        name: createSQLExpressionFilterCompiler(
-            new SQLConcat(
-                SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[0].firstName'),
-                new SQLScalar(' '),
-                SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[0].lastName'),
-            ),
-            { isJSONValue: true, isJSONObject: false, type: SQLValueType.JSONString },
-        ),
+        },
     }),
-    'details.parents[1]': createSQLFilterNamespace({
-        name: createSQLExpressionFilterCompiler(
-            new SQLConcat(
-                SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[1].firstName'),
-                new SQLScalar(' '),
-                SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[1].lastName'),
-            ),
-            { isJSONValue: true, isJSONObject: false, type: SQLValueType.JSONString },
-        ),
+    'email': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.email'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
     }),
-    'unverifiedEmail': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedEmails'),
-        { isJSONValue: true, isJSONObject: true, type: SQLValueType.JSONString },
-    ),
-    'phone': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.phone'),
-        { isJSONValue: true },
-    ),
-    'details.address': createSQLFilterNamespace({
-        city: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.city'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
-        ),
-        postalCode: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.postalCode'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
-        ),
-        street: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.street'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
-        ),
-        number: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.number'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
-        ),
+    'parentEmail': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].email'),
+        type: SQLModernValueType.JSONArray,
+        nullable: true,
     }),
-    'details.parents[*].address': createSQLFilterNamespace({
-        city: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.city'),
-            { isJSONValue: true, isJSONObject: true },
-        ),
-        postalCode: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.postalCode'),
-            { isJSONValue: true, isJSONObject: true },
-        ),
-        street: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.street'),
-            { isJSONValue: true, isJSONObject: true },
-        ),
-        number: createSQLExpressionFilterCompiler(
-            SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.number'),
-            { isJSONValue: true, isJSONObject: true },
-        ),
+    'details.parents[0]': {
+        ...baseModernSQLFilterCompilers,
+        name: createColumnFilter({
+            expression: new SQLCast(
+                new SQLConcat(
+                    SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[0].firstName'),
+                    new SQLScalar(' '),
+                    SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[0].lastName'),
+                ),
+                'CHAR'),
+            type: SQLModernValueType.String,
+            nullable: true,
+        }),
+    },
+    'details.parents[1]': {
+        ...baseModernSQLFilterCompilers,
+        name: createColumnFilter({
+            expression: new SQLCast(
+                new SQLConcat(
+                    SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[1].firstName'),
+                    new SQLScalar(' '),
+                    SQL.jsonUnquotedValue(SQL.column(membersTable, 'details'), '$.value.parents[1].lastName'),
+                ),
+                'CHAR'),
+            type: SQLModernValueType.String,
+            nullable: true,
+        }),
+    },
+    'unverifiedEmail': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedEmails'),
+        type: SQLModernValueType.JSONArray,
+        nullable: true,
     }),
-    'parentPhone': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].phone'),
-        { isJSONValue: true, isJSONObject: true },
-    ),
-    'unverifiedPhone': createSQLExpressionFilterCompiler(
-        SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedPhones'),
-        { isJSONValue: true, isJSONObject: true },
-    ),
-    'registrations': createSQLRelationFilterCompiler(
+    'phone': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.phone'),
+        type: SQLModernValueType.JSONString,
+        nullable: true,
+    }),
+    'details.address': {
+        ...baseModernSQLFilterCompilers,
+        city: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.city'),
+            type: SQLModernValueType.JSONString,
+            nullable: true,
+        }),
+        postalCode: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.postalCode'),
+            type: SQLModernValueType.JSONString,
+            nullable: true,
+        }),
+        street: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.street'),
+            type: SQLModernValueType.JSONString,
+            nullable: true,
+        }),
+        number: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.number'),
+            type: SQLModernValueType.JSONString,
+            nullable: true,
+        }),
+    },
+    'details.parents[*].address': {
+        ...baseModernSQLFilterCompilers,
+        city: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.city'),
+            type: SQLModernValueType.JSONArray,
+            nullable: true,
+        }),
+        postalCode: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.postalCode'),
+            type: SQLModernValueType.JSONArray,
+            nullable: true,
+        }),
+        street: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.street'),
+            type: SQLModernValueType.JSONArray,
+            nullable: true,
+        }),
+        number: createColumnFilter({
+            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.number'),
+            type: SQLModernValueType.JSONArray,
+            nullable: true,
+        }),
+    },
+    'parentPhone': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].phone'),
+        type: SQLModernValueType.JSONArray,
+        nullable: true,
+    }),
+    'unverifiedPhone': createColumnFilter({
+        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedPhones'),
+        type: SQLModernValueType.JSONArray,
+        nullable: true,
+    }),
+    'registrations': createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('registrations'),
@@ -173,10 +225,14 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         {
             ...baseRegistrationFilterCompilers,
             // Override the registration periodId - can be outdated - and always use the group periodId
-            periodId: createSQLColumnFilterCompiler(SQL.column('groups', 'periodId')),
+            periodId: createColumnFilter({
+                expression: SQL.column('groups', 'periodId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
         },
     ),
-    'responsibilities': createSQLRelationFilterCompiler(
+    'responsibilities': createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('member_responsibility_records'),
@@ -202,22 +258,50 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('members', 'id'),
             ),
         {
-            ...baseSQLFilterCompilers,
+            ...baseModernSQLFilterCompilers,
             // Alias for responsibilityId
-            id: createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
-            responsibilityId: createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'responsibilityId')),
-            organizationId: createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'organizationId')),
-            startDate: createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'startDate')),
-            endDate: createSQLColumnFilterCompiler(SQL.column('member_responsibility_records', 'endDate')),
-            group: createSQLFilterNamespace({
-                ...baseSQLFilterCompilers,
-                id: createSQLColumnFilterCompiler(SQL.column('groups', 'id')),
-                defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId')),
+            id: createColumnFilter({
+                expression: SQL.column('member_responsibility_records', 'responsibilityId'),
+                type: SQLModernValueType.String,
+                nullable: false,
             }),
-            organization: createSQLFilterNamespace(organizationFilterCompilers),
+            responsibilityId: createColumnFilter({
+                expression: SQL.column('member_responsibility_records', 'responsibilityId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            organizationId: createColumnFilter({
+                expression: SQL.column('member_responsibility_records', 'organizationId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            startDate: createColumnFilter({
+                expression: SQL.column('member_responsibility_records', 'startDate'),
+                type: SQLModernValueType.Datetime,
+                nullable: false,
+            }),
+            endDate: createColumnFilter({
+                expression: SQL.column('member_responsibility_records', 'endDate'),
+                type: SQLModernValueType.Datetime,
+                nullable: true,
+            }),
+            group: {
+                ...baseModernSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.column('groups', 'id'),
+                    type: SQLModernValueType.String,
+                    nullable: false,
+                }),
+                defaultAgeGroupId: createColumnFilter({
+                    expression: SQL.column('groups', 'defaultAgeGroupId'),
+                    type: SQLModernValueType.String,
+                    nullable: true,
+                }),
+            },
+            organization: organizationFilterCompilers,
         },
     ),
-    'platformMemberships': createSQLRelationFilterCompiler(
+    'platformMemberships': createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('member_platform_memberships'),
@@ -231,23 +315,75 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 null,
             ),
         {
-            ...baseSQLFilterCompilers,
-            id: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'id')),
-            membershipTypeId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'membershipTypeId')),
-            organizationId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'organizationId')),
-            periodId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'periodId')),
-            price: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'price')),
-            priceWithoutDiscount: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'priceWithoutDiscount')),
-            startDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'startDate')),
-            endDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'endDate')),
-            expireDate: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'expireDate')),
-            trialUntil: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'trialUntil')),
-            locked: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'locked')),
-            balanceItemId: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'balanceItemId')),
-            generated: createSQLColumnFilterCompiler(SQL.column('member_platform_memberships', 'generated')),
+            ...baseModernSQLFilterCompilers,
+            id: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'id'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            membershipTypeId: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'membershipTypeId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            organizationId: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'organizationId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            periodId: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'periodId'),
+                type: SQLModernValueType.String,
+                nullable: false,
+            }),
+            price: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'price'),
+                type: SQLModernValueType.Number,
+                nullable: false,
+            }),
+            priceWithoutDiscount: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'priceWithoutDiscount'),
+                type: SQLModernValueType.Number,
+                nullable: false,
+            }),
+            startDate: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'startDate'),
+                type: SQLModernValueType.Datetime,
+                nullable: false,
+            }),
+            endDate: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'endDate'),
+                type: SQLModernValueType.Datetime,
+                nullable: false,
+            }),
+            expireDate: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'expireDate'),
+                type: SQLModernValueType.Datetime,
+                nullable: true,
+            }),
+            trialUntil: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'trialUntil'),
+                type: SQLModernValueType.Datetime,
+                nullable: true,
+            }),
+            locked: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'locked'),
+                type: SQLModernValueType.Boolean,
+                nullable: false,
+            }),
+            balanceItemId: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'balanceItemId'),
+                type: SQLModernValueType.String,
+                nullable: true,
+            }),
+            generated: createColumnFilter({
+                expression: SQL.column('member_platform_memberships', 'generated'),
+                type: SQLModernValueType.Boolean,
+                nullable: false,
+            }),
         },
     ),
-    'organizations': createSQLRelationFilterCompiler(
+    'organizations': createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('registrations'),

@@ -1,21 +1,21 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
+import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { applySQLSorter, compileToModernSQLFilter, SQLModernFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { organizationRegistrationPeriodFilterCompilers } from '../../../../sql-filters/organization-registration-periods';
 import { organizationRegistrationPeriodSorters } from '../../../../sql-sorters/organization-registration-periods';
-import { Decoder } from '@simonbackx/simple-encoding';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<OrganizationRegistrationPeriodStruct[], LimitedFilteredRequest>;
 
-const filterCompilers: SQLFilterDefinitions = organizationRegistrationPeriodFilterCompilers;
+const filterCompilers: SQLModernFilterDefinitions = organizationRegistrationPeriodFilterCompilers;
 const sorters: SQLSortDefinitions<OrganizationRegistrationPeriod> = organizationRegistrationPeriodSorters;
 
 export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -47,11 +47,11 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
         const query = OrganizationRegistrationPeriod.select();
 
         if (scopeFilter) {
-            query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
+            query.where(await compileToModernSQLFilter(scopeFilter, filterCompilers));
         }
 
         if (q.filter) {
-            query.where(await compileToSQLFilter(q.filter, filterCompilers));
+            query.where(await compileToModernSQLFilter(q.filter, filterCompilers));
         }
 
         if (q.search) {
@@ -62,13 +62,13 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
             };
 
             if (searchFilter) {
-                query.where(await compileToSQLFilter(searchFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(searchFilter, filterCompilers));
             }
         }
 
         if (q instanceof LimitedFilteredRequest) {
             if (q.pageFilter) {
-                query.where(await compileToSQLFilter(q.pageFilter, filterCompilers));
+                query.where(await compileToModernSQLFilter(q.pageFilter, filterCompilers));
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);

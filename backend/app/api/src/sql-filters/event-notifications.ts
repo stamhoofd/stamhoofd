@@ -1,25 +1,61 @@
-import { SQL, SQLFilterDefinitions, baseSQLFilterCompilers, createSQLColumnFilterCompiler, createSQLJoinedRelationFilterCompiler, createSQLRelationFilterCompiler } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
 import { eventFilterCompilers } from './events';
 import { organizationFilterCompilers } from './organizations';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
 
-export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
-    id: createSQLColumnFilterCompiler('id'),
-    typeId: createSQLColumnFilterCompiler('typeId'),
-    periodId: createSQLColumnFilterCompiler('periodId'),
-    organizationId: createSQLColumnFilterCompiler('organizationId'),
-    startDate: createSQLColumnFilterCompiler('startDate'),
-    endDate: createSQLColumnFilterCompiler('endDate'),
-    submittedAt: createSQLColumnFilterCompiler('submittedAt'),
-    createdAt: createSQLColumnFilterCompiler('createdAt'),
-    status: createSQLColumnFilterCompiler('status'),
-    organization: createSQLJoinedRelationFilterCompiler(
+export const eventNotificationsFilterCompilers: SQLModernFilterDefinitions = {
+    ...baseModernSQLFilterCompilers,
+    id: createColumnFilter({
+        expression: SQL.column('id'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    typeId: createColumnFilter({
+        expression: SQL.column('typeId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    periodId: createColumnFilter({
+        expression: SQL.column('periodId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    organizationId: createColumnFilter({
+        expression: SQL.column('organizationId'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    startDate: createColumnFilter({
+        expression: SQL.column('startDate'),
+        type: SQLModernValueType.Datetime,
+        nullable: false,
+    }),
+    endDate: createColumnFilter({
+        expression: SQL.column('endDate'),
+        type: SQLModernValueType.Datetime,
+        nullable: false,
+    }),
+    submittedAt: createColumnFilter({
+        expression: SQL.column('submittedAt'),
+        type: SQLModernValueType.Datetime,
+        nullable: true,
+    }),
+    createdAt: createColumnFilter({
+        expression: SQL.column('createdAt'),
+        type: SQLModernValueType.Datetime,
+        nullable: false,
+    }),
+    status: createColumnFilter({
+        expression: SQL.column('status'),
+        type: SQLModernValueType.String,
+        nullable: false,
+    }),
+    organization: createJoinedRelationFilter(
         organizationJoin,
         organizationFilterCompilers,
     ),
-    events: createSQLRelationFilterCompiler(
+    events: createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('events'),
