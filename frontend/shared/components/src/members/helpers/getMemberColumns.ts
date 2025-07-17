@@ -41,7 +41,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             id: 'age',
             name: $t(`992b79e9-8c6e-4096-aa59-9e5f546eac41`),
             getValue: member => member.member.details.age,
-            format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`ba6f46a9-2598-4da2-beb2-fdf9ba890bfd`))) : $t(`af93c340-950c-4f6c-be6a-6bb847ec2d41`),
+            format: (age, width) => age !== null ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`ba6f46a9-2598-4da2-beb2-fdf9ba890bfd`))) : $t(`af93c340-950c-4f6c-be6a-6bb847ec2d41`),
             minimumWidth: 50,
             recommendedWidth: 120,
         }),
