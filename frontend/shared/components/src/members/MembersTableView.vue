@@ -131,6 +131,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
                     $elemMatch: {
                         organizationId: organization.value.id,
                         periodId: props.periodId,
+                        group: {
+                            // Do not show members that are only registered for a waiting list or event
+                            type: GroupType.Membership,
+                        },
                     },
                 },
             };
