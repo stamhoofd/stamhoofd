@@ -4,7 +4,7 @@ export * from './src/SQLExpressions';
 export * from './src/SQLJsonExpressions';
 export * from './src/SQLWhere';
 export * from './src/SQLSelect';
-export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLModernValueType, compileToModernSQLFilter, baseModernSQLFilterCompilers, SQLModernFilterDefinitions } from './src/filters/modern/SQLModernFilter';
+export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType, compileToModernSQLFilter, baseModernSQLFilterCompilers, SQLModernFilterDefinitions } from './src/filters/modern/SQLModernFilter';
 export * from './src/filters/SQLSorter';
 export * from './src/SQLOrderBy';
 export * from './src/SQLInsert';

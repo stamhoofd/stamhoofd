@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const EmailRelationFilterCompilers = {
     emails: createExistsFilter(
@@ -12,12 +12,12 @@ export const EmailRelationFilterCompilers = {
             ...baseModernSQLFilterCompilers,
             emailType: createColumnFilter({
                 expression: SQL.column('emailType'),
-                type: SQLModernValueType.String,
+                type: SQLValueType.String,
                 nullable: false,
             }),
             sentAt: createColumnFilter({
                 expression: SQL.column('sentAt'),
-                type: SQLModernValueType.Datetime,
+                type: SQLValueType.Datetime,
                 nullable: true,
             }),
         },

@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLModernFilterDefinitions, SQLModernValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLModernFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { memberFilterCompilers } from './members';
 import { organizationFilterCompilers } from './organizations';
 import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers';
@@ -10,42 +10,42 @@ export const receivableBalanceFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     objectType: createColumnFilter({
         expression: SQL.column('objectType'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     amountOpen: createColumnFilter({
         expression: SQL.column('amountOpen'),
-        type: SQLModernValueType.Number,
+        type: SQLValueType.Number,
         nullable: false,
     }),
     amountPending: createColumnFilter({
         expression: SQL.column('amountPending'),
-        type: SQLModernValueType.Number,
+        type: SQLValueType.Number,
         nullable: false,
     }),
     nextDueAt: createColumnFilter({
         expression: SQL.column('nextDueAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: true,
     }),
     lastReminderEmail: createColumnFilter({
         expression: SQL.column('lastReminderEmail'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: true,
     }),
     reminderEmailCount: createColumnFilter({
         expression: SQL.column('reminderEmailCount'),
-        type: SQLModernValueType.Number,
+        type: SQLValueType.Number,
         nullable: false,
     }),
     reminderAmountIncreased: createColumnFilter({
@@ -54,7 +54,7 @@ export const receivableBalanceFilterCompilers: SQLModernFilterDefinitions = {
             '>',
             SQL.column('lastReminderAmountOpen'),
         ).then(1).else(0),
-        type: SQLModernValueType.Boolean,
+        type: SQLValueType.Boolean,
         nullable: false,
     }),
     organizations: createExistsFilter(
@@ -106,7 +106,7 @@ export const receivableBalanceFilterCompilers: SQLModernFilterDefinitions = {
                     new SQLScalar(' '),
                     SQL.column('lastName'),
                 ),
-                type: SQLModernValueType.String,
+                type: SQLValueType.String,
                 nullable: false,
             }),
         },

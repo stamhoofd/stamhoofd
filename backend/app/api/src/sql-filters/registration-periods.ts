@@ -1,20 +1,20 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const registrationPeriodFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     startDate: createColumnFilter({
         expression: SQL.column('startDate'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     endDate: createColumnFilter({
         expression: SQL.column('endDate'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
 };

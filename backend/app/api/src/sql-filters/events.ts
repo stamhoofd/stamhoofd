@@ -1,60 +1,60 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const eventFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     'id': createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     'name': createColumnFilter({
         expression: SQL.column('name'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     'organizationId': createColumnFilter({
         expression: SQL.column('organizationId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     'startDate': createColumnFilter({
         expression: SQL.column('startDate'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     'endDate': createColumnFilter({
         expression: SQL.column('endDate'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     'groupIds': createColumnFilter({
         expression: SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
-        type: SQLModernValueType.JSONArray,
+        type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'groupId': createColumnFilter({
         expression: SQL.column('groupId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     'typeId': createColumnFilter({
         expression: SQL.column('typeId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     'defaultAgeGroupIds': createColumnFilter({
         expression: SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
-        type: SQLModernValueType.JSONArray,
+        type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'organizationTagIds': createColumnFilter({
         expression: SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds'),
-        type: SQLModernValueType.JSONArray,
+        type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'meta.visible': createColumnFilter({
         expression: SQL.jsonValue(SQL.column('meta'), '$.value.visible'),
-        type: SQLModernValueType.JSONBoolean,
+        type: SQLValueType.JSONBoolean,
         nullable: false,
     }),
     'group': createExistsFilter(
@@ -68,7 +68,7 @@ export const eventFilterCompilers: SQLModernFilterDefinitions = {
             ...baseModernSQLFilterCompilers,
             organizationId: createColumnFilter({
                 expression: SQL.column('organizationId'),
-                type: SQLModernValueType.String,
+                type: SQLValueType.String,
                 nullable: false,
             }),
         },

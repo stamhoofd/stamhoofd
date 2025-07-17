@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQLModernValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { TableDefinition, test, testMatch, testMultipleErrors } from '../utils';
 
@@ -13,7 +13,7 @@ describe('$contains', () => {
     it('Throws when passing non-string values', async () => {
         const filters = {
             ...baseModernSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: false }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
         await testMultipleErrors({
@@ -62,7 +62,7 @@ describe('$contains', () => {
         it('Removes caps in the query', async () => {
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: false }),
+                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             };
 
             await test({
@@ -82,7 +82,7 @@ describe('$contains', () => {
         it('Escapes percentage', async () => {
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: false }),
+                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             };
 
             await test({
@@ -102,7 +102,7 @@ describe('$contains', () => {
         it('Escapes underscore', async () => {
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: false }),
+                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             };
 
             await test({
@@ -122,7 +122,7 @@ describe('$contains', () => {
         it('Escapes backslash characters', async () => {
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: false }),
+                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             };
 
             await test({
@@ -150,7 +150,7 @@ describe('$contains', () => {
             };
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: true }),
+                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
             };
 
             it('Can actually search for %', async () => {
@@ -343,7 +343,7 @@ describe('$contains', () => {
             };
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLModernValueType.JSONString, nullable: false }),
+                'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
             };
 
             it('Can actually search for %', async () => {
@@ -549,7 +549,7 @@ describe('$contains', () => {
                 ...baseModernSQLFilterCompilers,
                 settings: {
                     ...baseModernSQLFilterCompilers,
-                    names: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.names'), type: SQLModernValueType.JSONArray, nullable: false }),
+                    names: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false }),
                 },
             };
 
@@ -684,7 +684,7 @@ describe('$contains', () => {
             };
             const filters = {
                 ...baseModernSQLFilterCompilers,
-                'settings.names': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.parents[*].name'), type: SQLModernValueType.JSONArray, nullable: false }),
+                'settings.names': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
             };
 
             it('Can search in the array', async () => {

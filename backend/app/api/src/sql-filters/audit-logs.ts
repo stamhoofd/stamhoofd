@@ -1,30 +1,30 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const auditLogFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     type: createColumnFilter({
         expression: SQL.column('type'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     objectId: createColumnFilter({
         expression: SQL.column('objectId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
 };

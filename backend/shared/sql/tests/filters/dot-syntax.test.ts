@@ -1,20 +1,20 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, SQLModernValueType } from '../../src/filters/modern/SQLModernFilter';
+import { baseModernSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/modern/SQLModernFilter';
 import { SQL } from '../../src/SQL';
 import { test, testError } from '../utils';
 
 describe('Dot syntax', () => {
     const filters = {
         ...baseModernSQLFilterCompilers,
-        name: createColumnFilter({ expression: SQL.column('name'), type: SQLModernValueType.String, nullable: true }),
-        age: createColumnFilter({ expression: SQL.column('age'), type: SQLModernValueType.Number, nullable: false }),
+        name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         settings: {
             ...baseModernSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLModernValueType.JSONString, nullable: true }),
-            age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLModernValueType.JSONNumber, nullable: true }),
+            name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true }),
+            age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
             dog: {
                 ...baseModernSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.name'), type: SQLModernValueType.JSONString, nullable: true }),
-                age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.age'), type: SQLModernValueType.JSONNumber, nullable: true }),
+                name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true }),
+                age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true }),
             },
         },
     };

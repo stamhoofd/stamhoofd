@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 import { eventFilterCompilers } from './events';
 import { organizationFilterCompilers } from './organizations';
 
@@ -8,47 +8,47 @@ export const eventNotificationsFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     typeId: createColumnFilter({
         expression: SQL.column('typeId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     periodId: createColumnFilter({
         expression: SQL.column('periodId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     startDate: createColumnFilter({
         expression: SQL.column('startDate'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     endDate: createColumnFilter({
         expression: SQL.column('endDate'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     submittedAt: createColumnFilter({
         expression: SQL.column('submittedAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: true,
     }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     status: createColumnFilter({
         expression: SQL.column('status'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     organization: createJoinedRelationFilter(

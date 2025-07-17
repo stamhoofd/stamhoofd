@@ -1,48 +1,48 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLModernFilterDefinitions, SQLModernValueType } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLModernFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
 
 export const groupFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     periodId: createColumnFilter({
         expression: SQL.column('periodId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     name: createColumnFilter({
         expression: SQL.jsonValue(SQL.column('settings'), '$.value.name'),
-        type: SQLModernValueType.JSONString,
+        type: SQLValueType.JSONString,
         nullable: false,
     }),
     status: createColumnFilter({
         expression: SQL.column('status'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     defaultAgeGroupId: createColumnFilter({
         expression: SQL.column('defaultAgeGroupId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     bundleDiscounts: createWildcardColumnFilter(
         (key: string) => ({
             expression: SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true),
-            type: SQLModernValueType.JSONArray,
+            type: SQLValueType.JSONArray,
             nullable: true,
         }),
         (key: string) => ({
             ...baseModernSQLFilterCompilers,
             name: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}.name`, true),
-                type: SQLModernValueType.JSONArray,
+                type: SQLValueType.JSONArray,
                 nullable: true,
             }),
         }),

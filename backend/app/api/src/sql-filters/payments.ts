@@ -1,4 +1,4 @@
-import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLModernFilterDefinitions, SQLModernValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseModernSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLModernFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments';
 
 /**
@@ -8,69 +8,69 @@ export const paymentFilterCompilers: SQLModernFilterDefinitions = {
     ...baseModernSQLFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     method: createColumnFilter({
         expression: SQL.column('method'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     status: createColumnFilter({
         expression: SQL.column('status'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: false,
     }),
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     updatedAt: createColumnFilter({
         expression: SQL.column('updatedAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: false,
     }),
     paidAt: createColumnFilter({
         expression: SQL.column('paidAt'),
-        type: SQLModernValueType.Datetime,
+        type: SQLValueType.Datetime,
         nullable: true,
     }),
     price: createColumnFilter({
         expression: SQL.column('price'),
-        type: SQLModernValueType.Number,
+        type: SQLValueType.Number,
         nullable: false,
     }),
     provider: createColumnFilter({
         expression: SQL.column('provider'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     transferDescription: createColumnFilter({
         expression: SQL.column('transferDescription'),
-        type: SQLModernValueType.String,
+        type: SQLValueType.String,
         nullable: true,
     }),
     customer: {
         ...baseModernSQLFilterCompilers,
         email: createColumnFilter({
             expression: SQL.jsonValue(SQL.column('customer'), '$.value.email'),
-            type: SQLModernValueType.JSONString,
+            type: SQLValueType.JSONString,
             nullable: true,
         }),
         firstName: createColumnFilter({
             expression: SQL.jsonValue(SQL.column('customer'), '$.value.firstName'),
-            type: SQLModernValueType.JSONString,
+            type: SQLValueType.JSONString,
             nullable: true,
         }),
         lastName: createColumnFilter({
             expression: SQL.jsonValue(SQL.column('customer'), '$.value.lastName'),
-            type: SQLModernValueType.JSONString,
+            type: SQLValueType.JSONString,
             nullable: true,
         }),
         name: createColumnFilter({
@@ -82,29 +82,29 @@ export const paymentFilterCompilers: SQLModernFilterDefinitions = {
                 ),
                 'CHAR',
             ),
-            type: SQLModernValueType.String,
+            type: SQLValueType.String,
             nullable: true,
         }),
         company: {
             ...baseModernSQLFilterCompilers,
             name: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.name'),
-                type: SQLModernValueType.JSONString,
+                type: SQLValueType.JSONString,
                 nullable: true,
             }),
             VATNumber: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.VATNumber'),
-                type: SQLModernValueType.JSONString,
+                type: SQLValueType.JSONString,
                 nullable: true,
             }),
             companyNumber: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.companyNumber'),
-                type: SQLModernValueType.JSONString,
+                type: SQLValueType.JSONString,
                 nullable: true,
             }),
             administrationEmail: createColumnFilter({
                 expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.administrationEmail'),
-                type: SQLModernValueType.JSONString,
+                type: SQLValueType.JSONString,
                 nullable: true,
             }),
         },

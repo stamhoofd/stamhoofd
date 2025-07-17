@@ -3,7 +3,7 @@ import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../../SQLExpressions';
 import { SQLJsonSearch } from '../../../SQLJsonExpressions';
 import { SQLWhereEqual, SQLWhereLike, SQLWhereSign } from '../../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLModernValueType } from '../SQLModernFilter';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLModernFilter';
 import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
 
 export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
@@ -18,7 +18,7 @@ export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilt
             });
         }
 
-        if (column.type === SQLModernValueType.JSONArray || column.type === SQLModernValueType.JSONObject) {
+        if (column.type === SQLValueType.JSONArray || column.type === SQLValueType.JSONObject) {
             // For JSON arrays and objects, we use JSON_CONTAINS
             return new SQLWhereEqual(
                 new SQLJsonSearch(
