@@ -98,7 +98,6 @@ export * from './src/members/MembershipStatus.js';
 export * from './src/AppliedRegistrationDiscount.js';
 export * from './src/MemberAdmin.js';
 export * from './src/UitpasClientCredentialsStatus.js';
-
 export * from './src/LoadedPermissions.js';
 
 // UserPermissions
