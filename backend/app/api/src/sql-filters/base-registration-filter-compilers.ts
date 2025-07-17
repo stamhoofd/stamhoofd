@@ -21,13 +21,13 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
     group: createSQLFilterNamespace({
         ...baseSQLFilterCompilers,
         id: createSQLColumnFilterCompiler('groupId'),
+        type: createSQLColumnFilterCompiler(SQL.column('groups', 'type')),
         name: createSQLExpressionFilterCompiler(
             SQL.jsonValue(SQL.column('groups', 'settings'), '$.value.name'),
             { isJSONValue: true, type: SQLValueType.JSONString },
         ),
-        status: createSQLExpressionFilterCompiler(
+        status: createSQLColumnFilterCompiler(
             SQL.column('groups', 'status'),
-            { isJSONValue: true, type: SQLValueType.JSONString },
         ),
         defaultAgeGroupId: createSQLColumnFilterCompiler(SQL.column('groups', 'defaultAgeGroupId'), { nullable: true }),
     }),
