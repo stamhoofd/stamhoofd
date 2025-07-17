@@ -63,6 +63,10 @@
     "original": "Niet alle gegevens van jouw eenheid werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Not all data of your unit has been filled in in the Stripe dashboard. Check if everything has been filled in. The following things might be missing:"
   },
+  "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
+    "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Keeo). Zorg dat deze overeenkomt met de namen in Keeo.",
+    "translation": "‘{group}’ is not a valid registration group (it does not exist in Keeo). Please make sure it matches the names in Keeo."
+  },
   "0fa660da-1e74-4940-af88-eafafb1094b6": {
     "original": "De URI van de eenheid is te kort",
     "translation": "The URI of the unit is too short"

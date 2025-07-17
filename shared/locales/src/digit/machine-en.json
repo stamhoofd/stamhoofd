@@ -64,8 +64,8 @@
     "translation": "Members can pay their outstanding amount by going to ‘My account’. At the top, under 'quick actions', they will see a button with which they can pay their outstanding amount (you can send an email with a login button to go to ‘My account’)."
   },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
-    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Ravot). Zorg dat deze overeenkomt met de namen in Ravot.",
-    "translation": "'{group}' is not a valid registration group (it does not exist in Ravot). Make sure it matches the group names in Ravot."
+    "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Ravot). Zorg dat deze overeenkomt met de namen in Ravot.",
+    "translation": "‘{group}’ is not a valid registration group (it does not exist in Ravot). Please make sure it matches the names in Ravot."
   },
   "0fa660da-1e74-4940-af88-eafafb1094b6": {
     "original": "De URI van de groep is te kort",

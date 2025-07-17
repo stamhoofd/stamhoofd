@@ -1248,8 +1248,8 @@
     "translation": "Default age group"
   },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
-    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
-    "translation": "'{group}' is not a valid registration group (it does not exist in Stamhoofd). Make sure it matches the names in Stamhoofd."
+    "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
+    "translation": "‘{group}’ is not a valid registration group (it does not exist in Stamhoofd). Please make sure it matches the names in Stamhoofd."
   },
   "0f0113ca-2269-49c3-b5f2-423005f71afc": {
     "original": "Huidige e-mail opslaan",

@@ -1284,8 +1284,8 @@
     "translation": "Tranche d'âge standard"
   },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
-    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
-    "translation": "'{group}' n’est pas un groupe d’inscription valide (il n’existe pas dans Stamhoofd). Vérifie qu’il correspond aux noms utilisés dans Stamhoofd."
+    "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Stamhoofd). Zorg dat deze overeenkomt met de namen in Stamhoofd.",
+    "translation": "‘{group}’ n'est pas un groupe d'inscription valide (ce groupe n'existe pas dans Stamhoofd). Veillez à ce qu'il corresponde exactement aux noms utilisés dans Stamhoofd."
   },
   "0f0113ca-2269-49c3-b5f2-423005f71afc": {
     "original": "Huidige e-mail opslaan",

@@ -64,8 +64,8 @@
     "translation": "Toutes les données de votre unité n’ont pas été saisies dans le tableau de bord Stripe. Vérifiez si tout a été rempli. Les éléments suivants pourraient manquer :"
   },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
-    "original": "'{group}' is geen geldige inschrijvingsgroep (deze bestaat niet in Jamboree). Zorg dat deze overeenkomt met de namen in Jamboree.",
-    "translation": "'{group}' n’est pas un groupe d'inscription valide (il n’existe pas dans Jamboree). Vérifie qu’il correspond aux noms utilisés dans Jamboree."
+    "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Jamboree). Zorg dat deze overeenkomt met de namen in Jamboree.",
+    "translation": "‘{group}’ n'est pas un groupe d'inscription valide (ce groupe n'existe pas dans Jamboree). Veillez à ce qu'il corresponde exactement aux noms utilisés dans Jamboree."
   },
   "0fa660da-1e74-4940-af88-eafafb1094b6": {
     "original": "De URI van de eenheid is te kort",
