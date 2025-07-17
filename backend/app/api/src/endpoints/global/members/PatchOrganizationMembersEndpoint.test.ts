@@ -77,11 +77,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const token = await Token.createToken(user);
 
             const arr: Body = new PatchableArray();
+            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
             const put = MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
                     firstName,
                     lastName,
-                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    birthDay: newBirthDay,
                     email: 'anewemail@example.com',
                 }),
             });
@@ -100,7 +101,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const member = response.body.members[0];
             expect(member.details.firstName).toBe(firstName);
             expect(member.details.lastName).toBe(lastName);
-            expect(member.details.birthDay).toEqual(existingMember.details.birthDay);
+            expect(member.details.birthDay).toEqual(newBirthDay);
             expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
             expect(member.details.alternativeEmails).toHaveLength(0);
         });
@@ -141,11 +142,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const token = await Token.createToken(user);
 
             const arr: Body = new PatchableArray();
+            const newBirthDay = new Date(existingMember.details.birthDay!.getTime() + 1);
             const put = MemberWithRegistrationsBlob.create({
                 details: MemberDetails.create({
                     firstName,
                     lastName,
-                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    birthDay: newBirthDay,
                     securityCode: existingMember.details.securityCode,
                     email: 'anewemail@example.com',
                 }),
@@ -165,9 +167,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const member = response.body.members[0];
             expect(member.details.firstName).toBe(firstName);
             expect(member.details.lastName).toBe(lastName);
-            expect(member.details.birthDay).toEqual(existingMember.details.birthDay);
-            expect(member.details.email).toBe('original@example.com'); // this has been merged
-            expect(member.details.alternativeEmails).toEqual(['anewemail@example.com']); // this has been merged
+            expect(member.details.birthDay).toEqual(newBirthDay);
+            expect(member.details.email).toBe('anewemail@example.com'); // this has been merged
+            expect(member.details.alternativeEmails).toEqual(['original@example.com']); // this has been merged
 
             // Check the registration is still there
             expect(member.registrations.length).toBe(1);
