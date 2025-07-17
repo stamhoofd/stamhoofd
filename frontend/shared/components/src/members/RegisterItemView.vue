@@ -82,6 +82,10 @@
                         {{ $t('44ba544c-3db6-4f35-b7d1-b63fdcadd9ab') }}
                     </p>
 
+                    <p v-if="admin && getPeriodString(price)" class="style-description-small">
+                        {{ getPeriodString(price) }}
+                    </p>
+
                     <template #right>
                         <span class="style-price-base">{{ formatPrice(price.price.forMember(item.member)) }}</span>
                     </template>
@@ -144,7 +148,7 @@
 import { patchObject } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CheckboxListItem, DateSelection, ErrorBox, ImageComponent, NavigationActions, NumberInput, PriceBreakdownBox, STList, useErrors, useNavigationActions, useOrganization } from '@stamhoofd/components';
-import { GroupOption, GroupOptionMenu, GroupType, PatchAnswers, PriceBreakdown, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
+import { GroupOption, GroupOptionMenu, GroupPrice, GroupType, PatchAnswers, PriceBreakdown, RegisterItem, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 import FillRecordCategoryBox from '../records/components/FillRecordCategoryBox.vue';
@@ -179,6 +183,8 @@ function validate() {
     validationWarning.value = props.item.cartError ? null : props.item.validationWarning;
 }
 
+watch(() => props.item.groupPrice, () => validate(), { immediate: true });
+
 onMounted(() => {
     errors.errorBox = null;
     try {
@@ -198,6 +204,8 @@ const customStartDate = computed({
     get: () => props.item.customStartDate,
     set: (value: Date | null) => props.item.customStartDate = value,
 });
+
+const defaultStartDate = computed(() => customStartDate.value ?? props.item.calculatedStartDate);
 
 async function addToCart() {
     if (saving.value) {
@@ -287,6 +295,25 @@ watch(() => [props.item.groupPrice, props.item.options, props.item.trial], () =>
     }
     cachedTotalPrice.value = clone.totalPrice;
 }, { deep: true });
+
+function getPeriodString(groupPrice: GroupPrice): string | null {
+    const startDate = groupPrice.startDate;
+    const endDate = groupPrice.endDate;
+
+    if (startDate && endDate) {
+        return $t(`Beschikbaar tussen: {range}`, { range: Formatter.dateRange(startDate, endDate) });
+    }
+
+    if (startDate) {
+        return $t(`Beschikbaar vanaf {date}`, { date: Formatter.startDate(startDate) });
+    }
+
+    if (endDate) {
+        return $t(`Onbeschikbaar na {date}`, { date: Formatter.endDate(endDate) });
+    }
+
+    return null;
+}
 
 </script>
 

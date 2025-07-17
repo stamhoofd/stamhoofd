@@ -96,6 +96,13 @@
                                 {{ reducedPriceName }}: <span>{{ formatPrice(price.price.reducedPrice) }}</span>
                             </p>
 
+                            <p v-if="price.startDate" class="style-description-small">
+                                {{ $t('Beschikbaar vanaf {date}', {date: formatDateTime(price.startDate)}) }}
+                            </p>
+                            <p v-if="price.endDate" class="style-description-small">
+                                {{ $t('Onbeschikbaar na {date}', {date: formatDateTime(price.endDate)}) }}
+                            </p>
+
                             <p v-for="[id, discount] of price.bundleDiscounts" :key="id" class="style-description-small">
                                 <span class="icon small label" /><span>{{ discount.name.toString() }}</span>
                             </p>
@@ -115,7 +122,7 @@
                         </STListItem>
                     </template>
                 </STList>
-                <GroupPriceBox v-else :period="patchedPeriod" @patch:period="addPatch" :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" @patch:price="addPricePatch" />
+                <GroupPriceBox v-else :period="patchedPeriod" :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :validator="errors.validator" @patch:period="addPatch" @patch:price="addPricePatch" />
             </div>
 
             <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">
@@ -463,7 +470,7 @@
                     </p>
 
                     <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="startDate" :placeholderDate="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
+                        <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                     </STInputBox>
                     <p class="style-description-small">
                         {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
@@ -495,7 +502,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders } from '@stamhoofd/components';
+import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders, useValidation } from '@stamhoofd/components';
 import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, TranslatedString, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
@@ -613,6 +620,22 @@ const inheritedRecordsConfiguration = computed(() => {
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
+
+useValidation(errors.validator, () => {
+    for (const group of patchedPeriod.value.groups) {
+        if (group.id === props.groupId) {
+            try {
+                group.settings.throwIfInvalidPrices();
+            }
+            catch (e) {
+                errors.errorBox = new ErrorBox(e);
+                return false;
+            }
+        }
+    }
+
+    return true;
+});
 
 const pop = usePop();
 const { priceName: reducedPriceName } = useFinancialSupportSettings({
@@ -1071,7 +1094,7 @@ async function addGroupPrice() {
 
         const groupPatch = Group.patch({
             id: patchedGroup.value.id,
-            settings: settingsPatch
+            settings: settingsPatch,
         });
         basePatch.groups.addPatch(groupPatch);
 

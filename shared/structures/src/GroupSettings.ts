@@ -2,10 +2,12 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Decoder, EnumDe
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
+import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
 import { TranslatedString } from './TranslatedString.js';
@@ -13,7 +15,6 @@ import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
-import { ReduceablePrice } from './ReduceablePrice.js';
 
 export class GroupPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -53,6 +54,12 @@ export class GroupPrice extends AutoEncoder {
     @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), version: 374 })
     bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings> = new Map();
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    startDate: Date | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    endDate: Date | null = null;
+
     getUsedStock(group: Group) {
         const groupStockReservations = group.stockReservations;
         return StockReservation.getAmount('GroupPrice', this.id, groupStockReservations);
@@ -88,6 +95,18 @@ export class GroupPrice extends AutoEncoder {
             return Math.max(0, this.stock - this.getUsedStock(item));
         }
         return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group));
+    }
+
+    isInPeriod(date: Date): boolean {
+        if (this.startDate !== null && this.startDate > date) {
+            return false;
+        }
+
+        if (this.endDate !== null && this.endDate < date) {
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -754,11 +773,20 @@ export class GroupSettings extends AutoEncoder {
         return Formatter.firstLetters(this.name, maxLength);
     }
 
-    getFilteredPrices(options?: { admin?: boolean }) {
+    getFilteredPrices(options?: { admin?: boolean; date?: Date }) {
+        if (options?.admin) {
+            return [...this.prices];
+        }
+
         return this.prices.filter((p) => {
-            if (p.hidden && !options?.admin) {
+            if (p.hidden) {
                 return false;
             }
+
+            if (options?.date && !p.isInPeriod(options.date)) {
+                return false;
+            }
+
             return true;
         });
     }
@@ -772,6 +800,48 @@ export class GroupSettings extends AutoEncoder {
     get isFree() {
         return !this.prices.find(p => p.price.price > 0) && !this.optionMenus.find(o => o.options.find(p => p.price.price > 0));
     }
+
+    throwIfInvalidPrices() {
+        const isForever = coversForever(this.prices);
+        if (!isForever) {
+            throw new SimpleError({
+                code: 'prices_period_gap',
+                message: 'Not every date has a price.',
+                human: $t('Er is niet voor elke datum een tarief.'),
+            });
+        }
+    }
+}
+
+type Period = {
+    startDate: Date | null;
+    endDate: Date | null;
+};
+
+function coversForever(periods: Period[]): boolean {
+    const normalized = periods
+        .map(({ startDate, endDate }) => ({
+            startDate: startDate ? startDate.getTime() : -Infinity,
+            endDate: endDate ? endDate.getTime() : Infinity,
+        }))
+        .filter(p => p.startDate < p.endDate) // Skip empty periods
+        .sort((a, b) => a.startDate - b.startDate);
+
+    if (normalized.length === 0) return false;
+
+    const currentStart = normalized[0].startDate;
+    let currentEnd = normalized[0].endDate;
+
+    for (let i = 1; i < normalized.length; i++) {
+        const { startDate, endDate } = normalized[i];
+        if (startDate > currentEnd) {
+            // Gap found
+            return false;
+        }
+        currentEnd = Math.max(currentEnd, endDate);
+    }
+
+    return currentStart === -Infinity && currentEnd === Infinity;
 }
 
 export const GroupSettingsPatch = GroupSettings.patchType();
