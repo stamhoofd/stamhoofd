@@ -3,6 +3,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { PlatformFamilyManager, startSilentRegister } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemPaymentDetailed, DetailedReceivableBalance, Group, GroupPrice, GroupType, Organization, OrganizationRegistrationPeriod, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, Platform, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterCheckout, RegisterItem, Registration, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { sleep } from '@stamhoofd/utility';
 import { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import { MemberImportReport } from './MemberImportReport';
 
@@ -66,6 +67,7 @@ export class MemberImporter {
                 await this.importMember(importResult, importMemberResults);
                 await this.importRegistration(importResult, importContext);
                 await this.importPayment(importResult, importContext);
+                await sleep(100);
             }
             catch (e: any) {
                 console.error(e);
