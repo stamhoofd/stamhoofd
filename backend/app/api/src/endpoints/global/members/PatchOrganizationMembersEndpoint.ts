@@ -14,10 +14,10 @@ import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
+import { MemberNumberService } from '../../../services/MemberNumberService';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
 import { RegistrationService } from '../../../services/RegistrationService';
 import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate';
-import { MemberNumberService } from '../../../services/MemberNumberService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -957,7 +957,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
-                human: `${member.details.firstName} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.`,
+                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.`, { member: member.details.firstName }),
                 statusCode: 400,
             });
         }
