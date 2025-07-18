@@ -6,8 +6,10 @@ import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { resumeEmails } from './helpers/EmailResumer';
 import { GlobalHelper } from './helpers/GlobalHelper';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater';
@@ -17,10 +19,9 @@ import { BalanceItemService } from './services/BalanceItemService';
 import { DocumentService } from './services/DocumentService';
 import { FileSignService } from './services/FileSignService';
 import { PlatformMembershipService } from './services/PlatformMembershipService';
-import { UniqueUserService } from './services/UniqueUserService';
-import { QueueHandler } from '@stamhoofd/queues';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasService } from './services/UitpasService';
+import { UniqueMemberNumberService } from './services/UniqueMemberNumberService';
+import { UniqueUserService } from './services/UniqueUserService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -65,6 +66,7 @@ const start = async () => {
 
     await GlobalHelper.load();
     await UniqueUserService.check();
+    await UniqueMemberNumberService.check();
 
     // Init platform shared struct: otherwise permissions won't work with missing responsibilities
     productionLog('Loading platform...');
