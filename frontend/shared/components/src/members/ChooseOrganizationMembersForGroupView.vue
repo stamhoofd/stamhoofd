@@ -72,7 +72,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { CenteredMessage, ErrorBox, PermyriadInput, PriceBreakdownBox, STErrorsDefault, Toast, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
 import { computed, onMounted, ref } from 'vue';
-import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';
+import { startCheckout, useAddMember, useCheckoutDefaultItem, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
@@ -112,6 +112,7 @@ const editMember = useEditMember();
 const checkoutRegisterItem = useCheckoutRegisterItem();
 const getDefaultItem = useGetDefaultItem();
 const chooseGroupForMember = useChooseGroupForMember();
+const checkoutDefaultItem = useCheckoutDefaultItem();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
@@ -156,23 +157,13 @@ async function addMember() {
             member.family.pendingRegisterItems = [item];
 
             // First ask the user to complete or verify the member details
-            await editMember(member, {
-                title: !member._oldId ? $t('2a44031f-dfa5-45df-824e-ba107d311c13') : $t('733d4169-a86f-425e-bb4b-15ce3af5aa60'),
-                saveText: $t('2a9075bb-a743-411e-8a3d-94e5e57363f0'),
-
-                // We'll replace the previous steps, you can't go back to the previous step
+            await checkoutDefaultItem({
+                member,
+                group: props.group,
+                groupOrganization: props.groupOrganization,
+                startCheckoutFlow: false,
                 displayOptions: { action: 'show', replace: 100, force: true },
-                navigate,
-                finishHandler: async (navigate: NavigationActions) => {
-                    await checkoutRegisterItem({
-                        item,
-                        startCheckoutFlow: false,
-
-                        // Here you'll still be able to go back
-                        displayOptions: { action: 'show' },
-                        customNavigate: navigate,
-                    });
-                },
+                customNavigate: navigate,
             });
         },
     });
