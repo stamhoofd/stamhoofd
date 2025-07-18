@@ -1,6 +1,6 @@
-import { SimpleError } from "@simonbackx/simple-errors";
-import { UitpasClientCredentialsStatus } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { SimpleError } from '@simonbackx/simple-errors';
+import { UitpasClientCredentialsStatus } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
 type PermissionsResponse = Array<{
     organizer: {
@@ -22,14 +22,14 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
 
     for (const item of json) {
         if (
-            typeof item !== 'object' || item === null ||
-            !('organizer' in item) ||
-            typeof (item as any).organizer !== 'object' || (item as any).organizer === null ||
-            typeof (item as any).organizer.id !== 'string' ||
-            typeof (item as any).organizer.name !== 'string' ||
-            !('permissions' in item) ||
-            !Array.isArray((item as any).permissions) ||
-            !(item as any).permissions.every((perm: unknown) => typeof perm === 'string')
+            typeof item !== 'object' || item === null
+            || !('organizer' in item)
+            || typeof (item as any).organizer !== 'object' || (item as any).organizer === null
+            || typeof (item as any).organizer.id !== 'string'
+            || typeof (item as any).organizer.name !== 'string'
+            || !('permissions' in item)
+            || !Array.isArray((item as any).permissions)
+            || !(item as any).permissions.every((perm: unknown) => typeof perm === 'string')
         ) {
             console.error('Invalid PermissionsResponse:', json);
             throw new SimpleError({
@@ -74,36 +74,38 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         });
     });
     assertIsPermissionsResponse(json);
-    const neededPermissions = organizationId ? [{
-        permission: 'PASSES_READ',
-        human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer'
-    }] : [{
-        permission: 'TARIFFS_READ',
-        human: 'Tarieven opvragen'
-    }, {
-        permission: 'TICKETSALES_REGISTER',
-        human: 'Ticketsales registreren'
-    }, {
-        permission: 'TICKETSALES_SEARCH',
-        human: 'Ticketsales zoeken'
-    }];
-    const item = json.find((item) => item.organizer.id === uitpasOrganizerId);
+    const neededPermissions = organizationId
+        ? [{
+                permission: 'PASSES_READ',
+                human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
+            }]
+        : [{
+                permission: 'TARIFFS_READ',
+                human: 'Tarieven opvragen',
+            }, {
+                permission: 'TICKETSALES_REGISTER',
+                human: 'Ticketsales registreren',
+            }, {
+                permission: 'TICKETSALES_SEARCH',
+                human: 'Ticketsales zoeken',
+            }];
+    const item = json.find(item => item.organizer.id === uitpasOrganizerId);
     if (!item) {
-        const organizers = Formatter.joinLast(json.map((i) => i.organizer.name), ', ', ' ' + $t(' en ') + ' ')
+        const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t(' en ') + ' ');
         return {
-            status: UitpasClientCredentialsStatus.NO_PERMISSIONS,
+            status: UitpasClientCredentialsStatus.NoPermissions,
             human: $t('Jouw UiTPAS-integratie heeft geen toegansrechten tot de geselecteerde UiTPAS-organisator, maar wel tot ') + organizers,
         };
     }
-    const missingPermissions = neededPermissions.filter((needed) => !item.permissions.includes(needed.permission));
+    const missingPermissions = neededPermissions.filter(needed => !item.permissions.includes(needed.permission));
     if (missingPermissions.length > 0) {
-        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map((p) => p.human), ', ', ' ' + $t(' en ') + ' ');
+        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map(p => p.human), ', ', ' ' + $t(' en ') + ' ');
         return {
-            status: UitpasClientCredentialsStatus.MISSING_PERMISSIONS,
+            status: UitpasClientCredentialsStatus.MissingPermissions,
             human: $t('Jouw UiTPAS-integratie mist de volgende toegangsrechten voor de geselecteerde UiTPAS-organisator: ') + missingPermissionsHuman,
         };
     }
     return {
-        status: UitpasClientCredentialsStatus.OK
+        status: UitpasClientCredentialsStatus.Ok,
     };
 }
