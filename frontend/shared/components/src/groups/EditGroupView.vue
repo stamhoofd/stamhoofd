@@ -311,7 +311,7 @@
                 </STList>
             </div>
 
-            <div v-if="patchedGroup.waitingList || enableMaxMembers" class="container">
+            <div class="container">
                 <hr><h2>{{ $t('a56bcf08-214d-421b-9cc0-336d2b5ab0ea') }}</h2>
                 <p>{{ $t('fb860b93-1b92-43ba-9e3d-1f6573725f23') }}</p>
                 <p class="style-description-block">
