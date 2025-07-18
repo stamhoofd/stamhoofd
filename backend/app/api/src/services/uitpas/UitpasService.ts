@@ -158,6 +158,10 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-ticket-sales
     }
 
+    static async registerAttendance() {
+        // https://api-test.uitpas.be/checkins
+    }
+
     static async searchUitpasEvents() {
         // input = client credentials of organization & uitpasOrganizerId
         // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
