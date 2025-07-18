@@ -1,15 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member, Organization } from '@stamhoofd/models';
 import { Parent, ParentType, PropertyFilter, RecordCategory, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { DataValidator } from '@stamhoofd/utility';
-
-// type CategoryAndRecord = {
-//     category: RecordCategory;
-//     record: RecordSettings;
-// };
-
-let okCount = 0;
-let errorCount = 0;
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 enum RnType {
     Member,
@@ -82,7 +74,7 @@ async function startMigrateRnNumbers() {
         for await (const member of Member.select()
             .where('organizationId', organization.id)
             .all()) {
-            await handleMember(member, nationalRegisterNumberRecords, organization);
+            await handleMember(member, nationalRegisterNumberRecords);
         }
     }
 }
@@ -91,20 +83,37 @@ function getRnType(categoryAndRecord: CategoryPathJoinedAndRecord): RnType {
     const normalizedRecordName = categoryAndRecord.record.name.toString().toLowerCase();
     const normalizedCategoryName = categoryAndRecord.categoryPath.toLowerCase();
 
-    if (['ouder', 'voogd', 'mama', 'papa', 'schuldenaar', 'ontvanger'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
-        if (['1', 'eerste'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
-            return RnType.Parent1;
+    const getParentType = (value: string) => {
+        if (['ouder', 'voogd', 'mama', 'papa', 'schuldenaar', 'ontvanger'].some(x => value.includes(x))) {
+            if (['1', 'eerste'].some(x => value.includes(x))) {
+                return RnType.Parent1;
+            }
+            if (['2', 'tweede'].some(x => value.includes(x))) {
+                return RnType.Parent2;
+            }
+            if (['mama'].some(x => value.includes(x))) {
+                return RnType.Mother;
+            }
+            if (['papa'].some(x => value.includes(x))) {
+                return RnType.Father;
+            }
+            return RnType.ParentUnknown;
         }
-        if (['2', 'tweede'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
-            return RnType.Parent2;
-        }
-        if (['mama'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
-            return RnType.Mother;
-        }
-        if (['papa'].some(x => normalizedRecordName.includes(x) || normalizedCategoryName.includes(x))) {
-            return RnType.Father;
-        }
-        return RnType.ParentUnknown;
+        return null;
+    };
+
+    const parentTypeForRecord = getParentType(normalizedRecordName);
+    if (parentTypeForRecord) {
+        return parentTypeForRecord;
+    }
+
+    if (['kind', ' lid', 'zoon', 'dochter'].some(x => normalizedRecordName.includes(x))) {
+        return RnType.Member;
+    }
+
+    const parentTypeForPath = getParentType(normalizedCategoryName);
+    if (parentTypeForPath) {
+        return parentTypeForPath;
     }
 
     return RnType.Member;
@@ -149,13 +158,14 @@ function getParentByRecordCategory(member: Member, categoryPathAndRecord: Catego
 }
 
 // todo: remove, temporary for testing
-function cleanMember(member: Member) {
-    member.details.nationalRegisterNumber = null;
-    member.details.parents.forEach(p => p.nationalRegisterNumber = null);
-}
+// function cleanMember(member: Member) {
+//     member.details.nationalRegisterNumber = null;
+//     member.details.parents.forEach(p => p.nationalRegisterNumber = null);
+//     member.details.notes = null;
+// }
 
-async function handleMember(member: Member, categoryAndRecords: CategoryPathJoinedAndRecord[], organization: Organization) {
-    cleanMember(member);
+async function handleMember(member: Member, categoryAndRecords: CategoryPathJoinedAndRecord[]) {
+    // cleanMember(member);
     // hardcoded exception for member: the member has no parents but has a sibling with parents
     if (member.id === '1e31c769-c6be-4e36-8159-c95e5b522f9f') {
         const sibling = await Member.getByID('c9116cc7-9648-4a5d-8968-ae6a0da086b5');
@@ -167,7 +177,7 @@ async function handleMember(member: Member, categoryAndRecords: CategoryPathJoin
         }
     }
     const recordAnswers = member.details.recordAnswers;
-    let parentsRn: string | null = null;
+    const foundRns = new Set<string>();
 
     for (const categoryAndRecord of categoryAndRecords) {
         const { record } = categoryAndRecord;
@@ -176,7 +186,16 @@ async function handleMember(member: Member, categoryAndRecords: CategoryPathJoin
             let value = recordAnswer.value;
             if (value && value.length > 6) {
                 if (!DataValidator.verifyBelgianNationalNumber(value)) {
-                    console.error(`Invalid national register number: ${value}`);
+                    const warning = `Ongeldig rijksregisternummer: ${value}`;
+
+                    if (!member.details.notes?.includes(warning)) {
+                        if (member.details.notes) {
+                            member.details.notes = `${member.details.notes}\n${warning}`;
+                        }
+                        else {
+                            member.details.notes = warning;
+                        }
+                    }
                     continue;
                 }
 
@@ -186,18 +205,42 @@ async function handleMember(member: Member, categoryAndRecords: CategoryPathJoin
 
                 if (type === RnType.Member) {
                     if (member.details.birthDay !== null && !DataValidator.doesMatchBelgianNationalNumber(value, member.details.birthDay)) {
-                        errorCount++;
-                        // todo: add to notes?
-                        // console.error(`Invalid national register number: ${value} does not match birth day: ${Formatter.date(member.details.birthDay)}`);
-                        // console.error(categoryAndRecord.categoryPath, ' (record name: ', record.name.toString(), ')');
+                        // if member is under 18, check if nationRegisterNumber is form person over 18 (=> probably from parent)
+                        if (member.details.age! < 18) {
+                            const age = getAgeFromNr(value);
+                            if (age >= 18) {
+                                foundRns.add(value);
+
+                                const warning = 'Het rijksregisternummer van het lid stemt niet overeen met zijn geboortedatum, daarom werd het toegekend aan de ouders.';
+
+                                if (!member.details.notes?.includes(warning)) {
+                                    if (member.details.notes) {
+                                        member.details.notes = `${member.details.notes}\n${warning}`;
+                                    }
+                                    else {
+                                        member.details.notes = warning;
+                                    }
+                                }
+                                continue;
+                            }
+                        }
+
+                        if (!member.details.notes?.includes('Het rijksregisternummer stemt niet overeen met de geboortedatum van het lid:')) {
+                            if (member.details.notes) {
+                                member.details.notes = `${member.details.notes}\nHet rijksregisternummer stemt niet overeen met de geboortedatum van het lid: ${value}`;
+                            }
+                            else {
+                                member.details.notes = `Het rijksregisternummer stemt niet overeen met de geboortedatum van het lid: ${value}`;
+                            }
+                        }
                         continue;
                     }
-                    okCount++;
                     if (member.details.nationalRegisterNumber === null) {
                         member.details.nationalRegisterNumber = value;
                     }
                 }
                 else {
+                    // #region handle parent
                     const parent = getParentByRecordCategory(member, categoryAndRecord);
                     if (parent) {
                         if (parent.nationalRegisterNumber === null) {
@@ -259,59 +302,64 @@ async function handleMember(member: Member, categoryAndRecords: CategoryPathJoin
                             continue;
                         }
                     }
+                    // #endregion
 
-                    if (parentsRn === value) {
+                    if (member.details.birthDay !== null && DataValidator.doesMatchBelgianNationalNumber(value, member.details.birthDay)) {
+                        if (member.details.nationalRegisterNumber === null) {
+                            member.details.nationalRegisterNumber = value;
+                        }
                         continue;
                     }
 
-                    // hardcoded exceptions for members (both parents have type mother, but the second parent should be a father)
-                    if (['09b15c9d-387b-42df-9d41-e26e23920021', '1a3a7ac5-1c6d-4959-8a4e-7fc874fe1920'].includes(member.id)) {
-                        if (type === RnType.Mother) {
-                            member.details.parents[0].nationalRegisterNumber = value;
-                        }
-                        else if (type === RnType.Father) {
-                            member.details.parents[1].nationalRegisterNumber = value;
-                        }
-                        continue;
-                    }
-                    else if (parentsRn !== null) {
-                        // known exception, do not log (has two mothers -> guess which rn is for whom)
-                        if (member.id !== '8246e6c1-1039-4cc5-be63-d0632d3a4a04') {
-                            console.error(`Parents of member ${member.id} already have a national register number: ${parentsRn} (value: ${value})`);
-                        }
-
-                        const parentWithoutRN = member.details.parents.find(p => p.nationalRegisterNumber === null);
-                        if (parentWithoutRN) {
-                            parentWithoutRN.nationalRegisterNumber = value;
-                        }
-                        return;
-                    }
-                    parentsRn = value;
+                    foundRns.add(value);
                 }
             }
         }
-        // else {
-        //     if (recordAnswer instanceof RecordAnswer) {
-        //         console.error(record.name.toString());
-        //         console.error('record answer is not of type text: ', recordAnswer.settings.type);
-        //     }
-        //     // else {
-        //     //     if (doLog) {
-        //     //         console.error(record.name.toString());
-        //     //         console.error('record answer is not of type text: ', typeof recordAnswer);
-        //     //     }
-        //     // }
-        // }
     }
 
-    if (parentsRn !== null) {
+    if (foundRns.size) {
         const parentsWithoutRn = member.details.parents.filter(p => p.nationalRegisterNumber === null);
-        for (const parent of parentsWithoutRn) {
-            parent.nationalRegisterNumber = parentsRn;
+
+        if (foundRns.size === 1) {
+            const parentsNr = [...foundRns][0];
+            parentsWithoutRn.forEach(p => p.nationalRegisterNumber = parentsNr);
+        }
+        else {
+            const nrArray = [...foundRns];
+            const firstNr = nrArray[0];
+
+            for (const parent of parentsWithoutRn) {
+                const nr = nrArray.shift();
+                if (nr) {
+                    parent.nationalRegisterNumber = nr;
+                }
+                else if (firstNr) {
+                    parent.nationalRegisterNumber = firstNr;
+                }
+            }
+
+            const warning = 'De rijksregisternummers van de ouders zijn mogelijks omgewisseld.';
+            if (!member.details.notes?.includes(warning)) {
+                if (member.details.notes) {
+                    member.details.notes = `${member.details.notes}\n${warning}`;
+                }
+                else {
+                    member.details.notes = warning;
+                }
+            }
+
+            if (nrArray.length) {
+                if (!member.details.notes?.includes('Niet-toegekende rijksregisternummers')) {
+                    if (member.details.notes) {
+                        member.details.notes = `${member.details.notes}\nNiet-toegekende rijksregisternummers: ${nrArray.join(', ')}`;
+                    }
+                    else {
+                        member.details.notes = `Niet-toegekende rijksregisternummers: ${nrArray.join(', ')}`;
+                    }
+                }
+            }
         }
     }
-
-    // todo: change constraints
 
     // // todo: remove (temporary)
     // if (member.memberNumber !== null || member.details.memberNumber !== null) {
@@ -319,8 +367,26 @@ async function handleMember(member: Member, categoryAndRecords: CategoryPathJoin
     //     member.details.memberNumber = null;
     // }
 
-    member.details.legacyRecordAnswers = [...member.details.recordAnswers.values()];
+    if (hasDuplicateParenRn(member)) {
+        const warning = 'Sommige ouders hebben hetzelfde rijksregisternummer, kijk deze na.';
+        if (!member.details.notes?.includes(warning)) {
+            if (member.details.notes) {
+                member.details.notes = `${member.details.notes}\n${warning}`;
+            }
+            else {
+                member.details.notes = warning;
+            }
+        }
+    }
+
+    // member.details.legacyRecordAnswers = [...member.details.recordAnswers.values()];
     await member.save();
+}
+
+function hasDuplicateParenRn(member: Member) {
+    const rns = member.details.parents.map(p => p.nationalRegisterNumber).filter(p => !!p);
+    const uniqueRns = new Set(rns);
+    return uniqueRns.size !== rns.length;
 }
 
 export default new Migration(async () => {
@@ -335,6 +401,50 @@ export default new Migration(async () => {
     }
 
     await startMigrateRnNumbers();
-    console.log('ok count: ', okCount);
-    console.log('error count: ', errorCount);
 });
+
+function getAgeFromNr(value: string) {
+    const birthDate = getBirthDayFromNr(value);
+    if (birthDate === null) {
+        return -1;
+    }
+    return getAge(birthDate);
+}
+
+function getBirthDayFromNr(value: string): Date | null {
+    let year = parseInt(value.substring(0, 2));
+
+    if (isNaN(year)) {
+        return null;
+    }
+
+    if (year < 30) {
+        year = year + 2000;
+    }
+    else {
+        year = year + 1900;
+    }
+
+    const monthString = value.substring(3, 5);
+    const month = parseInt(monthString);
+    if (isNaN(month)) {
+        return null;
+    }
+    const day = parseInt(value.substring(6, 8));
+    if (isNaN(day)) {
+        return null;
+    }
+    return new Date(year, month - 1, day);
+}
+
+function getAge(birthDate: Date) {
+    const now = new Date();
+    // For now calculate based on Brussels timezone (we'll need to correct this later)
+    const birthDay = Formatter.luxon(birthDate);
+    let age = now.getFullYear() - birthDay.year;
+    const m = now.getMonth() - (birthDay.month - 1);
+    if (m < 0 || (m === 0 && now.getDate() < birthDay.day)) {
+        age--;
+    }
+    return age;
+}
