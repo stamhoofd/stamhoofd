@@ -93,6 +93,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="uitpasFeature" :selectable="true" class="left-center" @click="$navigate(Routes.Uitpas)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ true ? $t('Koppel je UiTPAS-organisator') : $t('Beheer je UiTPAS-integratie') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('Sluit aan bij UiTPAS, zodat je gemeente tussenkomt in het UiTPAS-kansentarief.') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="isShowPremises" :selectable="true" class="left-center" @click="$navigate(Routes.Premises)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/house.svg">
@@ -364,6 +379,7 @@ import PremisesView from './PremisesView.vue';
 import PrivacySettingsView from './PrivacySettingsView.vue';
 import RegistrationPageSettingsView from './RegistrationPageSettingsView.vue';
 import RegistrationPaymentSettingsView from './RegistrationPaymentSettingsView.vue';
+import UitpasSettingsView from './UitpasSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
@@ -392,6 +408,7 @@ enum Routes {
     Premises = 'lokalen',
     BalanceNotifications = 'openstaande-bedragen-notificaties',
     MembersImport = 'leden-importeren',
+    Uitpas = 'uitpas',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -401,6 +418,7 @@ const present = usePresent();
 const buildEditGroupsView = useEditGroupsView();
 const organization = useOrganization();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const uitpasFeature = useFeatureFlag()('uitpas');
 
 defineRoutes([
     {
@@ -535,6 +553,11 @@ defineRoutes([
         url: Routes.MembersImport,
         present: 'popup',
         component: ImportMembersView,
+    },
+    {
+        url: Routes.Uitpas,
+        present: 'popup',
+        component: UitpasSettingsView,
     },
 ]);
 
