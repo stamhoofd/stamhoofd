@@ -1,13 +1,13 @@
 <template>
     <div>
-        <ViewMemberRecordCategoryBox v-for="category of recordCategories.categories" :key="category.id" :member="member" :category="category"  :is-admin="recordCategories.adminPermissionsMap.get(category.id) ?? false" />
+        <ViewMemberRecordCategoryBox v-for="category of recordCategories.categories" :key="category.id" :member="member" :category="category" :is-admin="recordCategories.adminPermissionsMap.get(category.id) ?? false" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { PermissionLevel, PlatformMember, RecordCategory } from '@stamhoofd/structures';
+import { PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useAuth } from '../../../hooks';
+import { useAuth, useOrganization } from '../../../hooks';
 import ViewMemberRecordCategoryBox from './ViewMemberRecordCategoryBox.vue';
 
 defineOptions({
@@ -19,6 +19,7 @@ const props = defineProps<{
 }>();
 
 const auth = useAuth();
+const organization = useOrganization();
 
 const recordCategories = computed(() => {
     const checkPermissions = {
@@ -29,6 +30,7 @@ const recordCategories = computed(() => {
     const member = props.member;
     return member.getEnabledRecordCategories({
         checkPermissions,
+        scopeOrganization: organization.value,
     });
 });
 

@@ -238,6 +238,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                             user: auth.user!,
                             level: PermissionLevel.Read,
                         },
+                        scopeOrganization: organization,
                     };
 
                     const member = registration.member;

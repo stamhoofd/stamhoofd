@@ -42,7 +42,7 @@ import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
-import { useAuth } from '../../../hooks';
+import { useAuth, useOrganization } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 import EditEmergencyContactsBox from './EditEmergencyContactsBox.vue';
 import EditMemberDataPermissionsBox from './EditMemberDataPermissionsBox.vue';
@@ -74,10 +74,15 @@ const props = withDefaults(
 const auth = useAuth();
 const app = useAppContext();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
+const organization = useOrganization();
 
 const recordCategories = computed(() =>
     props.member.getEnabledRecordCategories({
-        checkPermissions: { user: auth.user!, level: PermissionLevel.Write },
+        checkPermissions: {
+            user: auth.user!,
+            level: PermissionLevel.Write,
+        },
+        scopeOrganization: organization.value,
     }),
 );
 </script>

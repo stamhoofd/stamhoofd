@@ -246,6 +246,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                             user: auth.user!,
                             level: PermissionLevel.Read,
                         },
+                        scopeOrganization: organization,
                     };
 
                     // Check missing information

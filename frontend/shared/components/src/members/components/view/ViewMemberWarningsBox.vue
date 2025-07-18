@@ -15,12 +15,11 @@
 </template>
 
 <script setup lang="ts">
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberPlatformMembership, MembershipStatus, PermissionLevel, PlatformMember, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useDataPermissionSettings, useFinancialSupportSettings } from '../../../groups';
-import { useAuth } from '../../../hooks';
+import { useAuth, useOrganization } from '../../../hooks';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
 
 defineOptions({
@@ -32,6 +31,7 @@ const props = defineProps<{
 }>();
 const auth = useAuth();
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), false);
+const organization = useOrganization();
 
 // Possible the member didn't fill in the answers yet
 const autoCompletedAnswers = computed(() => {
@@ -40,6 +40,7 @@ const autoCompletedAnswers = computed(() => {
             user: auth.user!,
             level: PermissionLevel.Read,
         },
+        scopeOrganization: organization.value,
     });
     const allRecords = recordCategories.flatMap(category => category.getAllFilteredRecords(props.member));
     const answerClone: typeof props.member.patchedMember.details.recordAnswers = new Map();

@@ -1114,7 +1114,7 @@ export class PlatformMember implements ObjectWithRecords {
                         }
                         if (!hasUserManagerPermissions && checkPermissions.user.permissions) {
                             // Check permissions
-                            // we need at least permission in one organization
+                            // we need at least permission in one organization where this member is registered
                             for (const organization of scopedOrganizations) {
                                 const organizationPermissions = checkPermissions.user.permissions.forOrganization(organization, Platform.shared);
 
