@@ -482,17 +482,20 @@ export class AuthenticatedStructures {
             const blob = MemberWithRegistrationsBlob.create({
                 ...member,
                 balances: memberBalances,
-                registrations: member.registrations.map((r) => {
-                    const base = r.getStructure();
+                registrations: await Promise.all(
+                    member.registrations.map(async (r) => {
+                        const base = r.getStructure();
 
-                    base.balances = balancesPermission
-                        ? (balances.filter(b => r.id === b.objectId && b.objectType === ReceivableBalanceType.registration).map((b) => {
-                                return GenericBalance.create(b);
-                            }))
-                        : [];
+                        base.balances = balancesPermission
+                            ? (balances.filter(b => r.id === b.objectId && b.objectType === ReceivableBalanceType.registration).map((b) => {
+                                    return GenericBalance.create(b);
+                                }))
+                            : [];
+                        base.group = await this.group(r.group);
 
-                    return base;
-                }),
+                        return base;
+                    }),
+                ),
                 details: member.details,
                 users: member.users.map(u => u.getStructure()),
             });
