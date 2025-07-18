@@ -131,6 +131,7 @@ import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';
 import { useErrors } from '../../errors/useErrors';
 import { useEmitPatch } from '../../hooks';
+import { Formatter } from '@stamhoofd/utility';
 
 const props = withDefaults(defineProps<{
     price: GroupPrice;
@@ -205,7 +206,17 @@ const hasStartDate = computed({
             return;
         }
         if (value) {
-            addPatch({ startDate: startDate.value ?? new Date() });
+            addPatch({
+                startDate:
+                    startDate.value
+                    ?? Formatter.luxon(new Date())
+                        .set({
+                            hour: 0,
+                            minute: 0,
+                            second: 0,
+                            millisecond: 0,
+                        }).toJSDate(),
+            });
         }
         else {
             addPatch({ startDate: null });
@@ -225,7 +236,16 @@ const hasEndDate = computed({
             return;
         }
         if (value) {
-            addPatch({ endDate: endDate.value ?? new Date() });
+            addPatch({ 
+                endDate: endDate.value 
+                    ?? Formatter.luxon(new Date())
+                        .set({
+                            hour: 23,
+                            minute: 59,
+                            second: 59,
+                            millisecond: 999,
+                        }).toJSDate(),
+            });
         }
         else {
             addPatch({ endDate: null });
