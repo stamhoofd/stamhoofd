@@ -97,10 +97,10 @@
                             </p>
 
                             <p v-if="price.startDate" class="style-description-small">
-                                {{ $t('Beschikbaar vanaf {date}', {date: formatDateTime(price.startDate)}) }}
+                                {{ $t('Beschikbaar vanaf {date}', {date: formatStartDate(price.startDate)}) }}
                             </p>
                             <p v-if="price.endDate" class="style-description-small">
-                                {{ $t('Onbeschikbaar na {date}', {date: formatDateTime(price.endDate)}) }}
+                                {{ $t('Onbeschikbaar na {date}', {date: formatEndDate(price.endDate)}) }}
                             </p>
 
                             <p v-for="[id, discount] of price.bundleDiscounts" :key="id" class="style-description-small">
