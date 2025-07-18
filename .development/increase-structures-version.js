@@ -18,6 +18,15 @@ const needle = '...NextVersion';
 const dryRun = false;
 let foundUsage = false;
 
+function hasOption(argName) {
+    for (const [index, a] of process.argv.entries()) {
+        if (a === argName) {
+            return true;
+        }
+    }
+    return false;
+}
+
 async function processFile(filePath) {
     if (!filePath.endsWith('.ts')) {
         return;
@@ -189,7 +198,7 @@ async function run() {
 
     console.log(chalk.bold(chalk.blueBright('Increasing structures version to ' + nextVersion + '... (if changed)\n')));
 
-    if (!dryRun) {
+    if (!dryRun && !hasOption('--force')) {
         // Update remotes
         await exec('git remote update');
 
