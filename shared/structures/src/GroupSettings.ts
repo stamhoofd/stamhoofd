@@ -819,6 +819,7 @@ type Period = {
 };
 
 function coversForever(periods: Period[]): boolean {
+    const allowedGap = 1; // Allow 1ms gaps (23:59:59.999 to 00:00:00.000)
     const normalized = periods
         .map(({ startDate, endDate }) => ({
             startDate: startDate ? startDate.getTime() : -Infinity,
@@ -834,7 +835,7 @@ function coversForever(periods: Period[]): boolean {
 
     for (let i = 1; i < normalized.length; i++) {
         const { startDate, endDate } = normalized[i];
-        if (startDate > currentEnd) {
+        if (startDate > currentEnd + allowedGap) {
             // Gap found
             return false;
         }
