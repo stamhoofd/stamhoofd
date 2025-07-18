@@ -81,12 +81,15 @@ export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: 
     };
 }
 
-export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLFilterDefinitions): SQLFilterCompiler {
+export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurrentColumn, childDefinitions?: (key: string) => SQLFilterDefinitions, options?: { checkPermission?: (key: string) => Promise<void> }): SQLFilterCompiler {
     const wildcardCompiler = (filter: StamhoofdFilter, _, key: string) => {
         const compiler = childDefinitions ? filterDefinitionsToCompiler(childDefinitions(key)) : filterDefinitionsToCompiler(baseSQLFilterCompilers);
         const runner = $andSQLFilterCompiler(filter, compiler);
 
         return async (_: SQLCurrentColumn) => {
+            if (options?.checkPermission) {
+                await options.checkPermission(key);
+            }
             const column = getColumn(key);
             if (column.checkPermission) {
                 await column.checkPermission();
@@ -243,6 +246,7 @@ export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
         return {
             expression: new SQLJsonValue(column.expression, 'CHAR'),
             type: SQLValueType.String,
+            nullable: column.nullable,
         };
     }
 
@@ -250,6 +254,7 @@ export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
         return {
             expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
             type: SQLValueType.Boolean,
+            nullable: column.nullable,
         };
     }
 
@@ -257,6 +262,7 @@ export function normalizeColumn(column: SQLCurrentColumn): SQLCurrentColumn {
         return {
             expression: new SQLJsonValue(column.expression, 'UNSIGNED'),
             type: SQLValueType.Number,
+            nullable: column.nullable,
         };
     }
     return column;
