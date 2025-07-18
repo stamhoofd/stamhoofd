@@ -317,6 +317,10 @@ export class AdminPermissionChecker {
             return true;
         }
 
+        if (!this.checkScope(member.organizationId)) {
+            return false;
+        }
+
         if (member.organizationId && await this.hasFullAccess(member.organizationId, permissionLevel)) {
             return true;
         }
