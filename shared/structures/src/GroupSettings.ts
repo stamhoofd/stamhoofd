@@ -807,7 +807,7 @@ export class GroupSettings extends AutoEncoder {
             throw new SimpleError({
                 code: 'prices_period_gap',
                 message: 'Not every date has a price.',
-                human: $t('Er is niet voor elke datum een tarief.'),
+                human: $t('Er zijn tijdstippen waarop geen enkel tarief beschikbaar is. Controleer of de begin en einddatum (en tijdstip) van tarieven mooi op elkaar aansluiten.'),
             });
         }
     }
