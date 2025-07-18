@@ -111,7 +111,13 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         steps.push(...getAllMemberSteps(member, item, admin ? { outdatedTime: null } : undefined));
     }
     else {
-        member.family.checkout.sendConfirmationEmail = item.group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
+        if (item.replaceRegistrations.length > 0) {
+            // By default never send emails for moves or edits
+            member.family.checkout.sendConfirmationEmail = false;
+        }
+        else {
+            member.family.checkout.sendConfirmationEmail = item.group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
+        }
     }
 
     const manager = new MemberStepManager(context, member, steps, async (navigate) => {
