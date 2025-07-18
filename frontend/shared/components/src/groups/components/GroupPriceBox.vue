@@ -40,7 +40,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="hasStartDate || !isSingle" :selectable="true" :element-name="hasStartDate ? 'div' : 'label'">
+            <STListItem v-if="hasStartDate || !isSingle" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="hasStartDate" />
                 </template>
@@ -49,7 +49,7 @@
                     {{ $t('Beschikbaar vanaf datum') }}
                 </h3>
 
-                <div v-if="hasStartDate" class="split-inputs option">
+                <div v-if="hasStartDate" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="startDate" :error-box="errors.errorBox">
                         <DateSelection v-model="startDate" />
                     </STInputBox>
@@ -57,7 +57,7 @@
                 </div>
             </STListItem>
 
-            <STListItem v-if="hasEndDate || !isSingle" :selectable="true" :element-name="hasEndDate ? 'div' : 'label'">
+            <STListItem v-if="hasEndDate || !isSingle" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="hasEndDate" />
                 </template>
@@ -66,7 +66,7 @@
                     {{ $t('Onbeschikbaar na datum') }}
                 </h3>
 
-                <div v-if="hasEndDate" class="split-inputs option">
+                <div v-if="hasEndDate" class="split-inputs option" @click.stop.prevent>
                     <STInputBox title="" error-fields="endDate" :error-box="errors.errorBox">
                         <DateSelection v-model="endDate" />
                     </STInputBox>
