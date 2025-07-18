@@ -783,7 +783,7 @@ export function getDocumentsUIFilterBuilders() {
     return [groupFilter, ...builders];
 }
 
-export function getFilterBuildersForRecordCategories(categories: RecordCategory[], prefix = '') {
+export function getFilterBuildersForRecordCategories(categories: RecordCategory[], prefix = '', options?: { includeNullable?: boolean }) {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
     for (const category of categories) {
@@ -821,10 +821,14 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             }
 
             if (record.type === RecordType.Checkbox) {
+                const extra = options?.includeNullable
+                    ? [new MultipleChoiceUIFilterOption($t('Niet ingevuld'), null)]
+                    : [];
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
                         name: prefix + categoryPrefix + record.name,
                         options: [
+                            ...extra,
                             new MultipleChoiceUIFilterOption($t('d87cdb56-c8a6-4466-a6fd-f32fe59561f5'), true),
                             new MultipleChoiceUIFilterOption($t('01b79813-933b-4045-b426-82700f921eaa'), false),
                         ],
@@ -840,10 +844,15 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             }
 
             if (record.type === RecordType.ChooseOne) {
+                const extra = options?.includeNullable
+                    ? [new MultipleChoiceUIFilterOption($t('Niet ingevuld'), null)]
+                    : [];
+
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
                         name: prefix + categoryPrefix + record.name,
                         options: [
+                            ...extra,
                             ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name.toString(), c.id)),
                         ],
                         wrapper: {
@@ -862,10 +871,15 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
             }
 
             if (record.type === RecordType.MultipleChoice) {
+                const extra = options?.includeNullable
+                    ? [new MultipleChoiceUIFilterOption($t('Niet ingevuld'), null)]
+                    : [];
+
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
                         name: prefix + categoryPrefix + record.name,
                         options: [
+                            ...extra,
                             ...record.choices.map(c => new MultipleChoiceUIFilterOption(c.name.toString(), c.id)),
                         ],
                         wrapper: {
@@ -887,7 +901,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
         }
 
         allForCategory.push(
-            ...getFilterBuildersForRecordCategories(category.childCategories, prefix + categoryPrefix),
+            ...getFilterBuildersForRecordCategories(category.childCategories, prefix + categoryPrefix, options),
         );
 
         if (allForCategory.length > 0) {
