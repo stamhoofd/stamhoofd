@@ -41,6 +41,7 @@ export { default as STFloatingFooter } from './src/navigation/STFloatingFooter.v
 export { default as STNavigationBar } from './src/navigation/STNavigationBar.vue';
 export { default as STNavigationTitle } from './src/navigation/STNavigationTitle.vue';
 export { default as STToolbar } from './src/navigation/STToolbar.vue';
+export { default as LoadingInputBox } from './src/navigation/LoadingInputBox.vue';
 
 // Overlays
 export { CenteredMessage, CenteredMessageButton } from './src/overlays/CenteredMessage';

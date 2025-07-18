@@ -170,14 +170,31 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
 
                 // verify the UiTPAS numbers are valid for social tariff (static check + API call to UiTPAS)
-                try {
-                    await UitpasService.checkUitpasNumbers(uitpasNumbers); // Throws if invalid
-                }
-                catch (e) {
-                    if (isSimpleError(e) || isSimpleErrors(e)) {
-                        e.addNamespace('uitpasNumbers');
+                if (item.product.uitpasEventId) {
+                    const basePrice = item.product.prices.find(p => p.id === item.productPrice.uitpasBaseProductPriceId)?.price ?? 0;
+                    const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, uitpasNumbers, basePrice, item.product.uitpasEventId);
+                    const allSamePrice = reducedPrices.every(price => price === reducedPrices[0]);
+                    if (!allSamePrice) {
+                        // TO DO opsplitsen van items
+                        // for now: throw error
+                        throw new SimpleError({
+                            code: 'uitpas_numbers_have_different_prices',
+                            message: 'UiTPAS numbers have different prices',
+                            human: $t('Het UiTPAS-kansentarief is niet hetzelfde voor alle opgegeven UiTPAS-nummers.'),
+                        });
                     }
-                    throw e;
+                    if (reducedPrices[0] !== item.productPrice.price) {
+                        // TO DO: prijs wijzingen
+                        // for now: throw error
+                        throw new SimpleError({
+                            code: 'uitpas_social_tariff_price_mismatch',
+                            message: 'UiTPAS social tariff have a different price',
+                            human: $t('Het UiTPAS-kansentarief is niet hetzelfde als de ingestelde prijs van het product.'),
+                        });
+                    }
+                }
+                else {
+                    await UitpasService.checkUitpasNumbers(uitpasNumbers); // Throws if invalid
                 }
             }
 

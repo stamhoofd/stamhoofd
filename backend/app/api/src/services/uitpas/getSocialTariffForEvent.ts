@@ -78,5 +78,5 @@ export async function getSocialTariffForEvent(access_token: string, basePrice: n
     if (json.available.length > 1) {
         console.warn('Multiple social tariffs available for event', uitpasEventId, '(used ', json.available[0].price, ' as base price. All options:', json.available);
     }
-    return json.available[0].price;
+    return Math.round(json.available[0].price * 100);
 }

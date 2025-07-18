@@ -5,8 +5,9 @@
         </STInputBox>
 
         <STInputBox error-fields="price" :error-box="errorBox" :title="$t(`52bff8d2-52af-4d3f-b092-96bcfa4c0d03`)">
-            <PriceInput v-model="price" :v-if="!uitpasSocialTariffLoading" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="!!product.uitpasEventId" />
-            <STInputBox :v-if="uitpasSocialTariffLoading" :placeholder="$t('Aan het berekenen...')" :disabled="true" />
+            <LoadingInputBox :loading="uitpasSocialTariffLoading">
+                <PriceInput v-model="price" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" :disabled="!!product.uitpasEventId && enableUitpasSocialTariff" />
+            </LoadingInputBox>
             <p v-if="!!product.uitpasEventId" class="style-description-small">
                 {{ $t('3028ddfe-f756-4b75-b3d2-e9281dd75c63') }}
             </p>
@@ -100,14 +101,18 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, CenteredMessage, useFeatureFlag } from '@stamhoofd/components';
+import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, CenteredMessage, useFeatureFlag, LoadingInputBox } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/src/context/hooks/useGetOfficialUitpasSocialTariff';
+
+const { getOfficialUitpasSocialTariff } = useGetOfficialUitpasSocialTariff();
 
 const props = defineProps<{
     errorBox: ErrorBox | null;
     productPrice: ProductPrice;
     product: Product;
+    isNew: boolean;
 }>();
 
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<Product>): void }>();
@@ -116,6 +121,13 @@ const uitpasFeature = useFeatureFlag()('uitpas');
 const patchedProductPrice = computed(() => props.productPrice);
 
 const uitpasSocialTariffLoading = ref(false);
+
+onMounted(async () => {
+    if (props.isNew) {
+        await updateUitpasSocialTariff();
+    }
+    // if not new, we display the cached price
+});
 
 const name = computed({
     get: () => patchedProductPrice.value.name,
@@ -185,7 +197,7 @@ const usedStock = computed(() => patchedProductPrice.value.usedStock);
 
 function addPricePatch(patch: AutoEncoderPatchType<ProductPrice>) {
     const p = Product.patch({});
-    p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: props.productPrice.id })));
+    p.prices.addPatch(ProductPrice.patch(Object.assign({}, patch, { id: patchedProductPrice.value.id })));
     emits('patch', p);
 }
 
@@ -195,40 +207,34 @@ const uitpasBaseProductPriceId = computed({
     get: () => patchedProductPrice.value.uitpasBaseProductPriceId,
     set: (value: string | null) => {
         if (value === patchedProductPrice.value.uitpasBaseProductPriceId) {
-            return;
+            return; // no change
         }
-
-        // If no name is set for this price, we suggest the name UiTPAS kansentarief.
-        if (!name.value) {
-            name.value = 'UiTPAS kansentarief';
-        }
-        /* We could suggest a name based on the base price, but there are a lot of edge cases.
-
-        const basePriceName = props.product.prices.find(p => p.id === value)?.name;
-        const suggestedPriceName = 'UiTPAS kansentarief' + (basePriceName ? ' ' + basePriceName : '');
-        if (name.value) {
-            const oldBasePriceName = props.product.prices.find(p => p.id === patchedProductPrice.value.uitpasBaseProductPriceId)?.name;
-            const oldSuggestedPriceName = 'UiTPAS kansentarief' + (oldBasePriceName ? ' ' + oldBasePriceName : '');
-            if (name.value === oldSuggestedPriceName) {
-                name.value = suggestedPriceName;
-            }
-        }
-        else {
-            name.value = suggestedPriceName;
-        }
-        */
         addPricePatch(ProductPrice.patch({ uitpasBaseProductPriceId: value }));
-        if (!!props.product.uitpasEventId && value) {
-            // call to backend to get the social tariff given this base price
-            uitpasSocialTariffLoading.value = true;
-            price.value = 10.00;
-            // wait 50ms
-            setTimeout(() => {
-                uitpasSocialTariffLoading.value = false;
-            }, 50);
-        }
     },
 });
+
+watch(uitpasBaseProductPriceId, updateUitpasSocialTariff);
+
+async function updateUitpasSocialTariff() {
+    if (!name.value && uitpasBaseProductPriceId.value) {
+        // If no name is set for this price, we suggest the name UiTPAS kansentarief.
+        name.value = 'UiTPAS kansentarief';
+    }
+    if (props.product.uitpasEventId && uitpasBaseProductPriceId.value) {
+        // official flow
+        uitpasSocialTariffLoading.value = true;
+        const basePrice = props.product.prices.find(p => p.id === uitpasBaseProductPriceId.value)?.price ?? 0;
+        try {
+            price.value = await getOfficialUitpasSocialTariff(props.product.uitpasEventId, basePrice);
+        }
+        catch (e) {
+            Toast.fromError(e).show();
+        }
+        finally {
+            uitpasSocialTariffLoading.value = false;
+        }
+    }
+}
 
 const enableUitpasSocialTariff = computed({
     get: () => uitpasBaseProductPriceId.value !== null,
@@ -273,3 +279,22 @@ const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
 });
 
 </script>
+<style lang="scss">
+    .input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    }
+
+    .input.with-spinner {
+    padding-right: 2.5em; /* space for the spinner */
+    }
+
+    .spinner-inside-input {
+    position: absolute;
+    right: 0.75em;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* let clicks go through to the input */
+    }
+</style>

@@ -22,6 +22,7 @@ export class Cart extends AutoEncoder {
             if (i.code === c && allowMerge) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
+                // to do: what if same item, but different price due to uitpas social tariff?
                 i.uitpasNumbers.push(...item.uitpasNumbers);
                 return;
             }
@@ -48,6 +49,7 @@ export class Cart extends AutoEncoder {
             if (i.code === c && i.code !== oldCode) {
                 i.amount += item.amount;
                 i.seats.push(...item.seats);
+                // to do: what if same item, but different price due to uitpas social tariff?
                 i.uitpasNumbers.push(...item.uitpasNumbers);
                 this.removeItem(old);
                 return;

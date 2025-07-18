@@ -7,6 +7,7 @@ import { searchUitpasOrganizers } from './searchUitpasOrganizers';
 import { checkPermissionsFor } from './checkPermissionsFor';
 import { checkUitpasNumbers } from './checkUitpasNumbers';
 import { getSocialTariffForEvent } from './getSocialTariffForEvent';
+import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumber';
 
 function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
@@ -133,8 +134,10 @@ export class UitpasService {
         });
     }
 
-    static async getSocialTariffForUitpasNumber(uitpasNumber: string, uitpasEventId: string) {
+    static async getSocialTariffForUitpasNumbers(organisationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventId: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        return await getSocialTariffForUitpasNumbers(access_token, uitpasNumbers, basePrice, uitpasEventId);
     }
 
     static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventId: string) {

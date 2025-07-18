@@ -59,7 +59,7 @@
         </h2>
         <p>{{ $t("b81de0d8-04af-48b7-8df4-a5fa51fa60ce") }}</p>
 
-        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
+        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :isNew="isNew" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
 
         <STList v-else v-model="draggablePrices" :draggable="true">
             <template #item="{item: price}">

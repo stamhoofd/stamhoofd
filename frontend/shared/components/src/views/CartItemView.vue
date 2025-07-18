@@ -118,6 +118,9 @@
                         type="text"
                         :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
                     >
+                    <p v-if="cartItem.calculatedPrices[index] ? (cartItem.calculatedPrices[index].price - 1) !== cartItem.productPrice.price : false" class="style-description-small">
+                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van') }} {{ formatPrice(cartItem.calculatedPrices[index].price - 1) }} {{ $t('in plaats van het standaard sociaal tarief van') }} {{ formatPrice(cartItem.productPrice.price) }}.
+                    </p>
                 </STInputBox>
             </template>
 
@@ -328,7 +331,7 @@ async function validateUitpasNumbers() {
                 basePrice: baseProductPrice.price,
                 reducedPrice: props.cartItem.productPrice.price,
                 uitpasNumbers: props.cartItem.uitpasNumbers,
-                uitpasEventId: null,
+                uitpasEventId: props.cartItem.product.uitpasEventId, // null for non-official flow, not null for official flow
             }),
             decoder: UitpasPriceCheckResponse as Decoder<UitpasPriceCheckResponse>,
         }); // will throw if one of the uitpas numbers is invalid
@@ -341,7 +344,25 @@ async function validateUitpasNumbers() {
                 human: $t('4bc1cd70-a8ea-45c0-b9c6-c95a4d766990'),
             });
         }
-        // for now we don't do anything with the reduced prices
+        const allSamePrice = reducedPrices.every(price => price === reducedPrices[0]);
+        if (!allSamePrice) {
+            // TO DO opsplitsen van items
+            // for now: throw error
+            throw new SimpleError({
+                code: 'uitpas_numbers_have_different_prices',
+                message: 'UiTPAS numbers have different prices',
+                human: $t('Het UiTPAS-kansentarief is niet hetzelfde voor alle opgegeven UiTPAS-nummers.'),
+            });
+        }
+        if (reducedPrices[0] !== props.cartItem.productPrice.price) {
+            // TO DO: prijs wijzingen
+            // for now: throw error
+            throw new SimpleError({
+                code: 'uitpas_social_tariff_price_mismatch',
+                message: 'UiTPAS social tariff have a different price',
+                human: $t('Het UiTPAS-kansentarief is niet hetzelfde als de ingestelde prijs van het product.'),
+            });
+        }
     }
     catch (e) {
         if (!Request.isAbortError(e)) {

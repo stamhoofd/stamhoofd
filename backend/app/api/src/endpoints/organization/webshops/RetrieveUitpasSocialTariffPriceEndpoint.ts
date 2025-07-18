@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
@@ -34,28 +34,28 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 // request shouldn't include a reduced price
 
                 // this call should be authenticated, as it is done from the webshop settings
-                const organization = await Context.setOrganizationScope();
+                const organization = await Context.setOrganizationScope({ willAuthenticate: true });
                 await Context.authenticate();
-
                 const reducedPrice = await UitpasService.getSocialTariffForEvent(
                     organization.id,
-                    request.body.basePrice,
+                    request.body.basePrice, // Convert from cents to euros
                     request.body.uitpasEventId,
                 );
                 const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
-                    prices: [reducedPrice],
+                    prices: [reducedPrice], // Convert to cents
                 });
                 return new Response(uitpasPriceCheckResponse);
             }
             else {
                 // OFFICIAL FLOW with an UiTPAS number
                 // request should include a reduced price (estimate by the frontend)
+                const organization = await Context.setOrganizationScope({ willAuthenticate: false });
+                const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, request.body.uitpasNumbers, request.body.basePrice, request.body.uitpasEventId); // Throws if invalid
+                const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
+                    prices: reducedPrices,
+                });
+                return new Response(uitpasPriceCheckResponse);
             }
-            throw new SimpleError({
-                code: 'not_implemented',
-                message: 'Official flow not yet implemented',
-                human: 'De officiële flow voor het valideren van een UiTPAS-nummer wordt nog niet ondersteund.',
-            });
         }
         else {
             // NON-OFFICIAL FLOW
@@ -75,15 +75,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                     human: $t('f792eda7-03b9-465d-807d-3d08ba148c8b'),
                 });
             }
-            try {
-                await UitpasService.checkUitpasNumbers(request.body.uitpasNumbers); // Throws if invalid
-            }
-            catch (e) {
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    e.addNamespace('uitpasNumbers');
-                }
-                throw e;
-            }
+            await UitpasService.checkUitpasNumbers(request.body.uitpasNumbers); // Throws if invalid
             const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
                 prices: request.body.uitpasNumbers.map(_ => reducedPrice), // All reduced prices are the same in this non-official flow
             });
