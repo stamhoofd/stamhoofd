@@ -12,7 +12,7 @@ import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { AuditLogService } from '../../../services/AuditLogService';
-import { UitpasService } from '../../../services/UitpasService';
+import { UitpasService } from '../../../services/uitpas/UitpasService';
 
 type Params = { id: string };
 type Query = undefined;
