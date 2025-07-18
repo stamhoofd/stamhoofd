@@ -122,33 +122,60 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector);
     }
 
-    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (!this.organization || group.organizationId !== this.organization.id) {
+    canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
+        if (organization === undefined || (organization === null && this.organization)) {
+            organization = this.organization;
+        }
+
+        if (!organization || group.organizationId !== organization.id) {
             return this.hasFullPlatformAccess();
         }
 
-        if (group.hasAccess(this.permissions, this.organization.period.settings.categories, permissionLevel)) {
+        if (group.periodId !== organization.period.period.id) {
+            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
+                if (!this.hasFullAccess()) {
+                    return false;
+                }
+            }
+        }
+
+        const permissions = this.getPermissionsForOrganization(organization);
+        if (!permissions) {
+            return false;
+        }
+
+        if (permissions.hasResourceAccess(PermissionsResourceType.Groups, group.id, permissionLevel)) {
             return true;
         }
 
-        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === this.organization.id) {
-            // we'll need to check the event permissions
-            return this.canWriteEventForOrganization(group.event, this.organization);
+        // Check parent categories
+        if (group.type === GroupType.Membership) {
+            const parentCategories = group.getParentCategories(organization.period.settings.categories);
+            for (const category of parentCategories) {
+                if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
+                    return true;
+                }
+            }
         }
 
-        if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === this.organization.id) {
+        if (group.type === GroupType.EventRegistration && group.event && group.event.organizationId === organization.id) {
             // we'll need to check the event permissions
-            return this.canWriteEventForOrganization(group.parentGroup.event, this.organization);
+            return this.canWriteEventForOrganization(group.event, organization);
+        }
+
+        if (group.type === GroupType.WaitingList && group.parentGroup && group.parentGroup.type === GroupType.EventRegistration && group.parentGroup.event && group.parentGroup.event.organizationId === organization.id) {
+            // we'll need to check the event permissions
+            return this.canWriteEventForOrganization(group.parentGroup.event, organization);
         }
 
         return false;
     }
 
-    canRegisterMembersInGroup(group: Group) {
-        if (this.canAccessGroup(group, PermissionLevel.Write)) {
+    canRegisterMembersInGroup(group: Group, organization?: Organization | null) {
+        if (this.canAccessGroup(group, PermissionLevel.Write, organization)) {
             return true;
         }
-        if (this.organization) {
+        if (this.organization && this.organization.id !== group.organizationId) {
             if (group.settings.allowRegistrationsByOrganization && !group.closed) {
                 return this.hasFullAccess();
             }
@@ -165,7 +192,7 @@ export class ContextPermissions {
     }
 
     canAccessRegistration(registration: Registration, organization: Organization, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        if (registration.group.hasAccess(this.getPermissionsForOrganization(organization), organization.period.settings.categories, permissionLevel)) {
+        if (this.canAccessGroup(registration.group, permissionLevel, organization)) {
             return true;
         }
         return false;
