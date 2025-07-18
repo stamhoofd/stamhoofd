@@ -380,6 +380,11 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        // Check permissions aren't scoped to a specific organization, and they mismatch
+        if (!this.checkScope(registration.organizationId)) {
+            return false;
+        }
+
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
@@ -389,6 +394,15 @@ export class AdminPermissionChecker {
         if (organizationPermissions.hasAccess(PermissionLevel.Full)) {
             // Only full permissions; because non-full doesn't have access to other periods
             return true;
+        }
+        const organization = await this.getOrganization(registration.organizationId);
+
+        if (registration.periodId !== organization.periodId) {
+            if (STAMHOOFD.userMode === 'organization' || registration.periodId !== this.platform.period.id) {
+                // We already checked for full permissions - and we don't have full permissions
+                // so that also means no permissions for registrations in other periods
+                return false;
+            }
         }
 
         const group = await this.getGroup(registration.groupId);
