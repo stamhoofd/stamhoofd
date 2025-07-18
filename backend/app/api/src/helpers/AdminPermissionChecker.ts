@@ -152,7 +152,7 @@ export class AdminPermissionChecker {
         if (organizationId) {
             // If request is scoped to a different organization
             if (this.organization && organizationId !== this.organization.id) {
-                    return false;
+                return false;
             }
 
             // If user is limited to scope
@@ -1088,6 +1088,65 @@ export class AdminPermissionChecker {
         return false;
     }
 
+    async canFilterMembersOnRecordId(recordId: string): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
+        const record = await MemberRecordStore.getRecord(recordId);
+        if (!record) {
+            return {
+                canAccess: false,
+                record: null,
+            };
+        }
+
+        if (!this.checkScope(record.organizationId)) {
+            return {
+                canAccess: false,
+                record: record.record,
+            };
+        }
+
+        if (!this.user.permissions) {
+            return {
+                canAccess: false,
+                record: record.record,
+            };
+        }
+
+        if (record.organizationId) {
+            const organizationPermissions = await this.getOrganizationPermissions(record.organizationId);
+            if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, PermissionLevel.Read)) {
+                return {
+                    canAccess: true,
+                    record: record.record,
+                };
+            }
+        }
+        else {
+            // ONLY check current scoped organization
+            if (this.organization) {
+                const organizationPermissions = await this.getOrganizationPermissions(this.organization.id);
+                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, PermissionLevel.Read)) {
+                    return {
+                        canAccess: true,
+                        record: record.record,
+                    };
+                }
+            }
+        }
+
+        // 2. Check platform permissions
+        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, PermissionLevel.Read)) {
+            return {
+                canAccess: true,
+                record: record.record,
+            };
+        }
+
+        return {
+            canAccess: false,
+            record: record.record,
+        };
+    }
+
     async checkRecordAccess(member: MemberWithRegistrations, recordId: string, level: PermissionLevel = PermissionLevel.Read): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
         const record = await MemberRecordStore.getRecord(recordId);
         if (!record) {
@@ -1172,10 +1231,10 @@ export class AdminPermissionChecker {
                 if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
                     checkedOrganizations.set(registration.organizationId, true);
                     if (await this.canAccessRegistration(registration, level)) {
-                    return {
-                        canAccess: true,
-                        record: record.record,
-                    };
+                        return {
+                            canAccess: true,
+                            record: record.record,
+                        };
                     }
                 }
                 else {

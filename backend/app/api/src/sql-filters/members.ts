@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar, createWildcardColumnFilter, SQLJsonExtract } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
@@ -413,4 +413,56 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             ),
         organizationFilterCompilers,
     ),
+    'details': {
+        ...baseSQLFilterCompilers,
+        recordAnswers: createWildcardColumnFilter(
+            (key: string) => ({
+                expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
+                type: SQLValueType.JSONObject,
+                nullable: true,
+            }),
+            (key: string) => ({
+                ...baseSQLFilterCompilers,
+                selected: createColumnFilter({
+                    expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
+                    type: SQLValueType.JSONBoolean,
+                    nullable: true,
+                }),
+                selectedChoice: {
+                    ...baseSQLFilterCompilers,
+                    id: createColumnFilter({
+                        expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
+                        type: SQLValueType.JSONString,
+                        nullable: true,
+                    }),
+                },
+                selectedChoices: {
+                    ...baseSQLFilterCompilers,
+                    id: createColumnFilter({
+                        expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
+                        type: SQLValueType.JSONArray,
+                        nullable: true,
+                    }),
+                },
+                value: createColumnFilter({
+                    expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
+                    type: SQLValueType.JSONString,
+                    nullable: true,
+                }),
+            }),
+            {
+                checkPermission: async (key: string) => {
+                    const result = await Context.auth.canFilterMembersOnRecordId(key);
+                    if (!result.canAccess) {
+                        throw new SimpleError({
+                            code: 'permission_denied',
+                            message: 'No permissions for financial support filter (organization scope).',
+                            human: result.record ? $t(`Je hebt niet voldoende toegangsrechten om te filteren op {recordName}`, { recordName: result.record.name }) : $t(`Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld`),
+                            statusCode: 400,
+                        });
+                    }
+                },
+            },
+        ),
+    },
 };
