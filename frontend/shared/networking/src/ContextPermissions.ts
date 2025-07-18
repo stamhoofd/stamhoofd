@@ -106,6 +106,10 @@ export class ContextPermissions {
         return this.permissions?.hasAccessRight(right) ?? false;
     }
 
+    hasResourceAccess(resourceType: PermissionsResourceType, resourceId: string, level: PermissionLevel = PermissionLevel.Read) {
+        return this.permissions?.hasResourceAccess(resourceType, resourceId, level) ?? false;
+    }
+
     hasResourceAccessRight(resourceType: PermissionsResourceType, resourceId: string, right: AccessRight) {
         return this.permissions?.hasResourceAccessRight(resourceType, resourceId, right) ?? false;
     }

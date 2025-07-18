@@ -1,5 +1,5 @@
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { computed, ComputedRef, Ref, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
@@ -684,6 +684,42 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 },
             }),
         );
+    }
+
+    function filterRecordCategory(recordCategory: RecordCategory) {
+        return auth.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id);
+    }
+
+    const recordCategoriesFilterBuilders: UIFilterBuilder<UIFilter>[] = [];
+    recordCategoriesFilterBuilders.push(
+        ...getFilterBuildersForRecordCategories(
+            platform.config.recordsConfiguration.recordCategories.filter(filterRecordCategory),
+            undefined,
+            { includeNullable: true },
+        ),
+    );
+
+    if (organization.value !== null) {
+        // Also include complex filters
+        recordCategoriesFilterBuilders.push(
+            ...getFilterBuildersForRecordCategories(
+                organization.value.meta.recordsConfiguration.recordCategories.filter(filterRecordCategory),
+                undefined,
+                { includeNullable: true },
+            ),
+        );
+    }
+
+    if (recordCategoriesFilterBuilders.length > 0) {
+        const groupFilter = new GroupUIFilterBuilder({
+            name: $t('Vragenlijsten'),
+            builders: recordCategoriesFilterBuilders,
+            wrapper: {
+                details: FilterWrapperMarker,
+            },
+        });
+        recordCategoriesFilterBuilders.unshift(groupFilter);
+        all.push(groupFilter);
     }
 
     return all;
