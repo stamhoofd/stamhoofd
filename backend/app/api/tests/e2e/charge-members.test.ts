@@ -75,6 +75,7 @@ describe('E2E.ChargeMembers', () => {
     });
 
     beforeAll(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
         period = await new RegistrationPeriodFactory({
             startDate: new Date(2023, 0, 1),
             endDate: new Date(2023, 11, 31),
