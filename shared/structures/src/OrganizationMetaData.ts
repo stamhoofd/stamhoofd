@@ -17,6 +17,7 @@ import { PaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
 import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
+import { UitpasClientCredentialsStatus } from './UitpasClientCredentialsStatus.js';
 
 export class OrganizationPackages extends AutoEncoder {
     @field({ decoder: new MapDecoder(new EnumDecoder(STPackageType), STPackageStatus) })
@@ -432,6 +433,15 @@ export class OrganizationMetaData extends AutoEncoder {
         version: 57,
     })
     rootCategoryId = this.categories[0]?.id ?? '';
+
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    uitpasOrganizerId: string | null = null;
+
+    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    uitpasOrganizerName: string | null = null;
+
+    @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), ...NextVersion, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
+    uitpasClientCredentialsStatus: UitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotConfigured;
 
     /**
      * @deprecated
