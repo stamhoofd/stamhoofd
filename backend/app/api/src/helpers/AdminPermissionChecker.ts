@@ -1048,6 +1048,11 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        if (await this.canAccessMember(member, PermissionLevel.Full)) {
+            // If we have full access to the member, we can always access NRN
+            return false;
+        }
+
         // First list all organizations this member is part of
         const organizations: Organization[] = [];
 
