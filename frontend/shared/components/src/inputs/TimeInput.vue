@@ -92,8 +92,16 @@ function validate() {
         }
 
         const luxonModelValue = DateTime.fromJSDate(model.value!).setZone(Formatter.timezone);
-        model.value = DateTime.fromObject({ year: luxonModelValue.year, month: luxonModelValue.month, day: luxonModelValue.day, hour, minute, second: 0, millisecond: 0 },
-            { zone: Formatter.timezone })
+        model.value = DateTime.fromObject({
+            year: luxonModelValue.year,
+            month: luxonModelValue.month,
+            day: luxonModelValue.day,
+            hour,
+            minute,
+            second: (minute === 59) ? 59 : 0, // If it's 23:59, we set seconds to 59 to avoid issues with the next day
+            millisecond: (minute === 59) ? 999 : 0, // If it's 23:59, we set milliseconds to 999 to avoid issues with the next day
+        },
+        { zone: Formatter.timezone })
             .toJSDate();
 
         errors.errorBox = null;

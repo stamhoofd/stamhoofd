@@ -90,8 +90,8 @@ const defaultLocalTime: ComputedRef<{ hour: number; minute: number; second: numb
         return {
             hour: dateTime.hour,
             minute: dateTime.minute,
-            second: 0,
-            millisecond: 0,
+            second: (dateTime.minute === 59) ? 59 : 0, // If it's 23:59, we set seconds to 59 to avoid issues with the next day
+            millisecond: (dateTime.minute === 59) ? 999 : 0, // If it's 23:59, we set milliseconds to 999 to avoid issues with the next day
         };
     }
 
