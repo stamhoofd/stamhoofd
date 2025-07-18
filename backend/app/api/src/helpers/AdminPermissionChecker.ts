@@ -1130,9 +1130,9 @@ export class AdminPermissionChecker {
             }
         }
         else {
-            // 1. Check all organizations (they can give permissions)
-            for (const organizationId of this.user.permissions.organizationPermissions.keys()) {
-                const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+            // Also check current scoped organization
+            if (this.organization) {
+                const organizationPermissions = await this.getOrganizationPermissions(this.organization.id);
                 if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
                     return {
                         canAccess: true,
@@ -1150,16 +1150,35 @@ export class AdminPermissionChecker {
             };
         }
 
-        // It is possible that this is a platform admin, and inherits automatic permissions for tags. So'll need to loop all the organizations where this member has an active registration for
-        if (!record.organizationId && this.platformPermissions) {
-            const organizations = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
-            for (const organizationId of organizations) {
-                const organizationPermissions = await this.getOrganizationPermissions(organizationId);
+        // It is possible that this is a platform admin (or an admin that has access to multiple organizations), and inherits automatic permissions for tags. So'll need to loop all the organizations where this member has an active registration for
+        if (!record.organizationId && !this.organization && this.hasSomePlatformAccess()) {
+            const checkedOrganizations = new Map<string, boolean>();
+            for (const registration of member.registrations) {
+                const permissions = checkedOrganizations.get(registration.organizationId);
+
+                // Checking the organization permissions is faster (and less data lookups required), so we do that first before doing the more expensive registration access check
+                if (permissions !== null) {
+                    if (permissions === true && await this.canAccessRegistration(registration, level)) {
+                        return {
+                            canAccess: true,
+                            record: record.record,
+                        };
+                    }
+                    continue;
+                }
+
+                const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
                 if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+                    checkedOrganizations.set(registration.organizationId, true);
+                    if (await this.canAccessRegistration(registration, level)) {
                     return {
                         canAccess: true,
                         record: record.record,
                     };
+                    }
+                }
+                else {
+                    checkedOrganizations.set(registration.organizationId, false);
                 }
             }
         }
