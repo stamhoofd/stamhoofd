@@ -57,6 +57,6 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             column.expression,
             SQLWhereSign.Equal,
             valuesExpression,
-        );
+        ).setNullable(column.nullable);
     };
 }

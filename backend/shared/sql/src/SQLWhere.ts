@@ -331,9 +331,25 @@ export class SQLWhereEqual extends SQLWhere {
             ]);
         }
 
+        let sign = this.sign as string;
+        if (this.sign === SQLWhereSign.Equal && this.nullable) {
+            // Swap with null-safe equal
+            sign = '<=>';
+        }
+        else if (this.sign === SQLWhereSign.NotEqual && this.nullable) {
+            // Swap with null-safe not equal
+            return joinSQLQuery([
+                'NOT (',
+                this.column.getSQL(options),
+                ` <=> `,
+                this.value.getSQL(options),
+                ')',
+            ]);
+        }
+
         return joinSQLQuery([
             this.column.getSQL(options),
-            ` ${this.sign} `,
+            ` ${sign} `,
             this.value.getSQL(options),
         ]);
     }
