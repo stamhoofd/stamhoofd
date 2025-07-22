@@ -448,8 +448,8 @@ describe('member merge', () => {
             });
 
             const d1Old = MemberDetails.create({
-                firstName: 'John',
-                lastName: 'Doe',
+                firstName: 'Jöhn',
+                lastName: 'Dôe',
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
                 uitpasNumber: '56',
@@ -600,15 +600,15 @@ describe('member merge', () => {
 
             // assert
             test('firstName', () => {
-                expect(d1.firstName).toBe(d2Old.firstName);
+                expect(d1.firstName).toBe(d1Old.firstName);
             });
 
             test('lastName', () => {
-                expect(d1.lastName).toBe(d2Old.lastName);
+                expect(d1.lastName).toBe(d1Old.lastName);
             });
 
             test('memberNumber', () => {
-                expect(d1.memberNumber).toBe(d2Old.memberNumber);
+                expect(d1.memberNumber).toBe(d1Old.memberNumber);
             });
 
             test('uitpasNumber', () => {

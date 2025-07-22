@@ -217,10 +217,10 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     otherDetails.cleanData();
 
     // string details
-    mergeString(baseDetails, otherDetails, 'firstName');
-    mergeString(baseDetails, otherDetails, 'lastName');
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'firstName');
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'lastName');
 
-    mergeString(baseDetails, otherDetails, 'memberNumber');
+    mergeStringIfBaseNotSet(baseDetails, otherDetails, 'memberNumber');
     mergeString(baseDetails, otherDetails, 'uitpasNumber');
 
     // email
@@ -442,6 +442,25 @@ function mergeString<T, K extends keyof T>(
 ): boolean {
     const otherValue = other[key] as string | null | undefined;
     if (isNullOrEmpty(otherValue)) {
+        return false;
+    }
+
+    (base[key] as string | null | undefined) = otherValue;
+
+    return true;
+}
+
+function mergeStringIfBaseNotSet<T, K extends keyof T>(
+    base: T,
+    other: T,
+    key: K & (T[K] extends string | null | undefined ? K : never),
+): boolean {
+    const otherValue = other[key] as string | null | undefined;
+    if (isNullOrEmpty(otherValue)) {
+        return false;
+    }
+
+    if (!isNullOrEmpty(base[key] as string | null | undefined)) {
         return false;
     }
 
