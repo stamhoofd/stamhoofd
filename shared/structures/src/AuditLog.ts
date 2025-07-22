@@ -243,135 +243,135 @@ export function getAuditLogTypeName(type: AuditLogType): string {
 export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?: string] {
     switch (type) {
         case AuditLogType.MemberEdited:
-            return [`user`, `edit`];
+            return [`user`, `edit stroke`];
         case AuditLogType.MemberAdded:
             return [`user`, 'add green'];
         case AuditLogType.MemberDeleted:
-            return [`user`, `canceled red`];
+            return [`user`, `trash red stroke`];
         case AuditLogType.MemberRegistered:
             return [`membership-filled`, `success`];
         case AuditLogType.MemberUnregistered:
             return [`membership-filled`, `canceled red`];
         case AuditLogType.PlatformSettingsChanged:
-            return [`flag`, `settings`];
+            return [`flag`, `settings stroke`];
 
         case AuditLogType.OrganizationEdited:
             return [`flag`];
         case AuditLogType.OrganizationAdded:
             return [`flag`, `add green`];
         case AuditLogType.OrganizationDeleted:
-            return [`flag`, `canceled red`];
+            return [`flag`, `trash red stroke`];
 
         case AuditLogType.Unknown:
             return [`history`];
 
         case AuditLogType.EventEdited:
-            return [`calendar`, `edit`];
+            return [`calendar`, `edit stroke`];
         case AuditLogType.EventAdded:
             return [`calendar`, `add green`];
         case AuditLogType.EventDeleted:
-            return [`calendar`, `canceled red`];
+            return [`calendar`, `trash red stroke`];
 
         case AuditLogType.GroupEdited:
-            return [`group`, `edit`];
+            return [`group`, `edit stroke`];
         case AuditLogType.GroupAdded:
             return [`group`, `add green`];
         case AuditLogType.GroupDeleted:
-            return [`group`, `canceled red`];
+            return [`group`, `trash red stroke`];
 
         case AuditLogType.WaitingListEdited:
-            return [`hourglass`, `edit`];
+            return [`hourglass`, `edit stroke`];
         case AuditLogType.WaitingListAdded:
             return [`hourglass`, `add green`];
         case AuditLogType.WaitingListDeleted:
-            return [`hourglass`, `canceled red`];
+            return [`hourglass`, `trash red stroke`];
 
         case AuditLogType.RegistrationPeriodEdited:
-            return [`history`, `edit`];
+            return [`history`, `edit stroke`];
         case AuditLogType.RegistrationPeriodAdded:
             return [`history`, `add green`];
         case AuditLogType.RegistrationPeriodDeleted:
-            return [`history`, `canceled red`];
+            return [`history`, `trash red stroke`];
 
         case AuditLogType.StripeAccountAdded:
             return [`stripe`, `add green`];
         case AuditLogType.StripeAccountDeleted:
-            return [`stripe`, `canceled red`];
+            return [`stripe`, `trash red stroke`];
         case AuditLogType.StripeAccountEdited:
-            return [`stripe`, `edit`];
+            return [`stripe`, `edit stroke`];
 
         case AuditLogType.WebshopEdited:
-            return [`basket`, `edit`];
+            return [`basket`, `edit stroke`];
         case AuditLogType.WebshopAdded:
             return [`basket`, `add green`];
         case AuditLogType.WebshopDeleted:
-            return [`basket`, `canceled red`];
+            return [`basket`, `trash red stroke`];
         case AuditLogType.OrderAdded:
             return [`basket`, `add green`];
         case AuditLogType.OrderEdited:
-            return [`basket`, `edit`];
+            return [`basket`, `edit stroke`];
         case AuditLogType.OrderDeleted:
-            return [`basket`, `canceled red`];
+            return [`basket`, `trash red stroke`];
 
         case AuditLogType.PaymentAdded:
             return [`card`, `add green`];
         case AuditLogType.PaymentEdited:
-            return [`card`, `edit`];
+            return [`card`, `edit stroke`];
         case AuditLogType.PaymentDeleted:
-            return [`card`, `canceled red`];
+            return [`card`, `trash red stroke`];
 
         case AuditLogType.DocumentTemplateAdded:
             return [`file`, `add green`];
         case AuditLogType.DocumentTemplateEdited:
-            return [`file`, `edit`];
+            return [`file`, `edit stroke`];
         case AuditLogType.DocumentTemplateDeleted:
-            return [`file`, `canceled red`];
+            return [`file`, `trash red stroke`];
 
         case AuditLogType.UserAdded:
             return [`user`, `add green`];
         case AuditLogType.UserEdited:
-            return [`user`, `edit`];
+            return [`user`, `edit stroke`];
         case AuditLogType.UserDeleted:
-            return [`user`, `canceled red`];
+            return [`user`, `trash red stroke`];
 
         case AuditLogType.MemberResponsibilityRecordAdded:
             return [`star`, `add green`];
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return [`star`, `edit`];
+            return [`star`, `edit stroke`];
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return [`star`, `canceled red`];
+            return [`star`, `trash red stroke`];
 
         case AuditLogType.MemberPlatformMembershipAdded:
             return [`membership-filled`, `add green`];
         case AuditLogType.MemberPlatformMembershipEdited:
-            return [`membership-filled`, `edit`];
+            return [`membership-filled`, `edit stroke`];
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return [`membership-filled`, `canceled red`];
+            return [`membership-filled`, `trash red stroke`];
 
         case AuditLogType.EmailSent:
-            return [`email`, `success primary`];
+            return [`email`, `success primary stroke`];
         case AuditLogType.EmailSending:
-            return [`email`, `clock`];
+            return [`email`, `clock stroke`];
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return [`email`, `error red`];
+            return [`email`, `error red stroke`];
         case AuditLogType.EmailAddressHardBounced:
-            return [`email`, `error red`];
+            return [`email`, `error red stroke`];
         case AuditLogType.EmailAddressSoftBounced:
-            return [`email`, `warning`];
+            return [`email`, `warning stroke`];
         case AuditLogType.EmailAddressUnsubscribed:
-            return [`email`, `disabled red`];
+            return [`email`, `disabled red stroke`];
         case AuditLogType.EmailAddressFraudComplaint:
-            return [`email`, `error red`];
+            return [`email`, `error red stroke`];
 
         case AuditLogType.EmailTemplateAdded:
             return [`email-template`, `add green`];
         case AuditLogType.EmailTemplateEdited:
-            return [`email-template`, `edit`];
+            return [`email-template`, `edit stroke`];
         case AuditLogType.EmailTemplateDeleted:
-            return [`email-template`, `canceled red`];
+            return [`email-template`, `trash red stroke`];
 
         case AuditLogType.MemberSecurityCodeUsed:
-            return [`key`, `success primary`];
+            return [`key`, `success primary stroke`];
     }
 }
 
