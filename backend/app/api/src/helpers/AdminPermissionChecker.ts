@@ -354,14 +354,12 @@ export class AdminPermissionChecker {
      */
     async canDeleteMember(member: MemberWithRegistrations) {
         if (member.registrations.length === 0 && this.isUserManager(member)) {
-            const platformMemberships = await MemberPlatformMembership.where({ memberId: member.id });
-            if (platformMemberships.length === 0) {
-                return true;
-            }
-
             const cachedBalance = await CachedBalance.getForObjects([member.id]);
             if (cachedBalance.length === 0 || (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)) {
-                return true;
+                const platformMemberships = await MemberPlatformMembership.where({ memberId: member.id });
+                if (platformMemberships.length === 0) {
+                    return true;
+                }
             }
         }
 
