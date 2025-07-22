@@ -463,9 +463,14 @@ defineRoutes([
                     const updatedGroup = updatedPeriod.groups.find(g => g.id === group.id);
                     if (updatedGroup) {
                         group.deepSet(updatedGroup);
+
+                        if (updatedGroup.deletedAt) {
+                            props.event.group = null;
+                        }
                     }
                     else {
                         console.warn('Group not found in updated period', group.id, updatedPeriod.groups);
+                        props.event.group = null;
                     }
                 },
             };

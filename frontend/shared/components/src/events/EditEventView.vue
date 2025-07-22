@@ -27,10 +27,6 @@
             <WYSIWYGTextInput v-model="description" :placeholder="$t('2cb56415-5e16-4a75-9012-8971be8dbc6a')" />
         </STInputBox>
 
-        <STList>
-            <CheckboxListItem v-model="hasGroup" :label="$t('24d2a5c1-fcc6-4209-9bd1-12f4e60f6ddc')" :description="$t('c74102fe-aa0c-4602-99d3-e6510e19632a')" />
-        </STList>
-
         <hr><h2>{{ $t('112b7686-dffc-4ae9-9706-e3efcd34898f') }}</h2>
 
         <Checkbox v-if="!type || (type.maximumDays !== 1 && (type.minimumDays ?? 1) <= 1)" v-model="multipleDays">
@@ -228,8 +224,8 @@
 import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, CheckboxListItem, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
-import { AccessRight, Event, EventLocation, EventMeta, Group, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
+import { AddressInput, CenteredMessage, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AccessRight, Event, EventLocation, EventMeta, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -238,7 +234,6 @@ import { useAuth, useContext, useOrganization, usePatch, usePlatform } from '../
 import DefaultAgeGroupIdsInput from '../inputs/DefaultAgeGroupIdsInput.vue';
 import GroupsInput from '../inputs/GroupsInput.vue';
 import DeleteView from '../views/DeleteView.vue';
-import { useCreateEventGroup } from './composables/createEventGroup';
 import { useEventPermissions } from './composables/useEventPermissions';
 
 const props = withDefaults(
@@ -341,47 +336,6 @@ const startDate = computed({
             d.setMonth(startDate.getMonth());
             d.setDate(startDate.getDate());
             endDate.value = d;
-        }
-    },
-});
-
-const createEventGroup = useCreateEventGroup();
-const hasGroup = computed({
-    get: () => patched.value.group !== null,
-    set: (enabled) => {
-        if (enabled === hasGroup.value) {
-            return;
-        }
-
-        if (enabled) {
-            const originalGroup = props.event.group;
-            if (originalGroup) {
-                // Keep original group by unsetting the patch explicitly
-                patch.value.group = undefined;
-            }
-            else {
-                createEventGroup(patched.value, (group: Group) => {
-                    addPatch({
-                        // Create a new default group
-                        group,
-                    });
-                }).catch(e => () => {
-                    Toast.fromError(e).show();
-                });
-            }
-        }
-        else {
-            if (patched.value.group) {
-                if (patched.value.group.settings.getUsedStock(patched.value.group)) {
-                    // Not allowed
-                    Toast.error($t('a7c16100-f8b3-46a2-94fa-24cc4b693f32'))
-                        .show();
-                    return;
-                }
-                addPatch({
-                    group: null,
-                });
-            }
         }
     },
 });
