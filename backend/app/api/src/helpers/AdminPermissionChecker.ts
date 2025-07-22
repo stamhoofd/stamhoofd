@@ -966,6 +966,11 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        // Temporary access
+        if (hasTemporaryMemberAccess(this.user.id, member.id, level)) {
+            return true;
+        }
+
         // First list all organizations this member is part of
         const organizations: Organization[] = [];
 
@@ -1046,9 +1051,8 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (await this.canAccessMember(member, PermissionLevel.Full)) {
-            // If we have full access to the member, we can always access NRN
-            return false;
+        if (hasTemporaryMemberAccess(this.user.id, member.id, PermissionLevel.Full)) {
+            return true;
         }
 
         // First list all organizations this member is part of
@@ -1207,6 +1211,13 @@ export class AdminPermissionChecker {
 
         // 2. Check platform permissions
         if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, level)) {
+            return {
+                canAccess: true,
+                record: record.record,
+            };
+        }
+
+        if (hasTemporaryMemberAccess(this.user.id, member.id, PermissionLevel.Full)) {
             return {
                 canAccess: true,
                 record: record.record,
