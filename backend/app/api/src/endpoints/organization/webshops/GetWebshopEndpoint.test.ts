@@ -30,24 +30,17 @@ describe('Endpoint.GetWebshop', () => {
         expect((response.body as any).privateMeta).toBeUndefined();
     });
 
-    test('Allow access without organization scope in old v243', async () => {
+    test('Allow access without organization scope', async () => {
         const organization = await new OrganizationFactory({}).create();
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
-        const r = Request.buildJson('GET', '/v243/webshop/' + webshop.id);
+        const r = Request.buildJson('GET', '/webshop/' + webshop.id);
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
 
         expect(response.body.id).toEqual(webshop.id);
         expect((response.body as any).privateMeta).toBeUndefined();
-    });
-
-    test('Do not allow access without organization scope in v244', async () => {
-        const organization = await new OrganizationFactory({}).create();
-        const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-        const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id);
-        await expect(testServer.test(endpoint, r)).rejects.toThrow('Please specify the organization in the hostname');
     });
 
     test('Get webshop as admin', async () => {
