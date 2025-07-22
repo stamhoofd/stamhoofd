@@ -65,14 +65,38 @@ const suggestion = computed(() => {
     return null;
 });
 
+function doesMatchNRNSuggestion(nrn: string | null): boolean {
+    if (!nrn) {
+        return false;
+    }
+    // Remove TRAILING -
+    let nrnWithoutDash = nrn.replace(/-$/, '');
+    return nrrRaw.value === nrn || nrrRaw.value === nrnWithoutDash || (nrrRaw.value.length === 0 && !!nrn);
+}
+
 const isSuggestion = computed(() => {
-    return nrrRaw.value === suggestion.value;
+    return doesMatchNRNSuggestion(suggestion.value);
 });
 
-watch(() => props.birthDay, (val) => {
+watch(() => props.birthDay, (val, oldValue) => {
     if (val && !value.value && !nrrRaw.value) {
         // Autofill
         nrrRaw.value = suggestion.value ?? '';
+        return;
+    }
+
+    let wasSuggestion = false;
+    if (oldValue) {
+        wasSuggestion = doesMatchNRNSuggestion(DataValidator.generateBelgianNationalNumber(oldValue));
+    }
+
+    if (wasSuggestion) {
+        if (!val) {
+            nrrRaw.value = '';
+        }
+        else {
+            nrrRaw.value = suggestion.value ?? '';
+        }
     }
 }, { immediate: true });
 
@@ -91,7 +115,7 @@ function validate(final = true, silent = false) {
 
     nrrRaw.value = nrrRaw.value.trim();
 
-    if (!props.required && (nrrRaw.value.length === 0 || nrrRaw.value === suggestion.value)) {
+    if (!props.required && (nrrRaw.value.length === 0 || isSuggestion.value)) {
         if (!silent) {
             errors.errorBox = null;
         }
