@@ -142,31 +142,18 @@ export class PlatformFamilyManager {
                 throw e;
             }
 
-            const createdMembers = response.data.members.filter(m => ![...clearAfter.values()].find(mm => mm.id === m.id));
-
             for (const c of clearAfter.values()) {
                 const savedMember = c.patchedMember; // Before clearing the patches
                 c.markSaved();
 
                 // Check in response
-                const updatedMember = response.data.members.find(m => m.id === c.id);
+                const updatedMember = response.data.members.find(m => m.id === c.id || m.details.oldIds.includes(c.id));
                 if (updatedMember) {
                     c.member.deepSet(updatedMember);
+                    c.patch.id = updatedMember.id;
                 }
                 else {
-                    // Probably duplicate member, so we have a different id
-                    const updatedMember = createdMembers.find(m => m.details.isEqual(savedMember.details));
-                    if (updatedMember) {
-                        // We have an id change here
-                        const oldId = c.id;
-                        c.member.deepSet(updatedMember);
-                        c.patch.id = updatedMember.id;
-
-                        c._oldId = oldId;
-                    }
-                    else {
-                        console.error('Patched members but missing in response. This should not happen.', savedMember, c);
-                    }
+                    console.error('Patched members but missing in response. This should not happen.', savedMember, c);
                 }
             }
 

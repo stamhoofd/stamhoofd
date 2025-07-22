@@ -55,6 +55,13 @@ export class MemberDetails extends AutoEncoder {
     memberNumber: string | null = null;
 
     /**
+     * In case the member has been merged with other members, this array contains a list
+     * of the old ids of the members that were merged into this member.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    oldIds: string[] = [];
+
+    /**
      * Note: when this is set to 'NationalRegisterNumberOptOut' it means the user manually opted out - and doesn't have a national register number
      */
     @field({ decoder: StringDecoder, version: 348, nullable: true })
@@ -354,40 +361,6 @@ export class MemberDetails extends AutoEncoder {
                 this.trackingYear = null;
             }
         }
-    }
-
-    isEqual(other: MemberDetails): boolean {
-        this.cleanData();
-        other.cleanData();
-
-        if (!this.firstName || !other.firstName) {
-            // Not possible to compare
-            return false;
-        }
-
-        if (!this.lastName || !other.lastName) {
-            // Not possible to compare
-            return false;
-        }
-
-        if (!this.birthDay || !other.birthDay) {
-            // Not possible to compare
-            return false;
-        }
-
-        if (this.firstName !== other.firstName) {
-            return false;
-        }
-
-        if (this.lastName !== other.lastName) {
-            return false;
-        }
-
-        if (this.birthDayFormatted !== other.birthDayFormatted) {
-            return false;
-        }
-
-        return true;
     }
 
     get name() {

@@ -299,6 +299,13 @@ export function mergeMemberDetails(base: Member, other: Member): void {
             baseDetails.unverifiedAddresses.push(address);
         }
     }
+
+    // Ids
+    baseDetails.oldIds = Formatter.uniqueArray([...baseDetails.oldIds, ...otherDetails.oldIds]).filter(b => b !== base.id);
+
+    if (other.id) {
+        baseDetails.oldIds = Formatter.uniqueArray([...baseDetails.oldIds, other.id]);
+    }
 }
 
 export function selectBaseMember(members: Member[]): {

@@ -148,7 +148,9 @@ async function addMember() {
                 return;
             }
 
-            if (member._oldId) {
+            const isExistingMember = member.patchedMember.details.oldIds.length > 0;
+
+            if (isExistingMember) {
                 Toast.warning($t(`eb3037bc-a195-41a8-ad30-947dce3ed73c`, { name: member.patchedMember.name })).show();
             }
 
@@ -157,7 +159,7 @@ async function addMember() {
 
             // First ask the user to complete or verify the member details
             await editMember(member, {
-                title: !member._oldId ? $t('2a44031f-dfa5-45df-824e-ba107d311c13') : $t('733d4169-a86f-425e-bb4b-15ce3af5aa60'),
+                title: !isExistingMember ? $t('2a44031f-dfa5-45df-824e-ba107d311c13') : $t('733d4169-a86f-425e-bb4b-15ce3af5aa60'),
                 saveText: $t('2a9075bb-a743-411e-8a3d-94e5e57363f0'),
 
                 // We'll replace the previous steps, you can't go back to the previous step

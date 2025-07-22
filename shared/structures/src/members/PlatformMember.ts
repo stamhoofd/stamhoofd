@@ -207,14 +207,14 @@ export class PlatformFamily {
 
     copyFromClone(clone: PlatformFamily) {
         for (const member of this.members) {
-            const cloneMember = clone.members.find(m => m.id === member.id) ?? clone.members.find(m => m._oldId && m._oldId === member.id);
+            const cloneMember = clone.members.find(m => m.id === member.id)
+                ?? clone.members.find(m => m.member.details.oldIds.includes(member.id) || member.member.details.oldIds.includes(m.id));
 
             if (cloneMember) {
                 member.member.deepSet(cloneMember.member);
                 member.patch.deepSet(cloneMember.patch);
                 member.patch.id = member.id;
                 member.isNew = cloneMember.isNew;
-                member._oldId = cloneMember._oldId;
 
                 if (cloneMember._savingPatch || cloneMember._isCreating) {
                     console.warn('Copying from member that is being saved');
@@ -502,11 +502,6 @@ export class PlatformMember implements ObjectWithRecords {
     _savingPatch: AutoEncoderPatchType<MemberWithRegistrationsBlob> | null = null;
     _isCreating: boolean | null = null;
 
-    /**
-     * In case this was a duplicate member, we need to keep track of the old id to merge changes
-     */
-    _oldId: string | null = null;
-
     family: PlatformFamily;
     isNew = false;
 
@@ -538,8 +533,6 @@ export class PlatformMember implements ObjectWithRecords {
             isNew: this.isNew,
             patch: this.patch.clone(),
         });
-
-        c._oldId = this._oldId;
 
         return c;
     }
