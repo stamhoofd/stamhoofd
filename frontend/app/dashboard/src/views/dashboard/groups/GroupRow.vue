@@ -53,19 +53,18 @@ export default class GroupRow extends Mixins(NavigationMixin) {
             isNew: false,
             saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                 this.$emit('patch:period', patch);
-            },
-            deleteHandler: () => {
-                const settings = OrganizationRegistrationPeriodSettings.patch({});
-                const pp = GroupCategory.patch({ id: this.parentCategory.id });
-                pp.groupIds.addDelete(this.group.id);
-                settings.categories.addPatch(pp);
 
-                const q = OrganizationRegistrationPeriod.patch({
-                    settings,
-                });
-                q.groups.addDelete(this.group.id);
-
-                this.$emit('patch:period', q);
+                // Check deleted
+                if (patch.groups.getDeletes().includes(this.group.id)) {
+                    const settings = OrganizationRegistrationPeriodSettings.patch({});
+                    const pp = GroupCategory.patch({ id: this.parentCategory.id });
+                    pp.groupIds.addDelete(this.group.id);
+                    settings.categories.addPatch(pp);
+                    const q = OrganizationRegistrationPeriod.patch({
+                        settings,
+                    });
+                    this.$emit('patch:period', q);
+                }
             },
         }).setDisplayStyle('popup'));
     }

@@ -3,7 +3,7 @@ import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegi
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
@@ -350,6 +350,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         model.deletedAt = new Date();
         await model.save();
+
+        const events = await Event.select().where('groupId', id).fetch();
+        for (const event of events) {
+            event.groupId = null;
+            await event.save();
+        }
     }
 
     static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null) {

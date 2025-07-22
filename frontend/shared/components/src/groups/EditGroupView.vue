@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="loadingExternalOrganizerErrorBox">
-        <SaveView v-if="!loadingOrganizer && patchedPeriod" :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew && deleteHandler ? {delete: deleteMe} : {}">
+        <SaveView v-if="!loadingOrganizer && patchedPeriod" :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
             <h1>
                 {{ title }}
             </h1>
@@ -526,12 +526,10 @@ const props = withDefaults(
         groupId: string;
         isMultiOrganization?: boolean;
         saveHandler: (period: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
-        deleteHandler?: (() => Promise<void>) | null;
         showToasts?: boolean;
         organizationHint?: Organization | null;
     }>(),
     {
-        deleteHandler: null,
         showToasts: true,
         isMultiOrganization: false,
         organizationHint: null,
@@ -549,9 +547,7 @@ if (!groupBeforePatch.value) {
 
 function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Group>>) {
     const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
-
     groups.addPatch(Group.patch({ id: props.groupId, ...newPatch }));
-
     addPatch({ groups });
 }
 
@@ -1059,13 +1055,21 @@ async function deleteMe() {
     if (!await CenteredMessage.confirm(patchedGroup.value.type === GroupType.EventRegistration ? $t('90ec517b-14e6-4436-8c91-fabac5c1bddf') : $t('11426f89-b2bf-4f7a-bd5a-a51c34e6aa96'), $t('201437e3-f779-47b6-b4de-a0fa00f3863e'))) {
         return;
     }
-    if (deleting.value || saving.value || !props.deleteHandler) {
+    if (deleting.value || saving.value || props.isNew) {
         return;
     }
 
     deleting.value = true;
     try {
-        await props.deleteHandler();
+        const groups: PatchableArrayAutoEncoder<Group> = new PatchableArray();
+        groups.addDelete(props.groupId);
+        // Only patch the delete, discard all other changes
+        await props.saveHandler(
+            OrganizationRegistrationPeriod.patch({
+                id: props.period.id,
+                groups,
+            }),
+        );
         if (props.showToasts) {
             Toast.success($t('eb66ea67-3c37-40f2-8572-9589d71ffab6')).show();
         }

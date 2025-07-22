@@ -55,6 +55,10 @@ const description = computed(() => {
         return 'Leeg';
     }
 
+    if (childGroups.value.length === 0 && childCategories.value.length === 0) {
+        return 'Leeg';
+    }
+
     if (childGroups.value.length > 0) {
         if (childGroups.value.length > 4) {
             return `${childGroups.value.length} groepen (${childGroups.value.slice(0, 2).map(g => g.settings.name).join(', ')}...)`;

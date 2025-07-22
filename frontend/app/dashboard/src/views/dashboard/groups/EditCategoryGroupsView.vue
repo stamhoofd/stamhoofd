@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot && enableActivities ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
 
@@ -81,17 +81,6 @@
             <p>{{ $t('70b46ba6-abe4-42a1-a0ab-a1b5bfd68210') }}</p>
             <button type="button" class="button text" @click="openGroupTrash">
                 <span class="icon trash" /><span>{{ $t('620629c5-5e45-4c6a-ae94-a841ef7387fe') }}</span>
-            </button>
-        </div>
-
-        <div v-if="canDeleteOrRename && !isNew && !isRoot && enableActivities" class="container">
-            <hr><h2>
-                {{ $t('e3ea7df6-8ebd-4bf9-a25e-6be3bfc29e57') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
             </button>
         </div>
     </SaveView>
