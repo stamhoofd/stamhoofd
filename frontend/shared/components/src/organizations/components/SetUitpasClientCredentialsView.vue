@@ -28,7 +28,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useRequiredOrganization } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { UitpasClientCredentialsStatusHelper, UitpasGetClienIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
+import { UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
 import { ref, onMounted, watch } from 'vue';
 
@@ -58,7 +58,7 @@ onMounted(async () => {
             path: '/organization/uitpas-client-id',
             owner,
             shouldRetry: true,
-            decoder: UitpasGetClienIdResponse as Decoder<UitpasGetClienIdResponse>,
+            decoder: UitpasGetClientIdResponse as Decoder<UitpasGetClientIdResponse>,
         });
         originaClientId = response.data.clientId;
         clientId.value = response.data.clientId;

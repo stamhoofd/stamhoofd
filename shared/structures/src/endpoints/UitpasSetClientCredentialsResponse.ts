@@ -9,7 +9,7 @@ export class UitpasSetClientCredentialsResponse extends AutoEncoder {
     human?: string;
 }
 
-export class UitpasGetClienIdResponse extends AutoEncoder {
+export class UitpasGetClientIdResponse extends AutoEncoder {
     @field({ decoder: StringDecoder })
     clientId: string;
 }

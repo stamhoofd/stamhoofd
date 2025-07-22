@@ -313,10 +313,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     if (oldStatus !== UitpasClientCredentialsStatus.NotConfigured) {
                         organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotChecked;
                         organization.meta.uitpasOrganizerId = request.body.meta.uitpasOrganizerId;
-                        await organization.save(); // save the organization now, so if somethings fails, the status is safely set to NOT_CHECKED
                         const { status } = await UitpasService.checkPermissionsFor(organization.id, organization.meta.uitpasOrganizerId);
                         organization.meta.uitpasClientCredentialsStatus = status;
-                        await organization.save();
                     }
 
                     // human message is ignored here

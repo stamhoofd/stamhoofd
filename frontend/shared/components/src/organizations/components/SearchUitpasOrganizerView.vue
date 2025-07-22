@@ -1,9 +1,9 @@
 <template>
     <div class="st-view search-organization-view">
-        <STNavigationBar :title="t" />
+        <STNavigationBar :title="title" />
 
         <main>
-            <h1>{{ t }}</h1>
+            <h1>{{ title }}</h1>
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
@@ -48,7 +48,6 @@ const name = ref('');
 const results = ref([]) as Ref<UitpasOrganizerResponse[]>;
 const owner = useRequestOwner();
 const errors = useErrors();
-const t = props.title;
 
 let lastName = '';
 let counter = 0;

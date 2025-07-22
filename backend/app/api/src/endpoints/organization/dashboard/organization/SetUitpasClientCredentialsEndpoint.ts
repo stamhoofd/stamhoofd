@@ -31,16 +31,8 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope();
+        const organization = await Context.setOrganizationScope();
         await Context.authenticate();
-
-        if (!organization) {
-            throw new SimpleError({
-                message: 'This endpoint requires an organization scope, platform scope is not implemented',
-                code: 'not_implemented',
-                human: $t('Deze endpoint vereist een organisatie scope, platform credentials kunnen nog niet worden ingesteld'),
-            });
-        }
 
         if (!await Context.auth.hasFullAccess(organization.id)) {
             throw Context.auth.error();
