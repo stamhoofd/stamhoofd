@@ -12,6 +12,9 @@ export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    @field({ decoder: StringDecoder, ...NextVersion })
+    organizationId = '';
+
     /**
      * Not writeable
      */
@@ -118,6 +121,9 @@ export class WebshopPreview extends AutoEncoder {
 export class Webshop extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
+
+    @field({ decoder: StringDecoder, ...NextVersion })
+    organizationId = '';
 
     /**
      * Not writeable

@@ -315,7 +315,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
                 else {
                     const webshop = await Webshop.getByID(patch.webshopId);
-                    if (!webshop || webshop.organizationId !== event.organizationId) {
+                    if (!webshop || (event.organizationId && webshop.organizationId !== event.organizationId)) {
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Webshop not found',

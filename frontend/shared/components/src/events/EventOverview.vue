@@ -107,22 +107,28 @@
                                 </template>
                             </STListItem>
 
-                            <STListItem v-if="event.webshopId && webshop" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Webshop)">
+                            <STListItem v-if="event.webshopId" :selectable="canEditWebshopHere" class="left-center right-stack" @click="canEditWebshopHere ? $navigate(Routes.Webshop) : null">
                                 <template #left>
                                     <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                                 </template>
-                                <h2 v-if="webshop.meta.name === event.name" class="style-title-list">
+                                <h2 v-if="!webshop || webshop.meta.name === event.name" class="style-title-list">
                                     {{ $t('9d7bf734-ef1e-421b-ae0f-3dec3040a360') }}
                                 </h2>
                                 <h2 v-else class="style-title-list">
                                     {{ webshop.meta.name ?? $t('adb2856b-67d7-4dbf-bf16-e4478250a05d') }}
                                 </h2>
-                                <p class="style-description-small">
+                                <p v-if="canEditWebshopHere" class="style-description-small">
                                     {{ $t('485a1995-f06e-4c04-a9cb-8f38a043cf98') }}
+                                </p>
+                                <p v-else-if="webshop" class="style-description-small">
+                                    {{ $t('Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze vereniging.') }}
+                                </p>
+                                <p v-else class="style-description-small">
+                                    {{ $t('De webshop kon niet geladen worden.') }}
                                 </p>
                                 <template #right>
                                     <button v-if="canWriteEvent" v-tooltip="$t('5ac02b3f-f412-43de-bd15-45b9679635b4')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
-                                    <span class="icon arrow-right-small gray" />
+                                    <span v-if="canEditWebshopHere" class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
 
@@ -224,12 +230,11 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, appToUri, EmailTemplateType, Event, Group, LimitedFilteredRequest, Organization, OrganizationRegistrationPeriod, PaginatedResponseDecoder, PrivateWebshop, SortItemDirection, Webshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, appToUri, EmailTemplateType, Event, Group, Organization, OrganizationRegistrationPeriod, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentOptions, computed, nextTick, Ref, ref, watch } from 'vue';
+import { ComponentOptions, computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
 import { LoadComponent } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { EditEmailTemplatesView } from '../email';
@@ -261,15 +266,15 @@ const auth = useAuth();
 const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
 const owner = useRequestOwner();
-const webshop = computed(() => {
+// @ts-expect-error Something wrong with Vue converting structures to refs, causes too large types and causes a ts error "Type instantiation is excessively deep and possibly infinite."
+const webshop = computed<WebshopPreview | null>(() => {
     if (!props.event.webshopId) {
         return null;
     }
     if (loadedWebshop.value) {
         return loadedWebshop.value;
     }
-    // @ts-ignore
-    return (eventOrganization.value?.webshops.find(w => w.id === props.event.webshopId) as WebshopPreview | undefined) ?? null;
+    return (eventOrganization.value?.webshops.find(w => w.id === props.event.webshopId) as any as WebshopPreview | undefined) ?? null;
 });
 const loadedWebshop = ref<WebshopPreview | null>(null);
 let didLoadWebshop = false;
@@ -280,12 +285,23 @@ function setOrganization(o: Organization) {
     loadWebshop().catch(console.error);
 }
 
+const canEditWebshopHere = computed(() => {
+    return props.event.webshopId && webshop.value && webshop.value.organizationId === organization.value?.id;
+});
+
 watch(() => props.event.webshopId, () => {
     // Reset webshop when the event's webshopId changes
     loadedWebshop.value = null;
     didLoadWebshop = false;
     loadingWebshop.value = false;
     loadWebshop().catch(console.error);
+});
+
+onMounted(() => {
+    if (props.event.webshopId && !props.event.organizationId) {
+        // Load the webshop of national events
+        loadWebshop().catch(console.error);
+    }
 });
 
 async function loadWebshop() {
@@ -295,18 +311,20 @@ async function loadWebshop() {
     if (didLoadWebshop) {
         return;
     }
-    let loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
+    let loaded = groupOrganization.value?.webshops.find(w => w.id === props.event.webshopId) ?? organization.value?.webshops.find(w => w.id === props.event.webshopId) ?? null;
     if (loaded) {
+        console.error('Webshop already loaded', loaded);
         loadedWebshop.value = loaded;
         return;
     }
 
+    const organizationId = props.event.organizationId ?? organization.value?.id ?? null;
     didLoadWebshop = true;
     loadingWebshop.value = true;
 
     // Fetch webshop by id
     try {
-        const response = await context.value.getAuthenticatedServerForOrganization(props.event.organizationId).request({
+        const response = await context.value.getAuthenticatedServerForOrganization(organizationId).request({
             method: 'GET',
             path: '/webshop/' + props.event.webshopId,
             decoder: WebshopPreview as Decoder<WebshopPreview>,
@@ -575,6 +593,12 @@ async function unlinkWebshop() {
 }
 
 async function linkWebshop(event: MouseEvent) {
+    const org = eventOrganization.value ?? organization.value;
+    if (!org) {
+        Toast.warning($t(`Ga naar het beheerdersportaal van een vereniging (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.`)).show();
+        return;
+    }
+
     const contextMenu = new ContextMenu([
         [
             new ContextMenuItem({
@@ -586,9 +610,9 @@ async function linkWebshop(event: MouseEvent) {
             }),
             new ContextMenuItem({
                 name: 'Bestaande webshop koppelen',
-                disabled: !eventOrganization.value || eventOrganization.value.webshops.length === 0,
+                disabled: !org || org.webshops.length === 0,
                 childMenu: new ContextMenu([
-                    eventOrganization.value!.webshops.filter(w => w.meta.status !== WebshopStatus.Archived).map(webshop => new ContextMenuItem({
+                    org.webshops.filter(w => w.meta.status !== WebshopStatus.Archived).map(webshop => new ContextMenuItem({
                         name: webshop.meta.name,
                         action: async () => {
                             try {
@@ -605,7 +629,7 @@ async function linkWebshop(event: MouseEvent) {
                             }
                         },
                     })),
-                    eventOrganization.value!.webshops.filter(w => w.meta.status === WebshopStatus.Archived).map(webshop => new ContextMenuItem({
+                    org.webshops.filter(w => w.meta.status === WebshopStatus.Archived).map(webshop => new ContextMenuItem({
                         name: webshop.meta.name,
                         action: async () => {
                             try {
