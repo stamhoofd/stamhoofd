@@ -1,10 +1,8 @@
 import { Model } from '@simonbackx/simple-database';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Order, UitpasClientCredential, WebshopUitpasNumber } from '@stamhoofd/models';
+import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { OrderStatus, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository';
-import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers';
 import { checkPermissionsFor } from './checkPermissionsFor';
 import { checkUitpasNumbers } from './checkUitpasNumbers';
@@ -134,12 +132,14 @@ export class UitpasService {
         });
     }
 
-    static async getSocialTariffForUitpasNumber(uitpasNumber: string, uitpasEventId: string) {
-        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
+    static async getSocialTariffForUitpasNumbers(organisationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventId: string) {
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        // TODO using https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
     }
 
-    static async getSocialTariffForEvent(basePrice: number, uitpasEventId: string) {
-        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
+    static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventId: string) {
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        // TODO using https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
     }
 
     static async registerTicketSales() {
@@ -163,7 +163,6 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
         return searchUitpasOrganizers(access_token, name);
-        
     }
 
     static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId: string): Promise<{
@@ -177,7 +176,7 @@ export class UitpasService {
 
     /**
      * Returns the client ID if it is configured for the organization, otherwise an empty string. Empty strings means no client ID and secret configured.
-     * @param organisationId 
+     * @param organisationId
      * @returns clientId or empty string if not configured
      */
     static async getClientIdFor(organizationId: string | null): Promise<string> {
@@ -200,8 +199,8 @@ export class UitpasService {
     /**
      * Store the uitpas client credentials if they are valid
      * @param organizationId null for platform
-     * @param clientId 
-     * @param clientSecret 
+     * @param clientId
+     * @param clientSecret
      * @returns wether the credentials were valid and thus stored successfully
      */
     static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<boolean> {

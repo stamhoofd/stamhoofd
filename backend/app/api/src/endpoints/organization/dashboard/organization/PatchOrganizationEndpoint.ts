@@ -2,7 +2,7 @@ import { AutoEncoderPatchType, cloneObject, Decoder, isPatchableArray, isPatchMa
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
@@ -12,6 +12,7 @@ import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../../helpers/TagHelper';
 import { ViesHelper } from '../../../../helpers/ViesHelper';
+import { UitpasService } from '../../../../services/uitpas/UitpasService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -296,6 +297,35 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platform.config.tags);
 
                     updateTags = true;
+                }
+
+                if (request.body.meta.uitpasClientCredentialsStatus) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'You cannot set the uitpasClientCredentialsStatus manually',
+                        human: $t('Je kan de status van de UiTPAS-credentials niet handmatig instellen'),
+                    });
+                }
+
+                if (request.body.meta.uitpasOrganizerId) {
+                    const oldStatus = organization.meta.uitpasClientCredentialsStatus;
+                    // re-evaluate the status
+                    if (oldStatus !== UitpasClientCredentialsStatus.NotConfigured) {
+                        organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotChecked;
+                        organization.meta.uitpasOrganizerId = request.body.meta.uitpasOrganizerId;
+                        const { status } = await UitpasService.checkPermissionsFor(organization.id, organization.meta.uitpasOrganizerId);
+                        organization.meta.uitpasClientCredentialsStatus = status;
+                    }
+
+                    // human message is ignored here
+                    // if (human) {
+                    //     const e = new SimpleError({
+                    //         code: 'uitpas-client-credentials-error',
+                    //         message: 'set-uitpas-credentials-returned-human-message',
+                    //         human: human,
+                    //     })
+                    //     errors.addError(e)
+                    // }
                 }
             }
 
