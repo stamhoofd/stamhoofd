@@ -9,6 +9,22 @@
     }
 }
 
+.textarea-overlay {
+    position: relative;
+
+    >span {
+        position: absolute;
+        right: 10px;
+        bottom: 5px;
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+        @extend .style-input;
+        color: $color-dark;
+        opacity: 0.5;
+    }
+}
+
 .input {
     @extend .style-input;
     @extend .style-input-box;
@@ -74,13 +90,15 @@
         margin-top: 7px
     }
 
-    &:disabled, &.disabled {
+    &:disabled,
+    &.disabled {
         color: $color-gray-1;
         cursor: not-allowed;
 
         // Safari fix color opacity
         -webkit-text-fill-color: $color-gray-1;
-        opacity: 1; /* required on iOS */
+        opacity: 1;
+        /* required on iOS */
 
         @media (hover: hover) {
             &:hover {
@@ -91,6 +109,12 @@
 
     &::placeholder {
         color: $color-gray-5;
+        opacity: 1;
+    }
+
+    &.placeholder:not(:focus) {
+        color: $color-gray-5;
+        opacity: 1;
     }
 
     &.error {
@@ -169,7 +193,7 @@ select.input {
         max-width: none;
     }
 
-    & > * {
+    &>* {
         flex-grow: 1;
         margin: 0 5px;
 
@@ -206,7 +230,7 @@ select.input {
     }
 
     &:not(.right) {
-        > * {
+        >* {
             padding-left: 43px;
         }
 
@@ -214,9 +238,9 @@ select.input {
             left: 12px;
         }
     }
-  
+
     &.right {
-        > * {
+        >* {
             padding-right: 35px;
         }
 
@@ -231,13 +255,21 @@ select.input {
     flex-direction: row;
     align-items: center;
 
-    > div:first-child {
+    >div:first-child {
         flex-grow: 1;
     }
 
-    > div:last-child {
+    >div:last-child {
         padding-left: 10px;
         flex-shrink: 0;
+
+        &:first-child {
+            padding-left: 0;
+        }
+    }
+
+    +.st-list {
+        margin-top: 15px;
     }
 }
 
@@ -255,13 +287,13 @@ select.input {
     flex-direction: row;
     align-items: center;
 
-    > span:first-child {
+    >span:first-child {
         color: $color-gray-1;
         flex-shrink: 0;
         min-width: 0;
     }
 
-    > *:last-child {
+    >*:last-child {
         flex-grow: 1;
         min-width: 0;
     }
@@ -272,7 +304,7 @@ select.input {
     color: $color-dark;
     padding: 15px;
     width: 100%;
-    
+
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -282,7 +314,7 @@ select.input {
         display: flex;
         flex-direction: row;
         align-items: center;
-        
+
         cursor: pointer;
         touch-action: manipulation;
         user-select: none;
@@ -292,14 +324,14 @@ select.input {
             opacity: 0.3;
         }
 
-        > span {
+        >span {
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
             min-width: 0;
         }
 
-        > .icon {
+        >.icon {
             flex-shrink: 0;
         }
     }
