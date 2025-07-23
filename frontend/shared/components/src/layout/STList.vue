@@ -58,20 +58,36 @@ export default class STList extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/variables' as *;
 
 .st-list {
     padding: 0;
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
+    position: relative;
 
     .st-list > & {
         // Allow stacking if we need partial draggable area
         margin: 0;
     }
 
-    > .st-list-item {        
+    > .st-list-item {
         &.list-move {
-            transition: transform 0.2s;
+            transition: transform 0.2s, opacity 0.2s !important;
+        }
+
+        &.list-enter-active,
+        &.list-leave-active {
+            transition: transform 0.2s, opacity 0.2s !important;
+        }
+
+        &.list-enter-from,
+        &.list-leave-to {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        &.list-leave-active {
+            position: absolute;
         }
 
         &.is-dragging {
@@ -86,7 +102,6 @@ export default class STList extends Vue {
         }
     }
 
-
     +.style-button-bar {
         margin-top: 15px;
     }
@@ -99,13 +114,11 @@ export default class STList extends Vue {
         }
     }
 
-
     &.is-dragging {
         * {
             cursor: grabbing !important;
         }
     }
-   
 
 }
 </style>

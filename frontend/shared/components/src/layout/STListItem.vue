@@ -1,5 +1,18 @@
 <template>
-    <component :is="elementName" class="st-list-item" :class="{selectable, disabled, button: elementName === 'button'}" :type="elementName === 'button' ? 'button' : undefined" @click="onClick" @contextmenu="$emit('contextmenu', $event)">
+    <component
+        :is="dynamicElementName"
+        class="st-list-item"
+        :class="[{
+            selectable,
+            hoverable,
+            disabled,
+            button: dynamicElementName === 'button'
+        }, $attrs.class]"
+        :type="dynamicElementName === 'button' ? 'button' : undefined"
+        v-bind="$attrs"
+        @click="onClick"
+        @contextmenu="$emit('contextmenu', $event)"
+    >
         <div class="left">
             <slot name="left" />
         </div>
@@ -31,6 +44,17 @@ export default class STListItem extends Vue {
     @Prop({ default: false, type: Boolean })
         disabled!: boolean;
 
+    get dynamicElementName() {
+        if (this.elementName === 'article' && this.selectable && !this.disabled) {
+            return 'button';
+        }
+        return this.elementName;
+    }
+
+    get hoverable() {
+        return this.dynamicElementName === 'button' || this.dynamicElementName === 'label';
+    }
+
     onClick(event) {
         const isDragging = this.$parent?.$parent?.$el.className.indexOf('is-dragging') !== -1;
         if (isDragging) {
@@ -43,46 +67,50 @@ export default class STListItem extends Vue {
 </script>
 
 <style lang="scss">
-@use '~@stamhoofd/scss/base/variables' as *;
-@use '~@stamhoofd/scss/base/text-styles' as *;
-
-.st-list-description {
-    @extend .style-description;
-    padding: 5px 0;
-}
+@use "@stamhoofd/scss/base/variables" as *;
+@use "@stamhoofd/scss/base/text-styles" as *;
 
 a.st-list-item {
-    &, &:hover, &:active, &:visited, &:link {
-        color: inherit;
-        text-decoration: inherit;
-    }
+  &,
+  &:hover,
+  &:active,
+  &:visited,
+  &:link {
+    color: inherit;
+    text-decoration: inherit;
+  }
 }
 
 button.st-list-item {
-    text-align: inherit;
+  text-align: inherit;
 }
 
 .st-list-item {
-
+    --custom-st-horizontal-padding: max(15px, var(--st-horizontal-padding, 15px));
+    --added-st-horizontal-padding: calc(var(--custom-st-horizontal-padding) - var(--st-horizontal-padding, 15px));
     padding-left: var(--st-horizontal-padding, 15px);
     padding-right: 0;
     padding-right: var(--st-horizontal-padding, 15px);
-
     margin: 0;
     display: flex !important;
     flex-direction: row;
+    align-items: stretch;
     width: 100%; // fix for buttons
     box-sizing: border-box;
     contain: style paint;
 
     @extend .style-normal;
 
-    >.left {
+    &.selected {
+        color: $color-primary;
+    }
+
+    > .left {
         flex-shrink: 0;
 
-        padding-top: var(--st-list-padding, 15px);
+        padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
         padding-right: 15px;
-        padding-bottom: var(--st-list-padding, 15px);
+        padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
         min-width: 0; // flexbox disable becoming bigger than parent
 
         &:empty {
@@ -91,7 +119,7 @@ button.st-list-item {
     }
 
     &.left-center {
-        >.left {
+        > .left {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -103,6 +131,12 @@ button.st-list-item {
             @extend .style-description-small;
             text-align: right;
             padding-left: 10px;
+        }
+    }
+
+    &.right-top {
+        > .main > div > .right {
+            align-self: flex-start;
         }
     }
 
@@ -139,11 +173,11 @@ button.st-list-item {
                 margin: 0 5px;
 
                 &:last-child {
-                    margin-right: 0;
+                margin-right: 0;
                 }
 
                 &:first-child {
-                    margin-left: 0;
+                margin-left: 0;
                 }
             }
 
@@ -151,11 +185,11 @@ button.st-list-item {
                 margin: -5px 5px;
 
                 &:last-child {
-                    margin-right: 0;
+                margin-right: 0;
                 }
 
                 &:first-child {
-                    margin-left: 0;
+                margin-left: 0;
                 }
             }
         }
@@ -163,11 +197,11 @@ button.st-list-item {
         &.no-margin {
             .right {
                 > * {
-                    margin: 0;
+                margin: 0;
                 }
 
                 > .button {
-                    margin: -5px 0;
+                margin: -5px 0;
                 }
             }
         }
@@ -182,7 +216,7 @@ button.st-list-item {
             padding: 0 !important;
         }
     }
-    
+
     > .main {
         flex-grow: 1;
 
@@ -199,8 +233,8 @@ button.st-list-item {
             flex-grow: 1;
 
             > .middle {
-                padding-top: var(--st-list-padding, 15px);
-                padding-bottom: var(--st-list-padding, 15px);
+                padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
+                padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
                 flex-grow: 1;
                 min-width: 0; // flexbox disable becoming bigger than parent
             }
@@ -210,12 +244,12 @@ button.st-list-item {
                 min-width: 0; // flexbox disable becoming bigger than parent
                 flex-shrink: 0;
 
-                padding-top: var(--st-list-padding-right, var(--st-list-padding, 10px));
-                padding-bottom: var(--st-list-padding-right, var(--st-list-padding, 10px));
+                padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
+                padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
                 padding-left: 15px;
 
                 &:empty {
-                    display: none;
+                display: none;
                 }
             }
         }
@@ -228,10 +262,11 @@ button.st-list-item {
             background: $color-border;
             border-radius: $border-width-thin/2;
             margin: 0;
-            margin-right: calc(-1 * var(--st-horizontal-padding, 15px));
+            margin-right: calc(-1 * var(--custom-st-horizontal-padding, 15px));
+            z-index: -2;
 
             // Increase width + horizontal padding
-            padding-right: var(--st-horizontal-padding, 15px);
+            padding-right: var(--custom-st-horizontal-padding, 15px);
         }
     }
 
@@ -242,19 +277,43 @@ button.st-list-item {
                 display: block;
 
                 > .middle {
-                    padding-right: var(--st-horizontal-padding, 15px);
-                    padding-bottom: 0px;
+                padding-right: var(--custom-st-horizontal-padding, 15px);
+                padding-bottom: 0px;
                 }
 
                 > .right {
-                    padding-top: 5px;
-                    padding-bottom: 15px;
+                padding-top: 5px;
+                padding-bottom: 15px;
                 }
             }
         }
     }
 
-    &:last-child, &.no-border {
+    &.smartphone-wrap-left {
+        @media (max-width: 450px) {
+            display: block !important;
+
+            > .left {
+                padding-top: var(--st-list-padding, 15px);
+                padding-right: 0;
+                padding-bottom: 0;
+            }
+        }
+    }
+
+    &.full-border {
+        position: relative;
+
+        > .main > hr {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    }
+
+    &:last-child,
+    &.no-border {
         > .main > hr {
             display: none;
         }
@@ -267,37 +326,69 @@ button.st-list-item {
     &.selectable:not(.is-dragging) {
         touch-action: manipulation;
         user-select: none;
-        transition: background-color 0.2s 0.1s;
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         cursor: pointer;
+        overflow: visible;
+        position: relative;
 
-        > .main {
-            > hr {
-                transition: opacity 0.2s 0.1s;
-            }
+        &:after {
+            // This is the hover layer
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            right: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            bottom: 1px;
+            background: $color-primary-lighter;
+            z-index: -3;
+            opacity: 0;
+            pointer-events: none;
+            border-radius: min($border-radius, var(--added-st-horizontal-padding, 0px));
+
+            transition: opacity 0.1s;
         }
 
-        &:active {
-            transition: none;
-            background: $color-background-shade;
-            background: var(--color-current-background-shade, $color-background-shade);
+        &:before {
+            // This is the click layer
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            right: calc(-1 * var(--added-st-horizontal-padding, 0px));
+            bottom: -2px;
+            background: $color-primary-light;
+            z-index: -1;
+            opacity: 0;
+            pointer-events: none;
+            border-radius: min($border-radius, var(--added-st-horizontal-padding, 0px));
 
-             > .main {
-                > hr {
-                    transition: none;
+            // Slow fade out
+            transition: opacity 0.4s 0.1s;
+        }
+
+        &.hoverable:hover {
+            &:after {
+                opacity: 1;
+                transition: none;
+            }
+
+            &:has(button:hover), &:has(select:hover), &:has(textarea:hover), &:has(input:not([type=radio]):not([type=checkbox]):hover), &:has(label:hover), &:has(.input:hover) {
+                // Skip hover
+                &:after {
                     opacity: 0;
                 }
             }
         }
 
-        &:active:has(button:active) {
-            transition: background-color 0.2s 0.1s;
-            background: none;
+        &:active, &.hoverable:active {
+            &:before {
+                opacity: 1;
+                transition: none;
+            }
 
-             > .main {
-                > hr {
-                    opacity: 1;
-                    transition: opacity 0.2s 0.1s;
+            &:has(button:active), &:has(select:active), &:has(label:active), &:has(textarea:active), &:has(input:not([type=radio]):not([type=checkbox]):active), &:has(.input:active) {
+                &:before {
+                    opacity: 0;
                 }
             }
         }

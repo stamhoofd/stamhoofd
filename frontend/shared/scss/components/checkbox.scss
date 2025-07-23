@@ -11,11 +11,11 @@ $checkbox-border-radius: 5px;
     display: inline-block; // needed to not cover whole width, since that might cause accidental clicks
     cursor: pointer;
 
-    > input {
+    >input {
         display: none;
     }
 
-    > div {
+    >div {
         @extend .style-input;
 
         display: flex;
@@ -24,23 +24,24 @@ $checkbox-border-radius: 5px;
         justify-content: flex-start;
     }
 
-    > div > div:first-child {
+    >div>div:first-child {
         width: 20px;
         height: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    svg > path {
+
+    svg>path {
         stroke-dasharray: 30;
         stroke-dashoffset: 30;
         stroke: currentColor;
         transition: stroke-dashoffset 0.4s 0.1s;
     }
 
-    input:checked + div {
-        > div:first-child {
-            svg > path {
+    input:checked+div {
+        >div:first-child {
+            svg>path {
                 stroke-dashoffset: 0;
             }
         }
@@ -59,49 +60,50 @@ $checkbox-border-radius: 5px;
     max-width: 100%;
     width: fit-content; // Prevent clicking on empty space
 
-    > input {
+    >input {
         display: none;
     }
 
     &.with-text {
-        > div {
+        >div {
             padding: 10px 0;
         }
     }
 
-    > div {
+    >div {
         @extend .style-input;
 
         display: flex;
         flex-direction: row;
         align-items: flex-start;
         justify-content: flex-start;
-        
-        > div:first-child {
+        position: relative;
+
+        >div:first-child {
             width: 20px;
             height: 20px;
             flex-shrink: 0;
             flex-basis: 20px;
             border-radius: $checkbox-border-radius;
-            border: $border-width solid $color-border;
-            box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.1);
-            background: $color-background;
+            border: 1px solid $color-border-shade;
+            box-shadow: 0px 1px 2px 0px $color-input-shadow;
+            background: $color-current-background;
             box-sizing: border-box;
             transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
 
-            svg > path {
+            svg>path {
                 stroke-dasharray: 30;
                 stroke-dashoffset: 30;
-                stroke: $color-background;
+                stroke: $color-current-background;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
 
-            ~ div {
+            ~div {
                 margin-left: 15px;
-                
+
                 @extend .style-title-list;
 
                 &:empty {
@@ -112,45 +114,82 @@ $checkbox-border-radius: 5px;
         }
     }
 
-    > input[type="radio"] + div {
-        > div:first-child {
+    >input[type="checkbox"]+div {
+        >div:first-child {
+            position: relative;
+
+            &:after {
+                // For indeterminate state
+                content: "";
+                opacity: 0;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 10px;
+                height: 2px;
+                background: $color-current-background;
+                border-radius: 2px;
+                transition: opacity 0.2s 0s;
+            }
+        }
+    }
+
+    >input[type="radio"]+div {
+        >div:first-child {
             border-radius: 11px;
 
             &::after {
                 content: "";
                 height: 20px - $border-width * 2;
                 width: 20px - $border-width * 2;
-                background: $color-background;
+                background: $color-current-background;
                 border-radius: calc((20px - $border-width * 2) / 2);
                 transition: transform 0.2s;
-                transform: scale(1, 1);
+                transform: scale(0.9, 0.9);
             }
         }
     }
 
-    > input:checked + div {
-        > div:first-child {
+    >input:checked+div {
+        >div:first-child {
             border: $border-width solid $color-primary;
             background: $color-primary;
 
-            svg > path {
+            svg>path {
                 stroke-dashoffset: 0;
             }
         }
     }
 
-    > input[type="radio"]:checked + div {
-        > div:first-child {
+    >input[type="checkbox"]:indeterminate+div {
+        >div:first-child {
+            border: $border-width solid $color-primary;
+            background: $color-primary;
+
+            svg>path {
+                stroke-dashoffset: 30;
+            }
+
+            &::after {
+                opacity: 1;
+                transition: opacity 0.2s 0.4s;
+            }
+        }
+    }
+
+    >input[type="radio"]:checked+div {
+        >div:first-child {
             &::after {
                 transform: scale(0.4, 0.4);
             }
         }
     }
 
-    > input:disabled + div  {
+    >input:disabled+div {
         cursor: not-allowed;
 
-        > div:first-child {
+        >div:first-child {
             border: $border-width solid $color-border;
             background: $color-background-shade-darker;
 
@@ -158,18 +197,18 @@ $checkbox-border-radius: 5px;
                 transform: none;
             }
 
-            svg > path {
+            svg>path {
                 stroke: $color-background-shade;
             }
         }
     }
 
-    > input:disabled:checked + div  {
-        > div:first-child {
+    >input:disabled:checked+div {
+        >div:first-child {
             border: $border-width solid $color-border;
             background: $color-border;
 
-            svg > path {
+            svg>path {
                 stroke: $color-gray-1;
             }
         }
@@ -177,7 +216,7 @@ $checkbox-border-radius: 5px;
 
     @media (max-width: 450px) {
         &.long-text {
-            > div  > div:first-child ~ div {
+            >div>div:first-child~div {
                 font-size: 13px;
             }
         }
@@ -186,17 +225,28 @@ $checkbox-border-radius: 5px;
 
 // Extra padding on first
 label.style-label {
-    + .checkbox,
-    + .radio {
+
+    +.checkbox,
+    +.radio {
         margin-top: 20px;
     }
 }
 
+// Checkbox: animate both when active and not checked (because you can disable it)
+label:active:not(:has(button:active, select:active, label:active, textarea:active, input:not([type=radio]):not([type=checkbox]):active, .input:active, .st-input-box:active)) .checkbox,
+.checkbox:active {
+    >input:not(:disabled)+div {
+        >div:first-child {
+            transform: scale(0.8, 0.8);
+        }
+    }
+}
 
-
-label:active .checkbox, label:active .radio, .checkbox:active, .radio:active {
-    > div {
-        > div:first-child {
+// Radio: only shrink if not yet checked
+label:active:not(:has(button:active, select:active, label:active, textarea:active, input:not([type=radio]):not([type=checkbox]):active, .input:active, .st-input-box:active)) .radio,
+.radio:active {
+    >input:not(:disabled):not(:checked)+div {
+        >div:first-child {
             transform: scale(0.8, 0.8);
         }
     }

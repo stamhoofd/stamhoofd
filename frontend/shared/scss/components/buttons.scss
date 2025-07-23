@@ -4,20 +4,32 @@
 
 .inline-link {
     cursor: pointer;
-    &, &:hover, &:link, &:active, &:visited {
+
+    &,
+    &:hover,
+    &:link,
+    &:active,
+    &:visited {
         color: $color-primary;
         font-weight: $font-weight-semibold;
         text-decoration: none;
     }
 
     &.secundary {
-        &, &:hover, &:link, &:active, &:visited {
+
+        &,
+        &:hover,
+        &:link,
+        &:active,
+        &:visited {
             color: $color-gray-4;
         }
     }
 
-    &:hover {
-        opacity: 0.6;
+    @media (hover: hover) {
+        &:hover {
+            opacity: 0.6;
+        }
     }
 
     &:active {
@@ -38,21 +50,26 @@
     color: inherit;
     //contain: style paint;
 
-    &:link, &:visited, &:active, &:hover {
+    &:link,
+    &:visited,
+    &:active,
+    &:hover {
         text-decoration: none;
     }
 
     &.simple {
-         &:active {
+        &:active {
             opacity: 0.4;
         }
     }
 
-    &.primary, &.secundary, &.destructive {
+    &.primary,
+    &.secundary,
+    &.destructive {
         @extend .style-button;
 
         border-radius: $border-radius;
-        
+
         transition: transform 0.2s, opacity 0.2s;
 
         height: 42px;
@@ -68,7 +85,7 @@
         display: inline-flex;
 
         // Ignore stretch when a button is directly inside the main of st-view (which has display flex)
-        .st-view > main > & {
+        .st-view>main>& {
             align-self: flex-start;
         }
 
@@ -76,7 +93,8 @@
             transform: scale(0.95, 0.95);
         }
 
-        &:disabled, &.disabled {
+        &:disabled,
+        &.disabled {
             color: $color-gray-2;
             background: $color-background-shade;
             box-shadow: none;
@@ -87,9 +105,10 @@
             }
         }
 
-        > .icon, > .bubble {
+        >.icon,
+        >.bubble {
             align-self: center;
-            
+
             &:first-child {
                 margin-right: 10px;
                 margin-left: -5px;
@@ -100,7 +119,7 @@
                 margin-right: -5px;
             }
 
-            
+
         }
 
         &.full {
@@ -114,13 +133,15 @@
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}),
+            0 0 0 4px $color-primary;
         }
 
         // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
         &:focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}),
+            0 0 0 4px $color-primary;
         }
 
         .dropdown-text {
@@ -129,7 +150,7 @@
             padding-right: 40px;
         }
 
-        > .bubble {
+        >.bubble {
             @extend .style-bubble;
             background: $color-background;
             color: $color-primary;
@@ -148,6 +169,7 @@
                 opacity: 0.5;
                 width: $border-width;
             }
+
             font-size: 24px;
             width: 40px;
             height: 42px;
@@ -156,8 +178,10 @@
             margin-right: -27px;
             margin-left: 27px - $border-width;
 
-            &:hover {
-                background-color: rgba($color-background, 0.2);
+            @media (hover: hover) {
+                &:hover {
+                    background-color: rgba($color-background, 0.2);
+                }
             }
         }
     }
@@ -168,30 +192,34 @@
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}),
+            0 0 0 4px $color-error;
         }
 
         // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
         &:focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}),
+            0 0 0 4px $color-error;
         }
     }
 
     &.secundary {
         color: $color-dark;
-        
+
         background: $color-gray-3;
 
         &.focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}),
+            0 0 0 4px $color-gray-1;
         }
 
         // Some weird thing in SCSS doesn't allow to combine this with the one above (it stops working)
         &:focus-visible {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
-            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
+            box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}),
+            0 0 0 4px $color-gray-1;
         }
 
         &.green {
@@ -205,8 +233,11 @@
         }
     }
 
-    &.secundary, &.primary, &.text, &.destructive {
-        &> span {
+    &.secundary,
+    &.primary,
+    &.text,
+    &.destructive {
+        &>span {
             text-overflow: ellipsis;
             overflow: hidden;
             white-space: nowrap;
@@ -215,20 +246,6 @@
                 text-overflow: clip;
                 flex-shrink: 0;
             }
-
-        }
-
-        &.wrap {
-            height: auto;
-            line-height: 1.4;
-            min-height: 34px;
-
-            > span {
-                white-space: normal;
-                overflow: visible;
-                text-align: left;
-                margin: 8px 0;
-            }
         }
     }
 
@@ -236,11 +253,43 @@
         cursor: help;
     }
 
-    &.text, &.navigation {
+    &.icons {
+        @extend .style-button-small;
+        color: $color-gray-4;
+
+        // Multiple icons stacked after each other
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        // note: if you need overflow ellipsis, please use a <span> inside of the button.
+        // we need to overflow for the breakout region
+        overflow: visible;
+        white-space: nowrap;
+        transition: opacity 0.2s ease-out, color 0.2s;
+        position: relative;
+
+        &:after {
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -10px;
+            right: -10px;
+            bottom: -5px;
+        }
+
+        &:active {
+            opacity: 0.15;
+            transition: opacity 0s, color 0.2s;
+        }
+    }
+
+    &.text,
+    &.navigation {
         @extend .style-button-small;
         color: $color-gray-4;
         text-overflow: ellipsis;
-        
+
         //display: inline-block;
         //vertical-align: middle;
         display: flex;
@@ -251,11 +300,11 @@
             display: inline-flex;
         }
 
-        > span {
+        >span {
             min-width: 0;
         }
 
-        > .icon {
+        &:not(.column)>.icon:not(.dot) {
             flex-shrink: 0;
 
             &:first-child {
@@ -267,15 +316,15 @@
             }
         }
 
-
         // note: if you need overflow ellipsis, please use a <span> inside of the button.
         // we need to overflow for the breakout region
-        overflow: visible; 
+        overflow: visible;
 
         height: 34px;
         line-height: 34px;
         white-space: nowrap;
-        transition: opacity 0.2s 0.1s ease-out, color 0.2s;
+        transition: opacity 0.2s ease-out,
+        color 0.2s;
         position: relative;
         max-width: 100%;
 
@@ -289,6 +338,17 @@
             bottom: -5px;
         }
 
+        &.increase-click-area:after {
+            // Increase touch area by 15pixels
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -20px;
+            right: -20px;
+            bottom: -10px;
+        }
+
+
         &.navigation:last-child:after {
             right: -20px;
         }
@@ -299,6 +359,12 @@
 
         &.small {
             font-size: 12px;
+
+            @media (max-width: 600px) {
+                &.column {
+                    font-size: 10px;
+                }
+            }
         }
 
         &.selected {
@@ -308,16 +374,16 @@
         &.unbold {
             font-weight: $font-weight-medium;
         }
-        
+
         &.inherit-color {
             color: inherit;
         }
 
-        > * {
+        >* {
             vertical-align: top;
         }
 
-        > .bubble {
+        >.bubble {
             @extend .style-bubble;
 
             &:last-child {
@@ -335,11 +401,12 @@
             position: relative;
             overflow: visible;
 
-            > span {
-                margin-bottom: 4px;
+            >span {
+                margin-bottom: 7px;
             }
 
-            > .bubble, > .style-bubble {
+            >.bubble,
+            >.style-bubble {
                 background: $color-error;
                 position: absolute;
                 left: 50%;
@@ -348,22 +415,38 @@
             }
         }
 
+        @media (hover: hover) {
+            &:hover {
+                opacity: 0.5;
+                transition: opacity 0s, color 0.2s;
+
+                &.selected {
+                    opacity: 1;
+                }
+            }
+        }
+
         &:active {
             opacity: 0.15;
             transition: opacity 0s, color 0.2s;
+
+            &.selected {
+                opacity: 0.15;
+            }
         }
 
         @media (max-width: 600px) {
             &.limit-space {
                 overflow: visible;
-                
+
                 span:not(.icon) {
                     display: none
                 }
             }
         }
 
-        &:disabled, &.disabled {
+        &:disabled,
+        &.disabled {
             color: $color-gray-2;
             box-shadow: none;
             cursor: not-allowed;
@@ -376,11 +459,51 @@
 
     &.icon {
         color: $color-gray-4;
-        transition: opacity 0.2s ease-out, color 0.2s ;
+        transition: opacity 0.2s ease-out, color 0.2s;
         overflow: visible; // fix for breakout region
+        position: relative;
 
         &.selected {
             color: $color-primary;
+        }
+
+        body.native-iOS .st-navigation-bar &,
+        body.web-iOS .st-navigation-bar & {
+            color: $color-primary;
+        }
+
+        body.native-android .st-navigation-bar &,
+        body.web-android .st-navigation-bar & {
+            color: $color-dark;
+        }
+
+        &.red {
+            color: $color-error;
+        }
+
+        &.enabled {
+            &:after {
+                content: "";
+                position: absolute;
+                left: 50% !important;
+                right: auto !important;
+                width: 34px;
+                height: 34px;
+                top: 50% !important;
+                bottom: auto !important;
+                background-color: $color-background-shade;
+                border-radius: $border-radius;
+                transform: translate(-50%, -50%);
+                z-index: 0;
+                will-change: opacity;
+                opacity: 1;
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+            }
+
+            &:before {
+                color: $color-primary;
+                transition: color 0s;
+            }
         }
 
         &:disabled,
@@ -389,7 +512,7 @@
             cursor: not-allowed;
         }
 
-        &:after {
+        &::after {
             // Breakout region
             // Increase touch area by 15pixels
             content: '';
@@ -400,26 +523,99 @@
             bottom: -10px;
         }
 
-        &.navigation:last-child:after {
-            right: -20px;
-        }
-
-        &.navigation:first-child:after {
-            left: -20px;
-        }
-
-        &:active {
-            opacity: 0.15;
-            transition: opacity 0s, color 0.2s;
-        }
 
         position: relative;
 
-        body.web-android &, body.native-android & {
-            transition: none;
-            &:active {
+        &:is(a),
+        &:is(button),
+        label & {
+            @media (pointer: coarse) {
+                &:before {
+                    transition: opacity 0.2s ease-out;
+                }
+
+                &:active {
+                    &:before {
+                        opacity: 0.15;
+                        transition: opacity 0s;
+                    }
+                }
+            }
+
+            @media (pointer: fine) {
+                position: relative;
                 opacity: 1;
-                transition: none;
+
+                &:after {
+                    content: "";
+                    position: absolute;
+                    left: 50% !important;
+                    right: auto !important;
+                    width: 34px;
+                    height: 34px;
+                    top: 50% !important;
+                    bottom: auto !important;
+                    background-color: $color-background-shade;
+                    border-radius: $border-radius;
+                    transform: translate(-50%, -50%);
+                    z-index: 0;
+                    will-change: opacity;
+                    opacity: 0;
+                    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                }
+
+                &:before {
+                    transition: color 0.2s ease-out;
+                }
+
+                &:active {
+                    &:before {
+                        color: $color-dark;
+                        transition: color 0s;
+                    }
+                }
+
+                &.small {
+                    &:after {
+                        width: 30px;
+                        height: 30px;
+                    }
+                }
+
+                &:before {
+                    z-index: 1;
+                }
+
+                &.active,
+                &:hover,
+                &:active {
+                    &:after {
+
+                        opacity: 1;
+                        transform: translate(-50%, -50%);
+
+                        transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                    }
+                }
+
+                &:active {
+                    &:after {
+                        background-color: $color-gray-3;
+                    }
+                }
+
+            }
+        }
+
+        body.web-android &,
+        body.native-android & {
+            transition: none;
+
+            &:active {
+                &:before {
+                    opacity: 1;
+                    transition: none;
+                }
             }
 
             &:after {
@@ -435,13 +631,14 @@
                 border-radius: 200px;
                 pointer-events: none;
 
-                transform: translate(-50%, -50%) scale(0.05, 0.05) ;
+                transform: translate(-50%, -50%) scale(0.05, 0.05);
                 z-index: 0;
 
                 will-change: opacity, transform;
                 opacity: 0;
 
-                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);;
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                ;
 
 
             }
@@ -452,6 +649,7 @@
 
             &.active {
                 opacity: 1;
+
                 &:after {
 
                     opacity: 1;
@@ -466,27 +664,29 @@
 
 .button.navigation {
     font-size: 17px;
-    font-weight: $font-weight-medium;
+    font-weight: $font-weight-semibold;
     color: $color-gray-4;
 
     overflow: visible;
 
     // Visually correct back button
-    &:first-child > .icon.arrow-back:first-child {
+    &:first-child>.icon.arrow-back:first-child {
         margin-left: -4px;
     }
 
-    body.native-iOS &, body.web-iOS & {
+    body.native-iOS &,
+    body.web-iOS & {
         color: $color-primary;
 
         // Visually correct back button
-        &:first-child > .icon.arrow-back:first-child {
+        &:first-child>.icon.arrow-back:first-child {
             margin-left: -9px;
             margin-right: 0px;
         }
     }
 
-    body.native-android &, body.web-android & {
+    body.native-android &,
+    body.web-android & {
         color: $color-dark;
     }
 
@@ -494,7 +694,8 @@
         font-weight: $font-weight-semibold;
     }
 
-    &:disabled, &.disabled {
+    &:disabled,
+    &.disabled {
         color: $color-gray-2 !important;
         box-shadow: none;
         cursor: not-allowed;
