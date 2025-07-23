@@ -371,8 +371,8 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     dbPayment.mollieId = molliePayment.id
                     await dbPayment.save();
 
-                    if ((molliePayment.details as BankTransferDetails)?.transferReference) {
-                        const details = molliePayment.details as BankTransferDetails
+                    if (molliePayment.details && 'transferReference' in molliePayment.details && 'bankAccount' in molliePayment.details) {
+                        const details = molliePayment.details
                         payment.transferSettings = TransferSettings.create({
                             iban: details.bankAccount,
                             creditor: 'Stamhoofd',

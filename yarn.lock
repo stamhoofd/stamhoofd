@@ -1653,12 +1653,14 @@
     yargs "17.7.2"
     yargs-parser "21.1.1"
 
-"@mollie/api-client@3.7.0":
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/@mollie/api-client/-/api-client-3.7.0.tgz#e7db8b7ab0556b76cd1bc0e2fd36a0dad55b5116"
-  integrity sha512-8pYq08xwv7VJIQvOJU+3nThZbXuNLhtD8iJQQ4UYW67kxHw4eC6cVE9SNVtUuHRfxTwcKLv5wrZd9jFb3BFqiA==
+"@mollie/api-client@4.3.3":
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/@mollie/api-client/-/api-client-4.3.3.tgz#41110b2c5d7cc6cba5f8dd81df7695d91ab41fca"
+  integrity sha512-vA8EM3nO8pcTX2AAG93FQElZ9uVpKJ7DBCEalvyStZEnGYGD3fIVPs6Pmr0lIB2tkjrqjEdbhfwwaK4MtBxs+w==
   dependencies:
-    axios "^0.27.2"
+    "@types/node-fetch" "^2.6.12"
+    node-fetch "^2.7.0"
+    ruply "^1.0.1"
 
 "@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3":
   version "2.1.8-no-fsevents.3"
@@ -2780,6 +2782,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/node-fetch@^2.6.12":
+  version "2.6.12"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.12.tgz#8ab5c3ef8330f13100a7479e2cd56d3386830a03"
+  integrity sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==
+  dependencies:
+    "@types/node" "*"
+    form-data "^4.0.0"
+
 "@types/node-forge@^1.3.0":
   version "1.3.11"
   resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.11.tgz#0972ea538ddb0f4d9c2fa0ec5db5724773a604da"
@@ -3692,7 +3702,7 @@ axios@1.6.8, axios@^1.6.0, axios@^1.6.1, axios@^1.6.2:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
-axios@^0.27.2, axios@^0.28.1:
+axios@^0.28.1:
   version "0.28.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.28.1.tgz#2a7bcd34a3837b71ee1a5ca3762214b86b703e70"
   integrity sha512-iUcGA5a7p0mVb4Gm/sy+FSECNkPFT4y7wt6OM/CDpO/OnNCvSs3PoMG8ibrC9jRoGYU0gUK5pXVC4NPXq6lHRQ==
@@ -9160,7 +9170,7 @@ node-fetch@2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-fetch@^2.6.7:
+node-fetch@^2.6.7, node-fetch@^2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
@@ -11198,6 +11208,11 @@ run-parallel@^1.1.9:
   integrity sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==
   dependencies:
     queue-microtask "^1.2.2"
+
+ruply@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ruply/-/ruply-1.0.1.tgz#9f54177232500b88d249e2f0af7bb5c63f883fa4"
+  integrity sha512-p39LnaaJyuucPGlgaB0KiyifpcuOkn24+Hq5y0ejAD/LlH+mRAbkHn2tckCLgHir+S+nis1WYG+TYEC4zHX0WQ==
 
 rxjs@^7.5.5, rxjs@^7.8.1:
   version "7.8.1"
