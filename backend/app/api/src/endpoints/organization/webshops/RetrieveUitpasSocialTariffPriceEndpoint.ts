@@ -60,7 +60,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
         else {
             // NON-OFFICIAL FLOW
             // request should include UiTPAS-numbers, reduced price AND base price
-            if (!request.body.reducedPrice) {
+            if (request.body.reducedPrice === null) {
                 throw new SimpleError({
                     code: 'missing_reduced_price',
                     message: 'Reduced price must be provided for non-official flow.',

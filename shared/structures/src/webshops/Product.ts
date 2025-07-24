@@ -7,6 +7,7 @@ import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
 import { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
+import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
