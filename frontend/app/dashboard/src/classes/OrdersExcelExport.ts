@@ -276,7 +276,7 @@ export class OrdersExcelExport {
     /**
      * List all orders
      */
-    static createOrders(orders: PrivateOrder[], shouldIncludeSettements: boolean): XLSX.WorkSheet {
+    static createOrders(orders: PrivateOrder[]): XLSX.WorkSheet {
         const answerColumns = new Map<string, number>()
         const answerNames: string[] = []
 
@@ -343,7 +343,6 @@ export class OrdersExcelExport {
                 "Betaald",
                 "Status",
                 "Kortingscode",
-                ...(shouldIncludeSettements ? ["Uitbetalingsdatum", "Uitbetalingsmededeling"] : []),
                 ...itemNames
             ],
         ];
@@ -431,88 +430,12 @@ export class OrdersExcelExport {
                 order.pricePaid < order.totalToPay ? "Nog niet betaald" : "Betaald",
                 OrderStatusHelper.getName(order.status),
                 order.data.discountCodes.map(d => d.code).join(", "),
-                ...(shouldIncludeSettements ? 
-                    (order.payment?.settlement ? [Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.payment.settlement.settledAt)), order.payment.settlement.reference] : ["/", "/"])
-                    : []
-                ),
                 ...itemAmounts
             ]);
         }
 
         return ExcelHelper.buildWorksheet(wsData, {
             defaultColumnWidth: 13
-        })
-    }
-
-    /**
-     * List all amount per product variant
-     */
-    static createSettlements(orders: PrivateOrder[]): XLSX.WorkSheet {
-        
-        // Columns
-        const wsData: RowValue[][] = [
-            [
-                "ID",
-                "Mededeling",
-                "Datum",
-                "Totaal uitbetaald",
-                "Totaal van deze bestellingen",
-                "Transactiekosten (incl. BTW)"
-            ],
-        ];
-
-        const counter: Map<string, { id: string, reference: string, settledAt: Date, amount: number; total: number; fees: number}> = new Map()
-
-        for (const order of orders) {
-            if (order.payment?.settlement) {
-                const settlement = order.payment.settlement
-                
-                const existing = counter.get(settlement.id)
-                if (existing) {
-                    existing.settledAt = settlement.settledAt
-                    existing.total = settlement.amount
-                    existing.amount += order.payment.price
-                    existing.fees += settlement.fee
-                } else {
-                    counter.set(settlement.id, {
-                        id: settlement.id,
-                        reference: settlement.reference,
-                        settledAt: settlement.settledAt,
-                        amount: order.payment.price,
-                        total: settlement.amount,
-                        fees: settlement.fee
-                    })
-                }
-            }
-        }
-
-        // Sort by date
-        const arr = Array.from(counter.values())
-        arr.sort((a, b) => Sorter.byDateValue(a.settledAt, b.settledAt))
-
-        for (const item of arr) {
-          
-            wsData.push([
-                item.id,
-                item.reference,
-                Formatter.capitalizeFirstLetter(Formatter.dateWithDay(item.settledAt)),
-                {
-                    value: item.total / 100,
-                    format: "€0.00"
-                },
-                {
-                    value: item.amount / 100,
-                    format: "€0.00"
-                },
-                {
-                    value: item.fees / 100,
-                    format: "€0.00"
-                }
-            ]);
-        }
-
-        return ExcelHelper.buildWorksheet(wsData, {
-            defaultColumnWidth: 20
         })
     }
 
@@ -690,19 +613,10 @@ export class OrdersExcelExport {
 
     static export(webshop: WebshopPreview, orders: PrivateOrder[]) {
         const wb = XLSX.utils.book_new();
-
-        const shouldIncludeSettements = false
-
-        // Settlements: use the new finances export method
-        //for (const order of orders) {
-        //    if (((order.payment?.method === PaymentMethod.Bancontact || order.payment?.method === PaymentMethod.iDEAL || order.payment?.method === PaymentMethod.CreditCard) && (order.payment?.provider === PaymentProvider.Mollie || order.payment?.provider === PaymentProvider.Stripe)) || order.payment?.settlement) {
-        //        shouldIncludeSettements = true
-        //    }
-        //}
         
         /* Add the worksheet to the workbook */
         XLSX.utils.book_append_sheet(wb, this.createOrderLines(webshop, orders), "Artikel per lijn");
-        XLSX.utils.book_append_sheet(wb, this.createOrders(orders, shouldIncludeSettements), "Bestelling per lijn");
+        XLSX.utils.book_append_sheet(wb, this.createOrders(orders), "Bestelling per lijn");
         const products = this.createProducts(orders);
 
         if (products) {
@@ -710,9 +624,6 @@ export class OrdersExcelExport {
         }
         XLSX.utils.book_append_sheet(wb, this.createOptions(orders), "Totalen");
 
-        if (shouldIncludeSettements) {
-            XLSX.utils.book_append_sheet(wb, this.createSettlements(orders), "Uitbetalingen");
-        }
 
         if (AppManager.shared.downloadFile) {
             const data = XLSX.write(wb, { type: 'base64' });
