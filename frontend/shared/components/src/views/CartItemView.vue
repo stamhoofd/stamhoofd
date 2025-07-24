@@ -110,14 +110,16 @@
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
                 <hr><h2>{{ cartItem.amount < 2 ? $t('e330f60b-d331-49a2-a437-cddc31a878de') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
-
                 <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="max uitpas-number-input">
                     <input
-                        v-model="uitpasNumbers[index]"
+                        v-model="uitpasNumbers[index].uitpasNumber"
                         class="input"
                         type="text"
                         :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
                     >
+                    <p v-if="originalSelectedPriceId === cartItem.productPrice.id && cartItem.calculatedPrices[index] && cartItem.calculatedPrices[index].price !== cartItem.productPrice.price" class="style-description-small">
+                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {specificPrice: formatPrice(cartItem.calculatedPrices[index].price), generalPrice: formatPrice(cartItem.productPrice.price)}) }}
+                    </p>
                 </STInputBox>
             </template>
 
@@ -128,20 +130,22 @@
 
         <STToolbar v-if="canOrder">
             <template #right>
-                <button v-if="willNeedSeats" class="button primary" type="submit">
-                    <span>{{ $t('88fa4580-52a2-4b79-aa03-cd31eb98f3e1') }}</span>
-                    <span class="icon arrow-right" />
-                </button>
-                <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
-                    <span class="icon basket" />
-                    <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
-                </button>
-                <button v-else class="button primary" type="submit">
-                    <span v-if="cartEnabled" class="icon basket" />
-                    <span v-if="cartEnabled">{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
-                    <span v-else>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
-                    <span v-if="!cartEnabled" class="icon arrow-right" />
-                </button>
+                <LoadingButton :loading="loading">
+                    <button v-if="willNeedSeats" class="button primary" type="submit">
+                        <span>{{ $t('88fa4580-52a2-4b79-aa03-cd31eb98f3e1') }}</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                    <button v-else-if="oldItem && cartEnabled" class="button primary" type="submit">
+                        <span class="icon basket" />
+                        <span>{{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}</span>
+                    </button>
+                    <button v-else class="button primary" type="submit">
+                        <span v-if="cartEnabled" class="icon basket" />
+                        <span v-if="cartEnabled">{{ $t('36ba68cb-2159-4179-8ded-89e73d47cd87') }}</span>
+                        <span v-else>{{ $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') }}</span>
+                        <span v-if="!cartEnabled" class="icon arrow-right" />
+                    </button>
+                </LoadingButton>
             </template>
         </STToolbar>
     </form>
@@ -150,7 +154,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { Request } from '@simonbackx/simple-networking';
-import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, UitpasPriceCheckRequest, UitpasPriceCheckResponse, Webshop } from '@stamhoofd/structures';
+import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse, Webshop } from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 import { computed, onMounted, ref, Ref, watch } from 'vue';
@@ -197,10 +201,12 @@ const owner = useRequestOwner();
 
 const willNeedSeats = computed(() => withSeats.value);
 const cart = computed(() => props.checkout.cart);
+const originalSelectedPriceId = ref('');
 
 onMounted(() => {
     onChangeItem();
     handleNewAmount(props.cartItem.amount);
+    originalSelectedPriceId.value = props.cartItem.productPrice.id;
 });
 
 // External changes should trigger a price update
@@ -273,8 +279,10 @@ async function validateUitpasNumbers() {
         return;
     }
 
+    const uitpasNumbersOnly = props.cartItem.uitpasNumbers.map(p => p.uitpasNumber);
+
     // verify the amount of UiTPAS numbers
-    if (props.cartItem.uitpasNumbers.length !== props.cartItem.amount) {
+    if (uitpasNumbersOnly.length !== props.cartItem.amount) {
         // should not happen as frontend displays correct amount of input fields
         throw new SimpleError({
             code: 'uitpas_numbers_does_not_match_amount',
@@ -284,8 +292,8 @@ async function validateUitpasNumbers() {
     }
 
     // verify UiTPAS numbers are non-empty
-    for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
-        const uitpasNumber = props.cartItem.uitpasNumbers[i];
+    for (let i = 0; i < uitpasNumbersOnly.length; i++) {
+        const uitpasNumber = uitpasNumbersOnly[i];
         if (uitpasNumber.trim() === '') {
             throw new SimpleError({
                 code: 'empty_uitpas_number',
@@ -309,7 +317,7 @@ async function validateUitpasNumbers() {
     }
 
     // verify the UiTPAS numbers are unique (within the order)
-    if (props.cartItem.uitpasNumbers.length !== Formatter.uniqueArray(props.cartItem.uitpasNumbers).length) {
+    if (uitpasNumbersOnly.length !== Formatter.uniqueArray(uitpasNumbersOnly).length) {
         throw new SimpleError({
             code: 'duplicate_uitpas_numbers_used',
             message: 'Duplicate uitpas numbers used in order',
@@ -327,13 +335,13 @@ async function validateUitpasNumbers() {
             body: UitpasPriceCheckRequest.create({
                 basePrice: baseProductPrice.price,
                 reducedPrice: props.cartItem.productPrice.price,
-                uitpasNumbers: props.cartItem.uitpasNumbers,
-                uitpasEventId: null,
+                uitpasNumbers: uitpasNumbersOnly,
+                uitpasEventUrl: props.cartItem.product.uitpasEvent?.url ?? null, // null for non-official flow, not null for official flow
             }),
             decoder: UitpasPriceCheckResponse as Decoder<UitpasPriceCheckResponse>,
         }); // will throw if one of the uitpas numbers is invalid
         const reducedPrices = response.data.prices;
-        if (reducedPrices.length !== props.cartItem.uitpasNumbers.length) {
+        if (reducedPrices.length !== uitpasNumbersOnly.length) {
             // Should already be thrown by the backend
             throw new SimpleError({
                 code: 'invalid_uitpas_numbers',
@@ -341,7 +349,9 @@ async function validateUitpasNumbers() {
                 human: $t('4bc1cd70-a8ea-45c0-b9c6-c95a4d766990'),
             });
         }
-        // for now we don't do anything with the reduced prices
+        for (let i = 0; i < uitpasNumbersOnly.length; i++) {
+            props.cartItem.uitpasNumbers[i].price = reducedPrices[i];
+        }
     }
     catch (e) {
         if (!Request.isAbortError(e)) {
@@ -350,13 +360,18 @@ async function validateUitpasNumbers() {
     }
 }
 
+const loading = ref(false);
+
 async function addToCart() {
+    loading.value = true;
     if (!(await validate())) {
+        loading.value = false;
         return;
     }
 
     if (willNeedSeats.value) {
         chooseSeats();
+        loading.value = false;
         return;
     }
 
@@ -369,8 +384,10 @@ async function addToCart() {
     catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
+        loading.value = false;
         return;
     }
+    loading.value = false;
 }
 
 function chooseSeats() {
@@ -508,14 +525,24 @@ watch(() => props.cartItem.amount, handleNewAmount);
 
 function handleNewAmount(newAmount: number) {
     if (newAmount > uitpasNumbers.value.length) {
-        // Add empty strings
-        uitpasNumbers.value.push(...(Array(newAmount - uitpasNumbers.value.length).fill('') as string[]));
+        // add empty strings to the end
+        for (let i = uitpasNumbers.value.length; i < newAmount; i++) {
+            const u = UitpasNumberAndPrice.create({
+                uitpasNumber: '',
+                price: props.cartItem.productPrice.price,
+            });
+            uitpasNumbers.value.push(u);
+        }
+    }
+    else if (newAmount === 0) {
+        // clear all
+        uitpasNumbers.value = [];
     }
     else if (newAmount < uitpasNumbers.value.length) {
         // start removing empty strings from the end
         let index = uitpasNumbers.value.length - 1;
         do {
-            if (uitpasNumbers.value[index] === '') {
+            if (uitpasNumbers.value[index].uitpasNumber === '') {
                 uitpasNumbers.value.splice(index, 1);
             }
             index--;

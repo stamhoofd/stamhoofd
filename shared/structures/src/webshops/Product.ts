@@ -277,6 +277,13 @@ export class Product extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(OptionMenu) })
     optionMenus: OptionMenu[] = [];
 
+    /**
+     * If this id is not null, we use the official UiTPAS flow.
+     * If it is null, we use the non-official flow (if one of the productPrices is UiTPAS social tariff
+     */
+    @field({ decoder: UitpasEventResponse, nullable: true, ...NextVersion })
+    uitpasEvent: UitpasEventResponse | null = null;
+
     clearStock() {
         this.usedStock = 0;
         this.reservedSeats = [];
