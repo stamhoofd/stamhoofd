@@ -143,7 +143,7 @@ export class UitpasService {
     static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
-        return getSocialTariffForEvent(access_token, basePrice, uitpasEventUrl);
+        return await getSocialTariffForEvent(access_token, basePrice, uitpasEventUrl);
     }
 
     static async registerTicketSales() {
@@ -170,7 +170,7 @@ export class UitpasService {
     static async searchUitpasOrganizers(name: string): Promise<UitpasOrganizersResponse> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
-        return searchUitpasOrganizers(access_token, name);
+        return await searchUitpasOrganizers(access_token, name);
     }
 
     static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId: string): Promise<{
@@ -179,7 +179,7 @@ export class UitpasService {
     }> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-permissions
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return checkPermissionsFor(access_token, organizationId, uitpasOrganizerId);
+        return await checkPermissionsFor(access_token, organizationId, uitpasOrganizerId);
     }
 
     /**
@@ -201,7 +201,7 @@ export class UitpasService {
     static async checkUitpasNumbers(uitpasNumbers: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
-        return checkUitpasNumbers(access_token, uitpasNumbers);
+        return await checkUitpasNumbers(access_token, uitpasNumbers);
     }
 
     /**
