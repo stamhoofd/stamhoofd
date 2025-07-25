@@ -10,6 +10,31 @@
         </p>
 
         <STList v-else :with-animation="true">
+            <STListItem v-if="app !== 'registration' && auth.canAccessPlatformMember(member, PermissionLevel.Write)" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="parentsHaveAccess" :indeterminate="!parentsHaveAccessChangeDate" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Geef ouders toegang en stuur hen automatische e-mails') }}
+                </h3>
+                <p v-if="!parentsHaveAccessChangeDate && parentsHaveAccess" class="style-description-small">
+                    {{ $t('Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt.', {firstName: member.patchedMember.details.firstName}) }}
+                </p>
+                <p v-else-if="parentsHaveAccess" class="style-description-small">
+                    {{ $t('De ouders hebben toegang tot de gegevens van {firstName} en ontvangen automatische e-mails.', {firstName: member.patchedMember.details.firstName}) }}
+                    <I18nComponent v-if="member.patchedMember.details.defaultAge < 18" :t="$t('Ze behouden ook toegang nadat {firstName} 18 jaar wordt. <button>Ongedaan maken</button>', {firstName: member.patchedMember.details.firstName})">
+                        <template #button="{content}">
+                            <button class="inline-link" type="button" @click="clearParentsHaveAccess">
+                                {{ content }}
+                            </button>
+                        </template>
+                    </I18nComponent>
+                </p>
+                <p v-else class="style-description-small">
+                    {{ $t('De ouders krijgen geen toegang tot de gegevens van {firstName}. Ze ontvangen ook geen automatische e-mails.', {firstName: member.patchedMember.details.firstName}) }}
+                </p>
+            </STListItem>
+
             <STListItem v-for="parent in visibleParents" :key="parent.id" :selectable="true" element-name="label" class="right-stack left-center">
                 <template #left>
                     <Checkbox :model-value="isParentSelected(parent)" @update:model-value="setParentSelected(parent, $event)" />
@@ -61,13 +86,13 @@
 </template>
 
 <script setup lang="ts">
-import { Parent, PlatformMember } from '@stamhoofd/structures';
+import { BooleanStatus, Parent, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
@@ -77,6 +102,8 @@ import STList from '../../../layout/STList.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import EditParentView from './EditParentView.vue';
 import Title from './Title.vue';
+import { useAuth } from '../../../hooks';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 defineOptions({
     inheritAttrs: false,
@@ -91,6 +118,7 @@ const props = defineProps<{
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const present = usePresent();
 const errors = useErrors({ validator: props.validator });
+const auth = useAuth();
 
 useValidation(errors.validator, () => {
     const se = new SimpleErrors();
@@ -235,4 +263,38 @@ function clear() {
         reviewTimes: times,
     });
 }
+
+useValidation(props.validator, async () => {
+    if (props.willMarkReviewed) {
+        // Force saving: increase saved date + make sure it is not null
+        parentsHaveAccess.value = parentsHaveAccess.value as any;
+        await nextTick();
+    }
+    return true;
+});
+
+function clearParentsHaveAccess() {
+    props.member.addDetailsPatch({
+        parentsHaveAccess: null,
+    });
+}
+
+const parentsHaveAccessChangeDate = computed(() => props.member.patchedMember.details.parentsHaveAccess?.date ?? null);
+const parentsHaveAccess = computed({
+    get: () => props.member.patchedMember.details.parentsHaveAccess?.value ?? props.member.patchedMember.details.calculatedParentsHaveAccess,
+    set: (parentsHaveAccess) => {
+        if (parentsHaveAccess === (props.member.member.details.parentsHaveAccess?.value ?? false) && !props.willMarkReviewed) {
+            return props.member.addDetailsPatch({
+                parentsHaveAccess: props.member.member.details.parentsHaveAccess ?? BooleanStatus.create({
+                    value: parentsHaveAccess,
+                }),
+            });
+        }
+        return props.member.addDetailsPatch({
+            parentsHaveAccess: BooleanStatus.create({
+                value: parentsHaveAccess,
+            }),
+        });
+    },
+});
 </script>

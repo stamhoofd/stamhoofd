@@ -1,6 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
 import { Member, MemberFactory, MemberResponsibilityRecordFactory, User, UserFactory } from '@stamhoofd/models';
-import { MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
+import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MemberUserSyncer } from './MemberUserSyncer';
 
@@ -19,6 +19,143 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
+                parents: [
+                    Parent.create({
+                        firstName: 'Linda',
+                        lastName: 'Potter',
+                        email: 'linda@example.com',
+                    }),
+                    Parent.create({
+                        firstName: 'Peter',
+                        lastName: 'Doe',
+                        email: 'peter@example.com',
+                        alternativeEmails: [
+                            'peter@work.com',
+                        ],
+                    }),
+                ],
+                email: 'john@example.com',
+                alternativeEmails: ['john@work.com'],
+                unverifiedEmails: ['untitled@example.com', 'peter@example.com'], // Last one should be ignored
+            }),
+        }).create();
+
+        await MemberUserSyncer.onChangeMember(member);
+
+        const users = await Member.users.load(member);
+        expect(users).toIncludeSameMembers([
+            // Member
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@example.com',
+                memberId: member.id,
+            }),
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@work.com',
+                memberId: member.id,
+            }),
+
+            // Parents
+            expect.objectContaining({
+                firstName: 'Linda',
+                lastName: 'Potter',
+                email: 'linda@example.com',
+                memberId: null,
+                permissions: null,
+            }),
+            expect.objectContaining({
+                firstName: 'Peter',
+                lastName: 'Doe',
+                email: 'peter@example.com',
+                memberId: null,
+                permissions: null,
+            }),
+            expect.objectContaining({
+                firstName: 'Peter',
+                lastName: 'Doe',
+                email: 'peter@work.com',
+                memberId: null,
+                permissions: null,
+            }),
+
+            // Unverified
+            expect.objectContaining({
+                firstName: null,
+                lastName: null,
+                email: 'untitled@example.com',
+                memberId: null,
+                permissions: null,
+            }),
+        ]);
+    });
+
+    test('Parents do not get access by default for adult members', async () => {
+        const member = await new MemberFactory({
+            details: MemberDetails.create({
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 366 * 18), // 18 years old + compensation for leap years
+                parents: [
+                    Parent.create({
+                        firstName: 'Linda',
+                        lastName: 'Potter',
+                        email: 'linda@example.com',
+                    }),
+                    Parent.create({
+                        firstName: 'Peter',
+                        lastName: 'Doe',
+                        email: 'peter@example.com',
+                        alternativeEmails: [
+                            'peter@work.com',
+                        ],
+                    }),
+                ],
+                email: 'john@example.com',
+                alternativeEmails: ['john@work.com'],
+                unverifiedEmails: ['untitled@example.com', 'peter@example.com'], // Last one should be ignored
+            }),
+        }).create();
+
+        await MemberUserSyncer.onChangeMember(member);
+
+        const users = await Member.users.load(member);
+        expect(users).toIncludeSameMembers([
+            // Member
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@example.com',
+                memberId: member.id,
+            }),
+            expect.objectContaining({
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john@work.com',
+                memberId: member.id,
+            }),
+
+            // Unverified
+            expect.objectContaining({
+                firstName: null,
+                lastName: null,
+                email: 'untitled@example.com',
+                memberId: null,
+                permissions: null,
+            }),
+        ]);
+    });
+
+    test('Parents can get access for adult members if explicitly set', async () => {
+        const member = await new MemberFactory({
+            details: MemberDetails.create({
+                firstName: 'John',
+                lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 366 * 18), // 18 years old + compensation for leap years
+                parentsHaveAccess: BooleanStatus.create({ value: true }),
                 parents: [
                     Parent.create({
                         firstName: 'Linda',
@@ -104,6 +241,7 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                 parents: [
                     Parent.create({
                         firstName: 'Linda',
@@ -192,6 +330,7 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                 parents: [
                     Parent.create({
                         firstName: 'Linda',
@@ -225,6 +364,7 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                 parents: [
                     Parent.create({
                         firstName: 'Linda',
@@ -258,6 +398,7 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                 parents: [
                     Parent.create({
                         firstName: 'Linda',
@@ -291,6 +432,7 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                 parents: [
                     Parent.create({
                         firstName: 'John',
@@ -322,6 +464,7 @@ describe('Helpers.MemberUserSyncer', () => {
             details: MemberDetails.create({
                 firstName: 'John',
                 lastName: 'Doe',
+                birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                 parents: [
                     Parent.create({
                         firstName: 'John',
@@ -353,6 +496,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'John',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     parents: [
                         Parent.create({
                             firstName: 'Linda',
@@ -466,6 +610,170 @@ describe('Helpers.MemberUserSyncer', () => {
             });
         });
 
+        test('Parents are removed if access is revoked', async () => {
+            const member = await new MemberFactory({
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
+                    parents: [
+                        Parent.create({
+                            firstName: 'Linda',
+                            lastName: 'Potter',
+                            email: 'linda@example.com',
+                        }),
+                        Parent.create({
+                            firstName: 'Peter',
+                            lastName: 'Doe',
+                            email: 'peter@example.com',
+                            alternativeEmails: [
+                                'peter@work.com',
+                            ],
+                        }),
+                    ],
+                    email: 'john@example.com',
+                }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({
+                member,
+            }).create();
+
+            await MemberUserSyncer.onChangeMember(member);
+
+            let users = await Member.users.load(member);
+            expect(users).toIncludeSameMembers([
+                // Member
+                expect.objectContaining({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    memberId: member.id,
+                    permissions: expect.any(UserPermissions),
+                }),
+
+                // Parents
+                expect.objectContaining({
+                    firstName: 'Linda',
+                    lastName: 'Potter',
+                    email: 'linda@example.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+                expect.objectContaining({
+                    firstName: 'Peter',
+                    lastName: 'Doe',
+                    email: 'peter@example.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+                expect.objectContaining({
+                    firstName: 'Peter',
+                    lastName: 'Doe',
+                    email: 'peter@work.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+            ]);
+
+            // Revoke parents access
+            member.details.parentsHaveAccess = BooleanStatus.create({ value: false });
+            await MemberUserSyncer.onChangeMember(member);
+
+            users = await Member.users.load(member);
+            expect(users).toIncludeSameMembers([
+                // Member
+                expect.objectContaining({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    memberId: member.id,
+                    permissions: expect.any(UserPermissions),
+                }),
+            ]);
+        });
+
+        test('Parents are removed if member turns 18', async () => {
+            const member = await new MemberFactory({
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
+                    parents: [
+                        Parent.create({
+                            firstName: 'Linda',
+                            lastName: 'Potter',
+                            email: 'linda@example.com',
+                        }),
+                        Parent.create({
+                            firstName: 'Peter',
+                            lastName: 'Doe',
+                            email: 'peter@example.com',
+                            alternativeEmails: [
+                                'peter@work.com',
+                            ],
+                        }),
+                    ],
+                    email: 'john@example.com',
+                }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({
+                member,
+            }).create();
+
+            await MemberUserSyncer.onChangeMember(member);
+
+            let users = await Member.users.load(member);
+            expect(users).toIncludeSameMembers([
+                // Member
+                expect.objectContaining({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    memberId: member.id,
+                    permissions: expect.any(UserPermissions),
+                }),
+
+                // Parents
+                expect.objectContaining({
+                    firstName: 'Linda',
+                    lastName: 'Potter',
+                    email: 'linda@example.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+                expect.objectContaining({
+                    firstName: 'Peter',
+                    lastName: 'Doe',
+                    email: 'peter@example.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+                expect.objectContaining({
+                    firstName: 'Peter',
+                    lastName: 'Doe',
+                    email: 'peter@work.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+            ]);
+
+            // Revoke parents access
+            member.details.birthDay = new Date(Date.now() - 1000 * 60 * 60 * 24 * 366 * 18); // 18 years old + compensation for leap years
+            await MemberUserSyncer.onChangeMember(member);
+
+            users = await Member.users.load(member);
+            expect(users).toIncludeSameMembers([
+                // Member
+                expect.objectContaining({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    memberId: member.id,
+                    permissions: expect.any(UserPermissions),
+                }),
+            ]);
+        });
+
         test('Old emails with account are not removed', async () => {
             const user_m1 = await new UserFactory({ email: 'john@example.com' }).create();
             const user_m2 = await new UserFactory({ email: 'john@work.com' }).create();
@@ -478,6 +786,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'John',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     parents: [
                         Parent.create({
                             firstName: 'Linda',
@@ -634,12 +943,97 @@ describe('Helpers.MemberUserSyncer', () => {
         });
     });
 
+    describe('Linking', () => {
+        test('Parents are added if access is added', async () => {
+            const member = await new MemberFactory({
+                details: MemberDetails.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 366 * 18), // 18 years old + leap year margin
+                    parents: [
+                        Parent.create({
+                            firstName: 'Linda',
+                            lastName: 'Potter',
+                            email: 'linda@example.com',
+                        }),
+                        Parent.create({
+                            firstName: 'Peter',
+                            lastName: 'Doe',
+                            email: 'peter@example.com',
+                            alternativeEmails: [
+                                'peter@work.com',
+                            ],
+                        }),
+                    ],
+                    email: 'john@example.com',
+                }),
+            }).create();
+            await new MemberResponsibilityRecordFactory({
+                member,
+            }).create();
+
+            await MemberUserSyncer.onChangeMember(member);
+
+            let users = await Member.users.load(member);
+            expect(users).toIncludeSameMembers([
+                // Member
+                expect.objectContaining({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    memberId: member.id,
+                    permissions: expect.any(UserPermissions),
+                }),
+            ]);
+
+            // Revoke parents access
+            member.details.parentsHaveAccess = BooleanStatus.create({ value: true });
+            await MemberUserSyncer.onChangeMember(member);
+
+            users = await Member.users.load(member);
+            expect(users).toIncludeSameMembers([
+                // Member
+                expect.objectContaining({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    memberId: member.id,
+                    permissions: expect.any(UserPermissions),
+                }),
+
+                // Parents
+                expect.objectContaining({
+                    firstName: 'Linda',
+                    lastName: 'Potter',
+                    email: 'linda@example.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+                expect.objectContaining({
+                    firstName: 'Peter',
+                    lastName: 'Doe',
+                    email: 'peter@example.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+                expect.objectContaining({
+                    firstName: 'Peter',
+                    lastName: 'Doe',
+                    email: 'peter@work.com',
+                    memberId: null,
+                    permissions: null,
+                }),
+            ]);
+        });
+    });
+
     describe('Members with the same email addresses', () => {
         test('The most recent member is linked to a user if both do not have responsibilities', async () => {
             const member1 = await new MemberFactory({
                 details: MemberDetails.create({
                     firstName: 'John',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     email: 'john@example.com',
                 }),
             }).create();
@@ -663,6 +1057,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'Other',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     email: 'john@example.com',
                 }),
             }).create();
@@ -698,6 +1093,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'John',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     email: 'john@example.com',
                 }),
             }).create();
@@ -724,6 +1120,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'Other',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     email: 'john@example.com',
                 }),
             }).create();
@@ -764,6 +1161,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'John',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     email: 'john@example.com',
                 }),
             }).create();
@@ -784,6 +1182,7 @@ describe('Helpers.MemberUserSyncer', () => {
                 details: MemberDetails.create({
                     firstName: 'Other',
                     lastName: 'Doe',
+                    birthDay: new Date(Date.now() - 1000 * 60 * 60 * 24 * 365 * 8), // 8 years old
                     email: 'john@example.com',
                 }),
             }).create();
