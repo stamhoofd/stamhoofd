@@ -86,6 +86,31 @@ const warnings = computed(() => {
         }
     }
 
+    if (isPropertyEnabled('parents') && props.member.patchedMember.details.parents.length > 0) {
+        if (props.member.patchedMember.details.parentsHaveAccess?.value === true) {
+            if (props.member.patchedMember.details.defaultAge < 18) {
+                warnings.push(RecordWarning.create({
+                    text: TranslatedString.create($t('De ouders behouden toegang als dit lid 18 jaar wordt')),
+                    type: RecordWarningType.Info,
+                }));
+            }
+            else {
+                warnings.push(RecordWarning.create({
+                    text: TranslatedString.create($t('De ouders hebben toegang tot dit meerderjarig lid')),
+                    type: RecordWarningType.Info,
+                }));
+            }
+        }
+        else if (props.member.patchedMember.details.parentsHaveAccess?.value === false) {
+            if (props.member.patchedMember.details.defaultAge < 18) {
+                warnings.push(RecordWarning.create({
+                    text: TranslatedString.create($t('De ouders hebben geen toegang tot dit minderjarig lid')),
+                    type: RecordWarningType.Info,
+                }));
+            }
+        }
+    }
+
     if (props.member.membershipStatus === MembershipStatus.Trial) {
         warnings.push(RecordWarning.create({
             text: TranslatedString.create($t('29343dad-93c5-4e72-a6d5-3960cfbfcf42')),

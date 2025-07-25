@@ -49,17 +49,19 @@ export class MemberUserSyncerStatic {
                     });
                 }
 
-                for (const parent of member.details.parents) {
-                    for (const email of parent.getEmails()) {
-                        if (userEmails.includes(email.toLocaleLowerCase())) {
-                            continue;
-                        }
+                if (member.details.calculatedParentsHaveAccess) {
+                    for (const parent of member.details.parents) {
+                        for (const email of parent.getEmails()) {
+                            if (userEmails.includes(email.toLocaleLowerCase())) {
+                                continue;
+                            }
 
-                        // Link parents and unverified emails
-                        await this.linkUser(email, member, true, {
-                            firstName: parent.firstName,
-                            lastName: parent.lastName,
-                        });
+                            // Link parents and unverified emails
+                            await this.linkUser(email, member, true, {
+                                firstName: parent.firstName,
+                                lastName: parent.lastName,
+                            });
+                        }
                     }
                 }
 
@@ -88,6 +90,9 @@ export class MemberUserSyncerStatic {
                             // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                             await this.linkUser(user.email, member, true);
                         }
+                    }
+                    else if (!member.details.calculatedParentsHaveAccess && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
+                        await this.unlinkUser(user, member);
                     }
                 }
 
