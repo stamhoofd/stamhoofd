@@ -79,7 +79,11 @@
             </Checkbox>
 
             <Checkbox :checked="getFeatureFlag('stamhoofd-pay-by-saved')" @change="setFeatureFlag('stamhoofd-pay-by-saved', !!$event)">
-                Stamhoofd betalen via opgeslagen betaalmethode
+                Stamhoofd betalen via opgeslagen betaalmethode (deprecated)
+            </Checkbox>
+
+            <Checkbox :checked="getFeatureFlag('stamhoofd-pay-by-direct-debit')" @change="setFeatureFlag('stamhoofd-pay-by-direct-debit', !!$event)">
+                Betaalkaart koppelen via SEPA Direct Debit
             </Checkbox>
 
             <Checkbox :checked="getFeatureFlag('sso')" @change="setFeatureFlag('sso', !!$event)">

@@ -1,7 +1,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { Email } from "@stamhoofd/email";
-import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageStatusServiceFee, STPackageType, STPricingType } from '@stamhoofd/structures';
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
@@ -178,11 +178,24 @@ export class STPackage extends Model {
         pack.removeAt.setMonth(pack.removeAt.getMonth() + 3)
 
         // Custom renewals for single webshop:
-        if (this.meta.type === STPackageType.SingleWebshop) {
+        /*if (this.meta.type === STPackageType.SingleWebshop) {
             // Disable functions after two months
             pack.validUntil = new Date(pack.meta.startDate)
             pack.validUntil.setMonth(pack.validUntil.getMonth() + 2)
             pack.removeAt = new Date(pack.validUntil)
+        }*/
+        if (this.meta.type === STPackageType.SingleWebshop) {
+            pack.meta.type = STPackageType.Webshops;
+        }
+
+        // Change prices
+        if (pack.meta.type === STPackageType.Webshops || pack.meta.type === STPackageType.Members) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 1_80;
+            pack.meta.unitPrice = 0;
+            pack.meta.pricingType = STPricingType.Fixed;
+            pack.validUntil = null;
+            pack.removeAt = null;
         }
 
         return pack
@@ -195,7 +208,16 @@ export class STPackage extends Model {
             startDate: this.meta.startDate,
             validUntil: this.validUntil,
             removeAt: this.removeAt,
-            firstFailedPayment: this.meta.firstFailedPayment
+            firstFailedPayment: this.meta.firstFailedPayment,
+            serviceFees: [
+                STPackageStatusServiceFee.create({
+                    fixed: this.meta.serviceFeeFixed,
+                    percentage: this.meta.serviceFeePercentage,
+                    startDate: this.meta.startDate,
+                    endDate: this.validUntil && this.removeAt ? 
+                        new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime())) : ( this.validUntil ?? this.removeAt)
+                }
+            )]
         })
     }
 

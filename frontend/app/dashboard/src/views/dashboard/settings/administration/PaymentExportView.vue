@@ -35,6 +35,21 @@
                 </p>
             </STListItem>
 
+            <STListItem v-if="totalServiceFees">
+                <h3 class="style-definition-label">
+                    Servicekosten
+                </h3>
+
+                <p class="style-definition-text">
+                    {{ formatPrice(totalServiceFees) }}
+                </p>
+                <p class="style-description-small">
+                    <template v-if="VATPercentage > 0">
+                        Incl. {{ VATPercentage }}% BTW
+                    </template>
+                </p>
+            </STListItem>
+
             <STListItem v-if="totalNotPaidOut">
                 <h3 class="style-definition-label">
                     Niet uitbetaald
@@ -621,6 +636,19 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
         let total = 0
         for (const payment of this.payments) {
             total += payment.transferFee
+        }
+        return total
+    }
+
+    get totalServiceFees() {
+        if (this.filterBalanceItems !== null) {
+            // Not possible atm
+            return 0
+        }
+
+        let total = 0
+        for (const payment of this.payments) {
+            total += payment.serviceFeeManual + payment.serviceFeePayout
         }
         return total
     }

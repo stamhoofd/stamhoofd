@@ -23,6 +23,10 @@
                         <div class="container login-view">
                             <h1>Ledenportaal</h1>
                             <p>Log in om jouw gegevens te wijzigen, documenten te raadplegen of in te schrijven.</p>
+
+                            <p v-if="isTrial" class="secundary-box icon trial">
+                                Dit ledenportaal is in proefperiode. Je kan hier fictieve leden inschrijven om alles uit te proberen.
+                            </p>
                             
                             <div class="button-box">
                                 <button class="button primary full" type="button" @click="login()">
@@ -174,6 +178,10 @@ export default class HomeView extends Mixins(NavigationMixin){
         })
     }
 
+    get isTrial() {
+        return this.organization.meta.packages.isMembersTrial
+    }
+
     get firstImage() {
         for (const group of this.organization.groups) {
             if (group.settings.coverPhoto) {
@@ -315,9 +323,8 @@ export default class HomeView extends Mixins(NavigationMixin){
         padding-bottom: 20px;
     }
 
-    > p {
+    > h1 + p {
         @extend .style-description;
-        padding-bottom: 10px;
     }
 
     > .button-box {

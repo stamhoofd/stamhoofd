@@ -2,12 +2,13 @@ import { AutoEncoderPatchType, Decoder, ObjectData, patchObject } from '@simonba
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Group, Organization,PayconiqPayment, StripeAccount, Token, User, Webshop } from '@stamhoofd/models';
-import { BuckarooSettings, GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
+import { BuckarooSettings, Company,GroupPrivateSettings, Organization as OrganizationStruct, OrganizationPatch, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, Permissions } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
 import { Context } from '../../../../helpers/Context';
+import { ViesHelper } from '../../../../helpers/ViesHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -262,6 +263,33 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (request.body.meta.categories) {
                     deleteUnreachable = true
+                }
+
+                if (request.body.meta.companyName || request.body.meta.companyNumber || request.body.meta.VATNumber || request.body.meta.companyAddress) {
+                    // Validate VAT info
+                    const company = Company.create({
+                        name: organization.meta.companyName || '',
+                        VATNumber: organization.meta.VATNumber,
+                        companyNumber: organization.meta.companyNumber,
+                        address: organization.meta.companyAddress,
+                    })
+
+                    await ViesHelper.checkCompany(company, company);
+
+                    // Auto correct
+                    organization.meta.VATNumber = company.VATNumber
+                    organization.meta.companyNumber = company.companyNumber
+                    organization.meta.companyName = company.name
+                    organization.meta.companyAddress = company.address
+
+                    if ((company.name || company.companyNumber || company.VATNumber) && (company.name.length < 3 || company.name.toLowerCase() === 'vzw')) {
+                        throw new SimpleError({
+                            code: "invalid_company_name",
+                            message: "Company name is too short",
+                            human: "De bedrijfsnaam is te kort of ongeldig. Vul een geldige bedrijfsnaam in.",
+                            field: "companyName"
+                        })
+                    }
                 }
             }
 

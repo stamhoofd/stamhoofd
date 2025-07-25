@@ -113,6 +113,34 @@
                             </template> <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten-inhouding/'" class="inline-link" target="_blank">Meer info</a>
                         </p>
                     </STListItem>
+
+                    <STListItem v-if=" payment.serviceFeePayout">
+                        <h3 class="style-definition-label">
+                            Servicekost
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ formatPrice(payment.serviceFeePayout) }}
+                        </p>
+                        <p class="style-description-small">
+                            <template v-if="VATPercentage > 0">
+                                Incl. {{ VATPercentage }}% BTW -
+                            </template>Dit bedrag wordt automatisch ingehouden van je uitbetalingen.
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if=" payment.serviceFeeManual">
+                        <h3 class="style-definition-label">
+                            Servicekost
+                        </h3>
+
+                        <p class="style-definition-text">
+                            {{ formatPrice(payment.serviceFeeManual) }}
+                        </p>
+                        <p class="style-description-small">
+                            Excl. BTW
+                        </p>
+                    </STListItem>
                 </STList>
 
                 <template v-if="isManualMethod && canWrite">

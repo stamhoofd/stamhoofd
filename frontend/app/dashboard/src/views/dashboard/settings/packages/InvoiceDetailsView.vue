@@ -126,7 +126,12 @@ export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     charge() {
-        this.show(new ComponentWithProperties(PackageConfirmView))
+        this.show(
+            new ComponentWithProperties(PackageConfirmView, {
+                allowMandate: !this.isPaymentFailed,
+                isManualPayment: true
+            })
+        )
     }
 
     get organization() {

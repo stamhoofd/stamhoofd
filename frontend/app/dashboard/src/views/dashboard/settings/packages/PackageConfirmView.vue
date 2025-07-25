@@ -3,9 +3,27 @@
         <STNavigationBar title="Betalen" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1 class="style-navigation-title">
-                Betalen
+            <h1 v-if="bundles.length === 1">
+                {{ STPackageBundleHelper.getTitle(bundles[0]) }} activeren
             </h1>
+            <h1 v-else-if="bundles.length" class="style-navigation-title">
+                Functionaliteiten activeren
+            </h1>
+            <h1 v-else-if="isManualPayment" class="style-navigation-title">
+                Openstaand bedrag betalen
+            </h1>
+            <h1 v-else-if="!allowMandate" class="style-navigation-title">
+                Nieuwe betaalmethode toevoegen
+            </h1>
+            <h1 v-else-if="renewPackages.length" class="style-navigation-title">
+                Functionaliteiten verlengen
+            </h1>
+            <h1 v-else class="style-navigation-title">
+                Standaard betaalmethode wijzigen
+            </h1>
+            <p v-if="bundles.length">
+                We hebben nog enkele gegevens van je nodig om de activatie te bevestigen.
+            </p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -56,21 +74,62 @@
                 </div>
             </div>
 
-            <hr>
-            <h2>Algemene voorwaarden</h2>
+            <template v-if="allowMandate || selectedMandateId">
+                <hr>
+                <h2 v-if="bundles.length || renewPackages.length">
+                    Standaard betaalmethode
+                </h2>
+                <h2 v-else>
+                    Betaalmethode
+                </h2>
 
-            <STInputBox :error-box="errorBox" error-fields="terms" class="max">
-                <Checkbox v-model="terms">
-                    Ik ga akkoord met de <a :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank" class="inline-link">algemene voorwaarden</a>
-                </Checkbox>
-            </STInputBox>
+                <p v-if="bundles.length || renewPackages.length">
+                    Je moet Stamhoofd koppelen aan een bankkaart waarmee je voor Stamhoofd zal betalen. Dit dient ter validatie van je vereniging. Deze bankkaart wordt enkel in specifieke gevallen aangesproken (als je geen online betalingen gebruikt, of een betaalmethode waarbij we via een andere weg de servicekosten moeten inhouden).
+                </p>
+                <p v-else>
+                    Kies één van de reeds opgeslagen betaalmethodes of koppel een nieuwe betaalmethode.
+                </p>
 
-            <hr>
-            <h2>Overzicht</h2>
+                <MandateSelectionList
+                    v-model="selectedMandateId"
+                    :organization="organization"
+                    :required="false"
+                /> 
+            </template>
+
+            <template v-if="proFormaInvoice && proFormaInvoice.meta.priceWithVAT > 0 && selectedMandateId === null">
+                <hr>
+
+                <h2>Kies je betaalmethode</h2>
+
+                <p class="info-box">
+                    Betaal met de bankrekening van jouw vereniging en niet met een persoonlijke rekening. Deze bankrekening zal gebruikt worden voor toekomstige afrekeningen.
+                </p>
+
+                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+            </template>
+
+            <template v-else-if="proFormaInvoice && proFormaInvoice.meta.priceWithVAT == 0 && selectedMandateId === null">
+                <hr>
+
+                <h2>Koppel de bankkaart of creditcard van je vereniging</h2>
+                <p>
+                    Je moet Stamhoofd koppelen aan een bankkaart waarmee je voor Stamhoofd zal betalen. Dit dient ter validatie van je vereniging. Deze bankkaart wordt enkel in specifieke gevallen aangesproken (als je geen online betalingen gebruikt, of een betaalmethode waarbij we via een andere weg de servicekosten moeten inhouden).
+                </p>
+
+                <p class="info-box">
+                    Om je bankkaart te koppelen moeten we een betaling van 0,02 euro uitvoeren.
+                </p>
+
+                <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+            </template>
+
 
             <Spinner v-if="loadingProForma" />
 
-            <template v-else-if="proFormaInvoice">
+            <template v-else-if="proFormaInvoice && proFormaInvoice.meta.priceWithVAT > 0">
+                <hr>
+                <h2>Overzicht</h2>
                 <STList>
                     <STListItem v-for="item in proFormaInvoice.meta.items" :key="item.id">
                         <template slot="left">
@@ -119,32 +178,84 @@
                 </div>
             </template>
 
-            <template v-if="hasPerMember">
-                <hr>
-                <h2>Wijzigingen aantal leden en automatische betalingen</h2>
-                
-                <p>
-                    Aangezien één van de pakketten op basis van het aantal leden is, en dat aantal kan wijzigen tijdens de looptijd van jouw pakket wordt dit als volgt afgehandeld. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-worden-extra-leden-gefactureerd/'" class="inline-link" target="_blank">Meer info</a>
-                </p>
-            </template>
-
             <hr>
+            <h2>Algemene voorwaarden</h2>
 
-            <h2>Kies je betaalmethode</h2>
+            <STInputBox :error-box="errorBox" error-fields="terms" class="max">
+                <Checkbox v-model="terms">
+                    Ik ga akkoord met de <a :href="'https://'+$t('shared.domains.marketing')+'/terms/algemene-voorwaarden'" target="_blank" class="inline-link">algemene voorwaarden</a>
+                </Checkbox>
+            </STInputBox>
 
-            <p class="info-box">
-                Betaal bij voorkeur met de bankrekening van jouw vereniging en niet met een persoonlijke rekening. Automatische aanrekeningen van extra leden (bij ledenadministratie) gebeuren via dezelfde bankrekening waarmee je het laatst hebt betaald.
-            </p>
+            <template v-if="renewPackageDetails">
+                <hr>
+                <h2>Prijsdetails</h2>
+                <p>
+                    Meer info over alle prijzen en een prijscalculator kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
+                </p>
 
-            <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
+                <STList>
+                    <STListItem v-if="renewPackageDetails.meta.startDate && renewPackageDetails.meta.startDate.getTime() > Date.now() + 10000">
+                        Vanaf
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.startDate | date }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Vaste prijs
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.unitPrice | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="renewPackageDetails.meta.serviceFeePercentage && renewPackageDetails.meta.serviceFeeFixed">
+                        Servicekosten
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.serviceFeePercentage | percentage }} +
+                            {{ renewPackageDetails.meta.serviceFeeFixed | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-else-if="renewPackageDetails.meta.serviceFeePercentage">
+                        Servicekosten
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.serviceFeePercentage | percentage }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-else-if="renewPackageDetails.meta.serviceFeeFixed">
+                        Servicekosten
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.serviceFeeFixed | price }}
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
         </main>
 
         <STToolbar>
             <template slot="right">
                 <LoadingButton :loading="loading">
-                    <button class="button primary" type="button" @click="checkout">
-                        <span class="icon card" />
+                    <button v-if="bundles.length || renewPackages.length" class="button primary" type="button" @click="checkout">
+                        <span class="icon success" />
+                        <span>Activeren</span>
+                    </button>
+                    <button v-else-if="isManualPayment" class="button primary" type="button" @click="checkout">
                         <span>Betalen</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                    <button v-else-if="!selectedMandateId" class="button primary" type="button" @click="checkout">
+                        <span>Doorgaan</span>
+                        <span class="icon arrow-right" />
+                    </button>
+                    <button v-else class="button primary" type="button" @click="checkout">
+                        <span>Opslaan</span>
                     </button>
                 </LoadingButton>
             </template>
@@ -153,17 +264,18 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoder,AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
+import { AutoEncoder, AutoEncoderPatchType, Decoder } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, ErrorBox, LoadingButton, PaymentSelectionList, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, ErrorBox, LoadingButton, PaymentSelectionList, Radio, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPricingType, User, Version } from "@stamhoofd/structures";
+import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPackageBundle, STPackageBundleHelper, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
-import { Component, Mixins, Prop } from "vue-property-decorator";
+import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
-import PackageSettingsView, { SelectablePackage } from "./PackageSettingsView.vue";
+import MandateSelectionList from "./MandateSelectionList.vue";
+import PackageSettingsView from "./PackageSettingsView.vue";
 
 const throttle = (func, limit) => {
     let lastFunc;
@@ -199,21 +311,33 @@ const throttle = (func, limit) => {
         STListItem,
         Checkbox,
         PaymentSelectionList,
+        MandateSelectionList,
         AddressInput,
         Spinner,
         VATNumberInput,
-        CompanyNumberInput
+        CompanyNumberInput,
+        Radio
     },
     filters: {
         price: Formatter.price,
+        percentage: Formatter.percentage,
     }
 })
 export default class PackageConfirmView extends Mixins(NavigationMixin) {
     @Prop({ default: () => [] })
-        selectedPackages: SelectablePackage[]
+        bundles: STPackageBundle[]
 
     @Prop({ default: () => [] })
         renewPackages: STPackage[]
+
+    @Prop({ default: true })
+        allowMandate: boolean;
+
+    /**
+     * Manual payment of outstanding balance
+     */
+    @Prop({ default: false })
+        isManualPayment: boolean
 
     errorBox: ErrorBox | null = null
     validator = new Validator()
@@ -227,11 +351,13 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     proFormaInvoice: STInvoice | null = null
 
     selectedPaymentMethod: PaymentMethod = PaymentMethod.Unknown
+    selectedMandateId: string | null = null;
 
     organizationPatch: AutoEncoderPatchType<Organization> & AutoEncoder = OrganizationPatch.create({ id: OrganizationManager.organization.id })
     userPatch = User.patch({ id: this.user.id })
 
     throttledReload = throttle(this.loadProForma, 1000)
+    STPackageBundleHelper = STPackageBundleHelper;
 
     throttledLoadProForma() {
         if (this.loading) {
@@ -246,12 +372,21 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
         this.throttledReload();
     }
 
-    get hasPerMember() {
-        return !!this.selectedPackages.find(p => p.package.meta.pricingType === STPricingType.PerMember) || !!this.renewPackages.find(p => p.meta.pricingType === STPricingType.PerMember)
-    }
-
     mounted() {
         this.loadProForma().catch(console.error)
+    }
+
+    @Watch('selectedMandateId')
+    onSelectedMandateIdChange() {
+        this.throttledLoadProForma()
+    }
+
+    get renewPackageDetails() {
+        if (this.proFormaInvoice?.meta?.items?.length !== 1) {
+            return null
+        }
+        const p = this.proFormaInvoice.meta.items[0].package
+        return p ?? null;
     }
 
     async loadProForma() {
@@ -266,13 +401,14 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 method: "POST",
                 path: "/billing/activate-packages",
                 body: {
-                    bundles: this.selectedPackages.map(p => p.bundle),
+                    bundles: this.bundles,
                     renewPackageIds: this.renewPackages.map(p => p.id),
-                    paymentMethod: this.selectedPaymentMethod,
-                    includePending: true,
-                    proForma: true,
+                    includePending: this.selectedMandateId ? (this.bundles.length || this.renewPackages.length ? false : true) : true,
+                    paymentMethod: this.selectedMandateId ? PaymentMethod.Unknown : this.selectedPaymentMethod,
                     organizationPatch: this.organizationPatch.encode({ version: Version }),
                     userPatch: this.userPatch.encode({ version: Version }),
+                    mandateId: this.selectedMandateId,
+                    proForma: true,
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
             })
@@ -426,9 +562,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     get paymentMethods() {
         const extra: PaymentMethod[] = []
 
-        if (this.getFeatureFlag('stamhoofd-pay-by-saved')) {
-            extra.push(PaymentMethod.DirectDebit)
-        }
+        extra.push(PaymentMethod.DirectDebit)
 
         if (this.getFeatureFlag('stamhoofd-pay-by-transfer')) {
             extra.push(PaymentMethod.Transfer)
@@ -464,12 +598,13 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
                 method: "POST",
                 path: "/billing/activate-packages",
                 body: {
-                    bundles: this.selectedPackages.map(p => p.bundle),
+                    bundles: this.bundles,
                     renewPackageIds: this.renewPackages.map(p => p.id),
-                    includePending: true,
-                    paymentMethod: this.selectedPaymentMethod,
+                    includePending: this.selectedMandateId ? (this.bundles.length || this.renewPackages.length ? false : true) : true,
+                    paymentMethod: this.selectedMandateId ? PaymentMethod.Unknown : this.selectedPaymentMethod,
                     organizationPatch: this.organizationPatch.encode({ version: Version }),
                     userPatch: this.userPatch.encode({ version: Version }),
+                    mandateId: this.selectedMandateId,
                 },
                 decoder: STInvoiceResponse as Decoder<STInvoiceResponse>
             })

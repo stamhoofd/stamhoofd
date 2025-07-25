@@ -1,8 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
-import { SimpleError } from "@simonbackx/simple-errors";
 import { STInvoice } from "@stamhoofd/models";
-import { Token } from "@stamhoofd/models";
-import { STBillingStatus  } from "@stamhoofd/structures";
+import { STBillingStatus } from "@stamhoofd/structures";
 
 import { Context } from "../../../../helpers/Context";
 
@@ -32,7 +30,7 @@ export class GetBillingStatusEndpoint extends Endpoint<Params, Query, Body, Resp
         // If the user has permission, we'll also search if he has access to the organization's key
         if (!Context.auth.canManageFinances()) {
             throw Context.auth.error()
-        }  
+        }
 
         return new Response(await STInvoice.getBillingStatus(organization));
     }

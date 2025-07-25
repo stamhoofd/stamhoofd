@@ -262,23 +262,23 @@
                     <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                         <h2 class="style-title-list">
-                            Pakketten aankopen
+                            Functionaliteiten activeren
                         </h2>
                         <p class="style-description">
-                            Wijzig je pakketten of activeer nieuwe functies
+                            Activeer nieuwe functies
                         </p>
                         <template slot="right">
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="false" :selectable="true" class="left-center" @click="openBilling(true)">
+                    <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
                         <h2 class="style-title-list">
-                            Facturen en betalingen
+                            Facturen en betaalinstellingen
                         </h2>
                         <p class="style-description">
-                            Download jouw facturen en bekijk jouw tegoed
+                            Beheer hoe je betaalt voor Stamhoofd, download jouw facturen en bekijk jouw tegoed
                         </p>
                         <template slot="right">
                             <span class="icon arrow-right-small gray" />
@@ -309,12 +309,6 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
                 </STList>
-
-                <hr>
-                <h2>Functies gratis uitproberen</h2>
-                <p>Je kan alle functies van Stamhoofd gratis uitproberen in een demo-versie. Je kan de demo-versie enkel gebruiken om zelf alle functies te testen, niet om extern te gebruiken. Zodra je het in gebruik wilt nemen kan je overschakelen op één van onze pakketten. We rekenen nooit kosten aan zonder dit duidelijk te communiceren en hiervoor toestemming te vragen.</p>
-
-                <ModuleSettingsBox />
             </template>
         </main>
     </div>

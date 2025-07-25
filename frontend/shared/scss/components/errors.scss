@@ -60,6 +60,16 @@
     }
 }
 
+.secundary-box {
+    background: $color-secundary-background;
+    color: $color-secundary-dark;
+
+    &::before,
+    .inline-link {
+        color: $color-secundary;
+    }
+}
+
 .loading-box {
     background: $color-primary-background;
     color: $color-dark;
@@ -73,7 +83,7 @@
     }
 }
 
-.error-box, .success-box, .info-box, .warning-box, .loading-box, .discount-box {
+.error-box, .success-box, .info-box, .warning-box, .loading-box, .discount-box, .secundary-box {
     border-radius: $border-radius;
     font-size: 14px;
     line-height: 1.5;
@@ -144,7 +154,7 @@
     }
 }
 
-.error-box, .success-box, .info-box, .warning-box, .discount-box {
+.error-box, .success-box, .info-box, .warning-box, .discount-box, .secundary-box {
     @extend .icon-base;
 
     &::before {

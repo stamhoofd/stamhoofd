@@ -11,6 +11,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 
 type Params = { id: string };
@@ -168,7 +169,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.paymentConfiguration)
                 payment.provider = provider
                 payment.stripeAccountId = stripeAccount?.id ?? null
-
+                ServiceFeeHelper.setServiceFee(payment, organization, 'webshop');
+                
                 await payment.save()
 
                 // Deprecated field

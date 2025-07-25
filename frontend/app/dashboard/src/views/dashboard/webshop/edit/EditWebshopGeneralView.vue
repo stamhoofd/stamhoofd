@@ -247,7 +247,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     
     get viewTitle() {
         if (this.isNew) {
-            return "Nieuwe verkoop, inschrijvingsformulier of geldinzameling starten"
+            return "Nieuwe webshop, ticketverkoop of evenement";
         }
         return "Algemene instellingen"
     }

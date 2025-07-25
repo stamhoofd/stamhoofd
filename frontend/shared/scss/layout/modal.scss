@@ -30,7 +30,7 @@
     contain: strict;
 
     //transform: translate3d(0, 0, 0);
-    
+
     // Android fix / fix where position fixed is 100vh, and isn't the same as the viewport
     bottom: auto;
     height: 100vh;
@@ -54,19 +54,19 @@
     // We use an intermediate value to allow customisation of the calculation without needing the dependency
     --popup-padding-top-full: var(--popup-padding-top-raw);
     --popup-padding-bottom-full: var(--popup-padding-bottom-raw);
-                    
+
     // Padding visible below the popup (we'll set this to zero if the keyboard is open to save space)
     --popup-padding-top-outside: var(--popup-padding-top-full, 0px);
     --popup-padding-bottom-outside: var(--popup-padding-bottom-full, 0px);
-    
+
     --popup-height: calc(var(--vh, 1vh) * 100 - var(--popup-padding-top-outside, 0px) - var(--popup-padding-bottom-outside, 0px));
 
     // Improve performance
 
-    > div {
+    >div {
         --popup-padding-top-inside: max(0px, calc(var(--popup-padding-top-full, 0px) - var(--popup-padding-top-outside, 0px)));
         --popup-padding-bottom-inside: max(0px, calc(var(--popup-padding-bottom-full, 0px) - var(--popup-padding-bottom-outside, 0px)));
-        
+
         // Rounded corners need overflow hidden on scroll
         overflow: hidden;
         overflow: clip; // More modern + disables scrolling
@@ -100,10 +100,10 @@
             --bottom-padding: 0px;
             --st-safe-area-bottom: var(--popup-padding-bottom-inside, 0px);
             --st-safe-area-top: var(--popup-padding-top-inside, 0px);
-    
+
         }
 
-        &:after {
+        &::after {
             background: rgba(black, 0.4);
             content: "";
             position: absolute;
@@ -127,7 +127,7 @@
 
 
     &.fade-enter-active {
-        &:after {
+        &::after {
             transition: opacity 0.3s;
         }
 
@@ -138,7 +138,7 @@
     }
 
     &.fade-leave-active {
-        &:after {
+        &::after {
             transition: opacity 0.3s;
         }
 
@@ -150,7 +150,7 @@
 
     &.fade-enter,
     &.fade-leave-to {
-        &:after {
+        &::after {
             opacity: 0;
         }
 

@@ -506,8 +506,7 @@
             }
         }
 
-        &:disabled,
-        &.disabled {
+        &:disabled {
             color: $color-gray-2;
             cursor: not-allowed;
         }

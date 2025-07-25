@@ -7,6 +7,7 @@ import { BalanceItemStatus, EncryptedMemberWithRegistrations, PaymentMethod, Pay
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
+import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -260,6 +261,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         payment.price = balanceItem.pricePaid;
                         payment.paidAt = new Date()
                         payment.provider = null
+                        ServiceFeeHelper.setServiceFee(payment, organization, 'members')
                         await payment.save()
 
                         const balanceItemPayment = new BalanceItemPayment()

@@ -4,91 +4,104 @@
 
         <main>
             <h1>
-                Pakketten aankopen
+                Functionaliteiten activeren
             </h1>
             
             <STErrorsDefault :error-box="errorBox" />
 
-            <Spinner v-if="loadingStatus" />
+            <Spinner v-if="loadingStatus && status === null" />
             <template v-else>
                 <p v-if="availablePackages.length === 0" class="info-box">
-                    <span>Geweldig! Je hebt gebruikt momenteel alle functies. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.</span>
+                    <span>Geweldig! Je hebt gebruikt momenteel alle functies. Meer info over alle prijzen kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.</span>
                 </p>
 
                 <template v-else>
                     <p class="style-description-block">
-                        Selecteer alle functies die je wilt aankopen en klik op 'doorgaan'. Meer info over alle pakketten kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
+                        Kies de functies die je wilt activeren. Meer info over alle prijzen kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
                     </p>
 
                     <STList>
-                        <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="label" :selectable="true">
-                            <Checkbox slot="left" v-model="pack.selected" :disabled="!pack.canSelect(availablePackages)" />
+                        <STListItem v-for="pack of availablePackages" :key="pack.bundle" element-name="button" :selectable="true" class="right-stack" @click="checkout(pack)">
+                            <figure slot="left" class="style-image-with-icon" :class="{gray: !pack.alreadyBought && !pack.inTrial, 'secundary': !pack.alreadyBought && pack.inTrial}">
+                                <figure>
+                                    <span class="icon group" />
+                                </figure>
+
+                                <aside>
+                                    <span v-if="pack.alreadyBought" v-tooltip="'Deze functie is actief'" class="icon success small primary" />
+                                    <span v-else-if="pack.inTrial" v-tooltip="'Momenteel in proefperiode, activeer om in gebruik te nemen'" class="icon trial small stroke secundary" />
+                                </aside>
+                            </figure>
+
+                            <p v-if="pack.inTrial && !pack.alreadyBought" class="style-title-prefix-list theme-secundary">
+                                In proefperiode
+                                <button v-if="pack.inTrial && !pack.alreadyBought" slot="right" v-tooltip="'Stop proefperiode'" type="button" class="button icon small disabled selected" @click.stop="stopTrial(pack)" />
+                            </p>
+
+                            <p v-if="pack.alreadyBought && pack.expiresSoon" class="style-title-prefix-list">
+                                Vervalt binnenkort
+                            </p>
+
+                            <p v-else-if="pack.alreadyBought" class="style-title-prefix-list">
+                                Actief
+                            </p>
+
                             <h3 class="style-title-list">
                                 {{ pack.title }}
                             </h3>
-                            <p class="style-description">
+
+                            <p v-if="pack.alreadyBought && pack.package.validUntil" class="style-description-small">
+                                Geldig tot {{ pack.package.validUntil | dateTime }}
+                            </p>
+
+                            <p class="style-description-small">
                                 {{ pack.description }}
                             </p>
 
-                            <p v-if="!pack.canSelect(availablePackages)" slot="right" class="style-description">
-                                Niet combineerbaar
-                            </p>
+
+                            
+
+                            <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" slot="right" class="button text selected">
+                                <span>Activeren</span>
+                                <span class="icon arrow-right-small" />
+                            </span>
+
+                            <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" slot="right" class="button text selected">
+                                <span>Uitproberen</span>
+                                <span class="icon arrow-right-small" />
+                            </span>
+                            
+                            <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" slot="right" class="button text selected">
+                                <span>Verlengen</span>
+                                <span class="icon arrow-right-small" />
+                            </span>
+
+                            <span v-else-if="pack.alreadyBought" slot="right" class="button icon arrow-right-small" />
                         </STListItem>
                     </STList>
                 </template>
-
-                <hr>
-                <h2>Huidige pakketten</h2>
-
-                <STList v-if="status && status.packages.length > 0">
-                    <STListItem v-for="pack of status.packages" :key="pack.id" :selectable="true" class="right-stack " @click="openPackageDetails(pack)">
-                        <img v-if="getPackageIcon(pack)" slot="left" :src="getPackageIcon(pack)">
-
-                        <h3 class="style-title-list">
-                            {{ pack.meta.name }}
-                        </h3>
-                        <p v-if="pack.validUntil" class="style-description">
-                            Geldig tot {{ pack.validUntil | date }}
-                        </p>
-
-                        <button v-if="pack.shouldHintRenew()" slot="right" class="button text gray" type="button">
-                            Verleng nu
-                        </button>
-                        <span slot="right" class="icon arrow-right-small gray" />
-                    </STListItem>
-                </STList>
-
-                <p v-if="status && status.packages.length == 0" class="info-box">
-                    Je hebt momenteel nog geen pakketten geactiveerd
-                </p>
             </template>
         </main>
-
-        <STToolbar>
-            <template slot="right">
-                <LoadingButton :loading="loading">
-                    <button class="button primary" :disabled="!hasSelected" @click="checkout">
-                        Doorgaan
-                    </button>
-                </LoadingButton>
-            </template>
-        </STToolbar>
     </div>
 </template>
 
 <script lang="ts">
+import { Decoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import flagIcon from "@stamhoofd/assets/images/illustrations/package-activities.svg"
 import groupIcon from "@stamhoofd/assets/images/illustrations/package-members.svg"
 import experimentIcon from "@stamhoofd/assets/images/illustrations/package-trial.svg"
 import cartIcon from "@stamhoofd/assets/images/illustrations/package-webshops.svg"
-import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { UrlHelper } from '@stamhoofd/networking';
-import { STBillingStatus, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from "@stamhoofd/structures";
+import { BackButton, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar, Toast } from "@stamhoofd/components";
+import { CenteredMessage } from "@stamhoofd/components";
+import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { OrganizationType, PaymentMethod, STBillingStatus, STInvoiceResponse, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Watch } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../../classes/OrganizationManager";
+import ActivatedView from "../modules/members/ActivatedView.vue";
+import MembersStructureSetupView from "../modules/members/MembersStructureSetupView.vue";
 import PackageConfirmView from "./PackageConfirmView.vue";
 import PackageDetailsView from "./PackageDetailsView.vue";
 
@@ -97,6 +110,11 @@ export class SelectablePackage {
 
     // In case of a renewal, bundle can be empty
     bundle: STPackageBundle
+
+    alreadyBought = false
+    expiresSoon = false;
+    inTrial = false
+    canStartTrial = true;
 
     selected = false
 
@@ -156,9 +174,20 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     availablePackages: SelectablePackage[] = []
 
     loading = false
+    OrganizationManager = OrganizationManager
+
+    get organization() {
+        return OrganizationManager.organization
+    }
 
     mounted() {
         UrlHelper.setUrl("/finances/packages");
+        this.reload().catch(e => {
+            console.error(e)
+        })
+    }
+
+    activated() {
         this.reload().catch(e => {
             console.error(e)
         })
@@ -191,30 +220,39 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     }
 
     updatePackages() {
-        const packages: SelectablePackage[] = []
-        const limit = new Date()
-        limit.setDate(limit.getDate() + 3 * 31)
+        const packages: SelectablePackage[] = [];
+        const limit = new Date();
+        limit.setDate(limit.getDate() + 2 * 31);
+
         for (const bundle of Object.values(STPackageBundle)) {
             if (!STPackageBundleHelper.isPublic(bundle)) {
                 continue
             }
 
             let isCombineable = true
-            for (const p of this.status!.packages) {
-                if (!STPackageBundleHelper.isCombineable(bundle, p)) {
-                    if (p.validUntil !== null) {
-                        if (p.validUntil < new Date()) {
-                            // Allow to buy this package because it is expired
-                            continue;
-                        }
+            let isBought = false
+            let isTrial = false
+            let expiresSoon = false;
+            let boughtPackage: null | STPackage = null;
 
-                        if (p.validUntil < limit && !p.meta.allowRenew) {
-                            // Allow to buy this package because it expires in less than 3 months, and it doesn't allow renewing
-                            continue;
-                        }
+            for (const p of this.status!.packages) {
+                if (p.validUntil !== null) {
+                    if (p.validUntil < new Date()) {
+                        // Allow to buy this package because it is expired
+                        continue;
                     }
-                    isCombineable = false
-                    break;
+                }
+                
+                if (STPackageBundleHelper.isAlreadyBought(bundle, p)) {
+                    isBought = true
+
+                    if (!boughtPackage || p.validUntil === null || (p.validUntil !== null && boughtPackage.validUntil !== null && p.validUntil > boughtPackage.validUntil)) {
+                        boughtPackage = p
+                    }
+                }
+
+                if (STPackageBundleHelper.isInTrial(bundle, p)) {
+                    isTrial = true
                 }
             }
 
@@ -222,9 +260,25 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
                 continue;
             }
 
+            if (boughtPackage && boughtPackage.validUntil !== null && boughtPackage.validUntil < limit) {
+                // Allow to buy this package because it expires in less than 3 months, and it doesn't allow renewing
+                expiresSoon = true
+            }
+
             try {
-                const pack = STPackageBundleHelper.getCurrentPackage(bundle, new Date())
-                packages.push(new SelectablePackage(pack, bundle))
+                const pack = boughtPackage ?? STPackageBundleHelper.getCurrentPackage(bundle, new Date())
+                const pp = new SelectablePackage(pack, bundle);
+                pp.alreadyBought = isBought;
+                pp.inTrial = isTrial;
+                pp.expiresSoon = expiresSoon;
+                if (bundle === STPackageBundle.Members && !this.organization.meta.packages.canStartMembersTrial) {
+                    pp.canStartTrial = false;
+                }
+
+                if (bundle === STPackageBundle.Webshops && !this.organization.meta.packages.canStartWebshopsTrial) {
+                    pp.canStartTrial = false;
+                }
+                packages.push(pp)
             } catch (e) {
                 console.error(e)
             }
@@ -252,14 +306,166 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         }))
     }
 
-    checkout() {
-        if (!this.hasSelected) {
+    checkout(pack: SelectablePackage) {
+        if (pack.alreadyBought) {
+            this.show(new ComponentWithProperties(PackageDetailsView, {
+                pack: pack.package
+            }))
+            return;
+        }
+
+        if (pack.inTrial) {
+            this.show(new ComponentWithProperties(PackageConfirmView, {
+                bundles: [pack.bundle]
+            }))
+        } else {
+            switch (pack.bundle) {
+                case STPackageBundle.Members: {
+                    if (!this.organization.meta.packages.canStartMembersTrial) {
+                        new Toast("Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.", "error").show()
+                        this.show(new ComponentWithProperties(PackageConfirmView, {
+                            bundles: [pack.bundle]
+                        }))
+                        return
+
+                    }
+                    // Activate trial if possible (otherwise go to confirm)
+                    this.setupMemberAdministration();
+                    break;
+                }
+                case STPackageBundle.Webshops: {
+                    if (!this.organization.meta.packages.canStartWebshopsTrial) {
+                        new Toast("Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.", "error").show()
+                        this.show(new ComponentWithProperties(PackageConfirmView, {
+                            bundles: [pack.bundle]
+                        }))
+                        return
+
+                    }
+                    // Activate trial if possible (otherwise go to confirm)
+                    this.checkoutTrial(STPackageBundle.TrialWebshops, "De proefperiode voor webshops is gestart. Neem je tijd om alles rustig uit te proberen. Als je het daarna definitief in gebruik wilt nemen, kan je het systeem activeren.")
+                        .then(() => {
+                            this.dismiss()
+                        })
+                        .catch(console.error)
+                    break;
+                }
+            }
+        }
+    }
+
+    async stopTrial(pack: SelectablePackage) {
+        if (pack.alreadyBought) {
+            return;
+        }
+
+        if (!pack.inTrial) {
+            return;
+        }
+        switch (pack.bundle) {
+            case STPackageBundle.Members: {
+                if (!await CenteredMessage.confirm('Ben je zeker dat je de proefperiode voor de ledenadministratie wilt stopzetten?', 'Ja, stopzetten')) {
+                    return;
+                }
+                // Activate trial if possible (otherwise go to confirm)
+                this.deactivate(STPackageType.TrialMembers, "Proefperiode stopgezet").catch(console.error)
+                break;
+            }
+            case STPackageBundle.Webshops: {
+                if (!await CenteredMessage.confirm('Ben je zeker dat je de proefperiode voor webshops wilt stopzetten?', 'Ja, stopzetten')) {
+                    return;
+                }
+
+                // Activate trial if possible (otherwise go to confirm)
+                this.deactivate(STPackageType.TrialWebshops, "Proefperiode stopgezet").catch(console.error)
+                break;
+            }
+        }
+    }
+
+    loadingModule: STPackageType | null = null
+
+    setupMemberAdministration() {
+        if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+            // We have an automated flow for these organizations
+            this.show({
+                components: [
+                    new ComponentWithProperties(MembersStructureSetupView, {})
+                ]
+            })
+        } else {
+            this.checkoutTrial(STPackageBundle.TrialMembers, "De proefperiode voor ledenadministratie is gestart. Neem je tijd om alles rustig uit te proberen. Als je het daarna definitief in gebruik wilt nemen, kan je het systeem activeren.").then(() => {
+                // Wait for the backend to fill in all the default categories and groups
+                this.show({
+                    components: [
+                        new ComponentWithProperties(ActivatedView, {})
+                    ]
+                })
+            }).catch(e => console.error(e))
+        }
+    }
+
+    async checkoutTrial(bundle: STPackageBundle, message: string) {
+        if (this.loadingModule) {
+            new Toast("Even geduld, nog bezig met laden...", "info").show()
             return
         }
-        
-        this.show(new ComponentWithProperties(PackageConfirmView, {
-            selectedPackages: this.availablePackages.filter(p => p.selected)
-        }))
+        this.loadingModule = bundle as any as STPackageType
+
+        try {
+            await SessionManager.currentSession!.authenticatedServer.request({
+                method: "POST",
+                path: "/billing/activate-packages",
+                body: {
+                    bundles: [bundle],
+                    paymentMethod: PaymentMethod.Unknown
+                },
+                decoder: STInvoiceResponse as Decoder<STInvoiceResponse>,
+                shouldRetry: false
+            })
+            await SessionManager.currentSession!.fetchOrganization(false)
+            await this.reload()
+            new Toast(message, "success green").show()
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+
+        this.loadingModule = null
+    }
+
+    async deactivate(type: STPackageType, message: string) {
+        if (this.loadingModule) {
+            return
+        }
+        this.loadingModule = type
+
+        try {
+            const status = await OrganizationManager.loadBillingStatus({
+                shouldRetry: false,
+                owner: this
+            })
+            const packages = status.packages
+            const pack = packages.find(p => p.meta.type === type)
+
+            if (pack) {
+                await SessionManager.currentSession!.authenticatedServer.request({
+                    method: "POST",
+                    path: "/billing/deactivate-package/"+pack.id,
+                    owner: this,
+                    shouldRetry: false
+                })
+                await SessionManager.currentSession!.fetchOrganization(false)
+                await this.reload()
+                new Toast(message, "success green").show()
+            } else {
+                // Update out of date
+                await SessionManager.currentSession!.fetchOrganization(false)
+            }
+        } catch (e) {
+            Toast.fromError(e).show()
+        }
+
+        this.loadingModule = null
     }
   
     shouldNavigateAway() {

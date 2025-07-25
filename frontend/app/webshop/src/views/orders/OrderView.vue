@@ -10,7 +10,7 @@
 
         <main>
             <p v-if="!webshop.meta.reduceBranding" class="stamhoofd-header">
-                <a :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw je betaalbare webshop via</span>  <Logo /></a>
+                <a :href="'https://'+$t('shared.domains.marketing')+'?utm_medium=webshop'" target="_blank" class="button text"><span v-if="hasTickets">Verkoop ook tickets via </span><span v-else>Bouw ook je webshop via</span>  <Logo /></a>
             </p>
             <div class="box">
                 <main>

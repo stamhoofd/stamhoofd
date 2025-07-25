@@ -1,8 +1,10 @@
+import { createMollieClient } from '@mollie/api-client';
 import { column, ManyToOneRelation, Model } from "@simonbackx/simple-database";
+import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
 import { QueueHandler } from "@stamhoofd/queues";
-import { calculateVATPercentage, Country,Payment as PaymentStruct, PaymentMethod, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
+import { calculateVATPercentage, Country, OrganizationPaymentMandate, OrganizationPaymentMandateDetails,Payment as PaymentStruct, PaymentMethod, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
 import { Sorter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
@@ -604,7 +606,7 @@ export class STInvoice extends Model {
                             to: invoicingTo,
                             bcc: "simon@stamhoofd.be",
                             subject: "Betaling mislukt voor "+organization.name,
-                            text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                            text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betaalinstellingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         }, organization.i18n)
                     } else {
                         console.warn("No invoicing e-mail found for "+organization.name)
@@ -623,7 +625,7 @@ export class STInvoice extends Model {
                             to: invoicingTo,
                             bcc: "simon@stamhoofd.be",
                             subject: "Betaling mislukt voor "+organization.name,
-                            text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat we geen overschrijving hebben ontvangen voor jullie aankoop. Kijk even na wat er fout ging en betaal het openstaande bedrag om te vermijden dat de diensten worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betalingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                            text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat we geen overschrijving hebben ontvangen voor jullie aankoop. Kijk even na wat er fout ging en betaal het openstaande bedrag om te vermijden dat de diensten worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betaalinstellingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         }, organization.i18n)
                     }
                 }
@@ -690,7 +692,52 @@ export class STInvoice extends Model {
             packages: packages.map(pack => STPackageStruct.create(pack)),
             invoices: invoiceStructures,
             pendingInvoice: pendingInvoiceStruct,
-            credits: credits.map(c => STCreditStruct.create(c))
+            credits: credits.map(c => STCreditStruct.create(c)),
+            mandates: await this.getMollieMandates(organization),
         });
+    }
+
+    static async getMollieMandates(organization: Organization) {
+        // Poll mollie status
+        // Mollie payment is required
+        const mandates: OrganizationPaymentMandate[] = []
+
+        try {
+            const apiKey = STAMHOOFD.MOLLIE_API_KEY
+            if (!apiKey) {
+                throw new SimpleError({
+                    code: "",
+                    message: "Mollie niet correct gekoppeld"
+                })
+            }
+            
+            const mollieClient = createMollieClient({ apiKey });
+
+            if (organization.serverMeta.mollieCustomerId) {
+                const m = await mollieClient.customerMandates.page({ customerId: organization.serverMeta.mollieCustomerId, limit: 250 })
+                for (const mandate of m) {
+                    try {
+                        const details = mandate.details
+                        mandates.push(OrganizationPaymentMandate.create({
+                            ...mandate,
+                            isDefault: mandate.id === organization.serverMeta.mollieMandateId,
+                            createdAt: new Date(mandate.createdAt),
+                            details: OrganizationPaymentMandateDetails.create({
+                                consumerName: ('consumerName' in details ? details.consumerName : details.cardHolder) ?? undefined,
+                                consumerAccount: ('consumerAccount' in details ? details.consumerAccount : details.cardNumber) ?? undefined,
+                                consumerBic: ('consumerBic' in details ? details.consumerBic : details.cardExpiryDate) ?? undefined,
+                                cardExpiryDate: ('cardExpiryDate' in details ? details.cardExpiryDate : null),
+                                cardLabel: ('cardLabel' in details ? details.cardLabel : null),
+                            })
+                        }))
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+        return mandates;
     }
 }

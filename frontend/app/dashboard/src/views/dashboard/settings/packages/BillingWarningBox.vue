@@ -31,27 +31,27 @@
             </button>
         </p>
 
-        <p v-if="!shouldFilter('webshops') && isWebshopsTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel de webshops functie. Koop een pakket aan om het echt in gebruik te nemen.
+        <p v-if="!shouldFilter('webshops') && isWebshopsTrial" class="warning-box selectable with-button" @click="checkout(STPackageBundle.Webshops)">
+            Je test momenteel de webshops functie. Je webshops staan nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
-                Aankopen
+                Activeren
             </button>
         </p>
 
-        <p v-if="!shouldFilter('members') && isMembersTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel de ledenadministratie functie. Koop een pakket aan om het echt in gebruik te nemen.
+        <p v-if="!shouldFilter('members') && isMembersTrial" class="warning-box selectable with-button" @click="checkout(STPackageBundle.Members)">
+            Je test momenteel de ledenadministratie functie. Je ledenportaal staan nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
-                Aankopen
+                Activeren
             </button>
         </p>
 
         <p v-if="!shouldFilter('members') && isActivitiesTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel inschrijvingen voor activiteiten. Koop een pakket aan om het echt in gebruik te nemen.
+            Je test momenteel inschrijvingen voor activiteiten. Activeer de functie om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
-                Aankopen
+                Activeren
             </button>
         </p>
 
@@ -59,7 +59,7 @@
             Het ledenadministratie pakket is vervallen. Verleng jouw pakket om ervoor te zorgen dat leden terug kunnen inschrijven, en om te voorkomen dat gegevens verloren zullen gaan.
 
             <button class="button text" type="button">
-                Verlengen
+                Activeren
             </button>
         </p>
 
@@ -86,13 +86,12 @@
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, LoadComponent } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { STPackageType } from "@stamhoofd/structures";
+import { STPackageBundle, STPackageType } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
-import FinancesView from "../FinancesView.vue";
-import BillingSettingsView from "./BillingSettingsView.vue";
+import PackageConfirmView from "./PackageConfirmView.vue";
 import PackageSettingsView from "./PackageSettingsView.vue";
 
 @Component({
@@ -106,6 +105,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         filterTypes: "members" | "webshops" | null
 
     OrganizationManager = OrganizationManager
+    STPackageBundle = STPackageBundle
 
     shouldFilter(type: "members" | "webshops") {
         if (this.filterTypes === null) {
@@ -180,7 +180,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         for (const [type, pack] of this.organization.meta.packages.packages) {
             if (type === STPackageType.Webshops || type === STPackageType.SingleWebshop) {
                 if (pack.removeAt && pack.removeAt <= new Date()) {
-                    return null
+                    continue;
                 }
 
                 if (pack.deactivateDate === null) {
@@ -260,6 +260,19 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
             return false
         }
         return date <= new Date()
+    }
+
+    checkout(bundle: STPackageBundle) {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PackageConfirmView, {
+                        bundles: [bundle]
+                    })
+                })
+            ],
+            modalDisplayStyle: "popup",
+        });
     }
 
     openPackages() {

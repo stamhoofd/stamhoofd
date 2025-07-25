@@ -49,6 +49,9 @@ export class OrganizationServerMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, version: 86 })
     mollieCustomerId?: string
 
+    @field({ decoder: StringDecoder, optional: true, nullable: true })
+    mollieMandateId: string | null = null
+
     @field({ decoder: OpenIDClientConfiguration, nullable: true, version: 189 })
     ssoConfiguration: OpenIDClientConfiguration | null = null
 

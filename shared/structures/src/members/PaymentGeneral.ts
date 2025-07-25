@@ -26,6 +26,15 @@ export class PaymentGeneral extends Payment {
     @field({ decoder: IntegerDecoder, version: 196 })
     transferFee = 0
 
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeePayout = 0
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeeManual = 0
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeeManualCharged = 0
+
      /**
      * Only set for administrators with the correct permissions
      */

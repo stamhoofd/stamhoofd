@@ -11,6 +11,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
 import { Context } from '../../../helpers/Context';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { ExchangePaymentEndpoint } from '../shared/ExchangePaymentEndpoint';
 type Params = Record<string, never>;
@@ -293,6 +294,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationPaymentConfiguration)
         payment.provider = provider
         payment.stripeAccountId = stripeAccount?.id ?? null
+        ServiceFeeHelper.setServiceFee(payment, organization, 'members')
 
         await payment.save()
         const items: BalanceItem[] = []

@@ -7,6 +7,7 @@ import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PaymentStatus,
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
+import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper';
 import { ExchangePaymentEndpoint } from '../../shared/ExchangePaymentEndpoint';
 
 type Params = Record<string, never>;
@@ -130,6 +131,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             payment.price = totalPrice
+            ServiceFeeHelper.setServiceFee(payment, organization, balanceItems.find(b => b.orderId) ? 'webshop' : 'members');
 
             // Save payment
             await payment.save();

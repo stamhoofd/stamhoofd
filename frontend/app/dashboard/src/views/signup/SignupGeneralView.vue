@@ -7,10 +7,10 @@
         
         <main>
             <h1>
-                Sluit jouw vereniging aan bij Stamhoofd
+                Sluit aan bij Stamhoofd
             </h1>
             <p>
-                Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a :href="'https://'+ $t('shared.domains.marketing')" target="_blank" class="inline-link" v-if="validatedRegisterCode">Lees hier meer over Stamhoofd.</a>
+                Maak een account aan voor je vereniging of organisatie. Je kan alle functies gratis uitproberen zonder dat je betaalgegevens hoeft in te vullen. <a v-if="validatedRegisterCode" :href="'https://'+ $t('shared.domains.marketing')" target="_blank" class="inline-link">Lees hier meer over Stamhoofd.</a>
             </p>
             <button v-if="!validatedRegisterCode && visitViaUrl" class="info-box with-button selectable" type="button" @click="dismiss">
                 Gebruikt jouw vereniging Stamhoofd al? 
@@ -20,10 +20,10 @@
             </button>
 
             <p v-if="validatedRegisterCode && !validatedRegisterCode.customMessage" class="success-box icon gift">
-                Je ontvangt {{formatPrice(validatedRegisterCode.value)}} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
+                Je ontvangt {{ formatPrice(validatedRegisterCode.value) }} tegoed van {{ validatedRegisterCode.organizationName }} als je nu registreert
             </p>
             <p v-else-if="validatedRegisterCode" class="success-box icon gift">
-                {{validatedRegisterCode.customMessage}}
+                {{ validatedRegisterCode.customMessage }}
             </p>
 
             <p v-if="reuseRegisterCode" class="warning-box">
@@ -33,26 +33,26 @@
             <STErrorsDefault :error-box="errorBox" />
             <div class="split-inputs">
                 <div>
-                    <STInputBox title="Naam van jouw vereniging" error-fields="name" :error-box="errorBox">
+                    <STInputBox title="Naam vereniging of organisatie" error-fields="name" :error-box="errorBox">
                         <input
                             id="organization-name"
                             ref="firstInput"
                             v-model="name"
                             class="input"
                             type="text"
-                            placeholder="De naam van je vereniging"
+                            placeholder="De naam van je vereniging of organisatie"
                             autocomplete="organization"
                         >
                     </STInputBox>
 
-                    <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
+                    <AddressInput v-model="address" title="Adres" :validator="validator" :link-country-to-locale="true" />
                     <p class="style-description-small">
                         Geen adres? Vul dan een adres in dat in de buurt ligt
                     </p>
                 </div>
 
                 <div>
-                    <STInputBox title="Type vereniging" error-fields="type" :error-box="errorBox">
+                    <STInputBox title="Type organisatie" error-fields="type" :error-box="errorBox">
                         <Dropdown v-model="type">
                             <option :value="null" disabled>
                                 Maak een keuze
@@ -83,7 +83,6 @@
             </div>
 
             <template v-if="!validatedRegisterCode">
-
                 <hr>
                 <h2>Hoe ken je Stamhoofd?</h2>
 
@@ -102,7 +101,6 @@
                 <Checkbox :checked="getBooleanType(AcquisitionType.Other)" @change="setBooleanType(AcquisitionType.Other, $event)">
                     Andere
                 </Checkbox>
-
             </template>
         </main>
 
@@ -122,7 +120,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator, LoadingView } from "@stamhoofd/components";
+import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown,ErrorBox, LoadingButton, LoadingView,Slider, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components";
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Storage, UrlHelper } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from "@stamhoofd/structures";
@@ -412,6 +410,12 @@ export default class SignupGeneralView extends Mixins(NavigationMixin) {
         }
 
         const keys = Array.from(map.keys()).sort(Sorter.byStringValue)
+
+        // Move 'overige' to the end
+        const otherIndex = keys.indexOf("Overige")
+        if (otherIndex !== -1) {
+            keys.push(keys.splice(otherIndex, 1)[0])
+        }
 
         return keys.map((key) => {
             const types = map.get(key)!

@@ -6,6 +6,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, PrivatePayment,Webshop as WebshopStruct } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
+import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper';
 
 type Params = { id: string };
 type Query = undefined;
@@ -150,6 +151,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null
+                        ServiceFeeHelper.setServiceFee(payment, organization, 'webshop');
 
                         await payment.save()
 

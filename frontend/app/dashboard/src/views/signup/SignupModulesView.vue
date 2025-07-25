@@ -4,25 +4,14 @@
 
         <main>
             <h1>
-                Kies de functies die je wilt uitproberen
+                Waarmee wil je beginnen?
             </h1>
             <p>
-                Test de functies eerst rustig uit voor je beslist om een pakket te kopen. Je hoeft geen betaalgegevens in te geven.
+                Je kan later andere functies uitproberen via het instellingen menu.
             </p>
 
-            <ModuleSettingsBox />
+            <SmoothModuleSettingsBox />
         </main>
-
-        <STToolbar>
-            <template #left>
-                Je kan later deze functies wijzigingen via het instellingen menu.
-            </template>
-            <template #right>
-                <button class="button primary" type="submit">
-                    Aan de slag
-                </button>
-            </template>
-        </STToolbar>
     </form>
 </template>
 
@@ -31,7 +20,7 @@ import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, Checkbox,EmailInput, LoadingButton, STErrorsDefault, STInputBox, STNavigationBar, STToolbar } from "@stamhoofd/components"
 import { Component, Mixins } from "vue-property-decorator";
 
-import ModuleSettingsBox from "../dashboard/settings/ModuleSettingsBox.vue"
+import SmoothModuleSettingsBox from "../dashboard/settings/SmoothModuleSettingsBox.vue"
 
 @Component({
     components: {
@@ -43,7 +32,7 @@ import ModuleSettingsBox from "../dashboard/settings/ModuleSettingsBox.vue"
         BackButton,
         EmailInput,
         Checkbox,
-        ModuleSettingsBox
+        SmoothModuleSettingsBox
     }
 })
 export default class SignupModulesView extends Mixins(NavigationMixin) {

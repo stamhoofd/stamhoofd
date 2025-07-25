@@ -43,6 +43,9 @@
                     <p v-if="categories.length == 0 && products.length == 0" class="info-box">
                         Momenteel is er niets beschikbaar.
                     </p>
+                    <p v-if="isTrial" class="secundary-box icon trial">
+                        Deze webshop is in proefperiode. Je kan testbestellingen plaatsen. Activeer je Stamhoofd pakket als je de webshop in gebruik wilt nemen.
+                    </p>
                 </header>
 
                 <template v-if="!closed || showOpenAt">

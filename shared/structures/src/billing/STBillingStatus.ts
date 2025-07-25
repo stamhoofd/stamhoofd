@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field } from "@simonbackx/simple-encoding";
-import { STCredit } from "./STCredit";
 
+import { OrganizationPaymentMandate } from "./OrganizationPaymentMandate";
+import { STCredit } from "./STCredit";
 import { STInvoice, STPendingInvoice } from "./STInvoice";
 import { STPackage } from "./STPackage";
 
@@ -16,4 +17,7 @@ export class STBillingStatus extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(STCredit) })
     credits: STCredit[]
+
+    @field({ decoder: new ArrayDecoder(OrganizationPaymentMandate), optional: true })
+    mandates: OrganizationPaymentMandate[] = [];
 }

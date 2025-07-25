@@ -60,11 +60,11 @@ export { default as STListItem } from "./src/layout/STListItem.vue"
 
 // Other
 export { default as GroupAvatar } from "./src/GroupAvatar.vue"
+export * from "./src/helpers";
 export { default as OrganizationAvatar } from "./src/OrganizationAvatar.vue"
 export { default as OrganizationLogo } from "./src/OrganizationLogo.vue"
 export { default as Spinner } from "./src/Spinner.vue"
 export { default as Steps } from "./src/steps/Steps.vue"
-export * from "./src/helpers";
 
 // Icons
 export { default as FemaleIcon } from "./src/icons/FemaleIcon.vue"
@@ -110,11 +110,12 @@ export { default as VATNumberInput } from "./src/inputs/VATNumberInput.vue"
 export { default as WYSIWYGTextInput } from "./src/inputs/WYSIWYGTextInput.vue"
 
 // Shared views should be last
-export { default as CheckoutPriceBreakdown } from "./src/views/CheckoutPriceBreakdown.vue"
+export {default as AddDiscountCodeBox} from "./src/views/AddDiscountCodeBox.vue"
 export { default as CartItemRow } from "./src/views/CartItemRow.vue"
 export { default as CartItemView } from "./src/views/CartItemView.vue"
 export { default as CategoryBox } from "./src/views/CategoryBox.vue"
 export { default as ChangePasswordView } from "./src/views/ChangePasswordView.vue"
+export { default as CheckoutPriceBreakdown } from "./src/views/CheckoutPriceBreakdown.vue"
 export { default as ChooseSeatsView } from "./src/views/ChooseSeatsView.vue"
 export { default as ConfirmEmailView } from "./src/views/ConfirmEmailView.vue"
 export { default as DetailedTicketView } from "./src/views/DetailedTicketView.vue"
@@ -130,7 +131,6 @@ export { default as ProductGrid } from "./src/views/ProductGrid.vue"
 export { default as RecordCategoryAnswersBox } from "./src/views/RecordCategoryAnswersBox.vue"
 export { default as SeatSelectionBox } from "./src/views/SeatSelectionBox.vue"
 export { default as ShowSeatsView } from "./src/views/ShowSeatsView.vue"
-export {default as AddDiscountCodeBox} from "./src/views/AddDiscountCodeBox.vue"
 
 // Payment
 export * from "./src/ColorHelper"
@@ -150,10 +150,10 @@ export { default as RegistrationsFilterView } from "./src/filters/old/Registrati
 export { default as StringFilterView } from "./src/filters/old/StringFilterView.vue"
 
 // Filters new
-export * from "./src/filters/UIFilter"
-export * from "./src/filters/StringUIFilter"
 export * from "./src/filters/GroupUIFilter"
 export * from "./src/filters/MultipleChoiceUIFilter"
+export * from "./src/filters/StringUIFilter"
+export * from "./src/filters/UIFilter"
 
 // tables
 export * from "./src/tables/Column"

@@ -86,10 +86,10 @@
                     <STListItem :selectable="true" class="left-center" @click="openPackages(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/stock.svg">
                         <h2 class="style-title-list">
-                            Pakketten aankopen
+                            Functionaliteiten activeren
                         </h2>
                         <p class="style-description">
-                            Wijzig je pakketten of activeer nieuwe functies
+                            Activeer nieuwe functies
                         </p>
                         <template slot="right">
                             <span class="icon arrow-right-small gray" />
@@ -99,7 +99,7 @@
                     <STListItem :selectable="true" class="left-center" @click="openBilling(true)">
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/transfer.svg">
                         <h2 class="style-title-list">
-                            Facturen en betalingen
+                            Facturen en betaalinstellingen
                         </h2>
                         <p class="style-description">
                             Download jouw facturen en bekijk jouw tegoed.

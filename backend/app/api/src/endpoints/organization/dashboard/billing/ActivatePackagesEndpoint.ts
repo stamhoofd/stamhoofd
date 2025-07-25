@@ -1,13 +1,13 @@
-import { createMollieClient, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
-import { BankTransferDetails } from '@mollie/api-client/dist/types/src/data/payments/data';
+import { createMollieClient, MandateStatus, PaymentMethod as molliePaymentMethod, SequenceType } from '@mollie/api-client';
 import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Decoder, EnumDecoder, field, StringDecoder } from "@simonbackx/simple-encoding";
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { MolliePayment, Payment, Registration, STCredit, STInvoice, STPackage, STPendingInvoice, Token } from "@stamhoofd/models";
 import { QueueHandler } from '@stamhoofd/queues';
-import { Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceResponse, STPackage as STPackageStruct, STPackageBundle, STPackageBundleHelper, STPricingType, TransferSettings, User as UserStruct, Version } from "@stamhoofd/structures";
+import { Company,Organization as OrganizationStruct, OrganizationPatch, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, STInvoiceResponse, STPackage as STPackageStruct, STPackageBundle, STPackageBundleHelper, STPricingType, TransferSettings, User as UserStruct, Version } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
+import { ViesHelper } from '../../../../helpers/ViesHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -23,8 +23,24 @@ class Body extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     includePending = false
 
+    /**
+     * In case a new mandate has to be created.
+     * 
+     * Set to unknown to not create a new mandate (only works if total price is 0)
+     * 
+     * When used, the minimum amount will be set to 2 cents or a different value depending on the payment method.
+     */
     @field({ decoder: new EnumDecoder(PaymentMethod) })
-    paymentMethod: PaymentMethod
+    paymentMethod: PaymentMethod = PaymentMethod.Unknown
+
+     /**
+     * In case to use an existing mandate: the mandate id of Mollie to use.
+     * It should be a mandate of the Mollie customer linked to the organization.
+     * 
+     * If this mandate is valid, it will be set as the new default mandate for the organization.
+     */
+    @field({ decoder: StringDecoder, optional: true, nullable: true })
+    mandateId: string | null = null
 
     @field({ decoder: BooleanDecoder, optional: true })
     proForma = false
@@ -59,7 +75,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
         // If the user has permission, we'll also search if he has access to the organization's key
         if (!Context.auth.canActivatePackages()) {
             throw Context.auth.error()
-        }        
+        }
 
         // Apply patches if needed
         if (request.body.userPatch) {
@@ -87,7 +103,32 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        if (!request.body.proForma) {
+        if (!request.body.proForma && request.body.organizationPatch) {
+            // Validate VAT info
+            const company = Company.create({
+                name: organization.meta.companyName || '',
+                VATNumber: organization.meta.VATNumber,
+                companyNumber: organization.meta.companyNumber,
+                address: organization.meta.companyAddress,
+            })
+
+            await ViesHelper.checkCompany(company, company);
+
+            // Auto correct
+            organization.meta.VATNumber = company.VATNumber
+            organization.meta.companyNumber = company.companyNumber
+            organization.meta.companyName = company.name
+            organization.meta.companyAddress = company.address
+
+            if (company.name.length < 3 || company.name.toLowerCase() === 'vzw') {
+                throw new SimpleError({
+                    code: "invalid_company_name",
+                    message: "Company name is too short",
+                    human: "De bedrijfsnaam is te kort of ongeldig. Vul een geldige bedrijfsnaam in.",
+                    field: "companyName"
+                })
+            }
+
             await organization.save();
         }
 
@@ -193,11 +234,11 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     // If type is 
                     let amount = 1
 
-                    if (membersCount === null && pack.meta.pricingType === STPricingType.PerMember) {
+                    if (membersCount === null && model.meta.pricingType === STPricingType.PerMember) {
                         membersCount = await Registration.getActiveMembers(organization.id)
                     }
 
-                    if (pack.meta.pricingType === STPricingType.PerMember) {
+                    if (model.meta.pricingType === STPricingType.PerMember) {
                         amount = membersCount ?? 1
                     }
 
@@ -236,6 +277,28 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             // Apply credits
             await STCredit.applyCredits(organization.id, invoice, request.body.proForma)
+
+            // If we are going to link a payment method, set the minimum amount
+            const minimumAmount = 2;
+
+            if (request.body.paymentMethod !== PaymentMethod.Unknown && invoice.meta.priceWithVAT < minimumAmount && !request.body.proForma) {
+                invoice.meta.items.push(
+                    STInvoiceItem.create({
+                        name: 'Verificatie bankkaart',
+                        unitPrice: minimumAmount - invoice.meta.priceWithVAT,
+                        canUseCredits: false
+                    })
+                )
+            }
+
+            if (request.body.mandateId && request.body.paymentMethod !== PaymentMethod.Unknown) {
+                // can't set mandate with payment method
+                throw new SimpleError({
+                    code: "invalid_mandate",
+                    message: "Mandate ID is not allowed with payment method",
+                    human: "Je kan geen mandaat ID opgeven als je een betaalmethode kiest. Kies een betaalmethode of laat het veld leeg."
+                })  
+            }
             
             const price = invoice.meta.priceWithVAT
 
@@ -244,6 +307,16 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             if (!request.body.proForma) {
+                // Mollie payment is required
+                const apiKey = STAMHOOFD.MOLLIE_API_KEY
+                if (!apiKey) {
+                    throw new SimpleError({
+                        code: "",
+                        message: "Betalingen zijn tijdelijk onbeschikbaar"
+                    })
+                }
+                const mollieClient = createMollieClient({ apiKey });
+
                 // Create payment
                 const payment = new Payment()
                 payment.organizationId = null
@@ -265,25 +338,74 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                     _molliePaymentMethod = molliePaymentMethod.banktransfer
                     sequenceType = SequenceType.oneoff
                 } else if (payment.method == PaymentMethod.DirectDebit) {
-                    const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+                    // New mandate via SEPA Direct Debit
+                    _molliePaymentMethod = molliePaymentMethod.paybybank
+                } else if (payment.method == PaymentMethod.Unknown) {
+                    // Use an existing mandate to pay
+                    if (price > 0 || request.body.bundles.find(b => STPackageBundleHelper.requiresMandate(b))) {
+                        // Mandate is required
+                        if (!request.body.mandateId) {
+                            throw new SimpleError({
+                                code: "no_mandate",
+                                message: "mandateId required",
+                                human: "Er is geen mandaat gevonden. Probeer te betalen via een andere betaalmethode of maak een nieuw mandaat aan.",
+                                field: "mandateId"
+                            })
+                        }
+                    }
 
-                    if (pendingInvoice && pendingInvoice.invoiceId !== null && pendingInvoice.invoiceId !== invoice.id) {
-                        throw new SimpleError({
-                            code: "payment_pending",
-                            message: "Payment pending",
-                            human: "Er is momenteel al een afrekening in behandeling (dit kan 3 werkdagen duren). Probeer een andere betaalmethode."
-                        })
+                    if (price > 0) {
+                        const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
+
+                        if (pendingInvoice && pendingInvoice.invoiceId !== null && pendingInvoice.invoiceId !== invoice.id) {
+                            throw new SimpleError({
+                                code: "payment_pending",
+                                message: "Payment pending",
+                                human: "Er is momenteel al een afrekening in behandeling (dit kan 3 werkdagen duren). Probeer een andere betaalmethode."
+                            })
+                        }
                     }
                     
                     // Use saved payment method
                     _molliePaymentMethod = undefined
                     sequenceType = SequenceType.recurring
 
-                    if (!organization.serverMeta.mollieCustomerId) {
-                        throw new SimpleError({
-                            code: "no_mollie_customer",
-                            message: "Er is geen opgeslagen betaalmethode gevonden. Probeer te betalen via een andere betaalmethode."
-                        })
+                    if (request.body.mandateId) {
+                        if (!organization.serverMeta.mollieCustomerId) {
+                            throw new SimpleError({
+                                code: "no_mollie_customer",
+                                message: "Er is geen opgeslagen betaalmethode gevonden. Probeer te betalen via een andere betaalmethode."
+                            })
+                        }
+
+                        // Validate mandate
+                        try {
+                            const mandate = await mollieClient.customerMandates.get(
+                                request.body.mandateId,
+                                {customerId: organization.serverMeta.mollieCustomerId}
+                            )
+                            if (mandate.status !== MandateStatus.valid) {
+                                throw new SimpleError({
+                                    code: "invalid_mandate",
+                                    message: "Invalid mandate",
+                                    human: "Het gekozen bankrekening of bankkaart is niet meer geldig, kies een andere of koppel een nieuwe.",
+                                    field: "mandateId"
+                                })
+                            }
+
+                            organization.serverMeta.mollieMandateId = request.body.mandateId
+                            await organization.save()
+
+                        } catch (e) {
+                            console.error("Error getting mandate", e)
+                            throw new SimpleError({
+                                code: "invalid_mandate",
+                                message: "Invalid mandate",
+                                human: "Het gekozen bankrekening of bankkaart is niet meer geldig, kies een andere of koppel een nieuwe.",
+                                field: "mandateId"
+                            })
+                        }
+                        
                     }
                 }
 
@@ -305,19 +427,10 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 }
 
                 try {
-                    // Mollie payment is required
-                    const apiKey = STAMHOOFD.MOLLIE_API_KEY
-                    if (!apiKey) {
-                        throw new SimpleError({
-                            code: "",
-                            message: "Betalingen zijn tijdelijk onbeschikbaar"
-                        })
-                    }
-                    const mollieClient = createMollieClient({ apiKey });
                     let customerId = organization.serverMeta.mollieCustomerId
 
                     if (!organization.serverMeta.mollieCustomerId) {
-                        if (payment.method === PaymentMethod.DirectDebit) {
+                        if (payment.method === PaymentMethod.Unknown) {
                             throw new SimpleError({
                                 code: "no_mollie_customer",
                                 message: "Er is geen opgeslagen betaalmethode gevonden. Probeer te betalen via een andere betaalmethode."
@@ -354,12 +467,21 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                             paymentId: payment.id,
                         },
                         billingEmail: user.email,
+                        mandateId: request.body.mandateId ?? undefined,
                     });
 
-                    if (molliePayment.method === 'creditcard') {
-                        console.log("Corrected payment method to creditcard")
-                        payment.method = PaymentMethod.CreditCard
-                        await payment.save();
+                    if (request.body.mandateId) {
+                        if (molliePayment.method === 'creditcard') {
+                            console.log("Corrected payment method to creditcard")
+                            payment.method = PaymentMethod.CreditCard
+                            await payment.save();
+                        }
+
+                        if (molliePayment.method === 'directdebit') {
+                            console.log("Corrected payment method to DirectDebit")
+                            payment.method = PaymentMethod.DirectDebit
+                            await payment.save();
+                        }
                     }
 
                     console.log(molliePayment)

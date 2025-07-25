@@ -10,7 +10,7 @@ import { Registration } from '@stamhoofd/models';
 import { STInvoice } from '@stamhoofd/models';
 import { STPendingInvoice } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { GroupStatus, isMemberManaged, MemberWithRegistrations, PaymentMethod, PaymentProvider, PaymentStatus, UmbrellaOrganization } from '@stamhoofd/structures';
+import { GroupStatus, isMemberManaged, MemberWithRegistrations, PaymentMethod, PaymentProvider, PaymentStatus, STInvoiceItem, UmbrellaOrganization } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import AWS from 'aws-sdk';
 import { DateTime } from 'luxon';
@@ -545,6 +545,108 @@ async function checkOldPayments() {
     await doCheckPayments(payments)
 }
 
+// Charge manual service fees every night
+async function chargeServiceFees() {
+    if (STAMHOOFD.environment !== "development" && (new Date().getHours() > 5 || new Date().getHours() < 2)) {
+        return;
+    }
+
+    // Succeeded payments
+    const payments = await Payment.where({
+        status: PaymentStatus.Succeeded,
+        serviceFeeManual: {
+            sign: ">",
+            value: 0
+        },
+        serviceFeeManualCharged: 0,
+        createdAt: {
+            sign: "<",
+            value: Formatter.dateIso(new Date)
+        }
+    }, {
+        limit: 200,
+
+        // Return oldest payments first
+        sort: [{
+            column: 'createdAt',
+            direction: 'ASC'
+        }]
+    });
+
+    // Pending payments with method = Transfer or PointOfSale
+    const pendingPayments = await Payment.where({
+        status: {
+            sign: "IN",
+            value: [PaymentStatus.Pending, PaymentStatus.Created]
+        },
+        method: {
+            sign: "IN",
+            value: [PaymentMethod.Transfer, PaymentMethod.PointOfSale]
+        },
+        serviceFeeManual: {
+            sign: ">",
+            value: 0
+        },
+        serviceFeeManualCharged: 0,
+        createdAt: {
+            sign: "<",
+            value: Formatter.dateIso(new Date)
+        }
+    }, {
+        limit: 200,
+
+        // Return oldest payments first
+        sort: [{
+            column: 'createdAt',
+            direction: 'ASC'
+        }]
+    })
+
+    const allPayments = [...payments, ...pendingPayments];
+
+    console.log("[chargeServiceFees] Found " + allPayments.length + " payments to charge service fees for");
+
+    const mappedToOrganizationId = new Map<string, Payment[]>();
+    for (const payment of allPayments) {
+        if (!payment.organizationId) {
+            console.warn("[chargeServiceFees] Payment without organizationId, skipping", payment.id);
+            continue;
+        }
+        if (!mappedToOrganizationId.has(payment.organizationId)) {
+            mappedToOrganizationId.set(payment.organizationId, []);
+        }
+        mappedToOrganizationId.get(payment.organizationId)!.push(payment);
+    }
+
+    for (const [organizationId, payments] of mappedToOrganizationId.entries()) {
+        const organization = await Organization.getByID(organizationId);
+        if (!organization) {
+            console.warn("[chargeServiceFees] Organization not found for ID", organizationId);
+            continue;
+        }
+
+        const totalFees = payments.reduce((sum, payment) => sum + payment.serviceFeeManual, 0);
+
+        const days = Formatter.uniqueArray(payments.map(p => Formatter.dateNumber(p.createdAt)))
+
+        const name = "Servicekosten op " + Formatter.joinLast(days, ', ', ' en ')
+        const item = STInvoiceItem.create({
+            name,
+            amount: 1,
+            unitPrice: totalFees,
+            canUseCredits: true
+        })
+
+        console.log("Scheduling service fee charge for ", organization.id, item)
+        await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+            await STPendingInvoice.addItems(organization, [item])
+        });
+
+        const query = `UPDATE \`${Payment.table}\` SET serviceFeeManualCharged = serviceFeeManual WHERE id IN (?)`
+        await Database.update(query, [payments.map(p => p.id)]);
+    }
+}
+
 let didCheckBuckaroo = false;
 let lastBuckarooId = '';
 
@@ -1040,6 +1142,12 @@ registeredCronJobs.push({
 registeredCronJobs.push({
     name: 'checkOldPayments',
     method: checkOldPayments,
+    running: false
+});
+
+registeredCronJobs.push({
+    name: 'chargeServiceFees',
+    method: chargeServiceFees,
     running: false
 });
 

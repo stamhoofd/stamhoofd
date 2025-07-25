@@ -103,7 +103,7 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
 
                             const details = (mollieData.details as any) 
                             if (details?.cardNumber) {
-                                payment.iban = "xxxx xxxx xxxx "+details.cardNumber
+                                payment.iban = "•••• "+details.cardNumber
                             }
                             if (details?.cardHolder) {
                                 payment.ibanName = details.cardHolder
@@ -127,6 +127,10 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                                     const organization = await Organization.getByID(_invoice.organizationId)
                                     if (organization) {
                                         organization.serverMeta.mollieCustomerId = mollieData.customerId
+
+                                        if (mollieData.mandateId) {
+                                            organization.serverMeta.mollieMandateId = mollieData.mandateId
+                                        }
                                         console.log("Saving mollie customer", mollieData.customerId, "for organization", organization.id)
                                         await organization.save()
                                     }
@@ -135,6 +139,10 @@ export class ExchangeSTPaymentEndpoint extends Endpoint<Params, Query, Body, Res
                                 payment.status = PaymentStatus.Failed
                                 await payment.save();
                                 await invoice.markFailed(payment)
+                                
+                                if (mollieData.mandateId) {
+                                    // Delete this mandate id
+                                }
                             }
                         } else {
                             console.error("Mollie api key is missing for Stamhoofd payments! "+payment.id)

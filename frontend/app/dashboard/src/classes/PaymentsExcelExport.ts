@@ -34,6 +34,7 @@ export class PaymentsExcelExport {
                 "Betaald op",
                 "Bedrag",
                 "Transactiekosten",
+                "Servicekosten",
                 "Uitbetaald op",
                 "Uitbetalingsbedrag",
                 "Referentie",
@@ -116,6 +117,10 @@ export class PaymentsExcelExport {
                 },
                 {
                     value: payment.transferFee / 100,
+                    format: "€0.00"
+                },
+                {
+                    value: (payment.serviceFeePayout + payment.serviceFeeManual) / 100,
                     format: "€0.00"
                 },
                 {

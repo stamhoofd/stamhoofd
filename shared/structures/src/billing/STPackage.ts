@@ -1,4 +1,4 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from "@simonbackx/simple-encoding"
 import { SimpleError } from "@simonbackx/simple-errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,16 +28,16 @@ export class STPackageTypeHelper {
         switch (type) {
             case STPackageType.LegacyMembers: return "Ledenadministratie (oud gratis pakket)";
             case STPackageType.Members: {
-                return "Ledenadministratie, per lid";
+                return "Ledenadministratie";
             }
             case STPackageType.Webshops: {
-                return "Webshop module voor één jaar";
+                return "Webshops, ticketverkoop en openbare inschrijvingen";
             }
             case STPackageType.SingleWebshop: {
                 return "Webshop module voor één webshop (Starter)";
             }
-            case STPackageType.TrialMembers: return "Demo ledenadministratie";
-            case STPackageType.TrialWebshops: return "Demo webshops";
+            case STPackageType.TrialMembers: return "Proefperiode ledenadministratie";
+            case STPackageType.TrialWebshops: return "Proefperiode webshops";
         }
     }
 }
@@ -74,8 +74,23 @@ export class STPackageMeta extends AutoEncoder {
     @field({ decoder: new EnumDecoder(STPricingType) })
     pricingType = STPricingType.Fixed
 
+    /**
+     * One time price for the package, per year, or per member depending on pricingType
+     */
     @field({ decoder: IntegerDecoder })
     unitPrice = 0
+
+    /**
+     * Service fees, percentage. 100_00 = 100%, 1 = 0.01%
+     */
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeePercentage = 0
+
+    /**
+     * Fixed service fee per payment, in cents
+     */
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeeFixed = 0
 
     /// Contains the (paid) invoiced amount
     @field({ decoder: IntegerDecoder })
@@ -162,9 +177,9 @@ export class STPackage extends AutoEncoder {
             return false;
         }
 
-        // Allow renew 10 months in advance
+        // Allow renew 2 months in advance
         const allowAfter = new Date(this.validUntil)
-        allowAfter.setDate(allowAfter.getDate() - 31 * 10)
+        allowAfter.setDate(allowAfter.getDate() - 31 * 2)
 
         if (allowAfter < new Date()) {
             return true
@@ -182,6 +197,20 @@ export class STPackage extends AutoEncoder {
     }
 }
 
+export class STPackageStatusServiceFee extends AutoEncoder {
+    @field({ decoder: IntegerDecoder })
+    fixed = 0
+
+    @field({ decoder: IntegerDecoder })
+    percentage = 0
+
+    @field({ decoder: DateDecoder })
+    startDate: Date
+
+    @field({ decoder: DateDecoder, nullable: true })
+    endDate: Date | null = null
+}
+
 export class STPackageStatus extends AutoEncoder {
     @field({ decoder: DateDecoder })
     startDate: Date
@@ -195,6 +224,47 @@ export class STPackageStatus extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     firstFailedPayment: Date | null = null
+
+    /**
+     * Service fees, percentage. 100_00 = 100%, 1 = 0.01%
+     */
+    @field({ decoder: new ArrayDecoder(STPackageStatusServiceFee), optional: true })
+    serviceFees: STPackageStatusServiceFee[] = []
+
+    get activeServiceFees(): STPackageStatusServiceFee {
+        const now = new Date()
+        const filtered = this.serviceFees.filter(fee => {
+            if (fee.startDate <= now && (fee.endDate === null || fee.endDate >= now)) { 
+                return true
+            }
+            return false
+        });
+
+        // Return maximum fees
+        if (filtered.length === 0) {
+            return STPackageStatusServiceFee.create({
+                fixed: 0,
+                percentage: 0,
+                startDate: new Date(),
+                endDate: null
+            });
+        }
+
+        if (filtered.length === 1) {
+            return filtered[0]; // Only one fee, return it
+        }
+
+        console.warn("Multiple active service fees found, merging them", filtered);
+
+        return filtered.reduce((max, current) => {
+            return STPackageStatusServiceFee.create({
+                fixed: Math.max(max.fixed, current.fixed),
+                percentage: Math.max(max.percentage, current.percentage),
+                startDate: max.startDate,
+                endDate: max.endDate
+            });
+        });
+    }
 
     get isActive() {
         const d = new Date()
@@ -237,9 +307,10 @@ export class STPackageStatus extends AutoEncoder {
             return false
         }
 
-        // if (this.removeAt && this.removeAt < d) {
-        //     return false
-        // }
+        // If only valid for less than 30 days, still allow to use the package
+        if (this.validUntil && this.startDate.getTime() - this.validUntil.getTime() < 60 * 1000 * 60 * 25 * 31) {
+            return false
+        }
 
         if (this.validUntil && this.validUntil < d) {
             // Passed!
@@ -309,6 +380,8 @@ export class STPackageStatus extends AutoEncoder {
                 this.firstFailedPayment = status.firstFailedPayment
             }
         }
+
+        this.serviceFees.push(...status.serviceFees)
     }
 }
 

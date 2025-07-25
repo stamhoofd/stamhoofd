@@ -43,9 +43,33 @@ export class Payment extends Model {
 
     /**
      * Fee paid to the payment provider (if available, otherwise set to 0)
+     * Note: only set when we substract it from the payouts and need to invoice it (if using Stripe Express)
      */
     @column({ type: "integer" })
     transferFee = 0
+
+    /**
+     * Service fee that will be substracted from the payout (in addition to the transfer fee)
+     * Will get invoiced at the end of the month
+     * 
+     * This INCLUDES VAT
+     */
+    @column({ type: "integer" })
+    serviceFeePayout = 0
+
+    /**
+     * Service fee, not substracted from a payout, that needs to be paid via a different payment
+     * 
+     * This EXCLUDES VAT
+     */
+    @column({ type: "integer" })
+    serviceFeeManual = 0
+
+    /**
+     * Part of the serviceFeeManual, that has been invoiced (added to outstanding balance)
+     */
+    @column({ type: "integer" })
+    serviceFeeManualCharged = 0
 
     /**
      * Included in the total price
@@ -153,7 +177,7 @@ export class Payment extends Model {
                         })
                     })
                 }),
-                ...(!includeSettlements) ? {settlement: null, transferFee: 0, stripeAccountId: null} : {}
+                ...(!includeSettlements) ? {settlement: null, transferFee: 0, stripeAccountId: null, serviceFeeManual: 0, serviceFeeManualCharged: 0, serviceFeePayout: 0} : {}
             })
         })
     }

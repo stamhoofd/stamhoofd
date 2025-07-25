@@ -5,6 +5,8 @@ import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStat
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
 
+import { ServiceFeeHelper } from './ServiceFeeHelper';
+
 export class StripeHelper {
     static getInstance(accountId: string|null = null) {
         return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000, stripeAccount: accountId ?? undefined});
@@ -17,7 +19,7 @@ export class StripeHelper {
                 
                 if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
                     const fees = charge.balance_transaction.fee;
-                    payment.transferFee = fees;
+                    payment.transferFee = fees - payment.serviceFeePayout;
                 }
             }
 
@@ -27,19 +29,19 @@ export class StripeHelper {
 
             if (charge.payment_method_details?.bancontact) {
                 if (charge.payment_method_details.bancontact.iban_last4) {
-                    payment.iban = "xxxx " + charge.payment_method_details.bancontact.iban_last4
+                    payment.iban = "•••• " + charge.payment_method_details.bancontact.iban_last4
                 }
                 payment.ibanName = charge.payment_method_details.bancontact.verified_name
             }
             if (charge.payment_method_details?.ideal) {
                 if (charge.payment_method_details.ideal.iban_last4) {
-                    payment.iban = "xxxx " + charge.payment_method_details.ideal.iban_last4
+                    payment.iban = "•••• " + charge.payment_method_details.ideal.iban_last4
                 }
                 payment.ibanName = charge.payment_method_details.ideal.verified_name
             }
             if (charge.payment_method_details?.card) {
                 if (charge.payment_method_details.card.last4) {
-                    payment.iban = "xxxx " + charge.payment_method_details.card.last4
+                    payment.iban = "•••• " + charge.payment_method_details.card.last4
                 }
             }
             await payment.save()
@@ -195,7 +197,7 @@ export class StripeHelper {
 
         if (totalPrice < 50) {
             throw new SimpleError({
-                code: "minmum_amount",
+                code: "minimum_amount",
                 message: "The minimum amount for an online payment is € 0,50",
                 human: "Het minimum bedrag voor een online betaling is € 0,50",
             })
@@ -228,6 +230,7 @@ export class StripeHelper {
         }
 
         payment.transferFee = fee;
+        const serviceFee = payment.serviceFeePayout
 
         const fullMetadata = {
             ...(metadata ?? {}),
@@ -253,7 +256,7 @@ export class StripeHelper {
                 payment_method: paymentMethod.id,
                 payment_method_types: [payment.method.toLowerCase()],
                 statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
-                application_fee_amount: fee,
+                application_fee_amount: fee + serviceFee,
                 on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
                 confirm: true,
                 return_url: redirectUrl,
@@ -327,7 +330,7 @@ export class StripeHelper {
                 locale: i18n.language as 'nl',
                 payment_intent_data: {
                     on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
-                    application_fee_amount: fee,
+                    application_fee_amount: fee + serviceFee,
                     transfer_data: !directCharge ? {
                         destination: stripeAccount.accountId,
                     } : undefined,

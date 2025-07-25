@@ -129,7 +129,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: return 'Payconiq by Bancontact'
             case PaymentMethod.Transfer: return "Via overschrijving"
-            case PaymentMethod.DirectDebit: return "Opgeslagen betaalkaart"
+            case PaymentMethod.DirectDebit: return "Via bank"
         }
         return PaymentMethodHelper.getNameCapitalized(paymentMethod, this.context)
     }
@@ -141,7 +141,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
             case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "" : ""
             case PaymentMethod.iDEAL: return this.organization.address.country === Country.Netherlands ? "Meest gebruikte betaalmethode." : ""
             case PaymentMethod.Unknown: return ""
-            case PaymentMethod.DirectDebit: return "Indien beschikbaar (kan 3 werkdagen duren)"
+            case PaymentMethod.DirectDebit: return "Gebruik de app van je bank om je bankrekening te koppelen."
             case PaymentMethod.CreditCard: return ""
             case PaymentMethod.PointOfSale: return ""
         }

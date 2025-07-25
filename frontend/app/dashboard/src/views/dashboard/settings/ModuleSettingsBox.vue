@@ -1,43 +1,31 @@
 <template>
     <div class="module-settings-box">
         <div class="module-box">
-            <label class="box" :class="{ selected: enableWebshopModule }">
+            <label class="box" :class="{ selected: enableWebshopsTrial }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg"></div>
                 <div>
-                    <h2 class="style-title-list">Webshops, tickets, geldinzameling en openbare inschrijvingen</h2>
-                    <p v-if="enableWebshopModule && !isWebshopsTrial && !loadingWebshopModule" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <h2 class="style-title-list">Webshops, ticketverkoop, geldinzameling en openbare inschrijvingen</h2>
+                    <p v-if="enableWebshopsTrial && !isWebshopsTrial && !loadingWebshopModule" class="style-description">Dit zit in jouw pakket inbegrepen</p>
                     <p v-else class="style-description-small">
                         Het webshop systeem kan gebruikt worden voor gewone webshops, ticketverkopen, crowdfundings en inschrijvingen voor openbare evenementen.
                     </p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialWebshops'" />
-                    <Checkbox v-else v-model="enableWebshopModule" :disabled="enableWebshopModule && !isWebshopsTrial" />
+                    <Checkbox v-else v-model="enableWebshopsTrial" :disabled="!canEnableWebshopModule" />
                 </div>
             </label>
             
-            <label v-if="!hasLegacy" class="box" :class="{ selected: enableMemberModule }">
-                <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg"></div>
-                <div>
-                    <h2 class="style-title-list">Ledenadministratie en online inschrijvingen</h2>
-                    <p v-if="enableMemberModule && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
-                    <p v-else class="style-description-small">Laat leden online inschrijven via een eigen ledenportaal, beheer alle leden, maak attesten aan...</p>
-                </div>
-                <div>
-                    <Spinner v-if="loadingModule == 'TrialMembers'" />
-                    <Checkbox v-else v-model="enableMemberModule" :disabled="enableMemberModule && !isMembersTrial" />
-                </div>
-            </label>
-
-            <label v-else class="box" :class="{ selected: enableActivities }">
+            <label class="box" :class="{ selected: enableMembersTrial }">
                 <div><img slot="left" src="~@stamhoofd/assets/images/illustrations/group.svg"></div>
                 <div>
                     <h2 class="style-title-list">Ledenadministratie</h2>
-                    <p class="style-description-small">Laat leden inschrijven voor meerdere groepen (bv. voor activiteiten) en maak documenten/attesten aan.</p>
+                    <p v-if="enableMembersTrial && !isMembersTrial && !loadingMembers" class="style-description">Dit zit in jouw pakket inbegrepen</p>
+                    <p v-else class="style-description-small">Laat leden online inschrijven via een eigen ledenportaal, beheer alle leden, maak attesten aan... Dit is geschikter voor leden die meerdere keren of langere periodes ingeschreven zijn en biedt betere functies voor gegevensverzameling en overzicht.</p>
                 </div>
                 <div>
                     <Spinner v-if="loadingModule == 'TrialMembers'" />
-                    <Checkbox v-else v-model="enableActivities" :disabled="enableActivities && !isMembersTrial" />
+                    <Checkbox v-else v-model="enableMembersTrial" :disabled="enableMembersTrial && !isMembersTrial" />
                 </div>
             </label>
         </div>
@@ -87,7 +75,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         return this.loadingModule === STPackageType.TrialMembers
     }
 
-    get enableMemberModule() {
+    get enableMembersTrial() {
         if (this.organization.meta.packages.useMembers || this.loadingModule === STPackageType.TrialMembers) {
             return true;
         }
@@ -96,7 +84,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         return !this.organization.meta.packages.canStartMembersTrial;
     }
 
-    set enableMemberModule(enable: boolean) {
+    set enableMembersTrial(enable: boolean) {
         /*if (!enable || this.organization.groups.length > 0) {
             this.organization.meta.modules.useMembers = enable
             this.patchModule({ useMembers: enable }, enable ? "De ledenadministratie module is nu actief" : "De ledenadministratie module is nu uitgeschakeld").catch(e => console.error(e))
@@ -116,22 +104,17 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
             
         }*/
 
-        if (enable && !this.enableMemberModule) {
+        if (enable && !this.enableMembersTrial) {
             if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
                 // We have an automated flow for these organizations
                 this.present(new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(MembersStructureSetupView, {})
                 }).setDisplayStyle("popup"))
             } else {
-                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").then(() => {
-                    // Wait for the backend to fill in all the default categories and groups
-                    this.present(new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(ActivatedView, {})
-                    }).setDisplayStyle("popup"))
-                }).catch(e => console.error(e))
+                this.checkout(STPackageBundle.TrialMembers, "Je kan nu de ledenadministratie uittesten.").catch(e => console.error(e))
             }
         } else {
-            if (!enable && this.enableMemberModule) {
+            if (!enable && this.enableMembersTrial) {
                 this.deactivate(STPackageType.TrialMembers, "Het testen van de ledenadministratie is uitgeschakeld").catch(console.error)
             }
         }
@@ -163,35 +146,32 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         return this.loadingModule === STPackageType.TrialWebshops
     }
 
-    get enableWebshopModule() {
-        if (this.organization.meta.packages.useWebshops || this.loadingModule === STPackageType.TrialWebshops) {
+    get canEnableWebshopModule() {
+        if ((this.organization.meta.packages.useWebshops && !this.organization.meta.packages.isWebshopsTrial) || this.loadingModule === STPackageType.TrialWebshops) {
+            return false;
+        }
+
+        if (this.organization.meta.packages.isWebshopsTrial) {
+            // Can disable trial
             return true;
         }
 
         // Check if previously bought the package and not removeAt yet
-        return !this.organization.meta.packages.canStartWebshopsTrial;
+        return this.organization.meta.packages.canStartWebshopsTrial;
     }
 
-    set enableWebshopModule(enable: boolean) {
+    get enableWebshopsTrial() {
+        // Check if previously bought the package and not removeAt yet
+        return this.organization.meta.packages.isWebshopsTrial;
+    }
+
+    set enableWebshopsTrial(enable: boolean) {
         //this.organization.meta.modules.useWebshops = enable
 
-        if (enable && !this.enableWebshopModule) {
-            this.checkout(STPackageBundle.TrialWebshops, "Je kan nu webshops uittesten").then(async () => {
-                // Create new webshop view
-                if (this.organization.webshops.length === 0) {
-                    this.present(
-                        (
-                            await LoadComponent(
-                                () => import(/* webpackChunkName: "EditWebshopGeneralView" */ '../webshop/edit/EditWebshopGeneralView.vue'),
-                                {},
-                                { instant: true }
-                            )
-                        ).setDisplayStyle("popup")
-                    )
-                }
-            }).catch(console.error)
+        if (enable && !this.enableWebshopsTrial) {
+            this.checkout(STPackageBundle.TrialWebshops, "Je kan nu webshops uittesten").catch(console.error)
         } else {
-            if (!enable && this.enableWebshopModule) {
+            if (!enable && this.enableWebshopsTrial) {
                 this.deactivate(STPackageType.TrialWebshops, "Het testen van webshops is uitgeschakeld").catch(console.error)
             }
         }

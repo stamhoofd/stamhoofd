@@ -173,5 +173,14 @@ export class PrivatePayment extends Payment {
 
     @field({ decoder: IntegerDecoder, version: 197 })
     transferFee = 0
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeePayout = 0
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeeManual = 0
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    serviceFeeManualCharged = 0
 }
 

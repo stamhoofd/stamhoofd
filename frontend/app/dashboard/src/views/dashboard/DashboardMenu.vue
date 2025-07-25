@@ -25,21 +25,20 @@
             </div>-->
 
 
-            <button v-if="!enableWebshopModule && !enableMemberModule" type="button" class="menu-button button cta" @click="openSignupSelection()">
+            <button v-if="(!enableWebshopModule && !enableMemberModule) || (webshops.length === 0 && fullAccess && tree.getAllGroups().length == 0 )" type="button" class="menu-button button cta" @click="openSignupSelection()">
                 <span class="icon flag" />
-                <span>Proefperiode starten</span>
+                <span>Beginnen</span>
             </button>
-
-            <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button cta" @click="addWebshop()">
-                <span class="icon add" />
-                <span>Maak nieuwe webshop</span>
-            </button>
-
+            <template v-else>
+                <button v-if="enableWebshopModule && canCreateWebshops && webshops.length == 0" type="button" class="menu-button button cta" @click="addWebshop()">
+                    <span class="icon add" />
+                    <span>Maak nieuwe webshop</span>
+                </button>
+            </template>
             <button v-if="enableMemberModule && tree.getAllGroups().length == 0 && fullAccess" type="button" class="menu-button button cta" @click="manageGroups(true)">
                 <span class="icon settings" />
                 <span>Ledenadministratie</span>
             </button>
-
 
             <hr v-if="((!enableWebshopModule && !enableMemberModule) || (enableWebshopModule && canCreateWebshops && webshops.length == 0) || enableMemberModule && tree.getAllGroups().length == 0 && fullAccess) && ((enableMemberModule && tree.categories.length) || (enableWebshopModule && webshops.length > 0) || fullAccess || canManagePayments || (enableWebshopModule && hasWebshopArchive))">
 
@@ -482,7 +481,15 @@ export default class DashboardMenu extends Mixins(NavigationMixin) {
 
     async openSignupSelection(animated = true) {
         await LoadComponent(() => import(/* webpackChunkName: "SignupModulesView" */ "../signup/SignupModulesView.vue"), {}, { instant: true }).then((component) => {
-            this.present(component.setDisplayStyle("popup").setAnimated(animated))
+            this.present({
+                components: [
+                    new ComponentWithProperties(NavigationController, {
+                        root: component
+                    })
+                ],
+                animated,
+                modalDisplayStyle: "popup",
+            })
         })
     }
 

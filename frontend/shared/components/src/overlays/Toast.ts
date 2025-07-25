@@ -23,7 +23,7 @@ export class Toast {
     progress: number | null = null
     button: ToastButton | null = null
 
-    autohideAfter: number | null = 5000
+    autohideAfter: number | null = 8_000
 
     doHide: (() => void) | null = null
     action:  (() => void) | null = null

@@ -18,6 +18,9 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
 
     @Prop({ required: false })
         savedHandler?: (webshop: PrivateWebshop) => Promise<void>
+    
+    @Prop({ required: false })
+        beforeSaveHandler?: () => Promise<void>
 
     originalWebshop: PrivateWebshop = this.webshopManager?.webshop ?? this.initialWebshop ?? PrivateWebshop.create({})
 
@@ -78,6 +81,10 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
             await this.validate()
 
             if (this.isNew) {
+                if (this.beforeSaveHandler) {
+                    await this.beforeSaveHandler()
+                }
+
                 const response = await SessionManager.currentSession!.authenticatedServer.request({
                     method: "POST",
                     path: "/webshop",
@@ -111,6 +118,9 @@ export default class EditWebshopMixin extends Mixins(NavigationMixin) {
                         : "Jouw nieuwe webshop is aangemaakt. Je kan nu de producten toevoegen die je wilt verkopen en andere instellingen wijzigen."
                     , "success green").show()
             } else {
+                if (this.beforeSaveHandler) {
+                    await this.beforeSaveHandler()
+                }
                 await this.webshopManager!.patchWebshop(this.webshopPatch)
 
                 await this.afterSave()

@@ -22,7 +22,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem>
+                <STListItem v-if="pack.meta.unitPrice">
                     Prijs
 
                     <template slot="right">
@@ -99,11 +99,36 @@
             </STList>
 
             <STList v-else-if="pack.meta.pricingType === 'Fixed'">
-                <STListItem>
+                <STListItem v-if="pack.meta.unitPrice">
                     Prijs
 
                     <template slot="right">
                         {{ pack.meta.unitPrice | price }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="pack.meta.serviceFeePercentage && pack.meta.serviceFeeFixed">
+                    Servicekosten
+
+                    <template slot="right">
+                        {{ pack.meta.serviceFeePercentage | percentage }} +
+                        {{ pack.meta.serviceFeeFixed | price }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-else-if="pack.meta.serviceFeePercentage">
+                    Servicekosten
+
+                    <template slot="right">
+                        {{ pack.meta.serviceFeePercentage | percentage }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-else-if="pack.meta.serviceFeeFixed">
+                    Servicekosten
+
+                    <template slot="right">
+                        {{ pack.meta.serviceFeeFixed | price }}
                     </template>
                 </STListItem>
 
@@ -174,12 +199,13 @@ import PackageConfirmView from "./PackageConfirmView.vue";
     },
     filters: {
         price: Formatter.price,
-        date: Formatter.date.bind(Formatter)
+        date: Formatter.date.bind(Formatter),
+        percentage: Formatter.percentage.bind(Formatter)
     }
 })
 export default class PackageDetailsView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    pack: STPackage
+        pack: STPackage
 
     errorBox: ErrorBox | null = null
     validator = new Validator()

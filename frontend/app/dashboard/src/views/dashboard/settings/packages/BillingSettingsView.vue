@@ -4,7 +4,7 @@
 
         <main>
             <h1>
-                Facturen en betalingen
+                Facturen en betaalinstellingen
             </h1>
 
             <p>
@@ -42,6 +42,29 @@
                         </p>
                     </div>
                 </div>
+
+                <hr>
+                <h2>Standaard betaalmethode</h2>
+                <p>Koppel een bankkaart of creditcard waarmee automatische betalingen kunnen gebeuren. Deze rekening wordt gebruikt voor automatische incasso's.</p>
+
+                <MandateSelectionList
+                    :organization="organization"
+                    :default-status="status"
+                    :allow-selection="false"
+                />
+
+                <p>
+                    <button type="button" class="button text" @click="linkNewMandate">
+                        <span class="icon add" />  
+                        <span>Nieuwe betaalkaart koppelen</span>
+                    </button>
+                </p>
+                <p v-if="status && status.mandates.length > 0">
+                    <button type="button" class="button text" @click="updateDefaultMandate">
+                        <span class="icon sync" />  
+                        <span>Wijzig standaard betaalmethode</span>
+                    </button>
+                </p>
 
                 <template v-if="companyName">
                     <hr>
@@ -127,8 +150,8 @@
 </template>
 
 <script lang="ts">
-import { ComponentWithProperties, NavigationController,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage, Checkbox,ErrorBox,LoadingButton, Spinner, STErrorsDefault,STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { BackButton, CenteredMessage, Checkbox, ErrorBox, LoadingButton, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STCredit, STInvoice } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -138,6 +161,8 @@ import { OrganizationManager } from "../../../../classes/OrganizationManager";
 import GeneralSettingsView from "../GeneralSettingsView.vue";
 import CreditsView from "./CreditsView.vue";
 import InvoiceDetailsView from "./InvoiceDetailsView.vue";
+import MandateSelectionList from "./MandateSelectionList.vue";
+import PackageConfirmView from "./PackageConfirmView.vue";
 
 @Component({
     components: {
@@ -150,7 +175,8 @@ import InvoiceDetailsView from "./InvoiceDetailsView.vue";
         STList,
         STListItem,
         Spinner,
-        Checkbox
+        Checkbox,
+        MandateSelectionList
     },
     filters: {
         price: Formatter.price,
@@ -249,6 +275,20 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
         }).setDisplayStyle("popup"))
     }
 
+    linkNewMandate() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PackageConfirmView, {
+                allowMandate: false
+            })
+        }).setDisplayStyle("popup"))
+    }
+
+    updateDefaultMandate() {
+        this.present(new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(PackageConfirmView, {})
+        }).setDisplayStyle("popup"))
+    }
+    
     get hasFullAccess() {
         return SessionManager.currentSession?.user?.permissions?.hasFullAccess(this.organization.privateMeta?.roles ?? [], ) ?? false
     }

@@ -173,7 +173,7 @@ export class StripePayoutChecker {
         });
 
         payment.settlement = settlement;
-        payment.transferFee = totalFees;
+        payment.transferFee = totalFees - payment.serviceFeePayout;
 
         // Force an updatedAt timestamp of the related order
         // Mark order as 'updated', or the frontend won't pull in the updates

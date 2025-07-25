@@ -69,7 +69,12 @@ export default class InvoicePaymentStatusView extends Mixins(NavigationMixin){
         // Reload organization
         SessionManager.currentSession?.fetchOrganization().catch(e => console.error)
 
-        new CenteredMessage("Betaling gelukt!", "Bedankt voor jouw betaling. Het pakket wordt meteen geactiveerd").addCloseButton().show()
+        if (this.invoice && (this.invoice.meta.items.find(i => i.package))) {
+            new CenteredMessage("Betaling gelukt!", "Bedankt voor jouw betaling. Het pakket wordt meteen geactiveerd").addCloseButton().show()
+        } else {
+            new CenteredMessage("Betaling gelukt!", "Bedankt voor jouw betaling. Jouw gekozen bankrekening werd gekoppeld als standaard betaalmethode.").addCloseButton().show()
+        }
+
         this.dismiss({ force: true })
     }
 

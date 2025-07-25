@@ -20,6 +20,7 @@ export enum OrganizationType {
     Student = "Student",
     HorseRiding = "HorseRiding",
     Neighborhood = "Neighborhood",
+    Gymnastics = "Gymnastics",
     Nature = "Nature",
     Music = "Music",
     Professional = "Professional",
@@ -28,7 +29,14 @@ export enum OrganizationType {
     LGBTQ = "LGBTQ",
     Politics = "Politics",
     Union = "Union",
+    ParentsCommittee = "ParentsCommittee",
+    GoodCause = "GoodCause",
+    Kids = "Kids",
     Other = "Other",
+    City = "City",
+    Events = "Events",
+    Business = "Business",
+    Stage = "Stage",
 }
 
 export class OrganizationTypeHelper {
@@ -54,6 +62,10 @@ export class OrganizationTypeHelper {
             {
                 value: OrganizationType.Golf,
                 name: "Golf",
+            },
+            {
+                value: OrganizationType.Gymnastics,
+                name: "Turnen",
             },
             {
                 value: OrganizationType.Athletics,
@@ -113,7 +125,11 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Music,
-                name: "Muziekvereniging",
+                name: "Muziek (orkest, zang, band, fanfare, harmonie...)",
+            },
+            {
+                value: OrganizationType.Events,
+                name: "Evenementen",
             },
             {
                 value: OrganizationType.Professional,
@@ -121,27 +137,51 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Art,
-                name: "Kunstvereniging",
+                name: "Beeldende kunst (schilderen, beeldhouwen, fotografie...)",
+            },
+            {
+                value: OrganizationType.Stage,
+                name: "Theater (toneel, musical, ...)",
             },
             {
                 value: OrganizationType.Culture,
-                name: "Cultuur",
+                name: "Andere culturele vereniging",
             },
-            {
+            /*{
                 value: OrganizationType.LGBTQ,
                 name: "LGBTQ+",
-            },
+            },*/
             {
                 value: OrganizationType.Politics,
                 name: "Politiek",
             },
-            {
+            /*{
                 value: OrganizationType.Union,
                 name: "Vakbond",
-            },
+            },*/
             {
                 value: OrganizationType.School,
                 name: "School",
+            },
+            {
+                value: OrganizationType.Kids,
+                name: "Kinderen (kampen, speelpleinwerking, ...)",
+            },
+            {
+                value: OrganizationType.ParentsCommittee,
+                name: "Oudercomité",
+            },
+            {
+                value: OrganizationType.GoodCause,
+                name: "Goed doel",
+            },
+            {
+                value: OrganizationType.City,
+                name: "Gemeente of stad",
+            },
+            {
+                value: OrganizationType.Business,
+                name: "Bedrijf",
             },
             {
                 value: OrganizationType.Other,
@@ -154,6 +194,7 @@ export class OrganizationTypeHelper {
         switch (type) {
             case OrganizationType.Youth:
             case OrganizationType.Student:
+            case OrganizationType.Kids:
                 return "Jeugd";
 
             case OrganizationType.Sport:
@@ -165,29 +206,35 @@ export class OrganizationTypeHelper {
             case OrganizationType.Hockey:
             case OrganizationType.Cycling:
             case OrganizationType.Swimming:
-            case OrganizationType.Dance:
             case OrganizationType.Volleyball:
             case OrganizationType.Basketball:
             case OrganizationType.Judo:
             case OrganizationType.HorseRiding:
+            case OrganizationType.Gymnastics:
                 return "Sport";
-
-            
 
             case OrganizationType.Culture:
             case OrganizationType.Art:
             case OrganizationType.Music:
+            case OrganizationType.Stage:
+            case OrganizationType.Events:
+            case OrganizationType.Dance:
                 return "Cultuur";
 
+            case OrganizationType.School:
+                return "Onderwijs";
 
             case OrganizationType.Other:
+            case OrganizationType.ParentsCommittee:
             case OrganizationType.LGBTQ:
             case OrganizationType.Politics:
             case OrganizationType.Union:
             case OrganizationType.Nature:
             case OrganizationType.Professional:
             case OrganizationType.Neighborhood:
-            case OrganizationType.School:
+            case OrganizationType.GoodCause:
+            case OrganizationType.City:
+            case OrganizationType.Business:
                 return "Overige";
         }
     }

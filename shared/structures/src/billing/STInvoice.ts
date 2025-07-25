@@ -125,8 +125,12 @@ export class STInvoiceItem extends AutoEncoder {
         if (other.package && this.package && other.package.id !== this.package.id) {
             return false
         }
-        if (this.name === other.name) {
-            if (this.unitPrice === other.unitPrice && this.description === other.description) {
+        if (this.name === other.name && this.description === other.description) {
+            if (this.unitPrice === other.unitPrice) {
+                return true
+            }
+
+            if (this.amount === 1 && other.amount === 1) {
                 return true
             }
         }
@@ -134,6 +138,14 @@ export class STInvoiceItem extends AutoEncoder {
     }
 
     merge(other: STInvoiceItem): void {
+        if (other.unitPrice !== this.unitPrice) {
+            if (other.amount === 1 && this.amount === 1) {
+                this.unitPrice += other.unitPrice
+                this.package = other.package
+                return;
+            }
+            throw new Error("Cannot merge items with different unit prices and amount greater than 1");
+        }
         this.amount += other.amount
 
         // Other package will be more up to date

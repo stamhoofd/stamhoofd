@@ -8,7 +8,7 @@
             <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie ledenportaal, of kan je ze uitnodigen (<a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-schrijven-leden-in/'" class="inline-link" target="_blank">meer info</a>). Je kan gerust zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
 
             <hr>
-            <h2>Lidstructuur</h2>
+            <h2>1. Stel je lidstructuur in</h2>
 
             <p v-if="isYouth">
                 Alle activiteiten, leeftijdsgroepen, kampen of andere groepen waarvoor leden kunnen inschrijven worden 'inschrijvingsgroepen' genoemd. Zo kunnen leden inschrijven voor activiteiten van jouw vereniging, maar ook bijvoorbeeld voor een volledig jaar, semester... Dat bepaal je zelf. Op het einde van een inschrijvingsperiode kan je per groep individueel een nieuwe inschrijvingsperiode starten waarna leden opnieuw moeten inschrijven, of je kan de activiteit archiveren.
@@ -23,7 +23,7 @@
             </button>
 
             <hr>
-            <h2>Welke gegevens wil je verzamelen?</h2>
+            <h2>2. Beslis welke gegevens je wilt verzamelen</h2>
             
             <p class="style-description-block">
                 Je kan zelf kiezen welke informatie je wilt verzamelen van jouw leden (bv. geboortedatum, emailadres, telefoonnummer, eigen vragen...). Wijzig dit via de knop hieronder, of later via de instellingen.
@@ -36,7 +36,7 @@
 
             <hr>
             <h2 class="style-with-button">
-                <div>Eigen ledenportaal</div>
+                <div>3. Bekijk je eigen ledenportaal</div>
                 <div>
                     <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
                         <span class="icon external" />
@@ -55,6 +55,10 @@
             <p class="info-box">
                 {{ $t('dashboard.settings.registrationPage.linkDescription') }}
             </p>
+
+            <hr>
+            <h2>4. Stel meer in via 'Instellingen' in het menu</h2>
+            <p>Je kan alle bovenstaande zaken en nog meer (zoals financiële ondersteuning, vrije bijdrages, betaalmethodes, leden importeren) op elk moment wijzigen, via het tabblad 'Instellingen' in het menu van Stamhoofd.</p>
 
             <hr>
             <h2>Handige links</h2>
