@@ -327,6 +327,7 @@ async function validateUitpasNumbers() {
 
     // verify the UiTPAS numbers are valid for social tariff (call to backend)
     try {
+        console.error('Checking UiTPAS numbers for social tariff, reduced price', props.cartItem.productPrice.price);
         const response = await context.value.optionalAuthenticatedServer.request({
             method: 'POST',
             path: '/uitpas',

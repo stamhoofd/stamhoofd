@@ -173,7 +173,7 @@ const openSearchOrganizer = async () => {
                     await pop({ force: true });
                 }
             },
-        }),
+        }).setDisplayStyle('popup'),
     );
 };
 

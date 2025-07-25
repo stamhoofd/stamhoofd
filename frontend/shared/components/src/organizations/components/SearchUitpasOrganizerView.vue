@@ -133,6 +133,7 @@ async function doSelectOrganizer(organizer: UitpasOrganizerResponse) {
     selectedOrganizerId.value = organizer.id;
     try {
         await props.selectOrganizer(organizer, navigationActions);
+        loadingAfterOrganizerSelect.value = false;
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
