@@ -68,7 +68,8 @@ export class ViesHelperStatic {
         // In Belgium, the company number syntax is the same as VAT number
         let correctedVATNumber = companyNumber;
 
-        if (companyNumber.length > 2 && companyNumber.substr(0, 2) !== country) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        if (companyNumber.length > 2 && companyNumber.substr(0, 2).toUpperCase() !== country) {
             // Add required country in VAT number
             correctedVATNumber = country + companyNumber;
         }
