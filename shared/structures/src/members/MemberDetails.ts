@@ -159,6 +159,14 @@ export class MemberDetails extends AutoEncoder {
     requiresFinancialSupport: BooleanStatus | null = null;
 
     /**
+     * Indicates whether parents can have access to the members data and receive notification emails.
+     * When set to false, the account of parents won't be linked to the member.
+     * Also when not set, parents will have acess until the member reaches the age of 18.
+     */
+    @field({ decoder: BooleanStatus, nullable: true, ...NextVersion })
+    parentsHaveAccess: BooleanStatus | null = null;
+
+    /**
      * Gave permission to collect sensitive information
      */
     @field({ decoder: BooleanStatus, version: 117, optional: true })
@@ -404,6 +412,13 @@ export class MemberDetails extends AutoEncoder {
 
     get age(): number | null {
         return this.ageOnDate(new Date());
+    }
+
+    get calculatedParentsHaveAccess(): boolean {
+        if (this.parentsHaveAccess) {
+            return this.parentsHaveAccess.value;
+        }
+        return this.defaultAge < 18;
     }
 
     /**
