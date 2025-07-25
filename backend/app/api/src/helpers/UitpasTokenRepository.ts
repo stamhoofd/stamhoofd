@@ -44,7 +44,9 @@ export class UitpasTokenRepository {
             return false; // not valid
         }
         let model = new UitpasClientCredential();
-        model.organizationId = organizationId; model.clientId = clientId; model.clientSecret = clientSecret;
+        model.organizationId = organizationId;
+        model.clientId = clientId;
+        model.clientSecret = clientSecret;
         return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
             let repo = new UitpasTokenRepository(model);
             try {
@@ -202,7 +204,7 @@ export class UitpasTokenRepository {
     }
 
     static async getClientIdFor(organisationId: string | null): Promise<string> {
-        const repo = await UitpasTokenRepository.getRepoFromMemory(organisationId);
+        const repo = UitpasTokenRepository.getRepoFromMemory(organisationId);
         if (!repo) {
             const model = await UitpasClientCredential.select().where('organizationId', organisationId).first(false);
             if (!model) {

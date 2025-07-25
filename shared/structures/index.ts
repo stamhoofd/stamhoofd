@@ -129,6 +129,7 @@ export * from './src/endpoints/VerifyEmailRequest.js';
 export * from './src/endpoints/WebshopUriAvailabilityResponse.js';
 export * from './src/endpoints/UitpasPriceCheckRequest.js';
 export * from './src/endpoints/UitpasOrganizersResponse.js';
+export * from './src/endpoints/UitpasEventsResponse.js';
 export * from './src/endpoints/UitpasClientIdAndSecret.js';
 export * from './src/endpoints/UitpasSetClientCredentialsResponse.js';
 
@@ -199,6 +200,7 @@ export * from './src/webshops/TransferSettings.js';
 export * from './src/webshops/Webshop.js';
 export * from './src/webshops/WebshopField.js';
 export * from './src/webshops/WebshopMetaData.js';
+export * from './src/webshops/UitpasNumberAndPrice.js';
 
 // billing
 export * from './src/billing/STBillingStatus.js';

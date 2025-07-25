@@ -6,6 +6,8 @@ import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers';
 import { checkPermissionsFor } from './checkPermissionsFor';
 import { checkUitpasNumbers } from './checkUitpasNumbers';
+import { getSocialTariffForEvent } from './getSocialTariffForEvent';
+import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers';
 
 function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
@@ -17,10 +19,10 @@ function mapUitpasNumbersToProducts(order: Order): Map<string, string[]> {
     for (const item of items) {
         const a = productIdToUitpasNumbers.get(item.product.id);
         if (a) {
-            a.push(...item.uitpasNumbers);
+            a.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
         }
         else {
-            productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers]); // make a copy
+            productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers.map(p => p.uitpasNumber)]); // make a copy
         }
     }
     return productIdToUitpasNumbers;
@@ -132,14 +134,16 @@ export class UitpasService {
         });
     }
 
-    static async getSocialTariffForUitpasNumbers(organisationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventId: string) {
+    static async getSocialTariffForUitpasNumbers(organisationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
-        // TODO using https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
+        return await getSocialTariffForUitpasNumbers(access_token, uitpasNumbers, basePrice, uitpasEventUrl);
     }
 
-    static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventId: string) {
+    static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventUrl: string) {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
-        // TODO using https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
+        return await getSocialTariffForEvent(access_token, basePrice, uitpasEventUrl);
     }
 
     static async registerTicketSales() {
@@ -154,15 +158,19 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-ticket-sales
     }
 
-    static async searchUitpasEvents() {
-        // input = client credentials of organization & uitpasOrganizerId
+    static async registerAttendance() {
+        // https://api-test.uitpas.be/checkins
+    }
+
+    static searchUitpasEvents(organizationId: string, uitpasOrganizerId: string, textQuery?: string) {
+        // input = client id of organization (never platform0 & uitpasOrganizerId
         // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
     }
 
     static async searchUitpasOrganizers(name: string): Promise<UitpasOrganizersResponse> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
-        return searchUitpasOrganizers(access_token, name);
+        return await searchUitpasOrganizers(access_token, name);
     }
 
     static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId: string): Promise<{
@@ -171,7 +179,7 @@ export class UitpasService {
     }> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-permissions
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return checkPermissionsFor(access_token, organizationId, uitpasOrganizerId);
+        return await checkPermissionsFor(access_token, organizationId, uitpasOrganizerId);
     }
 
     /**
@@ -193,7 +201,7 @@ export class UitpasService {
     static async checkUitpasNumbers(uitpasNumbers: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
-        return checkUitpasNumbers(access_token, uitpasNumbers);
+        return await checkUitpasNumbers(access_token, uitpasNumbers);
     }
 
     /**
