@@ -173,7 +173,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 if (item.product.uitpasEvent) {
                     const basePrice = item.product.prices.find(p => p.id === item.productPrice.uitpasBaseProductPriceId)?.price ?? 0;
                     const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, uitpasNumbersOnly, basePrice, item.product.uitpasEvent.url);
-                    const expectedReducedPrices = item.uitpasNumbers.map(p => p.price);
+                    const expectedReducedPrices = item.uitpasNumbers;
                     if (reducedPrices.length < expectedReducedPrices.length) {
                         // should not happen
                         throw new SimpleError({
@@ -184,14 +184,15 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         });
                     }
                     for (let i = 0; i < expectedReducedPrices.length; i++) {
-                        if (reducedPrices[i] !== expectedReducedPrices[i]) {
+                        if (reducedPrices[i].price !== expectedReducedPrices[i].price) {
                             throw new SimpleError({
                                 code: 'uitpas_social_tariff_price_mismatch',
                                 message: 'UiTPAS social tariff have a different price',
-                                human: $t('Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.', { correctPrice: Formatter.price(reducedPrices[i]), orderPrice: Formatter.price(expectedReducedPrices[i]) }),
+                                human: $t('Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.', { correctPrice: Formatter.price(reducedPrices[i].price), orderPrice: Formatter.price(expectedReducedPrices[i].price) }),
                                 field: 'uitpasNumbers.' + i.toString(),
                             });
                         }
+                        item.uitpasNumbers[i].uitpasTariffId = reducedPrices[i].uitpasTariffId;
                     }
                 }
                 else {

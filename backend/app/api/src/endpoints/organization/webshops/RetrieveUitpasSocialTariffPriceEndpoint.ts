@@ -52,7 +52,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 const organization = await Context.setOrganizationScope({ willAuthenticate: false });
                 const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, request.body.uitpasNumbers, request.body.basePrice, request.body.uitpasEventUrl); // Throws if invalid
                 const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
-                    prices: reducedPrices,
+                    prices: reducedPrices.map(price => price.price), // ignore tariff id's here
                 });
                 return new Response(uitpasPriceCheckResponse);
             }

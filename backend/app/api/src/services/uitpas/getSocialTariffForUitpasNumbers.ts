@@ -1,7 +1,9 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { UitpasNumberAndPrice } from '@stamhoofd/structures';
 
 type SocialTariffReponse = {
     available: Array<{
+        id: string;
         price: number;
         remaining: number;
         // other properties ignored
@@ -25,7 +27,7 @@ function assertsIsSocialTariffResponse(json: unknown): asserts json is SocialTar
         || !('available' in json)
         || !Array.isArray(json.available)
         || !json.available.every(
-            (item: unknown) => typeof item === 'object' && item !== null && 'price' in item && typeof item.price === 'number' && 'remaining' in item && typeof item.remaining === 'number',
+            (item: unknown) => typeof item === 'object' && item !== null && 'id' in item && typeof item.id === 'string' && 'price' in item && typeof item.price === 'number' && 'remaining' in item && typeof item.remaining === 'number',
         )
     ) {
         console.error('Invalid response when getting UiTPAS social tariff:', json);
@@ -152,16 +154,20 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         });
     }
     console.log('Social tariff for UiTPAS number', uitpasNumber, 'with event id', uitpasEventUrl, 'is', json.available[0].price, 'euros');
-    return Math.round((json.available[0].price) * 100);
+    return UitpasNumberAndPrice.create({
+        uitpasNumber,
+        price: Math.round((json.available[0].price) * 100),
+        uitpasTariffId: json.available[0].id,
+    });
 }
 
 export async function getSocialTariffForUitpasNumbers(access_token: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
     const simpleErrors = new SimpleErrors();
-    const reducedPrices = new Array<number>(uitpasNumbers.length);
+    const reducedPrices = new Array<UitpasNumberAndPrice>(uitpasNumbers.length);
     for (let i = 0; i < uitpasNumbers.length; i++) {
         const uitpasNumber = uitpasNumbers[i];
         try {
-            reducedPrices[i] = await getSocialTariffForUitpasNumber(access_token, uitpasNumber, basePrice, uitpasEventUrl); // Throws if invalid
+            reducedPrices[i] = await getSocialTariffForUitpasNumber(access_token, uitpasNumber, basePrice, uitpasEventUrl);
         }
         catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
