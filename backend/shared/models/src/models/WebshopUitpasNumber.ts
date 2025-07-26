@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 
 export class WebshopUitpasNumber extends QueryableModel {
@@ -24,6 +24,35 @@ export class WebshopUitpasNumber extends QueryableModel {
 
     @column({ type: 'string' })
     orderId = '';
+
+    @column({ type: 'string', nullable: true })
+    ticketSaleId: string | null = null;
+
+    @column({ type: 'string', nullable: true })
+    uitpasEventUrl: string | null = null;
+
+    @column({ type: 'integer' })
+    basePrice: number;
+
+    @column({ type: 'integer' })
+    reducedPrice: number;
+
+    @column({ type: 'datetime', nullable: true })
+    registeredAt: Date | null = null;
+
+    @column({ type: 'string', nullable: true })
+    uitpasTariffId: string | null = null;
+
+    @column({ type: 'string' })
+    basePriceLabel: string;
+
+    /**
+     * It is possible that the reduced price when registering the ticket sale
+     * is different from when the order was placed. Therefore we store the reduced price
+     * when the ticket sale was created in this column.
+     */
+    @column({ type: 'integer', nullable: true })
+    reducedPriceUitpas: number | null = null;
 
     static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[]): Promise<boolean> {
         const hasBeenUsed = !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
