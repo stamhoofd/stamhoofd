@@ -6,4 +6,7 @@ export class UitpasNumberAndPrice extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     price: number;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    uitpasTariffId: string | null = null;
 }
