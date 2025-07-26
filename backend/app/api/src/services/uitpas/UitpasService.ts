@@ -9,88 +9,221 @@ import { checkUitpasNumbers } from './checkUitpasNumbers';
 import { getSocialTariffForEvent } from './getSocialTariffForEvent';
 import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers';
 import { searchUitpasEvents } from './searchUitpasEvents';
+import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSales } from './registerTicketSales';
+import { cancelTicketSales } from './cancelTicketSales';
+import { SimpleError } from '@simonbackx/simple-errors';
+
+type UitpasTicketSale = {
+    basePrice: number;
+    uitpasNumber: string;
+    basePriceLabel: string;
+    reducedPrice: number;
+    uitpasEventUrl: string | null;
+    uitpasTariffId: string | null;
+    productId: string;
+};
+
+type InsertUitpasNumber = {
+    ticketSaleId: string | null;
+    reducedPriceUitpas: number | null;
+    registeredAt: Date | null;
+    webshopId: string;
+    orderId: string;
+    productId: string;
+    uitpasNumber: string;
+    basePrice: number;
+    reducedPrice: number;
+    basePriceLabel: string;
+    uitpasTariffId: string | null; // null for non-official flow
+    uitpasEventUrl: string | null; // null for non-official flow
+};
 
 function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
 }
 
-function mapUitpasNumbersToProducts(order: Order): Map<string, string[]> {
-    const items = order.data.cart.items;
-    const productIdToUitpasNumbers: Map<string, string[]> = new Map();
-    for (const item of items) {
-        const a = productIdToUitpasNumbers.get(item.product.id);
-        if (a) {
-            a.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
-        }
-        else {
-            productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers.map(p => p.uitpasNumber)]); // make a copy
-        }
-    }
-    return productIdToUitpasNumbers;
-}
+// function mapUitpasNumbersToProducts(order: Order): Map<string, string[]> {
+//     const items = order.data.cart.items;
+//     const productIdToUitpasNumbers: Map<string, string[]> = new Map();
+//     for (const item of items) {
+//         const a = productIdToUitpasNumbers.get(item.product.id);
+//         if (a) {
+//             a.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
+//         }
+//         else {
+//             productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers.map(p => p.uitpasNumber)]); // make a copy
+//         }
+//     }
+//     return productIdToUitpasNumbers;
+// }
 
-function areUitpasNumbersChanged(oldOrder: Order, newOrder: Order): boolean {
-    const oldMap = mapUitpasNumbersToProducts(oldOrder);
-    const newMap = mapUitpasNumbersToProducts(newOrder);
-    if (oldMap.size !== newMap.size) {
-        return true;
+// function areUitpasNumbersChanged(oldOrder: Order, newOrder: Order): boolean {
+//     const oldMap = mapUitpasNumbersToProducts(oldOrder);
+//     const newMap = mapUitpasNumbersToProducts(newOrder);
+//     if (oldMap.size !== newMap.size) {
+//         return true;
+//     }
+//     for (const [productId, uitpasNumbers] of oldMap.entries()) {
+//         const newUitpasNumbers = newMap.get(productId);
+//         if (!newUitpasNumbers) {
+//             return true;
+//         }
+//         if (newUitpasNumbers.length !== uitpasNumbers.length) {
+//             return true;
+//         }
+//         for (const uitpasNumber of uitpasNumbers) {
+//             if (!newUitpasNumbers.includes(uitpasNumber)) {
+//                 return true;
+//             }
+//         }
+//     }
+//     return false;
+// }
+
+function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
+    const ticketSales: UitpasTicketSale[] = [];
+    if (!shouldReserveUitpasNumbers(order.status)) {
+        return ticketSales;
     }
-    for (const [productId, uitpasNumbers] of oldMap.entries()) {
-        const newUitpasNumbers = newMap.get(productId);
-        if (!newUitpasNumbers) {
-            return true;
-        }
-        if (newUitpasNumbers.length !== uitpasNumbers.length) {
-            return true;
-        }
-        for (const uitpasNumber of uitpasNumbers) {
-            if (!newUitpasNumbers.includes(uitpasNumber)) {
-                return true;
+    for (const item of order.data.cart.items) {
+        if (item.uitpasNumbers.length > 0) {
+            const baseProductPrice = item.product.prices.filter(price => price.id === item.productPrice.uitpasBaseProductPriceId)[0];
+            if (!baseProductPrice) {
+                throw new SimpleError({
+                    code: 'missing_uitpas_base_product_price',
+                    message: `Missing UiTPAS base product price`,
+                    human: $t(`Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.`),
+                });
+            }
+            const label = item.product.name + ' - ' + baseProductPrice.name;
+            for (const uitpasNumber of item.uitpasNumbers) {
+                ticketSales.push({
+                    productId: item.product.id,
+                    uitpasNumber: uitpasNumber.uitpasNumber,
+                    basePrice: baseProductPrice.price,
+                    reducedPrice: uitpasNumber.price,
+                    basePriceLabel: label,
+                    uitpasEventUrl: item.product.uitpasEvent?.url || null,
+                    uitpasTariffId: uitpasNumber.uitpasTariffId || null,
+                });
             }
         }
     }
-    return false;
+    return ticketSales;
 }
 
 export class UitpasService {
     static listening = false;
 
-    static async updateUitpasNumbers(order: Order) {
-        await this.deleteUitpasNumbers(order);
-        await this.createUitpasNumbers(order);
+    static async getWebshopUitpasNumberFromDb(order: Order): Promise<WebshopUitpasNumber[]> {
+        return await WebshopUitpasNumber.select().where('webshopId', order.webshopId).andWhere('orderId', order.id).fetch();
     }
 
-    static async createUitpasNumbers(order: Order) {
-        const mappedUitpasNumbers = mapUitpasNumbersToProducts(order); // productId -> Set of uitpas numbers
+    static async createUitpasNumbers(toBeInserted: InsertUitpasNumber[]) {
+        if (toBeInserted.length === 0) {
+            return;
+        }
         // add to DB
         const insert = WebshopUitpasNumber.insert();
         insert.columns(
             'id',
+            'ticketSaleId',
+            'reducedPriceUitpas',
+            'registeredAt',
             'webshopId',
             'orderId',
             'productId',
             'uitpasNumber',
+            'basePrice',
+            'reducedPrice',
+            'basePriceLabel',
+            'uitpasTariffId',
+            'uitpasEventUrl',
         );
-        const rows = [...mappedUitpasNumbers].flatMap(([productId, uitpasNumbers]) => {
-            return uitpasNumbers.map(uitpasNumber => [
+        const rows = toBeInserted.map((insert) => {
+            return [
                 uuidv4(),
-                order.webshopId,
-                order.id,
-                productId,
-                uitpasNumber,
-            ]);
+                insert.ticketSaleId,
+                insert.reducedPriceUitpas,
+                insert.registeredAt,
+                insert.webshopId,
+                insert.orderId,
+                insert.productId,
+                insert.uitpasNumber,
+                insert.basePrice,
+                insert.reducedPrice,
+                insert.basePriceLabel,
+                insert.uitpasTariffId,
+                insert.uitpasEventUrl,
+            ];
         });
-        if (rows.length === 0) {
-            // No uitpas numbers to insert, skipping
-            return;
-        }
+
         insert.values(...rows);
         await insert.insert();
     }
 
-    static async deleteUitpasNumbers(order: Order) {
-        await WebshopUitpasNumber.delete().where('webshopId', order.webshopId)
-            .andWhere('orderId', order.id);
+    /**
+     * This does not update DB!
+     */
+    static async updateTicketSales(order: Order, isNewOrder: boolean = false) {
+        const ticketSales = getUitpasTicketSales(order);
+        const registered = isNewOrder ? [] : await this.getWebshopUitpasNumberFromDb(order);
+
+        const unchangedRegistered: WebshopUitpasNumber[] = [];
+        const toBeRegistered: UitpasTicketSale[] = [];
+
+        for (const ticketSale of ticketSales) {
+            const i = registered.findIndex(request => request.uitpasNumber === ticketSale.uitpasNumber && request.basePrice === ticketSale.basePrice && request.basePriceLabel === ticketSale.basePriceLabel);
+            if (i !== -1) {
+                unchangedRegistered.push(registered[i]);
+                registered.splice(i, 1);
+                continue; // already registered, so skip
+            }
+            toBeRegistered.push(ticketSale);
+        }
+
+        const toBeCanceled = registered;
+
+        // Only register/cancel tickets if official flow is/was used
+        const toBeCanceledUitpasIds = toBeCanceled.filter(c => c.uitpasEventUrl && c.uitpasTariffId && c.ticketSaleId).map(c => c.ticketSaleId!);
+        const toBeRegisteredUitpasRequests: RegisterTicketSaleRequest[] = toBeRegistered.filter(c => c.uitpasEventUrl && c.uitpasTariffId) as RegisterTicketSaleRequest[];
+
+        let canceledUitpasId: string[] = [];
+        let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
+        if (toBeRegisteredUitpasRequests.length !== 0 || toBeCanceledUitpasIds.length !== 0) {
+            const access_token = await UitpasTokenRepository.getAccessTokenFor(order.organizationId);
+            canceledUitpasId = await cancelTicketSales(access_token, toBeCanceledUitpasIds);
+            try {
+                newlyRegistered = await registerTicketSales(access_token, toBeRegisteredUitpasRequests);
+            }
+            catch (e) {
+                console.error('Failed to register UiTPAS ticket sales', e);
+            }
+        }
+
+        const effectiveDeletes = toBeCanceled.filter(c => c.ticketSaleId === null || canceledUitpasId.find(id => id === c.ticketSaleId));
+        if (effectiveDeletes.length !== 0) {
+            await WebshopUitpasNumber.delete().where('id', effectiveDeletes.map(c => c.id));
+        }
+
+        const inserts = toBeRegistered.map((c) => {
+            const response = newlyRegistered.get(c as RegisterTicketSaleRequest);
+            return {
+                ticketSaleId: response?.ticketSaleId ?? null,
+                reducedPriceUitpas: response?.reducedPriceUitpas ?? null,
+                registeredAt: response?.registeredAt ?? null,
+                webshopId: order.webshopId,
+                orderId: order.id,
+                productId: c.productId,
+                uitpasNumber: c.uitpasNumber,
+                basePrice: c.basePrice,
+                reducedPrice: c.reducedPrice,
+                basePriceLabel: c.basePriceLabel,
+                uitpasTariffId: c.uitpasTariffId, // null for non-official flow
+                uitpasEventUrl: c.uitpasEventUrl, // null for non-official flow
+            };
+        });
+        await this.createUitpasNumbers(inserts);
     }
 
     static listen() {
@@ -101,9 +234,11 @@ export class UitpasService {
         Model.modelEventBus.addListener(this, async (event) => {
             try {
                 if (event.model instanceof Order) {
-                    // event.type ==='deteled' -> not needed as foreign key will delete the order
+                    // if (event.type === 'deleted') {
+                    // delete from db is not not needed as foreign key will delete the order
+                    // we do not cancel the ticket sales
                     if (event.type === 'created' && shouldReserveUitpasNumbers(event.model.status)) {
-                        await this.createUitpasNumbers(event.model);
+                        await this.updateTicketSales(event.model, true);
                         return;
                     }
                     if (event.type === 'updated') {
@@ -112,19 +247,13 @@ export class UitpasService {
                             const statusAfter = event.changedFields.status as OrderStatus;
                             const shouldReserveAfter = shouldReserveUitpasNumbers(statusAfter);
                             if (shouldReserveUitpasNumbers(statusBefore) !== shouldReserveAfter) {
-                                if (shouldReserveAfter) {
-                                    await this.createUitpasNumbers(event.model);
-                                    return;
-                                }
-                                await this.deleteUitpasNumbers(event.model);
+                                await this.updateTicketSales(event.model, shouldReserveAfter);
                                 return;
                             }
                         }
                         if (event.changedFields.data) {
-                            const oldOrder = event.getOldModel() as Order;
-                            if (areUitpasNumbersChanged(oldOrder, event.model)) {
-                                await this.updateUitpasNumbers(event.model);
-                            }
+                            await this.updateTicketSales(event.model);
+                            return;
                         }
                     }
                 }
@@ -147,12 +276,10 @@ export class UitpasService {
         return await getSocialTariffForEvent(access_token, basePrice, uitpasEventUrl);
     }
 
-    static async registerTicketSales() {
-        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/create-a-ticket-sale
-    }
-
-    static async cancelTicketSale() {
+    static async cancelTicketSales(organisationId: string, ticketSaleIds: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        return await cancelTicketSales(access_token, ticketSaleIds);
     }
 
     static async getTicketSales() {
