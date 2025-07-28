@@ -26,9 +26,9 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useRequiredOrganization } from '@stamhoofd/components';
+import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, useRequiredOrganization, LoadingViewTransition } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
+import { UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
 import { ref, onMounted, watch } from 'vue';
 
@@ -41,8 +41,18 @@ const isSaveLoading = ref(false);
 const clientId = ref('');
 const clientSecret = ref('');
 const organization = useRequiredOrganization();
+const navigationActions = useNavigationActions();
 
 let originaClientId: string;
+
+const props = withDefaults(
+    defineProps<{
+        onFixed?: ((navigation: NavigationActions) => Promise<void>) | null;
+    }>(),
+    {
+        onFixed: null,
+    },
+);
 
 // add watcher to clientId
 watch(clientId, (newValue) => {
@@ -120,7 +130,7 @@ async function save() {
             shouldRetry: false,
             decoder: UitpasSetClientCredentialsResponse as Decoder<UitpasSetClientCredentialsResponse>,
         });
-        isSaveLoading.value = false;
+
         const newStatus = response.data.status;
         organization.value.meta.uitpasClientCredentialsStatus = newStatus;
         const human = response.data.human;
@@ -131,19 +141,27 @@ async function save() {
                 human: human,
             });
             errors.errorBox = new ErrorBox(error);
+            isSaveLoading.value = false;
             return; // do not close the modal
         }
         else {
-            new Toast(UitpasClientCredentialsStatusHelper.getName(newStatus), UitpasClientCredentialsStatusHelper.getIcon(newStatus)).show();
             if (organization.value) {
                 organization.value.meta.uitpasClientCredentialsStatus = newStatus;
             }
-            pop({ force: true })?.catch(console.error);
+            if (props.onFixed && newStatus === UitpasClientCredentialsStatus.Ok) {
+                await props.onFixed(navigationActions);
+            }
+            else {
+                new Toast(UitpasClientCredentialsStatusHelper.getName(newStatus), UitpasClientCredentialsStatusHelper.getIcon(newStatus)).show();
+                await pop({ force: true });
+            }
+            isSaveLoading.value = false;
         }
     }
     catch (e) {
+        console.error(e);
+        isSaveLoading.value = false;
         if (!Request.isAbortError(e)) {
-            isSaveLoading.value = false;
             errors.errorBox = new ErrorBox(e);
         }
     }
