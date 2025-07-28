@@ -1,5 +1,5 @@
 <template>
-    <STInputBox :title="title" error-fields="uitpasNumber" :error-box="errorBox" :class="props.class">
+    <STInputBox :title="title" :error-fields="errorFields" :error-box="errorBox" :class="props.class">
         <input ref="input" v-model="uitpasNumberRaw" class="input" type="tel" :disabled="disabled" v-bind="$attrs" :placeholder="placeholder" autocomplete="off" inputmode="numeric" maxlength="13" @keydown="preventInvalidUitpasNumberChars" @change="validate(false)">
     </STInputBox>
 </template>
@@ -20,6 +20,8 @@ const props = withDefaults(defineProps<{
     disabled?: boolean;
     class?: string;
     required?: boolean;
+    placeholder?: string;
+    errorFields?: string;
 }>(), {
     validator: undefined,
     nullable: false,
@@ -27,6 +29,8 @@ const props = withDefaults(defineProps<{
     disabled: false,
     class: undefined,
     required: true,
+    placeholder: undefined,
+    errorFields: 'uitpasNumber',
 });
 
 const model = defineModel<string | null>({ required: true });
@@ -36,6 +40,7 @@ const uitpasNumberRaw = ref(model.value ?? '');
 watch(model, value => uitpasNumberRaw.value = value ?? '');
 
 const placeholder = computed(() => {
+    if (props.placeholder) return props.placeholder;
     const base = $t('5cb71059-9a9c-452c-8957-4622c5dc4af5', { example: '4329032984732' });
     if (props.required) return base;
     return $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f') + '. ' + base;
@@ -57,6 +62,7 @@ function clearErrorBox(silent: boolean) {
 }
 
 function validate(final = true, silent = false): boolean {
+    console.log('Validating uitpas number', uitpasNumberRaw.value, 'final:', final);
     if (!props.required && uitpasNumberRaw.value.length === 0) {
         clearErrorBox(silent);
         model.value = null;
@@ -82,7 +88,7 @@ function validate(final = true, silent = false): boolean {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
                 message: $t(`5c6ace17-d4d1-4492-8bf5-e8f90f9daed6`),
-                field: 'uitpasNumber',
+                field: props.errorFields,
             }));
         }
 
