@@ -8,6 +8,7 @@ import { checkPermissionsFor } from './checkPermissionsFor';
 import { checkUitpasNumbers } from './checkUitpasNumbers';
 import { getSocialTariffForEvent } from './getSocialTariffForEvent';
 import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers';
+import { searchUitpasEvents } from './searchUitpasEvents';
 
 function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
@@ -162,9 +163,11 @@ export class UitpasService {
         // https://api-test.uitpas.be/checkins
     }
 
-    static searchUitpasEvents(organizationId: string, uitpasOrganizerId: string, textQuery?: string) {
+    static async searchUitpasEvents(organizationId: string, uitpasOrganizerId: string, textQuery?: string) {
         // input = client id of organization (never platform0 & uitpasOrganizerId
         // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
+        const clientId = await UitpasTokenRepository.getClientIdFor(organizationId);
+        return searchUitpasEvents(clientId, uitpasOrganizerId, textQuery);
     }
 
     static async searchUitpasOrganizers(name: string): Promise<UitpasOrganizersResponse> {
