@@ -3,7 +3,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode, WebshopUitpasNumber } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -133,72 +133,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             request.body.validate(webshopStruct, organization.meta, request.i18n, false, Context.user?.getStructure());
             request.body.update(webshopStruct);
 
-            // UiTPAS numbers validation
-            const articlesWithUitpasSocialTariff = request.body.cart.items.filter(item => item.productPrice.uitpasBaseProductPriceId !== null);
-            for (const item of articlesWithUitpasSocialTariff) {
-                const uitpasNumbersOnly = item.uitpasNumbers.map(p => p.uitpasNumber);
-
-                // verify the amount of UiTPAS numbers
-                if (uitpasNumbersOnly.length !== item.amount) {
-                    throw new SimpleError({
-                        code: 'amount_of_uitpas_numbers_mismatch',
-                        message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
-                        human: $t('6140c642-69b2-43d6-80ba-2af4915c5837'),
-                        field: 'cart.items.uitpasNumbers',
-                    });
-                }
-
-                // verify the UiTPAS numbers are unique (within the order)
-                if (uitpasNumbersOnly.length !== Formatter.uniqueArray(uitpasNumbersOnly).length) {
-                    throw new SimpleError({
-                        code: 'duplicate_uitpas_numbers',
-                        message: 'Duplicate uitpas numbers used',
-                        human: $t('d9ec27f3-dafa-41e8-bcfb-9da564a4a675'),
-                        field: 'cart.items.uitpasNumbers',
-                    });
-                }
-
-                // verify the UiTPAS numbers are not already used for this product
-                const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshop.id, item.product.id, uitpasNumbersOnly);
-                if (hasBeenUsed) {
-                    throw new SimpleError({
-                        code: 'uitpas_number_already_used',
-                        message: 'One or more uitpas numbers are already used',
-                        human: $t('1ef059c2-e758-4cfa-bc2b-16a581029450'),
-                        field: 'cart.items.uitpasNumbers',
-                    });
-                }
-
-                // verify the UiTPAS numbers are valid for social tariff (static check + API call to UiTPAS)
-                if (item.product.uitpasEvent) {
-                    const basePrice = item.product.prices.find(p => p.id === item.productPrice.uitpasBaseProductPriceId)?.price ?? 0;
-                    const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, uitpasNumbersOnly, basePrice, item.product.uitpasEvent.url);
-                    const expectedReducedPrices = item.uitpasNumbers;
-                    if (reducedPrices.length < expectedReducedPrices.length) {
-                        // should not happen
-                        throw new SimpleError({
-                            code: 'uitpas_social_tariff_price_mismatch',
-                            message: 'UiTPAS wrong number of prices retruned',
-                            human: $t('2d1983fa-2224-422f-9ea0-fdae77cb4914'),
-                            field: 'cart.items.uitpasNumbers',
-                        });
-                    }
-                    for (let i = 0; i < expectedReducedPrices.length; i++) {
-                        if (reducedPrices[i].price !== expectedReducedPrices[i].price) {
-                            throw new SimpleError({
-                                code: 'uitpas_social_tariff_price_mismatch',
-                                message: 'UiTPAS social tariff have a different price',
-                                human: $t('2f4b9572-4b9c-42e0-91f1-b0984624d225', { correctPrice: Formatter.price(reducedPrices[i].price), orderPrice: Formatter.price(expectedReducedPrices[i].price) }),
-                                field: 'uitpasNumbers.' + i.toString(),
-                            });
-                        }
-                        item.uitpasNumbers[i].uitpasTariffId = reducedPrices[i].uitpasTariffId;
-                    }
-                }
-                else {
-                    await UitpasService.checkUitpasNumbers(uitpasNumbersOnly); // Throws if invalid
-                }
-            }
+            request.body.cart = await UitpasService.validateCart(organization.id, webshop.id, request.body.cart);
 
             const order = new Order().setRelation(Order.webshop, webshop);
             order.data = request.body; // TODO: validate

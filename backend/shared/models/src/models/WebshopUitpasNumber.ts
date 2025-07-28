@@ -54,8 +54,28 @@ export class WebshopUitpasNumber extends QueryableModel {
     @column({ type: 'integer', nullable: true })
     reducedPriceUitpas: number | null = null;
 
-    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[]): Promise<boolean> {
-        const hasBeenUsed = !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
-        return hasBeenUsed;
+    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[], uitpasEventUrl?: string, existingOrderId?: string): Promise<boolean> {
+        let query = WebshopUitpasNumber
+            .select()
+            .where('webshopId', webshopId)
+            .andWhere('uitpasNumber', uitpasNumbers);
+
+        if (uitpasEventUrl) {
+            query = query.andWhere(SQL.where('productId', productId).or('uitpasEventUrl', uitpasEventUrl));
+        }
+        else {
+            query = query.andWhere('productId', productId);
+        }
+
+        if (existingOrderId !== undefined) {
+            query = query.andWhereNot('orderId', existingOrderId);
+        }
+
+        return !!await query.first(false); ;
+    }
+
+    static async areThereRegisteredTicketSales(webshopId: string): Promise<boolean> {
+        const query = WebshopUitpasNumber.select().where('webshopId', webshopId).andWhereNot('ticketSaleId', null);
+        return !!await query.first(false);
     }
 }

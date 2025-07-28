@@ -1,107 +1,141 @@
 <template>
-    <STInputBox :title="title" error-fields="uitpasNumber" :error-box="errorBox" :class="props.class">
-        <input ref="input" v-model="uitpasNumberRaw" class="input" type="tel" :disabled="disabled" v-bind="$attrs" :placeholder="placeholder" autocomplete="off" inputmode="numeric" maxlength="13" @keydown="preventInvalidUitpasNumberChars" @change="validate(false)">
+    <STInputBox
+        :title="title"
+        :error-fields="errorFields"
+        :error-box="errorBoxes"
+        :class="props.class"
+    >
+        <input
+            v-model="uitpasNumberRaw"
+            v-format-input="DataValidator.getUitpasNumberInputFormatter()"
+            :placeholder="placeholder"
+            autocomplete="off"
+            inputmode="numeric"
+            maxlength="16"
+            class="input"
+            type="text"
+            :disabled="disabled"
+            v-bind="$attrs"
+            @change="validate(false)"
+            @input="onTyping"
+        >
+        <template #right>
+            <slot name="right" />
+        </template>
     </STInputBox>
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
-import { DataValidator } from '@stamhoofd/utility';
-import { Ref, computed, ref, watch } from 'vue';
-import { ErrorBox } from '../errors/ErrorBox';
+import { computed, ref, watch } from 'vue';
+import { useErrors } from '../errors/useErrors';
 import { Validator } from '../errors/Validator';
+import { DataValidator } from '@stamhoofd/utility';
+import { ErrorBox } from '../errors/ErrorBox';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { useValidation } from '../errors/useValidation';
-import STInputBox from './STInputBox.vue';
 
-const props = withDefaults(defineProps<{
-    validator?: Validator;
-    nullable?: boolean;
-    title?: string;
-    disabled?: boolean;
-    class?: string;
-    required?: boolean;
-}>(), {
-    validator: undefined,
-    nullable: false,
-    title: undefined,
-    disabled: false,
-    class: undefined,
-    required: true,
-});
+const props = withDefaults(
+    defineProps<{
+        validator?: Validator;
+        nullable?: boolean;
+        title?: string;
+        disabled?: boolean;
+        class?: string | null;
+        required?: boolean;
+        placeholder?: string;
+        errorFields?: string;
+        errorBox?: ErrorBox | null;
+    }>(), {
+        validator: undefined,
+        nullable: false,
+        title: undefined,
+        disabled: false,
+        class: undefined,
+        required: true,
+        placeholder: undefined,
+        errorFields: 'uitpasNumber',
+        errorBox: null,
+    },
+);
 
+const errors = useErrors({ validator: props.validator });
 const model = defineModel<string | null>({ required: true });
 
+useValidation(errors.validator, validate);
+
 const uitpasNumberRaw = ref(model.value ?? '');
-
-watch(model, value => uitpasNumberRaw.value = value ?? '');
-
 const placeholder = computed(() => {
-    const base = $t('5cb71059-9a9c-452c-8957-4622c5dc4af5', { example: '4329032984732' });
+    if (props.placeholder) return props.placeholder;
+    const base = $t('5cb71059-9a9c-452c-8957-4622c5dc4af5', { example: '4329 032 984 732' });
     if (props.required) return base;
     return $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f') + '. ' + base;
 });
 
-const input = ref<HTMLInputElement | null>(null);
-const errorBox: Ref<ErrorBox | null> = ref(null);
+watch(model, (value) => {
+    uitpasNumberRaw.value = value ? DataValidator.formatUitpasNumber(value) : '';
+}, { immediate: true });
 
-if (props.validator) {
-    useValidation(props.validator, () => {
-        return validate(true);
-    });
-}
-
-function clearErrorBox(silent: boolean) {
-    if (!silent) {
-        errorBox.value = null;
+const errorBoxes = computed(() => {
+    const arr: ErrorBox[] = [];
+    if (props.errorBox) {
+        arr.push(props.errorBox);
     }
+    if (errors.errorBox) {
+        arr.push(errors.errorBox);
+    }
+    return arr.length > 0 ? arr : null;
+});
+
+function onTyping() {
+    // Silently send modelValue to parents, but don't show visible errors yet
+    validate(false, true);
 }
 
-function validate(final = true, silent = false): boolean {
-    if (!props.required && uitpasNumberRaw.value.length === 0) {
-        clearErrorBox(silent);
-        model.value = null;
+function validate(final = true, silent = false) {
+    uitpasNumberRaw.value = uitpasNumberRaw.value.trim();
+
+    const unformatted = uitpasNumberRaw.value.replace(/\s+/g, '');
+
+    if (!props.required && unformatted.length === 0) {
+        if (!silent) {
+            errors.errorBox = null;
+        }
+
+        if (model.value !== null) {
+            model.value = null;
+        }
         return true;
     }
 
-    if (props.required && uitpasNumberRaw.value.length === 0 && !final) {
-        // Ignore empty email if not final
-        clearErrorBox(silent);
-
-        if (props.nullable) {
-            model.value = null;
-        }
-        else {
-            model.value = '';
+    if (props.required && unformatted.length === 0 && !final) {
+        if (!silent) {
+            errors.errorBox = null;
         }
 
+        model.value = props.nullable ? null : '';
         return false;
     }
 
-    if (!DataValidator.isUitpasNumberValid(uitpasNumberRaw.value)) {
+    if (!DataValidator.isUitpasNumberValid(unformatted)) {
         if (!silent) {
-            errorBox.value = new ErrorBox(new SimpleError({
+            errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`5c6ace17-d4d1-4492-8bf5-e8f90f9daed6`),
-                field: 'uitpasNumber',
+                message: unformatted.length === 0
+                    ? $t('Vul een UiTPAS-nummer in')
+                    : $t('Ongeldige UiTPAS-nummer, kijk het nummer na.'),
+                field: props.errorFields,
             }));
         }
-
         return false;
     }
-
-    model.value = uitpasNumberRaw.value;
-    clearErrorBox(silent);
-
-    return true;
-}
-
-function preventInvalidUitpasNumberChars(e: KeyboardEvent) {
-    // allow paste
-    if (e.ctrlKey || e.metaKey) return false;
-
-    // do not allow non-digits
-    if (e.key && /^\D$/.test(e.key)) {
-        e.preventDefault();
+    else {
+        if (model.value !== unformatted) {
+            model.value = unformatted;
+        }
+        if (!silent) {
+            errors.errorBox = null;
+        }
+        return true;
     }
 }
 </script>
