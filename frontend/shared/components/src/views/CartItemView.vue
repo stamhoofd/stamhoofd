@@ -110,17 +110,29 @@
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
                 <hr><h2>{{ cartItem.amount < 2 ? $t('e330f60b-d331-49a2-a437-cddc31a878de') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
-                <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="max uitpas-number-input">
-                    <input
+                <div v-for="(value, index) in uitpasNumbers" :key="index">
+                    <UitpasNumberInput
                         v-model="uitpasNumbers[index].uitpasNumber"
-                        class="input"
-                        type="text"
                         :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
+                        :class="'max uitpas-number-input'"
+                        :validator="errors.validator"
+                        :required="true"
+                        :error-fields="'uitpasNumbers.' + index"
+                        :error-box="errors.errorBox"
+                    />
+
+                    <p
+                        v-if="originalSelectedPriceId === cartItem.productPrice.id
+                            && cartItem.calculatedPrices[index]
+                            && cartItem.calculatedPrices[index].price !== cartItem.productPrice.price"
+                        class="style-description-small"
                     >
-                    <p v-if="originalSelectedPriceId === cartItem.productPrice.id && cartItem.uitpasNumbers[index] && cartItem.calculateOptionsPrice(cart, cartItem.uitpasNumbers[index].price) !== cartItem.calculateOptionsPrice(cart, cartItem.productPrice.price)" class="style-description-small">
-                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {specificPrice: formatPrice(cartItem.calculateOptionsPrice(cart, cartItem.uitpasNumbers[index].price)), generalPrice: formatPrice(cartItem.calculateOptionsPrice(cart, cartItem.productPrice.price))}) }}
+                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {
+                            specificPrice: formatPrice(cartItem.calculatedPrices[index].price),
+                            generalPrice: formatPrice(cartItem.productPrice.price)
+                        }) }}
                     </p>
-                </STInputBox>
+                </div>
             </template>
 
             <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
@@ -175,6 +187,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { useContext } from '../hooks';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
+import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -368,6 +381,12 @@ async function addToCart() {
     }
 
     loading.value = true;
+
+    if (!(await errors.validator.validate())) {
+        loading.value = false;
+        return;
+    }
+
     if (!(await validate())) {
         loading.value = false;
         return;

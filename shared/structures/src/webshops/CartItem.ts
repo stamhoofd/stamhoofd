@@ -515,10 +515,10 @@ export class CartItem extends AutoEncoder {
 
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
-                descriptions.push($t('e330f60b-d331-49a2-a437-cddc31a878de') + ': ' + this.uitpasNumbers[0].uitpasNumber);
+                descriptions.push($t('e330f60b-d331-49a2-a437-cddc31a878de') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
             }
             else {
-                descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.map(item => item.uitpasNumber).join(', '));
+                descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.map(item => DataValidator.formatUitpasNumber(item.uitpasNumber)).join(', '));
             }
         }
         return descriptions.filter(d => !!d).join('\n');
