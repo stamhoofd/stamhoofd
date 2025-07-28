@@ -25,7 +25,7 @@ import STErrorsInput from '../errors/STErrorsInput.vue';
 })
 export default class STInputBox extends VueComponent {
     @Prop({ default: '' }) errorFields: string;
-    @Prop({ default: null }) errorBox: ErrorBox | null;
+    @Prop({ default: null }) errorBox: ErrorBox | ErrorBox[] | null;
 
     @Prop({ default: false })
     indent!: boolean;
