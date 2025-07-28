@@ -9,6 +9,21 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <p v-if="!patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" class="warning-box with-button selectable" @click="openUitpasEventSearch()">
+            {{ $t('Er werd géén UiTPAS-evemenent gekoppeld, je krijgt géén automatische terugbetaling van je UiTPAS-regio.') }}
+
+            <button class="button text" type="button">
+                {{ $t('UiTPAS-evenement koppelen') }}
+            </button>
+        </p>
+        <p v-else-if="patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus !== UitpasClientCredentialsStatus.Ok" class="error-box with-button selectable" @click="openUitpasSettings()">
+            {{ UitpasClientCredentialsStatusHelper.getName(organization.meta.uitpasClientCredentialsStatus) }}
+
+            <button class="button text" type="button">
+                {{ $t('Controleer de instellingen') }}
+            </button>
+        </p>
+
         <div class="split-inputs">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                 <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
@@ -48,6 +63,45 @@
             <ProductSelectDateRangeInput v-model="dateRange" :date-ranges="allDateRanges" :validator="errors.validator" @modify="modifyDateRange" />
         </template>
 
+        <template v-if="patchedProduct.uitpasEvent">
+            <hr><h2 class="style-with-button">
+                <div>{{ $t('UiTPAS-evenement') }}</div>
+                `<button class="button text only-icon-smartphone" type="button" @click="clearUitpasEvent">
+                    <span class="icon unlink" />
+                    <span>{{ $t('Ontkoppel') }}</span>
+                </button>`
+            </h2>
+            <p class="style-description-small">
+                {{ $t('Krijg automatische terugbetaling van je UiTPAS-regio.') }}
+            </p>
+
+            <STList>
+                <STListItem
+                    :selectable="true"
+                    @click="openUitpasEventSearch()"
+                >
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ product.uitpasEvent ? product.uitpasEvent.name : $t('Koppel jouw UiTPAS-evenement') }}
+                    </h3>
+
+                    <p class="style-description">
+                        {{ product.uitpasEvent ? product.uitpasEvent.location : $t('Nog niet gekoppeld, je krijgt dus géén automatische terugbetaling.') }}
+                    </p>
+
+                    <template #right>
+                        <span class="button text">
+                            {{ product.uitpasEvent ? $t('Wijzig') : $t('Zoeken') }}
+                            <span class="icon arrow-right-small" />
+                        </span>
+                    </template>
+                </STListItem>
+            </STList>
+        </template>
+
         <hr><h2 class="style-with-button">
             <div>{{ $t('2b96c0b9-6c20-4962-8e99-ff898d893a0d') }}</div>
             <div>
@@ -59,7 +113,7 @@
         </h2>
         <p>{{ $t("b81de0d8-04af-48b7-8df4-a5fa51fa60ce") }}</p>
 
-        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
+        <ProductPriceBox v-if="patchedProduct.prices.length === 1" :is-new="isNew" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errors.errorBox" @patch="addProductPatch($event)" />
 
         <STList v-else v-model="draggablePrices" :draggable="true">
             <template #item="{item: price}">
@@ -348,8 +402,8 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, DateSelection, Dropdown, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, usePatch } from '@stamhoofd/components';
-import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
+import { CenteredMessage, NavigationActions, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, useRequiredOrganization, usePatch, Dropdown } from '@stamhoofd/components';
+import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper } from '@stamhoofd/structures';
 
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
@@ -362,6 +416,10 @@ import ProductPriceBox from './ProductPriceBox.vue';
 import ProductPriceRow from './ProductPriceRow.vue';
 import ProductSelectDateRangeInput from './ProductSelectDateRangeInput.vue';
 import ProductSelectLocationInput from './ProductSelectLocationInput.vue';
+import { useGoToUitpasConfiguration } from '@stamhoofd/components/src/context/hooks/useGoToUitpasConfiguration';
+import { useSetUitpasEvent } from '@stamhoofd/components/src/context/hooks/useSetUitpasEvent';
+
+const organization = useRequiredOrganization();
 
 const props = defineProps<{
     product: Product;
@@ -379,6 +437,8 @@ const uitpasFeature = useFeatureFlag()('uitpas');
 /// For now only used to update locations and times of other products that are shared
 const { patch: patchWebshop, patched: patchedWebshop, addPatch: addWebshopPatch, hasChanges: hasWebshopChanges } = usePatch(props.webshop);
 const { patch: patchProduct, patched: patchedProduct, addPatch: addProductPatch, hasChanges: hasProductChanges } = usePatch(props.product);
+const { goToUitpasConfiguration, goToUitpasEventSearch, goToUitpasSettings } = useGoToUitpasConfiguration(patchedProduct, addProductPatch);
+const { clearUitpasEvent } = useSetUitpasEvent(patchedProduct, addProductPatch);
 
 onMounted(() => {
     document.body.addEventListener('paste', onPastEventListener);
@@ -386,6 +446,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     document.body.removeEventListener('paste', onPastEventListener);
+});
+
+const atLeastOneUitpasSocialTariff = computed(() => {
+    return patchedProduct.value.prices.some(p => !!p.uitpasBaseProductPriceId);
 });
 
 function onPastEventListener(event: Event) {
@@ -766,6 +830,20 @@ function addField() {
     ).catch(console.error);
 }
 
+async function openUitpasEventSearch() {
+    const onFixed = async (navigationActions: NavigationActions) => {
+        await navigationActions.dismiss();
+    };
+    await goToUitpasEventSearch(false, onFixed);
+}
+
+async function openUitpasSettings() {
+    const onFixed = async (navigationActions: NavigationActions) => {
+        await navigationActions.dismiss();
+    };
+    await goToUitpasSettings(onFixed);
+}
+
 const productPricesAvailableForUitpasBaseProductPrice = computed(() => {
     return patchedProduct.value.prices.filter(p => (p.uitpasBaseProductPriceId === null));
 });
@@ -782,12 +860,41 @@ async function addProductPrice(enableUitpasSocialTariff: boolean = false) {
             Toast.error($t('f6291892-674b-4c66-8855-4937f4d15b86')).show();
             return;
         }
-        const isConfirmed = await CenteredMessage.confirm($t('eb05aa2d-65c0-4ead-961e-3b110439550e'), $t('613363e2-39ae-46c1-a31e-ace703ddfdd4'), undefined, $t('088a8928-cdae-4886-9f02-bb0510a9c59b'), false);
-        if (!isConfirmed) {
-            return;
-        }
-        price.uitpasBaseProductPriceId = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
-        price.name = 'UiTPAS kansentarief';
+        const onFixed = async (navigationActions?: NavigationActions) => {
+            price.uitpasBaseProductPriceId = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+            price.name = 'UiTPAS kansentarief';
+            const p = Product.patch({ id: props.product.id });
+            p.prices.addPut(price);
+            if (navigationActions) {
+                // replace all view on there NavigationController with a product price edit view
+                await navigationActions.show({
+                    components: [
+                        new ComponentWithProperties(EditProductPriceView, {
+                            product: patchedProduct.value.patch(p),
+                            productPrice: price,
+                            isNew: true,
+                            saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+                                // Merge both patches
+                                addProductPatch(p.patch(patch));
+                            },
+                        }),
+                    ],
+                    replace: 100,
+                });
+                return;
+            }
+            // they didn't make a NavigationController, so we just present the view
+            present(new ComponentWithProperties(EditProductPriceView, { product: patchedProduct.value.patch(p), productPrice: price, isNew: true, saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+                // Merge both patches
+                addProductPatch(p.patch(patch));
+
+                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+            } }).setDisplayStyle('popup'))
+                .catch(console.error);
+        };
+
+        await goToUitpasConfiguration(onFixed);
+        return;
     }
 
     const p = Product.patch({ id: props.product.id });
