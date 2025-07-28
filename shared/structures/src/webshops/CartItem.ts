@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, PartialWithoutMethods, StringDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Formatter } from '@stamhoofd/utility';
+import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { CartReservedSeat, ReservedSeat } from '../SeatingPlan.js';
@@ -671,6 +671,62 @@ export class CartItem extends AutoEncoder {
         return CartStockHelper.getRemaining(this.getAvailableStock(oldItem, cart, webshop, admin));
     }
 
+    validateUitpasNumbers() {
+        if (!this.productPrice.uitpasBaseProductPriceId) {
+            if (this.uitpasNumbers.length > 0) {
+                throw new SimpleError({
+                    code: 'uitpas_numbers_not_allowed',
+                    message: 'UiTPAS numbers not allowed for this product',
+                    human: $t('Geef enkel UiTPAS-nummers als je gebruikt maakt van het UiTPAS sociaal tarief.'),
+                    field: 'cart.items.uitpasNumbers',
+                });
+            }
+            return;
+        }
+        const uitpasNumbers = this.uitpasNumbers.map(p => p.uitpasNumber);
+
+        uitpasNumbers.forEach((num, i) => {
+            if (num === '') {
+                throw new SimpleError({
+                    code: 'empty_uitpas_number',
+                    message: 'Empty uitpas number',
+                    human: $t('Vul een UiTPAS-nummer in.'),
+                    field: 'uitpasNumbers.' + i.toString(),
+                });
+            }
+        });
+
+        const errors = uitpasNumbers.filter(num => !DataValidator.isUitpasNumberValid(num)).map((value, i) => new SimpleError({
+            code: 'invalid_uitpas_number',
+            message: 'Invalid uitpas number',
+            human: $t('Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.'),
+            field: 'uitpasNumbers.' + i.toString(),
+        }));
+        if (errors.length > 0) {
+            throw new SimpleErrors(...errors);
+        }
+
+        // verify the amount of UiTPAS numbers
+        if (uitpasNumbers.length !== this.amount) {
+            throw new SimpleError({
+                code: 'amount_of_uitpas_numbers_mismatch',
+                message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
+                human: $t('6140c642-69b2-43d6-80ba-2af4915c5837'),
+                field: 'cart.items.uitpasNumbers',
+            });
+        }
+
+        // verify the UiTPAS numbers are unique (within the item)
+        if (uitpasNumbers.length !== Formatter.uniqueArray(uitpasNumbers).length) {
+            throw new SimpleError({
+                code: 'duplicate_uitpas_numbers',
+                message: 'Duplicate uitpas numbers used',
+                human: $t('d9ec27f3-dafa-41e8-bcfb-9da564a4a675'),
+                field: 'cart.items.uitpasNumbers',
+            });
+        }
+    }
+
     /**
      * Update self to the newest available data and throw if it was not able to recover
      */
@@ -832,6 +888,8 @@ export class CartItem extends AutoEncoder {
                 seat.calculatePrice(seatingPlan);
             }
         }
+
+        this.validateUitpasNumbers();
 
         // Update prices
         // should now happen in the checkout so discounts are in sync
