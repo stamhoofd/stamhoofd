@@ -54,8 +54,10 @@ export class WebshopUitpasNumber extends QueryableModel {
     @column({ type: 'integer', nullable: true })
     reducedPriceUitpas: number | null = null;
 
-    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[]): Promise<boolean> {
-        const hasBeenUsed = !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
-        return hasBeenUsed;
+    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[], uitpasEventUrl?: string): Promise<boolean> {
+        if (uitpasEventUrl) {
+            return !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere(SQL.where('productId', productId).or('uitpasEventUrl', uitpasEventUrl)).andWhere('uitpasNumber', uitpasNumbers).first(false));
+        }
+        return !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
     }
 }

@@ -159,7 +159,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
 
                 // verify the UiTPAS numbers are not already used for this product
-                const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshop.id, item.product.id, uitpasNumbersOnly);
+                const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshop.id, item.product.id, uitpasNumbersOnly, item.product.uitpasEvent?.url);
                 if (hasBeenUsed) {
                     throw new SimpleError({
                         code: 'uitpas_number_already_used',
