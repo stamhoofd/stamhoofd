@@ -10,10 +10,14 @@
                 <input ref="input" v-model="name" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('Zoek op naam')">
             </form>
 
-            <Spinner v-if="loadingResults" class="gray center" />
+            <Spinner v-if="loadingResults || (loadingAfterOrganizerSelect && !selectedOrganizerId)" class="gray center" />
             <STList v-else>
                 <STListItem v-for="organizer in results" :key="organizer.id" :selectable="true" @click="doSelectOrganizer(organizer)">
                     <h2>{{ organizer.name }}</h2>
+                    <template #right>
+                        <Spinner v-if="loadingAfterOrganizerSelect && (organizer.id === selectedOrganizerId)" class="gray center" />
+                        <span v-else class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
             </STList>
             <p v-if="!loadingResults && results.length === 0 && name" class="info-box">
@@ -51,6 +55,9 @@ const errors = useErrors();
 
 let lastName = '';
 let counter = 0;
+
+const loadingAfterOrganizerSelect = ref(false);
+const selectedOrganizerId = ref('');
 
 const updateResults = async () => {
     const n = name.value;
@@ -123,7 +130,10 @@ watch(name, startUpdateResults);
 async function doSelectOrganizer(organizer: UitpasOrganizerResponse) {
     try {
         errors.errorBox = null;
+        loadingAfterOrganizerSelect.value = true;
+        selectedOrganizerId.value = organizer.id;
         await props.selectOrganizer(organizer, navigationActions);
+        loadingAfterOrganizerSelect.value = false;
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
