@@ -9,11 +9,11 @@ export enum UitpasClientCredentialsStatus {
 export class UitpasClientCredentialsStatusHelper {
     static getName(status: UitpasClientCredentialsStatus): string {
         switch (status) {
-            case UitpasClientCredentialsStatus.NotChecked: return $t('Toegangsrechten nog niet gecontroleerd');
-            case UitpasClientCredentialsStatus.NotConfigured: return $t('Niet ingesteld');
+            case UitpasClientCredentialsStatus.NotChecked: return $t('Toegangsrechten van jouw UiTPAS-integratie is nog niet gecontroleerd');
+            case UitpasClientCredentialsStatus.NotConfigured: return $t('Jouw UiTPAS-integratie is niet (meer) ingesteld');
             case UitpasClientCredentialsStatus.NoPermissions: return $t('Jouw UiTPAS-integratie heeft geen toegansrechten tot de UiTPAS-organisator');
             case UitpasClientCredentialsStatus.MissingPermissions: return $t('Jouw UiTPAS-integratie heeft onvoldoende toegangsrechten');
-            case UitpasClientCredentialsStatus.Ok: return $t('Ingesteld en geldig');
+            case UitpasClientCredentialsStatus.Ok: return $t('Jouw UiTPAS-integratie is ingesteld en geldig');
         }
     }
 
