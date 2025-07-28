@@ -10,6 +10,7 @@ import { ProductDiscountSettings } from './Discount.js';
 import { Option, OptionMenu, Product, ProductPrice, ProductType } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
+import { UitpasNumberAndPrice } from './UitpasNumberAndPrice.js';
 
 export class CartItemPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -131,11 +132,14 @@ export class CartItem extends AutoEncoder {
     calculatedPrices: CartItemPrice[] = [];
 
     /**
-     * In case this product is a UiTPAS social tarrif, we hold a list of UiTPAS numbers (length is equal to amount).
+     * In case this product is a UiTPAS social tarrif,
+     * we hold a list of UiTPAS numbers (length is equal to amount)
+     * and the price of the social tarrif for this uitpas number.
+     *
      * In case this is not a UiTPAS social tarrif, this will be an empty array.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), version: 377 })
-    uitpasNumbers: string[] = [];
+    @field({ decoder: new ArrayDecoder(UitpasNumberAndPrice), version: 377 })
+    uitpasNumbers: UitpasNumberAndPrice[] = [];
 
     /**
      * Show an error in the cart for recovery
@@ -269,22 +273,27 @@ export class CartItem extends AutoEncoder {
      */
     calculatePrices(cart: Cart) {
         const prices: CartItemPrice[] = [];
-
         const unitPrice = this.calculateUnitPrice(cart);
-        for (const seat of this.seats) {
-            const seatPrice = unitPrice + seat.price;
+        for (let i = 0; i < this.amount; i++) {
+            let p: number;
+            if (i < this.uitpasNumbers.length && this.product.uitpasEvent) {
+                p = this.calculateOptionsPrice(cart, this.uitpasNumbers[i].price);
+            }
+            else {
+                p = unitPrice;
+            }
+            if (i < this.seats.length) {
+                // Seats
+                const seatPrice = p + this.seats[i].price;
 
-            prices.push(CartItemPrice.create({
-                price: seatPrice,
-            }));
-        }
-
-        // Others (non seats)
-        const remaining = this.amount - this.seats.length;
-        if (remaining > 0) {
-            for (let index = 0; index < remaining; index++) {
                 prices.push(CartItemPrice.create({
-                    price: unitPrice,
+                    price: seatPrice,
+                }));
+            }
+            else {
+                // Others (non seats)
+                prices.push(CartItemPrice.create({
+                    price: p,
                 }));
             }
         }
@@ -298,18 +307,19 @@ export class CartItem extends AutoEncoder {
         if (this.productPrice.discountPrice !== null && amount >= this.productPrice.discountAmount) {
             price = this.productPrice.discountPrice;
         }
+        this.unitPrice = this.calculateOptionsPrice(cart, price);
+        return this.unitPrice;
+    }
+
+    calculateOptionsPrice(cart: Cart, priceBeforeOptions: number): number {
+        let price = priceBeforeOptions;
         for (const option of this.options) {
             price += option.option.price;
         }
-
         if (this.productPrice.price >= 0) {
-            this.unitPrice = Math.max(0, price);
-        }
-        else {
-            // Allow negative
-            this.unitPrice = price;
-        }
-        return this.unitPrice;
+            price = Math.max(0, price);
+        } // Allow negative
+        return price;
     }
 
     /**
@@ -505,10 +515,10 @@ export class CartItem extends AutoEncoder {
 
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
-                descriptions.push($t('e330f60b-d331-49a2-a437-cddc31a878de') + ': ' + this.uitpasNumbers[0]);
+                descriptions.push($t('e330f60b-d331-49a2-a437-cddc31a878de') + ': ' + this.uitpasNumbers[0].uitpasNumber);
             }
             else {
-                descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.join(', '));
+                descriptions.push($t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') + ': ' + this.uitpasNumbers.map(item => item.uitpasNumber).join(', '));
             }
         }
         return descriptions.filter(d => !!d).join('\n');

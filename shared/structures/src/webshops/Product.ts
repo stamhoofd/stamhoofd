@@ -7,6 +7,7 @@ import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
 import { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
+import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -276,6 +277,13 @@ export class Product extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(OptionMenu) })
     optionMenus: OptionMenu[] = [];
+
+    /**
+     * If this id is not null, we use the official UiTPAS flow.
+     * If it is null, we use the non-official flow (if one of the productPrices is UiTPAS social tariff
+     */
+    @field({ decoder: UitpasEventResponse, nullable: true, ...NextVersion })
+    uitpasEvent: UitpasEventResponse | null = null;
 
     clearStock() {
         this.usedStock = 0;

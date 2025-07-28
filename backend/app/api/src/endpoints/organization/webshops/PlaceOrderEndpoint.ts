@@ -1,7 +1,7 @@
 import { createMollieClient, PaymentMethod as molliePaymentMethod } from '@mollie/api-client';
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -136,10 +136,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             // UiTPAS numbers validation
             const articlesWithUitpasSocialTariff = request.body.cart.items.filter(item => item.productPrice.uitpasBaseProductPriceId !== null);
             for (const item of articlesWithUitpasSocialTariff) {
-                const uitpasNumbers = item.uitpasNumbers;
+                const uitpasNumbersOnly = item.uitpasNumbers.map(p => p.uitpasNumber);
 
                 // verify the amount of UiTPAS numbers
-                if (uitpasNumbers.length !== item.amount) {
+                if (uitpasNumbersOnly.length !== item.amount) {
                     throw new SimpleError({
                         code: 'amount_of_uitpas_numbers_mismatch',
                         message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
@@ -149,7 +149,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
 
                 // verify the UiTPAS numbers are unique (within the order)
-                if (uitpasNumbers.length !== Formatter.uniqueArray(uitpasNumbers).length) {
+                if (uitpasNumbersOnly.length !== Formatter.uniqueArray(uitpasNumbersOnly).length) {
                     throw new SimpleError({
                         code: 'duplicate_uitpas_numbers',
                         message: 'Duplicate uitpas numbers used',
@@ -159,7 +159,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
 
                 // verify the UiTPAS numbers are not already used for this product
-                const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshop.id, item.product.id, uitpasNumbers);
+                const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshop.id, item.product.id, uitpasNumbersOnly);
                 if (hasBeenUsed) {
                     throw new SimpleError({
                         code: 'uitpas_number_already_used',
@@ -170,14 +170,32 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
 
                 // verify the UiTPAS numbers are valid for social tariff (static check + API call to UiTPAS)
-                try {
-                    await UitpasService.checkUitpasNumbers(uitpasNumbers); // Throws if invalid
-                }
-                catch (e) {
-                    if (isSimpleError(e) || isSimpleErrors(e)) {
-                        e.addNamespace('uitpasNumbers');
+                if (item.product.uitpasEvent) {
+                    const basePrice = item.product.prices.find(p => p.id === item.productPrice.uitpasBaseProductPriceId)?.price ?? 0;
+                    const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, uitpasNumbersOnly, basePrice, item.product.uitpasEvent.url);
+                    const expectedReducedPrices = item.uitpasNumbers.map(p => p.price);
+                    if (reducedPrices.length < expectedReducedPrices.length) {
+                        // should not happen
+                        throw new SimpleError({
+                            code: 'uitpas_social_tariff_price_mismatch',
+                            message: 'UiTPAS wrong number of prices retruned',
+                            human: $t('Het kansentarief voor sommige UiTPAS-nummers kon niet worden opgehaald.'),
+                            field: 'cart.items.uitpasNumbers',
+                        });
                     }
-                    throw e;
+                    for (let i = 0; i < expectedReducedPrices.length; i++) {
+                        if (reducedPrices[i] !== expectedReducedPrices[i]) {
+                            throw new SimpleError({
+                                code: 'uitpas_social_tariff_price_mismatch',
+                                message: 'UiTPAS social tariff have a different price',
+                                human: $t('Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.', { correctPrice: Formatter.price(reducedPrices[i]), orderPrice: Formatter.price(expectedReducedPrices[i]) }),
+                                field: 'uitpasNumbers.' + i.toString(),
+                            });
+                        }
+                    }
+                }
+                else {
+                    await UitpasService.checkUitpasNumbers(uitpasNumbersOnly); // Throws if invalid
                 }
             }
 

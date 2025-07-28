@@ -1,6 +1,5 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from "@simonbackx/simple-errors";
-import { DataValidator } from "@stamhoofd/utility";
-import { UitpasTokenRepository } from "../../helpers/UitpasTokenRepository";
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { DataValidator } from '@stamhoofd/utility';
 
 type UitpasNumberSuccessfulResponse = {
     socialTariff: {
@@ -167,6 +166,7 @@ export async function checkUitpasNumbers(access_token: string, uitpasNumbers: st
         catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace(i.toString());
+                e.addNamespace('uitpasNumbers');
                 simpleErrors.addError(e);
             }
             else {
