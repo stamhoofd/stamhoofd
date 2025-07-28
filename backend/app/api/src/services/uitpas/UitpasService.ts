@@ -187,12 +187,19 @@ export class UitpasService {
         // Only register/cancel tickets if official flow is/was used
         const toBeCanceledUitpasIds = toBeCanceled.filter(c => c.uitpasEventUrl && c.uitpasTariffId && c.ticketSaleId).map(c => c.ticketSaleId!);
         const toBeRegisteredUitpasRequests: RegisterTicketSaleRequest[] = toBeRegistered.filter(c => c.uitpasEventUrl && c.uitpasTariffId) as RegisterTicketSaleRequest[];
+        const noUitpasTariffId = toBeRegistered.filter(c => c.uitpasEventUrl && !c.uitpasTariffId);
+        if (noUitpasTariffId.length > 0) {
+            console.warn('Some UiTPAS do not have an uitpasTariffId, although an UiTPAS event is linked (official flow)', noUitpasTariffId);
+        }
 
         let canceledUitpasId: string[] = [];
         let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
         if (toBeRegisteredUitpasRequests.length !== 0 || toBeCanceledUitpasIds.length !== 0) {
             const access_token = await UitpasTokenRepository.getAccessTokenFor(order.organizationId);
             canceledUitpasId = await cancelTicketSales(access_token, toBeCanceledUitpasIds);
+            if (canceledUitpasId.length !== toBeCanceledUitpasIds.length) {
+                console.error('Failed to cancel some UiTPAS ticket sales, successfully canceled:', canceledUitpasId, 'but tried to cancel:', toBeCanceledUitpasIds);
+            }
             try {
                 newlyRegistered = await registerTicketSales(access_token, toBeRegisteredUitpasRequests);
             }
