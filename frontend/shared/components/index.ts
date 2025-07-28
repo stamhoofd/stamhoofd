@@ -90,6 +90,7 @@ export { default as GroupIconWithWaitingList } from './src/members/components/gr
 export { default as IconContainer } from './src/icons/IconContainer.vue';
 export { default as ProgressIcon } from './src/icons/ProgressIcon.vue';
 export { default as ProgressRing } from './src/icons/ProgressRing.vue';
+export { default as DateBox } from './src/icons/DateBox.vue';
 
 // Shared views should be last
 export { default as AccountSettingsView } from './src/views/AccountSettingsView.vue';
