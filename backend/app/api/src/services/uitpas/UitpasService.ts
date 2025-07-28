@@ -1,6 +1,6 @@
 import { Model } from '@simonbackx/simple-database';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
-import { OrderStatus, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
+import { Cart, OrderStatus, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers';
@@ -12,6 +12,7 @@ import { searchUitpasEvents } from './searchUitpasEvents';
 import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSales } from './registerTicketSales';
 import { cancelTicketSales } from './cancelTicketSales';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
 
 type UitpasTicketSale = {
     basePrice: number;
@@ -355,5 +356,69 @@ export class UitpasService {
     static async clearClientCredentialsFor(organizationId: string | null) {
         // Clear the uitpas client credentials for the organization
         await UitpasTokenRepository.clearClientCredentialsFor(organizationId);
+    }
+
+    static async validateCart(organizationId: string, webshopId: string, cart: Cart): Promise<Cart> {
+        let access_token_org: string | null = null;
+        let access_token_platform: string | null = null;
+        for (const item of cart.items) {
+            if (item.uitpasNumbers.length === 0) {
+                continue;
+            }
+
+            // verify the UiTPAS numbers are not already used for this product
+            const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshopId, item.product.id, item.uitpasNumbers.map(p => p.uitpasNumber), item.product.uitpasEvent?.url);
+            if (hasBeenUsed) {
+                throw new SimpleError({
+                    code: 'uitpas_number_already_used',
+                    message: 'One or more uitpas numbers are already used',
+                    human: $t('Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit UiTPAS-evenement.'),
+                    field: 'uitpasNumbers',
+                });
+            }
+
+            if (item.product.uitpasEvent) {
+                // official flow
+                const basePrice = item.product.prices.filter(price => price.id === item.productPrice.uitpasBaseProductPriceId)[0]?.price;
+                if (!basePrice) {
+                    throw new SimpleError({
+                        code: 'missing_uitpas_base_product_price',
+                        message: `Missing UiTPAS base product price`,
+                        human: $t(`Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.`),
+                    });
+                }
+
+                access_token_org = access_token_org ?? await UitpasTokenRepository.getAccessTokenFor(organizationId);
+                const verified = await getSocialTariffForUitpasNumbers(access_token_org, item.uitpasNumbers.map(p => p.uitpasNumber), basePrice, item.product.uitpasEvent.url);
+                if (verified.length < item.uitpasNumbers.length) {
+                    throw new SimpleError({
+                        code: 'uitpas_social_tariff_price_mismatch',
+                        message: 'UiTPAS wrong number of prices returned',
+                        human: $t('Het kansentarief voor sommige UiTPAS-nummers kon niet worden opgehaald.'),
+                        field: 'uitpasNumbers',
+                    });
+                }
+                for (let i = 0; i < verified.length; i++) {
+                    if (item.uitpasNumbers[i].uitpasTariffId !== verified[i].uitpasTariffId) {
+                        // silently update
+                        item.uitpasNumbers[i].uitpasTariffId = verified[i].uitpasTariffId;
+                    }
+                    if (item.uitpasNumbers[i].price !== verified[i].price) {
+                        throw new SimpleError({
+                            code: 'uitpas_social_tariff_price_mismatch',
+                            message: 'UiTPAS social tariff have a different price',
+                            human: $t('Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.', { correctPrice: Formatter.price(verified[i].price), orderPrice: Formatter.price(item.uitpasNumbers[i].price) }),
+                            field: 'uitpasNumbers.' + i.toString(),
+                        });
+                    }
+                }
+            }
+            else {
+                // non-official flow
+                access_token_platform = access_token_platform ?? await UitpasTokenRepository.getAccessTokenFor();
+                await checkUitpasNumbers(access_token_platform, item.uitpasNumbers.map(p => p.uitpasNumber));
+            }
+        }
+        return cart;
     }
 };

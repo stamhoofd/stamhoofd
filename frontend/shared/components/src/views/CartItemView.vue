@@ -155,7 +155,7 @@
 import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { Request } from '@simonbackx/simple-networking';
 import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse, Webshop } from '@stamhoofd/structures';
-import { DataValidator, Formatter } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 
 import { computed, onMounted, ref, Ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -237,6 +237,11 @@ const formattedPriceWithDiscount = computed(() => pricedItem.value.getFormattedP
 const formattedPriceWithoutDiscount = computed(() => pricedItem.value.getFormattedPriceWithoutDiscount());
 
 async function validate() {
+    // clear only on save, so fast switchting between items doesn't clear the UiTPAS numbers
+    if (!props.cartItem.productPrice.uitpasBaseProductPriceId) {
+        props.cartItem.uitpasNumbers = [];
+    }
+
     try {
         const clonedCart = cart.value.clone();
 
@@ -254,12 +259,7 @@ async function validate() {
         });
 
         if (props.cartItem.productPrice.uitpasBaseProductPriceId !== null) {
-            // Validate UiTPAS numbers
             await validateUitpasNumbers();
-        }
-        else {
-            // Clear uitpas numbers if this is not a UiTPAS product
-            props.cartItem.uitpasNumbers = [];
         }
     }
     catch (e) {
@@ -279,55 +279,8 @@ async function validateUitpasNumbers() {
         return;
     }
 
-    const uitpasNumbersOnly = props.cartItem.uitpasNumbers.map(p => p.uitpasNumber);
-
-    // verify the amount of UiTPAS numbers
-    if (uitpasNumbersOnly.length !== props.cartItem.amount) {
-        // should not happen as frontend displays correct amount of input fields
-        throw new SimpleError({
-            code: 'uitpas_numbers_does_not_match_amount',
-            message: 'UiTPAS numbers does not match ordered amount',
-            human: $t('b54c138c-e72f-435b-822b-601d4a529124'),
-        });
-    }
-
-    // verify UiTPAS numbers are non-empty
-    for (let i = 0; i < uitpasNumbersOnly.length; i++) {
-        const uitpasNumber = uitpasNumbersOnly[i];
-        if (uitpasNumber.trim() === '') {
-            throw new SimpleError({
-                code: 'empty_uitpas_number',
-                message: 'Empty UiTPAS number provided',
-                human: $t('060b1af6-155c-468a-9657-6fcb10dfb133'),
-                field: 'uitpasNumbers.' + i,
-            });
-        }
-
-        // verify the UiTPAS numbers are valid (static check)
-        if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
-            throw new SimpleError({
-                code: 'uitpas_number_invalid',
-                message: `UiTPAS number invalid: ${uitpasNumber}`,
-                human: $t(
-                    `Het opgegeven UiTPAS-nummer is niet geldig. Controleer het nummer en probeer het opnieuw.`,
-                ),
-                field: 'uitpasNumbers.' + i,
-            });
-        }
-    }
-
-    // verify the UiTPAS numbers are unique (within the order)
-    if (uitpasNumbersOnly.length !== Formatter.uniqueArray(uitpasNumbersOnly).length) {
-        throw new SimpleError({
-            code: 'duplicate_uitpas_numbers_used',
-            message: 'Duplicate uitpas numbers used in order',
-            human: $t('b5192292-d520-49fa-8a9b-c9763bfdc91a'),
-        });
-    }
-
     // verify the UiTPAS numbers are valid for social tariff (call to backend)
     try {
-        console.error('Checking UiTPAS numbers for social tariff, reduced price', props.cartItem.productPrice.price);
         const response = await context.value.optionalAuthenticatedServer.request({
             method: 'POST',
             path: '/uitpas',
@@ -336,13 +289,13 @@ async function validateUitpasNumbers() {
             body: UitpasPriceCheckRequest.create({
                 basePrice: baseProductPrice.price,
                 reducedPrice: props.cartItem.productPrice.price,
-                uitpasNumbers: uitpasNumbersOnly,
+                uitpasNumbers: props.cartItem.uitpasNumbers.map(p => p.uitpasNumber),
                 uitpasEventUrl: props.cartItem.product.uitpasEvent?.url ?? null, // null for non-official flow, not null for official flow
             }),
             decoder: UitpasPriceCheckResponse as Decoder<UitpasPriceCheckResponse>,
         }); // will throw if one of the uitpas numbers is invalid
         const reducedPrices = response.data.prices;
-        if (reducedPrices.length !== uitpasNumbersOnly.length) {
+        if (reducedPrices.length < props.cartItem.uitpasNumbers.length) {
             // Should already be thrown by the backend
             throw new SimpleError({
                 code: 'invalid_uitpas_numbers',
@@ -350,7 +303,7 @@ async function validateUitpasNumbers() {
                 human: $t('4bc1cd70-a8ea-45c0-b9c6-c95a4d766990'),
             });
         }
-        for (let i = 0; i < uitpasNumbersOnly.length; i++) {
+        for (let i = 0; i < props.cartItem.uitpasNumbers.length; i++) {
             props.cartItem.uitpasNumbers[i].price = reducedPrices[i];
         }
     }
