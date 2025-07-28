@@ -26,29 +26,37 @@ import { Request } from '@simonbackx/simple-networking';
 })
 export default class STErrorsInput extends VueComponent {
     @Prop({ default: '' }) errorFields: string;
-    @Prop({ default: null }) errorBox: ErrorBox | null;
+    @Prop({ default: null }) errorBox: ErrorBox | ErrorBox[] | null;
     errors: SimpleError[] = [];
 
     @Watch('errorBox')
-    onNewErrors(val: ErrorBox) {
+    onNewErrors(val: ErrorBox | ErrorBox[] | null) {
         if (!val) {
             this.errors = [];
             return;
         }
-        if (this.errorFields === '') {
+        const arr = Array.isArray(val) ? val : [val];
+        if (arr.length === 0) {
+            this.errors = [];
             return;
         }
-        let errors: SimpleErrors;
+        this.errors = [];
+        for (const errorBox of arr) {
+            if (this.errorFields === '') {
+                continue;
+            }
+            let errors: SimpleErrors;
 
-        if (this.errorFields === '*') {
-            errors = val.remaining;
-        }
-        else {
-            errors = val.forFields(this.errorFields.split(','));
-        }
+            if (this.errorFields === '*') {
+                errors = errorBox.remaining;
+            }
+            else {
+                errors = errorBox.forFields(this.errorFields.split(','));
+            }
 
-        this.errors = errors.errors;
-        val.scrollTo(this.errors, this.$refs.errors as HTMLElement);
+            this.errors.push(...errors.errors);
+            errorBox.scrollTo(this.errors, this.$refs.errors as HTMLElement);
+        }
     }
 
     getErrorMessage(error: SimpleError) {
