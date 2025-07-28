@@ -311,7 +311,7 @@ export class CartItem extends AutoEncoder {
         return this.unitPrice;
     }
 
-    private calculateOptionsPrice(cart: Cart, priceBeforeOptions: number): number {
+    calculateOptionsPrice(cart: Cart, priceBeforeOptions: number): number {
         let price = priceBeforeOptions;
         for (const option of this.options) {
             price += option.option.price;

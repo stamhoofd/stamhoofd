@@ -117,8 +117,8 @@
                         type="text"
                         :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
                     >
-                    <p v-if="originalSelectedPriceId === cartItem.productPrice.id && cartItem.calculatedPrices[index] && cartItem.calculatedPrices[index].price !== cartItem.productPrice.price" class="style-description-small">
-                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {specificPrice: formatPrice(cartItem.calculatedPrices[index].price), generalPrice: formatPrice(cartItem.productPrice.price)}) }}
+                    <p v-if="originalSelectedPriceId === cartItem.productPrice.id && cartItem.uitpasNumbers[index] && cartItem.calculateOptionsPrice(cart, cartItem.uitpasNumbers[index].price) !== cartItem.calculateOptionsPrice(cart, cartItem.productPrice.price)" class="style-description-small">
+                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {specificPrice: formatPrice(cartItem.calculateOptionsPrice(cart, cartItem.uitpasNumbers[index].price)), generalPrice: formatPrice(cartItem.calculateOptionsPrice(cart, cartItem.productPrice.price))}) }}
                     </p>
                 </STInputBox>
             </template>
