@@ -11,7 +11,7 @@ type CycleData = {
 
 export async function startGroupCyclesToPeriodsMigration() {
     for await (const organization of Organization.select().all()) {
-        // if (organization.name !== 'Puurspanje Wielerteam') {
+        // if (organization.name !== 'Osta Berchem VC') {
         //     continue;
         // }
 
@@ -20,9 +20,9 @@ export async function startGroupCyclesToPeriodsMigration() {
         const groups = await Group.select().where('organizationId', organization.id).fetch();
 
         for (const group of groups) {
-            const cycle = group.cycle;
-            const startDate = group.settings.startDate;
-            const endDate = group.settings.endDate;
+            const cycle: number = group.cycle;
+            const startDate: Date = group.settings.startDate;
+            const endDate: Date = group.settings.endDate;
 
             const addCycle = (cycle: number, startDate: Date | null, endDate: Date | null) => {
                 if (endDate && startDate && endDate < startDate) {
@@ -50,9 +50,11 @@ export async function startGroupCyclesToPeriodsMigration() {
 
             if (cycle > 0 && group.settings.cycleSettings && group.settings.cycleSettings.size) {
                 for (const entry of group.settings.cycleSettings.entries()) {
-                    const currentCycle = entry[0];
+                    const currentCycle: number = entry[0];
                     const cycleSettings = entry[1];
-                    addCycle(currentCycle, cycleSettings.startDate, cycleSettings.endDate);
+                    const cycleStartDate: Date | null = cycleSettings.startDate;
+                    const cycleEndDate: Date | null = cycleSettings.endDate;
+                    addCycle(currentCycle, cycleStartDate, cycleEndDate);
                 }
             }
         }
@@ -78,28 +80,26 @@ export async function startGroupCyclesToPeriodsMigration() {
             console.log('Organization: ' + organization.name);
             console.error(e);
         }
-
-        // for (const group of cycleGroups) {
-        //     console.log('startDate: ' + Formatter.date(group.startDate, true) + ', endDate: ' + Formatter.date(group.endDate, true));
-
-        //     for (const cycle of group.cycles) {
-        //         console.log(`- ${cycle.startDate ? Formatter.date(cycle.startDate, true) : 'null'} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}`);
-        //     }
-        // }
     }
 
     throw new Error('wip todo');
 }
 
 function validateCycleGroups(groups: CycleGroup[]) {
-    for (const group of groups) {
+    const groupsString = groups.slice().reverse().map(c => `${c.startDate ? Formatter.date(c.startDate, true) : 'null'} - ${c.endDate ? Formatter.date(c.endDate, true) : 'null'}`).join(', ');
+
+    for (let i = 0; i < groups.length - 1; i++) {
+        const group = groups[i];
+        const isFirst = i === 0;
+        const isLast = i === groups.length - 1;
+
         for (const cycle of group.cycles) {
             if (cycle.startDate && cycle.startDate < group.startDate && differenceInDays(cycle.startDate, group.startDate) > 90) {
-                throw new Error(`cycle (${Formatter.date(cycle.startDate, true)} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}) is outside of group (${Formatter.date(group.startDate, true)} - ${Formatter.date(group.endDate, true)})`);
+                throw new Error(`cycle (${Formatter.date(cycle.startDate, true)} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}) is outside of group (${Formatter.date(group.startDate, true)} - ${Formatter.date(group.endDate, true)}) (isFirst: ${isFirst}, isLast: ${isLast}, groups: ${groupsString})`);
             }
 
             if (cycle.endDate && cycle.endDate > group.endDate && differenceInDays(cycle.endDate, group.endDate) > 90) {
-                throw new Error(`cycle (${cycle.startDate ? Formatter.date(cycle.startDate, true) : 'null'} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}) is outside of group (${Formatter.date(group.startDate, true)} - ${Formatter.date(group.endDate, true)})`);
+                throw new Error(`cycle (${cycle.startDate ? Formatter.date(cycle.startDate, true) : 'null'} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}) is outside of group (${Formatter.date(group.startDate, true)} - ${Formatter.date(group.endDate, true)}) (isFirst: ${isFirst}, isLast: ${isLast}, groups: ${groupsString})`);
             }
         }
     }
@@ -174,7 +174,7 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
 
         const dayDifference = differenceInDays(startDate, cycle.startDate);
 
-        if (dayDifference < 90) {
+        if (dayDifference < 150) {
             currentGroup.cycles.push(cycle);
         }
         else {
@@ -188,7 +188,7 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
 
     const groupsWithStartAndEnd: CycleGroup[] = [];
 
-    for (const group of groupsWithStart.reverse()) {
+    for (const group of groupsWithStart.slice().reverse()) {
         let endDate: Date;
 
         if (lastStartDate) {
@@ -210,29 +210,29 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
     let groupAddedBefore: CycleGroup | null = null;
     let groupAddedAfter: CycleGroup | null = null;
 
-    const getFirstGroup = () => {
+    const getNewestGroup = () => {
         return groupsWithStartAndEnd[0];
     };
 
-    const getLastGroup = () => {
+    const getOldestGroup = () => {
         return groupsWithStartAndEnd[groupsWithStartAndEnd.length - 1];
     };
 
     for (const cycleToAdd of [...shortCycles, ...skippedCycles]) {
         const bestGroupMatch = selectBestGroup(cycleToAdd, groupsWithStartAndEnd);
-        const firstGroup = getFirstGroup();
 
         // if null => outside of existing cycles => add new one before or after
         if (bestGroupMatch === null) {
+            const oldestGroup = getOldestGroup();
             let isBefore = false;
 
-            if (cycleToAdd.endDate && cycleToAdd.endDate < firstGroup.startDate) {
+            if (cycleToAdd.endDate && cycleToAdd.endDate < oldestGroup.startDate) {
                 isBefore = true;
             }
-            else if (cycleToAdd.startDate && cycleToAdd.startDate < firstGroup.startDate) {
-                if (!groupAddedBefore && differenceInDays(cycleToAdd.startDate, firstGroup.startDate) < 90) {
-                    firstGroup.startDate = cycleToAdd.startDate;
-                    firstGroup.cycles.push(cycleToAdd);
+            else if (cycleToAdd.startDate && cycleToAdd.startDate < oldestGroup.startDate) {
+                if (!groupAddedBefore && differenceInDays(cycleToAdd.startDate, oldestGroup.startDate) < 90) {
+                    oldestGroup.startDate = cycleToAdd.startDate;
+                    oldestGroup.cycles.push(cycleToAdd);
                     continue;
                 }
                 isBefore = true;
@@ -247,10 +247,10 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
                     groupAddedBefore.cycles.push(cycleToAdd);
                 }
                 else {
-                    const newEndDate = getDateBefore(firstGroup.startDate);
+                    const newEndDate = getDateBefore(oldestGroup.startDate);
                     let newStartDate = cycleToAdd.startDate;
                     if (!newStartDate) {
-                        newStartDate = new Date(firstGroup.startDate);
+                        newStartDate = new Date(oldestGroup.startDate);
                         newStartDate.setFullYear(newStartDate.getFullYear() - 1);
                     }
 
@@ -268,22 +268,35 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
                     groupAddedAfter.cycles.push(cycleToAdd);
                 }
                 else {
-                    const lastGroup = getLastGroup();
-                    const newStartDate = getDateAfter(lastGroup.endDate);
+                    const newestGroup = getNewestGroup();
+                    const newStartDate = getDateAfter(newestGroup.endDate);
                     let newEndDate = cycleToAdd.endDate;
                     if (!newEndDate) {
-                        newEndDate = new Date(lastGroup.endDate);
+                        newEndDate = new Date(newestGroup.endDate);
                         newEndDate.setFullYear(newEndDate.getFullYear() + 1);
                     }
 
                     const newGroup: CycleGroup = { startDate: newStartDate, endDate: newEndDate, cycles: [cycleToAdd] };
                     groupAddedAfter = newGroup;
-                    groupsWithStartAndEnd.push(newGroup);
+                    groupsWithStartAndEnd.unshift(newGroup);
                 }
             }
         }
         else {
             bestGroupMatch.cycles.push(cycleToAdd);
+        }
+    }
+
+    const newestGroup = getNewestGroup();
+    for (const cycle of newestGroup.cycles) {
+        if (cycle.endDate && cycle.endDate > newestGroup.endDate) {
+            newestGroup.endDate = cycle.endDate;
+        }
+    }
+    const oldestGroup = getOldestGroup();
+    for (const cycle of oldestGroup.cycles) {
+        if (cycle.startDate && cycle.startDate < oldestGroup.startDate) {
+            oldestGroup.startDate = cycle.startDate;
         }
     }
 
