@@ -363,6 +363,10 @@ async function validateUitpasNumbers() {
 const loading = ref(false);
 
 async function addToCart() {
+    if (loading.value) {
+        return;
+    }
+
     loading.value = true;
     if (!(await validate())) {
         loading.value = false;
