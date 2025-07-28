@@ -38,7 +38,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
                 await Context.authenticate();
                 const reducedPrice = await UitpasService.getSocialTariffForEvent(
                     organization.id,
-                    request.body.basePrice, // Convert from cents to euros
+                    request.body.basePrice,
                     request.body.uitpasEventUrl,
                 );
                 const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
