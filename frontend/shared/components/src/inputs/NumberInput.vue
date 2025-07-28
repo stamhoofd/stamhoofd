@@ -79,7 +79,7 @@ export default class NumberInput extends VueComponent {
     @Prop({ default: false })
     floatingPoint!: boolean; // In cents if floating point, never returns floats!
 
-    @Watch('value')
+    @Watch('modelValue')
     onValueChange() {
         this.clean();
     }
@@ -175,9 +175,9 @@ export default class NumberInput extends VueComponent {
             // Include decimals
             this.valueString
                 = (float < 0 ? '-' : '')
-                + Math.floor(abs)
-                + this.whatDecimalSeparator()
-                + ('' + Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, '0');
+                    + Math.floor(abs)
+                    + this.whatDecimalSeparator()
+                    + ('' + Math.round(Math.abs(decimals) * (this.floatingPoint ? 100 : 1))).padStart(2, '0');
         }
         else {
             // Hide decimals
