@@ -129,6 +129,7 @@
                         :validator="errors.validator"
                         :required="true"
                         :error-fields="'uitpasNumbers.' + index"
+                        :error-box="errors.errorBox"
                     />
 
                     <p
@@ -346,7 +347,7 @@ async function addToCart() {
 
     loading.value = true;
 
-    if (!await errors.validator.validate()) {
+    if (!(await errors.validator.validate())) {
         loading.value = false;
         return;
     }
