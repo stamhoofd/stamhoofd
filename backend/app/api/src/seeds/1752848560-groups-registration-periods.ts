@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization } from '@stamhoofd/models';
+import { Group, Organization, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 type CycleData = {
@@ -11,10 +12,6 @@ type CycleData = {
 
 export async function startGroupCyclesToPeriodsMigration() {
     for await (const organization of Organization.select().all()) {
-        // if (organization.name !== 'Osta Berchem VC') {
-        //     continue;
-        // }
-
         const allCycles: CycleData[] = [];
 
         const groups = await Group.select().where('organizationId', organization.id).fetch();
@@ -26,9 +23,13 @@ export async function startGroupCyclesToPeriodsMigration() {
 
             const addCycle = (cycle: number, startDate: Date | null, endDate: Date | null) => {
                 if (endDate && startDate && endDate < startDate) {
-                    // todo
-                    return;
+                    // switch start and end dates
+                    const originalStartDate = startDate;
+                    const originalEndDate = endDate;
+                    startDate = originalEndDate;
+                    endDate = originalStartDate;
                 }
+
                 const equalCycle = allCycles.find((data) => {
                     if (data.cycle === cycle && data.startDate === startDate && data.endDate === endDate) {
                         return true;
@@ -48,7 +49,7 @@ export async function startGroupCyclesToPeriodsMigration() {
 
             addCycle(cycle, startDate, endDate);
 
-            if (cycle > 0 && group.settings.cycleSettings && group.settings.cycleSettings.size) {
+            if (group.settings.cycleSettings && group.settings.cycleSettings.size) {
                 for (const entry of group.settings.cycleSettings.entries()) {
                     const currentCycle: number = entry[0];
                     const cycleSettings = entry[1];
@@ -60,11 +61,12 @@ export async function startGroupCyclesToPeriodsMigration() {
         }
 
         if (allCycles.length === 0) {
-            // todo?
-            // console.log('No groups found: ', groups.length);
+            // todo: should add period?
+            // throw new Error('No cycles found for organization: ' + organization.name);
             continue;
         }
 
+        console.log('Organization: ' + organization.name);
         const cycleGroups = groupCycles(allCycles);
 
         cycleGroups.forEach((g) => {
@@ -73,36 +75,22 @@ export async function startGroupCyclesToPeriodsMigration() {
             }
         });
 
-        try {
-            validateCycleGroups(cycleGroups);
-        }
-        catch (e) {
-            console.log('Organization: ' + organization.name);
-            console.error(e);
-        }
+        await migrateCycleGroups(cycleGroups, organization);
+        await cleanupCycleGroups(cycleGroups);
     }
-
-    throw new Error('wip todo');
 }
 
-function validateCycleGroups(groups: CycleGroup[]) {
-    const groupsString = groups.slice().reverse().map(c => `${c.startDate ? Formatter.date(c.startDate, true) : 'null'} - ${c.endDate ? Formatter.date(c.endDate, true) : 'null'}`).join(', ');
-
-    for (let i = 0; i < groups.length - 1; i++) {
-        const group = groups[i];
-        const isFirst = i === 0;
-        const isLast = i === groups.length - 1;
-
-        for (const cycle of group.cycles) {
-            if (cycle.startDate && cycle.startDate < group.startDate && differenceInDays(cycle.startDate, group.startDate) > 90) {
-                throw new Error(`cycle (${Formatter.date(cycle.startDate, true)} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}) is outside of group (${Formatter.date(group.startDate, true)} - ${Formatter.date(group.endDate, true)}) (isFirst: ${isFirst}, isLast: ${isLast}, groups: ${groupsString})`);
-            }
-
-            if (cycle.endDate && cycle.endDate > group.endDate && differenceInDays(cycle.endDate, group.endDate) > 90) {
-                throw new Error(`cycle (${cycle.startDate ? Formatter.date(cycle.startDate, true) : 'null'} - ${cycle.endDate ? Formatter.date(cycle.endDate, true) : 'null'}) is outside of group (${Formatter.date(group.startDate, true)} - ${Formatter.date(group.endDate, true)}) (isFirst: ${isFirst}, isLast: ${isLast}, groups: ${groupsString})`);
-            }
-        }
+async function cleanupCycleGroups(cycleGroups: CycleGroup[]) {
+    for (const group of cycleGroups.flatMap(cg => cg.cycles.flatMap(c => c.groups))) {
+        await cleanupGroup(group);
     }
+}
+
+async function cleanupGroup(group: Group) {
+    group.settings.cycleSettings = new Map();
+    // for testing
+    group.cycle = -99;
+    await group.save();
 }
 
 function sortCycles(cycles: CycleData[]) {
@@ -203,8 +191,18 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
     }
 
     if (groupsWithStartAndEnd.length === 0) {
-        // todo
-        throw new Error('no groups found');
+        const startDates = shortCycles.map(a => a.startDate).filter(a => a !== null).map(a => a!.getTime());
+        const endDates = shortCycles.map(a => a.endDate).filter(a => a !== null).map(a => a!.getTime());
+
+        if (startDates.length === 0 || endDates.length === 0) {
+            throw new Error('No cycle with start and end date found.');
+        }
+
+        groupsWithStartAndEnd.push({
+            startDate: new Date(Math.min(...startDates)),
+            cycles: shortCycles,
+            endDate: new Date(Math.max(...endDates)),
+        });
     }
 
     let groupAddedBefore: CycleGroup | null = null;
@@ -411,6 +409,178 @@ function differenceInDays(date1: Date, date2: Date) {
     const diffTime = Math.abs(date2.getTime() - date1.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+}
+
+async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organization) {
+    let previousPeriod: RegistrationPeriod | null = null;
+
+    const originalCategories = organization.meta.categories;
+
+    for (const cycleGroup of cycleGroups) {
+        // create registration period
+        const locked = cycleGroup.endDate.getFullYear() < new Date().getFullYear();
+        const period = await new RegistrationPeriodFactory({
+            startDate: cycleGroup.startDate,
+            endDate: cycleGroup.endDate,
+            locked,
+            previousPeriodId: previousPeriod ? previousPeriod.id : undefined,
+            organization,
+        }).create();
+
+        previousPeriod = period;
+
+        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period,
+        }).create();
+
+        const allGroups: { group: Group; originalGroup: Group; cylcleData: CycleData }[] = [];
+        const newGroups: Group[] = [];
+
+        // create group for each group in cycleGroup
+        for (const cycle of cycleGroup.cycles) {
+            for (const group of cycle.groups) {
+                if (cycle.cycle === group.cycle) {
+                    group.periodId = period.id;
+                    group.settings.startDate = cycleGroup.startDate;
+                    group.settings.endDate = cycleGroup.endDate;
+
+                    await group.save();
+
+                    allGroups.push({ group, originalGroup: group, cylcleData: cycle });
+                }
+                else {
+                    const newGroup = cloneGroup(cycle, group, period);
+                    await newGroup.save();
+                    newGroups.push(newGroup);
+                    allGroups.push({ group: newGroup, originalGroup: group, cylcleData: cycle });
+                }
+            }
+        }
+
+        // update registrations
+        for (const { group, originalGroup, cylcleData } of allGroups) {
+            let waitingList: Group | null = null;
+
+            const getOrCreateWaitingList = async () => {
+                if (group.waitingListId !== null) {
+                    if (waitingList !== null) {
+                        return waitingList;
+                    }
+                    const fetchedWaitingList = await Group.getByID(group.waitingListId);
+
+                    if (!fetchedWaitingList) {
+                        throw new Error('Waiting list not found');
+                    }
+
+                    waitingList = fetchedWaitingList;
+                    return fetchedWaitingList;
+                }
+
+                const newWaitingList = new Group();
+                // todo: for testing
+                newWaitingList.cycle = -99;
+                newWaitingList.type = GroupType.WaitingList;
+                newWaitingList.organizationId = organization.id;
+                newWaitingList.periodId = period.id;
+                newWaitingList.settings = GroupSettings.create({
+                    name: TranslatedString.create($t(`c1f1d9d0-3fa1-4633-8e14-8c4fc98b4f0f`) + ' ' + originalGroup.settings.name.toString()),
+                });
+
+                await newWaitingList.save();
+
+                waitingList = newWaitingList;
+                return newWaitingList;
+            };
+
+            const registrations = await Registration.select()
+                .where('groupId', originalGroup.id)
+                .andWhere('cycle', cylcleData.cycle)
+                .fetch();
+
+            for (const registration of registrations) {
+                if (registration.waitingList) {
+                    const waitingList = await getOrCreateWaitingList();
+                    if (group.waitingListId !== waitingList.id) {
+                        group.waitingListId = waitingList.id;
+                        await group.save();
+                    }
+
+                    registration.groupId = waitingList.id;
+                }
+                else {
+                    registration.groupId = group.id;
+                }
+
+                registration.periodId = period.id;
+                registration.cycle = cylcleData.cycle;
+                await registration.save();
+            }
+        }
+
+        const newCategoriesData = originalCategories.map((c) => {
+            const category = GroupCategory.create({
+                settings: GroupCategorySettings.create({
+                    ...c.settings,
+                }),
+                groupIds: [...new Set(c.groupIds.flatMap((oldId) => {
+                    const result = allGroups.find(g => g.originalGroup.id === oldId);
+                    if (result) {
+                        return [result.group.id];
+                    }
+                    return [];
+                }))],
+            });
+            return {
+                category,
+                originalCategory: c,
+            };
+        });
+
+        newCategoriesData.forEach((c) => {
+            const newCategoryIds = [...new Set(c.originalCategory.categoryIds.flatMap((id) => {
+                const result = newCategoriesData.find(c => c.originalCategory.id === id);
+                if (result) {
+                    return [result.category.id];
+                }
+                return [];
+            }))];
+            c.category.categoryIds = newCategoryIds;
+        });
+
+        organizationRegistrationPeriod.settings.categories = newCategoriesData.map(c => c.category);
+        await organizationRegistrationPeriod.save();
+    }
+}
+
+function cloneGroup(cycle: CycleData, group: Group, period: RegistrationPeriod) {
+    const newGroup = new Group();
+    newGroup.organizationId = group.organizationId;
+    newGroup.periodId = period.id;
+    newGroup.status = group.status;
+    newGroup.createdAt = group.createdAt;
+    newGroup.deletedAt = group.deletedAt;
+
+    // todo: should group ids in permissions get updated?
+    newGroup.privateSettings = GroupPrivateSettings.create({
+        ...group.privateSettings,
+    });
+
+    // todo? for testing
+    newGroup.cycle = -99;
+
+    const newSettings = GroupSettings
+        .create({
+            ...group.settings,
+            cycleSettings: new Map(),
+            startDate: cycle.startDate ?? undefined,
+            endDate: cycle.endDate ?? undefined,
+        });
+
+    newGroup.settings = newSettings;
+    newGroup.type = group.type;
+
+    return newGroup;
 }
 
 export default new Migration(async () => {
