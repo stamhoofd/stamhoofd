@@ -1,6 +1,6 @@
 import { Model } from '@simonbackx/simple-database';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
-import { Cart, OrderStatus, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
+import { Cart, OrderStatus, Product, ProductPrice, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers';
@@ -96,7 +96,7 @@ function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
                     human: $t(`Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.`),
                 });
             }
-            const label = item.product.name + ' - ' + baseProductPrice.name;
+            const label = makeBaseProductPriceLabel(item.product, baseProductPrice);
             for (const uitpasNumber of item.uitpasNumbers) {
                 ticketSales.push({
                     productId: item.product.id,
@@ -111,6 +111,16 @@ function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
         }
     }
     return ticketSales;
+}
+
+function makeBaseProductPriceLabel(product: Product, productPrice: ProductPrice): string {
+    if (product.name && productPrice.name) {
+        return product.name + ' - ' + productPrice.name;
+    }
+    if (productPrice.name) {
+        return productPrice.name;
+    }
+    return product.name;
 }
 
 export class UitpasService {
