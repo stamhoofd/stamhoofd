@@ -89,24 +89,26 @@ onMounted(async () => {
 
 errors.validator.addValidation('clientSecret', () => {
     if (clientSecret.value === '' && (clientId.value !== '' || originaClientId === '')) {
-        throw new SimpleError({
+        errors.errorBox = new ErrorBox(new SimpleError({
             code: 'missing_client_secret',
             message: 'missing client secret',
             human: $t('Vul een client secret in'),
             field: 'clientSecret',
-        });
+        }));
+        return false;
     }
     return true;
 });
 
 errors.validator.addValidation('clientId', () => {
     if (clientId.value === '' && (clientSecret.value !== '' || originaClientId === '')) {
-        throw new SimpleError({
+        errors.errorBox = new ErrorBox(new SimpleError({
             code: 'missing_client_id',
             message: 'missing client id',
             human: $t('Vul een client id in'),
             field: 'clientId',
-        });
+        }));
+        return false;
     }
     return true;
 });
