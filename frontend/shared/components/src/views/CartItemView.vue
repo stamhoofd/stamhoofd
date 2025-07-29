@@ -199,6 +199,7 @@ import { useContext } from '../hooks';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Decoder } from '@simonbackx/simple-encoding';
 import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;
@@ -341,6 +342,7 @@ async function validateUitpasNumbers() {
 const loading = ref(false);
 
 async function addToCart() {
+    console.log('Adding to cart', props.cartItem.product.name, 'with amount', props.cartItem.amount);
     if (loading.value) {
         return;
     }
@@ -508,6 +510,7 @@ const canOrder = computed(() => {
 const canSelectAmount = computed(() => product.value.maxPerOrder !== 1 && product.value.allowMultiple);
 
 const uitpasNumbers = ref(props.cartItem.uitpasNumbers);
+const originalUitpasNumbers = props.cartItem.uitpasNumbers.map(u => u.uitpasNumber);
 
 watch(() => props.cartItem.amount, handleNewAmount);
 
@@ -539,6 +542,18 @@ function handleNewAmount(newAmount: number) {
         uitpasNumbers.value.splice(newAmount);
     }
 }
+
+const shouldNavigateAway = async () => {
+    console.log('Checking if should navigate away from UitpasNumberInput');
+    if (originalUitpasNumbers.length === uitpasNumbers.value.length && originalUitpasNumbers.every((val, index) => val === uitpasNumbers.value[index].uitpasNumber)) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
 
 </script>
 
