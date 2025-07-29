@@ -88,7 +88,7 @@ async function cleanupCycleGroups(cycleGroups: CycleGroup[]) {
 
 async function cleanupGroup(group: Group) {
     group.settings.cycleSettings = new Map();
-    // for testing
+    // todo: for testing
     group.cycle = -99;
     await group.save();
 }
@@ -136,9 +136,8 @@ function groupCycles(cycles: CycleData[]): CycleGroup[] {
     if (!startDate) {
         startDate = shortCycles.find(a => a.startDate !== null)?.startDate;
         if (!startDate) {
-            throw new Error('No startDate found, todo');
+            throw new Error('No startDate found');
         }
-        // todo
     }
 
     let currentGroup: {
@@ -584,7 +583,6 @@ function cloneGroup(cycle: CycleData, group: Group, period: RegistrationPeriod) 
 }
 
 export default new Migration(async () => {
-    console.error('test groups-registration-periods');
     if (STAMHOOFD.environment === 'test') {
         console.log('skipped in tests');
         return;
