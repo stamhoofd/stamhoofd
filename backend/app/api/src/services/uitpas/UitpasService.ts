@@ -39,7 +39,7 @@ type InsertUitpasNumber = {
     uitpasEventUrl: string | null; // null for non-official flow
 };
 
-function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
+export function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
 }
 
@@ -368,7 +368,7 @@ export class UitpasService {
         await UitpasTokenRepository.clearClientCredentialsFor(organizationId);
     }
 
-    static async validateCart(organizationId: string, webshopId: string, cart: Cart): Promise<Cart> {
+    static async validateCart(organizationId: string, webshopId: string, cart: Cart, exisitingOrderId?: string): Promise<Cart> {
         let access_token_org: string | null = null;
         let access_token_platform: string | null = null;
         for (const item of cart.items) {
@@ -377,7 +377,7 @@ export class UitpasService {
             }
 
             // verify the UiTPAS numbers are not already used for this product
-            const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshopId, item.product.id, item.uitpasNumbers.map(p => p.uitpasNumber), item.product.uitpasEvent?.url);
+            const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshopId, item.product.id, item.uitpasNumbers.map(p => p.uitpasNumber), item.product.uitpasEvent?.url, exisitingOrderId);
             if (hasBeenUsed) {
                 throw new SimpleError({
                     code: 'uitpas_number_already_used',

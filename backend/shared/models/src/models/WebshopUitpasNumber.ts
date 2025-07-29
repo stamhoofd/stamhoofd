@@ -54,10 +54,23 @@ export class WebshopUitpasNumber extends QueryableModel {
     @column({ type: 'integer', nullable: true })
     reducedPriceUitpas: number | null = null;
 
-    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[], uitpasEventUrl?: string): Promise<boolean> {
+    static async areUitpasNumbersUsed(webshopId: string, productId: string, uitpasNumbers: string[], uitpasEventUrl?: string, existingOrderId?: string): Promise<boolean> {
+        let query = WebshopUitpasNumber
+            .select()
+            .where('webshopId', webshopId)
+            .andWhere('uitpasNumber', uitpasNumbers);
+
         if (uitpasEventUrl) {
-            return !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere(SQL.where('productId', productId).or('uitpasEventUrl', uitpasEventUrl)).andWhere('uitpasNumber', uitpasNumbers).first(false));
+            query = query.andWhere(SQL.where('productId', productId).or('uitpasEventUrl', uitpasEventUrl));
         }
-        return !!(await WebshopUitpasNumber.select().where('webshopId', webshopId).andWhere('productId', productId).andWhere('uitpasNumber', uitpasNumbers).first(false));
+        else {
+            query = query.andWhere('productId', productId);
+        }
+
+        if (existingOrderId !== undefined) {
+            query = query.andWhereNot('orderId', existingOrderId);
+        }
+
+        return !!await query.first(false); ;
     }
 }
