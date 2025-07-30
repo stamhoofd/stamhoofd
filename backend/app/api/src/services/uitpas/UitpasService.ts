@@ -321,7 +321,7 @@ export class UitpasService {
         return await searchUitpasOrganizers(access_token, name);
     }
 
-    static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId: string): Promise<{
+    static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId?: string): Promise<{
         status: UitpasClientCredentialsStatus;
         human?: string;
     }> {
