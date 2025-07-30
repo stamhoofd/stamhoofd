@@ -30,7 +30,7 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
             // ask for non-official or offcial flow
             const useNonOfficial = await CenteredMessage.confirm(
                 $t('Je gebruikt de niet-officiële UiTPAS-flow'),
-                $t('613363e2-39ae-46c1-a31e-ace703ddfdd4'),
+                $t('Doorgaan zonder terugbetalingen'),
                 $t('De toegepaste kortingen worden niet geregistreerd en je ontvangt geen automatische terugbetaling van UiTPAS. Wil je dit toch, configureer dan je UiTPAS-integratie in de instellingen.'),
                 $t('Ga naar instellingen'),
                 false,
