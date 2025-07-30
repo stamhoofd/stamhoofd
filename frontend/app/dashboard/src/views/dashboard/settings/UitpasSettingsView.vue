@@ -173,7 +173,7 @@ const openSearchOrganizer = async () => {
                     await pop({ force: true });
                 }
             },
-        }).setDisplayStyle('popup'),
+        }),
     );
 };
 
@@ -212,7 +212,6 @@ const openSearchUitpasEvent = async () => {
                 showNoteAboutNonOfficialFlow: false, // we are specifically going to settings to use the official flow
             }),
         ],
-        modalDisplayStyle: 'popup',
     }).catch(console.error);
 };
 
