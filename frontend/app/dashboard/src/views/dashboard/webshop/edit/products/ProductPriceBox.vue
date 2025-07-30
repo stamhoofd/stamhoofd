@@ -276,7 +276,7 @@ const enableUitpasSocialTariff = computed({
             if (!name.value) {
                 name.value = 'UiTPAS kansentarief';
             }
-            uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+            uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0]?.id ?? null;
         }).catch((e) => {
             Toast.fromError(e).show();
         });
