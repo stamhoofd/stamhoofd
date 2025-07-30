@@ -181,12 +181,10 @@ const openSetUitpasClientCredentialsView = async () => {
     present({
         components: [
             new ComponentWithProperties(SetUitpasClientCredentialsView, {
-                onFixed: (navigationActions: NavigationActions) => {
+                onFixed: async ({ dismiss }: NavigationActions) => {
+                    await dismiss({ force: true });
                     if (props.onFixedAndEventSelected && uitpasEvent.value) {
-                        return props.onFixedAndEventSelected(uitpasEvent.value, navigationActions);
-                    }
-                    else {
-                        return navigationActions.dismiss({ force: true });
+                        await props.onFixedAndEventSelected(uitpasEvent.value, navigationActions);
                     }
                 },
             }),
