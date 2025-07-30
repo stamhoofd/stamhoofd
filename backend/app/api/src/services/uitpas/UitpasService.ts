@@ -42,43 +42,27 @@ function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
 }
 
-// function mapUitpasNumbersToProducts(order: Order): Map<string, string[]> {
-//     const items = order.data.cart.items;
-//     const productIdToUitpasNumbers: Map<string, string[]> = new Map();
-//     for (const item of items) {
-//         const a = productIdToUitpasNumbers.get(item.product.id);
-//         if (a) {
-//             a.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
-//         }
-//         else {
-//             productIdToUitpasNumbers.set(item.product.id, [...item.uitpasNumbers.map(p => p.uitpasNumber)]); // make a copy
-//         }
-//     }
-//     return productIdToUitpasNumbers;
-// }
-
-// function areUitpasNumbersChanged(oldOrder: Order, newOrder: Order): boolean {
-//     const oldMap = mapUitpasNumbersToProducts(oldOrder);
-//     const newMap = mapUitpasNumbersToProducts(newOrder);
-//     if (oldMap.size !== newMap.size) {
-//         return true;
-//     }
-//     for (const [productId, uitpasNumbers] of oldMap.entries()) {
-//         const newUitpasNumbers = newMap.get(productId);
-//         if (!newUitpasNumbers) {
-//             return true;
-//         }
-//         if (newUitpasNumbers.length !== uitpasNumbers.length) {
-//             return true;
-//         }
-//         for (const uitpasNumber of uitpasNumbers) {
-//             if (!newUitpasNumbers.includes(uitpasNumber)) {
-//                 return true;
-//             }
-//         }
-//     }
-//     return false;
-// }
+function areThereUitpasChanges(oldTicketSales: UitpasTicketSale[], newTicketSales: UitpasTicketSale[]): boolean {
+    if (oldTicketSales.length !== newTicketSales.length) {
+        return true;
+    }
+    for (const oldTicketSale of oldTicketSales) {
+        const newTicketSale = newTicketSales.find(
+            ts =>
+                ts.uitpasNumber === oldTicketSale.uitpasNumber
+                && ts.basePrice === oldTicketSale.basePrice
+                && ts.basePriceLabel === oldTicketSale.basePriceLabel
+                && ts.reducedPrice === oldTicketSale.reducedPrice
+                && ts.uitpasTariffId === oldTicketSale.uitpasTariffId
+                && ts.uitpasEventUrl === oldTicketSale.uitpasEventUrl
+                && ts.productId === oldTicketSale.productId,
+        );
+        if (!newTicketSale) {
+            return true;
+        }
+    }
+    return false;
+}
 
 function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
     const ticketSales: UitpasTicketSale[] = [];
@@ -172,11 +156,8 @@ export class UitpasService {
         await insert.insert();
     }
 
-    /**
-     * This does not update DB!
-     */
-    static async updateTicketSales(order: Order, isNewOrder: boolean = false) {
-        const ticketSales = getUitpasTicketSales(order);
+    static async updateTicketSales(order: Order, isNewOrder: boolean, ticketSalesHint?: UitpasTicketSale[]): Promise<void> {
+        const ticketSales = ticketSalesHint ?? getUitpasTicketSales(order);
         const registered = isNewOrder ? [] : await this.getWebshopUitpasNumberFromDb(order);
 
         const unchangedRegistered: WebshopUitpasNumber[] = [];
@@ -269,8 +250,12 @@ export class UitpasService {
                             }
                         }
                         if (event.changedFields.data) {
-                            await this.updateTicketSales(event.model);
-                            return;
+                            const oldTicketSales = getUitpasTicketSales(event.getOldModel() as Order);
+                            const newTicketSales = getUitpasTicketSales(event.model);
+                            if (areThereUitpasChanges(oldTicketSales, newTicketSales)) {
+                                await this.updateTicketSales(event.model, false, newTicketSales);
+                                return;
+                            }
                         }
                     }
                 }
