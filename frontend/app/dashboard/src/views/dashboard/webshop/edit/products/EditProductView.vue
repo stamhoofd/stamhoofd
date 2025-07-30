@@ -85,16 +85,16 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ product.uitpasEvent ? product.uitpasEvent.name : $t('Koppel jouw UiTPAS-evenement') }}
+                        {{ patchedProduct.uitpasEvent.name }}
                     </h3>
 
                     <p class="style-description">
-                        {{ product.uitpasEvent ? product.uitpasEvent.location : $t('Nog niet gekoppeld, je krijgt dus géén automatische terugbetaling.') }}
+                        {{ patchedProduct.uitpasEvent.location }}
                     </p>
 
                     <template #right>
                         <span class="button text">
-                            {{ product.uitpasEvent ? $t('Wijzig') : $t('Zoeken') }}
+                            {{ $t('Wijzig') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
