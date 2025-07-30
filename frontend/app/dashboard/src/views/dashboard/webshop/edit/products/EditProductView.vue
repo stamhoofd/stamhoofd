@@ -9,20 +9,20 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="!patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" class="warning-box with-button selectable" @click="openUitpasEventSearch()">
+        <button v-if="!patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" type="button" class="warning-box with-button selectable" @click="openUitpasEventSearch()">
             {{ $t('Er werd géén UiTPAS-evemenent gekoppeld, je krijgt géén automatische terugbetaling van je UiTPAS-regio.') }}
 
-            <button class="button text" type="button">
+            <span class="button text" type="button">
                 {{ $t('UiTPAS-evenement koppelen') }}
-            </button>
-        </p>
-        <p v-else-if="patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus !== UitpasClientCredentialsStatus.Ok" class="error-box with-button selectable" @click="openUitpasSettings()">
+            </span>
+        </button>
+        <button v-else-if="patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus !== UitpasClientCredentialsStatus.Ok" type="button" class="error-box with-button selectable" @click="openUitpasSettings()">
             {{ UitpasClientCredentialsStatusHelper.getName(organization.meta.uitpasClientCredentialsStatus) }}
 
-            <button class="button text" type="button">
+            <span class="button text" type="button">
                 {{ $t('Controleer de instellingen') }}
-            </button>
-        </p>
+            </span>
+        </button>
 
         <div class="split-inputs">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
