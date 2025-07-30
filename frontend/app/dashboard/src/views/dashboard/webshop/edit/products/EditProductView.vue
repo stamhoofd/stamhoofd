@@ -72,7 +72,7 @@
                 </button>`
             </h2>
             <p class="style-description-small">
-                {{ $t('Krijg automatische terugbetaling van je UiTPAS-regio.') }}
+                {{ $t('Elk ticket moet een UiTPAS-evenement gekoppeld hebben om een automatische terugbetaling te krijgen van je UiTPAS-regio.') }}
             </p>
 
             <STList>
