@@ -173,9 +173,6 @@ export class UitpasService {
         await insert.insert();
     }
 
-    /**
-     * This does not update DB!
-     */
     static async updateTicketSales(order: Order, isNewOrder: boolean = false) {
         const ticketSales = getUitpasTicketSales(order);
         const registered = isNewOrder ? [] : await this.getWebshopUitpasNumberFromDb(order);
@@ -270,6 +267,9 @@ export class UitpasService {
                             }
                         }
                         if (event.changedFields.data) {
+                            const oldOrder = event.getOldModel() as Order;
+                            const newOrder = event.model;
+
                             await this.updateTicketSales(event.model);
                             return;
                         }
