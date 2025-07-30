@@ -241,11 +241,11 @@ export class UitpasTokenRepository {
         });
     }
 
-    static async getClientIdFor(organisationId: string | null): Promise<{
+    static async getClientIdFor(organizationId: string | null): Promise<{
         clientId: string;
         useTestEnv: boolean;
     }> {
-        const repo = UitpasTokenRepository.getRepoFromMemory(organisationId);
+        const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
         if (!repo) {
             const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
             if (!model) {

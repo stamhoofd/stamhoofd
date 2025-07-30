@@ -282,21 +282,21 @@ export class UitpasService {
         });
     }
 
-    static async getSocialTariffForUitpasNumbers(organisationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
+    static async getSocialTariffForUitpasNumbers(organizationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
         return await getSocialTariffForUitpasNumbers(accessToken, uitpasNumbers, basePrice, uitpasEventUrl);
     }
 
-    static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventUrl: string) {
+    static async getSocialTariffForEvent(organizationId: string, basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
         return await getSocialTariffForEvent(accessToken, basePrice, uitpasEventUrl);
     }
 
-    static async cancelTicketSales(organisationId: string, ticketSaleIds: string[]) {
+    static async cancelTicketSales(organizationId: string, ticketSaleIds: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
         return await cancelTicketSales(accessToken, ticketSaleIds);
     }
 
