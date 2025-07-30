@@ -13,6 +13,7 @@ import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSa
 import { cancelTicketSales } from './cancelTicketSales';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
+import { QueueHandler } from '@stamhoofd/queues';
 
 type UitpasTicketSale = {
     basePrice: number;
@@ -159,70 +160,74 @@ export class UitpasService {
 
     static async updateTicketSales(order: Order, isNewOrder: boolean, ticketSalesHint?: UitpasTicketSale[]): Promise<void> {
         const ticketSales = ticketSalesHint ?? getUitpasTicketSales(order);
-        const registered = isNewOrder ? [] : await this.getWebshopUitpasNumberFromDb(order);
 
-        const unchangedRegistered: WebshopUitpasNumber[] = [];
-        const toBeRegistered: UitpasTicketSale[] = [];
+        // queue on order, so no race conditions if the same order is updated multiple times in short time period
+        return await QueueHandler.schedule('uitpas-order-' + order.id, async () => {
+            const registered = isNewOrder ? [] : await this.getWebshopUitpasNumberFromDb(order);
 
-        for (const ticketSale of ticketSales) {
-            const i = registered.findIndex(request => request.uitpasNumber === ticketSale.uitpasNumber && request.basePrice === ticketSale.basePrice && request.basePriceLabel === ticketSale.basePriceLabel);
-            if (i !== -1) {
-                unchangedRegistered.push(registered[i]);
-                registered.splice(i, 1);
-                continue; // already registered, so skip
+            const unchangedRegistered: WebshopUitpasNumber[] = [];
+            const toBeRegistered: UitpasTicketSale[] = [];
+
+            for (const ticketSale of ticketSales) {
+                const i = registered.findIndex(request => request.uitpasNumber === ticketSale.uitpasNumber && request.basePrice === ticketSale.basePrice && request.basePriceLabel === ticketSale.basePriceLabel);
+                if (i !== -1) {
+                    unchangedRegistered.push(registered[i]);
+                    registered.splice(i, 1);
+                    continue; // already registered, so skip
+                }
+                toBeRegistered.push(ticketSale);
             }
-            toBeRegistered.push(ticketSale);
-        }
 
-        const toBeCanceled = registered;
+            const toBeCanceled = registered;
 
-        // Only register/cancel tickets if official flow is/was used
-        const toBeCanceledUitpasIds = toBeCanceled.filter(c => c.uitpasEventUrl && c.uitpasTariffId && c.ticketSaleId).map(c => c.ticketSaleId!);
-        const toBeRegisteredUitpasRequests: RegisterTicketSaleRequest[] = toBeRegistered.filter(c => c.uitpasEventUrl && c.uitpasTariffId) as RegisterTicketSaleRequest[];
-        const noUitpasTariffId = toBeRegistered.filter(c => c.uitpasEventUrl && !c.uitpasTariffId);
-        if (noUitpasTariffId.length > 0) {
-            console.warn('Some UiTPAS do not have an uitpasTariffId, although an UiTPAS event is linked (official flow)', noUitpasTariffId);
-        }
-
-        let canceledUitpasId: string[] = [];
-        let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
-        if (toBeRegisteredUitpasRequests.length !== 0 || toBeCanceledUitpasIds.length !== 0) {
-            const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(order.organizationId);
-            canceledUitpasId = await cancelTicketSales(accessToken, useTestEnv, toBeCanceledUitpasIds);
-            if (canceledUitpasId.length !== toBeCanceledUitpasIds.length) {
-                console.error('Failed to cancel some UiTPAS ticket sales, successfully canceled:', canceledUitpasId, 'but tried to cancel:', toBeCanceledUitpasIds);
+            // Only register/cancel tickets if official flow is/was used
+            const toBeCanceledUitpasIds = toBeCanceled.filter(c => c.uitpasEventUrl && c.uitpasTariffId && c.ticketSaleId).map(c => c.ticketSaleId!);
+            const toBeRegisteredUitpasRequests: RegisterTicketSaleRequest[] = toBeRegistered.filter(c => c.uitpasEventUrl && c.uitpasTariffId) as RegisterTicketSaleRequest[];
+            const noUitpasTariffId = toBeRegistered.filter(c => c.uitpasEventUrl && !c.uitpasTariffId);
+            if (noUitpasTariffId.length > 0) {
+                console.warn('Some UiTPAS do not have an uitpasTariffId, although an UiTPAS event is linked (official flow)', noUitpasTariffId);
             }
-            try {
-                newlyRegistered = await registerTicketSales(accessToken, useTestEnv, toBeRegisteredUitpasRequests);
-            }
-            catch (e) {
-                console.error('Failed to register UiTPAS ticket sales', e);
-            }
-        }
 
-        const effectiveDeletes = toBeCanceled.filter(c => c.ticketSaleId === null || canceledUitpasId.find(id => id === c.ticketSaleId));
-        if (effectiveDeletes.length !== 0) {
-            await WebshopUitpasNumber.delete().where('id', effectiveDeletes.map(c => c.id));
-        }
+            let canceledUitpasId: string[] = [];
+            let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
+            if (toBeRegisteredUitpasRequests.length !== 0 || toBeCanceledUitpasIds.length !== 0) {
+                const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(order.organizationId);
+                canceledUitpasId = await cancelTicketSales(accessToken, useTestEnv, toBeCanceledUitpasIds);
+                if (canceledUitpasId.length !== toBeCanceledUitpasIds.length) {
+                    console.error('Failed to cancel some UiTPAS ticket sales, successfully canceled:', canceledUitpasId, 'but tried to cancel:', toBeCanceledUitpasIds);
+                }
+                try {
+                    newlyRegistered = await registerTicketSales(accessToken, useTestEnv, toBeRegisteredUitpasRequests);
+                }
+                catch (e) {
+                    console.error('Failed to register UiTPAS ticket sales', e);
+                }
+            }
 
-        const inserts = toBeRegistered.map((c) => {
-            const response = newlyRegistered.get(c as RegisterTicketSaleRequest);
-            return {
-                ticketSaleId: response?.ticketSaleId ?? null,
-                reducedPriceUitpas: response?.reducedPriceUitpas ?? null,
-                registeredAt: response?.registeredAt ?? null,
-                webshopId: order.webshopId,
-                orderId: order.id,
-                productId: c.productId,
-                uitpasNumber: c.uitpasNumber,
-                basePrice: c.basePrice,
-                reducedPrice: c.reducedPrice,
-                basePriceLabel: c.basePriceLabel,
-                uitpasTariffId: c.uitpasTariffId, // null for non-official flow
-                uitpasEventUrl: c.uitpasEventUrl, // null for non-official flow
-            };
+            const effectiveDeletes = toBeCanceled.filter(c => c.ticketSaleId === null || canceledUitpasId.find(id => id === c.ticketSaleId));
+            if (effectiveDeletes.length !== 0) {
+                await WebshopUitpasNumber.delete().where('id', effectiveDeletes.map(c => c.id));
+            }
+
+            const inserts = toBeRegistered.map((c) => {
+                const response = newlyRegistered.get(c as RegisterTicketSaleRequest);
+                return {
+                    ticketSaleId: response?.ticketSaleId ?? null,
+                    reducedPriceUitpas: response?.reducedPriceUitpas ?? null,
+                    registeredAt: response?.registeredAt ?? null,
+                    webshopId: order.webshopId,
+                    orderId: order.id,
+                    productId: c.productId,
+                    uitpasNumber: c.uitpasNumber,
+                    basePrice: c.basePrice,
+                    reducedPrice: c.reducedPrice,
+                    basePriceLabel: c.basePriceLabel,
+                    uitpasTariffId: c.uitpasTariffId, // null for non-official flow
+                    uitpasEventUrl: c.uitpasEventUrl, // null for non-official flow
+                };
+            });
+            await this.createUitpasNumbers(inserts);
         });
-        await this.createUitpasNumbers(inserts);
     }
 
     static listen() {
