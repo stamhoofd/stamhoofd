@@ -150,15 +150,17 @@ const startUpdateResults = async () => {
 watch(text, startUpdateResults);
 
 async function doSelectEvent(event: UitpasEventResponse | null) {
+    errors.errorBox = null;
+    selectedEventUrl.value = event?.url ?? '';
+    loadingAfterEventSelect.value = true;
     try {
-        errors.errorBox = null;
-        selectedEventUrl.value = event?.url ?? '';
-        loadingAfterEventSelect.value = true;
         await props.selectEvent(event, navigationActions);
-        loadingAfterEventSelect.value = false;
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        loadingAfterEventSelect.value = false;
     }
 }
 
