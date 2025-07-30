@@ -128,15 +128,17 @@ const startUpdateResults = async () => {
 watch(name, startUpdateResults);
 
 async function doSelectOrganizer(organizer: UitpasOrganizerResponse) {
+    errors.errorBox = null;
+    loadingAfterOrganizerSelect.value = true;
+    selectedOrganizerId.value = organizer.id;
     try {
-        errors.errorBox = null;
-        loadingAfterOrganizerSelect.value = true;
-        selectedOrganizerId.value = organizer.id;
         await props.selectOrganizer(organizer, navigationActions);
-        loadingAfterOrganizerSelect.value = false;
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        loadingAfterOrganizerSelect.value = false;
     }
 }
 

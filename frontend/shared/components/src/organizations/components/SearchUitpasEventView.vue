@@ -5,7 +5,7 @@
         <main>
             <h1>{{ t }}</h1>
             <p class="style-description-small">
-                {{ $t('Door een evenement uit de UiTdatabank te koppelen kan {platform} een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.', { platform: capitalizeFirstLetter(STAMHOOFD.platformName) }) }}
+                {{ $t('Door een evenement uit de UiTdatabank te koppelen kan #platform een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.') }}
             </p>
             <p v-if="showNoteAboutNonOfficialFlow" class="style-description-small">
                 <I18nComponent :t="$t('Wil je de UiTPAS-nummers niet doorsturen en zelf het tarief instellen, <button>klik dan hier</button>.')">
@@ -150,15 +150,17 @@ const startUpdateResults = async () => {
 watch(text, startUpdateResults);
 
 async function doSelectEvent(event: UitpasEventResponse | null) {
+    errors.errorBox = null;
+    selectedEventUrl.value = event?.url ?? '';
+    loadingAfterEventSelect.value = true;
     try {
-        errors.errorBox = null;
-        selectedEventUrl.value = event?.url ?? '';
-        loadingAfterEventSelect.value = true;
         await props.selectEvent(event, navigationActions);
-        loadingAfterEventSelect.value = false;
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        loadingAfterEventSelect.value = false;
     }
 }
 

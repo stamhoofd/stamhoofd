@@ -79,7 +79,7 @@ async function save() {
                 }
                 else {
                     // also an update needed as the eventUrl might have been set
-                    basePrice = patched.value.prices.filter(p => p.id === productPrice.uitpasBaseProductPriceId)[0].price;
+                    basePrice = patched.value.prices.find(p => p.id === productPrice.uitpasBaseProductPriceId)?.price ?? 0;
                 }
                 const newReducedPrice = await getOfficialUitpasSocialTariff(uitpasEventUrl, basePrice);
                 addPricePatch(ProductPrice.patch({ id: productPrice.id, price: newReducedPrice }), productPrice.id);

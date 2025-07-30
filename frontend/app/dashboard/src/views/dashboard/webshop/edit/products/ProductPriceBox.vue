@@ -126,7 +126,7 @@ const uitpasFeature = useFeatureFlag()('uitpas');
 const patchedProductPrice = computed(() => props.productPrice);
 const patchedProduct = computed(() => props.product);
 function addProductPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Product>>) {
-    emits('patch', patch as AutoEncoderPatchType<Product>);
+    emits('patch', Product.patch({ id: props.product.id }).patch(Product.patch(patch)));
 }
 const { goToUitpasConfiguration } = useGoToUitpasConfiguration(patchedProduct, addProductPatch);
 
@@ -276,7 +276,7 @@ const enableUitpasSocialTariff = computed({
             if (!name.value) {
                 name.value = 'UiTPAS kansentarief';
             }
-            uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0].id;
+            uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0]?.id ?? null;
         }).catch((e) => {
             Toast.fromError(e).show();
         });
