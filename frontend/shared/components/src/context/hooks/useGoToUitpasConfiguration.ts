@@ -61,7 +61,6 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
     };
 
     const goToUitpasSettings = async (onFixed: (navigationActions: NavigationActions) => Promise<void>) => {
-        console.error('Product:', patchedProduct?.value);
         await present(
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(UitpasSettingsView, {
