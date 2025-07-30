@@ -2,7 +2,7 @@ import { Product, ProductPrice, UitpasEventResponse } from '@stamhoofd/structure
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { Ref } from 'vue';
+import { nextTick, Ref } from 'vue';
 import { useGetOfficialUitpasSocialTariff } from './useGetOfficialUitpasSocialTariff';
 
 type EventResponse = {
@@ -101,6 +101,7 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
     const setUitpasEvent = async (uitpasEvent: UitpasEventResponse | null): Promise<void> => {
         // store the new details
         addProductPatch({ uitpasEvent });
+        await nextTick();
 
         if (uitpasEvent) {
             const uitpasTariffs = patchedProduct.value.prices.filter(p => !!p.uitpasBaseProductPriceId);
@@ -111,13 +112,15 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
                 const produchtPatch = Product.patch({ id: patchedProduct.value.id });
                 produchtPatch.prices.addPatch(patch);
                 addProductPatch(produchtPatch);
+                await nextTick();
             }
         }
     };
 
-    const clearUitpasEvent = () => {
+    const clearUitpasEvent = async () => {
         // remove uitpas event
         addProductPatch({ uitpasEvent: null });
+        await nextTick();
     };
 
     return {
