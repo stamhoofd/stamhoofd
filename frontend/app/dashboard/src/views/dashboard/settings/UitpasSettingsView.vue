@@ -6,7 +6,7 @@
             <h1>{{ $t('Koppel met UiTPAS') }}</h1>
 
             <p>
-                <I18nComponent :t="$t('Door {platform} en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.', { platform: capitalizeFirstLetter(STAMHOOFD.platformName) })">
+                <I18nComponent :t="$t('Door #platform en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.')">
                     <template #button="{content}">
                         <a class="inline-link" href="https://platform.publiq.be/nl" target="_blank">
                             {{ content }}
