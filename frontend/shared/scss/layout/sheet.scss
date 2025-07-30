@@ -11,7 +11,7 @@
     }
 
 
-    > div {
+    > div:first-child {
         transition: transform 0.3s, opacity 0.3s;
         will-change: transform, opacity;
         max-height: var(--popup-height);
@@ -44,7 +44,7 @@
         }
     }
 
-    > div {
+    > div:first-child {
         background: $color-background-lighter;
         --color-current-background: #{$color-background-lighter};
         --color-current-background-shade: #{$color-background-lighter-shade};
@@ -81,7 +81,7 @@
 
     &.show-enter-from.animated,
     &.show-leave-to {
-        &>div {
+        & > div:first-child {
             transform: translate(0, calc(var(--popup-padding-top-outside, 0px) - 40px));
         }
     }
@@ -91,7 +91,7 @@
             transition: opacity 0.2s;
         }
 
-        &>div {
+        & > div:first-child {
             // Decelerated easing
             transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.2s;
         }
@@ -102,13 +102,13 @@
             transition: opacity 0.2s;
         }
 
-        &>div {
+        & > div:first-child {
             // Accelerated easing
             transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.2s;
         }
     }
 
-    > div {
+    > div:first-child {
         background: $color-background;
         
         --color-current-background: #{$color-background};

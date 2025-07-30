@@ -370,6 +370,10 @@
         opacity: 0.6;
     }
 
+    &.large {
+        font-size: 20px;
+    }
+
     &.negative {
         color: $color-error;
     }

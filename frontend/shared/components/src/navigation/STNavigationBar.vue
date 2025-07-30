@@ -171,7 +171,6 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
-@use '@stamhoofd/scss/layout/split-inputs.scss';
 @use '@stamhoofd/scss/base/text-styles.scss';
 
 .st-navigation-bar-container {

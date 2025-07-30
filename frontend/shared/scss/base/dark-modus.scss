@@ -1,22 +1,22 @@
 @use "./variables.scss" as *;
 
-body {
+body, :host {
     // Indicate both are supported
     color-scheme: light dark;
 }
 
-body.dark {
+body.dark, :host.dark {
     // Force dark
     color-scheme: dark;
     @include dark-modus;
 }
 
-body.light {
+body.light, :host.light {
     // Force light mode
     color-scheme: light;
 }
 
-body:not(.light) {
+body:not(.light), :host:not(.light) {
     @media (prefers-color-scheme: dark) {
         @include dark-modus;
     }
@@ -29,7 +29,7 @@ body:not(.light) {
 }
 
 
-body:not(.light) {
+body:not(.light), :host:not(.light) {
     @media (prefers-color-scheme: dark) {
         .st-color-directive {
             // Colors need to be recalculated using the local color hue and saturation
@@ -38,7 +38,7 @@ body:not(.light) {
     }
 }
 
-body.dark {
+body.dark, :host.dark {
     .st-color-directive {
         // Colors need to be recalculated using the local color hue and saturation
         @include dark-modus;

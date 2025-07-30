@@ -1,0 +1,21 @@
+{
+    "name": "@stamhoofd/calculator",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
+        "dev:preview": "NODE_ENV=development ENV_FILE=../../.env.json concurrently -r 'vite build' 'vite preview'",
+        "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build"
+    },
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "@stamhoofd/assets": "1.0.0",
+        "@stamhoofd/components": "1.0.0",
+        "@stamhoofd/scss": "1.0.0",
+        "@stamhoofd/structures": "*"
+    }
+}

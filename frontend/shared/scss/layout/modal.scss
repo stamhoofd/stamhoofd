@@ -1,8 +1,45 @@
 @use "../base/variables" as *;
 @use "../base/text-styles" as *;
 
+/**
+    Backdrop that makes sure you cant scroll.
+    Experimental, doesn't really work always.
+*/
+.modal-backdrop-fix-scrolling {
+    > .background {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        display: block;
+        right: 0;
+        opacity: 1;
+        contain: strict;
+        z-index: 0;
+
+        // Creates a child element that is higher, so that foces scrolling
+        overflow: scroll;
+        overscroll-behavior: none;
+    
+        &::after {
+            height: 100%;
+            padding-bottom: 1px;
+            content: "";
+            display: block;
+        }
+    }
+
+    &.show-leave-active {
+        > .background {
+            display: none;
+        }
+    }
+}
+
 .modal-backdrop {
-    &:after {
+    &::after {
         background: rgba(black, 0.7);
         content: "";
         position: absolute;
@@ -28,7 +65,7 @@
     display: block;
     z-index: 10000;
     contain: strict;
-
+    
     //transform: translate3d(0, 0, 0);
     
     // Android fix / fix where position fixed is 100vh, and isn't the same as the viewport
@@ -63,7 +100,7 @@
 
     // Improve performance
 
-    > div {
+    > div:first-child {
         --popup-padding-top-inside: max(0px, calc(var(--popup-padding-top-full, 0px) - var(--popup-padding-top-outside, 0px)));
         --popup-padding-bottom-inside: max(0px, calc(var(--popup-padding-bottom-full, 0px) - var(--popup-padding-bottom-outside, 0px)));
         
@@ -131,7 +168,7 @@
             transition: opacity 0.3s;
         }
 
-        &>div {
+        & > div:first-child {
             // Decelerated easing
             transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.3s;
         }
@@ -142,7 +179,7 @@
             transition: opacity 0.3s;
         }
 
-        &>div {
+        & > div:first-child {
             // Accelerated easing
             transition: transform 0.3s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.3s;
         }
@@ -154,7 +191,7 @@
             opacity: 0;
         }
 
-        &>div {
+        & > div:first-child {
             opacity: 0;
 
             @media not all and (prefers-reduced-motion) {

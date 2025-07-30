@@ -8,7 +8,7 @@ import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
 
 // https://vitejs.dev/config/
-export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
+export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
     if (process.env.NODE_ENV === 'production') {
         console.log('Building for production...');
     }
@@ -79,6 +79,12 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
             ],
         },
         plugins: [
+            viteSvgToWebfont({
+                ...iconConfig,
+                context: resolve(__dirname, './shared/assets/images/icons/'),
+                cssTemplate: resolve(__dirname, './shared/assets/images/icons/iconCss.hbs'),
+                moduleId: 'vite-svg-2-webfont.css?inline',
+            }),
             svgNamespacePlugin({
                 namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? '',
                 colors: loadedEnv?.ILLUSTRATIONS_COLORS,
@@ -89,11 +95,9 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                         comments: false,
                     },
                 },
-            }),
-            viteSvgToWebfont({
-                ...iconConfig,
-                context: resolve(__dirname, './shared/assets/images/icons/'),
-                cssTemplate: resolve(__dirname, './shared/assets/images/icons/iconCss.hbs'),
+                features: {
+                    customElement: options.name === 'calculator', // Only enable custom elements for the calculator
+                },
             }),
         ] as any,
         define: use_env,
@@ -112,18 +116,32 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     },
                 }
             : undefined,
+        preview: process.env.NODE_ENV !== 'production'
+            ? {
+                    host: '127.0.0.1',
+                    port: loadedEnv.PORT ?? options.port,
+                    strictPort: true,
+                    allowedHosts: ['.stamhoofd'],
+                }
+            : undefined,
         build: process.env.NODE_ENV !== 'production'
             ? {
                     sourcemap: 'inline',
                     rollupOptions: {
-                        treeshake: false, // Increases performance
+                        treeshake: true, // Increases performance
+                        output: {
+                            manualChunks: undefined, // disable any auto chunk splitting
+                            inlineDynamicImports: true, // This is needed to make sure that the dynamic imports are inlined
+                        },
                     },
                     watch: {
                         buildDelay: 1000,
                     },
+                    cssCodeSplit: false,
                 }
             : {
                     sourcemap: true,
+                    cssCodeSplit: false,
                 },
         publicDir: resolve(__dirname, './public'),
         test: {

@@ -18,6 +18,11 @@ export function build(service: Service): any {
                     PORT: 8082,
                 };
             }
+            case 'calculator': {
+                return {
+                    PORT: 8083,
+                };
+            }
             default: {
                 throw new Error(`Unknown frontend service: ${service.frontend as unknown as string}`);
             }
