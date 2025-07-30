@@ -35,6 +35,12 @@ export function normalizeCompareValue(val: StamhoofdCompareValue, againstType: S
             return val.toLocaleLowerCase();
         }
 
+        // Allowed to compare strings with dates
+        if (againstType === SQLValueType.Datetime) {
+            // Note, taht if you ever filter dates by string values, you need to work with UTC timezones
+            return val;
+        }
+
         throw new Error('Cannot compare a string with a non-string column');
     }
 
