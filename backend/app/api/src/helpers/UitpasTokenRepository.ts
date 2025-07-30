@@ -203,10 +203,10 @@ export class UitpasTokenRepository {
         });
     }
 
-    static async getClientIdFor(organisationId: string | null): Promise<string> {
-        const repo = UitpasTokenRepository.getRepoFromMemory(organisationId);
+    static async getClientIdFor(organizationId: string | null): Promise<string> {
+        const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
         if (!repo) {
-            const model = await UitpasClientCredential.select().where('organizationId', organisationId).first(false);
+            const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
             if (!model) {
                 return ''; // no client ID and secret configured
             }

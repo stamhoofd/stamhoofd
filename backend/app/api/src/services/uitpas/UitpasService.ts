@@ -135,15 +135,15 @@ export class UitpasService {
         });
     }
 
-    static async getSocialTariffForUitpasNumbers(organisationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
+    static async getSocialTariffForUitpasNumbers(organizationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
-        const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(organizationId);
         return await getSocialTariffForUitpasNumbers(access_token, uitpasNumbers, basePrice, uitpasEventUrl);
     }
 
-    static async getSocialTariffForEvent(organisationId: string, basePrice: number, uitpasEventUrl: string) {
+    static async getSocialTariffForEvent(organizationId: string, basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
-        const access_token = await UitpasTokenRepository.getAccessTokenFor(organisationId);
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(organizationId);
         return await getSocialTariffForEvent(access_token, basePrice, uitpasEventUrl);
     }
 
@@ -187,7 +187,7 @@ export class UitpasService {
 
     /**
      * Returns the client ID if it is configured for the organization, otherwise an empty string. Empty strings means no client ID and secret configured.
-     * @param organisationId
+     * @param organizationId
      * @returns clientId or empty string if not configured
      */
     static async getClientIdFor(organizationId: string | null): Promise<string> {
