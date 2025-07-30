@@ -7,7 +7,7 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="name" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('Zoek op naam')">
+                <input ref="input" v-model="name" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('Zoek op naam of id')">
             </form>
 
             <Spinner v-if="loadingResults || (loadingAfterOrganizerSelect && !selectedOrganizerId)" class="gray center" />
@@ -33,7 +33,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox, NavigationActions, Spinner, Toast, useContext, useErrors, useNavigationActions } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { UitpasOrganizerResponse, UitpasOrganizersResponse } from '@stamhoofd/structures';
-import { throttle } from '@stamhoofd/utility';
+import { DataValidator, throttle } from '@stamhoofd/utility';
 import { Ref, ref, watch } from 'vue';
 
 const props = withDefaults(
