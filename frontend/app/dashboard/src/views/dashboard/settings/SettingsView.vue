@@ -98,7 +98,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ true ? $t('Koppel je UiTPAS-organisator') : $t('Beheer je UiTPAS-integratie') }}
+                        {{ organization?.meta.uitpasOrganizerId ? $t('Koppel je UiTPAS-organisator') : $t('Beheer je UiTPAS-integratie') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('Sluit aan bij UiTPAS, zodat je gemeente tussenkomt in het UiTPAS-kansentarief.') }}
