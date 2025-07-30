@@ -2,7 +2,6 @@
     <div>
         <div v-if="loading || delayLoading" class="input-wrapper">
             <input
-                ref="ignore"
                 class="input with-spinner"
                 type="text"
                 autocomplete="off"
