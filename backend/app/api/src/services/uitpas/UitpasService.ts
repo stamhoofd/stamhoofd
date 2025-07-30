@@ -382,6 +382,10 @@ export class UitpasService {
         await UitpasTokenRepository.clearClientCredentialsFor(organizationId);
     }
 
+    static async areThereRegisteredTicketSales(webshopId: string): Promise<boolean> {
+        return await WebshopUitpasNumber.areThereRegisteredTicketSales(webshopId);
+    }
+
     static async validateCart(organizationId: string, webshopId: string, cart: Cart, exisitingOrderId?: string): Promise<Cart> {
         let forOrg: {
             accessToken: string;

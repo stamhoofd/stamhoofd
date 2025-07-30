@@ -73,4 +73,9 @@ export class WebshopUitpasNumber extends QueryableModel {
 
         return !!await query.first(false); ;
     }
+
+    static async areThereRegisteredTicketSales(webshopId: string): Promise<boolean> {
+        const query = WebshopUitpasNumber.select().where('webshopId', webshopId).andWhereNot('ticketSaleId', null);
+        return !!await query.first(false);
+    }
 }

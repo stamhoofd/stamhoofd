@@ -1,9 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, Order, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
+import { UitpasService } from '../../../../services/uitpas/UitpasService';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = { id: string };
 type Query = undefined;
@@ -40,6 +41,14 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const webshop = await Webshop.getByID(request.params.id);
         if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
             throw Context.auth.notFoundOrNoAccess();
+        }
+
+        if (await UitpasService.areThereRegisteredTicketSales(webshop.id)) {
+            throw new SimpleError({
+                code: 'webshop_has_registered_ticket_sales',
+                message: `Webshop ${webshop.id} has registered ticket sales`,
+                human: $t(`Deze webshop heeft geregistreerde verkopen bij UiTPAS. Je kan de webshop enkel archiveren.`),
+            });
         }
 
         const orders = await Order.where({ webshopId: webshop.id });
