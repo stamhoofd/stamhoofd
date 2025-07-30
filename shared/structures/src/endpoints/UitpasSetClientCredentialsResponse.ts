@@ -1,5 +1,5 @@
 import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
-import { UitpasClientCredentialsStatus } from '../UitpasClientCredentialsStatus';
+import { UitpasClientCredentialsStatus } from '../UitpasClientCredentialsStatus.js';
 
 export class UitpasSetClientCredentialsResponse extends AutoEncoder {
     @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus) })
