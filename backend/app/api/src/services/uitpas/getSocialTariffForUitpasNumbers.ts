@@ -51,8 +51,8 @@ function isSocialTariffErrorResponse(
         );
 }
 
-async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber: string, basePrice: number, uitpasEventUrl: string) {
-    const baseUrl = 'https://api-test.uitpas.be/tariffs';
+async function getSocialTariffForUitpasNumber(accessToken: string, useTestEnv: boolean, uitpasNumber: string, basePrice: number, uitpasEventUrl: string) {
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
     const params = new URLSearchParams();
     params.append('regularPrice', (basePrice / 100).toFixed(2));
     const eventId = uitpasEventUrl.split('/').pop();
@@ -66,9 +66,9 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
     params.append('eventId', eventId);
     params.append('uitpasNumber', uitpasNumber);
     params.append('type', 'SOCIALTARIFF'); // this ensures we get the social tariff or a message that explains why it's not available
-    const url = `${baseUrl}?${params.toString()}`;
+    const url = `${baseUrl}/tariffs?${params.toString()}`;
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     myHeaders.append('Accept', 'application/json');
     const requestOptions = {
         method: 'GET',
@@ -161,13 +161,13 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
     });
 }
 
-export async function getSocialTariffForUitpasNumbers(access_token: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
+export async function getSocialTariffForUitpasNumbers(accessToken: string, useTestEnv: boolean, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
     const simpleErrors = new SimpleErrors();
     const reducedPrices = new Array<UitpasNumberAndPrice>(uitpasNumbers.length);
     for (let i = 0; i < uitpasNumbers.length; i++) {
         const uitpasNumber = uitpasNumbers[i];
         try {
-            reducedPrices[i] = await getSocialTariffForUitpasNumber(access_token, uitpasNumber, basePrice, uitpasEventUrl);
+            reducedPrices[i] = await getSocialTariffForUitpasNumber(accessToken, useTestEnv, uitpasNumber, basePrice, uitpasEventUrl);
         }
         catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {

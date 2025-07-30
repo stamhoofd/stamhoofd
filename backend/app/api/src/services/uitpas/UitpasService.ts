@@ -207,12 +207,12 @@ export class UitpasService {
         let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
         if (toBeRegisteredUitpasRequests.length !== 0 || toBeCanceledUitpasIds.length !== 0) {
             const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(order.organizationId);
-            canceledUitpasId = await cancelTicketSales(accessToken, toBeCanceledUitpasIds);
+            canceledUitpasId = await cancelTicketSales(accessToken, useTestEnv, toBeCanceledUitpasIds);
             if (canceledUitpasId.length !== toBeCanceledUitpasIds.length) {
                 console.error('Failed to cancel some UiTPAS ticket sales, successfully canceled:', canceledUitpasId, 'but tried to cancel:', toBeCanceledUitpasIds);
             }
             try {
-                newlyRegistered = await registerTicketSales(accessToken, toBeRegisteredUitpasRequests);
+                newlyRegistered = await registerTicketSales(accessToken, useTestEnv, toBeRegisteredUitpasRequests);
             }
             catch (e) {
                 console.error('Failed to register UiTPAS ticket sales', e);
@@ -284,20 +284,20 @@ export class UitpasService {
 
     static async getSocialTariffForUitpasNumbers(organizationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return await getSocialTariffForUitpasNumbers(accessToken, uitpasNumbers, basePrice, uitpasEventUrl);
+        const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
+        return await getSocialTariffForUitpasNumbers(accessToken, useTestEnv, uitpasNumbers, basePrice, uitpasEventUrl);
     }
 
     static async getSocialTariffForEvent(organizationId: string, basePrice: number, uitpasEventUrl: string) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return await getSocialTariffForEvent(accessToken, basePrice, uitpasEventUrl);
+        const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
+        return await getSocialTariffForEvent(accessToken, useTestEnv, basePrice, uitpasEventUrl);
     }
 
     static async cancelTicketSales(organizationId: string, ticketSaleIds: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return await cancelTicketSales(accessToken, ticketSaleIds);
+        const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
+        return await cancelTicketSales(accessToken, useTestEnv, ticketSaleIds);
     }
 
     static async getTicketSales() {
@@ -317,8 +317,8 @@ export class UitpasService {
 
     static async searchUitpasOrganizers(name: string): Promise<UitpasOrganizersResponse> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
-        return await searchUitpasOrganizers(accessToken, name);
+        const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(); // uses platform credentials
+        return await searchUitpasOrganizers(accessToken, useTestEnv, name);
     }
 
     static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId?: string): Promise<{
@@ -326,8 +326,8 @@ export class UitpasService {
         human?: string;
     }> {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-permissions
-        const { accessToken } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return await checkPermissionsFor(accessToken, organizationId, uitpasOrganizerId);
+        const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(organizationId);
+        return await checkPermissionsFor(accessToken, useTestEnv, organizationId, uitpasOrganizerId);
     }
 
     /**
@@ -352,7 +352,7 @@ export class UitpasService {
     static async checkUitpasNumbers(uitpasNumbers: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
         const { accessToken, useTestEnv } = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
-        return await checkUitpasNumbers(accessToken, uitpasNumbers);
+        return await checkUitpasNumbers(accessToken, useTestEnv, uitpasNumbers);
     }
 
     /**
@@ -423,7 +423,7 @@ export class UitpasService {
                 }
 
                 forOrg = forOrg ?? await UitpasTokenRepository.getAccessTokenFor(organizationId);
-                const verified = await getSocialTariffForUitpasNumbers(forOrg.accessToken, item.uitpasNumbers.map(p => p.uitpasNumber), basePrice, item.product.uitpasEvent.url);
+                const verified = await getSocialTariffForUitpasNumbers(forOrg.accessToken, forOrg.useTestEnv, item.uitpasNumbers.map(p => p.uitpasNumber), basePrice, item.product.uitpasEvent.url);
                 if (verified.length < item.uitpasNumbers.length) {
                     throw new SimpleError({
                         code: 'uitpas_social_tariff_price_mismatch',
@@ -450,7 +450,7 @@ export class UitpasService {
             else {
                 // non-official flow
                 forPlatform = forPlatform ?? await UitpasTokenRepository.getAccessTokenFor();
-                await checkUitpasNumbers(forPlatform.accessToken, item.uitpasNumbers.map(p => p.uitpasNumber));
+                await checkUitpasNumbers(forPlatform.accessToken, forPlatform.useTestEnv, item.uitpasNumbers.map(p => p.uitpasNumber));
             }
         }
         return cart;

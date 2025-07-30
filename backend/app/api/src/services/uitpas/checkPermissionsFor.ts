@@ -41,10 +41,11 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
     }
 }
 
-export async function checkPermissionsFor(access_token: string, organizationId: string | null, uitpasOrganizerId?: string) {
-    const url = 'https://api-test.uitpas.be/permissions';
+export async function checkPermissionsFor(accessToken: string, useTestEnv: boolean, organizationId: string | null, uitpasOrganizerId?: string) {
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
+    const url = `${baseUrl}/permissions`;
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     myHeaders.append('Accept', 'application/json');
     const response = await fetch(url, {
         method: 'GET',

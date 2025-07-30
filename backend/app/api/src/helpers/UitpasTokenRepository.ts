@@ -121,7 +121,8 @@ export class UitpasTokenRepository {
     }
 
     private async getNewAccessToken() {
-        const url = 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token';
+        const baseUrl = this.uitpasClientCredential.useTestEnv ? 'https://account-test.uitid.be' : 'https://account.uitid.be';
+        const url = `${baseUrl}/realms/uitid/protocol/openid-connect/token`;
         const myHeaders = new Headers();
         myHeaders.append('Content-Type', 'application/x-www-form-urlencoded');
         const params = new URLSearchParams({

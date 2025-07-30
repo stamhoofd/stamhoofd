@@ -64,7 +64,7 @@ export async function searchUitpasEvents(clientId: string, useTestEnv: boolean, 
             human: $t(`Er is geen UiTPAS client ID geconfigureerd voor deze organisatie.`),
         });
     }
-    const baseUrl = 'https://search-test.uitdatabank.be/events';
+    const baseUrl = useTestEnv ? 'https://io-test.uitdatabank.be' : 'https://io.uitdatabank.be';
     const params = new URLSearchParams();
     params.append('clientId', clientId);
     params.append('organizerId', uitpasOrganizerId);
@@ -75,7 +75,7 @@ export async function searchUitpasEvents(clientId: string, useTestEnv: boolean, 
     if (textQuery) {
         params.append('text', textQuery);
     }
-    const url = `${baseUrl}?${params.toString()}`;
+    const url = `${baseUrl}/events?${params.toString()}`;
     const myHeaders = new Headers();
     myHeaders.append('Accept', 'application/json');
     const requestOptions = {

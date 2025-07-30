@@ -52,12 +52,12 @@ function isUitpasNumberErrorResponse(
         );
 }
 
-async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
-    const baseUrl = 'https://api-test.uitpas.be'; // TO DO: Use the URL from environment variables
+async function checkUitpasNumber(accessToken: string, useTestEnv: boolean, uitpasNumber: string) {
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
 
     const url = `${baseUrl}/passes/${uitpasNumber}`;
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     const requestOptions = {
         method: 'GET',
         headers: myHeaders,
@@ -145,12 +145,12 @@ async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
  * The field of the error will be the index of the uitpas number in the array.
  * @param uitpasNumbers The uitpas numbers to check
  */
-export async function checkUitpasNumbers(access_token: string, uitpasNumbers: string[]) {
+export async function checkUitpasNumbers(accessToken: string, useTestEnv: boolean, uitpasNumbers: string[]) {
     const simpleErrors = new SimpleErrors();
     for (let i = 0; i < uitpasNumbers.length; i++) {
         const uitpasNumber = uitpasNumbers[i];
         try {
-            await checkUitpasNumber(access_token, uitpasNumber); // Throws if invalid
+            await checkUitpasNumber(accessToken, useTestEnv, uitpasNumber); // Throws if invalid
         }
         catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {

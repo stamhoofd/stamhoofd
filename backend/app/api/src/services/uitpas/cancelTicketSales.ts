@@ -1,10 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 
-async function cancelTicketSale(access_token: string, ticketSaleId: string) {
+async function cancelTicketSale(accessToken: string, useTestEnv: boolean, ticketSaleId: string) {
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
-    const url = 'https://api-test.uitpas.be/ticket-sales/' + ticketSaleId;
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
+    const url = `${baseUrl}/ticket-sales/${ticketSaleId}`;
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     myHeaders.append('Accept', 'application/json');
     const requestOptions = {
         method: 'DELETE',
@@ -33,9 +34,9 @@ async function cancelTicketSale(access_token: string, ticketSaleId: string) {
 /**
  * Will never throw an error, but will return array of successfully canceled ticket sale ids
  */
-export async function cancelTicketSales(access_token: string, ticketSaleIds: string[]) {
+export async function cancelTicketSales(accessToken: string, useTestEnv: boolean, ticketSaleIds: string[]) {
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
-    const promises = ticketSaleIds.map(ticketSaleId => cancelTicketSale(access_token, ticketSaleId));
+    const promises = ticketSaleIds.map(ticketSaleId => cancelTicketSale(accessToken, useTestEnv, ticketSaleId));
     const results = await Promise.allSettled(promises);
     return results.filter(result => result.status === 'fulfilled').map(result => result.value);
 }

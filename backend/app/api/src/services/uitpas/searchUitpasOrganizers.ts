@@ -54,7 +54,7 @@ function assertIsOrganizersResponse(json: unknown): asserts json is OrganizersRe
     }
 }
 
-export async function searchUitpasOrganizers(access_token: string, name: string): Promise<UitpasOrganizersResponse> {
+export async function searchUitpasOrganizers(accessToken: string, useTestEnv: boolean, name: string): Promise<UitpasOrganizersResponse> {
     // uses platform credentials
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
     if (name === '') {
@@ -80,7 +80,7 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         const baseUrl = 'https://io-test.uitdatabank.be/organizers/';
         const url = `${baseUrl}${id}`;
         const myHeaders = new Headers();
-        myHeaders.append('Authorization', 'Bearer ' + access_token);
+        myHeaders.append('Authorization', 'Bearer ' + accessToken);
         myHeaders.append('Accept', 'application/json');
         const requestOptions = {
             method: 'GET',
@@ -108,13 +108,13 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         // if something fails, we fall back to the search endpoint
     }
 
-    const baseUrl = 'https://api-test.uitpas.be/organizers';
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
     const params = new URLSearchParams();
     params.append('name', name);
     params.append('limit', '200');
-    const url = `${baseUrl}?${params.toString()}`;
+    const url = `${baseUrl}/organizers?${params.toString()}`;
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     myHeaders.append('Accept', 'application/json');
     const requestOptions = {
         method: 'GET',

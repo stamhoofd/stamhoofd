@@ -55,14 +55,13 @@ function assertisSuccessResponse(json: unknown): asserts json is SuccessResponse
  * @returns Map of request (from parameters) -> response
  */
 
-export async function registerTicketSales(access_token: string, registerTicketSaleRequests: RegisterTicketSaleRequest[]): Promise<Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse>> {
+export async function registerTicketSales(accessToken: string, useTestEnv: boolean, registerTicketSaleRequests: RegisterTicketSaleRequest[]): Promise<Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse>> {
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/create-a-ticket-sale
-
-    console.error('Registering ticket sales', registerTicketSaleRequests);
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
     if (registerTicketSaleRequests.length === 0) {
         return new Map();
     };
-    const url = 'https://api-test.uitpas.be/ticket-sales';
+    const url = `${baseUrl}/ticket-sales`;
     const body = registerTicketSaleRequests.map((ticketSale) => {
         const eventId = ticketSale.uitpasEventUrl.split('/').pop();
         if (!eventId) {
@@ -84,7 +83,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         };
     });
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     myHeaders.append('Accept', 'application/json');
     myHeaders.append('Content-Type', 'application/json');
     const requestOptions = {

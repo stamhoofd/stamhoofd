@@ -26,8 +26,8 @@ function assertsIsStaticSocialTariffResponse(json: unknown): asserts json is Sta
     }
 }
 
-export async function getSocialTariffForEvent(access_token: string, basePrice: number, uitpasEventUrl: string) {
-    const baseUrl = 'https://api-test.uitpas.be/tariffs/static';
+export async function getSocialTariffForEvent(accessToken: string, useTestEnv: boolean, basePrice: number, uitpasEventUrl: string) {
+    const baseUrl = useTestEnv ? 'https://api-test.uitpas.be' : 'https://api.uitpas.be';
     const params = new URLSearchParams();
     params.append('regularPrice', (basePrice / 100).toFixed(2));
     const eventId = uitpasEventUrl.split('/').pop(); // Extract the event ID from the URL
@@ -39,9 +39,9 @@ export async function getSocialTariffForEvent(access_token: string, basePrice: n
         });
     }
     params.append('eventId', eventId);
-    const url = `${baseUrl}?${params.toString()}`;
+    const url = `${baseUrl}/tariffs/static?${params.toString()}`;
     const myHeaders = new Headers();
-    myHeaders.append('Authorization', 'Bearer ' + access_token);
+    myHeaders.append('Authorization', 'Bearer ' + accessToken);
     myHeaders.append('Accept', 'application/json');
     const requestOptions = {
         method: 'GET',
