@@ -126,7 +126,7 @@ const uitpasFeature = useFeatureFlag()('uitpas');
 const patchedProductPrice = computed(() => props.productPrice);
 const patchedProduct = computed(() => props.product);
 function addProductPatch(patch: PartialWithoutMethods<AutoEncoderPatchType<Product>>) {
-    emits('patch', patch as AutoEncoderPatchType<Product>);
+    emits('patch', Product.patch({ id: props.product.id }).patch(Product.patch(patch)));
 }
 const { goToUitpasConfiguration } = useGoToUitpasConfiguration(patchedProduct, addProductPatch);
 
