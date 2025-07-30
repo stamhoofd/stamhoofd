@@ -44,7 +44,7 @@ export default class LoadingInputWrapper extends VueComponent {
 }
 </script>
 
-<style scoped>
+<style lang="scss">
 .input-wrapper {
     position: relative;
     display: inline-block;
