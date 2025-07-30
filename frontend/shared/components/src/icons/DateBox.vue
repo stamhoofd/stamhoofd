@@ -11,9 +11,14 @@
 <script setup lang="ts">
 import { Formatter } from '@stamhoofd/utility';
 
-defineProps<{
-    date?: Date;
-}>();
+withDefaults(
+    defineProps<{
+        date?: Date | null;
+    }>(), {
+        date: null,
+    },
+);
+
 </script>
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
