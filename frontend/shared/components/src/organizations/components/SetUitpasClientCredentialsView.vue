@@ -18,7 +18,7 @@
                 <input ref="secondInput" v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t('Plak hier je client secret')">
             </STInputBox>
 
-            <Checkbox v-if="useTestEnv || isPlatformAdmin" v-model="useTestEnv" v-tooltip="!isPlatformAdmin ? $t('Enkel instelbaar door platformbeheerders') : ''" :disabled="!isPlatformAdmin">
+            <Checkbox v-if="useTestEnv || STAMHOOFD.environment === 'development'" v-model="useTestEnv">
                 {{ $t('Gebruik UiTPAS-testomgeving') }}
             </Checkbox>
         </SaveView>
@@ -30,7 +30,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, LoadingViewTransition, useOrganization, Checkbox, usePlatform, useAuth } from '@stamhoofd/components';
+import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, LoadingViewTransition, useOrganization, Checkbox, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
@@ -47,8 +47,6 @@ const clientSecret = ref('');
 const organization = useOrganization();
 const platform = usePlatform();
 const navigationActions = useNavigationActions();
-const auth = useAuth();
-const isPlatformAdmin = auth.hasPlatformFullAccess();
 
 let originaClientId: string;
 
