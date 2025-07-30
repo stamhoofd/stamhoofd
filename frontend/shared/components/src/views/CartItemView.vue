@@ -110,17 +110,6 @@
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
                 <hr><h2>{{ cartItem.amount < 2 ? $t('e330f60b-d331-49a2-a437-cddc31a878de') : $t('83eca88a-9820-4b6e-8849-9d59ec3e4a3b') }}</h2>
-                <!-- <STInputBox v-for="(value, index) in uitpasNumbers" :key="index" :error-fields="'uitpasNumbers.' + index" :error-box="errors.errorBox" class="max uitpas-number-input">
-                    <input
-                        v-model="uitpasNumbers[index].uitpasNumber"
-                        class="input"
-                        type="text"
-                        :placeholder="index === 0 ? 'Geef jouw UiTPAS-nummer in' : 'UiTPAS-nummer ' + (index + 1)"
-                    >
-                    <p v-if="originalSelectedPriceId === cartItem.productPrice.id && cartItem.uitpasNumbers[index] && cartItem.calculateOptionsPrice(cart, cartItem.uitpasNumbers[index].price) !== cartItem.calculateOptionsPrice(cart, cartItem.productPrice.price)" class="style-description-small">
-                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {specificPrice: formatPrice(cartItem.calculateOptionsPrice(cart, cartItem.uitpasNumbers[index].price)), generalPrice: formatPrice(cartItem.calculateOptionsPrice(cart, cartItem.productPrice.price))}) }}
-                    </p>
-                </STInputBox> -->
                 <div v-for="(value, index) in uitpasNumbers" :key="index">
                     <UitpasNumberInput
                         v-model="uitpasNumbers[index].uitpasNumber"
