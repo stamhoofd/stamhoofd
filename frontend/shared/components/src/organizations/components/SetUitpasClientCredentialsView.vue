@@ -17,6 +17,10 @@
             <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('Client secret')">
                 <input ref="secondInput" v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t('Plak hier je client secret')">
             </STInputBox>
+
+            <Checkbox v-model="useTestEnv">
+                {{ $t('Gebruik UiTPAS-testomgeving') }}
+            </Checkbox>
         </SaveView>
     </LoadingViewTransition>
 </template>
@@ -26,7 +30,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, useRequiredOrganization, LoadingViewTransition } from '@stamhoofd/components';
+import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, LoadingViewTransition, useRequiredOrganization, Checkbox } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
@@ -61,6 +65,8 @@ watch(clientId, (newValue) => {
     }
 });
 
+const useTestEnv = ref(false);
+
 onMounted(async () => {
     try {
         const response = await context.value.authenticatedServer.request({
@@ -72,6 +78,7 @@ onMounted(async () => {
         });
         originaClientId = response.data.clientId;
         clientId.value = response.data.clientId;
+        useTestEnv.value = response.data.useTestEnv;
         if (clientId.value === '') {
             clientSecret.value = '';
         }
@@ -124,6 +131,7 @@ async function save() {
         const cred = new UitpasClientIdAndSecret();
         cred.clientId = clientId.value;
         cred.clientSecret = clientSecret.value;
+        cred.useTestEnv = useTestEnv.value;
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/organization/uitpas-client-credentials',

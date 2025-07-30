@@ -54,7 +54,7 @@ function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
     }
 }
 
-export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: string, textQuery?: string): Promise<UitpasEventsResponse> {
+export async function searchUitpasEvents(clientId: string, useTestEnv: boolean, uitpasOrganizerId: string, textQuery?: string): Promise<UitpasEventsResponse> {
     // uses no credentials (only client id of the organization)
     // https://docs.publiq.be/docs/uitpas/events/searching
     if (!clientId) {

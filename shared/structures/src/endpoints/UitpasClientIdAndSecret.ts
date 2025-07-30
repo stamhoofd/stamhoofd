@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 
 export class UitpasClientIdAndSecret extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -6,6 +6,9 @@ export class UitpasClientIdAndSecret extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     clientSecret: string;
+
+    @field({ decoder: BooleanDecoder })
+    useTestEnv: boolean;
 
     static get placeholderClientSecret() {
         return '••••';

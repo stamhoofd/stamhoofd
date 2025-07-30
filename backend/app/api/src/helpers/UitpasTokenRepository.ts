@@ -39,7 +39,7 @@ export class UitpasTokenRepository {
         return await QueueHandler.schedule('uitpas/token-' + (organizationId ?? 'platform'), handler);
     }
 
-    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<boolean> {
+    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string, useTestEnv: boolean): Promise<boolean> {
         if (!clientId || !clientSecret) { // empty strings
             return false; // not valid
         }
@@ -47,6 +47,7 @@ export class UitpasTokenRepository {
         model.organizationId = organizationId;
         model.clientId = clientId;
         model.clientSecret = clientSecret;
+        model.useTestEnv = useTestEnv;
         return await UitpasTokenRepository.handleInQueue(organizationId, async () => {
             let repo = new UitpasTokenRepository(model);
             try {
@@ -158,6 +159,7 @@ export class UitpasTokenRepository {
             // update
             oldModel.clientId = model.clientId;
             oldModel.clientSecret = model.clientSecret;
+            oldModel.useTestEnv = model.useTestEnv;
             await oldModel.save();
             return oldModel; // return updated model
         }
@@ -173,10 +175,16 @@ export class UitpasTokenRepository {
      * @returns Promise<string> the access token for the organization or platform
      * @throws SimpleError if the token cannot be obtained or the API is not configured
      */
-    static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<string> {
+    static async getAccessTokenFor(organizationId: string | null = null, forceRefresh: boolean = false): Promise<{
+        accessToken: string;
+        useTestEnv: boolean;
+    }> {
         let repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
         if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
-            return repo.accessToken;
+            return {
+                accessToken: repo.accessToken,
+                useTestEnv: repo.uitpasClientCredential.useTestEnv,
+            }; // return the cached token
         }
 
         // Prevent multiple concurrent requests for the same organization, asking for an access token to the UiTPAS API.
@@ -185,7 +193,10 @@ export class UitpasTokenRepository {
             // we re-search for the repo, as another call to this funcion might have added while we we're waiting in the queue
             repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
             if (repo && repo.accessToken && !forceRefresh && repo.expiresOn > new Date()) {
-                return repo.accessToken;
+                return {
+                    accessToken: repo.accessToken,
+                    useTestEnv: repo.uitpasClientCredential.useTestEnv,
+                };
             }
             if (!repo) {
                 const model = await UitpasTokenRepository.getModelFromDb(organizationId);
@@ -199,20 +210,35 @@ export class UitpasTokenRepository {
                 repo = UitpasTokenRepository.setRepoInMemory(organizationId, new UitpasTokenRepository(model)); // store in memory
             }
             // ask for a new access token
-            return repo.getNewAccessToken();
+            return {
+                accessToken: await repo.getNewAccessToken(),
+                useTestEnv: repo.uitpasClientCredential.useTestEnv,
+            };
         });
     }
 
-    static async getClientIdFor(organizationId: string | null): Promise<string> {
-        const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
+    static async getClientIdFor(organisationId: string | null): Promise<{
+        clientId: string;
+        useTestEnv: boolean;
+    }> {
+        const repo = UitpasTokenRepository.getRepoFromMemory(organisationId);
         if (!repo) {
             const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
             if (!model) {
-                return ''; // no client ID and secret configured
+                return {
+                    clientId: '',
+                    useTestEnv: false,
+                }; // no client ID and secret configured
             }
-            return model.clientId; // client ID configured, but not in memory
+            return {
+                clientId: model.clientId,
+                useTestEnv: model.useTestEnv,
+            }; // client ID configured, but not in memory
         }
-        return repo.uitpasClientCredential.clientId; // client ID configured and in memory
+        return {
+            clientId: repo.uitpasClientCredential.clientId,
+            useTestEnv: repo.uitpasClientCredential.useTestEnv,
+        }; // client ID configured and in memory
     }
 
     static async clearClientCredentialsFor(organizationId: string | null): Promise<boolean> {

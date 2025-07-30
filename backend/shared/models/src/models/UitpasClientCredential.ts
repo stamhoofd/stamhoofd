@@ -18,6 +18,9 @@ export class UitpasClientCredential extends QueryableModel {
     @column({ type: 'string' })
     clientSecret: string;
 
+    @column({ type: 'boolean' })
+    useTestEnv: boolean;
+
     /**
      * The organizationId is the ID of the organization that this token belongs to.
      * If it is null, it means that this token is for the platform.

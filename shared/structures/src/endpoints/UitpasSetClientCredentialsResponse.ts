@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, BooleanDecoder, EnumDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { UitpasClientCredentialsStatus } from '../UitpasClientCredentialsStatus';
 
 export class UitpasSetClientCredentialsResponse extends AutoEncoder {
@@ -12,4 +12,7 @@ export class UitpasSetClientCredentialsResponse extends AutoEncoder {
 export class UitpasGetClientIdResponse extends AutoEncoder {
     @field({ decoder: StringDecoder })
     clientId: string;
+
+    @field({ decoder: BooleanDecoder })
+    useTestEnv: boolean;
 }
