@@ -266,7 +266,7 @@ const auth = useAuth();
 const createEventGroup = useCreateEventGroup();
 const eventOrganization: Ref<Organization | null> = ref(null);
 const owner = useRequestOwner();
-// @ts-expect-error Something wrong with Vue converting structures to refs, causes too large types and causes a ts error "Type instantiation is excessively deep and possibly infinite."
+// @ts-ignore Something wrong with Vue converting structures to refs, causes too large types and causes a ts error "Type instantiation is excessively deep and possibly infinite."
 const webshop = computed<WebshopPreview | null>(() => {
     if (!props.event.webshopId) {
         return null;

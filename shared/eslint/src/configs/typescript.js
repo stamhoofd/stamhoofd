@@ -30,6 +30,7 @@ export default {
         "@typescript-eslint/restrict-plus-operands": "off", // bullshit one
         "@typescript-eslint/require-await": "off", // You should be able to define async methods if you need to match required interfaces or types
     
-     "@typescript-eslint/no-redundant-type-constituents": "off" // Weird behaviour and reduces code readability
+        "@typescript-eslint/no-redundant-type-constituents": "off", // Weird behaviour and reduces code readability
+        "@typescript-eslint/ban-ts-comment": "off",
     }
 }
