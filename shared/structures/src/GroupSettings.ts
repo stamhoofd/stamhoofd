@@ -54,10 +54,10 @@ export class GroupPrice extends AutoEncoder {
     @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), version: 374 })
     bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings> = new Map();
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 378 })
     startDate: Date | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 378 })
     endDate: Date | null = null;
 
     getUsedStock(group: Group) {

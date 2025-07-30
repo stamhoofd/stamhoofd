@@ -99,7 +99,7 @@ export class Event extends AutoEncoder {
     @field({ decoder: Group, nullable: true })
     group: Group | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 378 })
     webshopId: string | null = null;
 
     @field({ decoder: DateDecoder })

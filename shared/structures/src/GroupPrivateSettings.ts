@@ -10,7 +10,7 @@ export class GroupPrivateSettings extends AutoEncoder {
      * Default setting for admin registrations:
      * send an email to members when an admin registers a member
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 378 })
     sendConfirmationEmailForManualRegistrations = false;
 
     @field({ decoder: PermissionsByRole, version: 60, optional: true })

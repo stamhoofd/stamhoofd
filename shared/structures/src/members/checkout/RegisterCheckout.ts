@@ -65,7 +65,7 @@ export class IDRegisterCheckout extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     totalPrice: number | null = null;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 378 })
     sendConfirmationEmail: boolean = false;
 
     get organizationId() {

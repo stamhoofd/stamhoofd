@@ -58,7 +58,7 @@ export class MemberDetails extends AutoEncoder {
      * In case the member has been merged with other members, this array contains a list
      * of the old ids of the members that were merged into this member.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 378 })
     oldIds: string[] = [];
 
     /**

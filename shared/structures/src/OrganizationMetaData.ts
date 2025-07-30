@@ -434,13 +434,13 @@ export class OrganizationMetaData extends AutoEncoder {
     })
     rootCategoryId = this.categories[0]?.id ?? '';
 
-    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: StringDecoder, version: 378, nullable: true })
     uitpasOrganizerId: string | null = null;
 
-    @field({ decoder: StringDecoder, ...NextVersion, nullable: true })
+    @field({ decoder: StringDecoder, version: 378, nullable: true })
     uitpasOrganizerName: string | null = null;
 
-    @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), ...NextVersion, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
+    @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), version: 378, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
     uitpasClientCredentialsStatus: UitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotConfigured;
 
     /**
