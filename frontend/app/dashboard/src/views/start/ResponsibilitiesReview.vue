@@ -1,26 +1,26 @@
 <template>
     <LoadingViewTransition>
-        <ReviewSetupStepView v-if="!$isLoading" :type="SetupStepType.Responsibilities">
+        <ReviewSetupStepView v-if="!isLoading" :type="SetupStepType.Responsibilities">
             <template #top>
                 <p>{{ $t('209f9f13-4897-4310-95eb-f436987b8ba7') }}</p>
             </template>
 
-            <p v-if="!$organizationBasedResponsibilities.length" class="info-box">
+            <p v-if="!organizationBasedResponsibilities.length" class="info-box">
                 {{ $t('3d43c0ab-d755-43ef-af26-f29cfe3743d5') }}
             </p>
 
-            <div v-if="$rowCategories" class="container">
-                <div v-if="$rowCategories.requiredRows.length" class="container">
+            <div v-if="rowCategories" class="container">
+                <div v-if="rowCategories.requiredRows.length" class="container">
                     <hr><h2>{{ $t('31e85868-a04b-42be-bf89-0b691378852c') }}</h2>
                     <STList class="info">
-                        <ResponsibilityReview v-for="row in $rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
+                        <ResponsibilityReview v-for="row in rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
 
-                <div v-if="$rowCategories.optionalRows.length" class="container">
+                <div v-if="rowCategories.optionalRows.length" class="container">
                     <hr><h2>{{ $t('f4caaf58-4248-4f91-9e76-c8cec82f528d') }}</h2>
                     <STList class="info">
-                        <ResponsibilityReview v-for="row in $rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
+                        <ResponsibilityReview v-for="row in rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
             </div>
@@ -52,11 +52,11 @@ const $context = useContext();
 const owner = useRequestOwner();
 const auth = useAuth();
 
-const $allMembers = ref(null) as Ref<PlatformMember[] | null>;
+const allMembers = ref(null) as Ref<PlatformMember[] | null>;
 
-const $organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
+const organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
 
-const $groups = computed(() => {
+const groups = computed(() => {
     const organization = $organization.value;
     if (!organization) return [];
     return organization.period.getCategoryTree({
@@ -67,30 +67,28 @@ const $groups = computed(() => {
     }).getAllGroups();
 });
 
-const $allRows = computed(() => {
+const allRows = computed(() => {
     const organization = $organization.value;
     if (!organization) return null;
 
-    const allMembers = $allMembers.value;
-    if (allMembers === null) return null;
+    const _allMembers = allMembers.value;
+    if (_allMembers === null) return null;
 
-    const groups = $groups.value;
-
-    const responsibilities = $organizationBasedResponsibilities.value;
+    const responsibilities = organizationBasedResponsibilities.value;
     return responsibilities
-        .flatMap(r => getRowData(r, allMembers, organization, groups))
+        .flatMap(r => getRowData(r, _allMembers, organization, groups.value))
         .sort((a, b) => getPriority(b) - getPriority(a));
 });
 
-const $rowCategories = computed(() => {
-    if ($allRows.value === null) {
+const rowCategories = computed(() => {
+    if (allRows.value === null) {
         return null;
     }
 
     const requiredRows: RowData[] = [];
     const optionalRows: RowData[] = [];
 
-    for (const row of $allRows.value) {
+    for (const row of allRows.value) {
         const responsibility = row.responsibility;
         const minimumMembers = responsibility.minimumMembers;
         const isRequired = !!minimumMembers;
@@ -109,7 +107,7 @@ const $rowCategories = computed(() => {
     };
 });
 
-const $isLoading = computed(() => $rowCategories.value === null);
+const isLoading = computed(() => rowCategories.value === null);
 
 onMounted(async () => {
     await fetchMembers();
@@ -120,8 +118,8 @@ useVisibilityChange(async () => {
 });
 
 async function fetchMembers() {
-    const responsibilities = $organizationBasedResponsibilities.value;
-    $allMembers.value = await getAllMembersWithResponsibilities(responsibilities);
+    const responsibilities = organizationBasedResponsibilities.value;
+    allMembers.value = await getAllMembersWithResponsibilities(responsibilities);
 }
 
 async function getAllMembersWithResponsibilities(responsibilities: MemberResponsibility[]): Promise<PlatformMember[]> {
