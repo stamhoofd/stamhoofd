@@ -16,6 +16,7 @@ import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
 import { User } from './User.js';
+import { UitpasClientCredentialsStatus } from './UitpasClientCredentialsStatus.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -441,6 +442,9 @@ export class PlatformConfig extends AutoEncoder {
         LoginMethod.Password,
         LoginMethodConfig.create({}),
     ]]);
+
+    @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), ...NextVersion, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
+    uitpasClientCredentialsStatus: UitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotConfigured;
 
     getEmailReplacements(platform: { privateConfig: PlatformPrivateConfig | null }, isPreviewing = false) {
         const base = [

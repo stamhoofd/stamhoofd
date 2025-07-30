@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, isPatchableArray, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct } from '@stamhoofd/structures';
+import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as PlatformStruct, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -106,6 +106,24 @@ export class PatchPlatformEndpoint extends Endpoint<
                             newConfig,
                             oldConfig,
                         );
+                    }
+
+                    if (request.body.config.uitpasClientCredentialsStatus) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'You cannot set the uitpasClientCredentialsStatus manually',
+                            human: $t('Je kan de status van de UiTPAS-credentials niet handmatig instellen'),
+                        });
+                    }
+
+                    if (currentConfig.featureFlags.includes('uitpas') && !oldConfig.featureFlags.includes('uitpas')) {
+                        if (oldConfig.uitpasClientCredentialsStatus !== UitpasClientCredentialsStatus.Ok) {
+                            throw new SimpleError({
+                                code: 'invalid_field',
+                                message: 'You cannot enable the uitpas feature flag when the uitpas client credentials are not set up',
+                                human: $t('Je kan de UiTPAS-feature niet inschakelen als de UiTPAS-credentials niet zijn ingesteld'),
+                            });
+                        }
                     }
                 }
                 else {
