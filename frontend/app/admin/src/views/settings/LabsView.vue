@@ -36,7 +36,7 @@
             {{ $t('331da9e3-2c97-4c70-a3d5-aa0ddb9625ad') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
+        <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setUitpasFeature(!!$event)">
             UiTPAS-kansentarief op webshops (onvolledig)
         </Checkbox>
 
@@ -81,7 +81,7 @@
 <script lang="ts" setup>
 import { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, NavigationActions, SetUitpasClientCredentialsView, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';
@@ -111,6 +111,25 @@ function setFeatureFlag(flag: string, value: boolean) {
             featureFlags: featureFlags as any,
         }),
     });
+}
+
+async function setUitpasFeature(value: boolean) {
+    if (value) {
+        await present({
+            components: [
+                new ComponentWithProperties(SetUitpasClientCredentialsView, {
+                    onFixed: async (navigationActions: NavigationActions) => {
+                        Toast.success('UiTPAS credentials opgeslagen').show();
+                        setFeatureFlag('uitpas', true);
+                        return await navigationActions.dismiss({ force: true });
+                    },
+                }),
+            ],
+            modalDisplayStyle: 'sheet',
+        }).catch(console.error);
+        return;
+    }
+    setFeatureFlag('uitpas', false);
 }
 
 function getLoginMethod(method: LoginMethod) {

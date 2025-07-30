@@ -30,7 +30,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, LoadingViewTransition, useRequiredOrganization, Checkbox } from '@stamhoofd/components';
+import { ErrorBox, NavigationActions, SaveView, STErrorsDefault, STInputBox, Toast, useContext, useErrors, useNavigationActions, LoadingViewTransition, useOrganization, Checkbox, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, UitpasGetClientIdResponse, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
 import { UitpasClientIdAndSecret } from '@stamhoofd/structures';
@@ -44,7 +44,8 @@ const isInitialLoading = ref(true);
 const isSaveLoading = ref(false);
 const clientId = ref('');
 const clientSecret = ref('');
-const organization = useRequiredOrganization();
+const organization = useOrganization();
+const platform = usePlatform();
 const navigationActions = useNavigationActions();
 
 let originaClientId: string;
@@ -71,7 +72,7 @@ onMounted(async () => {
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: '/organization/uitpas-client-id',
+            path: '/uitpas/client-id',
             owner,
             shouldRetry: true,
             decoder: UitpasGetClientIdResponse as Decoder<UitpasGetClientIdResponse>,
@@ -134,7 +135,7 @@ async function save() {
         cred.useTestEnv = useTestEnv.value;
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
-            path: '/organization/uitpas-client-credentials',
+            path: '/uitpas/client-credentials',
             body: cred,
             owner,
             shouldRetry: false,
@@ -142,7 +143,12 @@ async function save() {
         });
 
         const newStatus = response.data.status;
-        organization.value.meta.uitpasClientCredentialsStatus = newStatus;
+        if (organization.value) {
+            organization.value.meta.uitpasClientCredentialsStatus = newStatus;
+        }
+        else {
+            platform.value.config.uitpasClientCredentialsStatus = newStatus;
+        }
         const human = response.data.human;
         if (human) {
             const error = new SimpleError({
@@ -155,9 +161,6 @@ async function save() {
             return; // do not close the modal
         }
         else {
-            if (organization.value) {
-                organization.value.meta.uitpasClientCredentialsStatus = newStatus;
-            }
             if (props.onFixed && newStatus === UitpasClientCredentialsStatus.Ok) {
                 await props.onFixed(navigationActions);
             }

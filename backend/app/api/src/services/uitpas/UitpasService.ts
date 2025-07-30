@@ -356,6 +356,17 @@ export class UitpasService {
     }
 
     /**
+     * Update the uitpas client credentials if they are valid
+     * @param organizationId null for platform
+     * @param clientId
+     * @param useTestEnv
+     * @returns wether the credentials were valid and thus stored successfully
+     */
+    static async updateIfValid(organizationId: string | null, clientId: string, useTestEnv: boolean): Promise<boolean> {
+        return await UitpasTokenRepository.updateIfValid(organizationId, clientId, useTestEnv);
+    }
+
+    /**
      * Store the uitpas client credentials if they are valid
      * @param organizationId null for platform
      * @param clientId

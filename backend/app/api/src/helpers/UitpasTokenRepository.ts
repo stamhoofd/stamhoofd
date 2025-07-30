@@ -64,6 +64,24 @@ export class UitpasTokenRepository {
         });
     }
 
+    static async updateIfValid(organizationId: string | null, clientId: string, useTestEnv: boolean): Promise<boolean> {
+        // get the client secret
+        const repo = UitpasTokenRepository.getRepoFromMemory(organizationId);
+        if (repo) {
+            return await UitpasTokenRepository.storeIfValid(organizationId, clientId, repo.uitpasClientCredential.clientSecret, useTestEnv);
+        }
+        const repoFromDb = await UitpasTokenRepository.getModelFromDb(organizationId);
+        if (repoFromDb) {
+            // no noeed to store the repo in memory, as this will be done if it is valid in the storeIfValid
+            return await UitpasTokenRepository.storeIfValid(organizationId, clientId, repoFromDb.clientSecret, useTestEnv);
+        }
+        throw new SimpleError({
+            code: 'uitpas_api_not_configured_for_this_organization',
+            message: `UiTPAS api not configured for organization with id ${organizationId}`,
+            human: $t('Er is nog geen client secret opgeslagen voor deze organisatie.'),
+        });
+    }
+
     /**
      * organizationId (null means platform) -> UitpasTokenRepository
      */
@@ -74,24 +92,30 @@ export class UitpasTokenRepository {
     }
 
     private static async getModelFromDb(organizationId: string | null) {
-        let model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
+        const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
         if (model) {
             return model; // found in database
         }
         if (organizationId === null) {
-            // platform client id and secret are not yet in the database, but should be configured in the environment variables
-            if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
-                throw new SimpleError({
-                    code: 'uitpas_api_not_configured_for_platform',
-                    message: 'UiTPAS api is not configured for the platform',
-                    human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
-                });
-            }
-            model = new UitpasClientCredential();
-            model.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
-            model.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
-            model.organizationId = null; // null means platform
-            return model;
+            throw new SimpleError({
+                code: 'uitpas_api_not_configured_for_platform',
+                message: 'UiTPAS api is not configured for the platform',
+                human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
+            });
+
+            // // platform client id and secret are not yet in the database, but should be configured in the environment variables
+            // if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
+            //     throw new SimpleError({
+            //         code: 'uitpas_api_not_configured_for_platform',
+            //         message: 'UiTPAS api is not configured for the platform',
+            //         human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
+            //     });
+            // }
+            // model = new UitpasClientCredential();
+            // model.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
+            // model.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
+            // model.organizationId = null; // null means platform
+            // return model;
         }
         return null; // not found in database
     }
