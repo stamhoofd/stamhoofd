@@ -31,7 +31,7 @@
                         Sommige verenigingen zijn niet BTW-plichtig en moeten dus ook BTW betalen op hun kosten. Aangezien de meeste andere platformen ook altijd hun prijzen excl. BTW tonen, zijn we helaas genoodzaakt om dit standaard ook zo te tonen om vergelijken eerlijker te doen verlopen. Schakel dit aan als je de prijs wel met BTW wil zien.
                     </p>
                 </STListItem>
-                <STListItem class="right-stack" :selectable="true" element-name="label">
+                <STListItem v-if="unregisteredBusiness || input.options.country === Country.BE" class="right-stack" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox v-model="unregisteredBusiness" />
                     </template>
@@ -55,7 +55,7 @@
             </p>
 
             <STList>
-                <STListItem v-for="([method, fees]) of tariffDef.modules.get(input.module)?.getTier(input)?.transactionFees" :key="method" class="right-stack" :selectable="true" element-name="label">
+                <STListItem v-for="([method, fees]) of sortMap(tariffDef.modules.get(input.module)?.getTier(input)?.transactionFees)" :key="method" class="right-stack" :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox :model-value="getPaymentSelected(method)" @update:model-value="setPaymentSelected(method, $event)" />
                     </template>
@@ -90,12 +90,41 @@ import { CalculationInput } from './classes/CalculationInput';
 import { calculatePaymentMethodUsage, getPaymentMethodDescription, getPaymentMethodName, PaymentMethod } from './classes/PaymentMethod';
 import { StamhoofdTariffs } from './classes/tariffs/stamhoofd';
 import { ModuleType } from './classes/ModuleType';
+import { Country } from './classes/Country';
+import { TransactionFee } from './classes/TariffDefinition';
 
 const props = defineProps<{
     input: CalculationInput;
 }>();
 
 const module = computed(() => props.input.module);
+
+function sortMap(map: Map<PaymentMethod, TransactionFee[]> | undefined): Map<PaymentMethod, TransactionFee[]> | undefined {
+    if (props.input.options.country === Country.BE) {
+        return map;
+    }
+
+    // Make sure iDEAL is first, then creditcard, then Bancontact, then Payconiq
+    if (!map) {
+        return undefined;
+    }
+    const newMap = new Map<PaymentMethod, TransactionFee[]>();
+    const order = [PaymentMethod.iDEAL, PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.Payconiq];
+    for (const method of order) {
+        if (map.has(method)) {
+            newMap.set(method, map.get(method)!);
+        }
+    }
+
+    // Add remaining
+    for (const [method, fees] of map) {
+        if (!newMap.has(method)) {
+            newMap.set(method, fees);
+        }
+    }
+
+    return newMap;
+}
 
 const tariffDef = StamhoofdTariffs;
 const selectedPaymentMethods = computed({

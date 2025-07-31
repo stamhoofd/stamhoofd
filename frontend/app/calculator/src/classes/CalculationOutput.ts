@@ -1,6 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import { CalculationInput } from './CalculationInput';
 import { ModuleType } from './ModuleType';
+import { Country } from './Country';
 
 export type CalculationRemark = {
     id?: string;
@@ -146,40 +147,6 @@ export class CalculationOutput {
         return this.fixedFees.totalPrice + this.serviceFees.totalPrice + this.transactionFees.totalPrice;
     }
 
-    getPerPerson(input: CalculationInput) {
-        if (input.persons <= 0) {
-            return new CalculationGroup({});
-        }
-
-        if (input.module !== ModuleType.Members) {
-            return new CalculationGroup({});
-        }
-
-        return new CalculationGroup({
-            title: 'Totale kost per lid',
-            description: 'Voor alle ingevoerde inschrijvingen op jaarbasis. Excl. BTW',
-            lines: [
-                {
-                    title: 'Vaste kosten per lid',
-                    description: 'Werden gedeeld door het aantal leden om de kost per lid te berekenen',
-                    totalPrice: Math.round(this.fixedFees.totalPrice / input.persons),
-                },
-
-                {
-                    title: 'Servicekosten per lid',
-                    description: 'Kost voor het gebruik van Stamhoofd',
-                    totalPrice: Math.round(this.serviceFees.totalPrice / input.persons),
-                },
-
-                {
-                    title: 'Transactiekost per lid',
-                    description: `Gaat naar Stripe, Mollie of Payconiq`,
-                    totalPrice: Math.round(this.transactionFees.totalPrice / input.persons),
-                },
-            ],
-        });
-    }
-
     getSummary(input: CalculationInput) {
         if (input.amount <= 0) {
             return new CalculationGroup({});
@@ -204,7 +171,7 @@ export class CalculationOutput {
 
                     {
                         title: 'Gemiddelde transactiekost',
-                        description: `Gaat naar Stripe, Mollie of Payconiq`,
+                        description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
                         totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
                     },
                 ],
@@ -230,7 +197,7 @@ export class CalculationOutput {
 
                     {
                         title: 'Gemiddelde transactiekost',
-                        description: `Gaat naar Stripe, Mollie of Payconiq`,
+                        description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
                         totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
                     },
                 ],
@@ -255,69 +222,8 @@ export class CalculationOutput {
 
                 {
                     title: 'Gemiddelde transactiekost',
-                    description: `Gaat naar Stripe, Mollie of Payconiq`,
+                    description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
                     totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
-                },
-            ],
-        });
-    }
-
-    getTotal(input: CalculationInput) {
-        if (input.amount <= 0) {
-            return new CalculationGroup({});
-        }
-
-        return new CalculationGroup({
-            title: 'Totale kost',
-            description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
-            lines: [
-                {
-                    title: 'Vaste kosten',
-                    description: '',
-                    totalPrice: Math.round(this.fixedFees.totalPrice),
-                },
-
-                {
-                    title: 'Servicekosten',
-                    description: 'Kost voor het gebruik van Stamhoofd',
-                    totalPrice: Math.round(this.serviceFees.totalPrice),
-                },
-
-                {
-                    title: 'Transactiekosten',
-                    description: `Gaat naar Stripe, Mollie of Payconiq`,
-                    totalPrice: Math.round(this.transactionFees.totalPrice),
-                },
-            ],
-        });
-    }
-
-    getProfit(input: CalculationInput) {
-        return new CalculationGroup({
-            title: 'Winst',
-            lines: [
-                {
-                    title: 'Omzet',
-                    description: '',
-                    totalPrice: input.volume,
-                },
-
-                {
-                    title: 'Servicekosten',
-                    description: 'excl. BTW',
-                    totalPrice: -this.serviceFees.totalPrice,
-                },
-
-                {
-                    title: 'Transactiekosten',
-                    description: 'excl. BTW',
-                    totalPrice: -this.transactionFees.totalPrice,
-                },
-
-                {
-                    title: 'Vaste kosten',
-                    description: 'excl. BTW',
-                    totalPrice: -this.fixedFees.totalPrice,
                 },
             ],
         });

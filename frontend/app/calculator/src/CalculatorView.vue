@@ -68,7 +68,7 @@
                     </button>
                 </p>
 
-                <DetailedCalculationBox v-if="showDetails && result" :output="result.output" />
+                <DetailedCalculationBox v-if="showDetails && result" :output="result.output" :input="input" />
             </div>
         </div>
     </div>
@@ -98,15 +98,30 @@ const allModules = [
     ModuleType.Webshops,
 ];
 
+// try to get country from domain name
+const splitted = window.location.hostname.split('.');
+const tld = splitted[splitted.length - 1].toLowerCase();
+let country = Country.BE; // Default to Belgium if no match found
+switch (tld) {
+    case 'be': {
+        country = Country.BE;
+        break;
+    }
+    case 'nl': {
+        country = Country.NL;
+        break;
+    }
+}
+
 const tariffDef = StamhoofdTariffs;
 const input = ref(new CalculationInput({
     module: ModuleType.Tickets,
     products: [
         new CalculationProduct({ unitPrice: 7_00, amount: 100 }),
     ],
-    requestedPaymentMethods: [PaymentMethod.Payconiq, PaymentMethod.Bancontact],
+    requestedPaymentMethods: country === Country.BE ? [PaymentMethod.Payconiq, PaymentMethod.Bancontact] : [PaymentMethod.iDEAL],
     options: {
-        country: Country.BE,
+        country,
     },
 }));
 

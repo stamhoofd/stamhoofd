@@ -1,5 +1,53 @@
 <template>
     <article class="calculation-box">
+        <STList>
+            <STListItem>
+                <h3 v-if="input.module === ModuleType.Tickets" class="style-title-list">
+                    Aantal tickets
+                </h3>
+                <h3 v-if="input.module === ModuleType.Webshops" class="style-title-list">
+                    Aantal verkochte stuks
+                </h3>
+                <h3 v-if="input.module === ModuleType.Members" class="style-title-list">
+                    Aantal inschrijvingen
+                </h3>
+
+                <template #right>
+                    <span class="style-price-base">
+                        {{ formatInteger(input.amount) }}
+                    </span>
+                </template>
+            </STListItem>
+            <STListItem>
+                <h3 v-if="input.module === ModuleType.Tickets" class="style-title-list">
+                    Ticketprijs
+                </h3>
+                <h3 v-if="input.module === ModuleType.Webshops" class="style-title-list">
+                    Stukprijs
+                </h3>
+                <h3 v-if="input.module === ModuleType.Members" class="style-title-list">
+                    Prijs per inschrijving
+                </h3>
+
+                <template #right>
+                    <span class="style-price-base">
+                        {{ formatPrice(input.products[0]?.unitPrice ?? 0) }}
+                    </span>
+                </template>
+            </STListItem>
+            <STListItem>
+                <h3 class="style-title-list larger">
+                    Totale omzet
+                </h3>
+
+                <template #right>
+                    <span class="style-price-base large">
+                        {{ formatPrice(input.volume) }}
+                    </span>
+                </template>
+            </STListItem>
+        </STList>
+
         <STList v-if="output.serviceFees.totalPrice > 0">
             <STListItem v-for="(line, index) in output.serviceFees.lines" :key="index">
                 <h3 class="style-title-list">
@@ -65,10 +113,13 @@
 </template>
 
 <script lang="ts" setup>
+import { CalculationInput } from './classes/CalculationInput';
 import { CalculationOutput } from './classes/CalculationOutput';
+import { ModuleType } from './classes/ModuleType';
 
 defineProps<{
     output: CalculationOutput;
+    input: CalculationInput;
 }>();
 
 </script>
