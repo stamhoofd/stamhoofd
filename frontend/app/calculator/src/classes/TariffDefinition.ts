@@ -132,6 +132,11 @@ export class Tier {
         // Payment methods
         const paymentMethods = input.requestedPaymentMethods.filter(method => this.transactionFees.has(method));
 
+        if (paymentMethods.length === 0) {
+            // Select POS
+            paymentMethods.push(PaymentMethod.PointOfSale);
+        }
+
         // Start with the service fees
         if (this.fees.setupCost) {
             const title = 'Setupkosten';
