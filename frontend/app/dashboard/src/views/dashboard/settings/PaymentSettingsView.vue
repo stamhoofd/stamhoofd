@@ -160,7 +160,7 @@
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
             <h2>Online betalingen via Payconiq</h2>
-            <p class="st-list-description">
+            <p class="style-description">
                 Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>
             </p>
 
@@ -184,14 +184,14 @@
             </h2>
 
             <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="st-list-description">
+                <p class="style-description">
                     {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
                 </p>
                 <p v-if="isBelgium" class="info-box">
                     Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)
                 </p>
 
-                <p class="st-list-description">
+                <p class="style-description">
                     <button class="button text" type="button" @click="linkMollie">
                         <span class="icon link" />
                         <span>Mollie koppelen</span>
@@ -209,14 +209,14 @@
                     Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
                 </p>
 
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="st-list-description">
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="style-description">
                     Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
                 </p>
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="st-list-description">
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="style-description">
                     Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
                 </p>
 
-                <p class="st-list-description">
+                <p class="style-description">
                     <LoadingButton :loading="loadingMollie">
                         <button class="button text" type="button" @click="mollieDashboard">
                             <span class="icon external" />
@@ -224,7 +224,7 @@
                         </button>
                     </loadingbutton>
                 </p>
-                <p class="st-list-description">
+                <p class="style-description">
                     <button class="button text" type="button" @click="disconnectMollie">
                         <span class="icon trash" />
                         <span>Account loskoppelen van Stamhoofd</span>

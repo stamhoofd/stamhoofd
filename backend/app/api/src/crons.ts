@@ -561,7 +561,7 @@ async function chargeServiceFees() {
         serviceFeeManualCharged: 0,
         createdAt: {
             sign: "<",
-            value: Formatter.dateIso(new Date)
+            value: Formatter.dateIso(new Date())
         }
     }, {
         limit: 200,
@@ -581,7 +581,7 @@ async function chargeServiceFees() {
         },
         method: {
             sign: "IN",
-            value: [PaymentMethod.Transfer, PaymentMethod.PointOfSale]
+            value: [PaymentMethod.Transfer, PaymentMethod.PointOfSale, PaymentMethod.Unknown]
         },
         serviceFeeManual: {
             sign: ">",
@@ -590,7 +590,7 @@ async function chargeServiceFees() {
         serviceFeeManualCharged: 0,
         createdAt: {
             sign: "<",
-            value: Formatter.dateIso(new Date)
+            value: Formatter.dateIso(new Date())
         }
     }, {
         limit: 200,
@@ -625,7 +625,7 @@ async function chargeServiceFees() {
             continue;
         }
 
-        const totalFees = payments.reduce((sum, payment) => sum + payment.serviceFeeManual, 0);
+        const totalFees = payments.reduce((sum, payment) => sum + payment.serviceFeeManual - payment.serviceFeeManualCharged, 0);
 
         const days = Formatter.uniqueArray(payments.map(p => Formatter.dateNumber(p.createdAt)))
 

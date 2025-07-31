@@ -294,7 +294,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationPaymentConfiguration)
         payment.provider = provider
         payment.stripeAccountId = stripeAccount?.id ?? null
-        ServiceFeeHelper.setServiceFee(payment, organization, 'members')
+        ServiceFeeHelper.setServiceFee(payment, organization, 'members', payRegistrations.map(p => p.item.calculatedPrice))
 
         await payment.save()
         const items: BalanceItem[] = []

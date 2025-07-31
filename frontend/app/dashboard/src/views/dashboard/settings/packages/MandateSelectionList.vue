@@ -32,7 +32,7 @@
                     {{ getDescription(mandate) }}
                 </p>
 
-                <template #right>
+                <template v-if="allowDelete" #right>
                     <LoadingButton :loading="isDeleting(mandate)">
                         <button v-tooltip="'Ontkoppel deze bankrekening'" type="button" class="button icon trash" @click.stop="deleteMandate(mandate)" />
                     </LoadingButton>
@@ -93,6 +93,9 @@ export default class MandateSelectionList extends Mixins(NavigationMixin){
 
     @Prop({ default: true }) 
         allowSelection: boolean
+
+    @Prop({ default: true }) 
+        allowDelete: boolean
 
     loading = false;
     status: STBillingStatus | null = null

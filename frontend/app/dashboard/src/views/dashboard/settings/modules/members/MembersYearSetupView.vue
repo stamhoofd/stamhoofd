@@ -24,7 +24,7 @@
                 </STInputBox>
                 <TimeInput v-model="endDate" title="Tot welk tijdstip" :validator="validator" />
             </div>
-            <p class="st-list-description">
+            <p class="style-description">
                 Als de inschrijvingen het hele jaar doorlopen, vul dan hier gewoon een datum in ergens op het einde van het jaar. Let op het jaartal.
             </p>
         </main>

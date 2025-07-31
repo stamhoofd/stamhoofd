@@ -7,7 +7,7 @@
                 Sla jouw key op
             </h1>
         
-            <p class="st-list-description">
+            <p>
                 Hieronder kan je jouw key kopiëren. Bewaar deze goed, want je kan deze nooit meer opvragen.
             </p>
 

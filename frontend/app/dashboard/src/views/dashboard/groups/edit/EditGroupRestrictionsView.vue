@@ -16,7 +16,7 @@
                     <AgeInput v-model="maxAge" :year="startYear" placeholder="Onbeperkt" :nullable="true" />
                 </STInputBox>
             </div>
-            <p class="st-list-description">
+            <p class="style-description">
                 *Hoe oud het lid wordt in het kalenderjaar van de startdatum van deze groep (dus leeftijd op 31/12/{{ startYear }}).<template v-if="isBelgium">
                     Ter referentie: leden uit het eerste leerjaar zijn 6 jaar op 31 december. Leden uit het eerste secundair zijn 12 jaar op 31 december.
                 </template>

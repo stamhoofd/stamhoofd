@@ -11,14 +11,14 @@
             <div>
                 <ImageInput v-model="horizontalLogo" title="Horizontaal logo" :validator="validator" :resolutions="horizontalLogoResolutions" :required="false" />
 
-                <p class="st-list-description">
+                <p class="style-description">
                     Beter voor grotere schermen.
                 </p>
             </div>
 
             <div>
                 <ImageInput v-model="squareLogo" title="Vierkant logo" :validator="validator" :resolutions="squareLogoResolutions" :required="false" />
-                <p class="st-list-description">
+                <p class="style-description">
                     Beter voor op kleine schermen. Laat tekst zoveel mogelijk weg uit dit logo.
                 </p>
             </div>
@@ -27,12 +27,12 @@
         <Checkbox v-model="expandLogo">
             Logo groter weergeven (afgeraden)
         </Checkbox>
-        <p class="st-list-description">
+        <p class="style-description">
             Heb je een vierkant logo met veel tekst of heb je veel witruimte? Vink dit dan aan, in het andere geval kan je dit beter uitgevinkt laten. Sowieso is het verstandig om eerst alle witruimte van je logo weg te knippen voor je het hier uploadt.
         </p>
 
         <ColorInput v-model="color" title="Hoofdkleur (optioneel)" :validator="validator" placeholder="Geen kleur" :required="false" :disallowed="['#FFFFFF']" />
-        <p class="st-list-description">
+        <p class="style-description">
             Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.
         </p>
 
@@ -60,14 +60,14 @@
                 </p>
             </template>
 
-            <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="st-list-description">
+            <p v-if="isMailOk && (isRegisterOk || !enableMemberModule)" class="style-description">
                 <button class="button text" type="button" @click="setupDomain">
                     <span class="icon settings" />
                     <span>Domeinnaam wijzigen</span>
                 </button>
             </p>
 
-            <p v-else class="st-list-description">
+            <p v-else class="style-description">
                 <button class="button text" type="button" @click="setupDomain">
                     <span class="icon settings" />
                     <span>Domeinnaam instellen</span>
@@ -76,14 +76,14 @@
         </template>
 
         <template v-else>
-            <p v-if="enableMemberModule" class="st-list-description">
+            <p v-if="enableMemberModule" class="style-description">
                 Jullie ledenportaal is bereikbaar via <a class="button inline-link" :href="organization.registerUrl" target="_blank">{{ organization.registerUrl }}</a>. {{ $t('dashboard.settings.personalize.domainDescriptionSuffixForMemberRegistrations') }}
             </p>
-            <p v-else class="st-list-description">
+            <p v-else class="style-description">
                 {{ $t('dashboard.settings.personalize.domainDescription') }}
             </p>
 
-            <p class="st-list-description">
+            <p class="style-description">
                 <button class="button text" type="button" @click="setupDomain">
                     <span class="icon settings" />
                     <span>Domeinnaam instellen</span>

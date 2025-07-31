@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Payment, Token } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Order, Payment, Token } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Payment as PaymentStruct, PaymentGeneral, PaymentMethod, PaymentStatus, PermissionLevel } from "@stamhoofd/structures";
 
@@ -129,10 +129,8 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     field: "price"
                 })
             }
-
             payment.price = totalPrice
-            ServiceFeeHelper.setServiceFee(payment, organization, balanceItems.find(b => b.orderId) ? 'webshop' : 'members');
-
+            
             // Save payment
             await payment.save();
 

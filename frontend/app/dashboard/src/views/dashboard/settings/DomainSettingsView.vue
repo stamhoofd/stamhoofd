@@ -41,10 +41,10 @@
                     @change="domainChanged"
                 >
             </STInputBox>
-            <p v-if="mailDomain && enableMemberModule" class="st-list-description">
+            <p v-if="mailDomain && enableMemberModule" class="style-description">
                 Jullie ledenportaal zal bereikbaar zijn op {{ usedRegisterDomain }} nadat je het instellen hebt voltooid. Je kan dan ook e-mails versturen vanaf @{{ mailDomain }}.
             </p>
-            <p v-else-if="mailDomain" class="st-list-description">
+            <p v-else-if="mailDomain" class="style-description">
                 Je zal e-mails kunnen versturen vanaf @{{ mailDomain }} nadat je het instellen hebt voltooid.
             </p>
 

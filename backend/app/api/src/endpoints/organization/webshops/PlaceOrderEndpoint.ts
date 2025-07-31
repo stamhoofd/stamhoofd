@@ -6,7 +6,7 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct,WebshopAuthType } from "@stamhoofd/structures";
+import { BalanceItemStatus, Order as OrderStruct, OrderData, OrderResponse, Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Version, Webshop as WebshopStruct,WebshopAuthType, WebshopTicketType } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
@@ -152,178 +152,188 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (totalPrice == 0) {
                 // Force unknown payment method
                 order.data.paymentMethod = PaymentMethod.Unknown
+            }
 
+            const payment = new Payment()
+            payment.organizationId = organization.id
+            payment.method = request.body.paymentMethod
+            payment.status = PaymentStatus.Created
+            payment.price = totalPrice
+            payment.paidAt = null
+
+            if (totalPrice === 0) {
                 // Mark this order as paid
-                await order.markPaid(null, organization, webshop)
-                await order.save()
-            } else {
-                const payment = new Payment()
-                payment.organizationId = organization.id
-                payment.method = request.body.paymentMethod
-                payment.status = PaymentStatus.Created
-                payment.price = totalPrice
-                payment.paidAt = null
+                payment.status = PaymentStatus.Succeeded
+                payment.paidAt = new Date()
+            }
 
-                // Determine the payment provider
-                // Throws if invalid
-                const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.paymentConfiguration)
-                payment.provider = provider
-                payment.stripeAccountId = stripeAccount?.id ?? null
-                ServiceFeeHelper.setServiceFee(payment, organization, 'webshop');
-                
-                await payment.save()
+            // Determine the payment provider
+            // Throws if invalid
+            const {provider, stripeAccount} = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.paymentConfiguration)
+            payment.provider = provider
+            payment.stripeAccountId = stripeAccount?.id ?? null
+            ServiceFeeHelper.setServiceFee(
+                payment, 
+                organization, 
+                webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets', 
+                webshop.meta.ticketType === WebshopTicketType.SingleTicket ? [order.data.totalPrice] : order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice))
+            );
+            
+            await payment.save()
 
-                // Deprecated field
-                order.paymentId = payment.id
-                order.setRelation(Order.payment, payment)
+            // Deprecated field
+            order.paymentId = payment.id
+            order.setRelation(Order.payment, payment)
 
-                // Save order to get the id
-                await order.save()
+            // Save order to get the id
+            await order.save()
 
-                const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = []
+            const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = []
 
-                // Create balance item
-                const balanceItem = new BalanceItem();
-                balanceItem.orderId = order.id;
-                balanceItem.price = totalPrice
-                balanceItem.description = webshop.meta.name
-                balanceItem.pricePaid = 0
-                balanceItem.organizationId = organization.id;
-                balanceItem.status = BalanceItemStatus.Hidden;
-                await balanceItem.save();
+            // Create balance item
+            const balanceItem = new BalanceItem();
+            balanceItem.orderId = order.id;
+            balanceItem.price = totalPrice
+            balanceItem.description = webshop.meta.name
+            balanceItem.pricePaid = 0
+            balanceItem.organizationId = organization.id;
+            balanceItem.status = BalanceItemStatus.Hidden;
+            await balanceItem.save();
 
-                // Create one balance item payment to pay it in one payment
-                const balanceItemPayment = new BalanceItemPayment()
-                balanceItemPayment.balanceItemId = balanceItem.id;
-                balanceItemPayment.paymentId = payment.id;
-                balanceItemPayment.organizationId = organization.id;
-                balanceItemPayment.price = balanceItem.price;
-                await balanceItemPayment.save();
-                balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment()
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = balanceItem.price;
+            await balanceItemPayment.save();
+            balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem))
 
-                let paymentUrl: string | null = null
-                const description = webshop.meta.name+" - "+payment.id
+            let paymentUrl: string | null = null
+            const description = webshop.meta.name+" - "+payment.id
 
-                if (payment.method == PaymentMethod.Transfer) {
-                    await order.markValid(payment, [])
+            if (totalPrice === 0) {
+                // Mark this order as paid
+                await order.markPaid(payment, organization, webshop)
+            } else if (payment.method == PaymentMethod.Transfer) {
+                await order.markValid(payment, [])
 
-                    if (order.number) {
-                        balanceItem.description = order.generateBalanceDescription(webshop)
-                    }
-
-                    balanceItem.status = BalanceItemStatus.Pending;
-                    await balanceItem.save()
-                    await payment.save()
-                } else if (payment.method == PaymentMethod.PointOfSale) {
-                    // Not really paid, but needed to create the tickets if needed
-                    await order.markPaid(payment, organization, webshop)
-
-                    if (order.number) {
-                        balanceItem.description = order.generateBalanceDescription(webshop)
-                    }
-                    
-                    balanceItem.status = BalanceItemStatus.Pending;
-                    await balanceItem.save()
-                    await payment.save()
-                } else {
-                    const cancelUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)+"&cancel=true"
-                    const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
-                    const exchangeUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
-
-                    if (payment.provider === PaymentProvider.Stripe) {
-                        const stripeResult = await StripeHelper.createPayment({
-                            payment,
-                            stripeAccount,
-                            redirectUrl,
-                            cancelUrl,
-                            statementDescriptor: webshop.meta.name,
-                            metadata: {
-                                order: order.id,
-                                organization: organization.id,
-                                webshop: webshop.id,
-                                payment: payment.id,
-                            },
-                            i18n: request.i18n,
-                            lineItems: balanceItemPayments,
-                            organization,
-                            customer: {
-                                name: order.data.customer.name,
-                                email: order.data.customer.email,
-                            }
-                        });
-                        paymentUrl = stripeResult.paymentUrl
-                    } else if (payment.provider === PaymentProvider.Mollie) {
-                        // Mollie payment
-                        const token = await MollieToken.getTokenFor(webshop.organizationId)
-                        if (!token) {
-                            throw new SimpleError({ 
-                                code: "",
-                                message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
-                            })
-                        }
-                        const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost())
-                        if (!profileId) {
-                            throw new SimpleError({
-                                code: "",
-                                message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is tijdelijk onbeschikbaar"
-                            })
-                        }
-                        const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                        const locale = request.i18n.locale.replace('-', '_');
-                        const molliePayment = await mollieClient.payments.create({
-                            amount: {
-                                currency: 'EUR',
-                                value: (totalPrice / 100).toFixed(2)
-                            },
-                            method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                            testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
-                            profileId,
-                            description,
-                            redirectUrl,
-                            webhookUrl: exchangeUrl,
-                            metadata: {
-                                order: order.id,
-                                organization: organization.id,
-                                webshop: webshop.id,
-                                payment: payment.id
-                            },
-                            locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
-                        });
-                        console.log(molliePayment)
-                        paymentUrl = molliePayment.getCheckoutUrl()
-
-                        // Save payment
-                        const dbPayment = new MolliePayment()
-                        dbPayment.paymentId = payment.id
-                        dbPayment.mollieId = molliePayment.id
-                        await dbPayment.save();
-                    } else if (payment.provider == PaymentProvider.Payconiq) {
-                        paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl)
-                    } else if (payment.provider == PaymentProvider.Buckaroo) {
-                        // Increase request timeout because buckaroo is super slow
-                        request.request.request?.setTimeout(60 * 1000)
-                        const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
-                        const ip = request.request.getIP()
-                        paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl)
-                        await payment.save()
-
-                        // TypeScript doesn't understand that the status can change and isn't a const....
-                        if ((payment.status as any) === PaymentStatus.Failed) {
-                            throw new SimpleError({
-                                code: "payment_failed",
-                                message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
-                            })
-                        }
-                    } else {
-                        throw new Error("Unknown payment provider")
-                    }
+                if (order.number) {
+                    balanceItem.description = order.generateBalanceDescription(webshop)
                 }
 
-                return new Response(OrderResponse.create({
-                    paymentUrl: paymentUrl,
-                    order: OrderStruct.create({...order, payment: PaymentStruct.create(payment) })
-                }));
+                balanceItem.status = BalanceItemStatus.Pending;
+                await balanceItem.save()
+                await payment.save()
+            } else if (payment.method == PaymentMethod.PointOfSale) {
+                // Not really paid, but needed to create the tickets if needed
+                await order.markPaid(payment, organization, webshop)
+
+                if (order.number) {
+                    balanceItem.description = order.generateBalanceDescription(webshop)
+                }
+                
+                balanceItem.status = BalanceItemStatus.Pending;
+                await balanceItem.save()
+                await payment.save()
+            } else {
+                const cancelUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)+"&cancel=true"
+                const redirectUrl = "https://"+webshop.getHost()+'/payment?id='+encodeURIComponent(payment.id)
+                const exchangeUrl = 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true"
+
+                if (payment.provider === PaymentProvider.Stripe) {
+                    const stripeResult = await StripeHelper.createPayment({
+                        payment,
+                        stripeAccount,
+                        redirectUrl,
+                        cancelUrl,
+                        statementDescriptor: webshop.meta.name,
+                        metadata: {
+                            order: order.id,
+                            organization: organization.id,
+                            webshop: webshop.id,
+                            payment: payment.id,
+                        },
+                        i18n: request.i18n,
+                        lineItems: balanceItemPayments,
+                        organization,
+                        customer: {
+                            name: order.data.customer.name,
+                            email: order.data.customer.email,
+                        }
+                    });
+                    paymentUrl = stripeResult.paymentUrl
+                } else if (payment.provider === PaymentProvider.Mollie) {
+                    // Mollie payment
+                    const token = await MollieToken.getTokenFor(webshop.organizationId)
+                    if (!token) {
+                        throw new SimpleError({ 
+                            code: "",
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
+                        })
+                    }
+                    const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(webshop.getHost())
+                    if (!profileId) {
+                        throw new SimpleError({
+                            code: "",
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is tijdelijk onbeschikbaar"
+                        })
+                    }
+                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                    const locale = request.i18n.locale.replace('-', '_');
+                    const molliePayment = await mollieClient.payments.create({
+                        amount: {
+                            currency: 'EUR',
+                            value: (totalPrice / 100).toFixed(2)
+                        },
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production',
+                        profileId,
+                        description,
+                        redirectUrl,
+                        webhookUrl: exchangeUrl,
+                        metadata: {
+                            order: order.id,
+                            organization: organization.id,
+                            webshop: webshop.id,
+                            payment: payment.id
+                        },
+                        locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
+                    });
+                    console.log(molliePayment)
+                    paymentUrl = molliePayment.getCheckoutUrl()
+
+                    // Save payment
+                    const dbPayment = new MolliePayment()
+                    dbPayment.paymentId = payment.id
+                    dbPayment.mollieId = molliePayment.id
+                    await dbPayment.save();
+                } else if (payment.provider == PaymentProvider.Payconiq) {
+                    paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl)
+                } else if (payment.provider == PaymentProvider.Buckaroo) {
+                    // Increase request timeout because buckaroo is super slow
+                    request.request.request?.setTimeout(60 * 1000)
+                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? "", organization.privateMeta?.buckarooSettings?.secret ?? "", organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+                    const ip = request.request.getIP()
+                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl)
+                    await payment.save()
+
+                    // TypeScript doesn't understand that the status can change and isn't a const....
+                    if ((payment.status as any) === PaymentStatus.Failed) {
+                        throw new SimpleError({
+                            code: "payment_failed",
+                            message: "Betaling via " + PaymentMethodHelper.getName(payment.method) + " is onbeschikbaar"
+                        })
+                    }
+                } else {
+                    throw new Error("Unknown payment provider")
+                }
             }
+
+            return new Response(OrderResponse.create({
+                paymentUrl: paymentUrl,
+                order: OrderStruct.create({...order, payment: PaymentStruct.create(payment) })
+            }));
         } catch (e) {
             // Mark order as failed to release stock
             if (order) {

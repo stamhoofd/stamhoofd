@@ -7,7 +7,7 @@
                 Pas de volgende instellingen aan
             </h1>
         
-            <p class="st-list-description">
+            <p class="style-description">
                 Stel de volgende DNS-instellingen in voor jouw domeinnaam. Dit kan je meestal doen in het klantenpaneel van jouw registrar (bv. Combell, Versio, Transip, One.com, GoDaddy...) waar je je domeinnaam hebt gekocht.
             </p>
 

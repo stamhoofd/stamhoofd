@@ -40,7 +40,7 @@
                     @blur="resetCache"
                 >
             </STInputBox>
-            <p class="st-list-description">
+            <p class="style-description">
                 {{ $t('dashboard.webshop.customDomain.description') }}
             </p>
             

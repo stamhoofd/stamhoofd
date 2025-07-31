@@ -33,7 +33,7 @@
         <template v-if="enableMemberModule">
             <hr>
             <h2>Inschrijvingsgroepen</h2>
-            <p class="st-list-description">
+            <p class="style-description">
                 Selecteer de groepen die standaard met dit e-mailadres moeten versturen.
             </p>
 
@@ -50,7 +50,7 @@
         <template v-if="enableWebshopModule">
             <hr>
             <h2>Webshops</h2>
-            <p class="st-list-description">
+            <p class="style-description">
                 Selecteer de webshops waarvoor we dit e-mailadres moeten gebruiken (bv. bestelbevestiging).
             </p>
 

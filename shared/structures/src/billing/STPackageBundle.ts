@@ -182,7 +182,8 @@ export class STPackageBundleHelper {
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
                         serviceFeeFixed: 0,
-                        serviceFeePercentage: 1_80,
+                        serviceFeePercentage: 1_00,
+                        serviceFeeMaximum: 95,
                         startDate: new Date(date),
                         canDeactivate: true
                     })
@@ -200,7 +201,11 @@ export class STPackageBundleHelper {
                         allowRenew: false,
                         pricingType: STPricingType.Fixed,
                         serviceFeeFixed: 0,
-                        serviceFeePercentage: 1_80,
+                        serviceFeePercentage: 2_00,
+                        serviceFeePercentageTickets: 3_00,
+                        serviceFeeMinimumTickets: 15,
+                        serviceFeeMaximum: 95,
+                        serviceFeeMaximumTickets: 1_95,
                         startDate: new Date(date),
                         canDeactivate: true
                     })

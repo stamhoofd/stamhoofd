@@ -314,7 +314,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
             return;
         }
 
-        if (pack.inTrial) {
+        if (pack.inTrial || !pack.canStartTrial) {
             this.show(new ComponentWithProperties(PackageConfirmView, {
                 bundles: [pack.bundle]
             }))

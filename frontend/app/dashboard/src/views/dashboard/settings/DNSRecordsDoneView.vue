@@ -9,10 +9,10 @@
                 Gelukt! Jouw domeinnaam wordt binnenkort actief
             </h1>
         
-            <p v-if="enableMemberModule" class="st-list-description">
+            <p v-if="enableMemberModule" class="style-description">
                 Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails naar jouw leden automatisch vanaf @{{ mailDomain }} verstuurd. Jullie ledenportaal zal waarschijnlijk al iets sneller beschikbaar zijn op {{ registerDomain }}.
             </p>
-            <p v-else class="st-list-description">
+            <p v-else class="style-description">
                 Het kan nog even duren voor jouw aanpassingen zich verspreid hebben over het internet. Binnenkort worden e-mails automatisch vanaf @{{ mailDomain }} verstuurd.
             </p>
         </main>

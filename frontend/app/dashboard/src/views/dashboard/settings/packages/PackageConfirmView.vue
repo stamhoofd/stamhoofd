@@ -203,7 +203,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem>
+                    <STListItem class="right-description">
                         Vaste prijs
 
                         <template slot="right">
@@ -211,8 +211,10 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="renewPackageDetails.meta.serviceFeePercentage && renewPackageDetails.meta.serviceFeeFixed">
-                        Servicekosten
+                    <STListItem v-if="renewPackageDetails.meta.serviceFeePercentage && renewPackageDetails.meta.serviceFeeFixed" class="right-description">
+                        Servicekosten<template v-if="renewPackageDetails.meta.serviceFeePercentageTickets">
+                            webshops zonder tickets
+                        </template>
 
                         <template slot="right">
                             {{ renewPackageDetails.meta.serviceFeePercentage | percentage }} +
@@ -220,19 +222,43 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-else-if="renewPackageDetails.meta.serviceFeePercentage">
-                        Servicekosten
+                    <STListItem v-else-if="renewPackageDetails.meta.serviceFeePercentage" class="right-description">
+                        Servicekosten<template v-if="renewPackageDetails.meta.serviceFeePercentageTickets">
+                            per stuk (=geen ticket)
+                        </template>
 
                         <template slot="right">
                             {{ renewPackageDetails.meta.serviceFeePercentage | percentage }}
+                            <p v-if="renewPackageDetails.meta.serviceFeeMinimum" class="style-description-small">
+                                min. {{ renewPackageDetails.meta.serviceFeeMinimum | price }}
+                            </p>
+                            <p v-if="renewPackageDetails.meta.serviceFeeMaximum" class="style-description-small">
+                                max. {{ renewPackageDetails.meta.serviceFeeMaximum | price }}
+                            </p>
                         </template>
                     </STListItem>
 
                     <STListItem v-else-if="renewPackageDetails.meta.serviceFeeFixed">
-                        Servicekosten
+                        Servicekosten<template v-if="renewPackageDetails.meta.serviceFeePercentageTickets">
+                            per stuk (=geen ticket)
+                        </template>
 
                         <template slot="right">
                             {{ renewPackageDetails.meta.serviceFeeFixed | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="renewPackageDetails.meta.serviceFeePercentageTickets" class="right-description">
+                        Servicekosten per ticket
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.serviceFeePercentageTickets | percentage }}
+                            <p v-if="renewPackageDetails.meta.serviceFeeMinimumTickets" class="style-description-small">
+                                min. {{ renewPackageDetails.meta.serviceFeeMinimumTickets | price }}
+                            </p>
+                            <p v-if="renewPackageDetails.meta.serviceFeeMaximumTickets" class="style-description-small">
+                                max. {{ renewPackageDetails.meta.serviceFeeMaximumTickets | price }}
+                            </p>
                         </template>
                     </STListItem>
                 </STList>

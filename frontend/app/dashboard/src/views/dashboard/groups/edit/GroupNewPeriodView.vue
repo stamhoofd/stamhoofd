@@ -45,7 +45,7 @@
             Start- en eindtijdstip toevoegen
         </Checkbox>
 
-        <p class="st-list-description">
+        <p class="style-description">
             De start- en einddatum is zichtbaar bij het inschrijven en is puur informatief.
         </p>
 

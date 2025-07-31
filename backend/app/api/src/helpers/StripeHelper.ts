@@ -234,7 +234,9 @@ export class StripeHelper {
 
         const fullMetadata = {
             ...(metadata ?? {}),
-            organizationVATNumber: organization.meta.VATNumber
+            organizationVATNumber: organization.meta.VATNumber,
+            transactionFee: fee,
+            serviceFee: serviceFee,
         }
 
         const stripe = StripeHelper.getInstance(directCharge ? stripeAccount.accountId : null)

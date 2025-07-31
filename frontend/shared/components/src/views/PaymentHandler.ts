@@ -60,7 +60,7 @@ export class PaymentHandler {
     }, successHandler: (payment: Payment, component: NavigationMixin) => void, failedHandler: (payment: Payment | null) => void, transferHandler?: (payment: Payment | null) => void) {
         const {payment, organization, server, component, paymentUrl, returnUrl, transferSettings } = settings;
 
-        if (payment.method == PaymentMethod.PointOfSale) {
+        if (payment.method == PaymentMethod.PointOfSale || payment.method == PaymentMethod.Unknown) {
             successHandler(payment, component)
         } else if (payment.method == PaymentMethod.Transfer) {
             if (transferHandler) {

@@ -107,8 +107,10 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="pack.meta.serviceFeePercentage && pack.meta.serviceFeeFixed">
-                    Servicekosten
+                <STListItem v-if="pack.meta.serviceFeePercentage && pack.meta.serviceFeeFixed" class="right-description">
+                    Servicekosten<template v-if="pack.meta.serviceFeePercentageTickets">
+                        webshops zonder tickets
+                    </template>
 
                     <template slot="right">
                         {{ pack.meta.serviceFeePercentage | percentage }} +
@@ -116,19 +118,43 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-else-if="pack.meta.serviceFeePercentage">
-                    Servicekosten
+                <STListItem v-else-if="pack.meta.serviceFeePercentage" class="right-description">
+                    Servicekosten<template v-if="pack.meta.serviceFeePercentageTickets">
+                        per stuk (=geen ticket)
+                    </template>
 
                     <template slot="right">
                         {{ pack.meta.serviceFeePercentage | percentage }}
+                        <p v-if="pack.meta.serviceFeeMinimum" class="style-description-small">
+                            min. {{ pack.meta.serviceFeeMinimum | price }}
+                        </p>
+                        <p v-if="pack.meta.serviceFeeMaximum" class="style-description-small">
+                            max. {{ pack.meta.serviceFeeMaximum | price }}
+                        </p>
                     </template>
                 </STListItem>
 
                 <STListItem v-else-if="pack.meta.serviceFeeFixed">
-                    Servicekosten
+                    Servicekosten<template v-if="pack.meta.serviceFeePercentageTickets">
+                        per stuk (=geen ticket)
+                    </template>
 
                     <template slot="right">
                         {{ pack.meta.serviceFeeFixed | price }}
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="pack.meta.serviceFeePercentageTickets" class="right-description">
+                    Servicekosten per ticket
+
+                    <template slot="right">
+                        {{ pack.meta.serviceFeePercentageTickets | percentage }}
+                        <p v-if="pack.meta.serviceFeeMinimumTickets" class="style-description-small">
+                            min. {{ pack.meta.serviceFeeMinimumTickets | price }}
+                        </p>
+                        <p v-if="pack.meta.serviceFeeMaximumTickets" class="style-description-small">
+                            max. {{ pack.meta.serviceFeeMaximumTickets | price }}
+                        </p>
                     </template>
                 </STListItem>
 

@@ -2,12 +2,11 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-endpoints";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, Token, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Document, Group, Member, MemberFactory, MemberWithRegistrations, Organization, Payment, Registration, User } from '@stamhoofd/models';
 import { BalanceItemStatus, EncryptedMemberWithRegistrations, PaymentMethod, PaymentStatus, PermissionLevel, Registration as RegistrationStruct, User as UserStruct } from "@stamhoofd/structures";
 import { Formatter } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context';
-import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -261,7 +260,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         payment.price = balanceItem.pricePaid;
                         payment.paidAt = new Date()
                         payment.provider = null
-                        ServiceFeeHelper.setServiceFee(payment, organization, 'members')
                         await payment.save()
 
                         const balanceItemPayment = new BalanceItemPayment()
