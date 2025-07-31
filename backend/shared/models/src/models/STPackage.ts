@@ -189,7 +189,7 @@ export class STPackage extends Model {
         }
 
         // Change prices
-        if (pack.meta.type === STPackageType.Webshops || pack.meta.type === STPackageType.Members) {
+        if (pack.meta.type === STPackageType.Webshops) {
             pack.meta.serviceFeeFixed = 0;
             pack.meta.serviceFeePercentage = 2_00;
             pack.meta.serviceFeePercentageTickets = 3_00;
@@ -198,6 +198,16 @@ export class STPackage extends Model {
             pack.meta.serviceFeeMinimum = 0;
             pack.meta.serviceFeeMaximum = 95;
             pack.meta.serviceFeeMaximumTickets = 1_95;
+
+            pack.meta.unitPrice = 0;
+            pack.meta.pricingType = STPricingType.Fixed;
+            pack.validUntil = null;
+            pack.removeAt = null;
+        } else if (pack.meta.type === STPackageType.Members) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 1_00;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 95;
 
             pack.meta.unitPrice = 0;
             pack.meta.pricingType = STPricingType.Fixed;
