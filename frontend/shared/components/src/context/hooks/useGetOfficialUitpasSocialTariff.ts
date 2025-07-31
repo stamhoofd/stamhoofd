@@ -10,7 +10,6 @@ export function useGetOfficialUitpasSocialTariff() {
     const context = useContext();
     const getOfficialUitpasSocialTariff = async (uitpasEventUrl: string, basePrice: number): Promise<number> => {
         try {
-            console.error('Fetching official UiTPAS social STATIC tariff for event', uitpasEventUrl, basePrice);
             const response = await context.value.authenticatedServer.request({
                 method: 'POST',
                 path: '/uitpas',

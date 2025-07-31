@@ -124,6 +124,7 @@ function editCartItem(cartItem: CartItem) {
                         else {
                             checkoutManager.cart.addItem(cartItem);
                         }
+                        errors.errorBox = null;
                         checkoutManager.saveCart();
                     },
                 }),
