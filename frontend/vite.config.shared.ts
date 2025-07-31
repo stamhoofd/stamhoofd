@@ -6,6 +6,7 @@ import viteSvgToWebfont from 'vite-svg-2-webfont';
 import { type ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
+import postcssDiscardDulicates from 'postcss-discard-duplicates';
 
 // https://vitejs.dev/config/
 export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
@@ -139,10 +140,21 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     },
                     cssCodeSplit: false,
                 }
-            : {
-                    sourcemap: true,
-                    cssCodeSplit: false,
-                },
+            : (options.name === 'calculator'
+                    ? {
+                            lib: {
+                                name: 'StamhoofdCalculator',
+                                fileName: 'calculator',
+                                entry: './src/index.ts',
+                            },
+                            rollupOptions: {
+                                treeshake: 'smallest', // Increases performance
+                            },
+                        }
+                    : {
+                            sourcemap: true,
+                            cssCodeSplit: false,
+                        }),
         publicDir: resolve(__dirname, './public'),
         test: {
             globals: true,
@@ -159,6 +171,11 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
         },
         optimizeDeps: { exclude: ['fsevents'] },
         css: {
+            postcss: {
+                plugins: [
+                    postcssDiscardDulicates,
+                ],
+            },
             preprocessorOptions: {
                 scss: {
                     // Scss will change in a future version to resolve &'s in the same order as native CSS.

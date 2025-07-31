@@ -7,6 +7,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 export class TransactionFee {
     provider: string | null = null; // the payment provider for which this fee applies, e.g., 'Stripe', 'Mollie', etc.
+    onlyRegisteredBusinesses = false; // if true, this fee only applies to registered businesses, not individuals
 
     /**
      * Fixed transaction fee per order
@@ -32,6 +33,7 @@ export class TransactionFee {
     isInflated = false; // if true, this fee is manually inflated to ensure it is at least a certain amount
 
     constructor(options: Partial<TransactionFee> = {}) {
+        this.onlyRegisteredBusinesses = options.onlyRegisteredBusinesses ?? false;
         this.provider = options.provider || null;
         this.fixed = options.fixed || 0;
         this.fixedPerTicket = options.fixedPerTicket || 0;
@@ -72,6 +74,7 @@ export class Fees {
     percentage = 0; // * totalPrice (saved as per ten thousand, so 100 (1_00) = 1%)
     maxPerUnit: number | null;
     maxPerOrder: number | null;
+    minPerUnit = 0; // minimum amount for this fee, if set, it will not allow less than this amount
 
     includedFreeAmount = 0; // amount of tickets or members included for free
 
@@ -86,6 +89,7 @@ export class Fees {
         this.includedFreeAmount = options.includedFreeAmount || 0;
         this.maxPerUnit = options.maxPerUnit ?? null; // maximum amount for this fee, if set, it will not allow more than this amount
         this.maxPerOrder = options.maxPerOrder ?? null; // maximum amount for this fee
+        this.minPerUnit = options.minPerUnit ?? 0; // minimum amount for this fee, if set, it will not allow less than this amount
     }
 }
 
@@ -115,6 +119,13 @@ export class Tier {
         this.maximumUnitPrice = options.maximumUnitPrice ?? null; // if set, it will not allow more than this price per unit
     }
 
+    calculateVAT(price: number, input: CalculationInput) {
+        if (!input.withVAT) {
+            return price;
+        }
+        return Math.round(price * 1.21); // 21% VAT
+    }
+
     calculate(input: CalculationInput): CalculationOutput {
         const output = new CalculationOutput();
 
@@ -129,7 +140,7 @@ export class Tier {
                 {
                     title,
                     description: '',
-                    totalPrice: this.fees.setupCost,
+                    totalPrice: this.calculateVAT(this.fees.setupCost, input),
                 },
             );
         }
@@ -141,7 +152,7 @@ export class Tier {
                 {
                     title,
                     description: '',
-                    totalPrice: this.fees.setupCostOnlinePayments,
+                    totalPrice: this.calculateVAT(this.fees.setupCostOnlinePayments, input),
                 },
             );
         }
@@ -164,7 +175,7 @@ export class Tier {
                 new FixedPriceCalculationLine({
                     title: title,
                     amount: input.amount,
-                    unitPrice: this.fees.perUnit,
+                    unitPrice: this.calculateVAT(this.fees.perUnit, input),
                 }),
             );
         }
@@ -188,7 +199,7 @@ export class Tier {
                     title: title,
                     description: (this.minimumPersons && input.persons < this.minimumPersons) ? `Minimum van ${this.minimumPersons} personen vereist` : '',
                     amount: (this.minimumPersons && input.persons < this.minimumPersons) ? this.minimumPersons : input.persons,
-                    unitPrice: this.fees.perPerson,
+                    unitPrice: this.calculateVAT(this.fees.perPerson, input),
                 }),
             );
         }
@@ -216,36 +227,46 @@ export class Tier {
                     title,
                     description,
                     amount: input.orderCount,
-                    unitPrice: this.fees.perOrder,
+                    unitPrice: this.calculateVAT(this.fees.perOrder, input),
                 }),
             );
         }
 
         if (this.fees.percentage) {
-            if (this.fees.maxPerUnit) {
-                for (const product of input.products) {
-                    const z = new VolumePercentageCalculationLine({
+            for (const product of input.products) {
+                const z = new VolumePercentageCalculationLine({
+                    title: 'Servicekosten op volume',
+                    description: 'Berekend op totale omzet',
+                    volume: product.volume,
+                    percentage: this.fees.percentage,
+                    vatPercentage: input.withVAT ? 21 : 0,
+                });
+                if (this.fees.maxPerUnit && z.totalPrice / product.amount > this.fees.maxPerUnit) {
+                    const z = new FixedPriceCalculationLine({
                         title: 'Servicekosten op volume',
-                        description: 'Berekend op totale omzet',
-                        volume: product.volume,
-                        percentage: this.fees.percentage,
+                        description: 'Maximum kost per stuk',
+                        amount: product.amount,
+                        unitPrice: this.calculateVAT(this.fees.maxPerUnit, input),
                     });
-                    if (z.totalPrice / product.amount > this.fees.maxPerUnit) {
-                        const z = new FixedPriceCalculationLine({
-                            title: 'Servicekosten op volume',
-                            description: 'Maximum limiet per ticket',
-                            amount: product.amount,
-                            unitPrice: this.fees.maxPerUnit,
-                        });
-                        output.serviceFees.lines.push(
-                            z,
-                        );
-                    }
-                    else {
-                        output.serviceFees.lines.push(
-                            z,
-                        );
-                    }
+                    output.serviceFees.lines.push(
+                        z,
+                    );
+                }
+                else if (this.fees.minPerUnit && z.totalPrice / product.amount < this.fees.minPerUnit) {
+                    const z = new FixedPriceCalculationLine({
+                        title: 'Servicekosten op volume',
+                        description: 'Minimum kost per stuk',
+                        amount: product.amount,
+                        unitPrice: this.calculateVAT(this.fees.minPerUnit, input),
+                    });
+                    output.serviceFees.lines.push(
+                        z,
+                    );
+                }
+                else {
+                    output.serviceFees.lines.push(
+                        z,
+                    );
                 }
             }
         }
@@ -275,6 +296,9 @@ export class Tier {
 
             // Search for the cheapest fee
             for (const fee of fees) {
+                if (fee.onlyRegisteredBusinesses && !input.registeredBusiness) {
+                    continue; // Skip this fee if it is only for registered businesses and the input is not
+                }
                 const remarks: CalculationRemark[] = [];
                 if (fee.isInflated) {
                     remarks.push({
@@ -293,17 +317,17 @@ export class Tier {
                             title: 'Transactiekosten op volume',
                             volume,
                             percentage: fee.percentage,
+                            vatPercentage: input.withVAT ? 21 : 0,
                         }),
                         new FixedPriceCalculationLine({
-                            title: 'Transactiekosten op aantal bestellingen',
+                            title: 'Transactiekosten op aantal stuks',
                             amount: transactionCount,
-                            unitPrice: fee.fixed,
+                            unitPrice: this.calculateVAT(fee.fixed, input),
                         }),
                         new FixedPriceCalculationLine({
-                            title: 'Transactiekosten op aantal tickets',
-                            description: 'Opgelet, dit is per ticket, wat doorgaans een manier is om transactiekosten lager te doen lijken omdat je gemiddeld meerdere tickets per bestelling hebt.',
+                            title: 'Transactiekosten op aantal stuks',
                             amount: ticketsCount,
-                            unitPrice: fee.fixedPerTicket,
+                            unitPrice: this.calculateVAT(fee.fixedPerTicket, input),
                         }),
                     ],
                 });

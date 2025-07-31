@@ -1,12 +1,8 @@
 <template>
-    <SegmentedControl v-model="calculationMode" :items="availableCalculationModes.map(i => i.id)" :labels="availableCalculationModes.map(i => i.label)" />
     <CalculationGroupBox v-if="output && calculationMode === 'perUnit'" :calculation="output.getSummary(input)" />
-    <CalculationGroupBox v-if="output && calculationMode === 'perPerson'" :calculation="output.getPerPerson(input)" />
-    <CalculationGroupBox v-if="output && calculationMode === 'total'" :calculation="output.getTotal(input)" />
 </template>
 
 <script lang="ts" setup>
-import { SegmentedControl } from '@stamhoofd/components';
 import { computed, ref, watch } from 'vue';
 import CalculationGroupBox from './CalculationGroupBox.vue';
 import { CalculationInput } from './classes/CalculationInput';

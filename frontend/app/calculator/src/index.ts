@@ -7,8 +7,9 @@ import { defineCustomElement } from 'vue';
 
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-import App from './App.ce.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n';
+import { Country } from '@stamhoofd/structures';
+import App from './App.ce.vue';
 
 document.body.classList.add((AppManager.shared.isNative ? 'native-' : 'web-') + AppManager.shared.getOS());
 
@@ -19,6 +20,10 @@ const PriceCalculator = defineCustomElement(App, {
 
         const i18n = I18nController.getI18n();
         I18nController.fixedCountry = true;
+
+        I18nController.setMessages('nl', Country.Belgium, {
+            'bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b': 'Sluiten',
+        });
         app.use(i18n);
     },
 });

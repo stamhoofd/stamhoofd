@@ -59,6 +59,7 @@
     // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
     //background: rgba(black, 0.7);
     position: fixed;
+    position: var(--sheet-position, fixed);
     left: 0;
     top: 0;
     right: 0;

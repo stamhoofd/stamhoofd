@@ -196,6 +196,19 @@ export class I18nController {
         i18n.setLocale(locale, this.language, this.countryCode);
     }
 
+    static setMessages(language: string, countryCode: CountryCode, messages: Record<string, string>) {
+        // If the same language
+        const locale = language + '-' + countryCode;
+
+        const i18n = I18nController.getI18n();
+        const namespace = 'manual';
+
+        // If the language hasn't been loaded yet
+        i18n.loadLocale(namespace, locale, messages);
+        console.log('[I18n] Manually loaded locale', namespace, locale);
+        i18n.setLocale(locale, language, countryCode);
+    }
+
     static async getLocaleFromStorage(): Promise<{ language?: Language; country?: Country }> {
         const country = await Storage.keyValue.getItem('country');
         const language = await Storage.keyValue.getItem('language');

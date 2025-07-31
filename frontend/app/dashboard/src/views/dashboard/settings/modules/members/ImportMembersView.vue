@@ -12,7 +12,7 @@
         </p>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <label class="upload-box">
+        <label class="upload-members-upload-box">
             <span v-if="!file" class="icon upload" />
             <span v-else class="icon file-excel color-excel" />
             <div v-if="!file">
@@ -612,43 +612,43 @@ defineExpose({
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use "@stamhoofd/scss/base/text-styles.scss" as *;
 
-    .upload-box {
-        max-width: 100%;
-        box-sizing: border-box;
-        padding: 30px 20px;
-        border-radius: $border-radius;
-        background: $color-background-shade;
-        display: flex;
-        width: 100%;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-        cursor: pointer;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        user-select: none;
-        text-align: left;
-        transition: background-color 0.2s;
-        margin-bottom: 20px;
+.upload-members-upload-box {
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 30px 20px;
+    border-radius: $border-radius;
+    background: $color-background-shade;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    user-select: none;
+    text-align: left;
+    transition: background-color 0.2s;
+    margin-bottom: 20px;
 
-        &:active {
-            transition: none;
-            background-color: $color-background-shade-darker;
-        }
-
-        > .icon:first-child {
-            padding-right: 20px;
-            flex-shrink: 0;
-        }
-
-        > .icon:last-child {
-            padding-left: 20px;
-            flex-shrink: 0;
-            margin-left: auto;
-        }
+    &:active {
+        transition: none;
+        background-color: $color-background-shade-darker;
     }
+
+    > .icon:first-child {
+        padding-right: 20px;
+        flex-shrink: 0;
+    }
+
+    > .icon:last-child {
+        padding-left: 20px;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+}
 </style>

@@ -30,7 +30,6 @@
                 </template>
             </STListItem>
         </STList>
-        <CalculationRemarksBox :line="output.serviceFees" />
 
         <STList v-if="output.transactionFees.totalPrice > 0">
             <STListItem v-for="(line, index) in output.transactionFees.lines" :key="index">
@@ -62,12 +61,10 @@
                 </template>
             </STListItem>
         </STList>
-        <CalculationRemarksBox :line="output.transactionFees" />
     </article>
 </template>
 
 <script lang="ts" setup>
-import CalculationRemarksBox from './CalculationRemarksBox.vue';
 import { CalculationOutput } from './classes/CalculationOutput';
 
 defineProps<{

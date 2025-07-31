@@ -135,5 +135,3 @@ const defaultAgeGroupName = computed(() => {
     return defaultAgeGroup.name;
 });
 </script>
-
-<style lang="scss" scoped></style>

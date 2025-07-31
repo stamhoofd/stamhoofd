@@ -50,19 +50,24 @@ export class VolumePercentageCalculationLine implements CalculationLine {
      */
     volume: number = 0;
     percentage: number = 0; // saved as per ten thousand, so 100 (1_00) = 1%
+    vatPercentage: number = 0; // 21 or 0
 
     constructor(options: Partial<VolumePercentageCalculationLine>) {
         this.title = options.title || '';
         this.description = options.description || '';
         this.volume = options.volume || 0;
         this.percentage = options.percentage || 0;
+        this.vatPercentage = options.vatPercentage ?? 0; // e.g. 1.21 for 21% VAT
     }
 
     get totalPrice() {
-        return Math.ceil(this.volume * this.percentage / 100_00);
+        return Math.ceil(this.volume * this.percentage * (this.vatPercentage + 100) / 1000000);
     }
 
     get calculationDescription() {
+        if (this.vatPercentage) {
+            return `${Formatter.price(this.volume)} x ${Formatter.percentage(this.percentage)} + 21% BTW`;
+        }
         return `${Formatter.price(this.volume)} x ${Formatter.percentage(this.percentage)}`;
     }
 }
@@ -162,13 +167,13 @@ export class CalculationOutput {
 
                 {
                     title: 'Servicekosten per lid',
-                    description: 'Kost van Stamhoofd',
+                    description: 'Kost voor het gebruik van Stamhoofd',
                     totalPrice: Math.round(this.serviceFees.totalPrice / input.persons),
                 },
 
                 {
-                    title: 'Paymentfee per lid',
-                    description: `Gaat naar Stripe of Payconiq`,
+                    title: 'Transactiekost per lid',
+                    description: `Gaat naar Stripe, Mollie of Payconiq`,
                     totalPrice: Math.round(this.transactionFees.totalPrice / input.persons),
                 },
             ],
@@ -183,23 +188,49 @@ export class CalculationOutput {
         if (input.module === ModuleType.Members) {
             return new CalculationGroup({
                 title: 'Totale kost per inschrijving',
-                description: 'excl. BTW',
+                description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
                 lines: [
                     {
                         title: 'Vaste kosten per inschrijving',
-                        description: 'excl. BTW - gespreid over alle inschrijvingen',
+                        description: '',
                         totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
                     },
 
                     {
                         title: 'Servicekosten per inschrijving',
-                        description: 'Kost van Stamhoofd',
+                        description: 'Kost voor het gebruik van Stamhoofd',
                         totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
                     },
 
                     {
-                        title: 'Paymentfee per inschrijving',
-                        description: `Gaat naar Stripe of Payconiq`,
+                        title: 'Gemiddelde transactiekost',
+                        description: `Gaat naar Stripe, Mollie of Payconiq`,
+                        totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
+                    },
+                ],
+            });
+        }
+
+        if (input.module === ModuleType.Webshops) {
+            return new CalculationGroup({
+                title: 'Totale kost per stuk',
+                description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
+                lines: [
+                    {
+                        title: 'Vaste kosten per stuk',
+                        description: '',
+                        totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
+                    },
+
+                    {
+                        title: 'Servicekosten per stuk',
+                        description: 'Kost voor het gebruik van Stamhoofd',
+                        totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
+                    },
+
+                    {
+                        title: 'Gemiddelde transactiekost',
+                        description: `Gaat naar Stripe, Mollie of Payconiq`,
                         totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
                     },
                 ],
@@ -208,23 +239,23 @@ export class CalculationOutput {
 
         return new CalculationGroup({
             title: 'Totale kost per ticket',
-            description: 'excl. BTW',
+            description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
             lines: [
                 {
                     title: 'Vaste kosten per ticket',
-                    description: 'excl. BTW - gespreid over alle tickets',
+                    description: '',
                     totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
                 },
 
                 {
                     title: 'Servicekosten per ticket',
-                    description: 'Kost van Stamhoofd',
+                    description: 'Kost voor het gebruik van Stamhoofd',
                     totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
                 },
 
                 {
-                    title: 'Paymentfee per ticket',
-                    description: `Gaat naar Stripe of Payconiq`,
+                    title: 'Gemiddelde transactiekost',
+                    description: `Gaat naar Stripe, Mollie of Payconiq`,
                     totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
                 },
             ],
@@ -238,7 +269,7 @@ export class CalculationOutput {
 
         return new CalculationGroup({
             title: 'Totale kost',
-            description: 'excl. BTW',
+            description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
             lines: [
                 {
                     title: 'Vaste kosten',
@@ -248,13 +279,13 @@ export class CalculationOutput {
 
                 {
                     title: 'Servicekosten',
-                    description: 'Kost van Stamhoofd',
+                    description: 'Kost voor het gebruik van Stamhoofd',
                     totalPrice: Math.round(this.serviceFees.totalPrice),
                 },
 
                 {
-                    title: 'Paymentfees',
-                    description: `Gaat naar Stripe of Payconiq`,
+                    title: 'Transactiekosten',
+                    description: `Gaat naar Stripe, Mollie of Payconiq`,
                     totalPrice: Math.round(this.transactionFees.totalPrice),
                 },
             ],

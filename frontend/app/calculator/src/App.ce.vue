@@ -14,13 +14,11 @@ import CalculatorView from './CalculatorView.vue';
 const root = new ComponentWithProperties(NavigationController, {
     root: new ComponentWithProperties(CalculatorView, {}),
 });
-HistoryManager.activate();
-
 import webfontsString from 'virtual:vite-svg-2-webfont.css?inline';
 
 console.log('Webfonts string:', webfontsString);
 
-const boundaryString = '/** SHADOW-DOM */';
+const boundaryString = '/** @preserve SHADOW-DOM */';
 
 // And as a bit of a unique situation, we also need to register the font outside of the shadow DOM
 const splitted = webfontsString.split(boundaryString);

@@ -28,6 +28,8 @@ export class CalculationProduct {
 
 export class CalculationInput {
     module: ModuleType; // the module for which this input is calculated
+    registeredBusiness = true;
+    withVAT = false;
 
     products: CalculationProduct[] = []; // products that are part of the calculation, e.g. different ticket types or registrations
 
@@ -35,7 +37,7 @@ export class CalculationInput {
      * For some services, we need to know the amount of persons.
      */
     customPersons: number | null = null; // total amount of visitors or members
-    averageAmountPerOrder = 4; // average amount of tickets or registrations per order
+    customAverageAmountPerOrder: number | null = null; // average amount of tickets or registrations per order
 
     requestedPaymentMethods: PaymentMethod[]; // payment methods the user wants to use
 
@@ -44,10 +46,49 @@ export class CalculationInput {
     constructor(options: Partial<CalculationInput> = {}) {
         this.module = options.module || ModuleType.Tickets;
         this.products = options.products ?? [];
-        this.averageAmountPerOrder = options.averageAmountPerOrder ?? 4;
+        this.customAverageAmountPerOrder = options.averageAmountPerOrder ?? null;
         this.requestedPaymentMethods = options.requestedPaymentMethods ?? [];
         this.options = options.options ?? { country: Country.BE };
         this.customPersons = options.persons ?? null;
+        this.registeredBusiness = options.registeredBusiness ?? true;
+        this.withVAT = options.withVAT ?? false;
+    }
+
+    get averageAmountPerOrder() {
+        return this.customAverageAmountPerOrder ?? this.suggestedAverageAmountPerOrder;
+    }
+
+    set averageAmountPerOrder(value: number) {
+        this.customAverageAmountPerOrder = value;
+    }
+
+    get suggestedAverageAmountPerOrder() {
+        if (this.module === ModuleType.Members) {
+            return 1.3;
+        }
+
+        const product = this.products[0];
+        if (!product) {
+            return 3;
+        }
+
+        if (product.unitPrice < 5_00) {
+            return 5;
+        }
+
+        if (product.unitPrice < 10_00) {
+            return 4;
+        }
+
+        if (product.unitPrice < 30_00) {
+            return 3;
+        }
+
+        if (product.unitPrice < 80_00) {
+            return 2.6;
+        }
+
+        return 2;
     }
 
     get persons() {
