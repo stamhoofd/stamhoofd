@@ -1,1 +1,1 @@
-export const WhatsNewCount = 52
+export const WhatsNewCount = 53
