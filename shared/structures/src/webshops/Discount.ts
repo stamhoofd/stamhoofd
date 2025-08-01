@@ -1,10 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from "@simonbackx/simple-encoding";
-import { CartItem, CartItemPrice } from "./CartItem";
-import { v4 as uuidv4 } from "uuid";
-import { Checkout } from "./Checkout";
-import { Webshop } from "./Webshop";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field,IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
-import { OptionMenu, Option } from "./Product";
+import { v4 as uuidv4 } from "uuid";
+
+import { CartItem, CartItemPrice } from "./CartItem";
+import { Checkout } from "./Checkout";
+import { Option,OptionMenu } from "./Product";
+import { Webshop } from "./Webshop";
 
 export enum OptionSelectionRequirement {
     Required = "Required",
@@ -48,7 +49,7 @@ export class ProductSelector extends AutoEncoder {
     optionIds: Map<string, OptionSelectionRequirement> = new Map()
 
     getOptionRequirement(optionMenu: OptionMenu, option: Option): OptionSelectionRequirement  {
-        let value = this.optionIds.get(option.id);
+        const value = this.optionIds.get(option.id);
         if (!value) {
             if (optionMenu.multipleChoice) {
                 return OptionSelectionRequirement.Optional;
@@ -69,12 +70,12 @@ export class ProductSelector extends AutoEncoder {
             return false;
         }
 
-        if (this.productPriceIds.includes(cartItem.productPrice.id)) {
+        if (this.productPriceIds.length && !this.productPriceIds.includes(cartItem.productPrice.id)) {
             return false;
         }
 
         for (const option of cartItem.options) {
-            let value = this.getOptionRequirement(option.optionMenu, option.option)
+            const value = this.getOptionRequirement(option.optionMenu, option.option)
 
             if (value === OptionSelectionRequirement.Excluded) {
                 return false;
@@ -251,7 +252,7 @@ export class ProductDiscountSettings extends AutoEncoder {
     cartLabel: string|null = null;
 
     getApplicableDiscounts(offset: number, amount: number): ProductDiscount[] {
-        let d = this.discounts.slice()
+        const d = this.discounts.slice()
         if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatLast) {
             while(d.length < offset + amount) {
                 d.push(this.discounts[this.discounts.length - 1])
@@ -268,9 +269,9 @@ export class ProductDiscountSettings extends AutoEncoder {
     getTitle(webshop: Webshop, isAdmin = false): {title: string, description: string, footnote: string} {
         const n = this.product.getName(webshop, isAdmin)
 
-        let titles: string[] = [n.name];
+        const titles: string[] = [n.name];
         let descriptions: string[] = [];
-        let footnotes: string[] = [];
+        const footnotes: string[] = [];
 
         if (n.footnote) {
             const index = '*'.repeat(footnotes.length + 1);
@@ -446,9 +447,9 @@ export class Discount extends AutoEncoder {
     productDiscounts: ProductDiscountSettings[] = []
 
     getTitle(webshop: Webshop, isAdmin = false): {title: string, description: string, footnote: string} {
-        let titles: string[] = [];
-        let footnotes: string[] = [];
-        let descriptions: string[] = [];
+        const titles: string[] = [];
+        const footnotes: string[] = [];
+        const descriptions: string[] = [];
 
         if (this.orderDiscount.percentageDiscount) {
             titles.push(
