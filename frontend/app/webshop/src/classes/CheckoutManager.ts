@@ -1,8 +1,8 @@
 import { ArrayDecoder, Decoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import { Toast } from '@stamhoofd/components'
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { WebshopManager } from './WebshopManager'
-import { Toast } from '@stamhoofd/components'
 
 /**
  * Convenient access to the organization of the current session
