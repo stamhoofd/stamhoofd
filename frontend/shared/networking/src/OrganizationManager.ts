@@ -2,8 +2,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray } from '@simo
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -132,16 +131,24 @@ export class OrganizationManager {
         startDate.setMonth(0);
         startDate.setHours(0, 0, 0, 0);
 
+        const isPlatform = STAMHOOFD.userMode === 'platform';
+
+        const filter: StamhoofdFilter = {
+            startDate: {
+                $gt: startDate,
+            },
+        };
+
+        if (!isPlatform) {
+            filter.organizationId = this.organization.id;
+        }
+
         // Load periods
         const periodsResponse = await this.$context.authenticatedServer.request({
             method: 'GET',
             path: '/registration-periods',
             query: new LimitedFilteredRequest({
-                filter: {
-                    startDate: {
-                        $gt: startDate,
-                    },
-                },
+                filter,
                 limit: 10,
                 sort: [
                     {
