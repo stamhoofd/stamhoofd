@@ -1,5 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Group, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -10,11 +11,17 @@ type CycleData = {
     groups: Group[];
 };
 
+const cycleIfMigrated = -99;
+
 export async function startGroupCyclesToPeriodsMigration() {
     for await (const organization of Organization.select().all()) {
         const allCycles: CycleData[] = [];
 
         const groups = await Group.select().where('organizationId', organization.id).fetch();
+
+        if (groups.some(g => g.cycle === cycleIfMigrated)) {
+            continue;
+        }
 
         for (const group of groups) {
             const cycle: number = group.cycle;
@@ -89,7 +96,7 @@ async function cleanupCycleGroups(cycleGroups: CycleGroup[]) {
 async function cleanupGroup(group: Group) {
     group.settings.cycleSettings = new Map();
     // todo: for testing
-    group.cycle = -99;
+    group.cycle = cycleIfMigrated;
     await group.save();
 }
 
@@ -414,6 +421,11 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
     let previousPeriod: RegistrationPeriod | null = null;
 
     const originalCategories = organization.meta.categories;
+    const originalRootCategoryId = organization.meta.rootCategoryId;
+
+    if (originalRootCategoryId === '') {
+        throw new Error('Original root category is empty');
+    }
 
     for (const cycleGroup of cycleGroups) {
         // create registration period
@@ -478,7 +490,7 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
 
                 const newWaitingList = new Group();
                 // todo: for testing
-                newWaitingList.cycle = -99;
+                newWaitingList.cycle = cycleIfMigrated;
                 newWaitingList.type = GroupType.WaitingList;
                 newWaitingList.organizationId = organization.id;
                 newWaitingList.periodId = period.id;
@@ -547,7 +559,17 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
             c.category.categoryIds = newCategoryIds;
         });
 
+        const rootCategoryData = newCategoriesData.find(c => c.originalCategory.id === originalRootCategoryId);
+        if (!rootCategoryData) {
+            throw new Error('No root category found');
+        }
+        organizationRegistrationPeriod.settings.rootCategoryId = rootCategoryData.category.id;
+
         organizationRegistrationPeriod.settings.categories = newCategoriesData.map(c => c.category);
+        if (organizationRegistrationPeriod.settings.categories.length === 0) {
+            throw new Error('No categories found');
+        }
+
         await organizationRegistrationPeriod.save();
     }
 }
@@ -566,7 +588,7 @@ function cloneGroup(cycle: CycleData, group: Group, period: RegistrationPeriod) 
     });
 
     // todo? for testing
-    newGroup.cycle = -99;
+    newGroup.cycle = cycleIfMigrated;
 
     const newSettings = GroupSettings
         .create({
