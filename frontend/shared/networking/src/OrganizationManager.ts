@@ -1,9 +1,9 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components';
-import { LoginHelper, SessionContext, SessionManager } from '@stamhoofd/networking';
-import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
-import { Ref, inject, toRef } from 'vue';
+import { SessionContext, SessionManager } from '@stamhoofd/networking';
+import { DetailedPayableBalanceCollection, Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection } from '@stamhoofd/structures';
+import { inject, Ref, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
     return toRef(inject<OrganizationManager>('$organizationManager')) as any as Ref<OrganizationManager>;
@@ -226,5 +226,18 @@ export class OrganizationManager {
         if (this.$context.organization) {
             await SessionManager.addOrganizationToStorage(this.$context.organization);
         }
+    }
+
+    // todo: rename
+    async loadBillingStatus({ owner, shouldRetry }: { owner?: any; shouldRetry?: boolean }) {
+        // todo
+        return (await this.$context.authenticatedServer.request({
+            method: 'GET',
+            path: `/organization/payable-balance/detailed`,
+            decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
+            owner,
+            shouldRetry,
+            timeout: 5 * 60 * 1000,
+        })).data;
     }
 }

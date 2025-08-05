@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 
 import { Address } from '../addresses/Address.js';
+import { OrganizationPaymentMandate } from '../billing/OrganizationPaymentMandate.js';
 import { STBillingStatus } from '../billing/STBillingStatus.js';
 import { Organization } from '../Organization.js';
 import { OrganizationEmail } from '../OrganizationEmail.js';
@@ -26,47 +27,6 @@ export class OrganizationStats extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     activeAdmins: number;
 }
-
-export class OrganizationPaymentMandateDetails extends AutoEncoder {
-    @field({ decoder: StringDecoder, optional: true })
-    consumerName?: string;
-
-    @field({ decoder: StringDecoder, optional: true })
-    consumerAccount?: string;
-
-    @field({ decoder: StringDecoder, optional: true })
-    consumerBic?: string;
-}
-
-export class OrganizationPaymentMandate extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    id: string;
-
-    @field({ decoder: StringDecoder })
-    method: 'directdebit' | 'creditcard' | 'paypal';
-
-    @field({ decoder: StringDecoder })
-    status: 'valid' | 'pending' | 'invalid';
-
-    @field({ decoder: OrganizationPaymentMandateDetails })
-    details: OrganizationPaymentMandateDetails;
-
-    /**
-     * The signature date of the mandate in YYYY-MM-DD format.
-     */
-    @field({ decoder: StringDecoder, nullable: true })
-    signatureDate: string | null = null;
-
-    /**
-     * The mandate’s date and time of creation, in ISO 8601 format.
-     */
-    @field({ decoder: DateDecoder })
-    createdAt: Date;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    mandateReference: string | null = null;
-}
-
 export class OrganizationSummary extends Organization {
     @field({ decoder: STBillingStatus })
     billingStatus: STBillingStatus;

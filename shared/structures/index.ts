@@ -211,6 +211,7 @@ export * from './src/billing/STPackageBundle.js';
 
 // Admin
 export * from './src/admin/MemberSummary.js';
+export * from './src/billing/OrganizationPaymentMandate.js';
 export * from './src/admin/OrganizationSummary.js';
 export * from './src/admin/StripePayoutExport.js';
 export * from './src/Graph.js';

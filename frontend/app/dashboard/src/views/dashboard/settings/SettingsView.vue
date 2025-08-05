@@ -384,6 +384,7 @@ import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
+import PackageSettingsView from './packages/PackageSettingsView.vue';
 
 type ttt = FreeContributionSettingsView;
 
@@ -558,6 +559,11 @@ defineRoutes([
         url: Routes.Uitpas,
         present: 'popup',
         component: UitpasSettingsView,
+    },
+    {
+        url: Routes.Packages,
+        present: 'popup',
+        component: PackageSettingsView,
     },
 ]);
 

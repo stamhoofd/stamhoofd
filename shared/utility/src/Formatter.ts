@@ -1,3 +1,4 @@
+import { friendlyFormatIBAN } from 'ibantools';
 import { DateTime } from 'luxon';
 
 import { Sorter } from './Sorter';
@@ -11,6 +12,16 @@ export class Formatter {
 
     static emailSenderName(name: StringLike): string {
         return this.removeAccents(name).replace(/[^A-Za-z0-9-_]+/g, ' ').trim();
+    }
+
+    static iban(ibanRaw: string) {
+        try {
+            return friendlyFormatIBAN(ibanRaw) ?? ibanRaw; // 'NL91ABNA0517164300'
+        }
+        catch (e) {
+            console.error('Invalid IBAN', ibanRaw, e);
+            return ibanRaw; // Return the raw IBAN if it cannot be formatted
+        }
     }
 
     static slug(name: StringLike): string {

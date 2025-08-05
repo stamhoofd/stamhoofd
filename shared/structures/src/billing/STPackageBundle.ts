@@ -62,6 +62,64 @@ export class STPackageBundleHelper {
         return true;
     }
 
+    static isAlreadyBought(bundle: STPackageBundle, pack: STPackage): boolean {
+        switch (bundle) {
+            case STPackageBundle.Members: {
+                if (pack.meta.type === STPackageType.Members) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.Webshops: {
+                if (pack.meta.type === STPackageType.Webshops) {
+                    // Already bought
+                    return true;
+                }
+                if (pack.meta.type === STPackageType.SingleWebshop) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.SingleWebshop: {
+                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    static isInTrial(bundle: STPackageBundle, pack: STPackage): boolean {
+        switch (bundle) {
+            case STPackageBundle.Members: {
+                if (pack.meta.type === STPackageType.TrialMembers) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.Webshops: {
+                if (pack.meta.type === STPackageType.TrialWebshops) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.SingleWebshop: {
+                if (pack.meta.type === STPackageType.TrialWebshops) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
     static isCombineable(bundle: STPackageBundle, pack: STPackage): boolean {
         switch (bundle) {
             case STPackageBundle.Members: {
@@ -100,7 +158,6 @@ export class STPackageBundleHelper {
                 return true;
             }
         }
-        return false;
     }
 
     /**
@@ -222,7 +279,5 @@ export class STPackageBundleHelper {
                 });
             }
         }
-
-        throw new Error('Package not available');
     }
 }
