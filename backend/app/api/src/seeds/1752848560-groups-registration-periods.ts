@@ -427,7 +427,9 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
         throw new Error('Original root category is empty');
     }
 
-    for (const cycleGroup of cycleGroups) {
+    for (let i = 0; i < cycleGroups.length; i++) {
+        const cycleGroup = cycleGroups[i];
+
         // create registration period
         const locked = cycleGroup.endDate.getFullYear() < new Date().getFullYear();
         const period = await new RegistrationPeriodFactory({
@@ -437,6 +439,11 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
             previousPeriodId: previousPeriod ? previousPeriod.id : undefined,
             organization,
         }).create();
+
+        if (i === 0) {
+            organization.periodId = period.id;
+            await organization.save();
+        }
 
         previousPeriod = period;
 
