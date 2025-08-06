@@ -29,7 +29,7 @@
         </template>
 
         <STList>
-            <OrganizationRegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :organization="patchedOrganization" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
+            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :organization="patchedOrganization" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
         </STList>
 
         <p>
@@ -49,8 +49,8 @@ import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useCont
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
-import EditOrganizationRegistrationPeriodView from './EditRegistrationPeriodView.vue';
-import OrganizationRegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
+import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
+import RegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
 
 const errors = useErrors();
 const pop = usePop();
@@ -97,7 +97,7 @@ async function addPeriod() {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditOrganizationRegistrationPeriodView, {
+            new ComponentWithProperties(EditRegistrationPeriodView, {
                 period: newPeriod,
                 isNew: true,
                 saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
@@ -116,7 +116,7 @@ async function editPeriod(period: RegistrationPeriod) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
-            new ComponentWithProperties(EditOrganizationRegistrationPeriodView, {
+            new ComponentWithProperties(EditRegistrationPeriodView, {
                 period,
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
