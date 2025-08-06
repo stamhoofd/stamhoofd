@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot && enableActivities ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :title="title" :disabled="!hasPeriodChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot && enableActivities ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
 
@@ -44,7 +44,7 @@
             <hr><h2>{{ $t('cb83317b-713b-400c-a753-dc944ddf0351') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
-                    <GroupCategoryRow :category="category" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />
+                    <GroupCategoryRow :category="category" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" @patch:other-periods="addPeriodsArrayPatch" />
                 </template>
             </STList>
         </template>
@@ -57,7 +57,7 @@
 
             <STList v-model="draggableGroups" :draggable="true">
                 <template #item="{item: group}">
-                    <GroupRow :group="group" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" />
+                    <GroupRow :group="group" :period="patchedPeriod" :periods="patchedPeriods" :organization="organization" @patch:period="addPatch" @patch:other-period="addPeriodsPatch" />
                 </template>
             </STList>
         </template>
@@ -87,12 +87,14 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, STErrorsDefault, STInputBox, STList, SaveView, useAuth, useDraggableArrayIds, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, useAuth, useDraggableArrayIds, useErrors, usePatch } from '@stamhoofd/components';
 import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
-import { computed, getCurrentInstance, ref } from 'vue';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { Sorter } from '@stamhoofd/utility';
+import { computed, getCurrentInstance, Ref, ref } from 'vue';
 import GroupCategoryRow from './GroupCategoryRow.vue';
 import GroupRow from './GroupRow.vue';
 import GroupTrashView from './GroupTrashView.vue';
@@ -107,9 +109,10 @@ const props = defineProps<{
     isNew: boolean;
     period: OrganizationRegistrationPeriod;
     saveHandler: ((patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>);
+    saveOtherPeriodsHandler: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void>;
 }>();
 
-const { patched: patchedPeriod, hasChanges, patch, addPatch } = usePatch(props.period);
+const { patched: patchedPeriod, hasChanges: hasPeriodChanges, patch, addPatch } = usePatch(props.period);
 const enableActivities = computed(() => props.organization.meta.modules.useActivities);
 const saving = ref(false);
 const pop = usePop();
@@ -117,6 +120,40 @@ const errors = useErrors();
 const present = usePresent();
 const auth = useAuth();
 const isPlatformAdmin = auth.hasPlatformFullAccess();
+
+const organizationManager = useOrganizationManager();
+const owner = useRequestOwner();
+
+// Load groups
+organizationManager.value.loadPeriods(false, false, owner).catch(console.error);
+
+const periods = computed(() => {
+    const periods = organizationManager.value.organization.periods?.organizationPeriods;
+    if (periods === undefined) {
+        return [organizationManager.value.organization.period];
+    }
+
+    const periodsCopy = [...periods];
+
+    periodsCopy.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));
+
+    return periodsCopy;
+});
+
+const periodsPatch = ref(new PatchableArray()) as unknown as Ref<PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>>;
+
+const patchedPeriods = computed(() => periodsPatch.value.applyTo(periods.value) as OrganizationRegistrationPeriod[]);
+
+const hasOtherPeriodChanges = computed(() => periodsPatch.value.changes.length > 0);
+const hasChanges = computed(() => hasPeriodChanges.value || hasOtherPeriodChanges.value);
+
+function addPeriodsPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationRegistrationPeriod>>) {
+    periodsPatch.value.addPatch(OrganizationRegistrationPeriod.patch({ ...newPatch }));
+}
+
+function addPeriodsArrayPatch(newPatch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) {
+    periodsPatch.value = periodsPatch.value.patch(newPatch);
+}
 
 const patchedCategory = computed(() => {
     const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id);
@@ -231,7 +268,12 @@ async function save() {
     saving.value = true;
 
     try {
+        if (hasOtherPeriodChanges.value) {
+            await props.saveOtherPeriodsHandler(periodsPatch.value);
+        }
+
         await props.saveHandler(patch.value);
+
         await pop({ force: true });
     }
     catch (e) {
@@ -306,6 +348,9 @@ async function createCategory() {
                 isNew: true,
                 saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                     addPatch(p.patch(patch));
+                },
+                saveOtherPeriodsHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                    addPeriodsArrayPatch(patch);
                 },
             }),
         ],

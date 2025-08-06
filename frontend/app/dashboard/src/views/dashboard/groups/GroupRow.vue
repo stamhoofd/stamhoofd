@@ -15,180 +15,216 @@
     </STListItem>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, LongPressDirective, STListItem } from '@stamhoofd/components';
+import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
+import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, STListItem } from '@stamhoofd/components';
 import { Group, GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
+import { computed } from 'vue';
 
-@Component({
-    components: {
-        STListItem,
-        GroupAvatar,
-    },
-    directives: {
-        LongPress: LongPressDirective,
-    },
-})
-export default class GroupRow extends Mixins(NavigationMixin) {
-    @Prop({})
+const props = defineProps<{
     group: Group;
-
-    @Prop({})
     organization: Organization;
-
-    @Prop({})
     period: OrganizationRegistrationPeriod;
+    periods: OrganizationRegistrationPeriod[];
+}>();
 
-    get imageSrc() {
-        return (this.group.settings.squarePhoto ?? this.group.settings.coverPhoto)?.getPathForSize(50, 50);
+const emit = defineEmits<{
+    (e: 'patch:period', value: AutoEncoderPatchType<OrganizationRegistrationPeriod>): void;
+    (e: 'patch:otherPeriod', value: AutoEncoderPatchType<OrganizationRegistrationPeriod>): void;
+}>();
+
+const present = usePresent();
+
+const otherPeriods = computed(() => props.periods.filter(p => p.id !== props.period.id));
+
+function editGroup() {
+    present(new ComponentWithProperties(EditGroupView, {
+        period: props.period,
+        groupId: props.group.id,
+        isNew: false,
+        saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+            emit('patch:period', patch);
+
+            // Check deleted
+            if (patch.groups.getDeletes().includes(props.group.id)) {
+                const settings = OrganizationRegistrationPeriodSettings.patch({});
+                const pp = GroupCategory.patch({ id: parentCategory.value.id });
+                pp.groupIds.addDelete(props.group.id);
+                settings.categories.addPatch(pp);
+                const q = OrganizationRegistrationPeriod.patch({
+                    settings,
+                });
+                emit('patch:period', q);
+            }
+        },
+    }).setDisplayStyle('popup')).catch(console.error);
+}
+
+const parentCategory = computed(() => props.group.getParentCategories(props.period.settings.categories)[0]);
+const subGroups = computed(() => parentCategory.value.groupIds.map(id => props.period.groups.find(g => g.id === id)!).filter(g => !!g));
+const allCategories = computed(() => props.period.availableCategories.filter(c => c.categories.length === 0 && c.id !== parentCategory.value?.id));
+
+const moveTo = (category: GroupCategory) => {
+    const p = GroupCategory.patch({ id: category.id });
+    p.groupIds.addPut(props.group.id);
+
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    settings.categories.addPatch(p);
+
+    const pp = GroupCategory.patch({ id: parentCategory.value.id });
+    pp.groupIds.addDelete(props.group.id);
+    settings.categories.addPatch(pp);
+
+    const q = OrganizationRegistrationPeriod.patch({
+        settings,
+    });
+
+    emit('patch:period', q);
+};
+
+const moveToOtherPeriod = (period: OrganizationRegistrationPeriod, category: GroupCategory) => {
+    const groupPatch = Group.patch({ id: props.group.id, periodId: period.period.id });
+
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    const pp = GroupCategory.patch({ id: parentCategory.value.id });
+    pp.groupIds.addDelete(props.group.id);
+    settings.categories.addPatch(pp);
+
+    const periodPatch = OrganizationRegistrationPeriod.patch({
+        settings,
+    });
+
+    const p = GroupCategory.patch({ id: category.id });
+    p.groupIds.addPut(props.group.id);
+
+    const otherSettings = OrganizationRegistrationPeriodSettings.patch({});
+    otherSettings.categories.addPatch(p);
+
+    const otherPeriodPatch = OrganizationRegistrationPeriod.patch({
+        id: period.id,
+        settings: otherSettings,
+    });
+
+    otherPeriodPatch.groups.addPatch(groupPatch);
+
+    emit('patch:period', periodPatch);
+    emit('patch:otherPeriod', otherPeriodPatch);
+};
+
+const duplicate = () => {
+    const duplicated = props.group.clone();
+    duplicated.id = uuidv4();
+
+    // Remove suffix
+    duplicated.settings.name = TranslatedString.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
+
+    const suffix = ' (kopie)';
+
+    // Count the groups that already have a suffix, and add the numuber inside the suffix
+    // use subGroups.value
+    const suffixes = subGroups.value.map(g => g.settings.name.startsWith(duplicated.settings.name + ' (kopie') && g.settings.name.match(/ \(kopie( \d+)?\)$/));
+    const suffixesWithNumber = suffixes.filter(s => !!s) as RegExpMatchArray[];
+
+    const maxNumber = suffixesWithNumber.length > 0 ? Math.max(...suffixesWithNumber.map(s => parseInt(s[1] ?? '1'))) : 0;
+
+    if (maxNumber > 0) {
+        duplicated.settings.name = TranslatedString.create(duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')');
+    }
+    else {
+        duplicated.settings.name = TranslatedString.create(duplicated.settings.name + suffix);
     }
 
-    editGroup() {
-        this.present(new ComponentWithProperties(EditGroupView, {
-            period: this.period,
-            groupId: this.group.id,
-            isNew: false,
-            saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                this.$emit('patch:period', patch);
+    const p = GroupCategory.patch({ id: parentCategory.value.id });
+    p.groupIds.addPut(duplicated.id, props.group.id);
 
-                // Check deleted
-                if (patch.groups.getDeletes().includes(this.group.id)) {
+    const settings = OrganizationRegistrationPeriodSettings.patch({});
+    settings.categories.addPatch(p);
+
+    const organizationPatch = OrganizationRegistrationPeriod.patch({
+        settings,
+    });
+
+    organizationPatch.groups.addPut(duplicated);
+    emit('patch:period', organizationPatch);
+};
+
+function showContextMenu(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: 'Verplaats naar',
+                disabled: allCategories.value.length === 0,
+                childMenu: new ContextMenu([
+
+                    allCategories.value.map(cat =>
+                        new ContextMenuItem({
+                            name: cat.settings.name,
+                            rightText: cat.groupIds.length + '',
+                            action: () => {
+                                moveTo(cat);
+                                return true;
+                            },
+                        }),
+                    ),
+                    [
+                        // todo: maybe only for admins?
+                        new ContextMenuItem({
+                            name: $t('Ander werkjaar'),
+                            childMenu: new ContextMenu([
+                                otherPeriods.value.map(p => new ContextMenuItem({
+                                    name: p.period.name,
+                                    childMenu: new ContextMenu([
+                                        p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
+                                            name: c.settings.name,
+                                            rightText: c.groupIds.length + '',
+                                            action: () => {
+                                                moveToOtherPeriod(p, c);
+                                                return true;
+                                            },
+                                        })),
+                                    ]),
+                                })),
+
+                            ]),
+                            disabled: otherPeriods.value.length === 0,
+                        }),
+                    ],
+                ]),
+            }),
+
+            new ContextMenuItem({
+                name: 'Dupliceren',
+                icon: 'copy',
+                action: () => {
+                    duplicate();
+                    return true;
+                },
+            }),
+
+            new ContextMenuItem({
+                name: 'Verwijderen',
+                icon: 'trash',
+                action: () => {
                     const settings = OrganizationRegistrationPeriodSettings.patch({});
-                    const pp = GroupCategory.patch({ id: this.parentCategory.id });
-                    pp.groupIds.addDelete(this.group.id);
+                    const pp = GroupCategory.patch({ id: parentCategory.value.id });
+                    pp.groupIds.addDelete(props.group.id);
                     settings.categories.addPatch(pp);
+
                     const q = OrganizationRegistrationPeriod.patch({
                         settings,
                     });
-                    this.$emit('patch:period', q);
-                }
-            },
-        }).setDisplayStyle('popup'));
-    }
+                    q.groups.addDelete(props.group.id);
 
-    get parentCategory() {
-        return this.group.getParentCategories(this.period.settings.categories)[0];
-    }
+                    emit('patch:period', q);
 
-    get subGroups() {
-        return this.parentCategory.groupIds.map(id => this.period.groups.find(g => g.id === id)!).filter(g => !!g);
-    }
-
-    get allCategories() {
-        const parentCategory = this.parentCategory;
-        return this.period.availableCategories.filter(c => c.categories.length === 0 && c.id !== parentCategory?.id);
-    }
-
-    moveTo(category: GroupCategory) {
-        const p = GroupCategory.patch({ id: category.id });
-        p.groupIds.addPut(this.group.id);
-
-        const settings = OrganizationRegistrationPeriodSettings.patch({});
-        settings.categories.addPatch(p);
-
-        const pp = GroupCategory.patch({ id: this.parentCategory.id });
-        pp.groupIds.addDelete(this.group.id);
-        settings.categories.addPatch(pp);
-
-        const q = OrganizationRegistrationPeriod.patch({
-            settings,
-        });
-
-        this.$emit('patch:period', q);
-    }
-
-    duplicate() {
-        const duplicated = this.group.clone();
-        duplicated.id = uuidv4();
-
-        // Remove suffix
-        duplicated.settings.name = TranslatedString.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
-
-        const suffix = ' (kopie)';
-
-        // Count the groups that already have a suffix, and add the numuber inside the suffix
-        // use this.subGroups
-        const suffixes = this.subGroups.map(g => g.settings.name.startsWith(duplicated.settings.name + ' (kopie') && g.settings.name.match(/ \(kopie( \d+)?\)$/));
-        const suffixesWithNumber = suffixes.filter(s => !!s) as RegExpMatchArray[];
-
-        const maxNumber = suffixesWithNumber.length > 0 ? Math.max(...suffixesWithNumber.map(s => parseInt(s[1] ?? '1'))) : 0;
-
-        if (maxNumber > 0) {
-            duplicated.settings.name = TranslatedString.create(duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')');
-        }
-        else {
-            duplicated.settings.name = TranslatedString.create(duplicated.settings.name + suffix);
-        }
-
-        const p = GroupCategory.patch({ id: this.parentCategory.id });
-        p.groupIds.addPut(duplicated.id, this.group.id);
-
-        const settings = OrganizationRegistrationPeriodSettings.patch({});
-        settings.categories.addPatch(p);
-
-        const organizationPatch = OrganizationRegistrationPeriod.patch({
-            settings,
-        });
-
-        organizationPatch.groups.addPut(duplicated);
-        this.$emit('patch:period', organizationPatch);
-    }
-
-    showContextMenu(event: MouseEvent) {
-        const menu = new ContextMenu([
-            [
-                new ContextMenuItem({
-                    name: 'Verplaats naar',
-                    disabled: this.allCategories.length === 0,
-                    childMenu: new ContextMenu([
-                        this.allCategories.map(cat =>
-                            new ContextMenuItem({
-                                name: cat.settings.name,
-                                rightText: cat.groupIds.length + '',
-                                action: () => {
-                                    this.moveTo(cat);
-                                    return true;
-                                },
-                            }),
-                        ),
-                    ]),
-                }),
-
-                new ContextMenuItem({
-                    name: 'Dupliceren',
-                    icon: 'copy',
-                    action: () => {
-                        this.duplicate();
-                        return true;
-                    },
-                }),
-
-                new ContextMenuItem({
-                    name: 'Verwijderen',
-                    icon: 'trash',
-                    action: () => {
-                        const settings = OrganizationRegistrationPeriodSettings.patch({});
-                        const pp = GroupCategory.patch({ id: this.parentCategory.id });
-                        pp.groupIds.addDelete(this.group.id);
-                        settings.categories.addPatch(pp);
-
-                        const q = OrganizationRegistrationPeriod.patch({
-                            settings,
-                        });
-                        q.groups.addDelete(this.group.id);
-
-                        this.$emit('patch:period', q);
-
-                        return true;
-                    },
-                }),
-            ],
-        ]);
-        menu.show({ clickEvent: event }).catch(console.error);
-    }
+                    return true;
+                },
+            }),
+        ],
+    ]);
+    menu.show({ clickEvent: event }).catch(console.error);
 }
 </script>
 
