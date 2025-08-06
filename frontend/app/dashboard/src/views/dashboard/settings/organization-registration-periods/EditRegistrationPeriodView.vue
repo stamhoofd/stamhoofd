@@ -37,7 +37,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
-import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
+import { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -45,18 +45,18 @@ const saving = ref(false);
 const deleting = ref(false);
 
 const props = defineProps<{
-    organizationRegistrationPeriod: OrganizationRegistrationPeriod;
+    period: RegistrationPeriod;
     isNew: boolean;
-    saveHandler: (p: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>;
+    saveHandler: (p: AutoEncoderPatchType<RegistrationPeriod>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
 
 const organization = useRequiredOrganization();
-const isCurrentPeriod = computed(() => organization.value.period.id === props.organizationRegistrationPeriod.id);
+const isCurrentPeriod = computed(() => organization.value.period.period.id === props.period.id);
 const title = computed(() => props.isNew ? $t('c6f24e63-4735-43c4-a93a-405755ba70c2') : $t('7118def6-da94-4fce-9398-2131b31acf01'));
 const pop = usePop();
 
-const { patched, addPatch, hasChanges, patch } = usePatch(props.organizationRegistrationPeriod);
+const { patched, addPatch, hasChanges, patch } = usePatch(props.period);
 
 const save = async () => {
     if (saving.value || deleting.value) {
@@ -99,18 +99,18 @@ const doDelete = async () => {
 };
 
 const startDate = computed({
-    get: () => patched.value.period.startDate,
-    set: startDate => addPatch({ period: RegistrationPeriod.patch({ startDate }) }),
+    get: () => patched.value.startDate,
+    set: startDate => addPatch({ startDate }),
 });
 
 const endDate = computed({
-    get: () => patched.value.period.endDate,
-    set: endDate => addPatch({ period: RegistrationPeriod.patch({ endDate }) }),
+    get: () => patched.value.endDate,
+    set: endDate => addPatch({ endDate }),
 });
 
 const locked = computed({
-    get: () => patched.value.period.locked,
-    set: locked => addPatch({ period: RegistrationPeriod.patch({ locked }) }),
+    get: () => patched.value.locked,
+    set: locked => addPatch({ locked }),
 });
 
 const shouldNavigateAway = async () => {
