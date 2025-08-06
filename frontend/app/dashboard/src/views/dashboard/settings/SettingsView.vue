@@ -93,6 +93,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRegistrationPeriods)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('ef07b66f-6b78-4c47-9599-d8847ea97aaa') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PaymentAccounts)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
