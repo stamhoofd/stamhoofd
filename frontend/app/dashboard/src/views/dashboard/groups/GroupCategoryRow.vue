@@ -32,8 +32,13 @@ const props = defineProps<{
 const auth = useAuth();
 const isPlatformAdmin = auth.hasFullPlatformAccess();
 const present = usePresent();
-const emit = defineEmits(['patch:period']);
+const emit = defineEmits<{
+    (e: 'patch:period', value: AutoEncoderPatchType<OrganizationRegistrationPeriod>): void;
+    (e: 'patch:otherPeriods', value: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>): void;
+}>();
+
 const { addPatch } = useEmitPatch(props, emit, 'period');
+
 const parentCategory = computed(() => props.category.getParentCategories(props.period.settings.categories)[0]);
 const grandParentCategory = computed(() => parentCategory.value?.getParentCategories(props.period.settings.categories)[0]);
 const subCategories = computed(() => parentCategory.value.categoryIds.map(id => props.period.settings.categories.find(c => c.id === id)!).filter(c => c && c.id !== props.category.id));
@@ -87,6 +92,9 @@ async function editCategory() {
                 isNew: false,
                 saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                     addPatch(patch);
+                },
+                saveOtherPeriodsHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                    emit('patch:otherPeriods', patch);
                 },
             }),
         ],

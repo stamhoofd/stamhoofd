@@ -72,10 +72,10 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriod, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -93,6 +93,7 @@ const present = usePresent();
 const auth = useAuth();
 const splitViewController = useSplitViewController();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const patchOrganizationPeriods = usePatchOrganizationPeriods();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -286,6 +287,9 @@ async function editMe() {
             saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
                 patch.id = period.value.id;
                 await patchOrganizationPeriod(patch);
+            },
+            saveOtherPeriodsHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                await patchOrganizationPeriods(patch);
             },
         }),
     }).setDisplayStyle('popup'));
