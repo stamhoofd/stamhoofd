@@ -398,7 +398,7 @@ import UitpasSettingsView from './UitpasSettingsView.vue';
 import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
-import EditOrganizationRegistrationPeriodsView from './organization-registration-periods/EditOrganizationRegistrationPeriodsView.vue';
+import EditRegistrationPeriodsView from './organization-registration-periods/EditRegistrationPeriodsView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
 
 type ttt = FreeContributionSettingsView;
@@ -579,7 +579,7 @@ defineRoutes([
     {
         url: Routes.OrganizationRegistrationPeriods,
         present: 'popup',
-        component: EditOrganizationRegistrationPeriodsView as ComponentOptions,
+        component: EditRegistrationPeriodsView as ComponentOptions,
     },
 ]);
 
