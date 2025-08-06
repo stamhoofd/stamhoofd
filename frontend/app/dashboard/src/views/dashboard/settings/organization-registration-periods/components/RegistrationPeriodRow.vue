@@ -16,17 +16,15 @@
 </template>
 
 <script lang="ts" setup>
-import { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    organizationRegistrationPeriod: OrganizationRegistrationPeriod;
+    period: RegistrationPeriod;
     organization: Organization;
 }>();
 
-const period = computed(() => props.organizationRegistrationPeriod.period);
-
 const isCurrent = computed(() => {
-    return period.value.id === props.organization.period.period.id;
+    return props.period.id === props.organization.period.period.id;
 });
 </script>
