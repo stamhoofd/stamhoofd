@@ -6,8 +6,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="sortedPeriods.length && patchedOrganization.period.id !== sortedPeriods[0].id && (sortedPeriods[0].period.startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
-            <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].period.nameShort }}</h2>
+        <template v-if="sortedPeriods.length && patchedOrganization.period.period.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
+            <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</h2>
             <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
 
             <ul class="style-list">
@@ -21,7 +21,7 @@
             <p class="style-button-bar">
                 <button class="button primary" type="button" @click="setCurrent(sortedPeriods[0])">
                     <span class="icon flag" />
-                    <span>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].period.nameShort }}</span>
+                    <span>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</span>
                 </button>
             </p>
 
@@ -29,7 +29,7 @@
         </template>
 
         <STList>
-            <OrganizationRegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :organization-registration-period="period" :organization="patchedOrganization" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
+            <OrganizationRegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :organization="patchedOrganization" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
         </STList>
 
         <p>
@@ -43,13 +43,14 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, useRequiredOrganization } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
-import EditOrganizationRegistrationPeriodView from './EditOrganizationRegistrationPeriodView.vue';
-import OrganizationRegistrationPeriodRow from './components/OrganizationRegistrationPeriodRow.vue';
+import EditOrganizationRegistrationPeriodView from './EditRegistrationPeriodView.vue';
+import OrganizationRegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
 
 const errors = useErrors();
 const pop = usePop();
@@ -59,16 +60,15 @@ const context = useContext();
 const organization = useRequiredOrganization();
 const organizationManager = useOrganizationManager();
 
-const originalOrganizationPeriods = ref([]) as Ref<OrganizationRegistrationPeriod[]>;
+const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
+let newOrganizationPeriods: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod> = new PatchableArray();
+let existingOrganizationPeriods: OrganizationRegistrationPeriod[] = [];
 const loading = ref(true);
 const owner = useRequestOwner();
 
 loadData().catch(console.error);
 
-const { patched, patch, addArrayPatch: addOrganizationPeriodArrayPatch, hasChanges: hasChangesPeriods } = usePatchArray(originalOrganizationPeriods);
-
-// const {addArrayPatch: addPeriodArrayPatch} = usePatchArray(originalPeriods);
-let newPeriodsPatch: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
+const { patched, patch, addArrayPatch: addOrganizationPeriodArrayPatch, hasChanges: hasChangesPeriods } = usePatchArray(originalPeriods);
 
 const { patched: patchedOrganization, patch: organizationPatch, addPatch: addOrganizationPatch, hasChanges: hasChangesOrganization } = usePatch(organization);
 const hasChanges = computed(() => hasChangesPeriods.value || hasChangesOrganization.value);
@@ -76,54 +76,57 @@ const hasChanges = computed(() => hasChangesPeriods.value || hasChangesOrganizat
 const saving = ref(false);
 
 const sortedPeriods = computed(() => {
-    return patched.value.slice().sort((b, a) => a.period.startDate.getTime() - b.period.startDate.getTime());
+    return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
 });
 
 const title = computed(() => $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb'));
 
 async function addPeriod() {
-    const arr: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod> = new PatchableArray();
-    const organizationRegistrationPeriod = organization.value.period.clone();
-    organizationRegistrationPeriod.id = RegistrationPeriod.create({}).id;
-    organizationRegistrationPeriod.period.id = RegistrationPeriod.create({}).id;
+    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
+    const newOrganizationPeriod: OrganizationRegistrationPeriod = organization.value.period.clone();
+    const newPeriod: RegistrationPeriod = newOrganizationPeriod.period;
 
-    organizationRegistrationPeriod.period.startDate.setFullYear(organizationRegistrationPeriod.period.startDate.getFullYear() + 1);
-    organizationRegistrationPeriod.period.endDate.setFullYear(organizationRegistrationPeriod.period.endDate.getFullYear() + 1);
+    newOrganizationPeriod.id = RegistrationPeriod.create({}).id;
+    newPeriod.id = RegistrationPeriod.create({}).id;
 
-    arr.addPut(organizationRegistrationPeriod);
+    newPeriod.startDate.setFullYear(newPeriod.startDate.getFullYear() + 1);
+    newPeriod.endDate.setFullYear(newPeriod.endDate.getFullYear() + 1);
+
+    arr.addPut(newPeriod);
 
     await present({
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationRegistrationPeriodView, {
-                organizationRegistrationPeriod,
+                period: newPeriod,
                 isNew: true,
-                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    patch.id = organizationRegistrationPeriod.id;
+                saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
+                    patch.id = newPeriod.id;
                     arr.addPatch(patch);
                     addOrganizationPeriodArrayPatch(arr);
-                    newPeriodsPatch.addPut(organizationRegistrationPeriod.period);
+                    newOrganizationPeriods.addPut(newOrganizationPeriod);
+                    existingOrganizationPeriods.push(newOrganizationPeriod);
                 },
             }),
         ],
     });
 }
 
-async function editPeriod(organizationRegistrationPeriod: OrganizationRegistrationPeriod) {
+async function editPeriod(period: RegistrationPeriod) {
     await present({
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditOrganizationRegistrationPeriodView, {
-                organizationRegistrationPeriod,
+                period,
                 isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    const arr: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod> = new PatchableArray();
+                saveHandler: (patch: AutoEncoderPatchType<RegistrationPeriod>) => {
+                    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
                     arr.addPatch(patch);
                     addOrganizationPeriodArrayPatch(arr);
                 },
                 deleteHandler: () => {
-                    const arr: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod> = new PatchableArray();
-                    arr.addDelete(organizationRegistrationPeriod.id);
+                    const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
+                    arr.addDelete(period.id);
                     addOrganizationPeriodArrayPatch(arr);
                 },
             }),
@@ -131,12 +134,12 @@ async function editPeriod(organizationRegistrationPeriod: OrganizationRegistrati
     });
 }
 
-async function showContextMenu(event: MouseEvent, period: OrganizationRegistrationPeriod) {
+async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
                 name: $t(`5119aacc-24c1-43e6-b025-0efa7ea60ea3`),
-                disabled: patchedOrganization.value.period.id === period.id,
+                disabled: patchedOrganization.value.period.period.id === period.id,
                 action: () => {
                     setCurrent(period);
                     return true;
@@ -160,30 +163,27 @@ async function save() {
             return;
         }
 
-        if (newPeriodsPatch.getPuts().length > 0) {
-            // todo: what if period is added but adding the organization registration period fails?
+        if (hasChangesPeriods.value) {
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
-                body: newPeriodsPatch,
+                body: patch.value,
                 path: '/registration-periods',
                 decoder: new ArrayDecoder(RegistrationPeriod as Decoder<RegistrationPeriod>),
                 owner,
                 shouldRetry: false,
             });
-
-            // prevent adding the periods again
-            newPeriodsPatch = new PatchableArray();
         }
 
-        if (hasChangesPeriods.value) {
+        if (newOrganizationPeriods.getPuts().length > 0) {
             await context.value.authenticatedServer.request({
                 method: 'PATCH',
-                body: patch.value,
+                body: newOrganizationPeriods,
                 path: '/organization/registration-periods',
                 decoder: new ArrayDecoder(OrganizationRegistrationPeriod as Decoder<OrganizationRegistrationPeriod>),
                 owner,
                 shouldRetry: false,
             });
+            newOrganizationPeriods = new PatchableArray();
         }
 
         const changedPeriod = hasChangesOrganization.value;
@@ -203,8 +203,23 @@ async function save() {
     saving.value = false;
 }
 
-function setCurrent(period: OrganizationRegistrationPeriod) {
-    addOrganizationPatch({ period });
+function setCurrent(period: RegistrationPeriod) {
+    const organizationPeriod = existingOrganizationPeriods.find(op => op.period.id === period.id);
+
+    if (organizationPeriod) {
+        addOrganizationPatch({ period: organizationPeriod });
+        errors.errorBox = null;
+    }
+    else {
+        // todo: what todo in this case?
+        const error = new SimpleError({
+            code: 'not_found',
+            message: 'No OrganizationRegistrationPeriod found for RegistrationPeriod',
+            human: $t('Er kon niet worden overgeschakeld op dit werkjaar. Probeer het werkjaar te verwijderen en opnieuw te maken als er nog geen groepen zijn in dit werkjaar.'),
+            statusCode: 404,
+        });
+        errors.errorBox = new ErrorBox(error);
+    }
 }
 
 async function loadData() {
@@ -212,7 +227,8 @@ async function loadData() {
 
     try {
         const registrationPeriodList = (await organizationManager.value.loadPeriods(true, true, owner));
-        originalOrganizationPeriods.value = registrationPeriodList.organizationPeriods;
+        originalPeriods.value = registrationPeriodList.periods;
+        existingOrganizationPeriods = registrationPeriodList.organizationPeriods;
         loading.value = false;
     }
     catch (e) {
