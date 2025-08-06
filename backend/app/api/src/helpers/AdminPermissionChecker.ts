@@ -216,20 +216,28 @@ export class AdminPermissionChecker {
         return true;
     }
 
+    async canAccessGroupsInPeriod(periodId: string, organizationId: string) {
+        const organization = await this.getOrganization(organizationId);
+        if (periodId !== organization.periodId) {
+            if (STAMHOOFD.userMode === 'organization' || periodId !== this.platform.period.id) {
+                if (!await this.hasFullAccess(organization.id)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     async canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         // Check permissions aren't scoped to a specific organization, and they mismatch
         if (!this.checkScope(group.organizationId)) {
             // return false;
         }
-        const organization = await this.getOrganization(group.organizationId);
 
-        if (group.periodId !== organization.periodId) {
-            if (STAMHOOFD.userMode === 'organization' || group.periodId !== this.platform.period.id) {
-                if (!await this.hasFullAccess(group.organizationId)) {
-                    return false;
-                }
-            }
+        if (!await this.canAccessGroupsInPeriod(group.periodId, group.organizationId)) {
+            return false;
         }
+        const organization = await this.getOrganization(group.organizationId);
 
         if (group.deletedAt || group.status === GroupStatus.Archived) {
             return await this.canAccessArchivedGroups(group.organizationId);

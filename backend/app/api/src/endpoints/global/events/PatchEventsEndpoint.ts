@@ -38,7 +38,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!period) {
             throw new SimpleError({
                 code: 'invalid_period',
-                message: 'No period found for this start date',
+                message: 'No period found for this start date: ' + Formatter.dateIso(event.startDate),
                 human: Context.i18n.$t('5959a6a9-064a-413c-871f-c74a145ed569'),
                 field: 'startDate',
             });
@@ -50,6 +50,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (event.organizationId && groupOrganizationId !== event.organizationId) {
             // Silently ignore organizationId if it is invalid
             putGroup.organizationId = event.organizationId;
+        }
+
+        if (!await Context.auth.canAccessGroupsInPeriod(period.id, putGroup.organizationId)) {
+            throw Context.auth.error($t(`Je hebt geen toegangsrechten om inschrijvingen op te zetten voor activiteiten in deze periode (geen toegang tot werkjaar)`));
         }
 
         if (!group) {
@@ -254,7 +258,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     patch.group.type = GroupType.EventRegistration;
 
                     const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
-                    group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period);
+                    group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period, { isPatchingEvent: true });
                 }
                 else {
                     if (event.groupId === patch.group.id) {
@@ -276,10 +280,17 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 if (patch.startDate || patch.endDate) {
                     // Correct period id if needed
                     const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
-                    if (event.groupId) {
+                    if (event.groupId && period) {
                         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                             if (event.groupId) {
-                                group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: event.groupId }), period);
+                                group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
+                                    GroupStruct.patch({
+                                        id: event.groupId,
+                                        periodId: period.id,
+                                    }),
+                                    period,
+                                    { isPatchingEvent: true },
+                                );
                             }
                         });
                     }

@@ -155,7 +155,7 @@ export class PeriodHelper {
         await QueueHandler.schedule(tag, async () => {
             await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                 for await (const group of Group.select().where('periodId', period.id).all()) {
-                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id }), period);
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id, periodId: period.id }), period);
                 }
             });
         });
