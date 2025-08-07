@@ -107,7 +107,7 @@ const moveToOtherPeriod = (period: OrganizationRegistrationPeriod, category: Gro
         settings: otherSettings,
     });
 
-    otherPeriodPatch.groups.addPatch(groupPatch);
+    periodPatch.groups.addPatch(groupPatch);
 
     emit('patch:period', periodPatch);
     emit('patch:otherPeriod', otherPeriodPatch);
@@ -169,7 +169,6 @@ function showContextMenu(event: MouseEvent) {
                         }),
                     ),
                     [
-                        // todo: maybe only for admins?
                         new ContextMenuItem({
                             name: $t('Ander werkjaar'),
                             childMenu: new ContextMenu([
