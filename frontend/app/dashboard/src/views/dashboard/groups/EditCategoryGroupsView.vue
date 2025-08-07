@@ -1,15 +1,15 @@
 <template>
-    <SaveView :loading="saving" :title="title" :disabled="!hasPeriodChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot && enableActivities ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :title="title" :disabled="!hasChanges" @save="save" v-on="canDeleteOrRename && !isNew && !isRoot && enableActivities ? {delete: deleteMe} : {}">
         <h1>
             {{ title }}
 
             <span class="title-suffix">
-                {{ props.period.period.nameShort }}
+                {{ patchedPeriod.period.nameShort }}
             </span>
         </h1>
 
         <p v-if="isRoot && enableActivities">
-            {{ $t('5ee6f9ee-1cae-4980-a7ee-c99804e36c10') }} {{ period.period.name }}{{ $t('b2fce682-83e3-4791-9ff2-cefd2652f2ee') }}
+            {{ $t('5ee6f9ee-1cae-4980-a7ee-c99804e36c10') }} {{ patchedPeriod.period.name }}{{ $t('b2fce682-83e3-4791-9ff2-cefd2652f2ee') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -44,7 +44,7 @@
             <hr><h2>{{ $t('cb83317b-713b-400c-a753-dc944ddf0351') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
-                    <GroupCategoryRow :category="category" :period="patchedPeriod" :organization="organization" @patch:period="addPatch" @patch:other-periods="addPeriodsArrayPatch" />
+                    <GroupCategoryRow :category="category" :periods="patchedPeriods" :period-id="periodId" :organization="organization" @patch:periods="addPeriodsArrayPatch" />
                 </template>
             </STList>
         </template>
@@ -87,13 +87,11 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, useAuth, useDraggableArrayIds, useErrors, usePatch } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, useAuth, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
 import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
-import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { Sorter } from '@stamhoofd/utility';
 import { computed, getCurrentInstance, Ref, ref } from 'vue';
 import GroupCategoryRow from './GroupCategoryRow.vue';
 import GroupRow from './GroupRow.vue';
@@ -107,12 +105,11 @@ const props = defineProps<{
     organization: Organization;
     category: GroupCategory;
     isNew: boolean;
-    period: OrganizationRegistrationPeriod;
-    saveHandler: ((patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => Promise<void>);
-    saveOtherPeriodsHandler: (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void>;
+    periodId: string;
+    periods: OrganizationRegistrationPeriod[];
+    saveHandler: ((patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => Promise<void>);
 }>();
 
-const { patched: patchedPeriod, hasChanges: hasPeriodChanges, patch, addPatch } = usePatch(props.period);
 const enableActivities = computed(() => props.organization.meta.modules.useActivities);
 const saving = ref(false);
 const pop = usePop();
@@ -121,34 +118,15 @@ const present = usePresent();
 const auth = useAuth();
 const isPlatformAdmin = auth.hasPlatformFullAccess();
 
-const organizationManager = useOrganizationManager();
-const owner = useRequestOwner();
-
-// Load groups
-organizationManager.value.loadPeriods(false, false, owner).catch(console.error);
-
-const periods = computed(() => {
-    const periods = organizationManager.value.organization.periods?.organizationPeriods;
-    if (periods === undefined) {
-        return [organizationManager.value.organization.period];
-    }
-
-    const periodsCopy = [...periods];
-
-    periodsCopy.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));
-
-    return periodsCopy;
-});
-
 const periodsPatch = ref(new PatchableArray()) as unknown as Ref<PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>>;
 
-const patchedPeriods = computed(() => periodsPatch.value.applyTo(periods.value) as OrganizationRegistrationPeriod[]);
+const patchedPeriods = computed(() => periodsPatch.value.applyTo(props.periods) as OrganizationRegistrationPeriod[]);
+const patchedPeriod = computed(() => patchedPeriods.value.find(p => p.id === props.periodId)!);
 
-const hasOtherPeriodChanges = computed(() => periodsPatch.value.changes.length > 0);
-const hasChanges = computed(() => hasPeriodChanges.value || hasOtherPeriodChanges.value);
+const hasChanges = computed(() => periodsPatch.value.changes.length > 0);
 
-function addPeriodsPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<OrganizationRegistrationPeriod>>) {
-    periodsPatch.value.addPatch(OrganizationRegistrationPeriod.patch({ ...newPatch }));
+function addPeriodsPatch(newPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
+    periodsPatch.value.addPatch(newPatch);
 }
 
 function addPeriodsArrayPatch(newPatch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) {
@@ -250,6 +228,13 @@ const draggableGroups = useDraggableArrayIds(() => {
     }));
 });
 
+function addPatch(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
+    addPeriodsPatch(OrganizationRegistrationPeriod.patch({
+        ...patch,
+        id: props.periodId,
+    }));
+}
+
 function addCategoryPatch(patch: AutoEncoderPatchType<GroupCategory>) {
     const settings = OrganizationRegistrationPeriodSettings.patch({});
     patch.id = props.category.id;
@@ -268,11 +253,7 @@ async function save() {
     saving.value = true;
 
     try {
-        if (hasOtherPeriodChanges.value) {
-            await props.saveOtherPeriodsHandler(periodsPatch.value);
-        }
-
-        await props.saveHandler(patch.value);
+        await props.saveHandler(periodsPatch.value);
 
         await pop({ force: true });
     }
@@ -300,6 +281,7 @@ async function createGroup() {
     settings.categories.addPatch(me);
 
     const basePatch = OrganizationRegistrationPeriod.patch({
+        id: props.periodId,
         settings,
     });
 
@@ -344,12 +326,10 @@ async function createCategory() {
             new ComponentWithProperties(EditCategoryGroupsView, {
                 category: category,
                 organization: props.organization,
-                period: patchedPeriod.value.patch(p),
+                periods: props.periods,
+                periodId: props.periodId,
                 isNew: true,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(p.patch(patch));
-                },
-                saveOtherPeriodsHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
                     addPeriodsArrayPatch(patch);
                 },
             }),
@@ -361,7 +341,7 @@ async function createCategory() {
 async function openGroupTrash() {
     await present({
         components: [
-            new ComponentWithProperties(GroupTrashView, { period: props.period }).setDisplayStyle('popup'),
+            new ComponentWithProperties(GroupTrashView, { period: patchedPeriod.value }).setDisplayStyle('popup'),
         ],
         modalDisplayStyle: 'popup',
     });
@@ -374,9 +354,14 @@ async function deleteMe() {
     const settings = OrganizationRegistrationPeriodSettings.patch({});
     settings.categories.addDelete(props.category.id);
     const p = OrganizationRegistrationPeriod.patch({
+        id: props.periodId,
         settings,
     });
-    await props.saveHandler(p);
+
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
+    arr.addPatch(p);
+
+    await props.saveHandler(arr);
     await pop({ force: true });
 }
 
