@@ -165,6 +165,7 @@ const filterDefinitionIDSQLFilterIdMap = new Map([
     ['member_gender', 'gender'],
     ['member_birthDay', 'birthDay'],
     ['gender', 'gender'],
+    ['order_products', 'id'],
 ]);
 
 function getSQLFilterId(filter: Filter & { definitionId?: string }): string {
@@ -425,7 +426,7 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
         }
     }
 
-    const supported = new Set(['member_gender', 'gender', 'member_missing_data']);
+    const supported = new Set(['member_gender', 'gender', 'member_missing_data', 'order_products']);
 
     if (!supported.has(filter.definitionId)) {
         throw new Error(`Choices filter not supported: ${filter.definitionId}`);
@@ -466,6 +467,67 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                 missingData: {
                     $elemMatch: {
                         $in: [choiceId],
+                    },
+                },
+            };
+        });
+
+        switch (filter.mode) {
+            case ChoicesFilterMode.And: {
+                return {
+                    $and: filters,
+                };
+            }
+            case ChoicesFilterMode.Nand: {
+                return {
+                    $not: {
+                        $and: filters,
+                    },
+                };
+            }
+        }
+    }
+
+    if (filter.definitionId === 'order_products') {
+        if (filter.mode === ChoicesFilterMode.Or) {
+            return {
+                items: {
+                    $elemMatch: {
+                        product: {
+                            id: {
+                                $in: filter.choiceIds,
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        if (filter.mode === ChoicesFilterMode.Nor) {
+            return {
+                $not: {
+                    items: {
+                        $elemMatch: {
+                            product: {
+                                id: {
+                                    $in: filter.choiceIds,
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        const filters: StamhoofdFilter[] = filter.choiceIds.map((choiceId) => {
+            return {
+                items: {
+                    $elemMatch: {
+                        product: {
+                            id: {
+                                $in: [choiceId],
+                            },
+                        },
                     },
                 },
             };
