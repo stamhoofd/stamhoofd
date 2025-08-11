@@ -1,4 +1,4 @@
-import { Order, Organization, Payment } from "@stamhoofd/models";
+import { Organization, Payment } from "@stamhoofd/models";
 import { calculateVATPercentage, PaymentProvider, STPackageType } from "@stamhoofd/structures";
 
 export class ServiceFeeHelper {
@@ -40,15 +40,6 @@ export class ServiceFeeHelper {
 
             if (fees && (fees.fixed > 0 || fees.percentage > 0)) {
                 serviceFee = itemPrices.reduce((total, price) => {
-                    if (type === 'tickets') {
-                        return total + calculateFee(
-                            price, 
-                            fees.minimumTickets, 
-                            fees.maximumTickets,
-                            fees.fixed, 
-                            fees.percentageTickets
-                        );
-                    }
                     return total + calculateFee(
                         price, 
                         fees.minimum, 

@@ -194,7 +194,42 @@
                     Meer info over alle prijzen en een prijscalculator kan je terugvinden op <a :href="'https://'+$t('shared.domains.marketing')+'/prijzen'" class="inline-link" target="_blank">onze website</a>.
                 </p>
 
-                <STList>
+                <STList v-if="renewPackageDetails.meta.pricingType === 'PerMember'">
+                    <STListItem>
+                        Huidig aantal leden
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.paidAmount }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="renewPackageDetails.meta.unitPrice">
+                        Prijs
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.unitPrice | price }} / jaar / lid
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="renewPackageDetails.meta.minimumAmount">
+                        Minimum bedrag per jaar
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.minimumAmount * renewPackageDetails.meta.unitPrice | price }} 
+                            ({{ renewPackageDetails.meta.minimumAmount }} leden)
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Vanaf
+
+                        <template slot="right">
+                            {{ renewPackageDetails.meta.startDate | date }}
+                        </template>
+                    </STListItem>
+                </STList>
+
+                <STList v-else>
                     <STListItem v-if="renewPackageDetails.meta.startDate && renewPackageDetails.meta.startDate.getTime() > Date.now() + 10000">
                         Vanaf
 
@@ -212,9 +247,7 @@
                     </STListItem>
 
                     <STListItem v-if="renewPackageDetails.meta.serviceFeePercentage && renewPackageDetails.meta.serviceFeeFixed" class="right-description">
-                        Servicekosten<template v-if="renewPackageDetails.meta.serviceFeePercentageTickets">
-                            webshops zonder tickets
-                        </template>
+                        Servicekosten
 
                         <template slot="right">
                             {{ renewPackageDetails.meta.serviceFeePercentage | percentage }} +
@@ -223,9 +256,7 @@
                     </STListItem>
 
                     <STListItem v-else-if="renewPackageDetails.meta.serviceFeePercentage" class="right-description">
-                        Servicekosten<template v-if="renewPackageDetails.meta.serviceFeePercentageTickets">
-                            per stuk (=geen ticket)
-                        </template>
+                        Servicekosten per stuk/ticket
 
                         <template slot="right">
                             {{ renewPackageDetails.meta.serviceFeePercentage | percentage }}
@@ -239,26 +270,10 @@
                     </STListItem>
 
                     <STListItem v-else-if="renewPackageDetails.meta.serviceFeeFixed">
-                        Servicekosten<template v-if="renewPackageDetails.meta.serviceFeePercentageTickets">
-                            per stuk (=geen ticket)
-                        </template>
+                        Servicekosten per stuk/ticket
 
                         <template slot="right">
                             {{ renewPackageDetails.meta.serviceFeeFixed | price }}
-                        </template>
-                    </STListItem>
-
-                    <STListItem v-if="renewPackageDetails.meta.serviceFeePercentageTickets" class="right-description">
-                        Servicekosten per ticket
-
-                        <template slot="right">
-                            {{ renewPackageDetails.meta.serviceFeePercentageTickets | percentage }}
-                            <p v-if="renewPackageDetails.meta.serviceFeeMinimumTickets" class="style-description-small">
-                                min. {{ renewPackageDetails.meta.serviceFeeMinimumTickets | price }}
-                            </p>
-                            <p v-if="renewPackageDetails.meta.serviceFeeMaximumTickets" class="style-description-small">
-                                max. {{ renewPackageDetails.meta.serviceFeeMaximumTickets | price }}
-                            </p>
                         </template>
                     </STListItem>
                 </STList>

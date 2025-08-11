@@ -137,73 +137,72 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     if (totalPrice == 0) {
                         // Force unknown payment method
                         order.data.paymentMethod = PaymentMethod.Unknown
-                    }
-
-                    const payment = new Payment()
-                    payment.organizationId = organization.id
-                    payment.method = struct.data.paymentMethod
-                    payment.status = PaymentStatus.Created
-                    payment.price = totalPrice
-                    payment.paidAt = null
-
-                    if (totalPrice == 0) {
-                        // Force unknown payment method
-                        payment.status = PaymentStatus.Succeeded
-                        payment.paidAt = new Date()
-                    }
-
-                    // Determine the payment provider (always null because no online payments here)
-                    payment.provider = null
-                    ServiceFeeHelper.setServiceFee(
-                        payment, 
-                        organization, 
-                        webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets', 
-                        webshop.meta.ticketType === WebshopTicketType.SingleTicket ? [order.data.totalPrice] : order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice))
-                    );
-
-                    await payment.save()
-
-                    order.paymentId = payment.id
-                    order.setRelation(Order.payment, payment)
-
-                    // Create balance item
-                    const balanceItem = new BalanceItem();
-                    balanceItem.orderId = order.id;
-                    balanceItem.price = totalPrice
-                    balanceItem.description = webshop.meta.name
-                    balanceItem.pricePaid = 0
-                    balanceItem.organizationId = organization.id;
-                    balanceItem.status = BalanceItemStatus.Pending;
-                    await balanceItem.save();
-
-                    // Create one balance item payment to pay it in one payment
-                    const balanceItemPayment = new BalanceItemPayment()
-                    balanceItemPayment.balanceItemId = balanceItem.id;
-                    balanceItemPayment.paymentId = payment.id;
-                    balanceItemPayment.organizationId = organization.id;
-                    balanceItemPayment.price = balanceItem.price;
-                    await balanceItemPayment.save();
-
-                    if (totalPrice === 0) {
+                    
                         // Mark this order as paid
-                        await order.markPaid(payment, organization, webshop);
-                        await payment.save()
-                        await order.save()
-                    } else if (payment.method == PaymentMethod.Transfer) {
-                        await order.markValid(payment, [])
-                        await payment.save()
-                        await order.save()
-                    } else if (payment.method == PaymentMethod.PointOfSale) {
-                        // Not really paid, but needed to create the tickets if needed
-                        await order.markPaid(payment, organization, webshop)
-                        await payment.save()
+                        await order.markPaid(null, organization, webshop)
                         await order.save()
                     } else {
-                        throw new Error("Unsupported payment method")
-                    }
 
-                    balanceItem.description = order.generateBalanceDescription(webshop)
-                    await balanceItem.save()
+                        const payment = new Payment()
+                        payment.organizationId = organization.id
+                        payment.method = struct.data.paymentMethod
+                        payment.status = PaymentStatus.Created
+                        payment.price = totalPrice
+                        payment.paidAt = null
+
+                        // Determine the payment provider (always null because no online payments here)
+                        payment.provider = null
+                        ServiceFeeHelper.setServiceFee(
+                            payment, 
+                            organization, 
+                            webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets', 
+                            order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice))
+                        );
+
+                        await payment.save()
+
+                        order.paymentId = payment.id
+                        order.setRelation(Order.payment, payment)
+
+                        // Create balance item
+                        const balanceItem = new BalanceItem();
+                        balanceItem.orderId = order.id;
+                        balanceItem.price = totalPrice
+                        balanceItem.description = webshop.meta.name
+                        balanceItem.pricePaid = 0
+                        balanceItem.organizationId = organization.id;
+                        balanceItem.status = BalanceItemStatus.Pending;
+                        await balanceItem.save();
+
+                        // Create one balance item payment to pay it in one payment
+                        const balanceItemPayment = new BalanceItemPayment()
+                        balanceItemPayment.balanceItemId = balanceItem.id;
+                        balanceItemPayment.paymentId = payment.id;
+                        balanceItemPayment.organizationId = organization.id;
+                        balanceItemPayment.price = balanceItem.price;
+                        await balanceItemPayment.save();
+
+                        if (totalPrice === 0) {
+                            // Mark this order as paid
+                            await order.markPaid(payment, organization, webshop);
+                            await payment.save()
+                            await order.save()
+                        } else if (payment.method == PaymentMethod.Transfer) {
+                            await order.markValid(payment, [])
+                            await payment.save()
+                            await order.save()
+                        } else if (payment.method == PaymentMethod.PointOfSale) {
+                            // Not really paid, but needed to create the tickets if needed
+                            await order.markPaid(payment, organization, webshop)
+                            await payment.save()
+                            await order.save()
+                        } else {
+                            throw new Error("Unsupported payment method")
+                        }
+
+                        balanceItem.description = order.generateBalanceDescription(webshop)
+                        await balanceItem.save()
+                    }
                 } catch (e) {
                     await order.deleteOrderBecauseOfCreationError()
                     throw e;

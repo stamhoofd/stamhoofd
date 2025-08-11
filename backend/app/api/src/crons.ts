@@ -573,7 +573,7 @@ async function chargeServiceFees() {
         }]
     });
 
-    // Pending payments with method = Transfer or PointOfSale
+    // Pending payments older than 14 days with method = Transfer or PointOfSale
     const pendingPayments = await Payment.where({
         status: {
             sign: "IN",
@@ -590,7 +590,7 @@ async function chargeServiceFees() {
         serviceFeeManualCharged: 0,
         createdAt: {
             sign: "<",
-            value: Formatter.dateIso(new Date())
+            value: Formatter.dateIso(new Date(Date.now() - 1000 * 60 * 60 * 24 * 14))
         }
     }, {
         limit: 200,
@@ -973,7 +973,7 @@ let lastBillingCheck: Date | null = new Date()
 let lastBillingId = ""
 async function checkBilling() {
     if (STAMHOOFD.environment === "development") {
-        return
+        //return
     }
 
     console.log("[BILLING] Checking billing...")

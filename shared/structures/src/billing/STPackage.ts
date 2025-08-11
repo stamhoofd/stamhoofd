@@ -87,12 +87,6 @@ export class STPackageMeta extends AutoEncoder {
     serviceFeePercentage = 0
 
     /**
-     * Service fees for tickets, percentage. 100_00 = 100%, 1 = 0.01%
-     */
-    @field({ decoder: IntegerDecoder, optional: true })
-    serviceFeePercentageTickets = 0
-
-    /**
      * Fixed service fee per payment, in cents
      */
     @field({ decoder: IntegerDecoder, optional: true })
@@ -105,22 +99,10 @@ export class STPackageMeta extends AutoEncoder {
     serviceFeeMinimum: number | null = null
 
     /**
-     * Minimum per ticket, if tickets are used
-     */
-    @field({ decoder: IntegerDecoder, optional: true, nullable: true })
-    serviceFeeMinimumTickets: number | null = null
-
-    /**
      * Fixed service fee per payment, in cents
      */
     @field({ decoder: IntegerDecoder, optional: true, nullable: true })
     serviceFeeMaximum: number | null = null
-
-    /**
-     * Fixed service fee per payment, in cents
-     */
-    @field({ decoder: IntegerDecoder, optional: true, nullable: true })
-    serviceFeeMaximumTickets: number | null = null
 
     /// Contains the (paid) invoiced amount
     @field({ decoder: IntegerDecoder })
@@ -233,15 +215,6 @@ export class STPackageStatusServiceFee extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     percentage = 0
-
-    @field({ decoder: IntegerDecoder, optional: true  })
-    percentageTickets = 0
-
-    @field({ decoder: IntegerDecoder, nullable: true, optional: true })
-    minimumTickets: number | null = null
-
-    @field({ decoder: IntegerDecoder, nullable: true, optional: true  })
-    maximumTickets: number | null = null
 
     @field({ decoder: IntegerDecoder, nullable: true, optional: true  })
     minimum: number | null = null

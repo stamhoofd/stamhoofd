@@ -192,12 +192,8 @@ export class STPackage extends Model {
         if (pack.meta.type === STPackageType.Webshops) {
             pack.meta.serviceFeeFixed = 0;
             pack.meta.serviceFeePercentage = 2_00;
-            pack.meta.serviceFeePercentageTickets = 3_00;
-            
-            pack.meta.serviceFeeMinimumTickets = 15;
             pack.meta.serviceFeeMinimum = 0;
-            pack.meta.serviceFeeMaximum = 95;
-            pack.meta.serviceFeeMaximumTickets = 1_95;
+            pack.meta.serviceFeeMaximum = 20;
 
             pack.meta.unitPrice = 0;
             pack.meta.pricingType = STPricingType.Fixed;
@@ -205,14 +201,12 @@ export class STPackage extends Model {
             pack.removeAt = null;
         } else if (pack.meta.type === STPackageType.Members) {
             pack.meta.serviceFeeFixed = 0;
-            pack.meta.serviceFeePercentage = 1_00;
+            pack.meta.serviceFeePercentage = 0;
             pack.meta.serviceFeeMinimum = 0;
-            pack.meta.serviceFeeMaximum = 95;
+            pack.meta.serviceFeeMaximum = 0;
 
-            pack.meta.unitPrice = 0;
-            pack.meta.pricingType = STPricingType.Fixed;
-            pack.validUntil = null;
-            pack.removeAt = null;
+            pack.meta.unitPrice = 100;
+            pack.meta.pricingType = STPricingType.PerMember;
         }
 
         return pack
@@ -230,11 +224,8 @@ export class STPackage extends Model {
                 STPackageStatusServiceFee.create({
                     fixed: this.meta.serviceFeeFixed,
                     percentage: this.meta.serviceFeePercentage,
-                    percentageTickets: this.meta.serviceFeePercentageTickets,
                     minimum: this.meta.serviceFeeMinimum,
-                    minimumTickets: this.meta.serviceFeeMinimumTickets,
                     maximum: this.meta.serviceFeeMaximum,
-                    maximumTickets: this.meta.serviceFeeMaximumTickets,
                     startDate: this.meta.startDate,
                     endDate: this.validUntil && this.removeAt ? 
                         new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime())) : ( this.validUntil ?? this.removeAt)

@@ -172,20 +172,24 @@ export class STPackageBundleHelper {
     static getCurrentPackage(bundle: STPackageBundle, date: Date): STPackage {
         switch (bundle) {
             case STPackageBundle.Members: {
+                // 1 year valid
+                const validUntil = new Date(date)
+                validUntil.setFullYear(validUntil.getFullYear() + 1)
+
+                // Remove (= not renewable) if not renewed after 1 month
+                const removeAt = new Date(validUntil)
+                removeAt.setMonth(removeAt.getMonth() + 1)
+
                 return STPackage.create({
-                    validUntil: null,
-                    removeAt: null,
+                    validUntil,
+                    removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.Members,
-                        unitPrice: 0,
+                        unitPrice: 100,
                         minimumAmount: 0,
-                        allowRenew: false,
-                        pricingType: STPricingType.Fixed,
-                        serviceFeeFixed: 0,
-                        serviceFeePercentage: 1_00,
-                        serviceFeeMaximum: 95,
+                        allowRenew: true,
+                        pricingType: STPricingType.PerMember,
                         startDate: new Date(date),
-                        canDeactivate: true
                     })
                 })
             }
@@ -202,10 +206,7 @@ export class STPackageBundleHelper {
                         pricingType: STPricingType.Fixed,
                         serviceFeeFixed: 0,
                         serviceFeePercentage: 2_00,
-                        serviceFeePercentageTickets: 3_00,
-                        serviceFeeMinimumTickets: 15,
-                        serviceFeeMaximum: 95,
-                        serviceFeeMaximumTickets: 1_95,
+                        serviceFeeMaximum: 20,
                         startDate: new Date(date),
                         canDeactivate: true
                     })
