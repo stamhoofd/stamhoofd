@@ -54,6 +54,7 @@ export function createSQLRelationFilterCompiler(baseSelect: InstanceType<typeof 
             return new SQLWhereExists(q)
         }
 
+        console.error('Unknown $elemMatch filter', f);
         throw new Error('Invalid filter')
     }
 }
@@ -214,6 +215,7 @@ export function createSQLExpressionFilterCompiler(sqlExpression: SQLExpression, 
             );
         }
 
+        console.error('Unknown filter', f);
         throw new Error('Invalid filter')
     }
 }
