@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 function getParentCategory(group: Group, period: OrganizationRegistrationPeriod) {
@@ -18,11 +18,31 @@ async function migratePrices() {
         const allBundleDiscounts: BundleDiscount[] = [];
 
         for await (const group of Group.select().where('periodId', period.periodId).andWhere('organizationId', period.organizationId).all()) {
+            // if already migrated
             if (group.settings.prices.length > 0) {
                 if (group.settings.oldPrices.length > 0) {
                     group.settings.oldPrices = [];
                     await group.save();
                 }
+                continue;
+            }
+
+            // if archived
+            if (group.status === GroupStatus.Archived || group.deletedAt !== null) {
+                group.settings.oldPrices = [];
+                group.settings.prices = [
+                    GroupPrice.create({
+                        name: new TranslatedString('Standaard tarief'),
+                        startDate: null,
+                        endDate: null,
+                        price: ReduceablePrice.create({
+                            price: 0,
+                            reducedPrice: null,
+                        }),
+                    }),
+                ];
+
+                await group.save();
                 continue;
             }
 
@@ -151,7 +171,7 @@ function convertOldGroupPricesHelper(group: Group, parentCategoryId: string, par
     }
 
     const baseNameText = countWholeFamily ? 'Korting voor extra gezinslid' : 'Korting voor meerdere inschrijvingen';
-    const nameText = oldPrices.onlySameGroup ? `${group.settings.name.toString()} - ${baseNameText}` : `${parentCategoryName} - ${baseNameText}`;
+    const nameText = oldPrices.onlySameGroup ? baseNameText : `${parentCategoryName} - ${baseNameText}`;
 
     const bundleDiscount = BundleDiscount.create({
         name: new TranslatedString(nameText),
@@ -160,43 +180,42 @@ function convertOldGroupPricesHelper(group: Group, parentCategoryId: string, par
         countPerGroup,
     });
 
-    if (oldPrices.onlySameGroup === false) {
-        const categoryDiscount = findCategoryDiscount(bundleDiscount, bundleDiscountsFromCategory);
+    const categoryDiscount = findCategoryDiscount(bundleDiscount, bundleDiscountsFromCategory);
 
-        if (categoryDiscount) {
-            groupPrice.bundleDiscounts = new Map([
-                [
-                    categoryDiscount.id,
-                    BundleDiscountGroupPriceSettings.create({
-                        name: categoryDiscount.name,
-                        // set custom discounts if discounts are different
-                        customDiscounts: areDiscountsEqual(categoryDiscount.discounts, discounts) ? undefined : discounts,
-                    }),
-                ],
-            ]);
+    if (categoryDiscount) {
+        groupPrice.bundleDiscounts = new Map([
+            [
+                categoryDiscount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: categoryDiscount.name,
+                    // set custom discounts if discounts are different
+                    customDiscounts: areDiscountsEqual(categoryDiscount.discounts, discounts) ? undefined : discounts,
+                }),
+            ],
+        ]);
 
-            bundleDiscountsFromCategory.forEach((d) => {
-                if (groupPrice.bundleDiscounts.has(d.id)) {
-                    return;
-                }
-
-                groupPrice.bundleDiscounts.set(d.id, BundleDiscountGroupPriceSettings.create({
-                    name: d.name,
-                }));
-            });
-
-            // bundle discounts exists already
-            return { groupPrice, bundleDiscount: null };
-        }
-        else {
-            if (bundleMap.has(parentCategoryId)) {
-                const existing = bundleMap.get(parentCategoryId)!;
-                existing.push(bundleDiscount);
+        bundleDiscountsFromCategory.forEach((d) => {
+            if (groupPrice.bundleDiscounts.has(d.id)) {
+                return;
             }
-            else {
-                bundleMap.set(parentCategoryId, [bundleDiscount]);
-            }
-        }
+
+            groupPrice.bundleDiscounts.set(d.id, BundleDiscountGroupPriceSettings.create({
+                name: d.name,
+            }));
+        });
+
+        // bundle discounts exists already
+        return { groupPrice, bundleDiscount: null };
+    }
+
+    const key = oldPrices.onlySameGroup ? parentCategoryId : '';
+
+    if (bundleMap.has(key)) {
+        const existing = bundleMap.get(key)!;
+        existing.push(bundleDiscount);
+    }
+    else {
+        bundleMap.set(key, [bundleDiscount]);
     }
 
     groupPrice.bundleDiscounts = new Map([
@@ -222,11 +241,7 @@ function convertOldGroupPricesHelper(group: Group, parentCategoryId: string, par
 }
 
 function findCategoryDiscount(discount: BundleDiscount, bundleDiscounts: BundleDiscount[]): BundleDiscount | null {
-    if (discount.countWholeFamily) {
-        return bundleDiscounts.find(d => d.countPerGroup === false && d.countWholeFamily === true) ?? null;
-    }
-
-    return bundleDiscounts.find(d => d.countWholeFamily === discount.countWholeFamily) ?? null;
+    return bundleDiscounts.find(d => d.countPerGroup === discount.countPerGroup && d.countWholeFamily === discount.countWholeFamily) ?? null;
 }
 
 function areDiscountsEqual(a: GroupPriceDiscount[], b: GroupPriceDiscount[]) {
