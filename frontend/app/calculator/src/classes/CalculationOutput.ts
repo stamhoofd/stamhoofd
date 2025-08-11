@@ -153,26 +153,51 @@ export class CalculationOutput {
         }
 
         if (input.module === ModuleType.Members) {
+            if (input.products.length > 1) {
+                return new CalculationGroup({
+                    title: 'Totale kost per inschrijving',
+                    description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
+                    lines: [
+                        {
+                            title: 'Vaste kosten per inschrijving',
+                            description: '',
+                            totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
+                        },
+
+                        {
+                            title: 'Servicekosten per inschrijving',
+                            description: 'Kost voor het gebruik van Stamhoofd',
+                            totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
+                        },
+
+                        {
+                            title: 'Gemiddelde transactiekost per inschrijving',
+                            description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
+                            totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
+                        },
+                    ],
+                });
+            }
             return new CalculationGroup({
-                title: 'Totale kost per inschrijving',
+                title: 'Totale kost per lid, per jaar',
                 description: input.withVAT ? 'incl. 21% BTW' : 'excl. BTW',
                 lines: [
                     {
                         title: 'Vaste kosten per inschrijving',
                         description: '',
-                        totalPrice: Math.round(this.fixedFees.totalPrice / input.amount),
+                        totalPrice: Math.round(this.fixedFees.totalPrice / input.persons),
                     },
 
                     {
-                        title: 'Servicekosten per inschrijving',
+                        title: 'Servicekosten per lid, per jaar',
                         description: 'Kost voor het gebruik van Stamhoofd',
-                        totalPrice: Math.round(this.serviceFees.totalPrice / input.amount),
+                        totalPrice: Math.round(this.serviceFees.totalPrice / input.persons),
                     },
 
                     {
-                        title: 'Gemiddelde transactiekost',
+                        title: 'Gemiddelde transactiekost per inschrijving',
                         description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
-                        totalPrice: Math.round(this.transactionFees.totalPrice / input.amount),
+                        totalPrice: Math.round(this.transactionFees.totalPrice / input.persons),
                     },
                 ],
             });

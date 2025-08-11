@@ -27,7 +27,7 @@
                 <div v-for="(product, index) of products" :key="index" class="container">
                     <div class="split-inputs">
                         <div>
-                            <STInputBox :title="module === ModuleType.Members ? 'Wat is jouw prijs per inschrijving?' : (module === ModuleType.Webshops ? 'Wat is jouw artikelprijs?' : 'Wat is jouw ticketprijs?')" error-fields="unitPrice">
+                            <STInputBox :title="module === ModuleType.Members ? (products.length > 1 ? ('Inschrijvingsgroep/activiteit '+(index+1)) : 'Wat is jouw prijs per inschrijving?') : (module === ModuleType.Webshops ? (products.length > 1 ? ('Stukprijs '+(index+1)) : 'Wat is jouw stukprijs?') : (products.length > 1 ? ('Ticket '+(index+1)) : 'Wat is jouw ticketprijs?'))" error-fields="unitPrice">
                                 <PriceInput v-model="product.unitPrice" placeholder="bv. €10" />
                             </STInputBox>
                         </div>
@@ -38,18 +38,19 @@
 
                                 <template #right>
                                     <button v-if="products.length > 1" v-tooltip="module === ModuleType.Members ? 'Verwijderen' : 'Dit ticket verwijderen'" type="button" class="button icon small trash" @click="products.splice(index, 1)" />
-                                    <button v-if="false && index === products.length - 1" v-tooltip="module === ModuleType.Members ? 'Nog een activiteit, leeftijdsgroep of onderverdeling toevoegen' : 'Nog een ticket toevoegen'" type="button" class="button icon small add" @click="products.push(new CalculationProduct(product))" />
+                                    <button v-if="index === products.length - 1" v-tooltip="module === ModuleType.Members ? 'Nog een activiteit, leeftijdsgroep of onderverdeling toevoegen' : 'Nog een ticket toevoegen'" type="button" class="button icon small add" @click="products.push(new CalculationProduct(product))" />
                                 </template>
                             </STInputBox>
                         </div>
                     </div>
                 </div>
 
-                <div v-if="module === ModuleType.Members && (products.length > 1 || (persons !== null && persons !== suggestedPersons))">
-                    <STInputBox title="Uniek aantal leden" error-fields="persons">
-                        <NumberInput v-model="persons" suffix="leden" :placeholder="Formatter.integer(suggestedPersons) + ' leden'" :required="false" :min="minimumPersons" :max="maximumPersons" />
-                    </STInputBox>
-                </div>
+                <STInputBox v-if="module === ModuleType.Members && products.length > 1" title="Uniek aantal leden" error-fields="persons">
+                    <NumberInput v-model="persons" :min="minimumPersons" :max="maximumPersons" :placeholder="suggestedPersons + ' leden'" :suffix-singular="'lid'" :suffix="'leden'" />
+                </STInputBox>
+                <p v-if="module === ModuleType.Members" class="style-description-small">
+                    Een lid kan inschrijven voor zoveel activiteiten als je wilt, dat kost je niets meer. Je kan activiteiten of onderverdelingen toevoegen via de '+'-knop om ook je omzet en transactiekosten te berekenen.
+                </p>
             </div>
             <div class="main-text-container">
                 <STInputBox title="Kostprijs" class="max">
@@ -59,6 +60,10 @@
                         <button v-tooltip="'Meer instellingen'" type="button" class="button icon settings small" @click="showSettingsView" />
                     </template>
                 </STInputBox>
+
+                <p class="info-box icon discount">
+                    Je kiest zelf of je de kost doorrekent aan de besteller (via een administratiekost).
+                </p>
 
                 <p>
                     <button type="button" class="button text" @click="showDetails = !showDetails">
@@ -208,7 +213,7 @@ const result = computed(() => {
 
     --st-horizontal-padding: 30px;
     padding: 15px 30px;
-    margin: 15px 0;
+    margin: 0 0;
 }
 
 .list-input-box {

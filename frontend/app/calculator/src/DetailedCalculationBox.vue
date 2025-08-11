@@ -1,37 +1,23 @@
 <template>
     <article class="calculation-box">
         <STList>
-            <STListItem>
+            <STListItem v-for="(product, index) of input.products" :key="index">
                 <h3 v-if="input.module === ModuleType.Tickets" class="style-title-list">
-                    Aantal tickets
+                    Ticketprijs {{ (input.products.length > 1 ? (index + 1) : '') }}
                 </h3>
                 <h3 v-if="input.module === ModuleType.Webshops" class="style-title-list">
-                    Aantal verkochte stuks
+                    Stukprijs {{ (input.products.length > 1 ? (index + 1) : '') }}
                 </h3>
                 <h3 v-if="input.module === ModuleType.Members" class="style-title-list">
-                    Aantal inschrijvingen
+                    Prijs per inschrijving {{ (input.products.length > 1 ? (index + 1) : '') }}
                 </h3>
+                <p class="style-description-small">
+                    x {{ formatInteger(product.amount) }}
+                </p>
 
                 <template #right>
                     <span class="style-price-base">
-                        {{ formatInteger(input.amount) }}
-                    </span>
-                </template>
-            </STListItem>
-            <STListItem>
-                <h3 v-if="input.module === ModuleType.Tickets" class="style-title-list">
-                    Ticketprijs
-                </h3>
-                <h3 v-if="input.module === ModuleType.Webshops" class="style-title-list">
-                    Stukprijs
-                </h3>
-                <h3 v-if="input.module === ModuleType.Members" class="style-title-list">
-                    Prijs per inschrijving
-                </h3>
-
-                <template #right>
-                    <span class="style-price-base">
-                        {{ formatPrice(input.products[0]?.unitPrice ?? 0) }}
+                        {{ formatPrice(product.unitPrice ?? 0) }}
                     </span>
                 </template>
             </STListItem>

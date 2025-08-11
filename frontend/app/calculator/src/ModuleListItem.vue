@@ -8,7 +8,7 @@
             Ticketverkoop
         </h3>
         <p class="style-description-small">
-            Verkoop tickets voor een evenement, zoals een eetfestijn, fuif of festival. Scan de tickets snel en zonder internet met onze app.
+            Verkoop persoonlijke tickets voor een evenement, fuif of festival. Scan de tickets snel en zonder internet met onze app.
         </p>
 
         <template #right>

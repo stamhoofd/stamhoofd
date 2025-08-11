@@ -246,10 +246,21 @@ export class Tier {
                     percentage: this.fees.percentage,
                     vatPercentage: input.withVAT ? 21 : 0,
                 });
-                if (this.fees.maxPerUnit && z.totalPrice / product.amount > this.fees.maxPerUnit) {
+                if (this.fees.maxPerOrder && input.averageAmountPerOrder && z.totalPrice > Math.ceil(product.amount / input.averageAmountPerOrder) * this.fees.maxPerOrder) {
                     const z = new FixedPriceCalculationLine({
                         title: 'Servicekosten op volume',
-                        description: 'Maximum kost per stuk',
+                        description: 'Maximum per bestelling op geschat aantal bestellingen',
+                        amount: Math.ceil(product.amount / input.averageAmountPerOrder),
+                        unitPrice: this.calculateVAT(this.fees.maxPerOrder, input),
+                    });
+                    output.serviceFees.lines.push(
+                        z,
+                    );
+                }
+                else if (this.fees.maxPerUnit && z.totalPrice / product.amount > this.fees.maxPerUnit) {
+                    const z = new FixedPriceCalculationLine({
+                        title: 'Servicekosten op volume',
+                        description: this.fees.maxPerUnit ? 'Maximum kost per stuk' : 'Maximum per bestelling',
                         amount: product.amount,
                         unitPrice: this.calculateVAT(this.fees.maxPerUnit, input),
                     });

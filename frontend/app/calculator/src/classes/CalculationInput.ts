@@ -96,7 +96,7 @@ export class CalculationInput {
     }
 
     get suggestedPersons() {
-        return this.maximumPersons;
+        return Math.max(...this.products.map(p => p.amount), this.minimumPersons);
     }
 
     get maximumPersons() {
