@@ -13,11 +13,10 @@ import { FormatInputDirective } from './directives/FormatInputDirective';
 import STErrorsDefault from './errors/STErrorsDefault.vue';
 import { useContext, useFeatureFlag, useOrganization, usePlatform, useUser } from './hooks';
 import STInputBox from './inputs/STInputBox.vue';
+import TInput from './inputs/TInput.vue';
+import TTextarea from './inputs/TTextarea.vue';
 import STListItem from './layout/STListItem.vue';
 import STNavigationBar from './navigation/STNavigationBar.vue';
-import TTextarea from './inputs/TTextarea.vue';
-import TInput from './inputs/TInput.vue';
-import { format } from 'libphonenumber-js';
 
 export type ComponentExposed<T> =
 	T extends new (...args: any[]) => infer E ? E :

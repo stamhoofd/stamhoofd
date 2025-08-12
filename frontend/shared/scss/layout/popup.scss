@@ -5,7 +5,7 @@
 .modal-full-height {
     @extend .modal;
 
-    > div {
+    > div:first-child {
         height: var(--popup-height);
 
         
@@ -41,7 +41,7 @@
         display: none;
     }
 
-    > div {
+    > div:first-child {
         position: absolute;
         left: 50%;
         top: 0;
@@ -82,7 +82,7 @@
     }
 
     &.push-down-full {
-        > div {
+        > div:first-child {
             transition: transform 0.3s, opacity 0.3s, visibility step-end 0.3s;
             transform: translate3d(-50%, calc(var(--popup-padding-top-outside, 0px) - 15px), 0) scale(0.9, 0.9);
             visibility: hidden;
@@ -98,7 +98,7 @@
     }
 
     &.push-down {
-        > div {
+        > div:first-child {
             transform: translate3d(-50%, calc(var(--popup-padding-top-outside, 0px) - 10px), 0) scale(0.95, 0.95);
 
             &:after {

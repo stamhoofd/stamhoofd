@@ -157,6 +157,15 @@ export default class NumberInput extends VueComponent {
             return;
         }
 
+        // Only update valuestring if input not focused
+        // otherwise this gives glitchs when typing when minimum > 0
+        const inputElement = this.$refs.input as HTMLInputElement;
+        const activeElement = (('getRootNode' in inputElement ? (inputElement.getRootNode() ?? document) : document) as any).activeElement as HTMLElement;
+
+        if (inputElement === activeElement) {
+            return;
+        }
+
         let value = this.modelValue;
         if (value === null) {
             if (!this.required) {

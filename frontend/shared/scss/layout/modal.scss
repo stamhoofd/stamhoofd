@@ -2,7 +2,7 @@
 @use "../base/text-styles" as *;
 
 .modal-backdrop {
-    &:after {
+    &::after {
         background: rgba(black, 0.7);
         content: "";
         position: absolute;
@@ -22,13 +22,14 @@
     // DO NOT ADD MAX HEIGHT HERE! Always add it to the children of the navigation controllers!
     //background: rgba(black, 0.7);
     position: fixed;
+    position: var(--sheet-position, fixed);
     left: 0;
     top: 0;
     right: 0;
     display: block;
     z-index: 10000;
     contain: strict;
-
+    
     //transform: translate3d(0, 0, 0);
     
     // Android fix / fix where position fixed is 100vh, and isn't the same as the viewport
@@ -63,7 +64,7 @@
 
     // Improve performance
 
-    > div {
+    > div:first-child {
         --popup-padding-top-inside: max(0px, calc(var(--popup-padding-top-full, 0px) - var(--popup-padding-top-outside, 0px)));
         --popup-padding-bottom-inside: max(0px, calc(var(--popup-padding-bottom-full, 0px) - var(--popup-padding-bottom-outside, 0px)));
         
@@ -131,7 +132,7 @@
             transition: opacity 0.3s;
         }
 
-        &>div {
+        & > div:first-child {
             // Decelerated easing
             transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.3s;
         }
@@ -142,7 +143,7 @@
             transition: opacity 0.3s;
         }
 
-        &>div {
+        & > div:first-child {
             // Accelerated easing
             transition: transform 0.3s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.3s;
         }
@@ -154,7 +155,7 @@
             opacity: 0;
         }
 
-        &>div {
+        & > div:first-child {
             opacity: 0;
 
             @media not all and (prefers-reduced-motion) {
