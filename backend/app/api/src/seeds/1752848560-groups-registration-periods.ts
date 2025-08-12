@@ -209,6 +209,9 @@ async function cleanupCycleGroups(cycleGroups: CycleGroup[]) {
 async function cleanupGroup(group: Group) {
     group.settings.cycleSettings = new Map();
     group.cycle = cycleIfMigrated;
+    if (group.status === GroupStatus.Archived) {
+        group.status = GroupStatus.Closed;
+    }
     await group.save();
 }
 
