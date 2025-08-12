@@ -420,7 +420,7 @@ export default class OrderView extends Mixins(NavigationMixin){
     }
 
     get isPaid() {
-        return this.order && (this.order.balanceItems.every(item => item.status === BalanceItemStatus.Paid))
+        return this.order && (this.order.data.totalPrice === 0 || this.order.balanceItems.every(item => item.status === BalanceItemStatus.Paid))
     }
 
     get isTransfer() {
