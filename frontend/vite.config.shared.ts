@@ -84,7 +84,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                 ...iconConfig,
                 context: resolve(__dirname, './shared/assets/images/icons/'),
                 cssTemplate: resolve(__dirname, './shared/assets/images/icons/iconCss.hbs'),
-                moduleId: 'vite-svg-2-webfont.css?inline',
+                moduleId: options.name === 'calculator' ? 'vite-svg-2-webfont.css?inline' : 'vite-svg-2-webfont.css',
             }),
             svgNamespacePlugin({
                 namespace: loadedEnv?.ILLUSTRATIONS_NAMESPACE ?? '',
