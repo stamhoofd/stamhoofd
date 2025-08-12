@@ -102,6 +102,7 @@
 import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, PushOptions, useShow } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, Dropdown, ErrorBox, fetchAll, STErrorsDefault, STInputBox, useErrors, useMembersObjectFetcher, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { Address, LimitedFilteredRequest, OrganizationRegistrationPeriod, RecordAddressAnswer, RecordDateAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
 import { computed, Ref, ref, watch } from 'vue';
 import XLSX from 'xlsx';
@@ -121,7 +122,6 @@ import ImportMembersErrorsView from './ImportMembersErrorsView.vue';
 import ImportMembersQuestionsView from './ImportMembersQuestionsView.vue';
 import ImportVerifyProbablyEqualView from './ImportVerifyProbablyEqualView.vue';
 import RegistrationPeriodSelector from './RegistrationPeriodSelector.vue';
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -135,7 +135,28 @@ const sheetSelectionList = Object.keys(sheets.value);
 const internalSheetKey = ref<string | null>(null);
 const platform = usePlatform();
 const period: Ref<OrganizationRegistrationPeriod> = ref(organization.value.period) as unknown as Ref<OrganizationRegistrationPeriod>;
-const baseMatchers: Ref<ColumnMatcher[]> = ref(getAllMatchers(platform.value, organization.value, () => period.value.groups, () => period.value));
+
+const allBaseMatchers = getAllMatchers(platform.value, organization.value, () => period.value.groups, () => period.value);
+
+const baseMatchers: Ref<ColumnMatcher[]> = computed(() => {
+    const groups = period.value.groups;
+
+    const shouldHideParentDetails
+        // not enabled on organization
+        = organization.value.meta.recordsConfiguration.parents === null
+        // not enabled on platform
+            && platform.value.config.recordsConfiguration.parents === null
+        // not enabled on default age group of group
+            && platform.value.config.defaultAgeGroups.filter(dg => groups.some(g => g.defaultAgeGroupId === dg.id)).every(g => g.recordsConfiguration.parents === null)
+        // not enabled on group
+            && groups.every(g => g.settings.recordsConfiguration.parents === null);
+
+    if (shouldHideParentDetails) {
+        return allBaseMatchers.filter(m => m.category !== MemberDetailsMatcherCategory.Parent1 as string && m.category !== MemberDetailsMatcherCategory.Parent2 as string);
+    }
+
+    return allBaseMatchers.slice();
+});
 
 const groupSpecificMatchers = computed(() => {
     const result: ColumnMatcher[] = [];

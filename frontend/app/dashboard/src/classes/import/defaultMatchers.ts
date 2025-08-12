@@ -139,18 +139,12 @@ export const paymentMatchers = [
 ];
 
 export const getAllMatchers = (platform: Platform, organization: Organization, getGroups: () => Group[], getPeriod: () => OrganizationRegistrationPeriod) => {
-    let matchers = [
+    const matchers = [
         ...getMemberMatchers(getGroups, getPeriod),
         ...paymentMatchers,
         ...parentMatchers1,
         ...parentMatchers2,
     ];
-
-    const recordsConfiguration = organization.meta.recordsConfiguration;
-
-    if (recordsConfiguration.parents === null) {
-        matchers = matchers.filter(m => m.category !== MemberDetailsMatcherCategory.Parent1 as string && m.category !== MemberDetailsMatcherCategory.Parent2 as string);
-    }
 
     const recordCategories = [
         ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
