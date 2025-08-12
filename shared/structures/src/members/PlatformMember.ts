@@ -1009,7 +1009,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({ currentPeriod: true, includePending: false, types: [GroupType.Membership, GroupType.WaitingList] });
+        return this.filterGroups({ currentPeriod: true, includeFuture: false, includePending: false, types: [GroupType.Membership, GroupType.WaitingList] });
     }
 
     get registrationDescription() {
