@@ -47,14 +47,6 @@
             </button>
         </p>
 
-        <p v-if="!shouldFilter('members') && isActivitiesTrial" class="warning-box selectable with-button" @click="openPackages">
-            Je test momenteel inschrijvingen voor activiteiten. Activeer de functie om het echt in gebruik te nemen.
-
-            <button class="button text" type="button">
-                Activeren
-            </button>
-        </p>
-
         <p v-if="!shouldFilter('members') && hasExpired(membersDeactivateDate)" class="error-box selectable with-button" @click="openPackages">
             Het ledenadministratie pakket is vervallen. Verleng jouw pakket om ervoor te zorgen dat leden terug kunnen inschrijven, en om te voorkomen dat gegevens verloren zullen gaan.
 
@@ -65,14 +57,6 @@
 
         <p v-if="!isPaymentFailed && !shouldFilter('members') && isNearing(membersDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
             De ledenadministratie wordt uitgeschakeld vanaf {{ membersDeactivateDate | dateTime }}. Verleng jouw pakket om onderbreking van online inschrijvingen en het bekijken van gegevens te voorkomen.
-
-            <button class="button text" type="button">
-                Verlengen
-            </button>
-        </p>
-
-        <p v-if="!shouldFilter('members') && isNearing(membersActivitiesDeactivateDate)" class="warning-box selectable with-button" @click="openPackages">
-            De functionaliteiten 'Inschrijven voor activiteiten' worden uitgeschakeld vanaf {{ membersActivitiesDeactivateDate | dateTime }}. Verleng jouw pakket om de nieuwe functies te kunnen blijven gebruiken.
 
             <button class="button text" type="button">
                 Verlengen
@@ -200,7 +184,7 @@ export default class BillingWarningBox extends Mixins(NavigationMixin) {
         for (const [type, pack] of this.organization.meta.packages.packages) {
             if (type === STPackageType.Members || type === STPackageType.LegacyMembers) {
                 if (pack.removeAt && pack.removeAt <= new Date()) {
-                    return null
+                    continue;
                 }
                 if (pack.deactivateDate === null) {
                     return null
