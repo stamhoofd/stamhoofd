@@ -165,7 +165,9 @@ const filterDefinitionIDSQLFilterIdMap = new Map([
     ['member_gender', 'gender'],
     ['member_birthDay', 'birthDay'],
     ['gender', 'gender'],
-    ['order_products', 'id'],
+    // ['order_products', 'id'],
+    // ['order_product_prices', 'id'],
+    // ['order_checkoutMethod', 'id']
 ]);
 
 function getSQLFilterId(filter: Filter & { definitionId?: string }): string {
@@ -426,7 +428,7 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
         }
     }
 
-    const supported = new Set(['member_gender', 'gender', 'member_missing_data', 'order_products']);
+    const supported = new Set(['member_gender', 'gender', 'member_missing_data', 'order_products', 'order_product_prices', 'order_checkoutMethod']);
 
     if (!supported.has(filter.definitionId)) {
         throw new Error(`Choices filter not supported: ${filter.definitionId}`);
@@ -528,6 +530,143 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                                 $in: [choiceId],
                             },
                         },
+                    },
+                },
+            };
+        });
+
+        switch (filter.mode) {
+            case ChoicesFilterMode.And: {
+                return {
+                    $and: filters,
+                };
+            }
+            case ChoicesFilterMode.Nand: {
+                return {
+                    $not: {
+                        $and: filters,
+                    },
+                };
+            }
+        }
+    }
+
+    if (filter.definitionId === 'order_product_prices') {
+        const productPriceIds: Map<string, Set<string>> = new Map();
+
+        for (const choiceId of filter.choiceIds) {
+            const [productId, priceId] = choiceId.split(':');
+
+            if (productPriceIds.has(productId)) {
+                const set = productPriceIds.get(productId)!;
+                set.add(priceId);
+            }
+            else {
+                productPriceIds.set(productId, new Set([priceId]));
+            }
+        }
+
+        [...productPriceIds.entries()].map(([productId, priceIds]) => {
+            const priceIdsArray = [...priceIds.values()];
+
+            if (filter.mode === ChoicesFilterMode.Or) {
+                return {
+                    items: {
+                        $elemMatch: {
+                            product: {
+                                id: productId,
+                            },
+                            productPrice: {
+                                id: {
+                                    $in: priceIdsArray,
+                                },
+                            },
+                        },
+                    },
+                };
+            }
+
+            if (filter.mode === ChoicesFilterMode.Nor) {
+                return {
+                    $not: {
+                        items: {
+                            $elemMatch: {
+                                product: {
+                                    id: productId,
+                                },
+                                productPrice: {
+                                    id: {
+                                        $in: priceIdsArray,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                };
+            }
+
+            const filters: StamhoofdFilter[] = priceIdsArray.map((priceId) => {
+                return {
+                    items: {
+                        $elemMatch: {
+                            product: {
+                                id: productId,
+                            },
+                            productPrice: {
+                                id: {
+                                    $in: [priceId],
+                                },
+                            },
+                        },
+                    },
+                };
+            });
+
+            switch (filter.mode) {
+                case ChoicesFilterMode.And: {
+                    return {
+                        $and: filters,
+                    };
+                }
+                case ChoicesFilterMode.Nand: {
+                    return {
+                        $not: {
+                            $and: filters,
+                        },
+                    };
+                }
+            }
+        });
+    }
+
+    if (filter.definitionId === 'order_checkoutMethod') {
+        if (filter.mode === ChoicesFilterMode.Or) {
+            return {
+                checkoutMethod: {
+                    id: {
+                        $in: filter.choiceIds,
+                    },
+                },
+            };
+        }
+
+        if (filter.mode === ChoicesFilterMode.Nor) {
+            return {
+                $not: {
+                    checkoutMethod: {
+                        id: {
+                            $in: filter.choiceIds,
+                        },
+                    },
+                },
+            };
+        }
+
+        const filters: StamhoofdFilter[] = filter.choiceIds.map((choiceId) => {
+            return {
+                checkoutMethod: {
+                    id: {
+                        $in: [choiceId],
                     },
                 },
             };
