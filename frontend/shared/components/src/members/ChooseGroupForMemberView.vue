@@ -109,7 +109,7 @@ const alreadyRegisteredGroups = computed(() => {
         return [];
     }
 
-    return props.member.filterGroups({ organizationId, currentPeriod: true, includePending: false, types: [GroupType.WaitingList, GroupType.Membership] });
+    return props.member.filterGroups({ organizationId, currentPeriod: true, includeFuture: false, includePending: false, types: [GroupType.WaitingList, GroupType.Membership] });
 });
 
 const alreadyRegisteredMessage = computed(() => {

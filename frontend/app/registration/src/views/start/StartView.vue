@@ -245,7 +245,7 @@ async function checkData() {
 }
 
 function getRegistrationsForMember(member: PlatformMember) {
-    return member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership, GroupType.WaitingList] }).sort((a, b) =>
+    return member.filterRegistrations({ currentPeriod: true, includeFuture: false, types: [GroupType.Membership, GroupType.WaitingList] }).sort((a, b) =>
         Sorter.stack(
             Sorter.byDateValue(b.registeredAt ?? b.createdAt, a.registeredAt ?? a.createdAt),
         ),

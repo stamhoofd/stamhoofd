@@ -870,7 +870,7 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
-    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; includePending?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; includeFuture?: boolean; includePending?: boolean; types?: GroupType[]; organizationId?: string }) {
         const registrations = this.filterRegistrations(filters);
         const base: Group[] = [];
 
