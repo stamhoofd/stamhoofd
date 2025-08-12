@@ -167,7 +167,7 @@ const filterDefinitionIDSQLFilterIdMap = new Map([
     ['gender', 'gender'],
     // ['order_products', 'id'],
     // ['order_product_prices', 'id'],
-    // ['order_checkoutMethod', 'id']
+    // ['order_checkoutMethod', 'id'],
 ]);
 
 function getSQLFilterId(filter: Filter & { definitionId?: string }): string {
@@ -566,7 +566,7 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
             }
         }
 
-        [...productPriceIds.entries()].map(([productId, priceIds]) => {
+        const productFilters: StamhoofdFilter[] = [...productPriceIds.entries()].map(([productId, priceIds]) => {
             const priceIdsArray = [...priceIds.values()];
 
             if (filter.mode === ChoicesFilterMode.Or) {
@@ -583,7 +583,7 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                             },
                         },
                     },
-                };
+                } as StamhoofdFilter;
             }
 
             if (filter.mode === ChoicesFilterMode.Nor) {
@@ -637,6 +637,8 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                 }
             }
         });
+
+        return groupFilterHelper(filter.mode, productFilters);
     }
 
     if (filter.definitionId === 'order_checkoutMethod') {
@@ -856,9 +858,7 @@ function getFilterType(filter: Filter): FilterType {
     return FilterType.NumberFilter;
 }
 
-function filterGroupToStamhoofdFilter(filter: FilterGroup): StamhoofdFilter {
-    const filters = filter.filters.map(f => filterToStamhoofdFilter(f));
-
+function groupFilterHelper(mode: 'Or' | 'And' | 'Nand' | 'Nor', filters: StamhoofdFilter[]): StamhoofdFilter {
     if (filters.length === 0) {
         console.error('filterGroupToStamhoofdFilter: no filters');
         return null;
@@ -867,44 +867,59 @@ function filterGroupToStamhoofdFilter(filter: FilterGroup): StamhoofdFilter {
     if (filters.length === 1) {
         const singleFilter = filters[0];
 
-        switch (filter.mode) {
-            case GroupFilterMode.And:
+        switch (mode) {
+            case 'And':
                 return singleFilter;
-            case GroupFilterMode.Or:
+            case 'Or':
                 return singleFilter;
-            case GroupFilterMode.Nand:
+            case 'Nand':
                 return {
                     $not: singleFilter,
                 };
-            case GroupFilterMode.Nor:
+            case 'Nor':
                 return {
                     $not: singleFilter,
                 };
         }
     }
 
-    switch (filter.mode) {
-        case GroupFilterMode.And:
+    switch (mode) {
+        case 'And':
             return {
                 $and: filters,
             };
-        case GroupFilterMode.Or:
+        case 'Or':
             return {
                 $or: filters,
             };
-        case GroupFilterMode.Nand:
+        case 'Nand':
             return {
-                $not: {
-                    $and: filters,
-                },
+                $or: filters.flatMap(f => ({
+                    $not: f,
+                })),
             };
-        case GroupFilterMode.Nor:
+        case 'Nor':
             return {
-                $not: {
-                    $or: filters,
-                },
+                $and: filters.flatMap((f) => {
+                    if (f !== null) {
+                        // necessary to support 'order_product_prices' migration, else filter is not recognized in UI
+                        if (f['$or'] && Array.isArray(f['$or'])) {
+                            return f['$or'].map(f => ({ $not: f }));
+                        }
+                    }
+
+                    return [{
+                        $not: f,
+                    }];
+                }),
             };
     }
+}
+
+function filterGroupToStamhoofdFilter(filter: FilterGroup): StamhoofdFilter {
+    const filters = filter.filters.map(f => filterToStamhoofdFilter(f));
+
+    return groupFilterHelper(filter.mode, filters);
 }
 
 export function convertOldPropertyFilter(filter: OldPropertyFilter): PropertyFilter {
