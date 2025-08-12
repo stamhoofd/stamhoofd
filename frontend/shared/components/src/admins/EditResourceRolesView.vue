@@ -45,7 +45,7 @@ withDefaults(
         resource: { id: string; name: string; type: PermissionsResourceType };
         configurableAccessRights: AccessRight[];
     }>(), {
-        title: $t(`d51b7cc1-ce3d-45ad-9be0-105e97d0e4b9`),
+        title: () => $t(`d51b7cc1-ce3d-45ad-9be0-105e97d0e4b9`),
         description: '',
         configurableAccessRights: () => [],
     });
