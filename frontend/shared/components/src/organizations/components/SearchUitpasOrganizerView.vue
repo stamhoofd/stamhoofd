@@ -37,7 +37,7 @@ const props = withDefaults(
         title?: string;
         selectOrganizer: (uitpasOrganizerResponse: UitpasOrganizerResponse, navigation: NavigationActions) => Promise<void> | void;
     }>(), {
-        title: $t('UiTPAS-organisator zoeken'),
+        title: () => $t('UiTPAS-organisator zoeken'),
     },
 );
 
