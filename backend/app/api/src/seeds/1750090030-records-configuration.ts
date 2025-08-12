@@ -1,9 +1,13 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Organization } from '@stamhoofd/models';
+import { Organization, Webshop } from '@stamhoofd/models';
 
 export async function startRecordsConfigurationMigration() {
     for await (const organization of Organization.select().all()) {
         await organization.save();
+    }
+
+    for await (const webshop of Webshop.select().all()) {
+        await webshop.save();
     }
 }
 
