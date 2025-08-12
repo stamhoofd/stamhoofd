@@ -102,11 +102,11 @@
                     </div>
 
                     <template v-if="getBundleDiscountSelected(bundleDiscount)" #right>
-                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('8545df6d-c416-42dc-88e6-df1eab5c41f9')" type="button" class="button text selected" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
+                        <button v-if="getOverrideBundleDiscountSelected(bundleDiscount)" v-tooltip="$t('8545df6d-c416-42dc-88e6-df1eab5c41f9')" type="button" class="button text enabled" @click.prevent="() => setOverrideBundleDiscountSelected(bundleDiscount, false)">
                             <span class="icon sliders" />
                             <span>{{ $t('eab2f8ba-1f62-4328-a0b6-9593d3b6ca15') }}</span>
                         </button>
-                        <button v-else v-tooltip="$t('534fe662-2b92-479c-bb69-2155478673ed')" type="button" class="button icon sliders" @click="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
+                        <button v-else v-tooltip="$t('534fe662-2b92-479c-bb69-2155478673ed')" type="button" class="button icon sliders" @click.prevent="() => setOverrideBundleDiscountSelected(bundleDiscount, true)" />
                     </template>
                 </STListItem>
             </STList>
@@ -236,8 +236,8 @@ const hasEndDate = computed({
             return;
         }
         if (value) {
-            addPatch({ 
-                endDate: endDate.value 
+            addPatch({
+                endDate: endDate.value
                     ?? Formatter.luxon(new Date())
                         .set({
                             hour: 23,
