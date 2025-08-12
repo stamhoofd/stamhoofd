@@ -1,7 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupType, TranslatedString } from '@stamhoofd/structures';
+import { Group, Organization, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
+import { CycleInformation, GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 type CycleData = {
@@ -13,6 +12,105 @@ type CycleData = {
 
 const cycleIfMigrated = -99;
 
+function nullIfInvalidDate(date: Date) {
+    // some dates are very old and this throws an error otherwise
+    if (date.getFullYear() < 1950) {
+        return null;
+    }
+    return date;
+}
+
+function limitDate(date: Date): Date {
+    // some dates are very old and this throws an error otherwise
+    if (date.getFullYear() < 1950) {
+        return new Date(1950, date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+    }
+    return date;
+}
+
+/**
+ * Often cycle settings contains information about various cycles without start and end date.
+ * Therefore a good start and end date should be calculated.
+ */
+function convertCycleSettings(cycleSettings: Map<number, CycleInformation>, startDate: Date, endDate: Date): Map<number, CycleInformation> {
+    if (endDate < startDate) {
+        // switch start and end dates
+        const originalStartDate = startDate;
+        const originalEndDate = endDate;
+        startDate = originalEndDate;
+        endDate = originalStartDate;
+    }
+
+    const array = [...cycleSettings.entries()].map((entry) => {
+        const cycle = entry[0];
+        const settings = entry[1];
+        return {
+            cycle,
+            settings,
+        };
+    });
+
+    // reversed
+    array.sort((a, b) => b.cycle - a.cycle);
+
+    let lastStartDate: Date | null = nullIfInvalidDate(startDate);
+    let lastEndDate: Date | null = nullIfInvalidDate(endDate);
+
+    for (let i = 0; i < array.length; i++) {
+        const item = array[i];
+
+        if (item.settings.startDate !== null) {
+            lastStartDate = item.settings.startDate;
+        }
+        else {
+            if (lastEndDate !== null && lastStartDate !== null) {
+                const dayDifference = differenceInDays(lastStartDate, lastEndDate);
+
+                const years = Math.ceil(dayDifference / 366);
+
+                const newStartDate = new Date(lastStartDate.getTime());
+                newStartDate.setFullYear(newStartDate.getFullYear() - years);
+                item.settings.startDate = newStartDate;
+                lastStartDate = newStartDate;
+
+                // const isMostRecent = i === 0;
+
+                // if (!isMostRecent && item.settings.endDate === null) {
+                //     if (lastEndDate === null) {
+                //         throw new Error('Cannot calculate new end date');
+                //     }
+                //     const newEndDate = new Date(lastStartDate.getTime() - 1);
+                //     item.settings.endDate = newEndDate;
+                // }
+            }
+            else {
+                throw new Error('Cannot calculate new start date');
+            }
+        }
+
+        if (item.settings.endDate !== null) {
+            lastEndDate = item.settings.endDate;
+        }
+        else {
+            const isOldest = i === array.length - 1;
+            if (isOldest) {
+                continue;
+            }
+
+            if (lastStartDate !== null) {
+                const newEndDate = new Date(lastStartDate.getTime() - 1);
+                item.settings.endDate = newEndDate;
+            }
+            else {
+                // todo
+                throw Error('test todo');
+            }
+        }
+    }
+
+    return new Map([...array].reverse().map(item => [item.cycle, item.settings]));
+}
+
 export async function startGroupCyclesToPeriodsMigration() {
     for await (const organization of Organization.select().all()) {
         const allCycles: CycleData[] = [];
@@ -23,10 +121,11 @@ export async function startGroupCyclesToPeriodsMigration() {
             continue;
         }
 
+        console.log('Organization: ' + organization.name);
         for (const group of groups) {
             const cycle: number = group.cycle;
-            const startDate: Date = group.settings.startDate;
-            const endDate: Date = group.settings.endDate;
+            const startDate: Date = limitDate(group.settings.startDate);
+            const endDate: Date = limitDate(group.settings.endDate);
 
             const addCycle = (cycle: number, startDate: Date | null, endDate: Date | null) => {
                 if (endDate && startDate && endDate < startDate) {
@@ -57,11 +156,12 @@ export async function startGroupCyclesToPeriodsMigration() {
             addCycle(cycle, startDate, endDate);
 
             if (group.settings.cycleSettings && group.settings.cycleSettings.size) {
-                for (const entry of group.settings.cycleSettings.entries()) {
+                console.log('Group: ' + group.id + ' - ' + group.settings.name);
+                for (const entry of convertCycleSettings(group.settings.cycleSettings, startDate, endDate).entries()) {
                     const currentCycle: number = entry[0];
                     const cycleSettings = entry[1];
-                    const cycleStartDate: Date | null = cycleSettings.startDate;
-                    const cycleEndDate: Date | null = cycleSettings.endDate;
+                    const cycleStartDate: Date | null = cycleSettings.startDate ? limitDate(cycleSettings.startDate) : null;
+                    const cycleEndDate: Date | null = cycleSettings.endDate ? limitDate(cycleSettings.endDate) : null;
                     addCycle(currentCycle, cycleStartDate, cycleEndDate);
                 }
             }
@@ -73,7 +173,6 @@ export async function startGroupCyclesToPeriodsMigration() {
             continue;
         }
 
-        console.log('Organization: ' + organization.name);
         const cycleGroups = groupCycles(allCycles);
 
         cycleGroups.forEach((g) => {
@@ -82,7 +181,21 @@ export async function startGroupCyclesToPeriodsMigration() {
             }
         });
 
-        await migrateCycleGroups(cycleGroups, organization);
+        try {
+            await migrateCycleGroups(cycleGroups, organization);
+        }
+        catch (e) {
+            console.error(JSON.stringify(cycleGroups.map((cg) => {
+                return {
+                    startDate: cg.startDate.getTime(),
+                    endDate: cg.endDate.getTime(),
+                    groups: cg.cycles.flatMap(c => c.groups.map(g => g.id)),
+                };
+            })));
+            console.error(e);
+            throw e;
+        }
+
         await cleanupCycleGroups(cycleGroups);
     }
 }
@@ -95,7 +208,6 @@ async function cleanupCycleGroups(cycleGroups: CycleGroup[]) {
 
 async function cleanupGroup(group: Group) {
     group.settings.cycleSettings = new Map();
-    // todo: for testing
     group.cycle = cycleIfMigrated;
     await group.save();
 }
@@ -496,7 +608,6 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
                 }
 
                 const newWaitingList = new Group();
-                // todo: for testing
                 newWaitingList.cycle = cycleIfMigrated;
                 newWaitingList.type = GroupType.WaitingList;
                 newWaitingList.organizationId = organization.id;
@@ -536,6 +647,18 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
             }
         }
 
+        const archivedGroupIds = allGroups.filter(g => g.group.status === GroupStatus.Archived).map(g => g.group.id);
+        const hasArchivedGroups = archivedGroupIds.length > 0;
+
+        const archiveCategory = GroupCategory.create({
+            settings: GroupCategorySettings.create({
+                name: 'Archief',
+                description: 'Gearchiveerde groepen',
+                public: false,
+            }),
+            groupIds: [...archivedGroupIds],
+        });
+
         const newCategoriesData = originalCategories.map((c) => {
             const category = GroupCategory.create({
                 settings: GroupCategorySettings.create({
@@ -544,6 +667,9 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
                 groupIds: [...new Set(c.groupIds.flatMap((oldId) => {
                     const result = allGroups.find(g => g.originalGroup.id === oldId);
                     if (result) {
+                        if (result.group.status === GroupStatus.Archived) {
+                            return [];
+                        }
                         return [result.group.id];
                     }
                     return [];
@@ -572,7 +698,8 @@ async function migrateCycleGroups(cycleGroups: CycleGroup[], organization: Organ
         }
         organizationRegistrationPeriod.settings.rootCategoryId = rootCategoryData.category.id;
 
-        organizationRegistrationPeriod.settings.categories = newCategoriesData.map(c => c.category);
+        organizationRegistrationPeriod.settings.categories = newCategoriesData.map(c => c.category).concat(hasArchivedGroups ? [archiveCategory] : []);
+
         if (organizationRegistrationPeriod.settings.categories.length === 0) {
             throw new Error('No categories found');
         }
@@ -594,7 +721,6 @@ function cloneGroup(cycle: CycleData, group: Group, period: RegistrationPeriod) 
         ...group.privateSettings,
     });
 
-    // todo? for testing
     newGroup.cycle = cycleIfMigrated;
 
     const newSettings = GroupSettings
