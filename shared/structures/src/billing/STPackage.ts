@@ -328,7 +328,7 @@ export class STPackageStatus extends AutoEncoder {
         }
 
         // If only valid for less than 30 days, still allow to use the package
-        if (this.validUntil && this.startDate.getTime() - this.validUntil.getTime() < 60 * 1000 * 60 * 25 * 31) {
+        if (this.validUntil && this.validUntil.getTime() - this.startDate.getTime() < 60 * 1000 * 60 * 24 * 31) {
             return false
         }
 

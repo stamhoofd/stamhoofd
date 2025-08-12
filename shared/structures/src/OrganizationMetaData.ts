@@ -86,7 +86,7 @@ export class OrganizationPackages extends AutoEncoder {
     }
 
     get canStartMembersTrial() {
-        return !this.useMembers && !this.wasActive(STPackageType.Members)
+        return !this.useMembers && !this.wasActive(STPackageType.Members) && !this.wasActive(STPackageType.LegacyMembers)
     }
 
     get isMembersTrial() {
