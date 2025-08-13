@@ -7,10 +7,10 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="$reviewCheckboxData" />
+            <ReviewCheckbox :data="reviewCheckboxData" />
         </div>
 
-        <div v-else class="split-inputs">
+        <div class="split-inputs">
             <div>
                 <STInputBox :title="$t('840ac72d-d4b3-40ea-afb4-b0109e88c640')" error-fields="name" :error-box="errors.errorBox">
                     <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
@@ -88,10 +88,8 @@
             </button>
         </p>
 
-        <div v-if="!isReview">
-            <div v-for="category of recordCategories" :key="category.id" class="container">
-                <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
-            </div>
+        <div v-for="category of recordCategories" :key="category.id" class="container">
+            <hr><FillRecordCategoryBox :category="category" :value="patched" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="patchAnswers" />
         </div>
     </SaveView>
 </template>
@@ -118,11 +116,11 @@ const pop = usePop();
 const present = usePresent();
 const { patched, hasChanges, addPatch, patch } = usePatch(computed(() => organizationManager.value.organization));
 
-const { $overrideIsDone, $hasChanges: $hasReviewChanges, save: saveReview, $reviewCheckboxData } = useReview(SetupStepType.Companies);
+const { overrideIsDone, hasChanges: hasReviewChanges, save: saveReview, reviewCheckboxData } = useReview(SetupStepType.Companies);
 
 const hasSomeChanges = computed(() => {
     if (props.isReview) {
-        return hasChanges.value || $hasReviewChanges.value;
+        return hasChanges.value || hasReviewChanges.value;
     }
 
     return hasChanges.value;
@@ -135,8 +133,8 @@ const draggableCompanies = useDraggableArray<Company>(() => patched.value.meta.c
 }));
 
 watch(draggableCompanies, (companies) => {
-    $overrideIsDone.value = companies.length > 0;
-});
+    overrideIsDone.value = companies.length > 0;
+}, {immediate: true});
 
 const name = computed({
     get: () => patched.value.name,
@@ -243,14 +241,12 @@ async function save() {
 
     saving.value = true;
     try {
-        if (hasChanges.value) {
-            errors.errorBox = null;
-            if (!await errors.validator.validate()) {
-                saving.value = false;
-                return;
-            }
-            await organizationManager.value.patch(patch.value);
+        errors.errorBox = null;
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
         }
+        await organizationManager.value.patch(patch.value);
 
         if (props.isReview) {
             await saveReview();

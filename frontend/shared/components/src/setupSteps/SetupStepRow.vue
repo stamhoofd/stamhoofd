@@ -78,7 +78,7 @@ const icons: Record<SetupStepType, string> = {
     [SetupStepType.Premises]: 'home',
     [SetupStepType.Groups]: 'group',
     [SetupStepType.Responsibilities]: 'star',
-    [SetupStepType.Companies]: 'file-filled',
+    [SetupStepType.Companies]: 'flag',
     [SetupStepType.Emails]: 'email',
     [SetupStepType.Payment]: 'bank',
     [SetupStepType.Registrations]: 'edit',

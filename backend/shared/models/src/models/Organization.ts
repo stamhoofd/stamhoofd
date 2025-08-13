@@ -297,6 +297,21 @@ export class Organization extends QueryableModel {
         });
     }
 
+    getBaseStructureWithPrivateMeta(): OrganizationStruct {
+        return OrganizationStruct.create({
+            id: this.id,
+            active: this.active,
+            name: this.name,
+            meta: this.meta,
+            privateMeta: this.privateMeta,
+            address: this.address,
+            registerDomain: this.registerDomain,
+            uri: this.uri,
+            website: this.website,
+            createdAt: this.createdAt,
+        });
+    }
+
     async updateDNSRecords() {
         const organization = this;
 

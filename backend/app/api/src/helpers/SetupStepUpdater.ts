@@ -16,12 +16,14 @@ import {
     GroupType,
     MemberResponsibility,
     Platform as PlatformStruct,
+    RecordCategory,
     SetupStepType,
     SetupSteps,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService';
 import { GroupedThrottledQueue } from './GroupedThrottledQueue';
+import { AuthenticatedStructures } from './AuthenticatedStructures';
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -330,14 +332,27 @@ export class SetupStepUpdater {
     private static updateStepCompanies(
         setupSteps: SetupSteps,
         organization: Organization,
-        _platform: PlatformStruct,
+        platform: PlatformStruct,
     ) {
         const totalSteps = 1;
         let finishedSteps = 0;
 
         if (organization.meta.companies.length) {
             finishedSteps = 1;
+
+            try {
+                RecordCategory.validate(
+                    platform.config.organizationLevelRecordsConfiguration.recordCategories,
+                    organization.getBaseStructureWithPrivateMeta(), // private data needed for answers
+                );
+            }
+            catch (error) {
+                console.error('Error validating record categories for organization', organization.id, error);
+                finishedSteps = 0;
+            }
         }
+
+        console.log('Updating companies step for organization', organization.id, 'with total steps', totalSteps, 'and finished steps', finishedSteps);
 
         setupSteps.update(SetupStepType.Companies, {
             totalSteps,

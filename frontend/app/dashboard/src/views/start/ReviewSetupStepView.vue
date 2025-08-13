@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="title" :loading="$isSaving" :disabled="!$hasChanges" @save="save">
+    <SaveView :title="title" :loading="isSaving" :disabled="!hasChanges" @save="save">
         <h1>
             {{ title }}
         </h1>
         <slot name="top" />
-        <ReviewCheckbox :data="$reviewCheckboxData" />
+        <ReviewCheckbox :data="reviewCheckboxData" />
         <slot />
     </SaveView>
 </template>
@@ -19,7 +19,7 @@ const props = defineProps<{ type: SetupStepType }>();
 
 const setupStepTranslations = useSetupStepTranslations();
 
-const { $isSaving, $hasChanges, $reviewCheckboxData, save: saveReview } = useReview(props.type);
+const { isSaving, hasChanges, reviewCheckboxData, save: saveReview } = useReview(props.type);
 
 const organization = useOrganization();
 const step = computed(() => organization.value?.period.setupSteps.get(props.type));

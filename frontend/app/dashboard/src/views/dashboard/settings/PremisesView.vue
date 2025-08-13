@@ -8,7 +8,7 @@
         </p>
 
         <div v-if="isReview" class="container">
-            <ReviewCheckbox :data="$reviewCheckboxData" />
+            <ReviewCheckbox :data="reviewCheckboxData" />
             <hr>
         </div>
 
@@ -59,7 +59,7 @@ const saving = ref(false);
 
 const platform$ = usePlatform();
 const organizationManager$ = useOrganizationManager();
-const { $reviewCheckboxData, $hasChanges: $hasReviewChanges, $overrideIsDone, save: saveReview } = useReview(SetupStepType.Premises);
+const { reviewCheckboxData, hasChanges: hasReviewChanges, overrideIsDone, save: saveReview } = useReview(SetupStepType.Premises);
 const pop = usePop();
 const originalPremises = computed(() => organizationManager$.value.organization.privateMeta?.premises ?? []);
 const { patched: premises, patch, addArrayPatch, hasChanges } = usePatchArray(originalPremises);
@@ -67,7 +67,7 @@ const { patched: premises, patch, addArrayPatch, hasChanges } = usePatchArray(or
 const title = 'Lokalen';
 const hasSomeChanges = computed(() => {
     if (props.isReview) {
-        return hasChanges.value || $hasReviewChanges.value;
+        return hasChanges.value || hasReviewChanges.value;
     }
     return hasChanges.value;
 });
@@ -159,7 +159,7 @@ function updatePremiseLimitationWarnings() {
     }
 
     premiseLimitationWarnings.value = warnings;
-    $overrideIsDone.value = warnings.length === 0;
+    overrideIsDone.value = warnings.length === 0;
 }
 
 async function save() {
@@ -178,7 +178,7 @@ async function save() {
             }));
         }
 
-        if ($hasReviewChanges.value) {
+        if (hasReviewChanges.value) {
             await saveReview();
         }
 

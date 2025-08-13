@@ -298,6 +298,14 @@ export class RecordSettings extends BaseRecordSettings {
         }
 
         if (answer) {
+            if (answer.settings.type !== this.type) {
+                throw new SimpleError({
+                    code: 'field_type_changed',
+                    message: $t(`Kijk dit nog even na`),
+                    field: this.id,
+                });
+            }
+            answer.settings = this;
             answer.validate();
         }
     }

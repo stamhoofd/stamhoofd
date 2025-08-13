@@ -90,6 +90,10 @@ export class PatchPlatformEndpoint extends Endpoint<
                 throw Context.auth.error();
             }
 
+            if (request.body.config.organizationLevelRecordsConfiguration) {
+                shouldUpdateSetupSteps = true;
+            }
+
             const newConfig = request.body.config;
 
             // Update config
@@ -100,13 +104,11 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig: PlatformConfig = platform.config;
 
-                    if (shouldCheckSteps) {
-                        shouldUpdateSetupSteps = this.shouldUpdateSetupSteps(
-                            currentConfig,
-                            newConfig,
-                            oldConfig,
-                        );
-                    }
+                    shouldUpdateSetupSteps = shouldUpdateSetupSteps || this.shouldUpdateSetupSteps(
+                        currentConfig,
+                        newConfig,
+                        oldConfig,
+                    );
                 }
                 else {
                     platform.config = patchObject(platform.config, newConfig);

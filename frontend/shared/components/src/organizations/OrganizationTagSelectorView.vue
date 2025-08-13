@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :disabled="!$hasChanges" :save-text="$saveText" @save="save">
+    <SaveView :title="title" :disabled="!hasChanges" :save-text="$saveText" @save="save">
         <h1>{{ title }}<span v-show="$selectedTags.size > 0" class="selection-count">{{ " (" + $selectedTags.size + ")" }}</span></h1>
         <form class="search-box input-icon-container icon search gray" @submit.prevent>
             <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`8eaadab8-a8c2-4c8d-8119-e374ca0180cf`)">
@@ -72,7 +72,7 @@ const $saveText = computed(() => {
     return $t(`30ea6c91-c638-45f7-9042-13247195743d`);
 });
 
-const $hasChanges = computed(() => {
+const hasChanges = computed(() => {
     if (!props.tagIds.length) {
         return $selectedTags.value.size > 0;
     }

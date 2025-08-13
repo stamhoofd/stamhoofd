@@ -20,10 +20,10 @@ export type UseReview = {
     readonly step: ComputedRef<SetupStep | undefined>;
     readonly save: () => Promise<boolean>;
     readonly forceUpdate: () => Promise<void>;
-    readonly $isSaving: Ref<boolean>;
-    readonly $hasChanges: ComputedRef<boolean>;
-    readonly $overrideIsDone: Ref<boolean | null>;
-    readonly $reviewCheckboxData: ComputedRef<ReviewCheckboxData>;
+    readonly isSaving: Ref<boolean>;
+    readonly hasChanges: ComputedRef<boolean>;
+    readonly overrideIsDone: Ref<boolean | null>;
+    readonly reviewCheckboxData: ComputedRef<ReviewCheckboxData>;
 };
 
 export function useReview(type: SetupStepType): UseReview {
@@ -37,12 +37,12 @@ export function useReview(type: SetupStepType): UseReview {
 
     const $checkboxValue = ref(originalCheckboxValue);
     const isSaving = ref(false);
-    const $hasChanges = computed(() => originalCheckboxValue !== $checkboxValue.value);
-    const $overrideIsDone = ref<boolean | null>(null);
-    const $isDone = computed(() => $overrideIsDone.value !== null ? $overrideIsDone.value : !!$step.value?.isDone);
+    const hasChanges = computed(() => originalCheckboxValue !== $checkboxValue.value);
+    const overrideIsDone = ref<boolean | null>(null);
+    const $isDone = computed(() => overrideIsDone.value !== null ? overrideIsDone.value : !!$step.value?.isDone);
 
     const updateReviewedAt = async (isReviewed: boolean): Promise<boolean> => {
-        if (!$hasChanges.value) return true;
+        if (!hasChanges.value) return true;
 
         const periodId = $organization.value?.period.id;
         if (!periodId) {
@@ -75,7 +75,7 @@ export function useReview(type: SetupStepType): UseReview {
     };
 
     const save = async () => {
-        if (!$hasChanges.value) return true;
+        if (!hasChanges.value) return true;
 
         const isConfirm = $checkboxValue.value
             ? await CenteredMessage.confirm($t(`91edc253-7664-4d27-bdea-e050a7c0b553`), $t(`168f25d2-74c1-4c18-818a-796e7a8fee41`))
@@ -97,7 +97,7 @@ export function useReview(type: SetupStepType): UseReview {
 
     const forceUpdate = () => organizationManager.value.forceUpdate().catch(console.error);
 
-    const $reviewCheckboxData = computed<ReviewCheckboxData>(() => {
+    const reviewCheckboxData = computed<ReviewCheckboxData>(() => {
         return {
             step: $step.value,
             checkboxValue: $checkboxValue.value,
@@ -111,9 +111,9 @@ export function useReview(type: SetupStepType): UseReview {
         step: $step,
         save,
         forceUpdate,
-        $isSaving: readonly(isSaving),
-        $hasChanges: $hasChanges,
-        $overrideIsDone: $overrideIsDone,
-        $reviewCheckboxData,
+        isSaving: readonly(isSaving),
+        hasChanges: hasChanges,
+        overrideIsDone: overrideIsDone,
+        reviewCheckboxData,
     };
 }
