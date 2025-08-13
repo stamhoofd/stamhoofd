@@ -27,7 +27,6 @@ export class DocumentService {
                     const newFields = getGroupFieldsAffectingDocuments(event.model);
 
                     if (JSON.stringify(oldFields) === JSON.stringify(newFields)) {
-                        console.log('Group changes cannot affect documents');
                         return;
                     }
 
