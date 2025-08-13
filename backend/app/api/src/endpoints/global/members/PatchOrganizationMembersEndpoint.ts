@@ -3,7 +3,7 @@ import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPat
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -317,7 +317,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: Context.i18n.$t('d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840'),
+                        human: platformResponsibility ? $t('Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar voor een standaard leeftijdsgroep') : $t('d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840'),
                     });
                 }
 
@@ -688,7 +688,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         if (shouldUpdateSetupSteps && organization) {
-            SetupStepUpdater.updateForOrganization(organization).catch(console.error);
+            SetupStepUpdater.updateForOrganization(organization, { types: [
+                SetupStepType.Responsibilities,
+            ] }).catch(console.error);
         }
 
         return new Response(

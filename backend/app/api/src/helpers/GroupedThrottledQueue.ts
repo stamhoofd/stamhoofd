@@ -15,13 +15,15 @@ export class GroupedThrottledQueue<T> {
      * In milliseconds.
      */
     maxDelay: number | null = 10_000;
+    itemDelay: number | null = null;
 
     constructor(
         handler: (group: string, items: T[]) => Promise<void> | void,
-        options: { maxDelay?: number | null } = {},
+        options: { maxDelay?: number | null; itemDelay?: number | null } = {},
     ) {
         this.handler = handler;
-        this.maxDelay = options.maxDelay ?? 10_000;
+        this.maxDelay = options.maxDelay !== null ? (options.maxDelay ?? 10_000) : null;
+        this.itemDelay = options.itemDelay ?? null;
     }
 
     addItems(group: string, items: T[]): void {
@@ -32,7 +34,7 @@ export class GroupedThrottledQueue<T> {
             return;
         }
         const newQueue = new ThrottledQueue<T>(items => this.handler(group, items), {
-            maxDelay: null,
+            maxDelay: this.itemDelay,
             emptyHandler: () => {
                 this.queues.delete(group);
             },

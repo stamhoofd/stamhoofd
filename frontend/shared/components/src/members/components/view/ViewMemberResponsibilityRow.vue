@@ -21,13 +21,13 @@
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="$t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
+            <span v-if="!hasRegistration" v-tooltip="platformResponsibility ? $t('Deze functie is ongeldig omdat {name} niet is ingeschreven voor een standaard leeftijdsgroep. Deze functie zal automatisch verwijderd worden op het einde van de maand.', {name: member.patchedMember.firstName}) : $t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>
 
 <script lang="ts" setup>
-import { MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
+import { GroupType, MemberResponsibilityRecord, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { useOrganization, usePlatform } from '../../../hooks';
@@ -43,6 +43,10 @@ const platform = usePlatform();
 
 const app = useAppContext();
 
+const platformResponsibility = computed(() => {
+    return platform.value.config.responsibilities.find(rr => rr.id === props.responsibility.responsibilityId);
+});
+
 const responsibilityOrganization = computed(() => {
     return props.member.organizations.find(o => o.id === props.responsibility.organizationId);
 });
@@ -52,7 +56,7 @@ const group = computed(() => {
 });
 
 const resp = computed(() => {
-    return platform.value.config.responsibilities.find(rr => rr.id === props.responsibility.responsibilityId)
+    return platformResponsibility.value
         ?? responsibilityOrganization.value?.privateMeta?.responsibilities?.find(rr => rr.id === props.responsibility.responsibilityId)
         ?? null;
 });
@@ -63,6 +67,20 @@ const name = computed(() => {
 });
 
 const hasRegistration = computed(() => {
-    return props.member.filterRegistrations({ currentPeriod: true, organizationId: responsibilityOrganization.value?.id ?? undefined }).length > 0;
+    if (platformResponsibility.value) {
+        // For platform responsibilities, a registration for a default age group is required
+        return props.member.filterRegistrations({
+            periodId: platform.value.period.id,
+            organizationId: responsibilityOrganization.value?.id ?? undefined,
+            types: [GroupType.Membership],
+            defaultAgeGroupIds: platform.value.config.defaultAgeGroups.map(da => da.id),
+        }).length > 0;
+    }
+    return props.member.filterRegistrations({
+        periodId: platform.value.period.id,
+        organizationId: responsibilityOrganization.value?.id ?? undefined,
+        types: [GroupType.Membership],
+
+    }).length > 0;
 });
 </script>

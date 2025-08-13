@@ -13,14 +13,14 @@
                 <div v-if="rowCategories.requiredRows.length" class="container">
                     <hr><h2>{{ $t('31e85868-a04b-42be-bf89-0b691378852c') }}</h2>
                     <STList class="info">
-                        <ResponsibilityReview v-for="row in rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
+                        <ResponsibilityReview v-for="row in rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :invalid-members="row.invalidMembers ?? []" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
 
                 <div v-if="rowCategories.optionalRows.length" class="container">
                     <hr><h2>{{ $t('f4caaf58-4248-4f91-9e76-c8cec82f528d') }}</h2>
                     <STList class="info">
-                        <ResponsibilityReview v-for="row in rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :count="row.count" :progress="row.progress" :total="row.total" />
+                        <ResponsibilityReview v-for="row in rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :invalid-members="row.invalidMembers ?? []" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
             </div>
@@ -31,8 +31,8 @@
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
 import { LoadingViewTransition, useAuth, useContext, useOrganization, usePlatform, useVisibilityChange } from '@stamhoofd/components';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { Group, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
+import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
+import { Group, GroupType, LimitedFilteredRequest, MemberResponsibility, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, PlatformMember, SetupStepType, SortItemDirection } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 import ResponsibilityReview from './ResponsibilityReview.vue';
 import ReviewSetupStepView from './ReviewSetupStepView.vue';
@@ -41,20 +41,22 @@ type RowData = {
     responsibility: MemberResponsibility;
     group: Group | null;
     members: PlatformMember[];
+    invalidMembers?: PlatformMember[];
     count?: number;
     progress?: number;
     total?: number;
 };
 
 const $organization = useOrganization();
-const $platform = usePlatform();
+const platform = usePlatform();
 const $context = useContext();
 const owner = useRequestOwner();
 const auth = useAuth();
+const organizationManager = useOrganizationManager();
 
 const allMembers = ref(null) as Ref<PlatformMember[] | null>;
 
-const organizationBasedResponsibilities = computed(() => $platform.value.config.responsibilities.filter(r => r.organizationBased));
+const organizationBasedResponsibilities = computed(() => platform.value.config.responsibilities.filter(r => r.organizationBased));
 
 const groups = computed(() => {
     const organization = $organization.value;
@@ -111,10 +113,12 @@ const isLoading = computed(() => rowCategories.value === null);
 
 onMounted(async () => {
     await fetchMembers();
+    // await organizationManager.value.forceUpdate(); -> already happens via SetupStepsView when opending the route
 });
 
 useVisibilityChange(async () => {
     await fetchMembers();
+    await organizationManager.value.forceUpdate();
 });
 
 async function fetchMembers() {
@@ -133,12 +137,6 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
 
     const query = new LimitedFilteredRequest({
         filter: {
-            registrations: {
-                $elemMatch: {
-                    organizationId: organization.id,
-                    periodId: organization.period.period.id,
-                },
-            },
             responsibilities: {
                 $elemMatch: {
                     organizationId: organization.id,
@@ -179,7 +177,7 @@ async function getAllMembersWithResponsibilities(responsibilities: MemberRespons
 
     const results: PlatformMember[] = PlatformFamily.createSingles(blob, {
         contextOrganization: $context.value.organization,
-        platform: $platform.value,
+        platform: platform.value,
     });
 
     return results;
@@ -190,7 +188,7 @@ function getRowData(responsibility: MemberResponsibility, allMembersWithResponsi
         .map((row) => {
             return {
                 ...row,
-                ...getProgress(row.responsibility, row.members),
+                ...getProgress(row),
             };
         });
 }
@@ -199,6 +197,32 @@ function getPriority(row: RowData) {
     if (row.count === 0) return 0;
     if (row.count !== undefined) return 1;
     return 2;
+}
+
+function isValidResponsibility(member: PlatformMember, responsibility: MemberResponsibility, organization: Organization): boolean {
+    return member.filterRegistrations({
+        currentPeriod: true,
+        includeFuture: false,
+        organizationId: organization.id,
+        types: [GroupType.Membership],
+        defaultAgeGroupIds: platform.value.config.defaultAgeGroups.map(da => da.id),
+    }).length > 0;
+}
+
+function filterValidMembers(members: PlatformMember[], responsibility: MemberResponsibility, organization: Organization) {
+    const validMembers: PlatformMember[] = [];
+    const invalidMembers: PlatformMember[] = [];
+
+    for (const member of members) {
+        if (isValidResponsibility(member, responsibility, organization)) {
+            validMembers.push(member);
+        }
+        else {
+            invalidMembers.push(member);
+        }
+    }
+
+    return { validMembers, invalidMembers };
 }
 
 function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMembersWithResponsibilities: PlatformMember[], organization: Organization, allGroups: Group[]): Omit<RowData, 'progress'>[] {
@@ -224,10 +248,12 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
                     && (r.endDate === null || r.endDate > now),
                 ),
             );
+            const { validMembers, invalidMembers } = filterValidMembers(members, responsibility, organization);
 
             rows.push({
                 responsibility,
-                members,
+                members: validMembers,
+                invalidMembers,
                 group,
             });
         }
@@ -235,28 +261,32 @@ function getRowDataWithoutProgress(responsibility: MemberResponsibility, allMemb
         return rows;
     }
 
-    const members = allMembersWithResponsibilities.filter(platformMember => platformMember.member.responsibilities
-        .some(r => r.responsibilityId === responsibilityId
+    const members = allMembersWithResponsibilities.filter((platformMember) => {
+        return platformMember.member.responsibilities.some(r => r.responsibilityId === responsibilityId
             && r.organizationId === organizationId
             && (r.endDate === null || r.endDate > now),
-        ),
-    );
+        );
+    });
+
+    const { validMembers, invalidMembers } = filterValidMembers(members, responsibility, organization);
 
     return [{
         responsibility,
-        members,
+        members: validMembers,
+        invalidMembers,
         group: null,
     }];
 }
 
-function getProgress(responsibility: MemberResponsibility, members: PlatformMember[]): { count?: number; progress?: number; total?: number } {
+function getProgress(row: RowData): { count?: number; progress?: number; total?: number } {
+    const { responsibility, members, invalidMembers } = row;
     const { minimumMembers, maximumMembers } = responsibility;
 
     if (minimumMembers === null && maximumMembers === null) {
         return { count: members.length };
     }
 
-    const count = members.length;
+    let count = members.length;
     let total: number | null = null;
 
     // count will be lower
@@ -265,7 +295,8 @@ function getProgress(responsibility: MemberResponsibility, members: PlatformMemb
     }
 
     // count will exceed
-    else if (maximumMembers !== null && count > maximumMembers) {
+    else if (maximumMembers !== null && count + (invalidMembers?.length ?? 0) > maximumMembers) {
+        count = count + (invalidMembers?.length ?? 0);
         total = maximumMembers;
     }
     else {

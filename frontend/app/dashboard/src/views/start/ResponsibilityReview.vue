@@ -8,22 +8,26 @@
                 </template>
             </IconContainer>
         </template>
-        <h3 class="style-title-list">
+        <h3 class="style-title-list large">
             {{ name }}
         </h3>
-        <div>
-            <p v-if="placeholderString" class="style-description-small">
-                {{ placeholderString }}
-            </p>
+        <p v-if="placeholderString" class="style-description-small">
+            {{ placeholderString }}
+        </p>
 
-            <p v-for="member of members" :key="member.id" class="style-description-small inline-link secundary" @click="editMember(member)">
-                {{ member.member.name }}
-            </p>
-        </div>
+        <p v-for="member of members" :key="member.id" class="button text reduce-height" @click="editMember(member)">
+            <span>{{ member.member.name }}</span>
+            <span class="icon arrow-right-small" />
+        </p>
+
+        <p v-for="member of invalidMembers" :key="member.id" v-tooltip="$t('Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.')" class="button text error reduce-height" @click="editMember(member)">
+            <span>{{ member.member.name }}</span>
+            <span class="icon exclamation-two" />
+        </p>
         <template #right>
             <div>
                 <p v-if="total !== undefined" class="style-description-small">
-                    {{ members.length }} / {{ total }}
+                    {{ members.length + (invalidMembers?.length ?? 0) }} / {{ total }}
                 </p>
                 <p v-else-if="count !== undefined" class="style-description-small">
                     {{ count }}
@@ -42,6 +46,7 @@ const props = defineProps<{
     responsibility: MemberResponsibility;
     group: Group | null;
     members: PlatformMember[];
+    invalidMembers: PlatformMember[];
     count?: number;
     progress?: number;
     total?: number;
@@ -54,6 +59,8 @@ const color = computed(() => {
 });
 
 const $icon = computed<'help' | 'success' | 'error' | undefined>(() => {
+    if (props.invalidMembers.length) return 'error';
+
     const isOptional = $isOptional.value;
     if (!isOptional && props.count !== undefined) return 'success';
 

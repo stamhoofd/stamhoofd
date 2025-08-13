@@ -7,6 +7,7 @@ import {
     Organization,
     OrganizationRegistrationPeriod,
     Platform,
+    Registration,
 } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -20,6 +21,7 @@ import {
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService';
+import { GroupedThrottledQueue } from './GroupedThrottledQueue';
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -81,8 +83,23 @@ export class SetupStepUpdater {
             if (before !== after) {
                 console.log('Updating setups steps for organization', event.model.organizationId, 'because of change in members in group', event.model.id, 'from', before, 'to', after, '(limited)');
                 // We need to do a recalculation
-                SetupStepUpdater.updateForOrganizationId(event.model.organizationId)
+                SetupStepUpdater.updateForOrganizationId(event.model.organizationId, { types: [SetupStepType.Registrations] })
                     .catch(console.error);
+            }
+        });
+
+        const updateResponsibilitiesQueue = new GroupedThrottledQueue(async (organizationId: string) => {
+            console.log('(delayed) Updating setups steps for organization', organizationId, 'because of change in registrations');
+            SetupStepUpdater.updateForOrganizationId(organizationId, { types: [SetupStepType.Responsibilities] }).catch(console.error);
+        }, { maxDelay: 3_000 });
+
+        Model.modelEventBus.addListener({}, async (event) => {
+            if (!(event.model instanceof Registration)) {
+                return;
+            }
+
+            if ((event.type === 'updated' && ('registeredAt' in event.changedFields || 'deactivatedAt' in event.changedFields)) || (event.type === 'created' && event.model.registeredAt)) {
+                updateResponsibilitiesQueue.addItem(event.model.organizationId, 1);
             }
         });
     }
@@ -170,7 +187,7 @@ export class SetupStepUpdater {
         });
     }
 
-    static async updateForOrganizationId(id: string) {
+    static async updateForOrganizationId(id: string, options?: { types?: SetupStepType[] }) {
         const organization = await Organization.getByID(id);
         if (!organization) {
             throw new SimpleError({
@@ -180,7 +197,7 @@ export class SetupStepUpdater {
             });
         }
 
-        await this.updateForOrganization(organization);
+        await this.updateForOrganization(organization, options);
     }
 
     static async updateForOrganization(
@@ -188,9 +205,11 @@ export class SetupStepUpdater {
         {
             platform,
             organizationRegistrationPeriod,
+            types,
         }: {
             platform?: PlatformStruct;
             organizationRegistrationPeriod?: OrganizationRegistrationPeriod;
+            types?: SetupStepType[];
         } = {},
     ) {
         if (!platform) {
@@ -222,6 +241,7 @@ export class SetupStepUpdater {
             organizationRegistrationPeriod,
             platform,
             organization,
+            types,
         );
     }
 
@@ -229,12 +249,13 @@ export class SetupStepUpdater {
         organizationRegistrationPeriod: OrganizationRegistrationPeriod,
         platform: PlatformStruct,
         organization: Organization,
+        types?: SetupStepType[],
     ) {
         console.log('Updating setup steps for organization', organization.id);
         const setupSteps = organizationRegistrationPeriod.setupSteps;
 
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-            for (const stepType of Object.values(SetupStepType)) {
+            for (const stepType of types ?? Object.values(SetupStepType)) {
                 const operation = this.STEP_TYPE_OPERATIONS[stepType];
                 await operation(setupSteps, organization, platform);
             }
@@ -346,11 +367,14 @@ export class SetupStepUpdater {
         // Remove invalid responsibilities: members that are not registered in the current period
         const memberIds = Formatter.uniqueArray(allRecords.map(r => r.memberId));
         const members = await Member.getBlobByIds(...memberIds);
-        const validMembers = members.filter(m => m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
+        const validMembers = members.filter(m => m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.defaultAgeGroupId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
+        const invalidMembers = members.filter(m => !m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.defaultAgeGroupId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
 
         const validMembersIds = validMembers.map(m => m.id);
+        const invalidMembersIds = invalidMembers.map(m => m.id);
 
         const records = allRecords.filter(r => validMembersIds.includes(r.memberId));
+        const invalidRecords = allRecords.filter(r => invalidMembersIds.includes(r.memberId));
 
         let totalSteps = 0;
         let finishedSteps = 0;
@@ -381,6 +405,13 @@ export class SetupStepUpdater {
         for (const { responsibility, group } of flatResponsibilities) {
             const { minimumMembers: min, maximumMembers: max } = responsibility;
 
+            const invalidMembersWithThisResponsibility = !!invalidRecords.find(r => r.responsibilityId === responsibility.id && (group ? r.groupId === group.id : true));
+            if (invalidMembersWithThisResponsibility) {
+                totalSteps += Math.max(min ?? 1, 1);
+                // Step not okay: we have an invalid member with this responsibility
+                continue;
+            }
+
             if (min === null) {
                 continue;
             }
@@ -406,13 +437,14 @@ export class SetupStepUpdater {
             }
 
             if (max !== null && totalRecordsWithThisResponsibility > max) {
-                // Not added
+                // Not added (not okay)
                 continue;
             }
 
             finishedSteps += Math.min(min, totalRecordsWithThisResponsibility);
         }
 
+        console.log('Updating responsibilities step for organization', organization.id, 'with total steps', totalSteps, 'and finished steps', finishedSteps);
         setupSteps.update(SetupStepType.Responsibilities, {
             totalSteps,
             finishedSteps,

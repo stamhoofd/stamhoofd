@@ -17,6 +17,12 @@
         }
     }
 
+    &.error {
+        &, &:hover, &:link, &:active, &:visited {
+            color: $color-error;
+        }
+    }
+
     @media (hover: hover) {
         &:hover {
             opacity: 0.6;
@@ -269,6 +275,10 @@
         flex-direction: row;
         align-items: center;
 
+        &.error {
+            color: $color-error;
+        }
+
         &.inline {
             display: inline-flex;
         }
@@ -299,6 +309,11 @@
         transition: opacity 0.2s ease-out, color 0.2s;
         position: relative;
         max-width: 100%;
+
+        &.reduce-height {
+            height: 24px;
+            line-height: 24px;
+        }
 
         &:after {
             // Increase touch area by 15pixels
