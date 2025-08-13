@@ -88,7 +88,6 @@ import { Group, LoadedPermissions, MemberResponsibility, MemberResponsibilityRec
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { ScrollableSegmentedControl, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
