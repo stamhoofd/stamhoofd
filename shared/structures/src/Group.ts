@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Event } from './Event.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { GroupCategory } from './GroupCategory.js';
 import { GroupGenderType } from './GroupGenderType.js';
@@ -11,7 +12,6 @@ import { Gender } from './members/Gender.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
-import { Event } from './Event.js';
 
 export enum GroupStatus {
     Open = 'Open',
@@ -286,6 +286,21 @@ export class Group extends AutoEncoder {
                     $elemMatch: {
                         groupId: {
                             $in: this.settings.requireGroupIds,
+                        },
+                    },
+                },
+            });
+        }
+
+        if (this.settings.preventGroupIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        groupId: {
+                            $not: {
+                                $in: this.settings.preventGroupIds,
+                            },
+
                         },
                     },
                 },

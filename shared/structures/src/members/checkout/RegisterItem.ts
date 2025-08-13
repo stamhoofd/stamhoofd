@@ -666,6 +666,20 @@ export class RegisterItem implements ObjectWithRecords {
         return true;
     }
 
+    doesMeetPreventGroupIds() {
+        if (this.group.settings.preventGroupIds.length > 0) {
+            const hasGroup = this.member.member.registrations.find((r) => {
+                return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.preventGroupIds.includes(r.groupId);
+            });
+
+            if (hasGroup || this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.preventGroupIds.includes(item.group.id))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     doesMeetRequireOrganizationIds() {
         if (this.group.settings.requireOrganizationIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
@@ -1147,6 +1161,16 @@ export class RegisterItem implements ObjectWithRecords {
                     code: 'not_matching',
                     message: 'Not matching: requireGroupIds',
                     human: $t(`6deb2a31-fcc5-4961-bcd8-01cb8332411b`, {
+                        member: this.member.patchedMember.name,
+                    }),
+                });
+            }
+
+            if (!this.doesMeetPreventGroupIds()) {
+                throw new SimpleError({
+                    code: 'not_matching',
+                    message: 'Not matching: preventGroupIds',
+                    human: $t('{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verhinder inschrijving bij leeftijdsgroep).', {
                         member: this.member.patchedMember.name,
                     }),
                 });
