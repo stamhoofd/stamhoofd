@@ -193,7 +193,6 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
                     if (log.patchList.length === 0 && !log.description) {
                         // No changes or all skipped
-                        console.log('No changes after secundary filtering');
                         return false;
                     }
                 }
