@@ -110,6 +110,10 @@ function runReplacements(json) {
 
         // Sort keys from longest to shortest, then from caps to no caps, then alphabetically
         keys.sort((a, b) => {
+            // Remove any parts between ( and ) (special regex syntax)
+            a = a.replace(/\(.*?\)/g, '');
+            b = b.replace(/\(.*?\)/g, '');
+
             if (a.length !== b.length) {
                 return b.length - a.length; // longer keys first
             }
