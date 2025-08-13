@@ -15,7 +15,6 @@
 import { Dropdown } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 const props = withDefaults(defineProps<{ modelValue: OrganizationRegistrationPeriod; shouldDisableLockedPeriods?: boolean }>(), {
     shouldDisableLockedPeriods: false,
@@ -35,11 +34,7 @@ const periods = computed(() => {
         return [organizationManager.value.organization.period];
     }
 
-    const periodsCopy = [...periods];
-
-    periodsCopy.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));
-
-    return periodsCopy;
+    return [...periods];
 });
 
 const isSinglePeriod = computed(() => periods.value.length === 1);
