@@ -29,10 +29,10 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
         else { // !hasUrl && !isOk && !hasOtherUitpasPrices
             // ask for non-official or offcial flow
             const useNonOfficial = await CenteredMessage.confirm(
-                $t('Je gebruikt de niet-officiële UiTPAS-flow'),
-                $t('Doorgaan zonder terugbetalingen'),
-                $t('De toegepaste kortingen worden niet geregistreerd en je ontvangt geen automatische terugbetaling van UiTPAS. Wil je dit toch, configureer dan je UiTPAS-integratie in de instellingen.'),
-                $t('Ga naar instellingen'),
+                $t('5410f959-ba95-4c7e-9331-1d1147ac85b2'),
+                $t('7646c809-e882-46d6-9a5a-24e83087f70e'),
+                $t('6cd858a4-8cc5-42fc-9ca2-a87d1ee13d6b'),
+                $t('b59d4150-23bd-4014-9600-37b2ef667e06'),
                 false,
             );
 
@@ -48,11 +48,11 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
         await present(
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(SearchUitpasEventView, {
-                    title: $t('Zoek je UiTPAS-evenement'),
+                    title: $t('d37c7255-33dd-42a8-872d-0c719307f842'),
                     selectEvent: async (event: UitpasEventResponse | null, navigationActions: NavigationActions) => {
                         await setUitpasEvent(event);
                         await onFixed(navigationActions);
-                        new Toast($t('UiTPAS evenement gekoppeld'), 'success green').show();
+                        new Toast($t('235434e9-4d87-49a9-b4ce-26e7ee397b62'), 'success green').show();
                     },
                     showNoteAboutNonOfficialFlow: showNoteAboutNonOfficialFlow,
                 }),
@@ -68,7 +68,7 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
                     onFixedAndEventSelected: async (event: UitpasEventResponse, navigationActions: NavigationActions) => {
                         await setUitpasEvent(event);
                         await onFixed(navigationActions);
-                        new Toast($t('UiTPAS gekoppeld'), 'success green').show();
+                        new Toast($t('7e0a683f-f409-4fbe-b463-46ec451951cd'), 'success green').show();
                     },
                 }),
             }).setDisplayStyle('popup'),

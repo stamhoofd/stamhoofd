@@ -214,17 +214,17 @@ export function getOrganizationCompanyFilterBuilders() {
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`Ondernemingsnummer`),
+            name: $t(`c10884fe-e858-48f6-875b-a1132c618df3`),
             key: 'companyNumber',
         }),
         new StringFilterBuilder({
-            name: $t(`BTW-nummer`),
+            name: $t(`263b7054-d38f-4bb9-be63-84b4e614613d`),
             key: 'VATNumber',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t('Bedrijfstype'),
+            name: $t('58f56570-0bcc-4ec1-a42e-94dbf2677bc2'),
             options: [
-                new MultipleChoiceUIFilterOption($t('Feitelijke vereniging'), null),
+                new MultipleChoiceUIFilterOption($t('1c5b447a-93e8-46da-b6e1-ffc29a2967e8'), null),
             ],
             wrapper: {
                 companyNumber: {
@@ -385,8 +385,8 @@ export function useGetOrganizationUIFilterBuilders() {
                 },
             }),
             new GroupUIFilterBuilder({
-                name: $t(`Facturatiegegevens`),
-                description: $t('De gekoppelde bedrijfsgegevens, vzw of feitelijke vereniging. Een groep kan meerdere gekoppelde entiteiten hebben.'),
+                name: $t(`d6244dd4-a0b6-4063-9f93-91c5ab91905c`),
+                description: $t('1ca52417-1476-4cbb-a240-335a18fedf45'),
                 builders: getOrganizationCompanyFilterBuilders(),
                 wrapper: {
                     companies: {
@@ -867,7 +867,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
 
             if (record.type === RecordType.Checkbox) {
                 const extra = options?.includeNullable
-                    ? [new MultipleChoiceUIFilterOption($t('Niet ingevuld'), null)]
+                    ? [new MultipleChoiceUIFilterOption($t('e420367f-7ce9-4dd3-95b7-c24d0649cb59'), null)]
                     : [];
                 allForCategory.push(
                     new MultipleChoiceFilterBuilder({
@@ -890,7 +890,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
 
             if (record.type === RecordType.ChooseOne) {
                 const extra = options?.includeNullable
-                    ? [new MultipleChoiceUIFilterOption($t('Niet ingevuld'), null)]
+                    ? [new MultipleChoiceUIFilterOption($t('e420367f-7ce9-4dd3-95b7-c24d0649cb59'), null)]
                     : [];
 
                 allForCategory.push(
@@ -917,7 +917,7 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
 
             if (record.type === RecordType.MultipleChoice) {
                 const extra = options?.includeNullable
-                    ? [new MultipleChoiceUIFilterOption($t('Niet ingevuld'), null)]
+                    ? [new MultipleChoiceUIFilterOption($t('e420367f-7ce9-4dd3-95b7-c24d0649cb59'), null)]
                     : [];
 
                 allForCategory.push(

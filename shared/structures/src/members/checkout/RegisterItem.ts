@@ -1241,7 +1241,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_price',
                     message: 'GroupPrice is not valid for this date',
-                    human: $t(`Het gekozen tarief is niet toepasbaar voor deze datum.`),
+                    human: $t(`bc608e45-810c-4dd3-82f7-3eb2befc4ffc`),
                     meta: { recoverable: true },
                 });
             }

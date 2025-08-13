@@ -1,21 +1,21 @@
 <template>
     <LoadingViewTransition :loading="isInitialLoading">
-        <SaveView :title="$t('UiTPAS-integratie')" class="edit-sponsor-view" :loading="isSaveLoading" @save="save">
+        <SaveView :title="$t('aafe1357-1b66-4122-beb0-b773a933a477')" class="edit-sponsor-view" :loading="isSaveLoading" @save="save">
             <h1>
-                {{ $t('UiTPAS-integratie') }}
+                {{ $t('aafe1357-1b66-4122-beb0-b773a933a477') }}
             </h1>
 
             <p class="style-description-small">
-                {{ $t('Haal de gegevens op uit het') }} <a href="https://platform.publiq.be" class="inline-link" target="_blank">{{ $t('Publiq platform') }}</a>{{ $t('.') }}
+                {{ $t('b364c428-7d28-418e-9dba-08bce39433b2') }} <a href="https://platform.publiq.be" class="inline-link" target="_blank">{{ $t('fa9e3bb7-5491-47f8-8939-0370767107b9') }}</a>{{ $t('5658edc2-ca76-4463-8729-6b7438249d91') }}
             </p>
 
             <STErrorsDefault :error-box="errors.errorBox" />
-            <STInputBox error-fields="clientId" :error-box="errors.errorBox" :title="$t('Client id')">
-                <input ref="firstInput" v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t('Plak hier je client id')">
+            <STInputBox error-fields="clientId" :error-box="errors.errorBox" :title="$t('63b4a0d5-b7a6-416f-8ac1-68fcdc4e88f6')">
+                <input ref="firstInput" v-model="clientId" class="input" type="text" autocomplete="off" :placeholder="$t('74235c2d-fe1f-4d38-821e-2ace113152ef')">
             </STInputBox>
 
-            <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('Client secret')">
-                <input ref="secondInput" v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t('Plak hier je client secret')">
+            <STInputBox error-fields="clientSecret" :error-box="errors.errorBox" :title="$t('c9e33324-eb11-44af-8701-0ef6b4c322e6')">
+                <input ref="secondInput" v-model="clientSecret" class="input" type="text" autocomplete="off" :placeholder="$t('9a3796e7-0eeb-495a-9289-74fbcec07a0c')">
             </STInputBox>
         </SaveView>
     </LoadingViewTransition>
@@ -92,7 +92,7 @@ errors.validator.addValidation('clientSecret', () => {
         throw new SimpleError({
             code: 'missing_client_secret',
             message: 'missing client secret',
-            human: $t('Vul een client secret in'),
+            human: $t('eaeba023-03b7-480d-8e2f-4849d7585909'),
             field: 'clientSecret',
         });
     }
@@ -104,7 +104,7 @@ errors.validator.addValidation('clientId', () => {
         throw new SimpleError({
             code: 'missing_client_id',
             message: 'missing client id',
-            human: $t('Vul een client id in'),
+            human: $t('76dfb997-817a-4d98-8ba3-0daacd0f5957'),
             field: 'clientId',
         });
     }

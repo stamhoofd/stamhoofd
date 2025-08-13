@@ -179,7 +179,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         throw new SimpleError({
                             code: 'uitpas_social_tariff_price_mismatch',
                             message: 'UiTPAS wrong number of prices retruned',
-                            human: $t('Het kansentarief voor sommige UiTPAS-nummers kon niet worden opgehaald.'),
+                            human: $t('2d1983fa-2224-422f-9ea0-fdae77cb4914'),
                             field: 'cart.items.uitpasNumbers',
                         });
                     }
@@ -188,7 +188,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                             throw new SimpleError({
                                 code: 'uitpas_social_tariff_price_mismatch',
                                 message: 'UiTPAS social tariff have a different price',
-                                human: $t('Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.', { correctPrice: Formatter.price(reducedPrices[i].price), orderPrice: Formatter.price(expectedReducedPrices[i].price) }),
+                                human: $t('2f4b9572-4b9c-42e0-91f1-b0984624d225', { correctPrice: Formatter.price(reducedPrices[i].price), orderPrice: Formatter.price(expectedReducedPrices[i].price) }),
                                 field: 'uitpasNumbers.' + i.toString(),
                             });
                         }

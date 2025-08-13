@@ -77,7 +77,7 @@ function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
                 throw new SimpleError({
                     code: 'missing_uitpas_base_product_price',
                     message: `Missing UiTPAS base product price`,
-                    human: $t(`Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.`),
+                    human: $t(`f7eea411-fb92-458f-bf3e-e36ed870591b`),
                 });
             }
             const label = makeBaseProductPriceLabel(item.product, baseProductPrice);

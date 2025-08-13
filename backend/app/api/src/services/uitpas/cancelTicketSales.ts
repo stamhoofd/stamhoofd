@@ -24,7 +24,7 @@ async function cancelTicketSale(access_token: string, ticketSaleId: string) {
         throw new SimpleError({
             code: 'unsuccessful_response_registering_ticket_sales',
             message: `Unsuccessful response when registering UiTPAS ticket sales`,
-            human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`ed4e876c-6a40-49a7-ab65-2a4d5f31c13f`),
         });
     }
     return ticketSaleId;

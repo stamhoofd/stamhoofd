@@ -5,10 +5,10 @@
         <main>
             <h1>{{ t }}</h1>
             <p class="style-description-small">
-                {{ $t('Door een evenement uit de UiTdatabank te koppelen kan #platform een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.') }}
+                {{ $t('ff27568d-d68a-46f7-bf6f-1fd4564ac3b3') }}
             </p>
             <p v-if="showNoteAboutNonOfficialFlow" class="style-description-small">
-                <I18nComponent :t="$t('Wil je de UiTPAS-nummers niet doorsturen en zelf het tarief instellen, <button>klik dan hier</button>.')">
+                <I18nComponent :t="$t('4d88d9eb-24f1-42f9-8575-6a6e5f22b1ba')">
                     <template #button="{content}">
                         <button class="inline-link" type="button" @click="doSelectEvent(null)">
                             {{ content }}
@@ -19,7 +19,7 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="text" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('Zoek op naam, locatie, beschrijving, ...')">
+                <input ref="input" v-model="text" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('3e63b101-0a81-444c-af7b-8827fd8872f0')">
             </form>
 
             <Spinner v-if="loadingResults || (loadingAfterEventSelect && !selectedEventUrl)" class="gray center" />
@@ -39,7 +39,7 @@
                 </STListItem>
             </STList>
             <p v-if="!loadingResults && results.length === 0 && text" class="info-box">
-                {{ $t('Geen evenementen gevonden.') }}
+                {{ $t('1b51e5e9-5ba2-4924-948e-a431f0fc1a9a') }}
             </p>
         </main>
     </div>
@@ -61,7 +61,7 @@ const props = withDefaults(
         selectEvent: (UitpasEventResponse: UitpasEventResponse | null, navigation: NavigationActions) => Promise<void> | void;
         showNoteAboutNonOfficialFlow?: boolean;
     }>(), {
-        title: $t('UiTPAS-evenement zoeken'),
+        title: $t('4499fa60-aaf1-49a7-bb3a-cba68337a3c3'),
         showNoteAboutNonOfficialFlow: true,
     },
 );

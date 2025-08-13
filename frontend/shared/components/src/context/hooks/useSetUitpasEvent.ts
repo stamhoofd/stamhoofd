@@ -45,7 +45,7 @@ function assertIsEventResponse(json: unknown): asserts json is EventResponse {
         throw new SimpleError({
             code: 'invalid_event_response',
             message: `Invalid event response`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van het UiTPAS-evenement.`),
+            human: $t(`5696e0d8-a405-4087-b9bb-4bda3c9baab1`),
         });
     }
 }
@@ -58,7 +58,7 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
             throw new SimpleError({
                 code: 'fetch_error_getting_uitpas_event_details',
                 message: `Error fetching Uitpas event details`,
-                human: $t(`Er is een fout opgetreden bij het ophalen van het UiTPAS-evenement.`),
+                human: $t(`5696e0d8-a405-4087-b9bb-4bda3c9baab1`),
             });
         });
 
@@ -66,7 +66,7 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
             throw new SimpleError({
                 code: 'invalid_response_getting_uitpas_event_details',
                 message: `Invalid response when getting Uitpas event details`,
-                human: $t(`Er is een fout opgetreden bij het ophalen van het UiTPAS-evenement.`),
+                human: $t(`5696e0d8-a405-4087-b9bb-4bda3c9baab1`),
             });
         }
         const json = await response.json().catch(() => {
@@ -74,7 +74,7 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
             throw new SimpleError({
                 code: 'json_parsing_error_getting_uitpas_event_details',
                 message: `Error parsing JSON when getting Uitpas event details`,
-                human: $t(`Er is een fout opgetreden bij het ophalen van het UiTPAS-evenement.`),
+                human: $t(`5696e0d8-a405-4087-b9bb-4bda3c9baab1`),
             });
         });
 

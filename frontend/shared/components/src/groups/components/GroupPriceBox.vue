@@ -7,7 +7,7 @@
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" />
 
         <template v-if="!isSingle">
-            <hr><h2>{{ $t("Beschikbaarheid") }}</h2>
+            <hr><h2>{{ $t("6ada0ff0-3976-41f7-aa65-7af870964ebc") }}</h2>
         </template>
 
         <STList>
@@ -46,7 +46,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Beschikbaar vanaf datum') }}
+                    {{ $t('9128e6d1-9772-4258-b1e6-5d271b71727f') }}
                 </h3>
 
                 <div v-if="hasStartDate" class="split-inputs option" @click.stop.prevent>
@@ -63,7 +63,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Onbeschikbaar na datum') }}
+                    {{ $t('163c78b9-f0dd-4ec5-bdfe-32b389aeda7d') }}
                 </h3>
 
                 <div v-if="hasEndDate" class="split-inputs option" @click.stop.prevent>
@@ -157,7 +157,7 @@ useValidation(errors.validator, () => {
     if (startDate.value && endDate.value && startDate.value >= endDate.value) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'start_date_after_end_date',
-            message: $t(`De "onbeschikbaar na datum" moet na de "beschikbaar vanaf datum" zijn.`),
+            message: $t(`5e3928ce-0e62-402f-bf9a-5151a63cc759`),
         }));
 
         return false;

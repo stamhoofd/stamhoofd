@@ -303,7 +303,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'You cannot set the uitpasClientCredentialsStatus manually',
-                        human: $t('Je kan de status van de UiTPAS-credentials niet handmatig instellen'),
+                        human: $t('d8937ba8-6689-4c76-9841-d5a00c99074b'),
                     });
                 }
 

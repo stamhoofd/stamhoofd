@@ -51,7 +51,7 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
             throw new SimpleError({
                 message: 'You must provide a client id',
                 code: 'missing_client_id',
-                human: $t('Je moet een client id opgeven.'),
+                human: $t('9b9ec483-63b8-4696-ade6-0eb18f9008e6'),
                 field: 'clientId',
             });
         }
@@ -59,7 +59,7 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
             throw new SimpleError({
                 message: 'You must provide a client secret',
                 code: 'missing_client_secret',
-                human: $t('Je moet een client secret opgeven.'),
+                human: $t('58de00fb-3b0a-45a6-9214-7d11b4175779'),
                 field: 'clientSecret',
             });
         }
@@ -67,7 +67,7 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
             throw new SimpleError({
                 message: 'You cannot use the placeholder client secret for a different client id',
                 code: 'invalid_client_secret',
-                human: $t('Je kan niet enkel de client id wijzigen. Geef ook de client secret in.'),
+                human: $t('bbc79280-7ae2-4b8d-a900-2d7cbb552428'),
                 field: 'clientSecret',
             });
         }
@@ -77,7 +77,7 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
             throw new SimpleError({
                 message: 'This organization does not have a uitpas organizer id set',
                 code: 'missing_uitpas_organizer_id',
-                human: $t('Stel eerst een UiTPAS-organisator in.'),
+                human: $t('80fcde9c-c8c7-4fe1-b9a6-51684a23d850'),
             });
         }
 
@@ -88,7 +88,7 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
                 throw new SimpleError({
                     message: 'The provided client credentials are not valid',
                     code: 'invalid_client_credentials',
-                    human: $t('De opgegeven client credentials zijn niet geldig.'),
+                    human: $t('42bbd5c0-8789-4ca1-b667-1c9ecf4d0190'),
                 });
             }
         }

@@ -16,7 +16,7 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
         throw new SimpleError({
             code: 'invalid_permissions_response',
             message: 'Invalid response format for permissions',
-            human: $t('Er is iets misgelopen bij het ophalen van je rechten. Probeer het later opnieuw.'),
+            human: $t('7d3a6b57-f81a-4d58-bc2b-babb2261c40b'),
         });
     }
 
@@ -35,7 +35,7 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
             throw new SimpleError({
                 code: 'invalid_permissions_response',
                 message: 'Invalid response format for permissions',
-                human: $t('Er is iets misgelopen bij het ophalen van je rechten. Probeer het later opnieuw.'),
+                human: $t('7d3a6b57-f81a-4d58-bc2b-babb2261c40b'),
             });
         }
     }
@@ -54,7 +54,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         throw new SimpleError({
             code: 'uitpas_unreachable_checking_permissions',
             message: `Network issue when checking UiTPAS permissions`,
-            human: $t(`We konden UiTPAS niet bereiken om de rechten te controleren. Probeer het later opnieuw.`),
+            human: $t(`542b793c-3edf-4505-b33d-199ea409bbda`),
         });
     });
     if (!response.ok) {
@@ -62,7 +62,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         throw new SimpleError({
             code: 'unsuccessful_response_checking_permissions',
             message: `Unsuccesful response when checking UiTPAS permissions`,
-            human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`ed4e876c-6a40-49a7-ab65-2a4d5f31c13f`),
         });
     }
     const json = await response.json().catch(() => {
@@ -70,7 +70,7 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         throw new SimpleError({
             code: 'invalid_json_checking_permissions',
             message: `Invalid json when checking UiTPAS permissions`,
-            human: $t(`Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`93004d03-955a-4a9a-937d-2f30841dc5cc`),
         });
     });
     assertIsPermissionsResponse(json);
@@ -91,18 +91,18 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
             }];
     const item = json.find(item => item.organizer.id === uitpasOrganizerId);
     if (!item) {
-        const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t(' en ') + ' ');
+        const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t('6d35156d-e452-4b0f-80f4-b1e9024d08ee') + ' ');
         return {
             status: UitpasClientCredentialsStatus.NoPermissions,
-            human: $t('Jouw UiTPAS-integratie heeft geen toegansrechten tot de geselecteerde UiTPAS-organisator, maar wel tot ') + organizers,
+            human: $t('96c8a719-dba5-47ce-bb61-ee0754a5f776') + organizers,
         };
     }
     const missingPermissions = neededPermissions.filter(needed => !item.permissions.includes(needed.permission));
     if (missingPermissions.length > 0) {
-        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map(p => p.human), ', ', ' ' + $t(' en ') + ' ');
+        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map(p => p.human), ', ', ' ' + $t('6d35156d-e452-4b0f-80f4-b1e9024d08ee') + ' ');
         return {
             status: UitpasClientCredentialsStatus.MissingPermissions,
-            human: $t('Jouw UiTPAS-integratie mist de volgende toegangsrechten voor de geselecteerde UiTPAS-organisator: ') + missingPermissionsHuman,
+            human: $t('040fa935-5cbc-4a85-b578-354bf9d7fc04') + missingPermissionsHuman,
         };
     }
     return {

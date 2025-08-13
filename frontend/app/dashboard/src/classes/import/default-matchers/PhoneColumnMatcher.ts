@@ -73,7 +73,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                     if (phoneNumber && phoneNumber.isValid()) {
                         throw new SimpleError({
                             code: 'invalid_field',
-                            message: $t('Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31.'),
+                            message: $t('2ed46ae7-03d8-4a9c-8555-0edfc7157d53'),
                             field: 'phone',
                         });
                     }
@@ -94,7 +94,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
 
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t('Ongeldig GSM-nummer'),
+                message: $t('0bf875c9-f6a8-417d-82dd-4d6bfff9669f'),
                 field: 'phone',
             });
         }

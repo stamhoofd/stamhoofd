@@ -29,7 +29,7 @@ export function useGetOfficialUitpasSocialTariff() {
                 throw new SimpleError({
                     code: 'invalid_social_tariff',
                     message: 'No social tariff found received uitpas event',
-                    human: $t('Het sociaal tarief kon niet worden berekend. Probeer het later opnieuw.'),
+                    human: $t('c8da000d-cfa8-4ceb-8ea0-87c464271eb8'),
                 });
             }
             else if (reducedPrices.length > 1) {

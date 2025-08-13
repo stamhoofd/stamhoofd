@@ -83,7 +83,7 @@ export class UitpasTokenRepository {
                 throw new SimpleError({
                     code: 'uitpas_api_not_configured_for_platform',
                     message: 'UiTPAS api is not configured for the platform',
-                    human: $t('UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.'),
+                    human: $t('71a8218b-c58e-4e95-9626-551b80eb8367'),
                 });
             }
             model = new UitpasClientCredential();
@@ -123,7 +123,7 @@ export class UitpasTokenRepository {
                 throw new SimpleError({
                     code: 'invalid_uitpas_client_credentials',
                     message: `Invalid UiTPAS client credentials`,
-                    human: $t(`De opgegeven UiTPAS client credentials zijn ongeldig. Controleer ze en probeer opnieuw.`),
+                    human: $t(`1086bb24-5df4-4faf-9dc0-ab5a955b0d8f`),
                 });
             }
             console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`, response.statusText);
@@ -193,7 +193,7 @@ export class UitpasTokenRepository {
                     throw new SimpleError({
                         code: 'uitpas_api_not_configured_for_this_organization',
                         message: `UiTPAS api not configured for organization with id ${organizationId}`,
-                        human: $t('UiTPAS is nog niet volledig geconfigureerd voor deze organisatie.'),
+                        human: $t('6b333cb4-21fd-42be-b0c9-6d899f2fd348'),
                     });
                 }
                 repo = UitpasTokenRepository.setRepoInMemory(organizationId, new UitpasTokenRepository(model)); // store in memory

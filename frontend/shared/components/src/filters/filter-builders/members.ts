@@ -712,7 +712,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
     if (recordCategoriesFilterBuilders.length > 0) {
         const groupFilter = new GroupUIFilterBuilder({
-            name: $t('Vragenlijsten'),
+            name: $t('4953cb1c-9ba5-40a6-91ad-c25cda4cdfcc'),
             builders: recordCategoriesFilterBuilders,
             wrapper: {
                 details: FilterWrapperMarker,
@@ -749,7 +749,7 @@ export function useAdvancedPlatformMembershipUIFilterBuilders() {
             const all: UIFilterBuilder[] = [];
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Vereniging ID'),
+                    name: $t('9c92d16b-947d-4a06-bed4-054d8223d5cb'),
                     key: 'organizationId',
                     allowCreation: false,
                     wrapper: FilterWrapperMarker,

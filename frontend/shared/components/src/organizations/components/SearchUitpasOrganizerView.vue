@@ -7,7 +7,7 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="name" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('Zoek op naam')">
+                <input ref="input" v-model="name" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t('4b55bf53-f867-4613-b375-fe9a35be2cbc')">
             </form>
 
             <Spinner v-if="loadingResults || (loadingAfterOrganizerSelect && !selectedOrganizerId)" class="gray center" />
@@ -21,7 +21,7 @@
                 </STListItem>
             </STList>
             <p v-if="!loadingResults && results.length === 0 && name" class="info-box">
-                {{ $t('Geen organisatoren gevonden.') }}
+                {{ $t('e8835291-6b19-49dc-9888-fa0b2161d24a') }}
             </p>
         </main>
     </div>
@@ -41,7 +41,7 @@ const props = withDefaults(
         title?: string;
         selectOrganizer: (uitpasOrganizerResponse: UitpasOrganizerResponse, navigation: NavigationActions) => Promise<void> | void;
     }>(), {
-        title: () => $t('UiTPAS-organisator zoeken'),
+        title: () => $t('695dc336-3540-44b5-b990-66367f08af00'),
     },
 );
 

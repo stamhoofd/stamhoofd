@@ -27,7 +27,7 @@
                     {{ $t("a44947d8-7021-4398-ad41-7067dac8ae64") }}
                 </p>
                 <p v-if="!discountPossible" class="style-description-small" @click.stop.prevent>
-                    {{ $t('Kortingen bij de UiTPAS officiële flow zijn niet mogelijk.') }}
+                    {{ $t('8e328465-ed68-4f9a-92ba-8c2e172bb521') }}
                 </p>
 
                 <div v-if="useDiscount" class="split-inputs option" @click.stop.prevent>

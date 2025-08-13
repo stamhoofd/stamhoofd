@@ -21,7 +21,7 @@ function assertsIsStaticSocialTariffResponse(json: unknown): asserts json is Sta
         throw new SimpleError({
             code: 'invalid_response_getting_static_uitpas_social_tariff',
             message: `Invalid response when getting static UiTPAS social tariff`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van het kansentarief voor dit evenement. Probeer het later opnieuw.`),
+            human: $t(`a56854af-464a-45a4-8c39-10a9264b6ce4`),
         });
     }
 }
@@ -35,7 +35,7 @@ export async function getSocialTariffForEvent(access_token: string, basePrice: n
         throw new SimpleError({
             code: 'invalid_uitpas_event_url',
             message: `Invalid UiTPAS event URL: ${uitpasEventUrl}`,
-            human: $t(`De opgegeven UiTPAS-evenement URL is ongeldig.`),
+            human: $t(`85fb6e02-9b69-43cc-acf7-96a576461560`),
         });
     }
     params.append('eventId', eventId);
@@ -61,7 +61,7 @@ export async function getSocialTariffForEvent(access_token: string, basePrice: n
         throw new SimpleError({
             code: 'unsuccessful_response_getting_static_uitpas_social_tariff',
             message: `Unsuccessful response when getting static UiTPAS social tariff`,
-            human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`ed4e876c-6a40-49a7-ab65-2a4d5f31c13f`),
         });
     }
     const json = await response.json().catch(() => {
@@ -80,7 +80,7 @@ export async function getSocialTariffForEvent(access_token: string, basePrice: n
         throw new SimpleError({
             code: 'no_social_tariff_available',
             message: `No social tariff available for event ${eventId}`,
-            human: $t(`Er is geen kansentarief beschikbaar voor dit evenement.`),
+            human: $t(`ccd8e8b4-01a7-4e7c-8ae0-92d2a4c659eb`),
         });
     }
     if (json.available.length > 1) {

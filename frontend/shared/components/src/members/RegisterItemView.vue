@@ -305,15 +305,15 @@ function getPeriodString(groupPrice: GroupPrice): string | null {
     const endDate = groupPrice.endDate;
 
     if (startDate && endDate) {
-        return $t(`Beschikbaar tussen: {range}`, { range: Formatter.dateRange(startDate, endDate) });
+        return $t(`25d1906f-b5b8-441c-8ff7-2e41a75d13e4`, { range: Formatter.dateRange(startDate, endDate) });
     }
 
     if (startDate) {
-        return $t(`Beschikbaar vanaf {date}`, { date: Formatter.startDate(startDate) });
+        return $t(`761ba5a0-8f9b-4c87-b3d0-559e3f6e8d92`, { date: Formatter.startDate(startDate) });
     }
 
     if (endDate) {
-        return $t(`Onbeschikbaar na {date}`, { date: Formatter.endDate(endDate) });
+        return $t(`543f5147-f7a5-430b-9b20-b974e809627d`, { date: Formatter.endDate(endDate) });
     }
 
     return null;

@@ -1,6 +1,6 @@
 <template>
     <SaveView :title="$t('c67f13a2-08cb-4c30-a39d-d07679430672')" :loading="saving" :save-text="`Importeer ${importMemberResults.length} leden`" @save="goNext">
-        <h1>{{ saving ? $t('Bezig met importeren') : $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}</h1>
+        <h1>{{ saving ? $t('1153ea0d-ec79-4677-aea9-d2f293cdfe57') : $t('4c795a2e-9675-4151-8cba-6222ed2ec3b5') }}</h1>
         <p v-if="!saving">
             {{ $t('122da7ee-3e58-416c-a0b7-ee84fbd39a2e') }}
         </p>
@@ -266,7 +266,7 @@ const waitingListWarning = computed(() => {
         return null;
     }
 
-    return $t('Sommige leden hebben een groep zonder wachtlijst. Deze zullen meteen voor de groep worden ingeschreven en niet voor een wachtlijst. Deze groepen hebben geen wachtlijst: {groups}.', { groups: Formatter.joinLast(Array.from(groupMap.values()).map(g => g.settings.name.toString()), ', ', ' ' + $t('en') + ' ') });
+    return $t('aaca8552-d08b-45d4-a068-3e441ceb1142', { groups: Formatter.joinLast(Array.from(groupMap.values()).map(g => g.settings.name.toString()), ', ', ' ' + $t('en') + ' ') });
 });
 
 const membersWithNewRegistrations = computed(() => props.importMemberResults.filter(m => memberImporter.hasNewRegistration(m, isWaitingList.value)));
@@ -488,7 +488,7 @@ function openResultView() {
                 if (member.existingMember) {
                     if (registration !== null) {
                         if (registration.group.type === GroupType.WaitingList) {
-                            description.push($t(`Inschrijven voor wachtlijst '{group}'`, { group: groupName }) + suffix);
+                            description.push($t(`70c70815-5095-4eb7-9eb2-f93cb1660135`, { group: groupName }) + suffix);
                         }
                         else {
                             description.push($t(`6258cf03-8bad-4ed3-869b-5771bcd797f6`, { group: groupName }) + suffix);
@@ -509,7 +509,7 @@ function openResultView() {
                 }
                 else {
                     if (registration.group.type === GroupType.WaitingList) {
-                        description.push($t(`Toevoegen in het systeem met inschrijving voor wachtlijst '{group}'`, { group: groupName }) + suffix);
+                        description.push($t(`29e73b62-658a-4203-8c05-c4a39f4dc01d`, { group: groupName }) + suffix);
                     }
                     else {
                         description.push($t(`c3031fda-2cfb-46b7-8cb6-b31ad49034e8`, { group: groupName }) + suffix);

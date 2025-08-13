@@ -98,10 +98,10 @@
                         <img src="@stamhoofd/assets/images/illustrations/uitpas.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ true ? $t('Koppel je UiTPAS-organisator') : $t('Beheer je UiTPAS-integratie') }}
+                        {{ true ? $t('c112eac2-2515-4476-81d1-e8dc51bc063c') : $t('1b313bdc-e15f-4633-9bcf-969e55139b94') }}
                     </h2>
                     <p class="style-description">
-                        {{ $t('Sluit aan bij UiTPAS, zodat je gemeente tussenkomt in het UiTPAS-kansentarief.') }}
+                        {{ $t('b6334ba0-a28d-4ee4-b443-03f293473249') }}
                     </p>
                     <template #right>
                         <span class="icon arrow-right-small gray" />

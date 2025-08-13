@@ -1,12 +1,12 @@
 <template>
     <div id="settings-view" class="st-view">
-        <STNavigationBar :title="$t('Koppel je UiTPAS-organisator')" />
+        <STNavigationBar :title="$t('c112eac2-2515-4476-81d1-e8dc51bc063c')" />
 
         <main>
-            <h1>{{ $t('Koppel met UiTPAS') }}</h1>
+            <h1>{{ $t('bb419e01-886f-47b1-b1d9-2a3ef7094c92') }}</h1>
 
             <p>
-                <I18nComponent :t="$t('Door #platform en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.')">
+                <I18nComponent :t="$t('50c110d0-67dd-4733-9fb1-49a1a541e2bd')">
                     <template #button="{content}">
                         <a class="inline-link" href="https://platform.publiq.be/nl" target="_blank">
                             {{ content }}
@@ -30,16 +30,16 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('UiTPAS-organisator') }}
+                        {{ $t('549c952e-347f-4b1d-ae55-b645636e2522') }}
                     </h3>
 
                     <p class="style-description">
-                        {{ uitpasOrganizerId ? uitpasOrganizerName : $t('Zoek jouw vereniging in de UiTPAS organisatoren lijst.') }}
+                        {{ uitpasOrganizerId ? uitpasOrganizerName : $t('87e8488b-4190-42d9-bdd0-564a46671f7f') }}
                     </p>
 
                     <template #right>
                         <span class="button text">
-                            {{ uitpasOrganizerId ? $t('Wijzig') : $t('Zoeken') }}
+                            {{ uitpasOrganizerId ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('8012defc-bf79-4ee5-b8f4-6e6cc5242bf8') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -59,7 +59,7 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Configuur UiTPAS-integratie') }}
+                        {{ $t('0c503313-92c1-4063-887d-87bbff5a6e53') }}
                     </h3>
 
                     <p class="style-description">
@@ -68,7 +68,7 @@
 
                     <template #right>
                         <span v-if="uitpasOrganizerId" class="button text">
-                            {{ uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.NotConfigured ? $t('Configureer') : $t('Wijzig') }}
+                            {{ uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.NotConfigured ? $t('aa6ef361-7d1f-4a9a-a7e1-644958739117') : $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -88,16 +88,16 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('UiTPAS-evenement') }}
+                        {{ $t('1e92a151-6161-4941-aa3f-fa69e14f75ee') }}
                     </h3>
 
                     <p class="style-description">
-                        {{ uitpasEvent?.name ?? $t('Zoek jouw evenement in de UiTPAS lijst.') }}
+                        {{ uitpasEvent?.name ?? $t('c4fa8a72-56cd-4b5c-ae12-6533a493bac6') }}
                     </p>
 
                     <template #right>
                         <span v-if="!!uitpasOrganizerId && uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" class="button text">
-                            {{ uitpasEvent ? $t('Wijzig') : $t('Zoeken') }}
+                            {{ uitpasEvent ? $t('3b95fc70-7928-426b-b65b-3389d9e762cc') : $t('8012defc-bf79-4ee5-b8f4-6e6cc5242bf8') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
@@ -161,7 +161,7 @@ const uitpasClientCredentialsStatus = computed(() => organizationManager.value.o
 const openSearchOrganizer = async () => {
     await show(
         new ComponentWithProperties(SearchUitpasOrganizerView, {
-            title: $t('Zoek je UiTPAS-organisator'),
+            title: $t('2c7dc287-58ab-423b-984a-b0582c992b4d'),
             selectOrganizer: async (organizer: UitpasOrganizerResponse, { pop }: NavigationActions) => {
                 uitpasOrganizerName.value = organizer.name;
                 uitpasOrganizerId.value = organizer.id;
@@ -197,7 +197,7 @@ const openSearchUitpasEvent = async () => {
     await show({
         components: [
             new ComponentWithProperties(SearchUitpasEventView, {
-                title: $t('Zoek je UiTPAS-evenement'),
+                title: $t('d37c7255-33dd-42a8-872d-0c719307f842'),
                 selectEvent: async (event: UitpasEventResponse | null, navigationActions: NavigationActions) => {
                     uitpasEvent.value = event;
                     if (props.onFixedAndEventSelected && uitpasClientCredentialsStatus.value === UitpasClientCredentialsStatus.Ok && event) {

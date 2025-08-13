@@ -3,7 +3,7 @@
         <div class="overlay">
             <span v-if="date" class="day">{{ Formatter.day(date) }}</span>
             <span v-if="date" class="month">{{ Formatter.capitalizeFirstLetter(Formatter.month(date)) }}</span>
-            <span v-if="!date" class="month">{{ $t('Geen datum') }}</span>
+            <span v-if="!date" class="month">{{ $t('083c0978-adfc-44c6-8007-40c883cd4fc9') }}</span>
         </div>
     </div>
 </template>

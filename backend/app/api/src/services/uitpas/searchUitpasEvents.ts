@@ -49,7 +49,7 @@ function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
         throw new SimpleError({
             code: 'invalid_events_response',
             message: `Invalid events response`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van de UiTPAS-evenementen.`),
+            human: $t(`0b610eb8-551f-4ef6-acdc-fb3267dfc2a8`),
         });
     }
 }
@@ -61,7 +61,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         throw new SimpleError({
             code: 'no_client_id_for_uitpas_events',
             message: `No client ID configured for Uitpas events`,
-            human: $t(`Er is geen UiTPAS client ID geconfigureerd voor deze organisatie.`),
+            human: $t(`0009cce2-9d13-4f03-9258-345d8f8e396e`),
         });
     }
     const baseUrl = 'https://search-test.uitdatabank.be/events';
@@ -97,7 +97,7 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         throw new SimpleError({
             code: 'unsuccessful_response_searching_uitpas_events',
             message: `Unsuccessful response when searching for UiTPAS events`,
-            human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`ed4e876c-6a40-49a7-ab65-2a4d5f31c13f`),
         });
     }
     const json = await response.json().catch(() => {

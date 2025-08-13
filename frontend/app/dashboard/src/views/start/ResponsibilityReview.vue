@@ -20,7 +20,7 @@
             <span class="icon arrow-right-small" />
         </p>
 
-        <p v-for="member of invalidMembers" :key="member.id" v-tooltip="$t('Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.')" class="button text error reduce-height" @click="editMember(member)">
+        <p v-for="member of invalidMembers" :key="member.id" v-tooltip="$t('759abb2c-48d9-4eb6-bf3a-bd8284b28ffa')" class="button text error reduce-height" @click="editMember(member)">
             <span>{{ member.member.name }}</span>
             <span class="icon exclamation-two" />
         </p>

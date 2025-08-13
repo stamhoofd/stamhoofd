@@ -36,7 +36,7 @@ function assertIsUitpasNumberSuccessfulResponse(
         throw new SimpleError({
             code: 'invalid_response_retrieving_pass_by_uitpas_number',
             message: `Invalid response when retrieving pass by UiTPAS  number`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`),
+            human: $t(`4c6482ff-e6d9-4ea1-b11d-e12d697b4b7b`),
         });
     }
 }
@@ -110,7 +110,7 @@ async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
         throw new SimpleError({
             code: 'unsuccessful_and_unexpected_response_retrieving_pass_by_uitpas_number',
             message: `Unsuccesful response without message when retrieving pass by UiTPAS number`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?`),
+            human: $t(`4c6482ff-e6d9-4ea1-b11d-e12d697b4b7b`),
         });
     }
 

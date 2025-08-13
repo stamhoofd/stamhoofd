@@ -25,7 +25,7 @@ function assertIsOrganizersResponse(json: unknown): asserts json is OrganizersRe
         throw new SimpleError({
             code: 'invalid_response_searching_uitpas_organizers',
             message: `Invalid response when searching for UiTPAS organizers`,
-            human: $t(`Er is een fout opgetreden bij het zoeken naar UiTPAS-organisaties. Probeer het later opnieuw.`),
+            human: $t(`e1aab1a7-fded-4e5e-b994-6607684764ac`),
         });
     }
 }
@@ -37,7 +37,7 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         throw new SimpleError({
             code: 'empty_uitpas_organizer_name',
             message: `Empty name when searching for UiTPAS organizers`,
-            human: $t(`Je moet een naam opgeven om UiTPAS-organisaties te zoeken.`),
+            human: $t(`963105d8-a70a-4ba4-9ddc-b7f908d44664`),
         });
     }
     const baseUrl = 'https://api-test.uitpas.be/organizers';
@@ -66,7 +66,7 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         throw new SimpleError({
             code: 'unsuccessful_response_searching_uitpas_organizers',
             message: `Unsuccessful response when searching for UiTPAS organizers`,
-            human: $t(`Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.`),
+            human: $t(`ed4e876c-6a40-49a7-ab65-2a4d5f31c13f`),
         });
     }
     const json = await response.json().catch(() => {

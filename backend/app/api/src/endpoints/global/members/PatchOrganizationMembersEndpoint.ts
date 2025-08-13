@@ -317,7 +317,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: platformResponsibility ? $t('Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar voor een standaard leeftijdsgroep') : $t('d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840'),
+                        human: platformResponsibility ? $t('ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5') : $t('d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840'),
                     });
                 }
 
@@ -959,7 +959,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
-                human: $t(`{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.`, { member: member.details.firstName }),
+                human: $t(`510807a1-d4c7-45fa-9e3b-ddc8764d3f6e`, { member: member.details.firstName }),
                 statusCode: 400,
             });
         }

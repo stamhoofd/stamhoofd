@@ -121,10 +121,10 @@
                                     {{ $t('485a1995-f06e-4c04-a9cb-8f38a043cf98') }}
                                 </p>
                                 <p v-else-if="webshop" class="style-description-small">
-                                    {{ $t('Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze vereniging.') }}
+                                    {{ $t('198e7383-2512-4f6f-b919-2b4225b8e2a9') }}
                                 </p>
                                 <p v-else class="style-description-small">
-                                    {{ $t('De webshop kon niet geladen worden.') }}
+                                    {{ $t('dd4ec83e-2d84-406b-9f3b-4fb1ba3e6fc7') }}
                                 </p>
                                 <template #right>
                                     <button v-if="canWriteEvent" v-tooltip="$t('5ac02b3f-f412-43de-bd15-45b9679635b4')" class="button icon unlink" type="button" @click.stop="unlinkWebshop" />
@@ -595,7 +595,7 @@ async function unlinkWebshop() {
 async function linkWebshop(event: MouseEvent) {
     const org = eventOrganization.value ?? organization.value;
     if (!org) {
-        Toast.warning($t(`Ga naar het beheerdersportaal van een vereniging (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.`)).show();
+        Toast.warning($t(`449df98c-76b7-49b5-b807-9a431336fa86`)).show();
         return;
     }
 

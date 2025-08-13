@@ -5,7 +5,7 @@
                 class="input with-spinner"
                 type="text"
                 autocomplete="off"
-                :placeholder="$t('Berekenen...')"
+                :placeholder="$t('8a9b7083-6a55-400f-a244-7513385c3a8a')"
                 :disabled="true"
             >
             <Spinner class="spinner-inside-input" />

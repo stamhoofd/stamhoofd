@@ -301,7 +301,7 @@ export class RecordSettings extends BaseRecordSettings {
             if (answer.settings.type !== this.type) {
                 throw new SimpleError({
                     code: 'field_type_changed',
-                    message: $t(`Kijk dit nog even na`),
+                    message: $t(`621c533c-23fe-43b5-b493-a4352ac479d2`),
                     field: this.id,
                 });
             }

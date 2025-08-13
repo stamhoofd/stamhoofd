@@ -31,7 +31,7 @@ export function useAdvancedRegistrationsUIFilterBuilders() {
             const all: UIFilterBuilder[] = [];
             all.push(
                 new StringFilterBuilder({
-                    name: $t('Vereniging ID'),
+                    name: $t('9c92d16b-947d-4a06-bed4-054d8223d5cb'),
                     key: 'organizationId',
                     allowCreation: false,
                     wrapper: FilterWrapperMarker,

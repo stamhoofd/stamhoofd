@@ -34,7 +34,7 @@ function assertsIsSocialTariffResponse(json: unknown): asserts json is SocialTar
         throw new SimpleError({
             code: 'invalid_response_getting_uitpas_social_tariff',
             message: `Invalid response when getting UiTPAS social tariff`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van het kansentarief voor jouw UiTPAS-nummer. Probeer het later opnieuw.`),
+            human: $t(`466844b9-c042-4bc7-b77d-3f87376086b5`),
         });
     }
 }
@@ -60,7 +60,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'invalid_uitpas_event_url',
             message: `Invalid UiTPAS event URL: ${uitpasEventUrl}`,
-            human: $t(`De opgegeven UiTPAS-evenement URL is ongeldig.`),
+            human: $t(`85fb6e02-9b69-43cc-acf7-96a576461560`),
         });
     }
     params.append('eventId', eventId);
@@ -110,7 +110,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'unsuccessful_and_unexpected_response_retrieving_social_tariff_by_uitpas_number',
             message: `Unsuccesful response without message when retrieving social tariff by UiTPAS number`,
-            human: $t(`Er is een fout opgetreden bij het ophalen van je UiTPAS kansentarief. Kijk je het nummer even na?`),
+            human: $t(`1572d069-abda-4b31-a373-f0c3760c79b1`),
         });
     }
     const json = await response.json().catch(() => {
@@ -136,7 +136,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'no_social_tariff_available',
             message: `No social tariff available for event ${uitpasEventUrl}`,
-            human: $t(`Er is geen kansentarief beschikbaar voor dit evenement.`),
+            human: $t(`ccd8e8b4-01a7-4e7c-8ae0-92d2a4c659eb`),
         });
     }
     if (json.available.length > 1) {
@@ -150,7 +150,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'no_remaining_social_tariff',
             message: `No remaining social tariff for event ${uitpasEventUrl} and UiTPAS number ${uitpasNumber}`,
-            human: $t(`Je hebt recht op UiTPAS-kansentarief maar het overblijvend aantal is niet voldoende.`),
+            human: $t(`f9d6bc51-e7c9-4d3f-a13f-27871a018d83`),
         });
     }
     console.log('Social tariff for UiTPAS number', uitpasNumber, 'with event id', uitpasEventUrl, 'is', json.available[0].price, 'euros');

@@ -21,7 +21,7 @@
         </p>
 
         <template #right>
-            <span v-if="!hasRegistration" v-tooltip="platformResponsibility ? $t('Deze functie is ongeldig omdat {name} niet is ingeschreven voor een standaard leeftijdsgroep. Deze functie zal automatisch verwijderd worden op het einde van de maand.', {name: member.patchedMember.firstName}) : $t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
+            <span v-if="!hasRegistration" v-tooltip="platformResponsibility ? $t('699edd60-afb0-4c4d-aac5-58f7a6b0ff1f', {name: member.patchedMember.firstName}) : $t('71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492', {name: member.patchedMember.firstName})" class="icon warning yellow" />
         </template>
     </STListItem>
 </template>

@@ -10,17 +10,17 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <button v-if="!patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus === UitpasClientCredentialsStatus.Ok" type="button" class="warning-box with-button selectable" @click="openUitpasEventSearch()">
-            {{ $t('Er werd géén UiTPAS-evemenent gekoppeld, je krijgt géén automatische terugbetaling van je UiTPAS-regio.') }}
+            {{ $t('c43f7c56-b6f3-4de5-a543-c4c0c2b8cb6e') }}
 
             <span class="button text" type="button">
-                {{ $t('UiTPAS-evenement koppelen') }}
+                {{ $t('489734b2-e7e2-4c5e-a9ad-d00c29dc4f8e') }}
             </span>
         </button>
         <button v-else-if="patchedProduct.uitpasEvent && atLeastOneUitpasSocialTariff && uitpasFeature && organization.meta.uitpasClientCredentialsStatus !== UitpasClientCredentialsStatus.Ok" type="button" class="error-box with-button selectable" @click="openUitpasSettings()">
             {{ UitpasClientCredentialsStatusHelper.getName(organization.meta.uitpasClientCredentialsStatus) }}
 
             <span class="button text" type="button">
-                {{ $t('Controleer de instellingen') }}
+                {{ $t('8b74f225-07a7-4b5e-b937-4d479c888789') }}
             </span>
         </button>
 
@@ -65,14 +65,14 @@
 
         <template v-if="patchedProduct.uitpasEvent">
             <hr><h2 class="style-with-button">
-                <div>{{ $t('UiTPAS-evenement') }}</div>
+                <div>{{ $t('1e92a151-6161-4941-aa3f-fa69e14f75ee') }}</div>
                 `<button class="button text only-icon-smartphone" type="button" @click="clearUitpasEvent">
                     <span class="icon unlink" />
-                    <span>{{ $t('Ontkoppel') }}</span>
+                    <span>{{ $t('7ec9bfd6-8d4c-4f45-a5e8-7979c747de64') }}</span>
                 </button>`
             </h2>
             <p class="style-description-small">
-                {{ $t('Elk ticket moet een UiTPAS-evenement gekoppeld hebben om een automatische terugbetaling te krijgen van je UiTPAS-regio.') }}
+                {{ $t('d0c76989-c11b-4eef-ac8f-3c76e9ad315e') }}
             </p>
 
             <STList>
@@ -94,7 +94,7 @@
 
                     <template #right>
                         <span class="button text">
-                            {{ $t('Wijzig') }}
+                            {{ $t('3b95fc70-7928-426b-b65b-3389d9e762cc') }}
                             <span class="icon arrow-right-small" />
                         </span>
                     </template>
