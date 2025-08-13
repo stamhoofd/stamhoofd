@@ -33,11 +33,11 @@
   },
   "08ed827b-4ea2-4abd-966b-672d7dad3b23": {
     "original": "Om online betalingen te activeren moet je eerst allerlei documenten aanleveren (alle instructies via knop hieronder), de activatie hiervan duurt ongeveer 1 - 3 weken. Hiermee kan je betalingen via Bancontact, Payconiq, iDEAL en kredietkaart activeren. Kredietkaart is enkel mogelijk als je eenheid een ondernemingsnummer heeft.",
-    "translation": "To activate online payments, you must first submit various documents (all instructions via the button below), the activation of this takes approximately 1-3 weeks. This allows you to activate payments via Bancontact, Payconiq, iDEAL and credit card. Credit card is only possible if your unit has a company number."
+    "translation": "To activate online payments, you must first provide various documents (all instructions via the button below). The activation process takes about 1-3 weeks. With this you can enable payments via Bancontact, Payconiq, iDEAL and credit card. Credit card is only possible if your unit has a company number."
   },
   "0998a455-9ffc-4222-8432-ef7681908ad7": {
     "original": "Als een andere eenheid schulden aan jouw eenheid heeft, kan je hiervoor ook automatische e-mails versturen. Dit gebeurt op basis van functies die je hieronder kan instellen.",
-    "translation": "If another unit owes your unit money, you can also send automatic emails for this. This is done based on roles that you can set below."
+    "translation": "If another unit owes money to your unit, you can also send automatic emails for this. This is based on roles that you can configure below."
   },
   "0ab4ec6b-ae79-4d48-bd45-37da8e712509": {
     "original": "Je kan pas je volgende scoutsjaar klaarzetten ten vroegste 8 maanden voor de start ervan.",
@@ -53,7 +53,7 @@
   },
   "0b6949f6-80b7-4d48-9e1e-16bfb826014a": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt afgekeurd",
-    "translation": "Email sent to the submitter (and the unit's set contact persons) when a camp notification is rejected"
+    "translation": "Email sent to the petitioner (and the unit's designated contact persons) when a camp notification is rejected"
   },
   "0b7c21d5-b9ed-4ddc-9370-7f58255f4eba": {
     "original": "Instellen voor scoutsjaar",
@@ -61,7 +61,7 @@
   },
   "0c827ab2-42af-4b19-9160-a69475039314": {
     "original": "Niet alle gegevens van jouw eenheid werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
-    "translation": "Not all data of your unit has been filled in in the Stripe dashboard. Check if everything has been filled in. The following things might be missing:"
+    "translation": "Not all details of your unit have been filled in the Stripe dashboard. Check if everything has been entered. The following items may be missing:"
   },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
     "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Jamboree). Zorg dat deze overeenkomt met de namen in Jamboree.",
@@ -69,7 +69,7 @@
   },
   "0fa660da-1e74-4940-af88-eafafb1094b6": {
     "original": "De URI van de eenheid is te kort",
-    "translation": "The URI of the unit is too short"
+    "translation": "The unit's URI is too short"
   },
   "11b55f40-f3d4-4ce7-9831-57d188367b9f": {
     "original": "Vul de naam van de eenheid in",
@@ -111,9 +111,13 @@
     "original": "Maak een kopie van de instellingen van jouw eenheid.",
     "translation": "Make a copy of your unit's settings."
   },
+  "198e7383-2512-4f6f-b919-2b4225b8e2a9": {
+    "original": "Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze eenheid.",
+    "translation": "You can edit this webshop's settings via the administrator portal of this unit."
+  },
   "19e5262f-9dc1-40d9-b905-bda8462b6046": {
     "original": "Er bestaat al een eenheid met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
-    "translation": "A unit with the same name already exists. For example, add the name of your municipality."
+    "translation": "A unit with the same name already exists. Add the name of your municipality, for example."
   },
   "1af084bf-42d6-4a59-a7da-d1e87c6dba8e": {
     "original": "Dit lid is niet langer aangesloten bij GSB, en de verzekering loopt binnenkort af",
@@ -121,7 +125,7 @@
   },
   "1bb58aa1-e36e-4384-8c54-be3b71d77a3b": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als een kampmelding wordt goedgekeurd",
-    "translation": "Email sent to the submitter (and the unit's set contact persons) when a camp notification is approved"
+    "translation": "Email sent to the petitioner (and the unit's designated contact persons) when a camp notification is approved"
   },
   "1cbf76ca-79d3-4f12-8f09-dc585f5e9da3": {
     "original": "Scoutsjaren",
@@ -145,7 +149,7 @@
   },
   "227a2170-37b7-46b0-ac1e-516f603379b5": {
     "original": "Sommige aansluitingen verlopen via GSB (lid betaalt rechtstreeks aan de koepel) en worden dus ook niet echt aangerekend aan een individuele eenheid. Je kan deze via deze filter uitsluiten.",
-    "translation": "Some affiliations run via GSB (member pays directly to the umbrella organisation) and are therefore not actually charged to an individual unit. You can exclude these using this filter."
+    "translation": "Some affiliations run through GSB (member pays directly to the federation) and are therefore not really charged to an individual unit. You can exclude these using this filter."
   },
   "2300284a-a015-4c97-8ad1-6c9f2bbde174": {
     "original": "Log in als een beheerder van deze eenheid en beheer de leden, activiteiten en instellingen.",
@@ -201,7 +205,7 @@
   },
   "2aead74c-c67c-4844-8ba2-f7f930b35b5e": {
     "original": "Mijn eenheid staat er niet tussen",
-    "translation": "My unit is not among them"
+    "translation": "My unit is not listed"
   },
   "2be85b13-52d6-4322-adcc-b491b5749422": {
     "original": "Bevestiging 2/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
@@ -221,15 +225,11 @@
   },
   "2e5e2e62-1e0c-406d-96c9-f66e7c8e85bd": {
     "original": "Gegevens van de eenheid of persoon die instaat voor de opvang.",
-    "translation": "Details of the unit or person responsible for the reception."
+    "translation": "Data of the unit or person responsible for the childcare."
   },
   "2f325358-6e2f-418c-9fea-31a14abbc17a": {
     "original": "Eenheid",
     "translation": "Unit"
-  },
-  "2f645618-a9a9-4598-883d-6f1991ae379d": {
-    "original": "Geen rechtspersoonlijkheid (feitelijke eenheid)",
-    "translation": "No legal personality (de facto unit)"
   },
   "31757907-4cdd-4f0e-bb9d-cba9c1d997e4": {
     "original": "Deze eenheid bestaat niet",
@@ -265,7 +265,7 @@
   },
   "3573c612-1241-4b48-8ed5-8f11b8860e23": {
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
-    "translation": "You are logging into the feedback system with this account: {email}. You can first change units if you want to log in with a different account."
+    "translation": "You are logging in to the feedback system with this account: {email}. You can first change units if you want to log in with a different account."
   },
   "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
     "original": "Welkom op het ledenplatform van Jamboree 2027, hier kan je jouw gegevens, inschrijving en betalingen beheren.",
@@ -327,6 +327,10 @@
     "original": "Je hebt geen rechten om een activiteit aan te maken voor deze eenheid.",
     "translation": "You do not have the rights to create an activity for this unit."
   },
+  "449df98c-76b7-49b5-b807-9a431336fa86": {
+    "original": "Ga naar het beheerdersportaal van een eenheid (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.",
+    "translation": "Go to a unit's administrator portal (which will act as the organizer) to link a webshop to this activity."
+  },
   "44ff6618-ecbf-408b-9cc1-b1479e8ba8a2": {
     "original": "Het scoutsjaar dat je wilt instellen is al afgelopen",
     "translation": "The scouts year you want to configure has already ended"
@@ -353,7 +357,7 @@
   },
   "49742012-1ca8-4b91-a176-9ce3e17c1fe0": {
     "original": "Er kon geen uniek lidnummer aangemaakt worden. Mogelijks zijn er teveel leden met dezelfde geboortedatum. Neem contact op met de eenheid.",
-    "translation": "A unique member number could not be created. There may be too many members with the same date of birth. Contact the unit."
+    "translation": "A unique member number could not be created. There may be too many members with the same date of birth. Please contact the unit."
   },
   "49753d6a-7ca4-4145-8024-0be05a9ab063": {
     "original": "Deze beveiligingscode is ongeldig. Probeer het opnieuw of neem contact op met jouw eenheid om de juiste code te ontvangen.",
@@ -361,7 +365,7 @@
   },
   "49952c7d-05e9-46a2-b5ec-7411ed71be32": {
     "original": "bv. Ruimtereis eenheid",
-    "translation": "e.g. Space travel unit"
+    "translation": "e.g. Space Travel unit"
   },
   "4a2a630f-3396-404f-9316-d660df9935a9": {
     "original": "Alle aansluitingen die (al dan niet automatisch) aan leden worden toegevoegd, worden pas toegevoegd aan het openstaande bedrag van een eenheid na een manuele actie. Daarna kan een eenheid het bedrag betalen via een online betaling in hun beheerdersportaal.",
@@ -398,6 +402,10 @@
   "4fa242b7-c05d-44d4-ada5-fb60e91af818": {
     "original": "Er zijn nog geen eenheden",
     "translation": "There are no units yet"
+  },
+  "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
+    "original": "Door Jamboree en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
+    "translation": "By connecting Jamboree and UiTPAS, you can get an automatic refund for every sale at the UiTPAS discounted rate. First, you must become an official UiTPAS organizer so they know where to send the refund. After that, you'll need to create an integration on the <button>Publiq</button> website. Then, enter the data from that integration below. Finally, for each item in your webshop, you must link an event from the UiTdatabank."
   },
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Eenheid",
@@ -437,11 +445,7 @@
   },
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
-    "translation": "You can also set your own domain name (e.g. register.myunit.be). For this you must have already purchased the domain name; this will usually already be the case if you already have your own website."
-  },
-  "594307a3-05b8-47cf-81e2-59fb6254deba": {
-    "original": "Feitelijke eenheid",
-    "translation": "Actual unit"
+    "translation": "You can also set your own domain name (e.g. register.myunit.co.uk). For this, you must have already purchased the domain name; in most cases, this will already be the case if you already have your own website."
   },
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
@@ -453,11 +457,11 @@
   },
   "5b3e65b1-9444-4b65-a032-e184ed7c2471": {
     "original": "Mijn eenheid aansluiten",
-    "translation": "Connect my unit"
+    "translation": "Affiliate my unit"
   },
   "5c7d8f29-9d83-4f33-9d6b-0f947e384f75": {
     "original": "Importeer een zaalplan dat jij of een andere eenheid eerder uit Jamboree hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
-    "translation": "Import a floor plan that you or another unit has previously exported from Jamboree. Importing from other systems is not possible."
+    "translation": "Import a seating plan that you or another unit previously exported from Jamboree. Importing from other systems is not possible."
   },
   "5d1da89a-aa00-4953-aa59-53c0342c5c1a": {
     "original": "Kies voor welke eenheden deze standaard leeftijdsgroep beschikbaar is.",
@@ -469,7 +473,7 @@
   },
   "5d75775a-a4b5-426a-aea9-b1e75ee5f055": {
     "original": "bv. https://www.eenheid.be",
-    "translation": "e.g. https://www.unit.be"
+    "translation": "e.g. https://www.unit.co.uk"
   },
   "5dbc2f08-f2d0-43bc-973d-b789077ca3ad": {
     "original": "Welkom op het beheerdersportaal van Jamboree. Hier kan je leden beheren en instellingen aanpassen.",
@@ -481,7 +485,7 @@
   },
   "5e60cf0f-5489-4e90-8dab-97c56c2e989c": {
     "original": "Je probeert een doorverwijzingslink met korting van een andere eenheid te gebruiken, maar je hebt al een eenheid geregistreerd. Een doorverwijzingslink is enkel geldig voor de eerste eenheid die je op Jamboree aansluit.",
-    "translation": "You are trying to use a referral link with a discount from another unit, but you have already registered a unit. A referral link is only valid for the first unit you connect to Jamboree."
+    "translation": "You are trying to use a discount referral link from another unit, but you have already registered a unit. A referral link is only valid for the first unit you connect to Jamboree."
   },
   "5e99e2aa-a240-4894-8de3-f8f0fef20068": {
     "original": "Eenheidsnummer",
@@ -509,7 +513,7 @@
   },
   "6110db94-d89d-43d0-9c1c-d3e71253a795": {
     "original": "De DNS-instellingen van de domeinnaam van een eenheid zijn correct ingesteld.",
-    "translation": "The DNS settings of a unit's domain name are correctly set."
+    "translation": "The DNS settings of a unit's domain name are correctly configured."
   },
   "6149c3a0-74ee-476d-835f-94a4ac59ba34": {
     "original": "Eenheidsnaam",
@@ -525,11 +529,11 @@
   },
   "62246c37-15c7-4f7d-94e2-7476f971c8da": {
     "original": "Betalen van inschrijvingsgelden of webshops voor een eenheid via Jamboree (partner).",
-    "translation": "Payment of registration fees or webshops for a unit via Jamboree (partner)."
+    "translation": "Paying registration fees or webshops for a unit via Jamboree (partner)."
   },
   "6348587f-8d3e-4a13-8b52-5fa459366fee": {
     "original": "Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een eenheid ongeldig te zijn.",
-    "translation": "During a routine check, the DNS settings of a unit's domain name appear to be invalid."
+    "translation": "A routine check shows that the DNS settings of a unit's domain name are invalid."
   },
   "6435b870-2298-49bb-bd28-904e864178d3": {
     "original": "Bevestiging 3/3. Ben je 100% zeker dat je deze eenheid wilt verwijderen?",
@@ -569,7 +573,7 @@
   },
   "6a63ceb0-5926-42db-bb56-4d3a6bd81f7a": {
     "original": "Buurteenheid",
-    "translation": "Neighbour unit"
+    "translation": "Neighbourhood unit"
   },
   "6ad28fe1-da51-4538-90a3-eb42553b7057": {
     "original": "Studenteneenheid",
@@ -589,7 +593,7 @@
   },
   "6e675a7d-b124-4507-bf0c-9b70013e98ca": {
     "original": "Er bestaat al een eenheid met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze eenheid niet al bestaat.",
-    "translation": "A unit with the same URI already exists. Adjust this so that it is unique, and check whether this unit already exists."
+    "translation": "A unit with the same URI already exists. Adjust this so that it is unique, and check whether this unit does not already exist."
   },
   "6e7658ac-437e-4e1e-9efd-03c0a5cbd5d9": {
     "original": "website van je eenheid",
@@ -605,7 +609,7 @@
   },
   "6efffec1-322e-479d-b411-abbcbc4daf09": {
     "original": "Gegevens van de eenheid",
-    "translation": "Details of the unit"
+    "translation": "Unit data"
   },
   "6f77926b-801a-477d-8254-78166ca8e6be": {
     "original": "Scoutsgroep De Goudvis op Jamboree",
@@ -647,6 +651,10 @@
     "original": "Jouw eenheid betaalt {price} aan GSB.",
     "translation": "Your unit pays {price} to GSB."
   },
+  "759abb2c-48d9-4eb6-bf3a-bd8284b28ffa": {
+    "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige scoutsjaar. Verwijder de functie of schrijf het lid in voor het huidige scoutsjaar.",
+    "translation": "This member is not registered for a default age group in the current scouts year. Remove the role or register the member for the current scouts year."
+  },
   "768afe13-5f57-4a82-a6ac-77c8999b8aeb": {
     "original": "Jamboree toont op enkele plaatsen het logo van Jamboree op jullie webshop. Op die manier kunnen we Jamboree bekender maken bij andere eenheden, waardoor we Jamboree ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.",
     "translation": "Jamboree shows the Jamboree logo on your webshop in a few places. In this way, we can make Jamboree better known to other units, so that we can also keep Jamboree affordable. You can reduce this if you prefer not to."
@@ -657,7 +665,7 @@
   },
   "77a3f842-960f-43fa-a9f2-fcac7d3ecc88": {
     "original": "In dit overzicht staan enkel eenheden die al aangesloten zijn bij Jamboree. Een eenheid moet eerst aansluiten voor je kan inloggen.",
-    "translation": "This overview only shows units already affiliated with Jamboree. A unit must be affiliated first before you can log in."
+    "translation": "This overview only shows units that are already affiliated with Jamboree. A unit needs to be affiliated first before you can log in."
   },
   "78a012a9-3caa-405f-851d-429610138852": {
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een eenheid).",
@@ -665,11 +673,11 @@
   },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
-    "translation": "Choose a unit that is responsible for collecting the affiliation costs"
+    "translation": "Choose a unit that is responsible for collecting the affiliation costs."
   },
   "79cb9c3d-fe24-46cb-84bd-f1aa5fd625c5": {
     "original": "is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
-    "translation": "has not yet been activated by Stripe. Check if all necessary information has been filled in in your Stripe dashboard. Often the problem is that the address of one of the directors is missing in Stripe or the website link of the unit has not been filled in."
+    "translation": "has not yet been activated by Stripe. Check if all necessary information has been filled in in your Stripe dashboard. Often the problem is that the address of one of the directors is missing in Stripe or the website link of the unit was not filled in."
   },
   "7a44f6f1-bb2f-4e46-93c2-afcae9db3f80": {
     "original": "Opgelet: als je de link naar jouw webshop aanpast, werken mogelijks sommige links in al verzonden e-mails niet meer. De enige uitzondering hierop is als je van een standaard Jamboree link overschakelt op een eigen domeinnaam (dan blijven oude links werken). Doe dit dus enkel in het begin van een verkoop.",
@@ -725,15 +733,19 @@
   },
   "8459189d-6f9a-4541-9fb7-7618061f1969": {
     "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
-    "translation": "The unit has been created. Log in to the administrator portal to grant access to other administrators."
+    "translation": "The unit has been created. Log in to the administrator portal to give other administrators access."
   },
   "864675a2-7376-4a61-9c7d-f488e7906d7b": {
     "original": "De URI van de eenheid is te lang",
-    "translation": "The URI of the unit is too long"
+    "translation": "The unit's URI is too long."
   },
   "87a2582f-6de5-4b59-9395-7c49f8540659": {
     "original": "Eenheid",
     "translation": "Unit"
+  },
+  "87e8488b-4190-42d9-bdd0-564a46671f7f": {
+    "original": "Zoek jouw eenheid in de UiTPAS organisatoren lijst.",
+    "translation": "Find your unit in the list of UiTPAS organizers."
   },
   "880e4cac-5a7e-4d6d-80ad-c5472a005df6": {
     "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij GSB en daardoor niet verzekerd.",
@@ -757,7 +769,7 @@
   },
   "8bc53634-08a5-4404-9455-421955e83ce4": {
     "original": "Je hebt geen toegangsrechten om de facturatiegegevens van deze eenheid te bewerken.",
-    "translation": "You do not have access rights to edit the billing data of this unit."
+    "translation": "You do not have the access rights to edit the billing data of this unit."
   },
   "8cba151c-54df-4786-8d37-bf2af2005753": {
     "original": "Ticketverkoop via Jamboree",
@@ -789,7 +801,7 @@
   },
   "91e43562-956f-41ac-b5b6-a8bcb63edd66": {
     "original": "Deze domeinnaam is al in gebruik door een andere eenheid. Neem contact op met Jamboree als je denkt dat je toch toegang zou moeten krijgen.",
-    "translation": "This domain name is already in use by another unit. Contact Jamboree if you think you should still have access."
+    "translation": "This domain name is already in use by another unit. Please contact Jamboree if you think you should still have access."
   },
   "92a41b40-9841-4326-abaf-a8a7d97e5d55": {
     "original": "Je kan geen aansluitingen wijzigen in een vergrendeld scoutsjaar",
@@ -821,7 +833,7 @@
   },
   "971f8200-0bfd-4b95-9feb-629044d9af7f": {
     "original": "Voeg hier de e-mailadressen van jouw eenheid toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijneenheid.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen.",
-    "translation": "Add the email addresses of your unit here. If you have email addresses with your own domain (e.g. info@myunit.be), you can send emails from that email address if you first add your domain (possible in settings). Other emails are sent from @stamhoofd.email. Only add email addresses where you can receive emails."
+    "translation": "Add the email addresses of your unit here. If you have email addresses with your own domain name (e.g. info@myunit.co.uk), you can send emails from that email address if you add your domain name first (this can be done in settings). Other emails will be sent from @stamhoofd.email. Only add email addresses that can receive emails."
   },
   "97616151-90c3-4644-8854-e228c4f355f5": {
     "original": "Dit scoutsjaar is vergrendeld, je kan geen meldingen meer aanmaken voor deze periode",
@@ -838,6 +850,10 @@
   "9c916015-e69c-44b3-a568-d0af15854787": {
     "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
     "translation": "All groups are transferred to this new scout year. Main administrators can still view the previous scout year."
+  },
+  "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
+    "original": "Eenheid ID",
+    "translation": "Unit ID"
   },
   "9d283cbb-7ba2-4a16-88ec-ff0c19f39674": {
     "original": "Eenheidsnummer",
@@ -885,7 +901,7 @@
   },
   "a5b61d4d-207f-485c-8748-cbb04fcb2d23": {
     "original": "Beheer alle instellingen van deze eenheid",
-    "translation": "Manage all settings for this unit"
+    "translation": "Manage all settings of this unit"
   },
   "a5c0dce2-01df-4a57-8d02-0b79cec9b89d": {
     "original": "de eenheid {name} op {platform}",
@@ -905,7 +921,7 @@
   },
   "aa39f949-6fe5-4ed2-acb7-ff3d138cf243": {
     "original": "Deze functie is niet beschikbaar voor deze eenheid",
-    "translation": "This function is not available for this unit"
+    "translation": "This role is not available for this unit"
   },
   "aad47217-df26-43ce-a43c-896697d5fbd4": {
     "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen eenheid.",
@@ -922,10 +938,6 @@
   "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
     "original": "In dit overzicht staan enkel eenheden die al aangesloten zijn bij Jamboree. Je kan zelf een nieuwe eenheid aansluiten via de knop 'Aansluiten' bovenaan.",
     "translation": "This overview only shows units already affiliated with Jamboree. You can connect a new unit yourself via the 'Affiliation' button at the top."
-  },
-  "ab21ae18-0181-44ea-b41d-ff61c9358858": {
-    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke eenheid is niet voldoende (wordt niet geaccepteerd)",
-    "translation": "For Mollie you need a non-profit organisation. An actual unit is not sufficient (not accepted)"
   },
   "abd71533-048e-45c7-baf8-78769e5287de": {
     "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Jamboree worden overgenomen.",
@@ -961,11 +973,11 @@
   },
   "b263fa75-5a47-43a6-94a5-95eeac94567f": {
     "original": "Sommige inschrijvingen werden door een eenheid betaald. In dat geval zal de annuleringskost aangerekend worden aan de betalende eenheid (van organisator naar betalende eenheid) én het lid (van de betalende eenheid naar lid).",
-    "translation": "Some registrations were paid for by a unit. In that case, the cancellation costs will be charged to the paying unit (from organiser to paying unit) and the member (from the paying unit to the member)."
+    "translation": "Some registrations were paid for by a unit. In this case, the cancellation fee will be charged to the paying unit (from organiser to paying unit) and to the member (from the paying unit to the member)."
   },
   "b26772a9-019a-4555-a6ca-7eb5200cab8f": {
     "original": "Type eenheid",
-    "translation": "Unit type"
+    "translation": "Type of unit"
   },
   "b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1": {
     "original": "Dit scoutsjaar is niet actief",
@@ -973,7 +985,7 @@
   },
   "b2fbd227-40a3-495d-9826-0e199000cda9": {
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw eenheid. Stel deze eerst in voor je verder gaat.",
-    "translation": "You have not yet added billing information to your unit. Set this up first before you continue."
+    "translation": "You have not yet added billing data to your unit. Set this up first before continuing."
   },
   "b34e7f10-2e03-42f5-b865-2d88571d2a6e": {
     "original": "Deze periode is niet beschikbaar voor jouw eenheid.",
@@ -1025,7 +1037,7 @@
   },
   "bb17dafc-4305-4213-90c9-2bb2701d777f": {
     "original": "Deze functie is niet beschikbaar omdat jouw eenheid nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
-    "translation": "This function is not available because your unit is still using the old free member administration package. Via settings, head administrators can switch to the paid version with more functionalities."
+    "translation": "This function is not available because your unit still uses the old free member administration package. In settings, super administrators can upgrade to the paid version with more features."
   },
   "bc8578de-ee3c-4aac-bd19-3fd4040168a4": {
     "original": "De naam van deze eenheid",
@@ -1033,19 +1045,15 @@
   },
   "bc89861d-a799-4100-b06c-29d6808ba8d2": {
     "original": "Als je een betaling uitvoert in naam van je eenheid, is het noodzakelijk om facturatiegegevens met bedrijfsgegevens in te vullen.",
-    "translation": "If you make a payment in the name of your unit, it is necessary to fill in billing data with company details."
+    "translation": "If you make a payment on behalf of your unit, you need to provide billing data with company details."
   },
   "be7ebd45-bb3e-49bd-a4b0-6cf32d2977b8": {
     "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Jamboree overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
     "translation": "{existingCount} {memberTranslation} from your file are already in the system ({total} in total). You will overwrite information in Jamboree with data from your file for these members. Please note, this action cannot be undone."
   },
-  "becc82f0-4195-4a17-b3f5-03f305582e4a": {
-    "original": "Een feitelijke eenheid is niet geregistreerd en heeft geen ondernemingsnummer",
-    "translation": "An actual unit is not registered and does not have a company number"
-  },
   "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
     "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw eenheid.",
-    "translation": "Give these administrators quick read or edit access to all parts of your unit."
+    "translation": "Quickly give these administrators read or edit access to all sections of your unit."
   },
   "c14b0320-cb84-4386-a39a-aa9ffb5eb886": {
     "original": "Eenheidsnaam",
@@ -1057,7 +1065,7 @@
   },
   "c244a546-ac11-4aee-be3e-99b0b6079703": {
     "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je eenheid te behouden (bij algemene instellingen > personalisatie).",
-    "translation": "Enter the HEX colour code of your main colour above. Leave blank to keep the colour of your unit (under general settings > personalisation)."
+    "translation": "Enter the HEX colour code for your main colour above. Leave blank to retain your unit's colour (under general settings > personalisation)."
   },
   "c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb": {
     "original": "Scoutsjaren",
@@ -1085,7 +1093,7 @@
   },
   "c78c4a14-8796-4ddc-a449-33a38ef3a6ac": {
     "original": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijneenheid.be",
-    "translation": "You can also personalise this link with your own domain name via Settings > Personalise. e.g. register.myunit.be"
+    "translation": "You can also personalize this link with your own domain name via Settings > Personalise. e.g. register.myunit.co.uk"
   },
   "c82d1491-73f8-4f05-af15-5b7bf58f1bcb": {
     "original": "Gezien bij andere eenheid",
@@ -1098,10 +1106,6 @@
   "ca303b26-d586-4e46-ad0d-af968d252261": {
     "original": "Ben je zeker dat je dit scoutsjaar wilt verwijderen?",
     "translation": "Are you sure you want to delete this scout year?"
-  },
-  "ca923d49-c9c1-4c39-9e52-96b88a0223ed": {
-    "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke eenheid als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",
-    "translation": "Add one or more legal entities. If you have both an actual unit and a non-profit organisation, add them both. The first in the list is used by default when you make payments."
   },
   "cb51b737-c4cf-4ea7-aeb5-b5736a43c333": {
     "original": "De naam van je eenheid",
@@ -1185,7 +1189,7 @@
   },
   "d687b491-be68-4e5b-9acb-e2c090951c23": {
     "original": "bv. jouweenheid.be",
-    "translation": "e.g. yourunit.be"
+    "translation": "e.g. yourunit.co.uk"
   },
   "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
     "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij GSB.",
@@ -1205,7 +1209,7 @@
   },
   "da2d2d9e-07cc-471e-963a-7915c7698ba9": {
     "original": "gelezen en ga hiermee akkoord in naam van mijn eenheid.",
-    "translation": "read and agree to this on behalf of my unit."
+    "translation": "read and agree to them on behalf of my unit."
   },
   "da498f50-0d40-4c68-a87c-488bd555e752": {
     "original": "verificatiedocument van je eenheid",
@@ -1213,11 +1217,11 @@
   },
   "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
     "original": "Er bestaat al een eenheid met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",
-    "translation": "A unit with the same URI already exists. For example, add the name of your municipality."
+    "translation": "A unit with the same URI already exists. Please add the name of your municipality, for example."
   },
   "daf8a992-77cd-4c20-8bca-5c692fd1e431": {
     "original": "bv. https://www.eenheid.be/privacy",
-    "translation": "e.g. https://www.unit.be/privacy"
+    "translation": "e.g. https://www.unit.co.uk/privacy"
   },
   "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
     "original": "De datum van inschrijving ligt buiten het geselecteerde scoutsjaar.",
@@ -1256,8 +1260,8 @@
     "translation": "The scouts year you want to configure has not started yet."
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
-    "original": "Is jouw eenheid een feitelijke eenheid zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
-    "translation": "If your unit is an actual unit without a non-profit organisation, you must enter the reference number you requested from Belcotax here."
+    "original": "Is jouw eenheid een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
+    "translation": "If your unit is a de facto association without VZW, you must enter here the reference number you requested from Belcotax."
   },
   "e2130593-e64d-4f3a-bb16-75ba4ed7604e": {
     "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
@@ -1293,7 +1297,7 @@
   },
   "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een eenheid terug stabiel te zijn.",
-    "translation": "After periodic checks, the DNS settings of a unit's domain name appear to be stable again."
+    "translation": "After periodic checking, the DNS settings of a unit's domain name appear to be stable again."
   },
   "e866488b-bc8d-481f-900b-9cf1779f44b8": {
     "original": "De vervaldatum ligt tussen de start en einddatum en is optioneel. De aansluiting blijft nog geldig na deze datum, maar in het systeem wordt het gedeeltelijk beschouwd als 'verlopen'. Gebruik dit om een aansluiting nog even te laten doorlopen in het nieuwe scoutsjaar.",
@@ -1327,9 +1331,13 @@
     "original": "Dit lid is bij geen enkele eenheid ingeschreven voor het huidige scoutsjaar en kan daardoor niet aangesloten worden",
     "translation": "This member is not registered with any unit for the current scout year and therefore cannot be affiliated"
   },
+  "ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5": {
+    "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar voor een standaard leeftijdsgroep",
+    "translation": "You can only assign a role to members who are registered in the current scouts year for a default age group."
+  },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze eenheid",
-    "translation": "This function cannot be assigned to this unit"
+    "translation": "This role cannot be assigned to this unit."
   },
   "ef07b66f-6b78-4c47-9599-d8847ea97aaa": {
     "original": "Beheer de scoutsjaren en start een nieuw scoutsjaar op",
@@ -1369,7 +1377,7 @@
   },
   "f477755c-2d6e-473c-b9b9-2ebe0af173f3": {
     "original": "Verwijder deze eenheid",
-    "translation": "Delete this unit"
+    "translation": "Delete this unit."
   },
   "f4c0da5a-03a8-4be2-9ae1-ea049b5b46af": {
     "original": "Er is nog geen verantwoordelijke eenheid ingesteld. Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten.",
@@ -1449,10 +1457,14 @@
   },
   "fdf6dd9d-25f9-41bc-869b-beb2906aa77f": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als kopie van een kampmelding",
-    "translation": "Email sent to the submitter (and the unit's set contact persons) as a copy of a camp notification"
+    "translation": "Email sent to the petitioner (and the unit's designated contact persons) as a copy of a camp notification."
+  },
+  "ff27568d-d68a-46f7-bf6f-1fd4564ac3b3": {
+    "original": "Door een evenement uit de UiTdatabank te koppelen kan Jamboree een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.",
+    "translation": "By linking an event from the UiT database, Jamboree can register a sale with discounted rate to your UiTPAS region. You will then automatically receive a (partial) refund and your region will determine the discounted rate."
   },
   "ffdbd596-e9c8-4c67-bfdf-41a5199de133": {
     "original": "De link naar de website van jouw eenheid.",
-    "translation": "The link to your unit's website."
+    "translation": "The link to the website of your unit."
   }
 }

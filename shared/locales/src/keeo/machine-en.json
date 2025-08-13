@@ -111,6 +111,10 @@
     "original": "Maak een kopie van de instellingen van jouw eenheid.",
     "translation": "Make a copy of your unit's settings."
   },
+  "198e7383-2512-4f6f-b919-2b4225b8e2a9": {
+    "original": "Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze eenheid.",
+    "translation": "You can edit this webshop's settings via the administrator portal of this unit."
+  },
   "19e5262f-9dc1-40d9-b905-bda8462b6046": {
     "original": "Er bestaat al een eenheid met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
     "translation": "A unit with the same name already exists. For example, add the name of your municipality."
@@ -227,10 +231,6 @@
     "original": "Eenheid",
     "translation": "Unit"
   },
-  "2f645618-a9a9-4598-883d-6f1991ae379d": {
-    "original": "Geen rechtspersoonlijkheid (feitelijke eenheid)",
-    "translation": "No legal personality (de facto unit)"
-  },
   "31757907-4cdd-4f0e-bb9d-cba9c1d997e4": {
     "original": "Deze eenheid bestaat niet",
     "translation": "This unit does not exist"
@@ -327,6 +327,10 @@
     "original": "Je hebt geen rechten om een activiteit aan te maken voor deze eenheid.",
     "translation": "You do not have the rights to create an activity for this unit."
   },
+  "449df98c-76b7-49b5-b807-9a431336fa86": {
+    "original": "Ga naar het beheerdersportaal van een eenheid (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.",
+    "translation": "Go to a unit's administrator portal (which will act as the organizer) to link a webshop to this activity."
+  },
   "44ff6618-ecbf-408b-9cc1-b1479e8ba8a2": {
     "original": "Het scoutsjaar dat je wilt instellen is al afgelopen",
     "translation": "The scout year you want to configure has already ended."
@@ -399,6 +403,10 @@
     "original": "Er zijn nog geen eenheden",
     "translation": "There are no units yet"
   },
+  "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
+    "original": "Door Keeo en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
+    "translation": "By connecting Keeo and UiTPAS, you can receive an automatic refund for each sale at the UiTPAS discounted rate. First, you need to become an official UiTPAS organizer so they know where to send the refund. Then you must create an integration on the <button>Publiq</button> website. Enter the data from that integration below. Finally, you'll need to link an event from UiTdatabank to each item in the webshop."
+  },
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Eenheid",
     "translation": "Unit"
@@ -438,10 +446,6 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "You can also set your own domain name (e.g. register.myunit.be). For this you must have already purchased the domain name; this will usually already be the case if you already have your own website."
-  },
-  "594307a3-05b8-47cf-81e2-59fb6254deba": {
-    "original": "Feitelijke eenheid",
-    "translation": "Actual unit"
   },
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
@@ -647,6 +651,10 @@
     "original": "Jouw eenheid betaalt {price} aan FOS Open Scouting.",
     "translation": "Your unit pays {price} to FOS Open Scouting."
   },
+  "759abb2c-48d9-4eb6-bf3a-bd8284b28ffa": {
+    "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige scoutsjaar. Verwijder de functie of schrijf het lid in voor het huidige scoutsjaar.",
+    "translation": "This member is not registered for a default age group in the current scouting year. Remove the role or register the member for the current scouting year."
+  },
   "768afe13-5f57-4a82-a6ac-77c8999b8aeb": {
     "original": "Keeo toont op enkele plaatsen het logo van Keeo op jullie webshop. Op die manier kunnen we Keeo bekender maken bij andere eenheden, waardoor we Keeo ook betaalbaar kunnen houden. Je kan dit verminderen als je dit toch liever niet wilt.",
     "translation": "Keeo shows its logo on your webshop in a few places. This helps make Keeo better known among other units, which helps us keep Keeo affordable. You can reduce how often the logo appears if you prefer."
@@ -734,6 +742,10 @@
   "87a2582f-6de5-4b59-9395-7c49f8540659": {
     "original": "Eenheid",
     "translation": "Unit"
+  },
+  "87e8488b-4190-42d9-bdd0-564a46671f7f": {
+    "original": "Zoek jouw eenheid in de UiTPAS organisatoren lijst.",
+    "translation": "Find your unit in the list of UiTPAS organizers."
   },
   "880e4cac-5a7e-4d6d-80ad-c5472a005df6": {
     "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij FOS Open Scouting en daardoor niet verzekerd.",
@@ -839,6 +851,10 @@
     "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
     "translation": "All groups are transferred to this new scout year. Main administrators can still view the previous scout year."
   },
+  "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
+    "original": "Eenheid ID",
+    "translation": "Unit ID"
+  },
   "9d283cbb-7ba2-4a16-88ec-ff0c19f39674": {
     "original": "Eenheidsnummer",
     "translation": "Unit number"
@@ -922,10 +938,6 @@
   "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
     "original": "In dit overzicht staan enkel eenheden die al aangesloten zijn bij Keeo. Je kan zelf een nieuwe eenheid aansluiten via de knop 'Aansluiten' bovenaan.",
     "translation": "This overview only shows units already affiliated with Keeo. You can connect a new unit yourself via the 'Affiliation' button at the top."
-  },
-  "ab21ae18-0181-44ea-b41d-ff61c9358858": {
-    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke eenheid is niet voldoende (wordt niet geaccepteerd)",
-    "translation": "For Mollie you need a non-profit organisation. An actual unit is not sufficient (not accepted)"
   },
   "abd71533-048e-45c7-baf8-78769e5287de": {
     "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Keeo worden overgenomen.",
@@ -1039,10 +1051,6 @@
     "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Keeo overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
     "translation": "{existingCount} {memberTranslation} from your file are already in the system ({total} in total). You will overwrite information in Keeo with data from your file for these members. Please note, this action cannot be undone."
   },
-  "becc82f0-4195-4a17-b3f5-03f305582e4a": {
-    "original": "Een feitelijke eenheid is niet geregistreerd en heeft geen ondernemingsnummer",
-    "translation": "An actual unit is not registered and does not have a company number"
-  },
   "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
     "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw eenheid.",
     "translation": "Give these administrators quick read or edit access to all parts of your unit."
@@ -1098,10 +1106,6 @@
   "ca303b26-d586-4e46-ad0d-af968d252261": {
     "original": "Ben je zeker dat je dit scoutsjaar wilt verwijderen?",
     "translation": "Are you sure you want to delete this scout year?"
-  },
-  "ca923d49-c9c1-4c39-9e52-96b88a0223ed": {
-    "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke eenheid als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",
-    "translation": "Add one or more legal entities. If you have both an actual unit and a non-profit organisation, add them both. The first in the list is used by default when you make payments."
   },
   "cb51b737-c4cf-4ea7-aeb5-b5736a43c333": {
     "original": "De naam van je eenheid",
@@ -1256,8 +1260,8 @@
     "translation": "The scouting year you want to configure has not started yet."
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
-    "original": "Is jouw eenheid een feitelijke eenheid zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
-    "translation": "If your unit is an actual unit without a non-profit organisation, you must enter the reference number you requested from Belcotax here."
+    "original": "Is jouw eenheid een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
+    "translation": "If your unit is a de facto association without VZW, you must enter the reference number you requested from Belcotax here."
   },
   "e2130593-e64d-4f3a-bb16-75ba4ed7604e": {
     "original": "Leden worden als bestaand beschouwd als ze ingeschreven zijn voor een vorig scoutsjaar van gelijk welke inschrijvingsgroep.",
@@ -1326,6 +1330,10 @@
   "ec0c482e-0528-499f-82fa-b081bf708ded": {
     "original": "Dit lid is bij geen enkele eenheid ingeschreven voor het huidige scoutsjaar en kan daardoor niet aangesloten worden",
     "translation": "This member is not registered with any unit for the current scout year and therefore cannot be affiliated"
+  },
+  "ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5": {
+    "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar voor een standaard leeftijdsgroep",
+    "translation": "You can only assign a role to members who are registered in the current scouting year for a default age group."
   },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze eenheid",
@@ -1450,6 +1458,10 @@
   "fdf6dd9d-25f9-41bc-869b-beb2906aa77f": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de eenheid) als kopie van een kampmelding",
     "translation": "Email sent to the submitter (and the unit's set contact persons) as a copy of a camp notification"
+  },
+  "ff27568d-d68a-46f7-bf6f-1fd4564ac3b3": {
+    "original": "Door een evenement uit de UiTdatabank te koppelen kan Keeo een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.",
+    "translation": "By linking an event from the UiT database, Keeo can register a sale with discounted rate to your UiTPAS region. You will then automatically receive a (partial) refund and your region will determine the discounted rate."
   },
   "ffdbd596-e9c8-4c67-bfdf-41a5199de133": {
     "original": "De link naar de website van jouw eenheid.",

@@ -1,4 +1,8 @@
 {
+  "0009cce2-9d13-4f03-9258-345d8f8e396e": {
+    "original": "Er is geen UiTPAS client ID geconfigureerd voor deze organisatie.",
+    "translation": "Aucun identifiant client UiTPAS n'est configuré pour cette organisation."
+  },
   "000be3fe-9354-4c2c-baf1-d0cd4d079830": {
     "original": "Kampmeldingen",
     "translation": "Signalements de camp"
@@ -359,6 +363,10 @@
     "original": "Voeg alle lokalen toe en kijk of de gegevens nog up-to-date zijn.",
     "translation": "Ajoutez toutes les salles et vérifiez que les données sont toujours à jour."
   },
+  "040fa935-5cbc-4a85-b578-354bf9d7fc04": {
+    "original": "Jouw UiTPAS-integratie mist de volgende toegangsrechten voor de geselecteerde UiTPAS-organisator: ",
+    "translation": "Votre intégration UiTPAS ne dispose pas des droits d’accès suivants pour l’organisateur UiTPAS sélectionné : "
+  },
   "042858d8-e3a2-4b78-acac-020ab4555819": {
     "original": "Naam van het platform",
     "translation": "Nom de la plateforme"
@@ -616,8 +624,8 @@
     "translation": "Collecte de données"
   },
   "0712bc3b-15d5-4678-be41-8d168e5d52cf": {
-    "original": "Kijk na of de facturatiegegevens correct zijn en markeer het als nagekeken.",
-    "translation": "Vérifiez que les données de facturation sont correctes et marquez-les comme vérifiées."
+    "original": "Kijk na of alle gegevens nog correct zijn en markeer het als nagekeken.",
+    "translation": "Vérifiez si toutes les informations sont toujours correctes et indiquez que la vérification a été effectuée."
   },
   "07290df8-cad5-40df-9e10-3c7eccc049bc": {
     "original": "Voorbeeldleeftijdsgroep",
@@ -742,6 +750,10 @@
   "083a34cb-26f4-4467-978e-3dc19897befb": {
     "original": "Lidnummer wijzigen naar {memberNumber}",
     "translation": "Modifier le numéro de membre en {memberNumber}"
+  },
+  "083c0978-adfc-44c6-8007-40c883cd4fc9": {
+    "original": "Geen datum",
+    "translation": "Aucune date"
   },
   "084a7b59-d7d6-4352-8fe7-8f9e98ba1483": {
     "original": "Naam contactpersoon",
@@ -999,6 +1011,10 @@
     "original": "Leden die in meerdere groepen passen",
     "translation": "Membres en adéquation avec plusieurs groupes"
   },
+  "0b610eb8-551f-4ef6-acdc-fb3267dfc2a8": {
+    "original": "Er is een fout opgetreden bij het ophalen van de UiTPAS-evenementen.",
+    "translation": "Une erreur s'est produite lors de la récupération des événements UiTPAS."
+  },
   "0b6247ef-b8bb-4ed7-b403-b0a58ddebaf5": {
     "original": "Issuer",
     "translation": "Émetteur"
@@ -1055,6 +1071,10 @@
     "original": "Alles is correct ingesteld.",
     "translation": "Tout est correctement configuré."
   },
+  "0bf875c9-f6a8-417d-82dd-4d6bfff9669f": {
+    "original": "Ongeldig GSM-nummer",
+    "translation": "Numéro de GSM invalide"
+  },
   "0bfe39a0-47cc-437b-b090-7e435a7f22eb": {
     "original": "Kies optioneel meerdere keuzes uit {count} opties",
     "translation": "Choisissez facultativement plusieurs choix parmi {count} options"
@@ -1098,6 +1118,10 @@
   "0c4eaa6c-d6c6-411f-af6d-aa73233cf2c0": {
     "original": "Inschrijvingen activeren via het ledenportaal (enkel voor leden)",
     "translation": "Activer les inscriptions via le portail des membres (réservé aux membres)"
+  },
+  "0c503313-92c1-4063-887d-87bbff5a6e53": {
+    "original": "Configuur UiTPAS-integratie",
+    "translation": "Configurer l'intégration UiTPAS"
   },
   "0c57da32-95ac-4e64-a61a-0a7fa104294a": {
     "original": "Keuzemenu (kies één)",
@@ -1160,8 +1184,8 @@
     "translation": "par ex. Bpost"
   },
   "0d7093d6-d3c0-412e-af8a-d44a5d2394d9": {
-    "original": "Bevestig dat alle lokalen nagekeken zijn",
-    "translation": "Confirmez que toutes les salles ont été vérifiées"
+    "original": "Ik bevestig dat alle lokalen nagekeken zijn",
+    "translation": "Je confirme que toutes les salles ont été vérifiées"
   },
   "0d735b43-02e4-4846-8aea-a603bdc9f7a4": {
     "original": "Lijnen",
@@ -1403,6 +1427,10 @@
     "original": "Ongeldig rijksregisternummer",
     "translation": "Numéro de registre national invalide"
   },
+  "1086bb24-5df4-4faf-9dc0-ab5a955b0d8f": {
+    "original": "De opgegeven UiTPAS client credentials zijn ongeldig. Controleer ze en probeer opnieuw.",
+    "translation": "Les identifiants client UiTPAS fournis sont invalides. Vérifiez-les et réessayez."
+  },
   "1089afa3-5103-44de-a7e5-9501f058b26e": {
     "original": "deze week",
     "translation": "cette semaine"
@@ -1482,6 +1510,10 @@
   "11426f89-b2bf-4f7a-bd5a-a51c34e6aa96": {
     "original": "Ben je zeker dat je deze inschrijvingsgroep en bijhorende inschrijvingen wilt verwijderen?",
     "translation": "Êtes-vous sûr de vouloir supprimer ce groupe d’inscription et les inscriptions correspondantes ?"
+  },
+  "1153ea0d-ec79-4677-aea9-d2f293cdfe57": {
+    "original": "Bezig met importeren",
+    "translation": "Importation en cours"
   },
   "1186a60b-c59f-43d5-ba58-04ff9288c266": {
     "original": "Vul de voornaam in",
@@ -1875,6 +1907,10 @@
     "original": "annuleringskost",
     "translation": "frais d'annulation"
   },
+  "1572d069-abda-4b31-a373-f0c3760c79b1": {
+    "original": "Er is een fout opgetreden bij het ophalen van je UiTPAS kansentarief. Kijk je het nummer even na?",
+    "translation": "Une erreur s'est produite lors de la récupération de votre tarif préférentiel UiTPAS. Veuillez vérifier le numéro."
+  },
   "159724b0-4a18-4dcc-8ca5-93f690ea7276": {
     "original": "Zorg dat het niet mogelijk is om maar één plaats tussen te laten.",
     "translation": "Veillez à ce qu'il ne soit pas possible de laisser une seule place entre les deux."
@@ -1946,6 +1982,10 @@
   "1631299a-246c-4923-bc48-a09c6ead77b5": {
     "original": "Zichtbaar op de webshop, maar pas te bestellen vanaf een bepaalde datum.",
     "translation": "Visible sur la boutique en ligne, mais ne peut être commandé qu'à partir d'une certaine date."
+  },
+  "163c78b9-f0dd-4ec5-bdfe-32b389aeda7d": {
+    "original": "Onbeschikbaar na datum",
+    "translation": "Indisponible après la date"
   },
   "1663859d-2802-4317-9bd9-c8fc61d2baca": {
     "original": "Op naam van {name}",
@@ -2062,6 +2102,10 @@
   "17a71942-a3d7-4d19-97bb-307cabffc1d6": {
     "original": "Aan",
     "translation": "Activé"
+  },
+  "17b0fd6e-71a8-41fc-98e2-af859370aac8": {
+    "original": "Er zijn tijdstippen waarop geen enkel tarief beschikbaar is. Controleer of de begin en einddatum (en tijdstip) van tarieven mooi op elkaar aansluiten.",
+    "translation": "Il existe des moments où aucun tarif n’est disponible. Vérifiez que les dates et heures de début et de fin des tarifs se suivent bien."
   },
   "17c0327e-3206-4f14-a246-d215c97299f5": {
     "original": "De inschrijvingen of producten die zijn afgerekend",
@@ -2215,6 +2259,10 @@
     "original": "Stel een foto en icoontje van deze groep in.",
     "translation": "Définissez une photo et une icône pour ce groupe."
   },
+  "198e7383-2512-4f6f-b919-2b4225b8e2a9": {
+    "original": "Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze vereniging.",
+    "translation": "Vous pouvez modifier les paramètres de cette boutique via le portail d’administration de cette association."
+  },
   "19bc226c-2b4b-49bf-94a5-28e3d679ecc7": {
     "original": "Je hebt geen toegangsrechten tot één van de gekozen afrekeningen voor de betaling die je wilt aanmaken",
     "translation": "Vous n'avez pas les droits d'accès à une des factures choisies pour le paiement que vous voulez créer"
@@ -2347,9 +2395,17 @@
     "original": "Terug",
     "translation": "Retour"
   },
+  "1b313bdc-e15f-4633-9bcf-969e55139b94": {
+    "original": "Beheer je UiTPAS-integratie",
+    "translation": "Gérez votre intégration UiTPAS"
+  },
   "1b4a943c-e44d-4f9f-b5bd-08a485ef05d3": {
     "original": "Bijkomende informatie",
     "translation": "Informations supplémentaires"
+  },
+  "1b51e5e9-5ba2-4924-948e-a431f0fc1a9a": {
+    "original": "Geen evenementen gevonden.",
+    "translation": "Aucun événement trouvé."
   },
   "1b5413cd-5858-4a73-872b-5b6b26345039": {
     "original": "Logboek",
@@ -2415,6 +2471,10 @@
     "original": "Inloggen",
     "translation": "Connexion"
   },
+  "1c5b447a-93e8-46da-b6e1-ffc29a2967e8": {
+    "original": "Feitelijke vereniging",
+    "translation": "Association de fait"
+  },
   "1c5ba032-2132-4bda-8aae-7f622f6f3a2a": {
     "original": "Huidige",
     "translation": "Actuelle"
@@ -2438,6 +2498,10 @@
   "1c8e7100-b4ac-4c22-8e22-a19d3c039f74": {
     "original": "Dupliceren",
     "translation": "Dupliquer"
+  },
+  "1ca52417-1476-4cbb-a240-335a18fedf45": {
+    "original": "De gekoppelde bedrijfsgegevens, vzw of feitelijke vereniging. Een groep kan meerdere gekoppelde entiteiten hebben.",
+    "translation": "Les informations d'entreprise, ASBL ou association de fait associées. Un groupe peut être lié à plusieurs entités."
   },
   "1cb53933-ed06-45ae-9240-dd389298823c": {
     "original": "Ben je zeker dat je wilt sluiten zonder op te slaan?",
@@ -2599,6 +2663,10 @@
     "original": "Er is een update beschikbaar. Herlaad de pagina zodra het kan om te vermijden dat bepaalde zaken stoppen met werken.",
     "translation": "Une mise à jour est disponible. Rechargez la page dès que possible pour éviter que certaines fonctions ne cessent de fonctionner."
   },
+  "1e92a151-6161-4941-aa3f-fa69e14f75ee": {
+    "original": "UiTPAS-evenement",
+    "translation": "Événement UiTPAS"
+  },
   "1e976e4a-16ac-4d73-ad9b-f46720270c01": {
     "original": "+ 1 gratis",
     "translation": "+ 1 gratuit"
@@ -2620,8 +2688,8 @@
     "translation": "Invisible pour les membres"
   },
   "1ee738ae-a91d-474e-a495-996bf431126a": {
-    "original": "Bevestig dat alle functies zijn toegekend",
-    "translation": "Confirmez que toutes les fonctions ont été attribuées"
+    "original": "Ik bevestig dat alle functies zijn toegekend",
+    "translation": "Je confirme que toutes les fonctions ont été attribuées"
   },
   "1ef059c2-e758-4cfa-bc2b-16a581029450": {
     "original": "Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit artikel.",
@@ -2871,6 +2939,10 @@
     "original": "Kies minstens één leeftijdsgroep.",
     "translation": "Choisissez au moins un groupe d’âge."
   },
+  "22487e0a-3bb0-4cb2-80c0-18fea6f3f016": {
+    "original": "Toegangsrechten van jouw UiTPAS-integratie is nog niet gecontroleerd",
+    "translation": "Les droits d'accès de votre intégration UiTPAS n'ont pas encore été vérifiés"
+  },
   "224a3058-b5ca-4f18-bbab-2fd5b16eb6b9": {
     "original": "is groter dan",
     "translation": "est supérieur à"
@@ -2962,6 +3034,10 @@
   "233fbbc9-0118-41fb-9804-631fe55ddf31": {
     "original": "Klantgegevens",
     "translation": "Coordonnées du client"
+  },
+  "235434e9-4d87-49a9-b4ce-26e7ee397b62": {
+    "original": "UiTPAS evenement gekoppeld",
+    "translation": "Événement UiTPAS lié"
   },
   "23592db3-6fa9-48b0-9660-78eff742219d": {
     "original": "Keuzemenu bewerken",
@@ -3127,6 +3203,10 @@
     "original": "Betaald bedrag",
     "translation": "Montant payé"
   },
+  "25d1906f-b5b8-441c-8ff7-2e41a75d13e4": {
+    "original": "Beschikbaar tussen: {range}",
+    "translation": "Disponible entre : {range}"
+  },
   "25d866b7-3859-4a5d-b875-bc286e69f846": {
     "original": "Verwijderen",
     "translation": "Supprimer"
@@ -3190,6 +3270,10 @@
   "26369a8f-8080-4f00-af46-576fdf563ced": {
     "original": "Subtotaal",
     "translation": "Sous-total"
+  },
+  "263b7054-d38f-4bb9-be63-84b4e614613d": {
+    "original": "BTW-nummer",
+    "translation": "Numéro de TVA"
   },
   "264096eb-4cc6-4c2f-807a-107a84980f25": {
     "original": "tot nu",
@@ -3547,6 +3631,10 @@
     "original": "Oeps, jouw mandje is leeg. Voeg eerst inschrijvingen toe voor je verder gaat.",
     "translation": "Oups, votre panier est vide. Ajoutez d’abord des inscriptions avant de continuer."
   },
+  "29e73b62-658a-4203-8c05-c4a39f4dc01d": {
+    "original": "Toevoegen in het systeem met inschrijving voor wachtlijst '{group}'",
+    "translation": "Ajouter au système avec une inscription sur la liste d'attente '{group}'"
+  },
   "29e79d32-8805-4458-84db-c90e591f9727": {
     "original": "Deze betaling werd niet gevonden.",
     "translation": "Ce paiement n'a pas été trouvé."
@@ -3743,6 +3831,10 @@
     "original": "Je kan zelf ook manueel een betaling toevoegen (bv. als er ter plaatse werd betaald, of via een overschrijving die niet in het systeem is opgenomen) via de knop 'Betaling/terugbetaling registreren' hierboven.",
     "translation": "Vous pouvez également ajouter manuellement un paiement (par exemple, si le paiement a été effectué sur place ou via un virement bancaire non inclus dans le système) via le bouton 'Enregistrer un paiement/remboursement' ci-dessus."
   },
+  "2c7dc287-58ab-423b-984a-b0582c992b4d": {
+    "original": "Zoek je UiTPAS-organisator",
+    "translation": "Cherchez votre organisateur UiTPAS"
+  },
   "2c80a707-f641-49ac-a05c-55962b4c9660": {
     "original": "Kortingscode bewerken",
     "translation": "Modifier un code de réduction"
@@ -3810,6 +3902,10 @@
   "2d09d9be-60e7-4872-8f01-aabd51be4f1a": {
     "original": "mannen geboren in of voor",
     "translation": "hommes nés en ou avant"
+  },
+  "2d1983fa-2224-422f-9ea0-fdae77cb4914": {
+    "original": "Het kansentarief voor sommige UiTPAS-nummers kon niet worden opgehaald.",
+    "translation": "Le tarif préférentiel n’a pas pu être récupéré pour certains numéros UiTPAS."
   },
   "2d48ac49-d265-4e79-b897-5c5db0816dee": {
     "original": "Met deze knop kan de ontvanger zich uitschrijven voor alle e-mails.",
@@ -3927,6 +4023,10 @@
     "original": "Andere / geen",
     "translation": "Autre / aucun"
   },
+  "2ed46ae7-03d8-4a9c-8555-0edfc7157d53": {
+    "original": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan België, voeg dan de internationale code toe voor het nummer. Voor Nederland is dat bijvoorbeeld +31.",
+    "translation": "Numéro de GSM invalide. Si vous essayez d’entrer un numéro d’un autre pays que la Belgique, ajoutez le code international devant le numéro. Par exemple, pour les Pays-Bas, c'est +31."
+  },
   "2ee1d364-8747-430d-8a33-094e01df465e": {
     "original": "Je hebt geen toegang tot deze webshop en kan deze dus ook niet koppelen aan een activiteit.",
     "translation": "Tu n’as pas accès à cette boutique en ligne et tu ne peux donc pas la lier à une activité."
@@ -3947,10 +4047,6 @@
     "original": "Documenten",
     "translation": "Documents"
   },
-  "2f2899e5-4c62-4452-97d2-97f4fd670e86": {
-    "original": "GroepsID",
-    "translation": "ID de groupe"
-  },
   "2f311e82-a71b-4ef6-9902-715fb1a8486a": {
     "original": "Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen → Personaliseren. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.",
     "translation": "Vous pouvez définir la couleur principale pour toutes vos boutiques en ligne via les paramètres généraux → Personnalisation. Vous n'avez donc pas besoin de le définir séparément pour chaque boutique en ligne. La saisie de la couleur ici n'est utile que si vous souhaitez la définir différemment en toute connaissance de cause."
@@ -3970,6 +4066,10 @@
   "2f4a25b4-1c98-4449-9ba1-75418393f0c9": {
     "original": "Geen niet-geverifieerde adressen",
     "translation": "Aucune adresse non vérifiée"
+  },
+  "2f4b9572-4b9c-42e0-91f1-b0984624d225": {
+    "original": "Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.",
+    "translation": "Le tarif préférentiel pour cette UiTPAS est {correctPrice} au lieu de {orderPrice}."
   },
   "2f5d5e2d-cc3b-4cf6-8f4e-97b72a106163": {
     "original": "Ongebruikt",
@@ -4128,8 +4228,8 @@
     "translation": "Le nom que vous avez fourni n'est pas valide, veuillez le corriger avant de continuer."
   },
   "3124147c-09cf-4a87-8ae8-9545b90c1ba4": {
-    "original": "Bevestig dat je leeftijdsgroepen in orde zijn",
-    "translation": "Confirmez que vos groupes d’âge sont corrects"
+    "original": "Ik bevestig dat alle leeftijdsgroepen in orde zijn",
+    "translation": "Je confirme que tous les groupes d'âge sont en ordre"
   },
   "3124f6c0-32a9-46d3-ad0b-8f6eb3d04941": {
     "original": "Optioneel getal",
@@ -4216,8 +4316,8 @@
     "translation": "Choisissez votre adresse de livraison"
   },
   "31df7737-2a25-4a6c-9766-39acc3ccdbc8": {
-    "original": "Kijk je facturatiegegevens na",
-    "translation": "Vérifiez vos données de facturation"
+    "original": "Bevestig dat je groepsgegevens correct zijn",
+    "translation": "Confirmez que les données de votre groupe sont correctes"
   },
   "31e85868-a04b-42be-bf89-0b691378852c": {
     "original": "Verplichte functies",
@@ -4451,6 +4551,10 @@
     "original": "Er werden keuzemogelijkheden toegevoegd aan {product}, waar je nu eerst moet uit kiezen.",
     "translation": "Des options ont été ajoutées à {product}, vous devez maintenant faire un choix."
   },
+  "34a37057-5c76-43ea-bc79-e67b8b09a4ee": {
+    "original": "Beveiligingscode",
+    "translation": "Code de sécurité"
+  },
   "34a9760e-21d2-47c7-8311-06d34c8a8561": {
     "original": "Verwijder deze groep en alle daarbij horende informatie. Dit is meestal niet nodig.",
     "translation": "Supprimer ce groupe et toutes les informations qui y sont associées. Ce n'est généralement pas nécessaire."
@@ -4502,6 +4606,10 @@
   "355512bd-902c-4193-8aa0-81e5cb81284b": {
     "original": "Aangepast sinds voorlopige goedkeuring",
     "translation": "Modifié depuis l'approbation provisoire"
+  },
+  "3560487e-3f2c-4cc9-ad7f-4e9a0fc1bbb8": {
+    "original": "Je hebt niet voldoende toegangsrechten om te filteren op {recordName}",
+    "translation": "Vous n'avez pas les droits suffisants pour filtrer sur {recordName}"
   },
   "3573c612-1241-4b48-8ed5-8f11b8860e23": {
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van vereniging veranderen als je met een ander account wilt inloggen.",
@@ -4943,6 +5051,10 @@
     "original": "Redirect URI",
     "translation": "URI de redirection"
   },
+  "3b95fc70-7928-426b-b65b-3389d9e762cc": {
+    "original": "Wijzig",
+    "translation": "Modifier"
+  },
   "3ba66a09-31bc-4bef-9bba-ca44d5480c42": {
     "original": "Nog {count}",
     "translation": "Encore {count}"
@@ -5142,6 +5254,10 @@
   "3e515054-91e7-43ed-a9ce-563b626f337d": {
     "original": "tot",
     "translation": "à"
+  },
+  "3e63b101-0a81-444c-af7b-8827fd8872f0": {
+    "original": "Zoek op naam, locatie, beschrijving, ...",
+    "translation": "Rechercher par nom, lieu, description, ..."
   },
   "3e6429f3-1fc2-42ad-b585-4da7da164267": {
     "original": "Er kon geen lidnummer aangemaakt worden omdat er geen geboortedatum is ingesteld.",
@@ -5459,6 +5575,10 @@
     "original": "per dag",
     "translation": "par jour"
   },
+  "42bbd5c0-8789-4ca1-b667-1c9ecf4d0190": {
+    "original": "De opgegeven client credentials zijn niet geldig.",
+    "translation": "Les identifiants client fournis ne sont pas valides."
+  },
   "42dccb0d-88b1-4a18-9250-04aa969b1299": {
     "original": ". Verwijder of pas daar de link eerst aan als je die wilt hergebruiken.",
     "translation": ". Supprimez ou modifiez d'abord le lien si vous souhaitez le réutiliser."
@@ -5603,6 +5723,14 @@
     "original": "Geen tekst in deze cel",
     "translation": "Aucun texte dans cette cellule"
   },
+  "4499fa60-aaf1-49a7-bb3a-cba68337a3c3": {
+    "original": "UiTPAS-evenement zoeken",
+    "translation": "Rechercher un événement UiTPAS"
+  },
+  "449df98c-76b7-49b5-b807-9a431336fa86": {
+    "original": "Ga naar het beheerdersportaal van een vereniging (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.",
+    "translation": "Rendez-vous sur le portail d’administration d'une association (qui servira d’organisateur) pour relier une boutique à cette activité."
+  },
   "44a86a23-a189-421b-b53a-8f922c17ab78": {
     "original": "download",
     "translation": "télécharger"
@@ -5680,8 +5808,8 @@
     "translation": "Ajouter une catégorie"
   },
   "457fc4b2-9145-45c8-aba3-1fd629317330": {
-    "original": "Je hebt nog geen facturatiegegevens ingesteld. Vul dit aan.",
-    "translation": "Vous n’avez pas encore configuré de données de facturation. Veuillez les compléter."
+    "original": "Je hebt nog niet alle gegevens toegevoegd. Vul dit aan.",
+    "translation": "Vous n'avez pas encore ajouté toutes les informations. Veuillez compléter."
   },
   "45807c1e-fb46-496f-9584-9081c56e193c": {
     "original": "Beperk het beschikbare aantal stuks (waarvan nu {stock} verkocht of gereserveerd)",
@@ -5774,6 +5902,10 @@
   "46681ff6-bc40-4da6-9c3f-f8f335d72633": {
     "original": "Korting toevoegen",
     "translation": "Ajouter une réduction"
+  },
+  "466844b9-c042-4bc7-b77d-3f87376086b5": {
+    "original": "Er is een fout opgetreden bij het ophalen van het kansentarief voor jouw UiTPAS-nummer. Probeer het later opnieuw.",
+    "translation": "Une erreur s'est produite lors de la récupération du tarif préférentiel pour votre numéro UiTPAS. Veuillez réessayer plus tard."
   },
   "467951bf-92b1-417b-a56b-19ce254c3571": {
     "original": "Je kan op het ledenportaal inloggen met",
@@ -5955,6 +6087,10 @@
     "original": "Cel",
     "translation": "Cellule"
   },
+  "489734b2-e7e2-4c5e-a9ad-d00c29dc4f8e": {
+    "original": "UiTPAS-evenement koppelen",
+    "translation": "Associer un événement UiTPAS"
+  },
   "48b16d15-edcd-423a-abc3-a203a9c5d09e": {
     "original": "Ja, uitschrijven",
     "translation": "Oui, désinscription"
@@ -6018,6 +6154,10 @@
   "4953622b-9b0c-49c3-92b9-f5e2532c4c74": {
     "original": "De straat is verplicht",
     "translation": "La rue est obligatoire"
+  },
+  "4953cb1c-9ba5-40a6-91ad-c25cda4cdfcc": {
+    "original": "Vragenlijsten",
+    "translation": "Formulaires personnalisés"
   },
   "495e591a-15f2-43f3-ba4f-f02598624f52": {
     "original": "Te betalen bedrag",
@@ -6199,6 +6339,10 @@
     "original": "Aangepaste overeenkomsten",
     "translation": "Accords mis à jour"
   },
+  "4b55bf53-f867-4613-b375-fe9a35be2cbc": {
+    "original": "Zoek op naam",
+    "translation": "Recherche par nom"
+  },
   "4b6cb3f4-a5a7-40db-8e79-e7a892ae14a7": {
     "original": "Sluit webshop na een bepaalde datum",
     "translation": "Fermer la boutique en ligne après une certaine date"
@@ -6278,6 +6422,10 @@
   "4c61c43e-ed3c-418e-8773-681d19323520": {
     "original": "Groepsnummer",
     "translation": "Numéro de groupe"
+  },
+  "4c6482ff-e6d9-4ea1-b11d-e12d697b4b7b": {
+    "original": "Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?",
+    "translation": "Une erreur s'est produite lors de la récupération de votre UiTPAS. Veuillez vérifier le numéro."
   },
   "4c66b760-cef1-47bc-899a-1ec5ec363560": {
     "original": ", kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt",
@@ -6370,6 +6518,10 @@
   "4d88b931-3fa4-497d-8a23-481f8f58a967": {
     "original": "Ben je zeker dat je deze rol wilt verwijderen?",
     "translation": "Êtes-vous sûr de vouloir supprimer ce rôle ?"
+  },
+  "4d88d9eb-24f1-42f9-8575-6a6e5f22b1ba": {
+    "original": "Wil je de UiTPAS-nummers niet doorsturen en zelf het tarief instellen, <button>klik dan hier</button>.",
+    "translation": "Si vous ne souhaitez pas transmettre les numéros UiTPAS et déterminer vous-même le tarif, <button>cliquez ici</button>."
   },
   "4d8be2b1-559a-4c16-a76f-67a8ba85de7f": {
     "original": "Dit type melding bestaat niet",
@@ -6687,6 +6839,10 @@
     "original": "gratis",
     "translation": "gratuit"
   },
+  "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
+    "original": "Door Stamhoofd en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
+    "translation": "En connectant Stamhoofd et UiTPAS, vous pouvez obtenir un remboursement automatique pour chaque vente au tarif réduit UiTPAS. Il faut d'abord devenir un organisateur officiel UiTPAS afin de pouvoir préciser à qui le remboursement doit être effectué. Ensuite, créez une intégration sur le site de <button>Publiq</button>. Entrez ensuite les données de cette intégration ci-dessous. Enfin, pour chaque article de la boutique en ligne, vous devrez associer un événement de la base de données UiT."
+  },
   "50c67afd-9f29-4634-bbb6-91a6083d7b4b": {
     "original": "We konden de CNAME-record",
     "translation": "Nous n'avons pas pu trouver l'enregistrement CNAME"
@@ -6722,6 +6878,10 @@
   "50fc6c16-b3d2-4015-b04c-7f11c6e4d497": {
     "original": "De subdomeinnaam voor jouw registratiepagina is ongeldig",
     "translation": "Le nom de sous-domaine pour votre page d'inscription est invalide"
+  },
+  "510807a1-d4c7-45fa-9e3b-ddc8764d3f6e": {
+    "original": "{member} is al gekend in ons systeem, maar jouw e-mailadres niet. Om toegang te krijgen heb je de beveiligingscode nodig.",
+    "translation": "{member} est déjà connu dans notre système, mais votre adresse e-mail ne l'est pas. Pour accéder, il vous faut le code de sécurité."
   },
   "51190e58-cb85-4d12-b276-937d5514ccfd": {
     "original": "Download huidige HTML",
@@ -6943,9 +7103,21 @@
     "original": "Zoeken is niet mogelijk in audit logs",
     "translation": "La recherche n'est pas possible dans les journaux d'audit"
   },
+  "5410f959-ba95-4c7e-9331-1d1147ac85b2": {
+    "original": "Je gebruikt de niet-officiële UiTPAS-flow",
+    "translation": "Vous utilisez le flux UiTPAS non officiel"
+  },
+  "542b793c-3edf-4505-b33d-199ea409bbda": {
+    "original": "We konden UiTPAS niet bereiken om de rechten te controleren. Probeer het later opnieuw.",
+    "translation": "Nous n'avons pas pu contacter UiTPAS pour vérifier les droits. Veuillez réessayer plus tard."
+  },
   "542e21b0-662c-42df-b133-7dbb650b8e4f": {
     "original": "Volgjaar toevoegen",
     "translation": "Ajouter l'année suivante"
+  },
+  "543f5147-f7a5-430b-9b20-b974e809627d": {
+    "original": "Onbeschikbaar na {date}",
+    "translation": "Indisponible après {date}"
   },
   "544a77e9-c915-4f47-afbf-c626396b0308": {
     "original": "Uitbetalingsmededeling",
@@ -6986,6 +7158,10 @@
   "54979c74-008d-4435-a9a7-49ac63b4352e": {
     "original": "verbond",
     "translation": "fédération"
+  },
+  "549c952e-347f-4b1d-ae55-b645636e2522": {
+    "original": "UiTPAS-organisator",
+    "translation": "Organisateur UiTPAS"
   },
   "54a24516-1a43-4bc7-ac7a-c3fafa74ee22": {
     "original": "Kies minstens één standaard leeftijdsgroep",
@@ -7099,6 +7275,10 @@
     "original": "verkocht)",
     "translation": "vendues)"
   },
+  "5658edc2-ca76-4463-8729-6b7438249d91": {
+    "original": ".",
+    "translation": "."
+  },
   "566df267-1215-4b90-b893-0344c1f1f3d3": {
     "original": "Openstaand bedrag stijgt met",
     "translation": "Le montant en suspens augmente de"
@@ -7142,6 +7322,10 @@
   "56958164-b35f-4b78-b286-c3c7ac9c539d": {
     "original": "Geen toegang tot bestanden. Wijzig de toestemmingen van de app om bestanden te kunnen opslaan.",
     "translation": "Pas d'accès aux fichiers. Modifiez les autorisations de l'application pour pouvoir enregistrer des fichiers."
+  },
+  "5696e0d8-a405-4087-b9bb-4bda3c9baab1": {
+    "original": "Er is een fout opgetreden bij het ophalen van het UiTPAS-evenement.",
+    "translation": "Une erreur s’est produite lors de la récupération de l’événement UiTPAS."
   },
   "569d1c4a-9389-47dd-9acb-930419271276": {
     "original": "Maak een keuze",
@@ -7319,9 +7503,17 @@
     "original": "Stripe Documentatie",
     "translation": "Documentation Stripe"
   },
+  "58de00fb-3b0a-45a6-9214-7d11b4175779": {
+    "original": "Je moet een client secret opgeven.",
+    "translation": "Vous devez renseigner un client secret."
+  },
   "58ec13c4-413f-4977-b592-82c455b515ff": {
     "original": "Overslaan",
     "translation": "Passer"
+  },
+  "58f56570-0bcc-4ec1-a42e-94dbf2677bc2": {
+    "original": "Bedrijfstype",
+    "translation": "Type d’entreprise"
   },
   "58fa9950-5b41-421b-9f7f-24ea3fc021b5": {
     "original": "Informatieve tekst",
@@ -7432,8 +7624,8 @@
     "translation": "Vous pouvez commander au maximum 1 de ce produit"
   },
   "5a8403bb-90f8-4722-8cad-b275ffa781d9": {
-    "original": "Voeg je ontbrekende facturatiegegevens toe",
-    "translation": "Ajoutez vos données de facturation manquantes"
+    "original": "Voeg je ontbrekende groepsgegevens toe",
+    "translation": "Ajoutez les informations manquantes de votre groupe"
   },
   "5a851364-bef5-474a-b1f0-83f4e48edefb": {
     "original": "Geen internetverbinding. Kijk jouw verbinding na en herlaad de website.",
@@ -7754,6 +7946,10 @@
   "5e2a299f-a166-46a8-9975-cf1b1ce334a6": {
     "original": "Kampmeldingen",
     "translation": "Notifications de camp"
+  },
+  "5e3928ce-0e62-402f-bf9a-5151a63cc759": {
+    "original": "De \"onbeschikbaar na datum\" moet na de \"beschikbaar vanaf datum\" zijn.",
+    "translation": "La \"date d’indisponibilité\" doit être postérieure à la \"date de disponibilité\"."
   },
   "5e3c0459-3ee0-4c2f-9657-5e189dbf749d": {
     "original": "zojuist",
@@ -8123,6 +8319,10 @@
     "original": "Nu te betalen",
     "translation": "À payer maintenant"
   },
+  "621c533c-23fe-43b5-b493-a4352ac479d2": {
+    "original": "Kijk dit nog even na",
+    "translation": "Veuillez vérifier ceci à nouveau"
+  },
   "6223bc9f-b3e9-4cb2-a73e-62555499b6b7": {
     "original": "Beschrijving is verplicht",
     "translation": "La description est obligatoire"
@@ -8216,8 +8416,8 @@
     "translation": "Sur la page suivante, cliquez sur « Choisir une autre application » si vous souhaitez payer avec une application autre que Payconiq by Bancontact."
   },
   "6313a021-6795-4b7e-842c-f4574e433324": {
-    "original": "Facturatiegegevens",
-    "translation": "Coordonnées de facturation"
+    "original": "Groepsgegevens",
+    "translation": "Données du groupe"
   },
   "6348587f-8d3e-4a13-8b52-5fa459366fee": {
     "original": "Bij een routinecontrole blijken de DNS-instellingen van de domeinnaam van een vereniging ongeldig te zijn.",
@@ -8258,6 +8458,10 @@
   "63b03f2b-6f8c-465f-9a4f-328fd67131e3": {
     "original": "Als een vragenlijst niet verplicht is, zal men de stap kunnen overslaan zolang nog niets werd ingevuld. Meestal is het niet nodig om dit te gebruiken. Als de vragenlijst altijd verplicht is om in te vullen, kan je ook nog steeds optionele vragen in die lijst hebben. Meestal is het gewoon duidelijker om optionele vragen te gebruiken. Maar soms wil je bijvoorbeeld 'alles invullen' of 'niets invullen', dan kan je dit best gebruiken.",
     "translation": "Si un formulaire personnalisé n’est pas obligatoire, l’utilisateur pourra sauter l’étape tant qu’il n’a rien rempli. Généralement, il n’est pas nécessaire d’utiliser cette option. Si le formulaire personnalisé doit toujours être rempli, vous pouvez quand même avoir des questions facultatives dans la liste. Généralement, il est plus clair d’utiliser des questions facultatives. Mais parfois, vous voulez par exemple « tout remplir » ou « ne rien remplir », alors vous pouvez utiliser cette option."
+  },
+  "63b4a0d5-b7a6-416f-8ac1-68fcdc4e88f6": {
+    "original": "Client id",
+    "translation": "Client id"
   },
   "63b9a0c4-ee88-49b4-8609-dc014bc3e3a3": {
     "original": "Aansluiting verwijderd",
@@ -8643,6 +8847,10 @@
     "original": "meer informatie na over hoe je een vragenlijst kan instellen.",
     "translation": "plus d’informations sur la configuration d’un formulaire personnalisé."
   },
+  "695dc336-3540-44b5-b990-66367f08af00": {
+    "original": "UiTPAS-organisator zoeken",
+    "translation": "Rechercher un organisateur UiTPAS"
+  },
   "69783c9e-0199-4e1b-be23-35625515167d": {
     "original": "Vanaf {index}e inschrijving",
     "translation": "À partir de la {index}e inscription"
@@ -8658,6 +8866,10 @@
   "69919e1e-89c6-44d7-beb1-c7b243c5a316": {
     "original": "Ticket al gescand",
     "translation": "Ticket déjà scanné"
+  },
+  "699edd60-afb0-4c4d-aac5-58f7a6b0ff1f": {
+    "original": "Deze functie is ongeldig omdat {name} niet is ingeschreven voor een standaard leeftijdsgroep. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
+    "translation": "Cette fonction est invalide car {name} n’est pas inscrit dans un groupe d’âge standard. Cette fonction sera automatiquement supprimée à la fin du mois."
   },
   "69a7751b-c316-42cd-a766-98e7e11fe3d6": {
     "original": "Persoonsgegevens van leden",
@@ -8759,6 +8971,10 @@
     "original": "Studentenvereniging",
     "translation": "Association étudiante"
   },
+  "6ada0ff0-3976-41f7-aa65-7af870964ebc": {
+    "original": "Beschikbaarheid",
+    "translation": "Disponibilité"
+  },
   "6ade2adb-91c3-4aa4-95d4-fd4550ec98f4": {
     "original": "beschrijving van je vereniging",
     "translation": "description de votre association"
@@ -8802,6 +9018,10 @@
   "6b2de32e-471e-4e77-97d0-a800856ee5ba": {
     "original": "Vink hieronder de tickets aan die je wilt scannen en klik op \"starten\". Zo scan je niet per ongeluk een ongeldig ticket als je verschillende scanpunten hebt op je evenement (bv. drankkaarten en inkomtickets apart).",
     "translation": "Cochez ci-dessous les tickets que vous souhaitez scanner et cliquez sur \"démarrer\". Ainsi, vous n'allez pas scanner accidentellement un ticket invalide si vous avez plusieurs points de scannage lors de votre événement (par exemple, cartes de boisson et tickets d'entrée séparément)."
+  },
+  "6b333cb4-21fd-42be-b0c9-6d899f2fd348": {
+    "original": "UiTPAS is nog niet volledig geconfigureerd voor deze organisatie.",
+    "translation": "UiTPAS n'est pas encore entièrement configuré pour cette association."
   },
   "6b36fc82-d88c-49cc-ae94-4653ad37b3e3": {
     "original": "Dit type activiteit wordt niet ondersteund",
@@ -8939,6 +9159,10 @@
     "original": "Automatische systeemactie",
     "translation": "Action système automatique"
   },
+  "6cd858a4-8cc5-42fc-9ca2-a87d1ee13d6b": {
+    "original": "De toegepaste kortingen worden niet geregistreerd en je ontvangt geen automatische terugbetaling van UiTPAS. Wil je dit toch, configureer dan je UiTPAS-integratie in de instellingen.",
+    "translation": "Les réductions appliquées ne sont pas enregistrées et vous ne recevrez pas de remboursement automatique d’UiTPAS. Si vous souhaitez l’obtenir, configurez l’intégration UiTPAS dans les paramètres."
+  },
   "6ce03229-0735-459d-aa3c-da665e4bafc2": {
     "original": "Jullie ledenportaal",
     "translation": "Votre portail des membres"
@@ -8962,6 +9186,10 @@
   "6d281e06-4827-4b95-9434-9e3d5d96215a": {
     "original": "Deze zitplaats werd gewijzigd van {from} naar {to}",
     "translation": "Cette place a été modifiée de {from} à {to}"
+  },
+  "6d35156d-e452-4b0f-80f4-b1e9024d08ee": {
+    "original": " en ",
+    "translation": " et "
   },
   "6d4c2c27-ac05-4843-b329-c8bb806bfcb0": {
     "original": "Ouder toevoegen",
@@ -9295,6 +9523,10 @@
     "original": "Toegangsbeheer",
     "translation": "Gestion des accès"
   },
+  "70c70815-5095-4eb7-9eb2-f93cb1660135": {
+    "original": "Inschrijven voor wachtlijst '{group}'",
+    "translation": "Inscription sur la liste d'attente '{group}'"
+  },
   "70c99ed2-97be-4252-b7c4-6cd46d5c9513": {
     "original": "E-mailadres waarmee je wilt versturen",
     "translation": "Adresse e-mail avec laquelle vous souhaitez envoyer"
@@ -9362,6 +9594,10 @@
   "71a6c292-6ea9-41f7-bff7-740ab42842a9": {
     "original": "Er is een fout opgetreden bij het installeren van de update. Probeer het later opnieuw.",
     "translation": "Une erreur s'est produite lors de l'installation de la mise à jour. Veuillez réessayer plus tard."
+  },
+  "71a8218b-c58e-4e95-9626-551b80eb8367": {
+    "original": "UiTPAS is niet volledig geconfigureerd, contacteer de platformbeheerder.",
+    "translation": "UiTPAS n'est pas entièrement configuré, veuillez contacter l'administrateur de la plateforme."
   },
   "71b37c1d-7a2d-41c9-a6c0-fcd9c69a2492": {
     "original": "Deze functie is ongeldig omdat {name} niet is ingeschreven. Deze functie zal automatisch verwijderd worden op het einde van de maand.",
@@ -9575,6 +9811,10 @@
     "original": "Betaalmethodes voor inschrijvingen",
     "translation": "Modes de paiement pour les inscriptions"
   },
+  "74235c2d-fe1f-4d38-821e-2ace113152ef": {
+    "original": "Plak hier je client id",
+    "translation": "Collez ici votre client id"
+  },
   "74237967-b1be-405e-95bb-15ef1905742c": {
     "original": "Je hebt nog geen rollen aangemaakt. Maak een rol aan om beheerders op te delen.",
     "translation": "Vous n'avez pas encore créé de rôles. Créez un rôle pour répartir les administrateurs."
@@ -9695,6 +9935,10 @@
     "original": "Andere domeinnaam voor registratie",
     "translation": "Autre nom de domaine pour l'enregistrement"
   },
+  "759abb2c-48d9-4eb6-bf3a-bd8284b28ffa": {
+    "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.",
+    "translation": "Ce membre n'est pas inscrit dans un groupe d'âge standard pour l'année associative en cours. Supprimez la fonction ou inscrivez le membre pour l'année associative actuelle."
+  },
   "75b6fd85-2721-46fd-9ac0-8c96a782484c": {
     "original": "Jouw webshop blijft ook bereikbaar via",
     "translation": "Votre boutique en ligne reste également accessible via"
@@ -9719,6 +9963,10 @@
     "original": "Tijdelijk",
     "translation": "Temporaire"
   },
+  "761ba5a0-8f9b-4c87-b3d0-559e3f6e8d92": {
+    "original": "Beschikbaar vanaf {date}",
+    "translation": "Disponible à partir du {date}"
+  },
   "761c7de2-e697-4c39-9970-82d05fc886ca": {
     "original": "Vul een URL in",
     "translation": "Entrez une URL"
@@ -9726,6 +9974,10 @@
   "763f791b-dd8d-4cb2-aa57-3d93f33a7c8e": {
     "original": "Geen betalingen gevonden",
     "translation": "Aucun paiement trouvé"
+  },
+  "7646c809-e882-46d6-9a5a-24e83087f70e": {
+    "original": "Doorgaan zonder terugbetalingen",
+    "translation": "Continuer sans remboursements"
   },
   "76509866-f011-451f-ab1e-f03ad776be87": {
     "original": "Bestellingen verwijderd",
@@ -9774,6 +10026,10 @@
   "76b00f58-a587-431f-9c28-1b86d394fc26": {
     "original": "Stel in welke soorten lokalen verenigingen kunnen toevoegen",
     "translation": "Définissez quels types de salles peuvent être ajoutés par les associations"
+  },
+  "76dfb997-817a-4d98-8ba3-0daacd0f5957": {
+    "original": "Vul een client id in",
+    "translation": "Indiquez un client id"
   },
   "76eb7982-9fc5-490a-9414-42bb7f10b8d6": {
     "original": "Bewerk inschrijvingsinstellingen",
@@ -10259,6 +10515,10 @@
     "original": "Er zijn nog geen lokalen toegevoegd",
     "translation": "Aucun local n’a encore été ajouté"
   },
+  "7d3a6b57-f81a-4d58-bc2b-babb2261c40b": {
+    "original": "Er is iets misgelopen bij het ophalen van je rechten. Probeer het later opnieuw.",
+    "translation": "Une erreur est survenue lors de la récupération de vos droits. Veuillez réessayer plus tard."
+  },
   "7d4be8f3-fc0f-42ed-bb86-5bf672dedf5c": {
     "original": "Benaming verlaagd tarief",
     "translation": "Nom du tarif réduit"
@@ -10306,6 +10566,10 @@
   "7e08e7df-a19c-486d-9ab4-e892762c0913": {
     "original": "Je moet niet noodzakelijk overschrijven via een app of één van deze apps. Dit is puur voor het gemak, het gaat hier om een gewone overschrijving.",
     "translation": "Vous n'êtes pas obligé d'effectuer un virement via une application ou l'une de ces applications. Ceci est uniquement pour plus de commodité, il s'agit d'un virement ordinaire."
+  },
+  "7e0a683f-f409-4fbe-b463-46ec451951cd": {
+    "original": "UiTPAS gekoppeld",
+    "translation": "UiTPAS lié"
   },
   "7e1d2f82-ca2d-4acc-ab37-88834e63c999": {
     "original": "Later te betalen",
@@ -10366,6 +10630,10 @@
   "7eb4f64b-68be-4cb4-8fcb-255093af9037": {
     "original": "Hier zie je bij welke groep we elk lid gaan inschrijven, op basis van jouw instellingen en het bestand",
     "translation": "Voici le groupe où chaque membre sera inscrit, selon tes paramètres et ton fichier."
+  },
+  "7ec9bfd6-8d4c-4f45-a5e8-7979c747de64": {
+    "original": "Ontkoppel",
+    "translation": "Dissocier"
   },
   "7edb3d38-4eaf-4314-867e-9621b5fb826e": {
     "original": "lid past",
@@ -10459,6 +10727,10 @@
     "original": "De link naar de website van jouw vereniging.",
     "translation": "Le lien vers le site web de votre association."
   },
+  "8012defc-bf79-4ee5-b8f4-6e6cc5242bf8": {
+    "original": "Zoeken",
+    "translation": "Rechercher"
+  },
   "802581b7-38dd-45c3-815d-b786b6f9136c": {
     "original": "{name} definitief verwijderen?",
     "translation": "Supprimer {name} définitivement?"
@@ -10518,6 +10790,10 @@
   "80e82f78-0e15-4e6a-82c0-d4ee613683f8": {
     "original": "Rijksregisternummer wijzigen naar {nationalRegisterNumber}",
     "translation": "Modifier le numéro de registre national en {nationalRegisterNumber}"
+  },
+  "80fcde9c-c8c7-4fe1-b9a6-51684a23d850": {
+    "original": "Stel eerst een UiTPAS-organisator in.",
+    "translation": "Veuillez d'abord définir un organisateur UiTPAS."
   },
   "81082354-9a9a-4a23-aa02-3273d4906652": {
     "original": "E-mailadres ouder",
@@ -10907,6 +11183,10 @@
     "original": "Voor algemene e-mails of voor antwoorden op automatische e-mails als domeinnaam niet ingesteld is (bv. als antwoord op bestelbevestiging).",
     "translation": "Pour les e-mails généraux ou pour les réponses aux e-mails automatiques si le nom de domaine n'est pas défini (par ex. en réponse à une confirmation de commande)."
   },
+  "85fb6e02-9b69-43cc-acf7-96a576461560": {
+    "original": "De opgegeven UiTPAS-evenement URL is ongeldig.",
+    "translation": "L’URL UiTPAS pour cet événement n’est pas valide."
+  },
   "860735a0-eb27-44ba-9364-4d52f0ce6698": {
     "original": "Vink de rijen aan als het om dezelfde personen gaat",
     "translation": "Cochez les lignes si cela concerne la même personne"
@@ -11070,6 +11350,10 @@
   "87d9975e-d0ac-41d4-8472-dedcfaa571cb": {
     "original": "Proefperiode",
     "translation": "Période d’essai"
+  },
+  "87e8488b-4190-42d9-bdd0-564a46671f7f": {
+    "original": "Zoek jouw vereniging in de UiTPAS organisatoren lijst.",
+    "translation": "Cherchez votre association dans la liste des organisateurs UiTPAS."
   },
   "880e4cac-5a7e-4d6d-80ad-c5472a005df6": {
     "original": "De eerstvolgende aansluiting van dit lid start op {date}. Vandaag is dit lid niet aangesloten bij KSA Nationaal en daardoor niet verzekerd.",
@@ -11307,6 +11591,10 @@
     "original": "Het bestand is verlopen",
     "translation": "Le fichier a expiré"
   },
+  "8a9b7083-6a55-400f-a244-7513385c3a8a": {
+    "original": "Berekenen...",
+    "translation": "Calcul en cours..."
+  },
   "8aad46a6-a864-4e60-a3f0-dffe2b37033c": {
     "original": "Adres",
     "translation": "Adresse"
@@ -11359,6 +11647,10 @@
     "original": "In welk werkjaar wil je de leden inschrijven?",
     "translation": "Pour quelle année associative voulez-vous inscrire les membres ?"
   },
+  "8b74f225-07a7-4b5e-b937-4d479c888789": {
+    "original": "Controleer de instellingen",
+    "translation": "Vérifiez les paramètres"
+  },
   "8b7c18d3-3588-4f07-a269-391283e4c2cc": {
     "original": "Aanvinktekst",
     "translation": "Texte de la case à cocher"
@@ -11366,6 +11658,10 @@
   "8b7dab90-8fea-4a23-8766-431ce27edaec": {
     "original": "Er staan inschrijvingen klaar in je mandje. Reken ze af om ze definitief te maken.",
     "translation": "Il y a des inscriptions prêtes dans votre panier. Payez-les pour les finaliser."
+  },
+  "8b9c3203-aaea-4699-b274-2ac2eff7ec1d": {
+    "original": "Jouw UiTPAS-integratie is niet (meer) ingesteld",
+    "translation": "Votre intégration UiTPAS n'est pas (ou plus) configurée"
   },
   "8b9ef669-554d-4ee2-b3bd-2ea12f85fa26": {
     "original": "Bepaal wie een e-mail krijgt als notificatie van een kampmelding op niveau van een vereniging, naast de indiener van de melding.",
@@ -11627,6 +11923,10 @@
     "original": "Naam activiteit",
     "translation": "Nom de l’activité"
   },
+  "8e328465-ed68-4f9a-92ba-8c2e172bb521": {
+    "original": "Kortingen bij de UiTPAS officiële flow zijn niet mogelijk.",
+    "translation": "Les réductions dans le flux officiel UiTPAS ne sont pas possibles."
+  },
   "8e4c1895-286b-47e7-94c6-fceb63947706": {
     "original": "mannen geboren in",
     "translation": "hommes nés en"
@@ -11879,6 +12179,10 @@
     "original": "Niet beschikbaar",
     "translation": "Non disponible"
   },
+  "9128e6d1-9772-4258-b1e6-5d271b71727f": {
+    "original": "Beschikbaar vanaf datum",
+    "translation": "Disponible à partir de la date"
+  },
   "9128ebac-a394-422e-b1e6-c3d40f87e33b": {
     "original": "Herinnering verlopen pakket webshops",
     "translation": "Rappel échéance du forfait boutiques en ligne"
@@ -12018,6 +12322,10 @@
   "92f76d54-282e-448e-ae15-21411b7bc085": {
     "original": "Sluit jouw vereniging aan bij Stamhoofd",
     "translation": "Affiliez votre association à Stamhoofd"
+  },
+  "93004d03-955a-4a9a-937d-2f30841dc5cc": {
+    "original": "Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.",
+    "translation": "Une erreur s'est produite lors de la communication avec UiTPAS. Veuillez réessayer plus tard."
   },
   "930218d2-2e00-4d1f-90c9-59d77c1ed377": {
     "original": "Optioneel. Geef een uitleg wanneer dit type activiteit gebruikt moet worden.",
@@ -12247,6 +12555,10 @@
     "original": "Herinnering verlopen proefperiode pakket webshops",
     "translation": "Rappel échéance de la période d'essai du forfait boutiques en ligne"
   },
+  "963105d8-a70a-4ba4-9ddc-b7f908d44664": {
+    "original": "Je moet een naam opgeven om UiTPAS-organisaties te zoeken.",
+    "translation": "Vous devez indiquer un nom pour rechercher des associations UiTPAS."
+  },
   "9631f5ce-dbb9-4463-b565-618446657ea2": {
     "original": "Geactiveerd",
     "translation": "Activé"
@@ -12278,6 +12590,10 @@
   "96c10e6b-3974-40d4-8844-70b0b2fa110e": {
     "original": "Bevestig dat iedereen de juiste functies heeft gekregen.",
     "translation": "Confirmez que chacun a reçu les fonctions appropriées."
+  },
+  "96c8a719-dba5-47ce-bb61-ee0754a5f776": {
+    "original": "Jouw UiTPAS-integratie heeft geen toegansrechten tot de geselecteerde UiTPAS-organisator, maar wel tot ",
+    "translation": "Votre intégration UiTPAS n’a pas de droits d’accès à l’organisateur UiTPAS sélectionné, mais bien à "
   },
   "971f8200-0bfd-4b95-9feb-629044d9af7f": {
     "original": "Voeg hier de e-mailadressen van jouw vereniging toe. Als je e-mailadressen hebt met jouw eigen domeinnaam (bv. info@mijnvereniging.be), kan je e-mails versturen vanaf dat e-mailadres als je jouw domeinnaam eerst toevoegt (kan bij instellingen). Andere e-mails worden vanaf @stamhoofd.email verstuurd. Voeg enkel e-mailadressen toe waar je e-mails op kan ontvangen.",
@@ -12511,6 +12827,10 @@
     "original": "Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.",
     "translation": "Voici la liste des membres pour lesquels aucun groupe d’âge n’a été trouvé, probablement parce qu’ils sont trop jeunes ou trop âgés. Au besoin, ajuste les paramètres de tes groupes d’inscription."
   },
+  "9a3796e7-0eeb-495a-9289-74fbcec07a0c": {
+    "original": "Plak hier je client secret",
+    "translation": "Collez ici votre client secret"
+  },
   "9a384a73-d222-49f8-9203-76b8e525f1ab": {
     "original": "Ja, verplaatsen",
     "translation": "Oui, déplacer"
@@ -12639,6 +12959,10 @@
     "original": "Korting bewerken",
     "translation": "Modifier une réduction"
   },
+  "9b9ec483-63b8-4696-ade6-0eb18f9008e6": {
+    "original": "Je moet een client id opgeven.",
+    "translation": "Vous devez indiquer un client id."
+  },
   "9bbdb9e4-fc41-4135-8ad1-f55f61a7aa63": {
     "original": "Algemene kortingen",
     "translation": "Réductions générales"
@@ -12726,6 +13050,10 @@
   "9c916015-e69c-44b3-a568-d0af15854787": {
     "original": "Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
     "translation": "Tous les groupes sont transférés à cette nouvelle année associative. Les administrateurs principaux peuvent toujours consulter l'année associative précédente."
+  },
+  "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
+    "original": "Vereniging ID",
+    "translation": "ID association"
   },
   "9ca710ba-28cc-4008-9e10-9c61a1da3c2e": {
     "original": "{sso} activeren",
@@ -13227,6 +13555,10 @@
     "original": "Weekends",
     "translation": "Week-ends"
   },
+  "a24c0731-1c0f-46e2-8aaa-4569f6e0cc91": {
+    "original": "Jouw UiTPAS-integratie heeft geen toegansrechten tot de UiTPAS-organisator",
+    "translation": "Votre intégration UiTPAS n'a pas les droits d'accès nécessaires à l'organisateur UiTPAS"
+  },
   "a28ab93c-ac3a-4422-bcaf-170d28161604": {
     "original": "Deze leden passen in meerdere groepen, maar op basis van jouw prioriteit bij {group} zullen worden ingeschreven",
     "translation": "Ces membres correspondent à plusieurs groupes, mais seront inscrits dans {group} selon votre priorité."
@@ -13398,6 +13730,10 @@
   "a562ecf9-00ae-48b7-8568-4e762b11e1f3": {
     "original": "Deze facturatiegegevens zijn niet volledig. Bewerk ze en kijk ze na voor je verder gaat.",
     "translation": "Ces données de facturation ne sont pas complètes. Modifiez-les et vérifiez-les avant de continuer."
+  },
+  "a56854af-464a-45a4-8c39-10a9264b6ce4": {
+    "original": "Er is een fout opgetreden bij het ophalen van het kansentarief voor dit evenement. Probeer het later opnieuw.",
+    "translation": "Une erreur s'est produite lors de la récupération du tarif préférentiel pour cet événement. Veuillez réessayer plus tard."
   },
   "a56aa092-fd87-40b9-9a8c-7822796e6927": {
     "original": "reeds betaald",
@@ -13819,6 +14155,10 @@
     "original": "voorbeeld.com",
     "translation": "exemple.com"
   },
+  "aa6ef361-7d1f-4a9a-a7e1-644958739117": {
+    "original": "Configureer",
+    "translation": "Configurer"
+  },
   "aa752f68-29f0-4f3b-b73f-9a7b363b277b": {
     "original": "Geen straat en huisnummer in deze cel",
     "translation": "Aucune rue et numéro dans cette cellule"
@@ -13851,6 +14191,10 @@
     "original": "Kan in enkele uren worden geraden door een computer",
     "translation": "Peut être deviné en quelques heures par un ordinateur"
   },
+  "aaca8552-d08b-45d4-a068-3e441ceb1142": {
+    "original": "Sommige leden hebben een groep zonder wachtlijst. Deze zullen meteen voor de groep worden ingeschreven en niet voor een wachtlijst. Deze groepen hebben geen wachtlijst: {groups}.",
+    "translation": "Certains membres appartiennent à un groupe sans liste d'attente. Ils seront inscrits directement dans le groupe et non sur une liste d'attente. Ces groupes sans liste d’attente sont : {groups}."
+  },
   "aad47217-df26-43ce-a43c-896697d5fbd4": {
     "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen vereniging.",
     "translation": "Ajoutez des fonctions spécifiques qui ne s'appliquent qu'à votre propre association."
@@ -13867,9 +14211,17 @@
     "original": "{seconds} seconden geleden",
     "translation": "il y a {seconds} secondes"
   },
+  "aaf56535-c13b-4f92-9ba4-7309cae3e078": {
+    "original": "Deze organisatie heeft nog geen UiTPAS-organisatie ingesteld. Stel dit in via de algemene instellingen.",
+    "translation": "Cette association n'a pas encore d'organisation UiTPAS définie. Faites-le via les paramètres généraux."
+  },
   "aaf91fd2-250b-4f2e-88a1-21af5747c760": {
     "original": "Voeg toe",
     "translation": "Ajouter"
+  },
+  "aafe1357-1b66-4122-beb0-b773a933a477": {
+    "original": "UiTPAS-integratie",
+    "translation": "Intégration UiTPAS"
   },
   "ab00e79e-c7cb-4595-9119-4fb5ca366dd1": {
     "original": "Kies een vereniging",
@@ -14575,6 +14927,10 @@
     "original": "Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt.",
     "translation": "Lisez d’abord notre guide avant de commencer ! Prenez votre temps pour tout remplir correctement et complètement. Si vous faites des erreurs, vous risquez de prolonger le délai de connexion."
   },
+  "b364c428-7d28-418e-9dba-08bce39433b2": {
+    "original": "Haal de gegevens op uit het",
+    "translation": "Récupérer les données depuis le"
+  },
   "b36cd1f7-9923-433b-93d8-605ac65a4718": {
     "original": "Verwijder deze rol",
     "translation": "Supprimer ce rôle"
@@ -14779,6 +15135,10 @@
     "original": "Bevestig de naam van de activiteit",
     "translation": "Confirmez le nom de l'activité"
   },
+  "b59d4150-23bd-4014-9600-37b2ef667e06": {
+    "original": "Ga naar instellingen",
+    "translation": "Aller aux paramètres"
+  },
   "b5da58dd-0464-4b00-a45b-866ee7d5f993": {
     "original": "Veganistisch",
     "translation": "Végétalien"
@@ -14806,6 +15166,10 @@
   "b6271592-9d1a-4b59-9511-47917f7c6e5b": {
     "original": "is kleiner dan",
     "translation": "est inférieur à"
+  },
+  "b6334ba0-a28d-4ee4-b443-03f293473249": {
+    "original": "Sluit aan bij UiTPAS, zodat je gemeente tussenkomt in het UiTPAS-kansentarief.",
+    "translation": "Rejoignez UiTPAS pour que votre commune intervienne dans le tarif réduit UiTPAS."
   },
   "b6391640-1e01-47f9-913d-360fb0903b75": {
     "original": "Aangemaakt op",
@@ -14996,8 +15360,8 @@
     "translation": "Définissez éventuellement des limites pour le nombre de locaux de ce type par groupe."
   },
   "b831d108-6aa9-4e6e-97ce-9f50a1cab9e1": {
-    "original": "Bevestig dat de betaalmethodes correct zijn ingesteld",
-    "translation": "Confirmez que les méthodes de paiement sont correctement configurées"
+    "original": "Ik bevestig dat de betaalmethodes correct zijn ingesteld",
+    "translation": "Je confirme que les méthodes de paiement sont correctement configurées"
   },
   "b84fbf5b-58f6-4840-a0f1-977823fbe523": {
     "original": "Hoofdtags",
@@ -15235,6 +15599,10 @@
     "original": "Automatische aansluiting",
     "translation": "Affiliation automatique"
   },
+  "bb419e01-886f-47b1-b1d9-2a3ef7094c92": {
+    "original": "Koppel met UiTPAS",
+    "translation": "Se connecter à UiTPAS"
+  },
   "bb4843f4-d853-4953-8869-7d9c6c12b974": {
     "original": "Je kan kiezen wanneer deze stap overgeslagen kan worden.",
     "translation": "Vous pouvez choisir quand cette étape peut être sautée."
@@ -15283,6 +15651,10 @@
     "original": "Je hebt niet voldoende rechten om deze aansluiting te vergrendelen",
     "translation": "Vous n’avez pas les droits suffisants pour verrouiller cette adhésion."
   },
+  "bbc79280-7ae2-4b8d-a900-2d7cbb552428": {
+    "original": "Je kan niet enkel de client id wijzigen. Geef ook de client secret in.",
+    "translation": "Vous ne pouvez pas modifier uniquement le client id. Veuillez aussi entrer le client secret."
+  },
   "bbe0af99-b574-4719-a505-ca2285fa86e4": {
     "original": "Startdatum",
     "translation": "Date de début"
@@ -15322,6 +15694,10 @@
   "bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9": {
     "original": "Annuleren",
     "translation": "Annuler"
+  },
+  "bc608e45-810c-4dd3-82f7-3eb2befc4ffc": {
+    "original": "Het gekozen tarief is niet toepasbaar voor deze datum.",
+    "translation": "Le tarif sélectionné n'est pas applicable à cette date."
   },
   "bc68e8f0-2911-42d3-afca-790ed9a5fa35": {
     "original": "Oma",
@@ -15747,9 +16123,17 @@
     "original": "gouw",
     "translation": "district"
   },
+  "c10884fe-e858-48f6-875b-a1132c618df3": {
+    "original": "Ondernemingsnummer",
+    "translation": "Numéro d’entreprise"
+  },
   "c10b9adb-b872-4960-8141-bb28abdf2312": {
     "original": "Dit document uit prullenmand terug halen?",
     "translation": "Restaurer ce document de la corbeille ?"
+  },
+  "c112eac2-2515-4476-81d1-e8dc51bc063c": {
+    "original": "Koppel je UiTPAS-organisator",
+    "translation": "Associez votre organisateur UiTPAS"
   },
   "c113898b-d8ce-47ca-915d-2d069496aa88": {
     "original": "Je hebt succesvol toegang gekregen tot de gegevens van {name}",
@@ -15907,6 +16291,10 @@
     "original": "is gelijk aan",
     "translation": "est égal à"
   },
+  "c2e9194d-82b6-441a-ad47-bbac687667dd": {
+    "original": "Jouw UiTPAS-integratie is ingesteld en geldig",
+    "translation": "Votre intégration UiTPAS est configurée et valide"
+  },
   "c2ee9504-b07a-4d79-bd25-c14a1bba4d59": {
     "original": "Vouchers",
     "translation": "Bons"
@@ -16031,6 +16419,10 @@
     "original": "Zoek een vereniging",
     "translation": "Rechercher une association"
   },
+  "c43f7c56-b6f3-4de5-a543-c4c0c2b8cb6e": {
+    "original": "Er werd géén UiTPAS-evemenent gekoppeld, je krijgt géén automatische terugbetaling van je UiTPAS-regio.",
+    "translation": "Aucun événement UiTPAS n'a été associé, vous ne recevrez donc pas de remboursement automatique de votre région UiTPAS."
+  },
   "c4896202-dd3b-4445-a530-3fed231259c2": {
     "original": "De groep waarin je een lid probeert in te schrijven lijkt niet meer te bestaan. Je herlaadt best even de pagina om opnieuw te proberen.",
     "translation": "Le groupe auquel vous essayez d’inscrire un membre semble ne plus exister. Il est préférable de recharger la page pour réessayer."
@@ -16058,6 +16450,10 @@
   "c4f7d503-ed7f-4526-b082-28dc2ab7cb17": {
     "original": "Ben je 100% zeker dat je {name} wilt verwijderen? Vul dan de volledige naam van het lid in ter bevestiging. Je kan dit niet ongedaan maken.",
     "translation": "Êtes-vous sûr à 100% de vouloir supprimer {name}? Veuillez alors entrer le nom complet du membre pour confirmation. Vous ne pourrez pas annuler cette action."
+  },
+  "c4fa8a72-56cd-4b5c-ae12-6533a493bac6": {
+    "original": "Zoek jouw evenement in de UiTPAS lijst.",
+    "translation": "Cherchez votre événement dans la liste UiTPAS."
   },
   "c4fe92c5-851c-422a-842b-da21e56e6f4c": {
     "original": "Contactpersonen",
@@ -16331,6 +16727,10 @@
     "original": "Telefoonnummer wijzigen naar {phone}",
     "translation": "Modifier le numéro de téléphone en {phone}"
   },
+  "c8da000d-cfa8-4ceb-8ea0-87c464271eb8": {
+    "original": "Het sociaal tarief kon niet worden berekend. Probeer het later opnieuw.",
+    "translation": "Le tarif social n'a pas pu être calculé. Veuillez réessayer plus tard."
+  },
   "c8e499c2-8d90-480c-a15e-d9da5291b40e": {
     "original": "Je hebt niet voldoende rechten om de custom code aan te passen.",
     "translation": "Vous n'avez pas les droits suffisants pour modifier le code personnalisé."
@@ -16406,6 +16806,10 @@
   "c9ded123-9810-4bc8-815e-77e9ca9ae717": {
     "original": "bestellen",
     "translation": "commander"
+  },
+  "c9e33324-eb11-44af-8701-0ef6b4c322e6": {
+    "original": "Client secret",
+    "translation": "Client secret"
   },
   "c9eeb8e9-61f7-4ca0-a4e4-01681fc32245": {
     "original": "Of scan met een ondersteunende bank app",
@@ -16722,6 +17126,10 @@
   "ccc74056-d922-4af6-8318-4e797e0fd35e": {
     "original": "Voeg bij minstens één ouder een rijksregisternummer toe.",
     "translation": "Ajoutez un numéro de registre national à au moins un parent."
+  },
+  "ccd8e8b4-01a7-4e7c-8ae0-92d2a4c659eb": {
+    "original": "Er is geen kansentarief beschikbaar voor dit evenement.",
+    "translation": "Aucun tarif préférentiel n’est disponible pour cet événement."
   },
   "ccdda763-4c52-4a25-94ed-458b601be3a4": {
     "original": "Kortingscode toevoegen",
@@ -17055,6 +17463,10 @@
     "original": "Kortingvoorwaarde bewerken",
     "translation": "Modifier une condition de réduction"
   },
+  "d0c76989-c11b-4eef-ac8f-3c76e9ad315e": {
+    "original": "Elk ticket moet een UiTPAS-evenement gekoppeld hebben om een automatische terugbetaling te krijgen van je UiTPAS-regio.",
+    "translation": "Chaque ticket doit être lié à un événement UiTPAS afin de recevoir un remboursement automatique de votre région UiTPAS."
+  },
   "d0c91429-b8c8-4142-b95f-0bc249b9506c": {
     "original": "Eén van de openstaande bedragen is niet meer beschikbaar.",
     "translation": "Un des montants en suspens n'est plus disponible."
@@ -17262,6 +17674,10 @@
   "d35c5964-e8e9-4a42-bdd0-555ab32eda7c": {
     "original": "Optie bewerken",
     "translation": "Modifier l'option"
+  },
+  "d37c7255-33dd-42a8-872d-0c719307f842": {
+    "original": "Zoek je UiTPAS-evenement",
+    "translation": "Cherchez votre événement UiTPAS"
   },
   "d37f0355-379d-4128-aafa-fefb201188bc": {
     "original": "Annuleringskost",
@@ -17474,6 +17890,10 @@
   "d5e39906-8c0b-4006-bab5-96827f8daa53": {
     "original": "Er zijn geen leden die kunnen inschrijven.",
     "translation": "Aucun membre ne peut s'inscrire."
+  },
+  "d6244dd4-a0b6-4063-9f93-91c5ab91905c": {
+    "original": "Facturatiegegevens",
+    "translation": "Informations de facturation"
   },
   "d62b3102-adc0-4d5f-9dbb-c03138e44fe2": {
     "original": "Betaallijnen",
@@ -17694,6 +18114,10 @@
   "d886e927-86d1-48ed-93ed-60e924484db1": {
     "original": "Inschrijvingsgroep bewerken",
     "translation": "Modifier le groupe d’inscription"
+  },
+  "d8937ba8-6689-4c76-9841-d5a00c99074b": {
+    "original": "Je kan de status van de UiTPAS-credentials niet handmatig instellen",
+    "translation": "Vous ne pouvez pas définir manuellement le statut des identifiants UiTPAS"
   },
   "d89d7fcd-ecf3-40a2-afb6-f51c3f6c9bc6": {
     "original": "Keuzemenu aantal",
@@ -18199,6 +18623,10 @@
     "original": "Dit lid heeft recht op het kansentarief van de UiTPAS.",
     "translation": "Ce membre a droit au tarif préférentiel de l’UiTPAS."
   },
+  "dd4ec83e-2d84-406b-9f3b-4fb1ba3e6fc7": {
+    "original": "De webshop kon niet geladen worden.",
+    "translation": "La boutique n’a pas pu être chargée."
+  },
   "dd55e04b-e5d9-4d9a-befc-443eef4175a8": {
     "original": "Je moet een ‘uitschrijven’-knop of link toevoegen onderaan je e-mail. Klik daarvoor onderaan op het ‘toverstaf’ icoontje en kies voor ‘Knop om uit te schrijven voor e-mails’. Dit is verplicht volgens de GDPR-wetgeving, maar het zorgt ook voor een betere e-mail reputatie omdat minder e-mails als spam worden gemarkeerd.",
     "translation": "Vous devez ajouter un bouton ou un lien « se désinscrire » en bas de votre e-mail. Pour cela, cliquez sur l'icône « baguette magique » en bas et choisissez « Bouton pour se désinscrire des e-mails ». Ceci est obligatoire selon la législation RGPD, mais il améliore également la réputation de vos e-mails car moins d'e-mails sont marqués comme spam."
@@ -18563,6 +18991,10 @@
     "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.",
     "translation": "Saisissez ici le code couleur HEX de votre couleur principale. Laissez vide pour conserver la couleur bleue."
   },
+  "e1aab1a7-fded-4e5e-b994-6607684764ac": {
+    "original": "Er is een fout opgetreden bij het zoeken naar UiTPAS-organisaties. Probeer het later opnieuw.",
+    "translation": "Une erreur s'est produite lors de la recherche d'associations UiTPAS. Veuillez réessayer plus tard."
+  },
   "e1ba3253-f0a0-41b0-95a0-3fc0abb44264": {
     "original": "Bekijk een overzicht van jouw recente betalingen en jouw openstaand bedrag.",
     "translation": "Consultez un aperçu de vos paiements récents et de votre solde dû."
@@ -18774,6 +19206,10 @@
   "e41660ea-180a-45ef-987c-e780319c4331": {
     "original": "Geen",
     "translation": "Aucun"
+  },
+  "e420367f-7ce9-4dd3-95b7-c24d0649cb59": {
+    "original": "Niet ingevuld",
+    "translation": "Non rempli"
   },
   "e424d549-2bb8-4103-9a14-ac4063d7d454": {
     "original": "Oeps! De prijs is gewijzigd terwijl je aan het afrekenen was (naar {total}). Herlaad de pagina even om ervoor te zorgen dat je alle aangepaste prijzen ziet. Contacteer de webmaster als je dit probleem blijft ondervinden na het te herladen.",
@@ -19155,6 +19591,10 @@
     "original": "{name} is nu ingesteld als het huidige werkjaar",
     "translation": "{name} est maintenant défini comme l'année associative en cours"
   },
+  "e8835291-6b19-49dc-9888-fa0b2161d24a": {
+    "original": "Geen organisatoren gevonden.",
+    "translation": "Aucun organisateur trouvé."
+  },
   "e883ae60-e858-4bcf-9e60-5d03986459c2": {
     "original": "Eén of meerdere keuzemogelijkheden van {group} zijn niet meer beschikbaar",
     "translation": "Une ou plusieurs possibilités de choix de {group} ne sont plus disponibles"
@@ -19351,6 +19791,10 @@
     "original": "Waarschuwing als aangevinkt",
     "translation": "Avertissement si coché"
   },
+  "eaeba023-03b7-480d-8e2f-4849d7585909": {
+    "original": "Vul een client secret in",
+    "translation": "Indiquez un client secret"
+  },
   "eb03febc-d83b-4789-bb4d-0d97d542edfa": {
     "original": "De betaalmethode die je wilt gebruiken is niet toegestaan",
     "translation": "Le mode de paiement que vous souhaitez utiliser n'est pas autorisé"
@@ -19479,6 +19923,10 @@
     "original": "Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.",
     "translation": "Il est uniquement possible de demander la connexion dans les dates de début et de fin."
   },
+  "ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5": {
+    "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar voor een standaard leeftijdsgroep",
+    "translation": "Vous ne pouvez attribuer une fonction qu’aux membres inscrits cette année associative dans un groupe d'âge standard"
+  },
   "ec732e97-237c-4271-a890-77f18e2b006f": {
     "original": "Opsomming met nummers",
     "translation": "Liste numérotée"
@@ -19554,6 +20002,10 @@
   "ed42a654-193c-4d1b-8f5b-a98bed2b575d": {
     "original": "Bekijk en sla jouw ticket op via deze link.",
     "translation": "Consultez et enregistrez votre billet via ce lien."
+  },
+  "ed4e876c-6a40-49a7-ab65-2a4d5f31c13f": {
+    "original": "Er is een fout opgetreden bij het verbinden met UiTPAS. Probeer het later opnieuw.",
+    "translation": "Une erreur s'est produite lors de la connexion à UiTPAS. Réessayez plus tard."
   },
   "ed55e67d-1dce-46b2-8250-948c7cd616c2": {
     "original": "Aantal",
@@ -20067,6 +20519,10 @@
     "original": "Hiermee zal je worden afgemeld.",
     "translation": "Vous allez ainsi être déconnecté."
   },
+  "f3a5ff8c-f79e-474e-9e3e-5e85467f5770": {
+    "original": "Jouw UiTPAS-integratie heeft onvoldoende toegangsrechten",
+    "translation": "Votre intégration UiTPAS ne dispose pas de droits d'accès suffisants"
+  },
   "f3aa8253-d88e-41c7-8c98-ed477806c533": {
     "original": ", dan krijg je automatisch toegang tot alle bestaande gegevens.",
     "translation": " , vous aurez alors automatiquement accès à toutes les données existantes."
@@ -20240,8 +20696,8 @@
     "translation": "Administrateurs externes"
   },
   "f5404f0c-96f7-4f6a-834d-7616bfbedaf3": {
-    "original": "Bevestig dat je facturatiegegevens nagekeken zijn",
-    "translation": "Confirmez que vos données de facturation ont été vérifiées"
+    "original": "Ik bevestig dat alle groepsgegevens correct zijn",
+    "translation": "Je confirme que toutes les informations du groupe sont correctes"
   },
   "f544b972-416c-471d-8836-d7f3b16f947d": {
     "original": "Dit werkjaar is vergrendeld, je kan geen inschrijvingsgroepen meer toevoegen",
@@ -20278,6 +20734,10 @@
   "f5c908ad-c996-4dc8-acc0-dae902f13495": {
     "original": "Gemeente",
     "translation": "Commune"
+  },
+  "f5cac12d-ced6-43e6-bbd9-81b381807154": {
+    "original": "Er is een fout opgetreden bij het registreren van de UiTPAS-ticketverkoop.",
+    "translation": "Une erreur s'est produite lors de l'enregistrement des ventes de tickets UiTPAS."
   },
   "f5f56168-1922-4a23-b376-20a7738bfa66": {
     "original": "Onbeperkt",
@@ -20407,6 +20867,10 @@
     "original": "Gebruik dit als je hetzelfde attest in verschillende versies wilt beschikbaar maken aan hetzelfde lid.",
     "translation": "Utilisez ceci si vous souhaitez mettre le même document dans différentes versions à disposition du même membre."
   },
+  "f74892f9-d541-42b2-a398-3aa757c5ebd9": {
+    "original": "Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}",
+    "translation": "Votre UiTPAS vous donne droit à un tarif social de {specificPrice} au lieu du tarif social habituel de {generalPrice}"
+  },
   "f74aa987-0f92-4701-861d-2512efc5dda1": {
     "original": "De UiTPAS integratie is niet compleet, contacteer de beheerder.",
     "translation": "L’intégration UiTPAS n’est pas complète, contacte l’administrateur."
@@ -20458,6 +20922,10 @@
   "f7e792ed-2265-41e9-845f-e3ce0bc5da7c": {
     "original": "Adres",
     "translation": "Adresse"
+  },
+  "f7eea411-fb92-458f-bf3e-e36ed870591b": {
+    "original": "Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.",
+    "translation": "Une erreur s’est produite lors de l’enregistrement de la vente de tickets UiTPAS. Réessayez plus tard."
   },
   "f7f21afc-b5ca-4039-b5d8-8c6d3dfb1757": {
     "original": "Som hier op welke zaken",
@@ -20635,6 +21103,10 @@
     "original": "Deze gegevens worden verzameld en gekoppeld aan leden die inschrijven bij deze standaard leeftijdsgroep. Let erop dat deze gegevens gedeeld zijn met andere inschrijvingen. Als dezelfde gegevens dus voor meerdere inschrijvingen verzameld worden, dan worden ze maar één keer gevraagd (anders kunnen leden de gegevens wel nog nakijken als het al even geleden werd ingevuld) en kan je niet per inschrijving andere gegevens invullen. Gebruik ze dus niet voor tijdelijke vragen.",
     "translation": "Ces données sont collectées et associées aux membres qui s'inscrivent à ce groupe d'âge standard. Notez que ces données sont partagées avec d'autres inscriptions. Si les mêmes données sont donc collectées pour plusieurs inscriptions, elles ne sont demandées qu'une seule fois (sinon les membres peuvent toujours consulter les données si cela fait un certain temps qu'elles ont été saisies) et vous ne pouvez pas saisir de données différentes pour chaque inscription. Ne les utilisez donc pas pour des questions temporaires."
   },
+  "f9d6bc51-e7c9-4d3f-a13f-27871a018d83": {
+    "original": "Je hebt recht op UiTPAS-kansentarief maar het overblijvend aantal is niet voldoende.",
+    "translation": "Vous avez droit au tarif UiTPAS à tarif réduit, mais le nombre restant n'est pas suffisant."
+  },
   "f9dce2e6-4292-46f0-87cb-810375e88678": {
     "original": "Bestelbedrag",
     "translation": "Montant de la commande"
@@ -20726,6 +21198,10 @@
   "fa988b87-6665-43e4-a177-77031826e9a8": {
     "original": "Stamhoofd kan de inhoud van documenten automatisch wijzigen als de daarbij horende gegevens wijzigen, en nieuwe documenten aanmaken als er nieuwe inschrijvingen bij komen (ook na publicatie). Dat is ideaal om bijvoorbeeld ontbrekende of foute gegevens door leden nog te laten invullen via het ledenportaal. Op het moment dat je documenten officiëel hebt ingediend (indien van toepassing), zet je dit best uit. Als dit uit staat zullen onvolledige documenten niet langer zichtbaar zijn voor leden.",
     "translation": "Stamhoofd peut modifier automatiquement le contenu des documents si les données correspondantes changent et créer de nouveaux documents si de nouvelles inscriptions sont ajoutées (même après publication). C’est idéal pour permettre aux membres, par exemple, de compléter des données manquantes ou erronées via le portail des membres. Au moment où vous avez officiellement soumis vos documents (le cas échéant), il est préférable de désactiver cette option. Si cette option est désactivée, les documents incomplets ne seront plus visibles pour les membres."
+  },
+  "fa9e3bb7-5491-47f8-8939-0370767107b9": {
+    "original": "Publiq platform",
+    "translation": "plateforme Publiq"
   },
   "faa31f24-a42f-454b-9ceb-417c46dcee0d": {
     "original": "Aantal",
@@ -21098,6 +21574,10 @@
   "ff14d4f3-7664-4226-b895-55ba915042e2": {
     "original": "Verjaardag",
     "translation": "Anniversaire"
+  },
+  "ff27568d-d68a-46f7-bf6f-1fd4564ac3b3": {
+    "original": "Door een evenement uit de UiTdatabank te koppelen kan Stamhoofd een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.",
+    "translation": "En reliant un événement provenant de la base de données UiT, Stamhoofd peut enregistrer une vente avec tarif préférentiel dans votre région UiTPAS. Vous recevrez alors automatiquement un remboursement (partiel) et votre région fixera le tarif social."
   },
   "ff2beaea-cb8f-4de8-ba1c-039b7ba20bc0": {
     "original": "Kampmelding ingediend",

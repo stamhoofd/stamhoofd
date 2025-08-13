@@ -99,6 +99,10 @@
     "original": "Maak een kopie van de instellingen van jouw groep.",
     "translation": "Make a copy of your group's settings."
   },
+  "198e7383-2512-4f6f-b919-2b4225b8e2a9": {
+    "original": "Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze groep.",
+    "translation": "You can edit this webshop's settings through the administrators' portal for this group."
+  },
   "19e5262f-9dc1-40d9-b905-bda8462b6046": {
     "original": "Er bestaat al een groep met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
     "translation": "A group with the same name already exists. For example, add the name of your municipality."
@@ -191,10 +195,6 @@
     "original": "Groep",
     "translation": "Group"
   },
-  "2f645618-a9a9-4598-883d-6f1991ae379d": {
-    "original": "Geen rechtspersoonlijkheid (feitelijke groep)",
-    "translation": "No legal personality (de facto group)"
-  },
   "2fa762f2-c061-4c40-83cb-6ddc3e5f0f7a": {
     "original": "Je kan op ‘Mijn account’ inloggen met",
     "translation": "You can log in to ‘My account’ with"
@@ -267,6 +267,10 @@
     "original": "Je hebt geen rechten om een activiteit aan te maken voor deze groep.",
     "translation": "You do not have rights to create an activity for this group."
   },
+  "449df98c-76b7-49b5-b807-9a431336fa86": {
+    "original": "Ga naar het beheerdersportaal van een groep (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.",
+    "translation": "Go to the administrator portal of a group (which will act as the organizer) to link a webshop to this activity."
+  },
   "467951bf-92b1-417b-a56b-19ce254c3571": {
     "original": "Je kan op ‘Mijn account’ inloggen met",
     "translation": "You can log in to ‘My account’ with"
@@ -335,6 +339,10 @@
     "original": "Er zijn nog geen groepen",
     "translation": "There are no groups yet"
   },
+  "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
+    "original": "Door Ravot en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
+    "translation": "By connecting Ravot and UiTPAS, you can receive an automatic refund for every sale made with the UiTPAS discounted rate. First, you need to become an official UiTPAS organizer so they know where to send the refund. Next, you'll need to create an integration on the <button>Publiq</button> website. Enter the data of that integration below. Finally, for each item in your webshop, you will need to link an event from the UiTdatabank."
+  },
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Groep",
     "translation": "Group"
@@ -366,10 +374,6 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "You can also set your own domain name (e.g. inschrijven.mijngroep.be). However, you must have already purchased the domain name; this will usually already be the case if you already have your own website."
-  },
-  "594307a3-05b8-47cf-81e2-59fb6254deba": {
-    "original": "Feitelijke groep",
-    "translation": "Actual group"
   },
   "5aca8049-d981-4cc5-a86c-0c194047743d": {
     "original": "Natuurgroep",
@@ -615,6 +619,10 @@
     "original": "Groep",
     "translation": "Group"
   },
+  "87e8488b-4190-42d9-bdd0-564a46671f7f": {
+    "original": "Zoek jouw groep in de UiTPAS organisatoren lijst.",
+    "translation": "Find your group in the UiTPAS organizers list."
+  },
   "88119ffc-b692-4222-8217-75a9fa64f675": {
     "original": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
     "translation": "Charge an amount to the {count} selected groups."
@@ -707,6 +715,10 @@
     "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via ‘Mijn account’.",
     "translation": "You will receive an additional confirmation via email. If data changes in the future, you can now manage it via ‘My account’."
   },
+  "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
+    "original": "Groep ID",
+    "translation": "Group ID"
+  },
   "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
     "original": "Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)",
     "translation": "All age groups will be closed (unless the group already switched to this work year earlier)"
@@ -790,10 +802,6 @@
   "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
     "original": "In dit overzicht staan enkel groepen die al aangesloten zijn bij Ravot. Je kan zelf een nieuwe groep aansluiten via de knop 'Aansluiten' bovenaan.",
     "translation": "This overview only shows groups already affiliated with Ravot. You can connect a new group yourself via the 'Affiliation' button at the top."
-  },
-  "ab21ae18-0181-44ea-b41d-ff61c9358858": {
-    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke groep is niet voldoende (wordt niet geaccepteerd)",
-    "translation": "For Mollie you need a non-profit organisation. An actual group is not sufficient (not accepted)"
   },
   "abd71533-048e-45c7-baf8-78769e5287de": {
     "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Ravot worden overgenomen.",
@@ -883,10 +891,6 @@
     "original": "{existingCount} {memberTranslation} uit jouw bestand zitten al in het systeem ({total} in totaal). Je gaat informatie in Ravot overschrijven met informatie uit jouw bestand voor deze leden. Let goed op, je kan dit niet ongedaan maken.",
     "translation": "{existingCount} {memberTranslation} from your file are already in the system ({total} in total). You will overwrite information in Ravot with data from your file for these members. Please note, this action cannot be undone."
   },
-  "becc82f0-4195-4a17-b3f5-03f305582e4a": {
-    "original": "Een feitelijke groep is niet geregistreerd en heeft geen ondernemingsnummer",
-    "translation": "A de facto group is not registered and does not have a company number"
-  },
   "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
     "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw groep.",
     "translation": "Give these administrators quick read or edit access to all parts of your group."
@@ -926,10 +930,6 @@
   "c82d1491-73f8-4f05-af15-5b7bf58f1bcb": {
     "original": "Gezien bij andere groep",
     "translation": "Seen at another group"
-  },
-  "ca923d49-c9c1-4c39-9e52-96b88a0223ed": {
-    "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke groep als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",
-    "translation": "Add one or more legal entities. If you have both a de facto group and a non-profit organisation, add them both. The first one in the list is used by default when you make payments."
   },
   "cb51b737-c4cf-4ea7-aeb5-b5736a43c333": {
     "original": "De naam van je groep",
@@ -1056,8 +1056,8 @@
     "translation": "Group name"
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
-    "original": "Is jouw groep een feitelijke groep zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
-    "translation": "If your group is a de facto group without a non-profit organisation, you must enter the reference number you requested from Belcotax here."
+    "original": "Is jouw groep een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
+    "translation": "If your group is an informal association without a non-profit organization (VZW), please enter the reference number you requested from Belcotax here."
   },
   "e276e384-22f1-4894-93ae-8874329c6767": {
     "original": "Groep bewerken",
@@ -1206,6 +1206,10 @@
   "fdf6dd9d-25f9-41bc-869b-beb2906aa77f": {
     "original": "E-mail die wordt verzonden naar de indiener (en de ingestelde contactpersonen van de groep) als kopie van een kampmelding",
     "translation": "Email sent to the petitioner (and the group's configured contact persons) as a copy of a camp notification"
+  },
+  "ff27568d-d68a-46f7-bf6f-1fd4564ac3b3": {
+    "original": "Door een evenement uit de UiTdatabank te koppelen kan Ravot een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.",
+    "translation": "By linking an event from the UiTdatabank, Ravot can register a sale with discounted rate to your UiTPAS region. You will then automatically receive a (partial) refund, and your region will decide the discounted rate."
   },
   "ffdbd596-e9c8-4c67-bfdf-41a5199de133": {
     "original": "De link naar de website van jouw groep.",

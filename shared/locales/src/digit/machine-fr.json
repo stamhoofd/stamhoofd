@@ -119,6 +119,10 @@
     "original": "Maak een kopie van de instellingen van jouw groep.",
     "translation": "Faire une copie des paramètres de votre groupe."
   },
+  "198e7383-2512-4f6f-b919-2b4225b8e2a9": {
+    "original": "Je kan de instellingen van deze webshop bewerken via het beheerdersportaal van deze groep.",
+    "translation": "Vous pouvez modifier les paramètres de cette boutique en ligne via le portail d'administration de ce groupe."
+  },
   "19e5262f-9dc1-40d9-b905-bda8462b6046": {
     "original": "Er bestaat al een groep met dezelfde naam. Voeg bijvoorbeeld de naam van je gemeente toe.",
     "translation": "Un groupe avec le même nom existe déjà. Ajoutez par exemple le nom de votre commune."
@@ -239,10 +243,6 @@
     "original": "Groep",
     "translation": "Groupe"
   },
-  "2f645618-a9a9-4598-883d-6f1991ae379d": {
-    "original": "Geen rechtspersoonlijkheid (feitelijke groep)",
-    "translation": "Pas de personnalité juridique (groupe de fait)"
-  },
   "2fa762f2-c061-4c40-83cb-6ddc3e5f0f7a": {
     "original": "Je kan op ‘Mijn account’ inloggen met",
     "translation": "Vous pouvez vous connecter sur ‘Mon compte’ avec"
@@ -326,6 +326,10 @@
   "43ff8e32-1a0b-41cf-b9a6-8e4c85d12739": {
     "original": "Je hebt geen rechten om een activiteit aan te maken voor deze groep.",
     "translation": "Vous n'avez pas les droits pour créer une activité pour ce groupe."
+  },
+  "449df98c-76b7-49b5-b807-9a431336fa86": {
+    "original": "Ga naar het beheerdersportaal van een groep (die zal als organisator dienen) om een webshop te koppelen aan deze activiteit.",
+    "translation": "Rendez-vous sur le portail d'administration d'un groupe (qui sera l’organisateur) pour lier une boutique en ligne à cette activité."
   },
   "45285899-60e2-42c6-bb51-fdd16fe651e4": {
     "original": "Nog bezig met laden. Even geduld.",
@@ -415,6 +419,10 @@
     "original": "Er zijn nog geen groepen",
     "translation": "Il n'y a pas encore de groupes"
   },
+  "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
+    "original": "Door Ravot en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
+    "translation": "En connectant Ravot et UiTPAS, vous pouvez obtenir un remboursement automatique pour chaque vente au tarif réduit UiTPAS. Il faut d'abord devenir un organisateur officiel UiTPAS afin de pouvoir préciser à qui le remboursement doit être effectué. Ensuite, créez une intégration sur le site de <button>Publiq</button>. Entrez ensuite les données de cette intégration ci-dessous. Enfin, pour chaque article de la boutique en ligne, vous devrez associer un événement depuis la base de données UiT."
+  },
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Groep",
     "translation": "Groupe"
@@ -450,10 +458,6 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "Vous pouvez également définir votre propre nom de domaine (par ex. inscription.mongroupe.be). Pour ce faire, vous devez avoir déjà acheté le nom de domaine ; c'est généralement déjà le cas si vous avez déjà un site web."
-  },
-  "594307a3-05b8-47cf-81e2-59fb6254deba": {
-    "original": "Feitelijke groep",
-    "translation": "Groupe réel"
   },
   "5aca8049-d981-4cc5-a86c-0c194047743d": {
     "original": "Natuurgroep",
@@ -731,6 +735,10 @@
     "original": "Groep",
     "translation": "Groupe"
   },
+  "87e8488b-4190-42d9-bdd0-564a46671f7f": {
+    "original": "Zoek jouw groep in de UiTPAS organisatoren lijst.",
+    "translation": "Cherchez votre groupe dans la liste des organisateurs UiTPAS."
+  },
   "88119ffc-b692-4222-8217-75a9fa64f675": {
     "original": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
     "translation": "Facturez un montant aux {count} groupes sélectionnés."
@@ -851,6 +859,10 @@
     "original": "Deze record is optioneel",
     "translation": "Ce enregistrement est facultatif"
   },
+  "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
+    "original": "Groep ID",
+    "translation": "ID du groupe"
+  },
   "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
     "original": "Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)",
     "translation": "Tous les groupes d'âge seront fermés (sauf si le groupe a déjà migré vers cette année associative)"
@@ -942,10 +954,6 @@
   "ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5": {
     "original": "In dit overzicht staan enkel groepen die al aangesloten zijn bij Ravot. Je kan zelf een nieuwe groep aansluiten via de knop 'Aansluiten' bovenaan.",
     "translation": "Ce récapitulatif affiche uniquement les groupes déjà affiliés à Ravot. Vous pouvez vous-même affilier un nouveau groupe grâce au bouton 'S'affilier' en haut."
-  },
-  "ab21ae18-0181-44ea-b41d-ff61c9358858": {
-    "original": "Voor Mollie heb je een VZW nodig. Een feitelijke groep is niet voldoende (wordt niet geaccepteerd)",
-    "translation": "Pour Mollie, vous avez besoin d'une ASBL. Un groupe de fait ne suffit pas (n'est pas accepté)"
   },
   "ab858fd6-4451-4d88-869e-be425a661169": {
     "original": "Laag",
@@ -1063,10 +1071,6 @@
     "original": "Maximaal 5 req/s; 120 requests per 2 minuten; 1.000 requests per uur; 2.000 requests per dag",
     "translation": "Maximum 5 req/s ; 120 requêtes par 2 minutes ; 1 000 requêtes par heure ; 2 000 requêtes par jour"
   },
-  "becc82f0-4195-4a17-b3f5-03f305582e4a": {
-    "original": "Een feitelijke groep is niet geregistreerd en heeft geen ondernemingsnummer",
-    "translation": "Un groupe de fait n'est pas enregistré et n'a pas de numéro d'entreprise"
-  },
   "bf7f8c10-b6b5-4edb-90d8-a550d061dea6": {
     "original": "Geef deze beheerders snel lees of bewerk toegang tot alle onderdelen van jouw groep.",
     "translation": "Donnez rapidement à ces administrateurs un accès en lecture ou en écriture à toutes les parties de votre groupe."
@@ -1114,10 +1118,6 @@
   "c9169aad-6b6f-4701-b079-a9936697984c": {
     "original": "Tonen bij het registeren",
     "translation": "Afficher lors de l'enregistrement"
-  },
-  "ca923d49-c9c1-4c39-9e52-96b88a0223ed": {
-    "original": "Voeg één of meerdere juridische entiteiten toe. Als je zowel een feitelijke groep als een VZW hebt, voeg ze dan beide toe. De eerste in de lijst wordt standaard gebruikt als je betalingen uitvoert.",
-    "translation": "Ajoutez une ou plusieurs entités juridiques. Si vous avez à la fois un groupe de fait et une ASBL, ajoutez-les toutes les deux. La première de la liste sera utilisée par défaut lorsque vous effectuez des paiements."
   },
   "cb51b737-c4cf-4ea7-aeb5-b5736a43c333": {
     "original": "De naam van je groep",
@@ -1252,8 +1252,8 @@
     "translation": "Nom du groupe"
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
-    "original": "Is jouw groep een feitelijke groep zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
-    "translation": "Si votre groupe est un groupe de fait sans ASBL, vous devez saisir ici le numéro de référence que vous avez demandé à Belcotax."
+    "original": "Is jouw groep een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
+    "translation": "Si votre groupe est une association de fait sans ASBL, vous devez indiquer ici le numéro de référence que vous avez demandé auprès de Belcotax."
   },
   "e276e384-22f1-4894-93ae-8874329c6767": {
     "original": "Groep bewerken",
@@ -1426,6 +1426,10 @@
   "fe5a96e6-a7e6-4fe8-9b3f-8ef27bb204bb": {
     "original": "Je ontvangt momenteel geen e-mails van {name} op {email}. Toch een e-mail ontvangen? Stuur hem door naar {complaintEmail}",
     "translation": "Vous ne recevez actuellement aucun e-mail de {name} sur {email}. Vous avez tout de même reçu un e-mail ? Transmettez-le à {complaintEmail}"
+  },
+  "ff27568d-d68a-46f7-bf6f-1fd4564ac3b3": {
+    "original": "Door een evenement uit de UiTdatabank te koppelen kan Ravot een verkoop met kansentarief registreren bij jouw UiTPAS-regio. Je krijgt dan automatisch een (gedeeltelijke) terugbetaling en jouw regio bepaalt het kansentarief.",
+    "translation": "En reliant un événement provenant de la base de données UiT, Ravot peut enregistrer une vente avec tarif préférentiel dans votre région UiTPAS. Vous recevrez alors automatiquement un remboursement (partiel) et votre région fixera le tarif social."
   },
   "ff789452-b123-437a-a77b-34f3e0dd3e5c": {
     "original": "Optioneel. Bv. Inschrijving",
