@@ -14,7 +14,6 @@ import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
 import tentSvg from '@stamhoofd/assets/images/illustrations/tent.svg';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useVisibilityChange } from '../../composables';
 import { Toast } from '../../overlays/Toast';
 
@@ -25,7 +24,7 @@ export function useDashboardQuickActions(): QuickActions {
     const owner = useRequestOwner();
     const errors = useErrors();
     const auth = useAuth();
-    
+
     const platform = usePlatform();
 
     // Load outstanding amount
