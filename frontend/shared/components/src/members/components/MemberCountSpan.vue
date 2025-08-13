@@ -12,23 +12,24 @@ import { CountResponse, StamhoofdFilter } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
 
 const props = defineProps<{
-    filter: StamhoofdFilter,
+    filter: StamhoofdFilter;
 }>();
-const context = useContext()
+const context = useContext();
 const count = ref(null as null | number);
-const owner = useRequestOwner()
+const owner = useRequestOwner();
 
-watch(() => props.filter, async () => {
+watch(() => JSON.stringify(props.filter), async () => {
     Request.cancelAll(owner);
+    console.log('Fetching member count with filter', props.filter);
     const response = await context.value.authenticatedServer.request({
         method: 'GET',
         path: `/members/count`,
         query: {
-            filter: JSON.stringify(props.filter)
+            filter: JSON.stringify(props.filter),
         },
         decoder: CountResponse as Decoder<CountResponse>,
-        owner
-    })
+        owner,
+    });
 
     count.value = response.data.count;
 }, { immediate: true });
