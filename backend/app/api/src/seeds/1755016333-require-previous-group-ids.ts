@@ -14,14 +14,14 @@ export default new Migration(async () => {
         return;
     }
 
-    await startRequirePreviousGroupIdsMigration(false);
+    await startRequireAndPreventPreviousGroupIdsMigration(true);
 });
 
 /**
  *
  * @param dryRun for testing
  */
-export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
+export async function startRequireAndPreventPreviousGroupIdsMigration(dryRun: boolean) {
     for await (const organization of Organization.select().all()) {
         const groups = await Group.select().where('organizationId', organization.id).fetch();
         if (groups.length === 0) {
@@ -40,6 +40,7 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
             // cannot require to be registered for previous group if no previous period
             for (const group of groups) {
                 group.settings.requirePreviousGroupIds = [];
+                group.settings.preventPreviousGroupIds = [];
 
                 if (!dryRun) {
                     await group.save();
@@ -100,11 +101,13 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
 
         for (const group of groups) {
             const requireGroupIds = new Set(group.settings.requireGroupIds);
+            const preventGroupIds = new Set(group.settings.preventGroupIds);
 
             // there are no future periods after the migration, so if the period is different this means it is a period in the past
             // requirePreviousGroupIds should not be migrated for past periods
             if (group.periodId !== organization.periodId) {
                 group.settings.requirePreviousGroupIds = [];
+                group.settings.preventPreviousGroupIds = [];
                 if (!dryRun) {
                     await group.save();
                 }
@@ -112,56 +115,17 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
             }
 
             for (const groupIdToGetPreviousGroupOf of group.settings.requirePreviousGroupIds) {
-                const groupToGetPreviousGroupOf = groups.find(g => g.id === groupIdToGetPreviousGroupOf);
+                const previousGroups = getFirstPreviousGroup(groupIdToGetPreviousGroupOf, { groups, previousGroupsSorted, periods, previousPeriods });
+                previousGroups.forEach(g => requireGroupIds.add(g.id));
+            }
 
-                if (!groupToGetPreviousGroupOf) {
-                    throw new Error(`Group to get previous group of with id ${groupIdToGetPreviousGroupOf} not found`);
-                }
-
-                const periodOfGroupToGetPreviousGroupOf = periods.find(p => p.id === groupToGetPreviousGroupOf.periodId);
-
-                if (periodOfGroupToGetPreviousGroupOf === undefined) {
-                    throw new Error(`Period of group to get previous group of with id ${groupToGetPreviousGroupOf.id} not found`);
-                }
-
-                const samePreviousGroups = previousGroupsSorted.filter((g) => {
-                    if (g.id !== groupToGetPreviousGroupOf.id && g.settings.name.toString() === groupToGetPreviousGroupOf.settings.name.toString()
-                        && g.type === groupToGetPreviousGroupOf.type
-                        && g.settings.description.toString() === groupToGetPreviousGroupOf.settings.description.toString()) {
-                        const period = previousPeriods.find(p => p.id === g.periodId)!;
-                        if (period.startDate < periodOfGroupToGetPreviousGroupOf.startDate) {
-                            return true;
-                        }
-                    }
-                    return false;
-                },
-                );
-
-                const firstPreviousGroup = samePreviousGroups[0];
-
-                if (!firstPreviousGroup) {
-                    throw new Error(`Previous group for ${groupIdToGetPreviousGroupOf} not found`);
-                }
-
-                if (samePreviousGroups.length > 1) {
-                    const samePeriodAndStatus = samePreviousGroups.filter(g => g.periodId === firstPreviousGroup.periodId && g.status === firstPreviousGroup.status && g.settings.startDate.getTime() === firstPreviousGroup.settings.startDate.getTime());
-
-                    if (samePeriodAndStatus.length === 0) {
-                        throw new Error('Should not happen, mistake in logic ' + groupToGetPreviousGroupOf.id);
-                    }
-
-                    // should add other equal groups if they have the same period, status and start date
-                    if (samePeriodAndStatus.length > 1) {
-                        console.log(`Multiple previous groups for ${groupIdToGetPreviousGroupOf}, adding all`);
-                        samePeriodAndStatus.forEach(g => requireGroupIds.add(g.id));
-                        continue;
-                    }
-                }
-
-                requireGroupIds.add(firstPreviousGroup.id);
+            for (const groupIdToGetPreviousGroupOf of group.settings.preventPreviousGroupIds) {
+                const previousGroups = getFirstPreviousGroup(groupIdToGetPreviousGroupOf, { groups, previousGroupsSorted, periods, previousPeriods });
+                previousGroups.forEach(g => preventGroupIds.add(g.id));
             }
 
             group.settings.requireGroupIds = Array.from(requireGroupIds);
+            group.settings.preventGroupIds = Array.from(preventGroupIds);
 
             if (!dryRun) {
                 await group.save();
@@ -172,4 +136,53 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
     if (dryRun) {
         throw new Error('Migration not finished, run again without dryRun');
     }
+}
+
+function getFirstPreviousGroup(groupId: string, { groups, previousGroupsSorted, periods, previousPeriods }: { groups: Group[]; previousGroupsSorted: Group[]; periods: RegistrationPeriod[]; previousPeriods: RegistrationPeriod[] }): Group[] {
+    const groupToGetPreviousGroupOf = groups.find(g => g.id === groupId);
+
+    if (!groupToGetPreviousGroupOf) {
+        throw new Error(`Group to get previous group of with id ${groupId} not found`);
+    }
+
+    const periodOfGroupToGetPreviousGroupOf = periods.find(p => p.id === groupToGetPreviousGroupOf.periodId);
+
+    if (periodOfGroupToGetPreviousGroupOf === undefined) {
+        throw new Error(`Period of group to get previous group of with id ${groupToGetPreviousGroupOf.id} not found`);
+    }
+
+    const samePreviousGroups = previousGroupsSorted.filter((g) => {
+        if (g.id !== groupToGetPreviousGroupOf.id && g.settings.name.toString() === groupToGetPreviousGroupOf.settings.name.toString()
+            && g.type === groupToGetPreviousGroupOf.type
+            && g.settings.description.toString() === groupToGetPreviousGroupOf.settings.description.toString()) {
+            const period = previousPeriods.find(p => p.id === g.periodId)!;
+            if (period.startDate < periodOfGroupToGetPreviousGroupOf.startDate) {
+                return true;
+            }
+        }
+        return false;
+    },
+    );
+
+    const firstPreviousGroup = samePreviousGroups[0];
+
+    if (!firstPreviousGroup) {
+        throw new Error(`Previous group for ${groupId} not found`);
+    }
+
+    if (samePreviousGroups.length > 1) {
+        const samePeriodAndStatus = samePreviousGroups.filter(g => g.periodId === firstPreviousGroup.periodId && g.status === firstPreviousGroup.status && g.settings.startDate.getTime() === firstPreviousGroup.settings.startDate.getTime());
+
+        if (samePeriodAndStatus.length === 0) {
+            throw new Error('Should not happen, mistake in logic ' + groupToGetPreviousGroupOf.id);
+        }
+
+        // should add other equal groups if they have the same period, status and start date
+        if (samePeriodAndStatus.length > 1) {
+            console.log(`Multiple previous groups for ${groupId}, adding all`);
+            return samePeriodAndStatus;
+        }
+    }
+
+    return [firstPreviousGroup];
 }
