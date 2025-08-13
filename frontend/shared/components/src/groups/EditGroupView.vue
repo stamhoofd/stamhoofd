@@ -299,7 +299,7 @@
 
                 <button v-if="preventGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addPreventGroupIds">
                     <span class="icon add" />
-                    <span>{{ $t('Verhinder andere inschrijving') }}</span>
+                    <span>{{ $t('Verhinder inschrijven als ingeschreven bij') }}</span>
                 </button>
             </div>
 
@@ -493,7 +493,7 @@
             </JumpToContainer>
 
             <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowPreventGroupIds || !!preventGroupIds.length">
-                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('Verhinder andere inschrijvingen')" />
+                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('Verhinder inschrijven als ingeschreven bij')" />
             </JumpToContainer>
 
             <template v-if="$feature('member-trials')">
