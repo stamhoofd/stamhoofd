@@ -14,6 +14,7 @@ import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { BalanceItemService } from '../../../services/BalanceItemService';
 import { RegistrationService } from '../../../services/RegistrationService';
+import { PaymentService } from '../../../services/PaymentService';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout;
@@ -1047,119 +1048,125 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         let paymentUrl: string | null = null;
 
-        // Update balance items
-        if (payment.method === PaymentMethod.Transfer) {
-            // Send a small reminder email
-            try {
-                await Registration.sendTransferEmail(user, organization, payment);
+        try {
+            // Update balance items
+            if (payment.method === PaymentMethod.Transfer) {
+                // Send a small reminder email
+                try {
+                    await Registration.sendTransferEmail(user, organization, payment);
+                }
+                catch (e) {
+                    console.error('Failed to send transfer email');
+                    console.error(e);
+                }
             }
-            catch (e) {
-                console.error('Failed to send transfer email');
-                console.error(e);
+            else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
+                if (!checkout.redirectUrl || !checkout.cancelUrl) {
+                    throw new Error('Should have been caught earlier');
+                }
+
+                const _redirectUrl = new URL(checkout.redirectUrl);
+                _redirectUrl.searchParams.set('paymentId', payment.id);
+                _redirectUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+
+                const _cancelUrl = new URL(checkout.cancelUrl);
+                _cancelUrl.searchParams.set('paymentId', payment.id);
+                _cancelUrl.searchParams.set('cancel', 'true');
+                _cancelUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+
+                const redirectUrl = _redirectUrl.href;
+                const cancelUrl = _cancelUrl.href;
+
+                const webhookUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
+
+                if (payment.provider === PaymentProvider.Stripe) {
+                    const stripeResult = await StripeHelper.createPayment({
+                        payment,
+                        stripeAccount,
+                        redirectUrl,
+                        cancelUrl,
+                        statementDescriptor: organization.name,
+                        metadata: {
+                            organization: organization.id,
+                            user: user.id,
+                            payment: payment.id,
+                        },
+                        i18n: Context.i18n,
+                        lineItems: balanceItemPayments,
+                        organization,
+                        customer: {
+                            name: user.name ?? payMembers[0]?.details.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+                            email: user.email,
+                        },
+                    });
+                    paymentUrl = stripeResult.paymentUrl;
+                }
+                else if (payment.provider === PaymentProvider.Mollie) {
+                    // Mollie payment
+                    const token = await MollieToken.getTokenFor(organization.id);
+                    if (!token) {
+                        throw new SimpleError({
+                            code: '',
+                            message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        });
+                    }
+                    const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(organization.getHost());
+                    if (!profileId) {
+                        throw new SimpleError({
+                            code: '',
+                            message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        });
+                    }
+                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                    const locale = Context.i18n.locale.replace('-', '_');
+                    const molliePayment = await mollieClient.payments.create({
+                        amount: {
+                            currency: 'EUR',
+                            value: (totalPrice / 100).toFixed(2),
+                        },
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
+                        profileId,
+                        description,
+                        redirectUrl,
+                        webhookUrl,
+                        metadata: {
+                            paymentId: payment.id,
+                        },
+                        locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
+                    });
+                    paymentUrl = molliePayment.getCheckoutUrl();
+
+                    // Save payment
+                    const dbPayment = new MolliePayment();
+                    dbPayment.paymentId = payment.id;
+                    dbPayment.mollieId = molliePayment.id;
+                    await dbPayment.save();
+                }
+                else if (payment.provider === PaymentProvider.Payconiq) {
+                    paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl);
+                }
+                else if (payment.provider == PaymentProvider.Buckaroo) {
+                    // Increase request timeout because buckaroo is super slow (in development)
+                    Context.request.request?.setTimeout(60 * 1000);
+                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                    const ip = Context.request.getIP();
+                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl);
+                    await payment.save();
+
+                    // TypeScript doesn't understand that the status can change and isn't a const....
+                    if ((payment.status as any) === PaymentStatus.Failed) {
+                        throw new SimpleError({
+                            code: 'payment_failed',
+                            message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        });
+                    }
+                }
             }
         }
-        else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
-            if (!checkout.redirectUrl || !checkout.cancelUrl) {
-                throw new Error('Should have been caught earlier');
-            }
-
-            const _redirectUrl = new URL(checkout.redirectUrl);
-            _redirectUrl.searchParams.set('paymentId', payment.id);
-            _redirectUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
-
-            const _cancelUrl = new URL(checkout.cancelUrl);
-            _cancelUrl.searchParams.set('paymentId', payment.id);
-            _cancelUrl.searchParams.set('cancel', 'true');
-            _cancelUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
-
-            const redirectUrl = _redirectUrl.href;
-            const cancelUrl = _cancelUrl.href;
-
-            const webhookUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
-
-            if (payment.provider === PaymentProvider.Stripe) {
-                const stripeResult = await StripeHelper.createPayment({
-                    payment,
-                    stripeAccount,
-                    redirectUrl,
-                    cancelUrl,
-                    statementDescriptor: organization.name,
-                    metadata: {
-                        organization: organization.id,
-                        user: user.id,
-                        payment: payment.id,
-                    },
-                    i18n: Context.i18n,
-                    lineItems: balanceItemPayments,
-                    organization,
-                    customer: {
-                        name: user.name ?? payMembers[0]?.details.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
-                        email: user.email,
-                    },
-                });
-                paymentUrl = stripeResult.paymentUrl;
-            }
-            else if (payment.provider === PaymentProvider.Mollie) {
-                // Mollie payment
-                const token = await MollieToken.getTokenFor(organization.id);
-                if (!token) {
-                    throw new SimpleError({
-                        code: '',
-                        message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
-                    });
-                }
-                const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(organization.getHost());
-                if (!profileId) {
-                    throw new SimpleError({
-                        code: '',
-                        message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
-                    });
-                }
-                const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
-                const locale = Context.i18n.locale.replace('-', '_');
-                const molliePayment = await mollieClient.payments.create({
-                    amount: {
-                        currency: 'EUR',
-                        value: (totalPrice / 100).toFixed(2),
-                    },
-                    method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
-                    testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
-                    profileId,
-                    description,
-                    redirectUrl,
-                    webhookUrl,
-                    metadata: {
-                        paymentId: payment.id,
-                    },
-                    locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
-                });
-                paymentUrl = molliePayment.getCheckoutUrl();
-
-                // Save payment
-                const dbPayment = new MolliePayment();
-                dbPayment.paymentId = payment.id;
-                dbPayment.mollieId = molliePayment.id;
-                await dbPayment.save();
-            }
-            else if (payment.provider === PaymentProvider.Payconiq) {
-                paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl);
-            }
-            else if (payment.provider == PaymentProvider.Buckaroo) {
-                // Increase request timeout because buckaroo is super slow (in development)
-                Context.request.request?.setTimeout(60 * 1000);
-                const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
-                const ip = Context.request.getIP();
-                paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl);
-                await payment.save();
-
-                // TypeScript doesn't understand that the status can change and isn't a const....
-                if ((payment.status as any) === PaymentStatus.Failed) {
-                    throw new SimpleError({
-                        code: 'payment_failed',
-                        message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
-                    });
-                }
-            }
+        catch (e) {
+            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+            throw e;
         }
 
         return {

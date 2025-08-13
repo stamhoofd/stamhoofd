@@ -1,12 +1,11 @@
+import { Model } from '@simonbackx/simple-database';
 import { BalanceItem, CachedBalance, Document, MemberUser, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
-import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, ReceivableBalanceType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
+import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue';
+import { ThrottledQueue } from '../helpers/ThrottledQueue';
 import { AuditLogService } from './AuditLogService';
 import { PaymentReallocationService } from './PaymentReallocationService';
 import { RegistrationService } from './RegistrationService';
-import { Model } from '@simonbackx/simple-database';
-import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue';
-import { ThrottledQueue } from '../helpers/ThrottledQueue';
 
 const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
     await CachedBalance.updateForMembers(organizationId, memberIds);
@@ -210,6 +209,12 @@ export const BalanceItemService = {
             if (shouldMarkUpdated) {
                 await this.markUpdated(balanceItem, payment, organization);
             }
+
+            if (balanceItem.registrationId) {
+                if (balanceItem.type === BalanceItemType.Registration && !!payment && payment.status === PaymentStatus.Succeeded) {
+                    await RegistrationService.markRepeatedPaid(balanceItem.registrationId);
+                }
+            }
             return;
         }
 
@@ -220,7 +225,7 @@ export const BalanceItemService = {
         // If registration
         if (balanceItem.registrationId) {
             if (balanceItem.type === BalanceItemType.Registration) {
-                await RegistrationService.markValid(balanceItem.registrationId);
+                await RegistrationService.markValid(balanceItem.registrationId, { paid: !!payment && payment.status === PaymentStatus.Succeeded });
             }
         }
 
@@ -228,7 +233,7 @@ export const BalanceItemService = {
         await balanceItem.save();
     },
 
-    async markUpdated(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
+    async markUpdated(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
         // For orders: mark order as changed (so they are refetched in front ends)
         if (balanceItem.orderId) {
             await AuditLogService.setContext({ source: AuditLogSource.Payment }, async () => {

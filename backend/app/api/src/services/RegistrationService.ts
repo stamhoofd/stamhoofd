@@ -9,16 +9,45 @@ import { Formatter } from '@stamhoofd/utility';
 import { encodeObject } from '@simonbackx/simple-encoding';
 
 export const RegistrationService = {
-    async markValid(registrationId: string) {
+    /**
+     * If the registration was marked valid, and later paid, we'll still shorten the trail until period
+     */
+    async markRepeatedPaid(registrationId: string) {
         const registration = await Registration.getByID(registrationId);
         if (!registration) {
             throw new Error('Registration not found');
         }
 
         if (registration.registeredAt !== null && registration.deactivatedAt === null) {
+            // Already valid
+            if (registration.trialUntil && registration.trialUntil > new Date()) {
+                registration.trialUntil = new Date();
+                await registration.save();
+                await PlatformMembershipService.updateMembershipsForId(registration.memberId);
+            }
+        }
+        // do nothing: possible that we canceled the registration and don't want to reactivate it when we mark something paid
+    },
+
+    async markValid(registrationId: string, options?: { paid?: boolean }) {
+        const registration = await Registration.getByID(registrationId);
+        if (!registration) {
+            throw new Error('Registration not found');
+        }
+
+        if (registration.registeredAt !== null && registration.deactivatedAt === null) {
+            // Already valid
+            if (options?.paid && registration.trialUntil && registration.trialUntil > new Date()) {
+                registration.trialUntil = new Date();
+                await registration.save();
+                await PlatformMembershipService.updateMembershipsForId(registration.memberId);
+            }
             return false;
         }
 
+        if (options?.paid && registration.trialUntil && registration.trialUntil > new Date()) {
+            registration.trialUntil = new Date();
+        }
         registration.reservedUntil = null;
         registration.registeredAt = registration.registeredAt ?? new Date();
         registration.deactivatedAt = null;
