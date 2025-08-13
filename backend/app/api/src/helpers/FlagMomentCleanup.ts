@@ -26,7 +26,9 @@ export class FlagMomentCleanup {
     }
 
     static async getActiveMemberResponsibilityRecordsForOrganizationWithoutRegistrationInCurrentPeriod() {
-        const currentPeriodId = (await Platform.getShared()).periodId;
+        const platform = await Platform.getShared();
+        const currentPeriodId = platform.periodId;
+        const platformResponsibilityIds = platform.config.responsibilities.map(r => r.id);
 
         return await MemberResponsibilityRecord.select()
             .whereNot('organizationId', null)
@@ -62,6 +64,16 @@ export class FlagMomentCleanup {
                         ).where(
                             SQL.column(Group.table, 'type'),
                             GroupType.Membership,
+                        ).where(
+                            SQL.where(
+                                SQL.column(Group.table, 'defaultAgeGroupId'),
+                                '!=',
+                                null,
+                            ).or(
+                                SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'),
+                                '!=',
+                                platformResponsibilityIds,
+                            ),
                         ).where(
                             SQL.column(Group.table, 'deletedAt'),
                             null,
