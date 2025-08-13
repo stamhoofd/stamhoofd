@@ -123,15 +123,18 @@ export class MemberPlatformMembership extends QueryableModel {
         throw new Error('Cannot delete a membership. Use the deletedAt column.');
     }
 
+    /**
+     * Returns the last trial until date for this member. Null if this member does not have any trials
+     */
     async isElegibleForTrial(member: Member) {
         const period = await RegistrationPeriod.getByID(this.periodId);
         if (!period) {
-            return false;
+            return null;
         }
 
         if (!period.previousPeriodId) {
             // We have no previous period = no data = no trials
-            return false;
+            return null;
         }
 
         const platform = await Platform.getSharedStruct();
@@ -147,10 +150,25 @@ export class MemberPlatformMembership extends QueryableModel {
         const hasBlockingMemberships = !!membership;
 
         if (hasBlockingMemberships) {
-            return false;
+            return null;
         }
 
-        return true;
+        // The member needs to be registered for at least one registration that had a trial
+        const registrations = await Registration.select()
+            .where('memberId', member.id)
+            .where('periodId', period.id)
+            .where('organizationId', this.organizationId)
+            .where('deactivatedAt', null)
+            .where('registeredAt', '!=', null)
+            .where('trialUntil', '!=', null)
+            .fetch();
+
+        if (registrations.length === 0) {
+            return null;
+        }
+
+        const latestTrialUntil = new Date(Math.max(...registrations.map(r => r.trialUntil!.getTime())));
+        return latestTrialUntil;
     }
 
     async correctDates(member: Member, registration?: Registration) {
@@ -232,10 +250,16 @@ export class MemberPlatformMembership extends QueryableModel {
 
         if (periodConfig.trialDays) {
             // Check whether you are elegible for a trial
-            if (await this.isElegibleForTrial(member)) {
+            const latestTrialDate = await this.isElegibleForTrial(member);
+            if (latestTrialDate !== null) {
                 // Allowed to set trial until, maximum periodConfig.trialDays after startDate
                 let trialUntil = Formatter.luxon(this.startDate).plus({ days: periodConfig.trialDays });
                 trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
+
+                if (trialUntil.toJSDate() > latestTrialDate) {
+                    // Use the latest trial date instead
+                    trialUntil = Formatter.luxon(latestTrialDate);
+                }
 
                 // Max end date
                 if (trialUntil.toJSDate() > this.endDate) {
