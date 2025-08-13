@@ -3,6 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
 import { Group, LimitedFilteredRequest, Organization, OrganizationAdmins, OrganizationRegistrationPeriod, PaginatedResponseDecoder, RegistrationPeriod, RegistrationPeriodList, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { Ref, inject, toRef } from 'vue';
 
 export function useOrganizationManager(): Ref<OrganizationManager> {
@@ -199,6 +200,8 @@ export class OrganizationManager {
             });
             organizationPeriods = response.data.results;
         }
+
+        organizationPeriods.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));
 
         const list = RegistrationPeriodList.create({
             organizationPeriods: organizationPeriods,
