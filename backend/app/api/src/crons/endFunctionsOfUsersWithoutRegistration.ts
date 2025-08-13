@@ -1,5 +1,6 @@
 import { registerCron } from '@stamhoofd/crons';
 import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup';
+import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 
 // Only delete responsibilities when the server is running during a month change.
 // Chances are almost zero that we reboot during a month change
@@ -16,6 +17,19 @@ export async function endFunctionsOfUsersWithoutRegistration() {
     const currentMonth = now.getMonth();
 
     if (lastCleanupMonth === currentMonth && currentYear === lastCleanupYear) {
+        return;
+    }
+
+    // Check if the current period is active for more than 2 months
+    const platform = await Platform.getShared();
+    const period = await RegistrationPeriod.getByID(platform.periodId);
+    if (!period) {
+        console.warn('No active registration period found, skipping cleanup.');
+        return;
+    }
+
+    if (period.startDate > new Date(Date.now() - 1000 * 60 * 60 * 24 * 55)) {
+        console.warn('Current registration period is less than 2 months old, skipping cleanup.');
         return;
     }
 
