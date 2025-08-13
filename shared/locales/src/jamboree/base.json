@@ -23,6 +23,8 @@
         "demovereniging": "Scoutsgroep De Goudvis",
         "groepsnaam": "eenheidsnaam",
         "groepsnummer": "eenheidsnummer",
+        "Groepsgegevens": "Eenheidsgegevens",
+        "groepsgegevens": "eenheidsgegevens",
         "(?<![fF]eitelijke )vereniging": "eenheid",
         "verenigingen": "eenheden",
         "werkjaar": "scoutsjaar",
