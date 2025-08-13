@@ -72,7 +72,7 @@ const warnings = computed(() => {
         if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
             warnings.push(RecordWarning.create({
                 text: TranslatedString.create(financialSupportSettings.value.warningText),
-                type: RecordWarningType.Error,
+                type: RecordWarningType.Info,
             }));
         }
     }
