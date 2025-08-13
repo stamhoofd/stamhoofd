@@ -59,11 +59,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return c as any;
     }
 
-    from(namespace: string, table: string): this;
+    from(table: string, namespace: string): this;
     from(table: string): this;
     from(expression: SQLNamedExpression): this;
-    from(tableOrExpressiongOrNamespace: SQLNamedExpression | string, table?: string): this {
-        this._from = parseTable(tableOrExpressiongOrNamespace, table);
+    from(tableOrExpression: SQLNamedExpression | string, namespace?: string): this {
+        this._from = parseTable(tableOrExpression, namespace);
 
         return this;
     }

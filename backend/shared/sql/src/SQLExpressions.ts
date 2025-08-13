@@ -450,6 +450,64 @@ export class SQLTableExpression implements SQLNamedExpression {
     }
 }
 
+export type SQLJSONTableColumnType = 'VARCHAR' | 'INT' | 'TEXT';
+export class SQLJSONTableColumn implements SQLExpression {
+    name: string;
+    type: SQLJSONTableColumnType;
+    path: string;
+
+    constructor(name: string, type: SQLJSONTableColumnType, path: string) {
+        this.name = name;
+        this.type = type;
+        this.path = path;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            Database.escapeId(this.name),
+            ' ',
+            'VARCHAR(250)',
+            ' PATH ',
+            JSON.stringify(this.path),
+        ]);
+    }
+}
+
+export class SQLJSONTableExpression implements SQLNamedExpression {
+    expression: SQLExpression;
+    asNamespace: string;
+    jsonPath = '$[*]';
+    columns: SQLJSONTableColumn[] = [];
+
+    constructor(expression: SQLExpression, asNamespace: string) {
+        this.asNamespace = asNamespace;
+        this.expression = expression;
+    }
+
+    addColumn(name: string, type: SQLJSONTableColumnType, path: string): SQLJSONTableExpression {
+        this.columns.push(new SQLJSONTableColumn(name, type, path));
+        return this;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        const columnsSQL = joinSQLQuery(this.columns.map(c => c.getSQL(options)), ', ');
+        return joinSQLQuery([
+            'JSON_TABLE(',
+            this.expression.getSQL(options),
+            ', ',
+            JSON.stringify(this.jsonPath),
+            ' COLUMNS (',
+            columnsSQL,
+            ')) AS ',
+            Database.escapeId(this.asNamespace),
+        ]);
+    }
+
+    getName(): string {
+        return this.asNamespace;
+    }
+}
+
 export class SQLIf implements SQLExpression {
     _if: SQLExpression;
     _then: SQLExpression = new SQLNull();

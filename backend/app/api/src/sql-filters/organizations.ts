@@ -187,4 +187,56 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             }),
         },
     ),
+    companies: createExistsFilter(
+        /**
+         * There is a bug in MySQL 8 that is fixed in 9.3
+         * where EXISTS (select * from json_table(...)) does not work
+         * To fix this, we do a double select with join inside the select
+         * It is a bit slower, but it works for now.
+         */
+        SQL.select()
+            .from('organizations', 'innerOrganizations')
+            .join(
+                SQL.join(
+                    SQL.jsonTable(
+                        SQL.jsonValue(SQL.column('innerOrganizations', 'meta'), '$.value.companies'),
+                        'companies',
+                    )
+                        .addColumn(
+                            'companyNumber',
+                            'TEXT',
+                            '$.companyNumber',
+                        )
+                        .addColumn(
+                            'VATNumber',
+                            'TEXT',
+                            '$.VATNumber',
+                        )
+                        .addColumn(
+                            'name',
+                            'TEXT',
+                            '$.name',
+                        ),
+                ),
+            )
+            .where(SQL.column('innerOrganizations', 'id'), SQL.column('organizations', 'id')),
+        {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({
+                expression: SQL.column('companies', 'name'),
+                type: SQLValueType.String,
+                nullable: true,
+            }),
+            companyNumber: createColumnFilter({
+                expression: SQL.column('companies', 'companyNumber'),
+                type: SQLValueType.String,
+                nullable: true,
+            }),
+            VATNumber: createColumnFilter({
+                expression: SQL.column('companies', 'VATNumber'),
+                type: SQLValueType.String,
+                nullable: true,
+            }),
+        },
+    ),
 };

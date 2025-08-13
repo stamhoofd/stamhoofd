@@ -207,6 +207,43 @@ const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     return builders;
 };
 
+export function getOrganizationCompanyFilterBuilders() {
+    const all: UIFilterBuilder[] = [
+        new StringFilterBuilder({
+            name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+            key: 'name',
+        }),
+        new StringFilterBuilder({
+            name: $t(`Ondernemingsnummer`),
+            key: 'companyNumber',
+        }),
+        new StringFilterBuilder({
+            name: $t(`BTW-nummer`),
+            key: 'VATNumber',
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: $t('Bedrijfstype'),
+            options: [
+                new MultipleChoiceUIFilterOption($t('Feitelijke vereniging'), null),
+            ],
+            wrapper: {
+                companyNumber: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }),
+    ];
+
+    // Recursive: self referencing groups
+    all.unshift(
+        new GroupUIFilterBuilder({
+            builders: all,
+        }),
+    );
+
+    return all;
+}
+
 export function useGetOrganizationUIFilterBuilders() {
     const platform = usePlatform();
 
@@ -263,7 +300,101 @@ export function useGetOrganizationUIFilterBuilders() {
                         $in: FilterWrapperMarker,
                     },
                 },
-            })];
+            }),
+
+            new MultipleChoiceFilterBuilder({
+                name: $t(`95fc75cf-bf23-4895-bb64-dfec3944596c`),
+                multipleChoiceConfiguration: {
+                    isSubjectPlural: true,
+                    mode: MultipleChoiceUIFilterMode.And,
+                    showOptionSelectAll: true,
+                },
+                options: Object.entries(setupStepFilterNameMap).map(
+                    ([k, v]) =>
+                        new MultipleChoiceUIFilterOption(
+                            v,
+                            k as SetupStepType,
+                        ),
+                ),
+                wrapFilter: (f: StamhoofdFilter) => {
+                    const choices = Array.isArray(f) ? f : [f];
+
+                    return {
+                        setupSteps: {
+                            $elemMatch: {
+                                periodId: {
+                                    $eq: platform.value.period.id,
+                                },
+                                ...Object.fromEntries(
+                                    Object.values(SetupStepType)
+                                        .filter(
+                                            x => choices.includes(x),
+                                        )
+                                        .map((setupStep) => {
+                                            return [
+                                                setupStep,
+                                                {
+                                                    reviewedAt: {
+                                                        $neq: null,
+                                                    },
+                                                    complete: true,
+                                                },
+                                            ];
+                                        }),
+                                ),
+                            },
+                        },
+                    };
+                },
+                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
+                    if (typeof f !== 'object') return null;
+
+                    const elemMatch = (f as any).setupSteps?.$elemMatch;
+                    if (!elemMatch) return null;
+
+                    const periodId = elemMatch.periodId?.$eq;
+                    if (periodId !== platform.value.period.id) return null;
+
+                    const enumValues = Object.values(SetupStepType);
+                    const stringifiedValueToMatch = JSON.stringify({
+                        reviewedAt: { $neq: null },
+                        complete: true,
+                    });
+
+                    const results: SetupStepType[] = [];
+
+                    for (const [key, value] of Object.entries(elemMatch)) {
+                        if (enumValues.includes(key as SetupStepType)) {
+                            if (JSON.stringify(value) === stringifiedValueToMatch) {
+                                results.push(key as SetupStepType);
+                            }
+                            else {
+                                return null;
+                            }
+                        }
+                        else if (key !== 'periodId') {
+                            return null;
+                        }
+                    }
+
+                    if (results.length) {
+                        return results;
+                    }
+
+                    return null;
+                },
+            }),
+            new GroupUIFilterBuilder({
+                name: $t(`Facturatiegegevens`),
+                description: $t('De gekoppelde bedrijfsgegevens, vzw of feitelijke vereniging. Een groep kan meerdere gekoppelde entiteiten hebben.'),
+                builders: getOrganizationCompanyFilterBuilders(),
+                wrapper: {
+                    companies: {
+                        $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+        ];
 
         if (user?.permissions?.platform !== null) {
             all.push(
@@ -281,92 +412,6 @@ export function useGetOrganizationUIFilterBuilders() {
                         },
                     },
                 }),
-            );
-
-            all.push(
-                new MultipleChoiceFilterBuilder({
-                    name: $t(`95fc75cf-bf23-4895-bb64-dfec3944596c`),
-                    multipleChoiceConfiguration: {
-                        isSubjectPlural: true,
-                        mode: MultipleChoiceUIFilterMode.And,
-                        showOptionSelectAll: true,
-                    },
-                    options: Object.entries(setupStepFilterNameMap).map(
-                        ([k, v]) =>
-                            new MultipleChoiceUIFilterOption(
-                                v,
-                                k as SetupStepType,
-                            ),
-                    ),
-                    wrapFilter: (f: StamhoofdFilter) => {
-                        const choices = Array.isArray(f) ? f : [f];
-
-                        return {
-                            setupSteps: {
-                                $elemMatch: {
-                                    periodId: {
-                                        $eq: platform.value.period.id,
-                                    },
-                                    ...Object.fromEntries(
-                                        Object.values(SetupStepType)
-                                            .filter(
-                                                x => choices.includes(x),
-                                            )
-                                            .map((setupStep) => {
-                                                return [
-                                                    setupStep,
-                                                    {
-                                                        reviewedAt: {
-                                                            $neq: null,
-                                                        },
-                                                        complete: true,
-                                                    },
-                                                ];
-                                            }),
-                                    ),
-                                },
-                            },
-                        };
-                    },
-                    unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
-                        if (typeof f !== 'object') return null;
-
-                        const elemMatch = (f as any).setupSteps?.$elemMatch;
-                        if (!elemMatch) return null;
-
-                        const periodId = elemMatch.periodId?.$eq;
-                        if (periodId !== platform.value.period.id) return null;
-
-                        const enumValues = Object.values(SetupStepType);
-                        const stringifiedValueToMatch = JSON.stringify({
-                            reviewedAt: { $neq: null },
-                            complete: true,
-                        });
-
-                        const results: SetupStepType[] = [];
-
-                        for (const [key, value] of Object.entries(elemMatch)) {
-                            if (enumValues.includes(key as SetupStepType)) {
-                                if (JSON.stringify(value) === stringifiedValueToMatch) {
-                                    results.push(key as SetupStepType);
-                                }
-                                else {
-                                    return null;
-                                }
-                            }
-                            else if (key !== 'periodId') {
-                                return null;
-                            }
-                        }
-
-                        if (results.length) {
-                            return results;
-                        }
-
-                        return null;
-                    },
-                },
-                ),
             );
         }
 

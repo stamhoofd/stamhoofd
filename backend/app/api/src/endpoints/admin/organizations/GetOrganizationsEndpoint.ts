@@ -94,6 +94,8 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             query.limit(q.limit);
         }
 
+        console.log('GetOrganizationsEndpoint query', query.getSQL());
+
         return query;
     }
 

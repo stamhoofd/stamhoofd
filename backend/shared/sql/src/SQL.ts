@@ -1,7 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete';
 import { isSQLExpression, SQLExpression, SQLNamedExpression } from './SQLExpression';
-import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
+import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
 import { SQLInsert } from './SQLInsert';
 import { SQLJoin, SQLJoinType } from './SQLJoin';
 import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions';
@@ -44,6 +44,10 @@ class StaticSQL {
 
     table(table: string, asNamespace?: string): SQLTableExpression {
         return new SQLTableExpression(table, asNamespace);
+    }
+
+    jsonTable(expression: SQLExpression, asNamespace: string): SQLJSONTableExpression {
+        return new SQLJSONTableExpression(expression, asNamespace);
     }
 
     select(...columns: (SQLExpression | string)[]): InstanceType<typeof SQLSelect<SQLResultNamespacedRow>> {
