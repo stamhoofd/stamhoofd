@@ -1,11 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Group, Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
+import { AuditLogSource, Group as GroupStruct } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
-import { AuthenticatedStructures } from './AuthenticatedStructures';
-import { MemberUserSyncer } from './MemberUserSyncer';
 import { AuditLogService } from '../services/AuditLogService';
+import { AuthenticatedStructures } from './AuthenticatedStructures';
 import { SetupStepUpdater } from './SetupStepUpdater';
 
 export class PeriodHelper {
@@ -16,88 +15,6 @@ export class PeriodHelper {
             organization.periodId = period.id;
             await organization.save();
         });
-    }
-
-    static async stopAllResponsibilities() {
-        console.log('Stopping all responsibilities');
-        const platform = await Platform.getSharedPrivateStruct();
-        const keepPlatformResponsibilityIds = platform.config.responsibilities.filter(r => !r.organizationBased).map(r => r.id);
-        const keepResponsibilityIds = platform.config.responsibilities.filter(r => !r.organizationBased || r.permissions?.level === PermissionLevel.Full).map(r => r.id);
-        const batchSize = 100;
-
-        let lastId = '';
-        let c = 0;
-
-        while (true) {
-            const records = await MemberResponsibilityRecord.where(
-                {
-                    id: { sign: '>', value: lastId },
-                    endDate: null,
-                },
-                {
-                    limit: batchSize,
-                    sort: ['id'],
-                },
-            );
-
-            for (const record of records) {
-                lastId = record.id;
-
-                const invalid = keepPlatformResponsibilityIds.includes(record.responsibilityId) && record.organizationId;
-
-                if (!keepResponsibilityIds.includes(record.responsibilityId) || invalid) {
-                    record.endDate = new Date();
-                    await record.save();
-                    c++;
-                }
-            }
-
-            if (records.length < batchSize) {
-                break;
-            }
-        }
-
-        console.log('Done: stopped all responsibilities: ' + c);
-    }
-
-    static async syncAllMemberUsers() {
-        console.log('Syncing all members');
-
-        let c = 0;
-        let lastId: string = '';
-
-        while (true) {
-            const rawMembers = await Member.where({
-                id: {
-                    value: lastId,
-                    sign: '>',
-                },
-            }, { limit: 500, sort: ['id'] });
-
-            if (rawMembers.length === 0) {
-                break;
-            }
-
-            const membersWithRegistrations = await Member.getBlobByIds(...rawMembers.map(m => m.id));
-
-            const promises: Promise<any>[] = [];
-
-            for (const memberWithRegistrations of membersWithRegistrations) {
-                promises.push((async () => {
-                    await MemberUserSyncer.onChangeMember(memberWithRegistrations);
-                    c++;
-
-                    if (c % 10000 === 0) {
-                        console.log('Synced ' + c + ' members');
-                    }
-                })());
-            }
-
-            await Promise.all(promises);
-            lastId = rawMembers[rawMembers.length - 1].id;
-        }
-
-        console.log('Done: synced all members: ' + c);
     }
 
     static async createOrganizationPeriodForPeriod(organization: Organization, period: RegistrationPeriod) {
@@ -128,38 +45,15 @@ export class PeriodHelper {
             });
         }
 
-        const batchSize = 10;
         await QueueHandler.schedule(tag, async () => {
-            let lastId = '';
-
-            while (true) {
-                const organizations = await Organization.where(
-                    {
-                        id: { sign: '>', value: lastId },
-                    },
-                    {
-                        limit: batchSize,
-                        sort: ['id'],
-                    },
-                );
-
-                for (const organization of organizations) {
-                    try {
-                        await this.moveOrganizationToPeriod(organization, period);
-                    }
-                    catch (error) {
-                        console.error('Error moving organization to period', organization.id, error);
-                    }
-                    lastId = organization.id;
+            for await (const organization of Organization.select().all()) {
+                try {
+                    await this.moveOrganizationToPeriod(organization, period);
                 }
-
-                if (organizations.length < batchSize) {
-                    break;
+                catch (error) {
+                    console.error('Error moving organization to period', organization.id, error);
                 }
             }
-
-            await this.stopAllResponsibilities();
-            await this.syncAllMemberUsers();
         });
 
         // When done: update setup steps
@@ -175,31 +69,10 @@ export class PeriodHelper {
 
         console.log(tag);
 
-        const batchSize = 100;
         await QueueHandler.schedule(tag, async () => {
             await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                let lastId = '';
-
-                while (true) {
-                    const groups = await Group.where(
-                        {
-                            id: { sign: '>', value: lastId },
-                            periodId: period.id,
-                        },
-                        {
-                            limit: batchSize,
-                            sort: ['id'],
-                        },
-                    );
-
-                    for (const group of groups) {
-                        await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id }), period);
-                        lastId = group.id;
-                    }
-
-                    if (groups.length < batchSize) {
-                        break;
-                    }
+                for await (const group of Group.select().where('periodId', period.id).all()) {
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id }), period);
                 }
             });
         });
