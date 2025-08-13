@@ -16,7 +16,7 @@
         "#koepel": "de koepel",
         "Vereniging": "Groep",
         "Verenigingen": "Groepen",
-        "vereniging": "groep",
+        "(?<![fF]eitelijke )vereniging": "groep",
         "verenigingen": "groepen"
     },
     "5d507258-d6dd-4b3b-a6ef-1b14c6db14bc": "Je kan meerdere Stripe accounts aanmaken en koppelen aan jouw #groep. Voor alle inschrijvingen en per webshop kan je een ander Stripe account selecteren bij de betaalinstellingen."

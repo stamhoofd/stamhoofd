@@ -23,7 +23,7 @@
         "demovereniging": "FOS De Goudvis",
         "groepsnaam": "eenheidsnaam",
         "groepsnummer": "eenheidsnummer",
-        "vereniging": "eenheid",
+        "(?<![fF]eitelijke )vereniging": "eenheid",
         "verenigingen": "eenheden",
         "werkjaar": "scoutsjaar",
         "werkjaren": "scoutsjaren",
