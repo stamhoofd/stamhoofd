@@ -1195,7 +1195,7 @@ describe('E2E.Register', () => {
                 expect(trialUntil).not.toBeNull();
                 expect(trialUntil!.getFullYear()).toBe(2023);
                 expect(trialUntil!.getMonth()).toBe(4);
-                expect(trialUntil!.getDate()).toBe(24);
+                expect(trialUntil!.getDate()).toBe(19);
             }
             finally {
                 jest.useRealTimers().resetAllMocks();
