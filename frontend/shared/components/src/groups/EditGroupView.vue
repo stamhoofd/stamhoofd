@@ -296,6 +296,11 @@
                     <span class="icon add" />
                     <span>{{ $t('e7319239-1924-462c-bdfb-b9a29d875c41') }}</span>
                 </button>
+
+                <button v-if="preventGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addPreventGroupIds">
+                    <span class="icon add" />
+                    <span>{{ $t('Verhinder andere inschrijving') }}</span>
+                </button>
             </div>
 
             <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
@@ -487,6 +492,10 @@
                 <GroupIdsInput v-model="requireGroupIds" :default-period-id="patchedGroup.periodId" :title="$t(`52c3975b-4d59-4293-9ad6-993d18982d89`)" />
             </JumpToContainer>
 
+            <JumpToContainer v-if="patchedGroup.type === GroupType.Membership" class="container" :visible="forceShowPreventGroupIds || !!preventGroupIds.length">
+                <GroupIdsInput v-model="preventGroupIds" :default-period-id="patchedGroup.periodId" :title="$t('Verhinder andere inschrijvingen')" />
+            </JumpToContainer>
+
             <template v-if="$feature('member-trials')">
                 <template v-if="patchedGroup.type === GroupType.Membership && (!defaultMembershipConfig || defaultMembershipConfig.trialDays)">
                     <hr><h2>{{ $t('8265d9e0-32c1-453c-ab2f-d31f1eb244c3') }}</h2>
@@ -589,11 +598,16 @@ function addGroupPatch(newPatch: PartialWithoutMethods<AutoEncoderPatchType<Grou
 }
 
 const forceShowRequireGroupIds = ref(false);
+const forceShowPreventGroupIds = ref(false);
 const usedStock = computed(() => patchedGroup.value.settings.getUsedStock(patchedGroup.value) || 0);
 const auth = useAuth();
 
 function addRequireGroupIds() {
     forceShowRequireGroupIds.value = true;
+}
+
+function addPreventGroupIds() {
+    forceShowPreventGroupIds.value = true;
 }
 
 const { externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox } = useExternalOrganization(
@@ -867,6 +881,15 @@ const requireGroupIds = computed({
     set: requireGroupIds => addGroupPatch({
         settings: GroupSettings.patch({
             requireGroupIds: requireGroupIds as any,
+        }),
+    }),
+});
+
+const preventGroupIds = computed({
+    get: () => patchedGroup.value.settings.preventGroupIds,
+    set: preventGroupIds => addGroupPatch({
+        settings: GroupSettings.patch({
+            preventGroupIds: preventGroupIds as any,
         }),
     }),
 });
