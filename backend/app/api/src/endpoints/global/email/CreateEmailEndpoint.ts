@@ -1,10 +1,9 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Email, EmailTemplate, RateLimiter } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct, Version, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
+import { Email, RateLimiter } from '@stamhoofd/models';
+import { EmailPreview, EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context';
-import { SQL } from '@stamhoofd/sql';
 
 type Params = Record<string, never>;
 type Query = undefined;
