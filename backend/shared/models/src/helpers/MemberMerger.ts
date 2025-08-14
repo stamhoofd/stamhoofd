@@ -72,6 +72,7 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
 
     // Force review of all details
     base.details.reviewTimes.clearAll();
+    base.details.cleanData();
 
     await base.save();
 
