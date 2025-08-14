@@ -14,6 +14,7 @@ export class OrganizationRegistrationPeriodFactory extends Factory<Options, Orga
         const organizationRegistrationPeriod = new OrganizationRegistrationPeriod();
 
         organizationRegistrationPeriod.organizationId = this.options.organization.id;
+        // todo: migrate-platform-period-id
         organizationRegistrationPeriod.periodId = this.options.period.id;
 
         await organizationRegistrationPeriod.save();

@@ -335,6 +335,7 @@ export function useGetOrganizationUIFilterBuilders() {
                         if (!elemMatch) return null;
 
                         const periodId = elemMatch.periodId?.$eq;
+                        // todo: migrate-platform-period-id
                         if (periodId !== platform.value.period.id) return null;
 
                         const enumValues = Object.values(SetupStepType);

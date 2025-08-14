@@ -39,6 +39,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             country: Country.Belgium,
         });
 
+        // todo: migrate-platform-period-id
         const period = this.options.period ?? await new RegistrationPeriodFactory({}).create();
         organization.periodId = period.id;
 

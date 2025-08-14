@@ -41,6 +41,7 @@ async function getGroupMemberCompletion(group: Group) {
 
     const platform = await Platform.getSharedStruct();
 
+    // todo: migrate-platform-period-id
     if (group.periodId !== platform.period.id) {
         // Not included = no step
         return null;

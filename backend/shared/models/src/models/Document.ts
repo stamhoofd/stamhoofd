@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, RecordFileAnswer, RecordImageAnswer, Version } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -224,7 +224,7 @@ export class Document extends QueryableModel {
 
     static async updateForGroup(groupId: string, organizationId: string) {
         try {
-            console.log('Updating documents for group', groupId);
+            // console.log('Updating documents for group', groupId);
 
             const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
             const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });

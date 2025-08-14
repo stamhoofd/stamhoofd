@@ -26,6 +26,7 @@ export class FlagMomentCleanup {
     }
 
     static async getActiveMemberResponsibilityRecordsForOrganizationWithoutRegistrationInCurrentPeriod() {
+        // todo: migrate-platform-period-id
         const currentPeriodId = (await Platform.getShared()).periodId;
 
         return await MemberResponsibilityRecord.select()

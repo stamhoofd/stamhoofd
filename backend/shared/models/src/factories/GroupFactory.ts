@@ -30,6 +30,7 @@ export class GroupFactory extends Factory<Options, Group> {
         const group = new Group();
         group.organizationId = organization.id;
 
+        // todo: migrate-platform-period-id
         if (this.options.period) {
             group.periodId = this.options.period.id;
         }

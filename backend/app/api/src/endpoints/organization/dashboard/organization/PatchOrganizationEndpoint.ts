@@ -366,6 +366,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     });
                 }
 
+                // todo: migrate-platform-period-id
+                // todo: period should always have organization id if userMode not platform
                 const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
                 if (!period || (period.organizationId && period.organizationId !== organization.id)) {
                     throw new SimpleError({

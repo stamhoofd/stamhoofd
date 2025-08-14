@@ -306,7 +306,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         }
                     }
                     else {
-                        if (registration.periodId !== platform.periodId) {
+                        if (registration.periodId !== platform.periodIdIfPlatform) {
                             return false;
                         }
                     }
@@ -415,6 +415,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Add platform memberships
+            // todo: migrate-platform-period-id
             for (const { put } of patch.platformMemberships.getPuts()) {
                 if (put.periodId !== platform.periodId) {
                     const period = await RegistrationPeriod.getByID(put.periodId);

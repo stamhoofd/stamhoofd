@@ -5,8 +5,8 @@ import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { Context } from './Context';
 import { BalanceItemService } from '../services/BalanceItemService';
+import { Context } from './Context';
 
 /**
  * Builds authenticated structures for the current user
@@ -102,6 +102,7 @@ export class AuthenticatedStructures {
         return structs;
     }
 
+    // todo: migrate-platform-period-id
     static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[], periods?: RegistrationPeriod[], options?: { forceGroupIds?: string[] }) {
         if (organizationRegistrationPeriods.length === 0) {
             return [];

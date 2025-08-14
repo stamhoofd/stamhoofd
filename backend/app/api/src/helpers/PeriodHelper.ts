@@ -3,15 +3,17 @@ import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRe
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
+import { AuditLogService } from '../services/AuditLogService';
 import { AuthenticatedStructures } from './AuthenticatedStructures';
 import { MemberUserSyncer } from './MemberUserSyncer';
-import { AuditLogService } from '../services/AuditLogService';
 import { SetupStepUpdater } from './SetupStepUpdater';
 
 export class PeriodHelper {
+    // todo: migrate-platform-period-id
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             console.log('moveOrganizationToPeriod', organization.id, period.id);
+            // todo: migrate-platform-period-id
             await this.createOrganizationPeriodForPeriod(organization, period);
             organization.periodId = period.id;
             await organization.save();
@@ -100,6 +102,7 @@ export class PeriodHelper {
         console.log('Done: synced all members: ' + c);
     }
 
+    // todo: migrate-platform-period-id
     static async createOrganizationPeriodForPeriod(organization: Organization, period: RegistrationPeriod) {
         const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: period.id, organizationId: organization.id }, { limit: 1 });
 
