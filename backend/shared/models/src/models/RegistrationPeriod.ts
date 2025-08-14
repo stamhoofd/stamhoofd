@@ -67,6 +67,7 @@ export class RegistrationPeriod extends QueryableModel {
         return RegistrationPeriodStruct.create(this);
     }
 
+    // todo: migrate-platform-period-id
     static async getByDate(date: Date): Promise<RegistrationPeriod | null> {
         const result = await SQL.select().from(SQL.table(this.table))
             .where(SQL.column('startDate'), SQLWhereSign.LessEqual, date)

@@ -173,6 +173,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
 
 function switchCycle(event: MouseEvent) {
     const menu = new ContextMenu([
+        // todo: migrate-platform-period-id
         (platform.value.periods ?? []).slice(0, 5).map((p) => {
             return new ContextMenuItem({
                 name: p.name,

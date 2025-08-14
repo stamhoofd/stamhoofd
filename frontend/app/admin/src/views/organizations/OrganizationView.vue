@@ -101,6 +101,7 @@
                         {{ $t('Aantal leden' ) }}
                     </h3>
                     <p v-copyable class="style-definition-text">
+                        <!-- // todo: migrate-platform-period-id -->
                         <MemberCountSpan
                             :filter="{
                                 registrations: {

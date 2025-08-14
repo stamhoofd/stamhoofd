@@ -74,6 +74,7 @@ const app = useAppContext();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const auth = useAuth();
 const platform = usePlatform();
+// todo: migrate-platform-period-id
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
 
 const defaultFilter: StamhoofdFilter = getDefaultFilter();

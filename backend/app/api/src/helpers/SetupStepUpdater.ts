@@ -45,6 +45,7 @@ async function getGroupMemberCompletion(group: Group) {
 
     const platform = await Platform.getSharedStruct();
 
+    // todo: migrate-platform-period-id
     if (group.periodId !== platform.period.id) {
         // Not included = no step
         return null;
@@ -128,6 +129,7 @@ export class SetupStepUpdater {
         await QueueHandler.schedule(tag, async () => {
             const platform = (await Platform.getSharedPrivateStruct()).clone();
 
+            // todo: migrate-platform-period-id
             const periodId = platform.period.id;
 
             let lastId = '';
@@ -223,6 +225,7 @@ export class SetupStepUpdater {
         }
 
         if (!organizationRegistrationPeriod) {
+            // todo: migrate-platform-period-id
             const periodId = platform.period.id;
             organizationRegistrationPeriod = (
                 await OrganizationRegistrationPeriod.where({
@@ -506,6 +509,7 @@ export class SetupStepUpdater {
         platform: PlatformStruct) {
         const defaultAgeGroupIds = platform.config.defaultAgeGroups.filter(g => g.minimumRequiredMembers > 0).map(x => x.id);
 
+        // todo: migrate-platform-period-id
         const groupsWithDefaultAgeGroups = defaultAgeGroupIds.length > 0
             ? await Group.select()
                 .where('organizationId', organization.id)

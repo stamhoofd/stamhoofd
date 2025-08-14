@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, StartNewRegistrationPeriodView, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
 import { useOrganizationManager, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
