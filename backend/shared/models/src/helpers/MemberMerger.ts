@@ -74,6 +74,12 @@ export async function mergeTwoMembers(base: Member, other: Member): Promise<void
     base.details.reviewTimes.clearAll();
     base.details.cleanData();
 
+    if (other.existsInDatabase && other.details.memberNumber && other.details.memberNumber === base.details.memberNumber) {
+        // Clear member number first, because that will cause duplicate member number mysql errors
+        other.details.memberNumber = null;
+        await other.save();
+    }
+
     await base.save();
 
     if (other.existsInDatabase) {
