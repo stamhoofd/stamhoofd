@@ -13,6 +13,7 @@ import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { useGlobalRoutes } from './useGlobalRoutes';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
+import CommunicationView from './views/communication/CommunicationView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });
@@ -370,6 +371,15 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
         }),
     });
 
+    const communicationTab = new TabBarItem({
+        id: 'communication',
+        icon: 'email-filled',
+        name: $t(`Communicatie`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(CommunicationView, {}),
+        }),
+    });
+
     const sharedMoreItems: TabBarItem[] = [];
 
     if (STAMHOOFD.CHANGELOG_URL) {
@@ -421,7 +431,6 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                 icon: 'feedback',
                 name: $t(`630ab37a-85c8-4bbd-a281-b87e82a976d5`),
                 action: async function () {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     window.open(STAMHOOFD.FEEDBACK_URL!, '_blank');
                 },
             }),
@@ -465,6 +474,11 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             moreTab.items.unshift(auditLogsTab);
                             moreTab.items.unshift(documentsTab);
                             moreTab.items.unshift(financesTab);
+
+                            if (manualFeatureFlag('communication', reactiveSession)) {
+                                moreTab.items.unshift(communicationTab);
+                            }
+
                             moreTab.items.unshift(settingsTab);
                         }
                         else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
