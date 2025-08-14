@@ -57,7 +57,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
                     // Add organization scope filter
                     scopeFilter = {
-                        periodId: platform.periodId,
+                        periodId: platform.periodIdIfPlatform,
                         organization: {
                             $elemMatch: {
                                 tags: {

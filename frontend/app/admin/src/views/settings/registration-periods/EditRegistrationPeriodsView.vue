@@ -6,6 +6,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <!-- // todo: migrate-platform-period-id -->
         <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
             <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</h2>
             <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
@@ -45,7 +46,6 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';

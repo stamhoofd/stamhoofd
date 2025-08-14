@@ -7,11 +7,11 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context';
 import { MembershipCharger } from '../../../helpers/MembershipCharger';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
 import { TagHelper } from '../../../helpers/TagHelper';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
-import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -146,6 +146,8 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
         }
 
+        // todo: migrate-platform-period-id
+        // todo: should not be possible if userMode not platform?
         if (
             request.body.period
             && request.body.period.id !== platform.periodId

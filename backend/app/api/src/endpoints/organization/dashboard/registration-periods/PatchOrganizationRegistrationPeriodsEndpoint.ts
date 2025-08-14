@@ -53,6 +53,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const forceGroupIds: string[] = [];
 
         for (const patch of request.body.getPatches()) {
+            // todo: migrate-platform-period-id
+            // todo: check organization id also -> should not be able to patch periods of other organizations
             const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                 throw new SimpleError({
@@ -63,6 +65,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 });
             }
 
+            // todo: migrate-platform-period-id
+            // todo: check organization id here also?
             const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
 
             if (!period) {
@@ -318,6 +322,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const organizationPeriod = new OrganizationRegistrationPeriod();
         organizationPeriod.id = struct.id;
         organizationPeriod.organizationId = organization.id;
+        // todo: migrate-platform-period-id
         organizationPeriod.periodId = struct.period.id;
         organizationPeriod.settings = struct.settings;
         await organizationPeriod.save();
@@ -403,6 +408,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         if (period) {
+            // todo: migrate-platform-period-id
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
 
@@ -468,6 +474,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.waitingListId = existing.id;
                 }
                 else {
+                    // todo: migrate-platform-period-id
                     const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId);
 
                     if (!requiredPeriod) {
@@ -524,6 +531,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.id = struct.id;
         model.organizationId = organizationId;
         model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId);
+        // todo: migrate-platform-period-id
         model.periodId = period.id;
         model.settings = struct.settings;
         model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({});

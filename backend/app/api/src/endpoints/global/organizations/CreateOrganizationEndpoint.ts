@@ -85,6 +85,8 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.address = request.body.organization.address;
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
 
+        // todo: migrate-platform-period-id
+        // todo: add organizationId if not platform
         const period = new RegistrationPeriod();
 
         // WIP

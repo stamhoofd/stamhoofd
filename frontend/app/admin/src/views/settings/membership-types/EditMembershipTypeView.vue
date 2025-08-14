@@ -84,7 +84,6 @@ import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ContextMenu, ContextMenuItem, DefaultAgeGroupIdsInput, Dropdown, ErrorBox, JumpToContainer, SaveView, TagIdsInput, Toast, useErrors, usePatch } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
 import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, RegistrationPeriod } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -261,6 +260,7 @@ async function addConfig(event: MouseEvent) {
         availablePeriods.map((period) => {
             return new ContextMenuItem({
                 name: period.name,
+                // todo: migrate-platform-period-id
                 icon: period.id === platformManager.value.$platform.period.id ? 'dot' : undefined,
                 action: () => addConfigForPeriod(period),
             });

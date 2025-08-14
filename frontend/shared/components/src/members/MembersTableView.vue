@@ -25,6 +25,7 @@ const props = withDefaults(
     defineProps<{
         group?: Group | null;
         category?: GroupCategoryTree | null;
+        // todo: migrate-platform-period-id
         periodId?: string | null;
         responsibility?: MemberResponsibility | null; // for now only for saving column config
         customFilter?: StamhoofdFilter | null;
@@ -70,6 +71,7 @@ const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTa
 const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform();
+// todo: migrate-platform-period-id
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? organization?.value?.period?.period?.id ?? platform.value.period.id;
 const defaultFilter = app === 'admin' && !props.group
     ? {

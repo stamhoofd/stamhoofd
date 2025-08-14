@@ -1,4 +1,5 @@
 import { column } from '@simonbackx/simple-database';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 import { PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
@@ -37,6 +38,23 @@ export class Platform extends QueryableModel {
     @column({ type: 'json', decoder: PlatformServerConfig })
     serverConfig: PlatformServerConfig = PlatformServerConfig.create({});
 
+    /**
+     * Throws an error if userMode is not platform.
+     * The period id of the platform should almost never be used if the userMode is not platform.
+     * By throwing an error, we prevent accidental usage of the period id.
+     */
+    get periodIdIfPlatform() {
+        if (STAMHOOFD.userMode === 'platform') {
+            return this.periodId;
+        }
+
+        throw new SimpleError({
+            code: 'only_platform',
+            message: 'Period id should only be used if userMode is platform',
+            human: $t(`8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8`),
+        });
+    }
+
     private static shared: Platform | null = null;
     private static sharedPrivateStruct: PlatformStruct & { privateConfig: PlatformPrivateConfig } | null = null;
     private static sharedStruct: PlatformStruct | null = null;
@@ -71,6 +89,7 @@ export class Platform extends QueryableModel {
     }
 
     static async getForEditing(): Promise<Platform> {
+        // todo: migrate-platform-period-id
         return QueueHandler.schedule('Platform.getModel', async () => {
             // Build a new one
             let model = await this.getByID('1');

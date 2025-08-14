@@ -572,6 +572,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                         $and: [
                             FilterWrapperMarker,
                             {
+                                // todo: migrate-platform-period-id
                                 periodId: platform.period.id,
                             },
                         ],

@@ -126,6 +126,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             organization.meta = put.meta;
             organization.address = put.address;
 
+            // todo: migrate-platform-period-id
             const periodId = (await Platform.getShared()).periodId;
             organization.periodId = periodId;
 
