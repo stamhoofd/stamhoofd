@@ -56,6 +56,10 @@
             {{ $t('c22cb870-b859-4de9-9540-1d2d796a50f3') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('communication')" @update:model-value="setFeatureFlag('communication', !!$event)">
+            Communicatiemodule (onvolledig)
+        </Checkbox>
+
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
 
         <STList>
