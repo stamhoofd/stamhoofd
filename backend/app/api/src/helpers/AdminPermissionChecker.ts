@@ -379,11 +379,6 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        // Check permissions aren't scoped to a specific organization, and they mismatch
-        if (!this.checkScope(registration.organizationId)) {
-            return false;
-        }
-
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
 
         if (!organizationPermissions) {
