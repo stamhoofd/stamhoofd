@@ -5,6 +5,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
+import { Context } from '../../../helpers/Context';
 import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods';
 import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods';
 
@@ -33,8 +34,23 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
     }
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
-        const scopeFilter: StamhoofdFilter | undefined = undefined;
+        let scopeFilter: StamhoofdFilter | undefined = undefined;
         const query = RegistrationPeriod.select();
+
+        if (STAMHOOFD.userMode === 'organization') {
+            const organization = Context.organization;
+
+            if (!organization) {
+                throw new SimpleError({
+                    code: 'no_organization',
+                    message: 'Organization is undefined on Context',
+                });
+            }
+
+            scopeFilter = {
+                organizationId: organization.id,
+            };
+        }
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -126,6 +142,8 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
                 message: 'Limit can not be less than 1',
             });
         }
+
+        await Context.setUserOrganizationScope();
 
         return new Response(
             await GetRegistrationPeriodsEndpoint.buildData(request.query),
