@@ -398,6 +398,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId);
         }
 
+        // if the group is moved to another period
+        if (struct.periodId !== undefined && !(period && period.id === struct.periodId)) {
+            period = await RegistrationPeriod.getByID(struct.periodId);
+        }
+
         if (!period && !model.settings.period) {
             period = await RegistrationPeriod.getByID(model.periodId);
         }
