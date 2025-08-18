@@ -864,6 +864,13 @@ export class AdminPermissionChecker {
         return this.platformPermissions?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
     }
 
+    async canReadAllEmails(organizationId: Organization | string | null, senderId = ''): Promise<boolean> {
+        if (organizationId) {
+            return (await this.getOrganizationPermissions(organizationId))?.hasResourceAccess(PermissionsResourceType.Senders, senderId, PermissionLevel.Read) ?? false;
+        }
+        return this.platformPermissions?.hasResourceAccess(PermissionsResourceType.Senders, senderId, PermissionLevel.Read) ?? false;
+    }
+
     async canAccessEmail(email: Email, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         if (!this.checkScope(email.organizationId)) {
             return false;

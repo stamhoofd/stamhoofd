@@ -118,6 +118,10 @@ export class ContextPermissions {
         return this.permissions?.hasAccessRightForSomeResourceOfType(resourceType, right) ?? false;
     }
 
+    hasAccessForSomeResourceOfType(resourceType: PermissionsResourceType, level: PermissionLevel = PermissionLevel.Read) {
+        return this.permissions?.hasAccessForSomeResourceOfType(resourceType, level) ?? false;
+    }
+
     canManagePayments() {
         return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector);
     }

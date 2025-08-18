@@ -1,9 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, EmailPreview, getSortFilter, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, EmailPreview, EmailStatus, getSortFilter, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email } from '@stamhoofd/models';
+import { Email, Platform } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context';
 import { emailFilterCompilers } from '../../../sql-filters/emails';
@@ -35,11 +35,72 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const organization = Context.organization;
+        const user = Context.user;
+        if (!user) {
+            throw new Error('Not authenticated');
+        }
+
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
-        if (organization) {
+        const canReadAllEmails = await Context.auth.canReadAllEmails(organization ?? null);
+        scopeFilter = {
+            organizationId: organization?.id ?? null,
+        };
+
+        if (!canReadAllEmails) {
+            const senders = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
+            const ids: string[] = [];
+            for (const sender of senders) {
+                if (await Context.auth.canReadAllEmails(organization ?? null, sender.id)) {
+                    ids.push(sender.id);
+                }
+            }
+            if (ids.length === 0) {
+                throw Context.auth.error();
+            }
+
             scopeFilter = {
-                organizationId: organization.id,
+                $and: [
+                    {
+                        organizationId: organization?.id ?? null,
+                    },
+                    {
+                        $or: [
+                            {
+                                senderId: {
+                                    $in: ids,
+                                },
+                                status: {
+                                    $neq: EmailStatus.Draft,
+                                },
+                            },
+                            {
+                                userId: user.id,
+                            },
+                        ],
+                    },
+                ],
+            };
+        }
+        else {
+            scopeFilter = {
+                $and: [
+                    {
+                        organizationId: organization?.id ?? null,
+                    },
+                    {
+                        $or: [
+                            {
+                                status: {
+                                    $neq: EmailStatus.Draft,
+                                },
+                            },
+                            {
+                                userId: user.id,
+                            },
+                        ],
+                    },
+                ],
             };
         }
 
