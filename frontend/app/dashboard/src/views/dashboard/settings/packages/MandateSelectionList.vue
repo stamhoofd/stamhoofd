@@ -132,7 +132,7 @@ export default class MandateSelectionList extends Mixins(NavigationMixin){
             return cleaned.filter(b => b.status === 'valid')
         }
 
-        return cleaned;
+        return cleaned.filter(b => b.status === 'valid' || b.isDefault)
     }
 
     get selectedMandate() {
