@@ -845,8 +845,11 @@ export class AdminPermissionChecker {
         return this.hasSomeAccess(organizationId);
     }
 
-    canSendEmails() {
-        return !!this.user.permissions;
+    canSendEmails(organizationId: Organization | string | null) {
+        if (organizationId) {
+            return this.hasSomeAccess(organizationId);
+        }
+        return this.hasSomePlatformAccess();
     }
 
     async canReadEmailTemplates(organizationId: string) {
@@ -909,7 +912,7 @@ export class AdminPermissionChecker {
      */
     async hasSomeAccess(organizationOrId: string | Organization): Promise<boolean> {
         const organizationPermissions = await this.getOrganizationPermissions(organizationOrId);
-        return !!organizationPermissions;
+        return !!organizationPermissions && !organizationPermissions.isEmpty;
     }
 
     async canManageAdmins(organizationId: string) {

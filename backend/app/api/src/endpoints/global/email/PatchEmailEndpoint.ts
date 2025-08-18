@@ -31,7 +31,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canSendEmails()) {
+        if (!Context.auth.canSendEmails(organization)) {
             throw Context.auth.error();
         }
 
@@ -105,16 +105,16 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             model.throwIfNotReadyToSend();
 
             const replacement = '{{unsubscribeUrl}}';
- 
+
             if (model.html) {
                 // Check email contains an unsubscribe button
                 if (!model.html.includes(replacement)) {
                     throw new SimpleError({
-                        code: "missing_unsubscribe_button",
-                        message: "Missing unsubscribe button",
+                        code: 'missing_unsubscribe_button',
+                        message: 'Missing unsubscribe button',
                         human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
-                        field: "html"
-                    })
+                        field: 'html',
+                    });
                 }
             }
 
@@ -122,11 +122,11 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 // Check email contains an unsubscribe button
                 if (!model.text.includes(replacement)) {
                     throw new SimpleError({
-                        code: "missing_unsubscribe_button",
-                        message: "Missing unsubscribe button",
+                        code: 'missing_unsubscribe_button',
+                        message: 'Missing unsubscribe button',
                         human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
-                        field: "text"
-                    })
+                        field: 'text',
+                    });
                 }
             }
 

@@ -64,7 +64,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canSendEmails()) {
+        if (!Context.auth.canSendEmails(organization)) {
             throw Context.auth.error();
         }
 

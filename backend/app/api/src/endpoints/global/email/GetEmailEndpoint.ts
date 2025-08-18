@@ -32,7 +32,7 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canSendEmails()) {
+        if (!Context.auth.canSendEmails(organization)) {
             throw Context.auth.error();
         }
 
