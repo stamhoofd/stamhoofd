@@ -99,7 +99,7 @@ export class Formatter {
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         const year = datetime.year;
-        return datetime.day + ' ' + this.month(datetime.month) + (currentYear !== year || withYear === true || date < new Date() ? (' ' + year) : '');
+        return datetime.day + ' ' + this.month(datetime.month) + (withYear !== false && (currentYear !== year || withYear === true || date < new Date()) ? (' ' + year) : '');
     }
 
     /**
@@ -215,7 +215,7 @@ export class Formatter {
     /**
      * maandag, 1 januari (2020). Year only in different year
      */
-    static dateWithDay(date: Date, withYear = false): string {
+    static dateWithDay(date: Date, withYear: boolean | null = null): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return '?';
@@ -226,7 +226,7 @@ export class Formatter {
     /**
      * maandag, 1 januari (2020) om XX:XX. Year only in different year
      */
-    static dateTimeWithDay(date: Date, hideZero = false, withYear = false): string {
+    static dateTimeWithDay(date: Date, hideZero = false, withYear: boolean | null = null): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return '?';
@@ -275,8 +275,8 @@ export class Formatter {
         return year + '-' + (datetime.month + '').padStart(2, '0') + '-' + (datetime.day + '').padStart(2, '0') + ' ' + (datetime.hour + '').padStart(2, '0') + ':' + (datetime.minute + '').padStart(2, '0') + ':' + (datetime.second + '').padStart(2, '0');
     }
 
-    static startDate(startDate: Date, includeDay = false, withYear = false, includeTime: boolean | null = null): string {
-        if ((Formatter.time(startDate) === '0:00' && includeTime === null) || includeTime === false) {
+    static startDate(startDate: Date, includeDay = false, withYear: boolean | null = null, includeTime: boolean | null = null): string {
+        if (includeTime === false) {
             if (includeDay) {
                 return Formatter.dateWithDay(startDate, withYear);
             }
@@ -284,12 +284,12 @@ export class Formatter {
         }
 
         if (includeDay) {
-            return Formatter.dateTimeWithDay(startDate, withYear);
+            return Formatter.dateTimeWithDay(startDate, includeTime === null, withYear);
         }
-        return Formatter.dateTime(startDate, withYear);
+        return Formatter.dateTime(startDate, includeTime === null, withYear);
     }
 
-    static endDate(endDate: Date, includeDay = false, withYear = false, includeTime: boolean | null = null): string {
+    static endDate(endDate: Date, includeDay = false, withYear: boolean | null = null, includeTime: boolean | null = null): string {
         if ((Formatter.time(endDate) === '23:59' && includeTime === null) || includeTime === false) {
             if (includeDay) {
                 return Formatter.dateWithDay(endDate, withYear);
@@ -298,7 +298,7 @@ export class Formatter {
         }
 
         if (includeDay) {
-            return Formatter.dateTimeWithDay(endDate, withYear);
+            return Formatter.dateTimeWithDay(endDate, false, withYear);
         }
         return Formatter.dateTime(endDate, false, withYear);
     }
@@ -376,7 +376,7 @@ export class Formatter {
     /**
      * 1 januari (2020) om 12:00. Year only in different year
      */
-    static dateTime(date: Date, hideZero = false, withYear = false): string {
+    static dateTime(date: Date, hideZero = false, withYear: boolean | null = null): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return '?';
