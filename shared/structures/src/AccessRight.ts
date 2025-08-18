@@ -32,6 +32,11 @@ export enum AccessRight {
 
     // Webshop level permissions
     WebshopScanTickets = 'WebshopScanTickets',
+
+    /**
+     * Send messages for a given sender
+     */
+    SendMessages = 'SendMessages',
 }
 
 export class AccessRightHelper {
@@ -51,6 +56,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`5043355f-40a8-4291-b1f9-9645cea7ac3b`);
 
             case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
+            case AccessRight.SendMessages: return $t(`Berichten versturen`);
         }
     }
 
@@ -73,6 +79,7 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return $t(`8d64ab67-da1d-4143-8c6c-94ade8e1823f`);
             case AccessRight.MemberWriteFinancialData: return $t(`da4a7e62-2f98-4e87-89f5-d3643e7bb987`);
             case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
+            case AccessRight.SendMessages: return $t(`Versturen`);
         }
     }
 
@@ -91,6 +98,7 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return $t(`bcf9d463-8536-40ae-8e7e-a4c36e793dbc`);
             case AccessRight.MemberWriteFinancialData: return $t(`e3f2e800-1918-459d-aa79-ce6c8833bb53`);
             case AccessRight.MemberManageNRN: return $t(`ef892736-b403-4eb5-8e59-662ffbfd1c54`);
+            case AccessRight.SendMessages: return $t(`Inclusief eigen berichten bekijken`);
         }
     }
 
@@ -116,6 +124,7 @@ export class AccessRightHelper {
     static autoGrantRightForLevel(right: AccessRight): PermissionLevel | null {
         switch (right) {
             case AccessRight.WebshopScanTickets: return PermissionLevel.Write;
+            case AccessRight.SendMessages: return PermissionLevel.Write;
             case AccessRight.OrganizationEventNotificationReviewer: return null; // Never granted to full-admins, unless given by the platform
         }
         return PermissionLevel.Full;

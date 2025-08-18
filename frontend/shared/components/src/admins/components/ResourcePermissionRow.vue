@@ -49,10 +49,17 @@ const props = withDefaults(defineProps<{
     role: PermissionRoleDetailed | Permissions;
     inheritedRoles?: (PermissionRoleDetailed | Permissions)[];
     type: 'resource' | 'role'; // whether we show the name of the role or the resource
-    configurableAccessRights: AccessRight[];
+    configurableAccessRights?: AccessRight[];
+    configurablePermissionLevels?: PermissionLevel[];
     unlisted?: boolean;
+    defaultLevel?: PermissionLevel | null;
+    defaultAccessRights?: AccessRight[];
 }>(), {
     inheritedRoles: () => [],
+    configurableAccessRights: () => [],
+    configurablePermissionLevels: () => [PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write, PermissionLevel.Full],
+    defaultLevel: null,
+    defaultAccessRights: () => [],
     unlisted: false,
 });
 
@@ -205,7 +212,15 @@ const selected = computed({
         }
 
         if (value) {
-            permissionLevel.value = PermissionLevel.Read;
+            if (props.defaultLevel) {
+                permissionLevel.value = props.defaultLevel;
+            }
+            else {
+                permissionLevel.value = props.configurablePermissionLevels.find(l => l !== PermissionLevel.None) ?? PermissionLevel.Read;
+            }
+            for (const accessRight of props.defaultAccessRights) {
+                accessRightsMap.get(accessRight)!.value = true;
+            }
         }
         else {
             // Delete it
@@ -232,10 +247,10 @@ const levelText = computed(() => {
             if (accessRights.length) {
                 return accessRights.map(r => AccessRightHelper.getNameShort(r)).join(' + ');
             }
-            return $t(`5c7bd1da-78a7-428c-9c93-2be66c44ff6c`);
+            return $t(`5c7bd1da-78a7-428c-9c93-2be66c44ff6c`); // Special translation
         }
         case PermissionLevel.Read: {
-            const rights = [$t(`e80f2233-257d-45df-a04e-af7e5f694546`)];
+            const rights = [getPermissionLevelName(PermissionLevel.Read, props.resource.type)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -249,7 +264,7 @@ const levelText = computed(() => {
             return rights.join(' + ');
         }
         case PermissionLevel.Write: {
-            const rights = [$t(`194b293f-79ca-4ad9-820d-91f0ada966ad`)];
+            const rights = [getPermissionLevelName(PermissionLevel.Write, props.resource.type)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -263,7 +278,7 @@ const levelText = computed(() => {
             return rights.join(' + ');
         }
         case PermissionLevel.Full: {
-            const rights = [$t(`b182a5e2-aae7-48ae-bb42-c51edfb5df29`)];
+            const rights = [getPermissionLevelName(PermissionLevel.Full, props.resource.type)];
             const accessRights = allAccessRights.value;
 
             for (const right of accessRights) {
@@ -283,44 +298,30 @@ const levelText = computed(() => {
     }
 });
 
+function contextMenuItemForLevel(level: PermissionLevel) {
+    return new ContextMenuItem({
+        selected: permissionLevel.value === level,
+        name: getPermissionLevelName(level, props.resource.type),
+        disabled: getPermissionLevelNumber(level) < getPermissionLevelNumber(lockedMinimumLevel.value),
+        action: () => {
+            permissionLevel.value = level;
+        },
+    });
+}
+
 const choosePermissions = async (event: MouseEvent) => {
     const showAccessRights = props.configurableAccessRights;
+
     const contextMenu = new ContextMenu([
         // Base levels
-        [
-            new ContextMenuItem({
-                selected: permissionLevel.value === PermissionLevel.None,
-                name: $t(`dc1ffb07-49de-475c-9d96-6940d0cbbc09`),
-                disabled: getPermissionLevelNumber(PermissionLevel.None) < getPermissionLevelNumber(lockedMinimumLevel.value),
-                action: () => {
-                    permissionLevel.value = PermissionLevel.None;
-                },
-            }),
-            new ContextMenuItem({
-                selected: permissionLevel.value === PermissionLevel.Read,
-                name: $t(`e80f2233-257d-45df-a04e-af7e5f694546`),
-                disabled: getPermissionLevelNumber(PermissionLevel.Read) < getPermissionLevelNumber(lockedMinimumLevel.value),
-                action: () => {
-                    permissionLevel.value = PermissionLevel.Read;
-                },
-            }),
-            new ContextMenuItem({
-                selected: permissionLevel.value === PermissionLevel.Write,
-                name: $t(`194b293f-79ca-4ad9-820d-91f0ada966ad`),
-                disabled: getPermissionLevelNumber(PermissionLevel.Write) < getPermissionLevelNumber(lockedMinimumLevel.value),
-                action: () => {
-                    permissionLevel.value = PermissionLevel.Write;
-                },
-            }),
-            new ContextMenuItem({
-                selected: permissionLevel.value === PermissionLevel.Full,
-                disabled: getPermissionLevelNumber(PermissionLevel.Full) < getPermissionLevelNumber(lockedMinimumLevel.value),
-                name: $t(`b182a5e2-aae7-48ae-bb42-c51edfb5df29`),
-                action: () => {
-                    permissionLevel.value = PermissionLevel.Full;
-                },
-            }),
-        ],
+        ...(props.configurablePermissionLevels.length > 0
+            ? [
+                    props.configurablePermissionLevels.map((level) => {
+                        return contextMenuItemForLevel(level);
+                    }),
+                ]
+            : []),
+
         // Access rights
         ...(showAccessRights.length > 0
             ? [
@@ -329,13 +330,13 @@ const choosePermissions = async (event: MouseEvent) => {
                         const isLocked = lockedAccessRights.value.includes(accessRight);
                         const included = !!baseLevel && getPermissionLevelNumber(permissionLevel.value) >= getPermissionLevelNumber(baseLevel);
 
-                        let description: string|undefined = undefined;
+                        let description: string | undefined = undefined;
                         if (!isLocked) {
                             if (included) {
-                                description = ($t(`c3d22dca-87b6-4975-96ff-72ffe2ce99d0`) + ' ' + getPermissionLevelName(baseLevel));
+                                description = ($t(`c3d22dca-87b6-4975-96ff-72ffe2ce99d0`) + ' ' + getPermissionLevelName(baseLevel, props.resource.type));
                             }
                             else {
-                                description = ($t(`74dd7a35-db8b-477d-934a-2681d8d35184`) + ' ' + getPermissionLevelName(permissionLevel.value));
+                                description = AccessRightHelper.getDescription(accessRight) || ($t(`74dd7a35-db8b-477d-934a-2681d8d35184`) + ' ' + getPermissionLevelName(permissionLevel.value, props.resource.type));
                             }
                         }
 
