@@ -486,6 +486,10 @@ export class Formatter {
             .replace(/'/g, '&#039;');
     }
 
+    static escapeRegex(string: string) {
+        return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+
     static joinLast(array: (string | number)[], separator: string | undefined, lastSeparator: string | undefined): string {
         array = array.slice();
         const last = array.pop();

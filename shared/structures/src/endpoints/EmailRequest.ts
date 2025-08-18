@@ -31,6 +31,36 @@ export class Replacement extends AutoEncoder {
     html?: string;
 }
 
+export function replaceEmailHtml(html: string, replacements: Replacement[]) {
+    let replacedHtml = html;
+
+    for (const replacement of replacements) {
+        replacedHtml = replacedHtml.replace(
+            new RegExp(
+                Formatter.escapeRegex('{{' + replacement.token + '}}'),
+                'g',
+            ),
+            replacement.html || Formatter.escapeHtml(replacement.value),
+        );
+    }
+    return replacedHtml;
+}
+
+export function replaceEmailText(text: string, replacements: Replacement[]) {
+    let replacedText = text;
+
+    for (const replacement of replacements) {
+        replacedText = replacedText.replace(
+            new RegExp(
+                Formatter.escapeRegex('{{' + replacement.token + '}}'),
+                'g',
+            ),
+            replacement.value,
+        );
+    }
+    return replacedText;
+}
+
 export class Recipient extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     firstName: string | null = null;

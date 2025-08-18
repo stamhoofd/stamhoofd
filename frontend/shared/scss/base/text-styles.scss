@@ -539,14 +539,25 @@
     font-variation-settings: 'opsz' 19;
 }
 
-.style-description, .style-description-large, .style-description-small, .style-title-list {
+.style-description, .style-description-large, .style-description-small, .style-title-list, .style-title-prefix {
     /**
         Small optimizations for modern browsers only
     */
     &:has(> .icon) {
         display: flex;
         align-items: center;
-        gap: 3px;
+        gap: 4px;
+    }
+}
+
+.style-title-prefix-list {
+    /**
+        Small optimizations for modern browsers only
+    */
+    &:has(> .icon) {
+        display: flex;
+        align-items: center;
+        gap: 1px;
     }
 }
 

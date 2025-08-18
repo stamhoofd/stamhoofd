@@ -8,7 +8,7 @@ export * from './src/errors/Validator';
 export * from './src/errors/useValidation';
 
 // Classes
-export { EmailStyler } from './src/editor/EmailStyler';
+export * from './src/editor';
 export * from './src/EventBus';
 export * from './src/ViewportHelper';
 
@@ -31,7 +31,6 @@ export * from './src/bundle-discounts';
 export * from './src/export';
 
 // Navigation
-export { default as EditorView } from './src/editor/EditorView.vue';
 export { default as BackButton } from './src/navigation/BackButton.vue';
 export { default as LegalFooter } from './src/navigation/LegalFooter.vue';
 export { default as LoadingButton } from './src/navigation/LoadingButton.vue';

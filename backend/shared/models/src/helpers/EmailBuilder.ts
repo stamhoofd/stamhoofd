@@ -1,5 +1,5 @@
 import { Email, EmailAddress, EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
-import { BalanceItem as BalanceItemStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, Replacement } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -238,24 +238,6 @@ export type EmailBuilderOptions = {
     callback?: (error: Error | null) => void; // for each email
 };
 
-export function replaceHtml(html: string, replacements: Replacement[]) {
-    let replacedHtml = html;
-
-    for (const replacement of replacements) {
-        replacedHtml = replacedHtml.replaceAll('{{' + replacement.token + '}}', replacement.html || Formatter.escapeHtml(replacement.value));
-    }
-    return replacedHtml;
-}
-
-export function replaceText(text: string, replacements: Replacement[]) {
-    let replacedText = text;
-
-    for (const replacement of replacements) {
-        replacedText = replacedText.replaceAll('{{' + replacement.token + '}}', replacement.value);
-    }
-    return replacedText;
-}
-
 /**
  * @param organization defines replacements and unsubsribe behaviour
  */
@@ -367,8 +349,8 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             return undefined;
         }
 
-        const replacedHtml = replaceHtml(email.html, recipient.replacements);
-        const replacedSubject = replaceText(email.subject, recipient.replacements);
+        const replacedHtml = replaceEmailHtml(email.html, recipient.replacements);
+        const replacedSubject = replaceEmailText(email.subject, recipient.replacements);
 
         emailIndex += 1;
 

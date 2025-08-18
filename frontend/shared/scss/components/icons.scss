@@ -38,6 +38,16 @@
         }
     }
 
+    &.tiny {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+
+        &:before {
+            font-size: 16px;
+        }
+    }
+
     &.stroke {
         &:before {
             position: absolute;

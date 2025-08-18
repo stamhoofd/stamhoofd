@@ -1,4 +1,5 @@
 import { Country, CountryCode } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { App } from 'vue';
 
 export class I18n {
@@ -76,17 +77,13 @@ export class I18n {
         return this.messages?.get(key) ?? key;
     }
 
-    escapeRegex(string: string) {
-        return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-    }
-
     replace(text: string, replace?: Record<string, string | { toString(): string }>): string {
         if (!replace) {
             return text;
         }
         for (const key in replace) {
             const value = replace[key];
-            text = text.replace(new RegExp('\\{' + this.escapeRegex(key) + '\\}', 'g'), value.toString());
+            text = text.replace(new RegExp('\\{' + Formatter.escapeRegex(key) + '\\}', 'g'), value.toString());
         }
         return text;
     }

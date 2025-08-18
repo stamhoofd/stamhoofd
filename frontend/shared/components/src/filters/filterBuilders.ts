@@ -244,6 +244,30 @@ export function getOrganizationCompanyFilterBuilders() {
     return all;
 }
 
+export function useEmailFilterBuilders() {
+    return () => {
+        const all: UIFilterBuilder[] = [
+            new DateFilterBuilder({
+                name: $t(`Aangemaakt op`),
+                key: 'createdAt',
+            }),
+            new DateFilterBuilder({
+                name: $t(`Verstuurd op`),
+                key: 'sentAt',
+            }),
+        ];
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
+}
+
 export function useGetOrganizationUIFilterBuilders() {
     const platform = usePlatform();
 
