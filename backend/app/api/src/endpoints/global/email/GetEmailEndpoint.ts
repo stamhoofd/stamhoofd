@@ -32,7 +32,7 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canSendEmails(organization)) {
+        if (!await Context.auth.canReadEmails(organization)) {
             throw Context.auth.error();
         }
 
@@ -44,6 +44,10 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
                 message: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
                 statusCode: 404,
             });
+        }
+
+        if (!await Context.auth.canAccessEmail(model)) {
+            throw Context.auth.error();
         }
 
         return new Response(await model.getPreviewStructure());

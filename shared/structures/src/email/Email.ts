@@ -77,6 +77,9 @@ export class Email extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    senderId: string | null = null;
+
     @field({ decoder: EmailRecipientFilter })
     recipientFilter = EmailRecipientFilter.create({});
 

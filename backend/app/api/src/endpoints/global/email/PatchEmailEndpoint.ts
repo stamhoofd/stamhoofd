@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Email } from '@stamhoofd/models';
+import { Email, Platform } from '@stamhoofd/models';
 import { EmailPreview, EmailStatus, Email as EmailStruct } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
@@ -31,7 +31,8 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canSendEmails(organization)) {
+        if (!await Context.auth.canReadEmails(organization)) {
+            // Fast fail before query
             throw Context.auth.error();
         }
 
@@ -43,6 +44,10 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 message: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
                 statusCode: 404,
             });
+        }
+
+        if (!await Context.auth.canAccessEmail(model)) {
+            throw Context.auth.error();
         }
 
         if (model.status !== EmailStatus.Draft) {
@@ -60,6 +65,47 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             model.subject = request.body.subject;
         }
 
+        if (request.body.senderId !== undefined) {
+            const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
+            const sender = list.find(e => e.id === request.body.senderId);
+            if (sender) {
+                if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
+                    throw Context.auth.error({
+                        message: 'Cannot send emails from this sender',
+                        human: $t('Je hebt geen toegangsrechten om emails te versturen naar deze afzender.'),
+                    });
+                }
+                model.senderId = sender.id;
+                model.fromAddress = sender.email;
+                model.fromName = sender.name;
+            }
+            else {
+                throw new SimpleError({
+                    code: 'invalid_sender',
+                    human: 'Sender not found',
+                    message: $t(`De afzender die je hebt gekozen bestaat niet meer. Probeer een andere afzender te kiezen.`),
+                    statusCode: 400,
+                });
+            }
+        }
+        else if (model.senderId) {
+            // Update data, to avoid sending from an old address
+            const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
+            const sender = list.find(e => e.id === model.senderId);
+            if (sender) {
+                model.fromAddress = sender.email;
+                model.fromName = sender.name;
+            }
+            else {
+                throw new SimpleError({
+                    code: 'invalid_sender',
+                    human: 'Sender not found',
+                    message: $t(`De afzender van deze email bestaat niet meer. Probeer een andere afzender te kiezen.`),
+                    statusCode: 400,
+                });
+            }
+        }
+
         if (request.body.html !== undefined) {
             model.html = request.body.html;
         }
@@ -70,14 +116,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (request.body.json !== undefined) {
             model.json = request.body.json;
-        }
-
-        if (request.body.fromAddress !== undefined) {
-            model.fromAddress = request.body.fromAddress;
-        }
-
-        if (request.body.fromName !== undefined) {
-            model.fromName = request.body.fromName;
         }
 
         if (request.body.recipientFilter) {
@@ -102,6 +140,13 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
+            if (!await Context.auth.canSendEmail(model)) {
+                throw Context.auth.error({
+                    message: 'Cannot send emails from this sender',
+                    human: $t('Je hebt geen toegangsrechten om emails te versturen naar deze afzender.'),
+                });
+            }
+
             model.throwIfNotReadyToSend();
 
             const replacement = '{{unsubscribeUrl}}';

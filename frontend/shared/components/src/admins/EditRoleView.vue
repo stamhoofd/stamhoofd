@@ -291,7 +291,7 @@ const recordCategories = computed(() => {
 });
 
 const senders = computed(() => {
-    if (organization && props.scope !== 'admin') {
+    if (organization.value && props.scope !== 'admin') {
         return organization.value?.privateMeta?.emails ?? [];
     }
     return platform.value.privateConfig?.emails ?? [];

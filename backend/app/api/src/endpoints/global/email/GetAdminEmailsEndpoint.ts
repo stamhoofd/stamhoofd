@@ -116,7 +116,8 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!Context.auth.canSendEmails(organization)) {
+        if (!await Context.auth.canReadEmails(organization)) {
+            // This is a first fast check, we'll limit it later in the scope query
             throw Context.auth.error();
         }
 

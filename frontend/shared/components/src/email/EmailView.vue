@@ -48,13 +48,13 @@
                         <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`13b42902-e159-4e6a-8562-e87c9c691c8b`)">
                     </div>
                 </STListItem>
-                <STListItem v-if="emails.length > 0" class="no-padding" element-name="label">
+                <STListItem v-if="senders.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
                         <span>{{ $t('01b5d104-748c-4801-a369-4eab05809fcf') }}:</span>
 
-                        <div class="input-icon-container right icon arrow-down-small gray">
-                            <select v-model="selectedEmailAddress" class="list-input">
-                                <option v-for="e in emails" :key="e.id" :value="e">
+                        <div class="input-icon-container right icon arrow-down-small gray" :class="{'no-padding': !auth.hasFullAccess()}">
+                            <select v-model="senderId" class="list-input">
+                                <option v-for="e in senders" :key="e.id" :value="e.id">
                                     {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
                                 </option>
                             </select>
@@ -88,7 +88,7 @@
             </template>
 
             <!-- Warnings and errors -->
-            <template v-if="emails.length === 0">
+            <template v-if="senders.length === 0">
                 <p v-if="auth.hasFullAccess()" class="warning-box selectable with-button" @click="manageEmails">
                     {{ $t('ae013398-3667-40ff-ad66-c0cd0050f35c') }}
                     <span class="button text inherit-color">
@@ -101,14 +101,14 @@
                 </p>
             </template>
         </editorview>
-    </loadingviewtransition>
+    </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, OrganizationEmail } from '@stamhoofd/structures';
+import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, OrganizationEmail, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
@@ -122,6 +122,7 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
 import UploadFileButton from '../inputs/UploadFileButton.vue';
+import { LoadingViewTransition } from '../containers';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -183,11 +184,17 @@ const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
 const present = usePresent();
 
-const emails = computed(() => {
+const allSenders = computed(() => {
     if (organization.value) {
         return organization.value.privateMeta?.emails ?? [];
     }
     return platform.value?.privateConfig?.emails ?? [];
+});
+
+const senders = computed(() => {
+    return allSenders.value.filter((e) => {
+        return auth.hasResourceAccessRight(PermissionsResourceType.Senders, e.id, AccessRight.SendMessages);
+    });
 });
 
 const patch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
@@ -279,27 +286,10 @@ const subject = computed({
     },
 });
 
-const fromAddress = computed({
-    get: () => patchedEmail.value?.fromAddress ?? null,
-    set: (fromAddress) => {
-        addPatch({ fromAddress });
-    },
-});
-
-const fromName = computed({
-    get: () => patchedEmail.value?.fromName ?? null,
-    set: (fromName) => {
-        addPatch({ fromName });
-    },
-});
-
-const selectedEmailAddress = computed({
-    get: () => emails.value.find(e => e.email === fromAddress.value && e.name === fromName.value) ?? emails.value.find(e => e.email === fromAddress.value) ?? emails.value.find(e => e.name && e.name === fromName.value) ?? null,
-    set: (email: OrganizationEmail | null) => {
-        addPatch({
-            fromAddress: email?.email ?? null,
-            fromName: email?.name ?? null,
-        });
+const senderId = computed({
+    get: () => email.value?.senderId ?? null,
+    set: (id) => {
+        addPatch({ senderId: id });
     },
 });
 
@@ -327,7 +317,9 @@ watch(editor, (e) => {
 
 onMounted(() => {
     // Create the email
-    createEmail().catch(console.error);
+    createEmail().catch((e) => {
+        errors.errorBox = new ErrorBox(e);
+    });
 });
 
 useInterval(async () => {
@@ -344,8 +336,9 @@ async function createEmail() {
             path: '/email',
             body: Email.create({
                 recipientFilter: recipientFilter.value,
-                fromAddress: emails.value.length > 0 ? (emails.value.find(e => e.id === props.emailId) ?? emails.value.find(e => e.default) ?? emails.value[0]).email : null,
-                fromName: emails.value.length > 0 ? (emails.value.find(e => e.id === props.emailId) ?? emails.value.find(e => e.default) ?? emails.value[0]).name : null,
+                senderId: senders.value.length > 0 ? senders.value[0].id : null,
+                // fromAddress: senders.value.length > 0 ? (senders.value.find(e => e.id === props.emailId) ?? senders.value.find(e => e.default) ?? senders.value[0]).email : null,
+                // fromName: senders.value.length > 0 ? (senders.value.find(e => e.id === props.emailId) ?? senders.value.find(e => e.default) ?? senders.value[0]).name : null,
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
             }),

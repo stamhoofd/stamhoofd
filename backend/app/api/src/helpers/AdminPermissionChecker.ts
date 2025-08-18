@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, CachedBalance, Document, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore';
@@ -850,11 +850,65 @@ export class AdminPermissionChecker {
         return this.hasSomeAccess(organizationId);
     }
 
-    canSendEmails(organizationId: Organization | string | null) {
+    async canSendEmails(organizationId: Organization | string | null) {
         if (organizationId) {
-            return this.hasSomeAccess(organizationId);
+            return (await this.getOrganizationPermissions(organizationId))?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false;
         }
-        return this.hasSomePlatformAccess();
+        return this.platformPermissions?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false;
+    }
+
+    async canReadEmails(organizationId: Organization | string | null) {
+        if (organizationId) {
+            return (await this.getOrganizationPermissions(organizationId))?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
+        }
+        return this.platformPermissions?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
+    }
+
+    async canAccessEmail(email: Email, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+        if (!this.checkScope(email.organizationId)) {
+            return false;
+        }
+
+        if (email.userId === this.user.id) {
+            // User can always read their own emails
+            // Note; for sending we'll always need to use 'canSendEmailsFrom' externally
+            return true;
+        }
+
+        if (email.organizationId) {
+            const organizationPermissions = await this.getOrganizationPermissions(email.organizationId);
+            if (!organizationPermissions) {
+                return false;
+            }
+            if (!email.senderId) {
+                return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, '', level);
+            }
+            return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, level);
+        }
+
+        // Platform email
+        const platformPermissions = this.platformPermissions;
+        if (!platformPermissions) {
+            return false;
+        }
+        if (!email.senderId) {
+            return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, '', level);
+        }
+        return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, level);
+    }
+
+    async canSendEmail(email: Email): Promise<boolean> {
+        if (email.senderId) {
+            return await this.canSendEmailsFrom(email.organizationId, email.senderId);
+        }
+        return await this.canSendEmails(email.organizationId);
+    }
+
+    async canSendEmailsFrom(organizationId: Organization | string | null, senderId: string): Promise<boolean> {
+        if (organizationId) {
+            return (await this.getOrganizationPermissions(organizationId))?.hasResourceAccessRight(PermissionsResourceType.Senders, senderId, AccessRight.SendMessages) ?? false;
+        }
+        return this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.Senders, senderId, AccessRight.SendMessages) ?? false;
     }
 
     async canReadEmailTemplates(organizationId: string) {

@@ -245,6 +245,12 @@ select.input {
         &::before {
             right: 10px;
         }
+
+        &.no-padding {
+            &::before {
+                right: 0;
+            }
+        }
     }
 }
 
