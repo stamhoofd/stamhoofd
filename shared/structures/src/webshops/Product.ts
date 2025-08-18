@@ -9,51 +9,55 @@ import { Webshop } from './Webshop';
 import { WebshopField } from './WebshopField';
 
 export class ProductPrice extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+  @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+  id: string;
 
-    @field({ decoder: StringDecoder })
-    name = "";
-    
-    /**
-     * Price is always in cents, to avoid floating point errors
-     */
-    @field({ decoder: IntegerDecoder })
-    price = 0;
+  @field({ decoder: StringDecoder })
+  name = "";
 
-    // Optional: different price if you reach a given amount of pieces (options and prices shouldn't be the same)
-    @field({ decoder: IntegerDecoder, nullable: true, version: 93 })
-    discountPrice: number | null = null;
+  /**
+   * Price is always in cents, to avoid floating point errors
+   */
+  @field({ decoder: IntegerDecoder })
+  price = 0;
 
-    // Only used if discountPrice is not null
-    @field({ decoder: IntegerDecoder, version: 93 })
-    discountAmount = 2
+  // Optional: different price if you reach a given amount of pieces (options and prices shouldn't be the same)
+  @field({ decoder: IntegerDecoder, nullable: true, version: 93 })
+  discountPrice: number | null = null;
 
-    @field({ decoder: BooleanDecoder, version: 219 })
-    hidden = false
+  // Only used if discountPrice is not null
+  @field({ decoder: IntegerDecoder, version: 93 })
+  discountAmount = 2;
 
-    /**
-     * Total stock, excluding already sold items into account
-     */
-    @field({ decoder: IntegerDecoder, nullable: true, version: 221 })
-    stock: number | null = null
+  @field({ decoder: BooleanDecoder, version: 219 })
+  hidden = false;
 
-    @field({ decoder: IntegerDecoder, version: 221 })
-    usedStock = 0
+  /**
+   * Total stock, excluding already sold items into account
+   */
+  @field({ decoder: IntegerDecoder, nullable: true, version: 221 })
+  stock: number | null = null;
 
-    get isSoldOut(): boolean {
-        if (this.stock === null) {
-            return false
-        }
-        return this.usedStock >= this.stock
+  @field({ decoder: IntegerDecoder, version: 221 })
+  usedStock = 0;
+
+  get isSoldOut(): boolean {
+    if (this.stock === null) {
+      return false;
     }
+    return this.usedStock >= this.stock;
+  }
 
-    get remainingStock(): number | null {
-        if (this.stock === null) {
-            return null
-        }
-        return Math.max(0, this.stock - this.usedStock)
+  get remainingStock(): number | null {
+    if (this.stock === null) {
+      return null;
     }
+    return Math.max(0, this.stock - this.usedStock);
+  }
+
+  clearStock() {
+    this.usedStock = 0;
+  }
 }
 
 export class Option extends AutoEncoder {
@@ -283,6 +287,7 @@ export class Product extends AutoEncoder {
         this.usedStock = 0
         this.reservedSeats = []
         this.optionMenus.forEach(o => o.clearStock());
+        this.prices.forEach(p => p.clearStock());
     }
 
     get isSoldOut(): boolean {
