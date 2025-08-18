@@ -57,56 +57,62 @@ export class ProductPrice extends AutoEncoder {
 }
 
 export class Option extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+  @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+  id: string;
 
-    @field({ decoder: StringDecoder })
-    name = ""
+  @field({ decoder: StringDecoder })
+  name = "";
 
-    /**
-     * Price added (can be negative) is always in cents, to avoid floating point errors
-     */
-    @field({ decoder: IntegerDecoder })
-    price = 0;
+  /**
+   * Price added (can be negative) is always in cents, to avoid floating point errors
+   */
+  @field({ decoder: IntegerDecoder })
+  price = 0;
 
-    /**
-     * Total stock, excluding already sold items into account
-     */
-    @field({ decoder: IntegerDecoder, nullable: true, version: 221 })
-    stock: number | null = null
+  /**
+   * Total stock, excluding already sold items into account
+   */
+  @field({ decoder: IntegerDecoder, nullable: true, version: 221 })
+  stock: number | null = null;
 
-    @field({ decoder: IntegerDecoder, version: 221 })
-    usedStock = 0
+  @field({ decoder: IntegerDecoder, version: 221 })
+  usedStock = 0;
 
-    get isSoldOut(): boolean {
-        if (this.stock === null) {
-            return false
-        }
-        return this.usedStock >= this.stock
+  get isSoldOut(): boolean {
+    if (this.stock === null) {
+      return false;
     }
+    return this.usedStock >= this.stock;
+  }
 
-    get remainingStock(): number | null {
-        if (this.stock === null) {
-            return null
-        }
-        return Math.max(0, this.stock - this.usedStock)
+  get remainingStock(): number | null {
+    if (this.stock === null) {
+      return null;
     }
+    return Math.max(0, this.stock - this.usedStock);
+  }
+
+  clearStock() {
+    this.usedStock = 0;
+  }
 }
 
 export class OptionMenu extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
+  @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
+  id: string;
 
-    @field({ decoder: StringDecoder })
-    name = ""
+  @field({ decoder: StringDecoder })
+  name = "";
 
-    @field({ decoder: BooleanDecoder })
-    multipleChoice = false;
+  @field({ decoder: BooleanDecoder })
+  multipleChoice = false;
 
-    @field({ decoder: new ArrayDecoder(Option) })
-    options: Option[] = [
-        Option.create({})
-    ]
+  @field({ decoder: new ArrayDecoder(Option) })
+  options: Option[] = [Option.create({})];
+
+  clearStock() {
+    this.options.forEach((o) => o.clearStock());
+  }
 }
 
 export enum ProductType {
@@ -276,6 +282,7 @@ export class Product extends AutoEncoder {
     clearStock() {
         this.usedStock = 0
         this.reservedSeats = []
+        this.optionMenus.forEach(o => o.clearStock());
     }
 
     get isSoldOut(): boolean {
