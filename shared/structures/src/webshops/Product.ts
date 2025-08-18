@@ -3,11 +3,11 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address.js';
+import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
 import { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
-import { UitpasEventResponse } from '../endpoints/UitpasEventsResponse.js';
 
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -63,6 +63,10 @@ export class ProductPrice extends AutoEncoder {
         }
         return Math.max(0, this.stock - this.usedStock);
     }
+
+    clearStock() {
+        this.usedStock = 0;
+    }
 }
 
 export class Option extends AutoEncoder {
@@ -100,6 +104,10 @@ export class Option extends AutoEncoder {
         }
         return Math.max(0, this.stock - this.usedStock);
     }
+
+    clearStock() {
+        this.usedStock = 0;
+    }
 }
 
 export class OptionMenu extends AutoEncoder {
@@ -122,6 +130,10 @@ export class OptionMenu extends AutoEncoder {
     options: Option[] = [
         Option.create({}),
     ];
+
+    clearStock() {
+        this.options.forEach(o => o.clearStock());
+    }
 }
 
 export enum ProductType {
@@ -288,6 +300,8 @@ export class Product extends AutoEncoder {
     clearStock() {
         this.usedStock = 0;
         this.reservedSeats = [];
+        this.optionMenus.forEach(o => o.clearStock());
+        this.prices.forEach(p => p.clearStock());
     }
 
     get isSoldOut(): boolean {
