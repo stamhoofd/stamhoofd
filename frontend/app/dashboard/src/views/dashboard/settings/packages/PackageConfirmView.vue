@@ -603,8 +603,6 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
     get paymentMethods() {
         const extra: PaymentMethod[] = []
 
-        extra.push(PaymentMethod.DirectDebit)
-
         if (this.getFeatureFlag('stamhoofd-pay-by-transfer')) {
             extra.push(PaymentMethod.Transfer)
         }
