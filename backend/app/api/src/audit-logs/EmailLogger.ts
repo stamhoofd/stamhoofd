@@ -1,5 +1,5 @@
-import { Email, EmailRecipient, replaceHtml } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus } from '@stamhoofd/structures';
+import { Email, EmailRecipient } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus, replaceEmailHtml } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ModelLogger } from './ModelLogger';
 
@@ -54,7 +54,7 @@ export const EmailLogger = new ModelLogger(Email, {
         const map = new Map([
             ['e', AuditLogReplacement.create({
                 id: model.id,
-                value: replaceHtml(model.subject ?? '', options.data.recipient?.replacements ?? []),
+                value: replaceEmailHtml(model.subject ?? '', options.data.recipient?.replacements ?? []),
                 type: AuditLogReplacementType.Email,
             })],
             ['c', AuditLogReplacement.create({
@@ -64,7 +64,7 @@ export const EmailLogger = new ModelLogger(Email, {
         ]);
         if (options.data.recipient) {
             map.set('html', AuditLogReplacement.html(
-                replaceHtml(model.html ?? '', options.data.recipient?.replacements ?? []),
+                replaceEmailHtml(model.html ?? '', options.data.recipient?.replacements ?? []),
             ));
         }
         return map;
