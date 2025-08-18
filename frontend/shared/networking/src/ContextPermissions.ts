@@ -122,6 +122,10 @@ export class ContextPermissions {
         return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector);
     }
 
+    canManageEmailTemplates() {
+        return this.hasAccessRight(AccessRight.ManageEmailTemplates);
+    }
+
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {
         if (organization === undefined || (organization === null && this.organization)) {
             organization = this.organization;

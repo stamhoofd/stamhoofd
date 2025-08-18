@@ -37,6 +37,11 @@ export enum AccessRight {
      * Send messages for a given sender
      */
     SendMessages = 'SendMessages',
+
+    /**
+     * Create, edit and delete email templates
+     */
+    ManageEmailTemplates = 'ManageEmailTemplates',
 }
 
 export class AccessRightHelper {
@@ -57,6 +62,7 @@ export class AccessRightHelper {
 
             case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
             case AccessRight.SendMessages: return $t(`Berichten versturen`);
+            case AccessRight.ManageEmailTemplates: return $t(`E-mailsjablonen beheren`);
         }
     }
 
@@ -80,6 +86,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`da4a7e62-2f98-4e87-89f5-d3643e7bb987`);
             case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
             case AccessRight.SendMessages: return $t(`Versturen`);
+            case AccessRight.ManageEmailTemplates: return $t(`E-mailsjablonen`);
         }
     }
 
@@ -99,6 +106,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`e3f2e800-1918-459d-aa79-ce6c8833bb53`);
             case AccessRight.MemberManageNRN: return $t(`ef892736-b403-4eb5-8e59-662ffbfd1c54`);
             case AccessRight.SendMessages: return $t(`Inclusief eigen berichten bekijken`);
+            case AccessRight.ManageEmailTemplates: return $t(`E-mailsjablonen beheren`);
         }
     }
 
@@ -112,6 +120,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`a821c56c-e5de-4505-83ca-25d8a74d3c19`);
             case AccessRight.EventWrite: return $t(`f84ae947-6023-4ddd-ae90-93422290494b`);
             case AccessRight.MemberManageNRN: return $t(`746b82e0-dfe4-4091-89e1-d2f28659e6f9`);
+            case AccessRight.ManageEmailTemplates: return $t(`Bij het versturen van berichten kan de gebruiker onderaan bestaande e-mailsjablonen hergebruiken, toevoegen, aanpassen of verwijderen.`);
         }
         return null;
     }

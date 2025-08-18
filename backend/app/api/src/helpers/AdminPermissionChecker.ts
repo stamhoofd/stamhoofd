@@ -709,7 +709,7 @@ export class AdminPermissionChecker {
         }
 
         if (!template.organizationId) {
-            return this.hasPlatformFullAccess();
+            return this.hasPlatformFullAccess() || !!this.platformPermissions?.hasAccessRight(AccessRight.ManageEmailTemplates);
         }
 
         if (await this.hasFullAccess(template.organizationId)) {
@@ -731,6 +731,11 @@ export class AdminPermissionChecker {
                 return false;
             }
 
+            return true;
+        }
+
+        const o = await this.getOrganizationPermissions(template.organizationId);
+        if (o && o.hasAccessRight(AccessRight.ManageEmailTemplates)) {
             return true;
         }
 

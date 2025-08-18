@@ -127,6 +127,7 @@
                         :unlisted="true"
                         @patch:role="addPatch"
                     />
+                    <AccessRightPermissionRow :access-right="AccessRight.ManageEmailTemplates" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
                 </STList>
             </div>
 

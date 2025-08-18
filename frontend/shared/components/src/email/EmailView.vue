@@ -685,8 +685,9 @@ async function appendAttachment(file: File) {
 }
 
 const canOpenTemplates = computed(() => {
-    return !!email.value?.getTemplateType();
+    return !!email.value?.getTemplateType() && auth.canManageEmailTemplates();
 });
+
 async function openTemplates() {
     const type = email.value?.getTemplateType();
     if (!type) {
