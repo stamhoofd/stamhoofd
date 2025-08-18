@@ -15,7 +15,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        Verzonden op {{ formatDateTime(props.email.sentAt) }}
+                        {{ $t('Verzonden op') }}: {{ formatDateTime(props.email.sentAt) }}
                     </h2>
                 </STListItem>
                 <STListItem v-else>
@@ -24,7 +24,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        Aangemaakt op {{ formatDateTime(props.email.createdAt) }}
+                        {{ $t('Aangemaakt op') }}: {{ formatDateTime(props.email.createdAt) }}
                     </h2>
                 </STListItem>
 
@@ -34,7 +34,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        Van: {{ props.email.fromName || props.email.fromAddress }}
+                        {{ $t('Van') }}: {{ props.email.fromName || props.email.fromAddress }}
                     </h2>
                     <p v-if="props.email.fromName" class="style-description-small">
                         {{ props.email.fromAddress }}
@@ -47,7 +47,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        Ontvangers
+                        {{ $t('Ontvangers') }}
                     </h2>
 
                     <template #right>
