@@ -103,7 +103,9 @@
             <template v-if="canOrder && canSelectAmount">
                 <hr><h2>{{ $t('697df3e7-fbbf-421d-81c2-9c904dce4842') }}</h2>
 
-                <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                <STInputBox class="max">
+                    <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
+                </STInputBox>
 
                 <p v-if="stockText" class="style-description-small" v-text="stockText" />
             </template>

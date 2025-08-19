@@ -1,5 +1,5 @@
 <template>
-    <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box" :class="{indent}">
+    <STErrorsInput :error-fields="errorFields" :error-box="errorBox" class="st-input-box" :class="{indent, noTitle: !title}">
         <h4 :style="{display: title ? 'flex' : 'none'}">
             <label>{{ title }}</label>
             <div class="right">
@@ -56,6 +56,10 @@ export default class STInputBox extends VueComponent {
         @media (max-width: 500px) {
             max-width: none;
         }
+    }
+
+    h2 + &.noTitle  {
+        padding-top: 5px;
     }
 
     &.max > div {
