@@ -68,7 +68,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!await Context.auth.canSendEmails(organization)) {
             throw Context.auth.error({
                 message: 'Cannot send emails',
-                human: $t('Je hebt nog geen toegangsrechten gekregen om berichten te versturen. Vraag aan een hoofdbeheerder om jou toegang te geven via de instellingen van #platform.'),
+                human: $t('f7b7ac75-f7df-49cc-8961-b2478d9683e3'),
             });
         }
 
@@ -90,7 +90,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
-                    human: $t('Je hebt geen toegangsrechten om emails te versturen naar deze afzender.'),
+                    human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
                 });
             }
             model.senderId = sender.id;
@@ -101,7 +101,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_sender',
                 human: 'Sender not found',
-                message: $t(`De afzender die je hebt gekozen bestaat niet meer. Probeer een andere afzender te kiezen.`),
+                message: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
                 statusCode: 400,
             });
         }

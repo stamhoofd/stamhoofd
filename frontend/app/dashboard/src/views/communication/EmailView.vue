@@ -15,7 +15,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Verzonden op') }}: {{ formatDateTime(props.email.sentAt) }}
+                        {{ $t('39a982c1-916a-43da-857d-a15f67c96c62') }}: {{ formatDateTime(props.email.sentAt) }}
                     </h2>
                 </STListItem>
                 <STListItem v-else>
@@ -24,7 +24,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Aangemaakt op') }}: {{ formatDateTime(props.email.createdAt) }}
+                        {{ $t('52961dd4-be19-47a1-abe6-1e3c34e8157c') }}: {{ formatDateTime(props.email.createdAt) }}
                     </h2>
                 </STListItem>
 
@@ -34,7 +34,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Van') }}: {{ props.email.fromName || props.email.fromAddress }}
+                        {{ $t('a4a8cb20-8351-445a-bb59-91867679eead') }}: {{ props.email.fromName || props.email.fromAddress }}
                     </h2>
                     <p v-if="props.email.fromName" class="style-description-small">
                         {{ props.email.fromAddress }}
@@ -47,7 +47,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Ontvangers') }}
+                        {{ $t('ddc9d375-901c-4b2d-a257-0449083a9bfd') }}
                     </h2>
 
                     <template #right>
@@ -77,7 +77,7 @@ const props = defineProps<{
 }>();
 
 const title = computed(() => {
-    return props.email.subject || $t('Bericht zonder onderwerp');
+    return props.email.subject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
 });
 
 const getEmailStatus = useEmailStatus();

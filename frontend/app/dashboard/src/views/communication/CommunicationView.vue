@@ -4,9 +4,9 @@
 
         <main class="center">
             <h1>
-                {{ $t('Communicatie') }}
+                {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
             </h1>
-            <p>{{ $t(`Hier vind je een historiek van alle communicatie die werd verzonden. Wil je graag een bericht versturen, selecteer dan via het tabblad 'leden' of 'bestellingen' alle leden of bestellingen waar je naar wilt mailen.`) }}</p>
+            <p>{{ $t(`feae4831-c229-4b2a-8dc1-c65184cbdfec`) }}</p>
 
             <div class="input-with-buttons">
                 <div>
@@ -101,7 +101,7 @@ defineRoutes([
                     email: events.results[0],
                 };
             }
-            Toast.error($t(`Bericht niet gevonden`)).show();
+            Toast.error($t(`6e1f9492-f036-4b73-8e85-ccbae0d31ad7`)).show();
             throw new Error('Email not found');
         },
 

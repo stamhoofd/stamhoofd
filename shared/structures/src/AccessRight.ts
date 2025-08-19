@@ -61,8 +61,8 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`5043355f-40a8-4291-b1f9-9645cea7ac3b`);
 
             case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
-            case AccessRight.SendMessages: return $t(`Berichten versturen`);
-            case AccessRight.ManageEmailTemplates: return $t(`E-mailsjablonen beheren`);
+            case AccessRight.SendMessages: return $t(`50b99a49-6d0b-47ea-adb0-b2a7a7e9a119`);
+            case AccessRight.ManageEmailTemplates: return $t(`0d2a7261-a88a-4c60-b1f9-3785d5e22d93`);
         }
     }
 
@@ -85,8 +85,8 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return $t(`8d64ab67-da1d-4143-8c6c-94ade8e1823f`);
             case AccessRight.MemberWriteFinancialData: return $t(`da4a7e62-2f98-4e87-89f5-d3643e7bb987`);
             case AccessRight.MemberManageNRN: return $t(`bdf22e21-e4f9-4561-b750-0ea06d73c2f4`);
-            case AccessRight.SendMessages: return $t(`Versturen`);
-            case AccessRight.ManageEmailTemplates: return $t(`E-mailsjablonen`);
+            case AccessRight.SendMessages: return $t(`618f51bc-cad2-453f-bece-70ba56b7d1a9`);
+            case AccessRight.ManageEmailTemplates: return $t(`dc8dddba-1aae-49ad-bdda-68d3e88a1964`);
         }
     }
 
@@ -105,8 +105,8 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return $t(`bcf9d463-8536-40ae-8e7e-a4c36e793dbc`);
             case AccessRight.MemberWriteFinancialData: return $t(`e3f2e800-1918-459d-aa79-ce6c8833bb53`);
             case AccessRight.MemberManageNRN: return $t(`ef892736-b403-4eb5-8e59-662ffbfd1c54`);
-            case AccessRight.SendMessages: return $t(`Inclusief eigen berichten bekijken`);
-            case AccessRight.ManageEmailTemplates: return $t(`E-mailsjablonen beheren`);
+            case AccessRight.SendMessages: return $t(`848e4722-1eb4-4463-b772-5ceee1881c74`);
+            case AccessRight.ManageEmailTemplates: return $t(`0d2a7261-a88a-4c60-b1f9-3785d5e22d93`);
         }
     }
 
@@ -120,7 +120,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`a821c56c-e5de-4505-83ca-25d8a74d3c19`);
             case AccessRight.EventWrite: return $t(`f84ae947-6023-4ddd-ae90-93422290494b`);
             case AccessRight.MemberManageNRN: return $t(`746b82e0-dfe4-4091-89e1-d2f28659e6f9`);
-            case AccessRight.ManageEmailTemplates: return $t(`Bij het versturen van berichten kan de gebruiker onderaan bestaande e-mailsjablonen hergebruiken, toevoegen, aanpassen of verwijderen.`);
+            case AccessRight.ManageEmailTemplates: return $t(`1a6eb95b-4cf7-48e8-80b9-a4eb1b6deda8`);
         }
         return null;
     }

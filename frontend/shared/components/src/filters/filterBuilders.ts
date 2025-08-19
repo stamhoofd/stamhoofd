@@ -248,11 +248,11 @@ export function useEmailFilterBuilders() {
     return () => {
         const all: UIFilterBuilder[] = [
             new DateFilterBuilder({
-                name: $t(`Aangemaakt op`),
+                name: $t(`52961dd4-be19-47a1-abe6-1e3c34e8157c`),
                 key: 'createdAt',
             }),
             new DateFilterBuilder({
-                name: $t(`Verstuurd op`),
+                name: $t(`69b8f1cf-5531-4df5-bca1-0026fa2c8edb`),
                 key: 'sentAt',
             }),
         ];

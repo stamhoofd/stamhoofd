@@ -72,7 +72,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
                     throw Context.auth.error({
                         message: 'Cannot send emails from this sender',
-                        human: $t('Je hebt geen toegangsrechten om emails te versturen naar deze afzender.'),
+                        human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
                     });
                 }
                 model.senderId = sender.id;
@@ -83,7 +83,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'invalid_sender',
                     human: 'Sender not found',
-                    message: $t(`De afzender die je hebt gekozen bestaat niet meer. Probeer een andere afzender te kiezen.`),
+                    message: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
                     statusCode: 400,
                 });
             }
@@ -100,7 +100,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'invalid_sender',
                     human: 'Sender not found',
-                    message: $t(`De afzender van deze email bestaat niet meer. Probeer een andere afzender te kiezen.`),
+                    message: $t(`f08cccb3-faf9-473f-b729-16120fadec9c`),
                     statusCode: 400,
                 });
             }
@@ -143,7 +143,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (!await Context.auth.canSendEmail(model)) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
-                    human: $t('Je hebt geen toegangsrechten om emails te versturen naar deze afzender.'),
+                    human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
                 });
             }
 

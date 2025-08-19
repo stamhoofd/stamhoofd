@@ -6,23 +6,23 @@ export function useEmailStatus() {
         switch (email.status) {
             case EmailStatus.Draft:
                 return {
-                    text: $t('Concept'),
+                    text: $t('6def054b-5748-43ea-ae84-28c53941b78a'),
                     icon: 'edit',
                     theme: 'theme-secundary',
                 };
             case EmailStatus.Sending:
                 return {
-                    text: $t('Bezig met verzenden'),
+                    text: $t('f5eb4dcd-ddc1-4952-a40e-845cda2b88ce'),
                     icon: 'reverse',
                     theme: 'theme-secundary',
                 };
             case EmailStatus.Sent:
                 return {
-                    text: email.sentAt ? (Formatter.dateWithDay(email.sentAt, false)) : $t('Verzonden'),
+                    text: email.sentAt ? (Formatter.dateWithDay(email.sentAt, false)) : $t('5101ef12-a812-4748-91dd-778c0a3fe482'),
                 };
             case EmailStatus.Failed:
                 return {
-                    text: $t('Mislukt'),
+                    text: $t('c147043d-f708-4aa8-aad6-0547f4fb425a'),
                     icon: 'error',
                     theme: 'theme-error',
                 };

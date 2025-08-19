@@ -53,8 +53,8 @@ export function minimumPermissionLevel(...levels: PermissionLevel[]): Permission
 export function getPermissionLevelName(level: PermissionLevel, resourceType: PermissionsResourceType | null = null): string {
     if (resourceType === PermissionsResourceType.Senders) {
         switch (level) {
-            case PermissionLevel.Read: return $t(`Alle berichten bekijken`);
-            case PermissionLevel.Write: return $t(`Versturen, bewerken en bekijken`);
+            case PermissionLevel.Read: return $t(`1b2bf97a-f263-40f6-9246-4f0cb326f5ff`);
+            case PermissionLevel.Write: return $t(`c77d1dfb-a556-4373-9643-5ebe22dc7c21`);
         }
     }
     switch (level) {

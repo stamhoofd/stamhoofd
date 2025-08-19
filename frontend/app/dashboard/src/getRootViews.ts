@@ -374,7 +374,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`Communicatie`),
+        name: $t(`a6304a41-8c83-419b-8e7e-c26f4a047c19`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(CommunicationView, {}),
         }),

@@ -85,18 +85,18 @@
             <div v-if="senders.length" class="container">
                 <hr>
                 <h2>
-                    {{ $t('Communicatie') }}
+                    {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
                 </h2>
-                <p>{{ $t('Beheer wie berichten mag versturen, vanaf welke afzenders, en wie reeds verzonden berichten kan bekijken.') }}</p>
+                <p>{{ $t('78db0e8d-3b1f-4982-baf7-dba7c930db48') }}</p>
                 <p class="info-box">
-                    {{ $t('De functie om verzonden berichten te bekijken is nog niet beschikbaar maar komt er binnenkort aan. Je stelt best dus al meteen alle rechten goed in.') }}
+                    {{ $t('893c2f52-23b5-48e7-b1e8-fb3700c5e1e4') }}
                 </p>
 
                 <STList>
                     <ResourcePermissionRow
                         :role="patched"
                         :inherited-roles="inheritedRoles"
-                        :resource="{id: '', name: $t('Alle afzenders'), type: PermissionsResourceType.Senders }"
+                        :resource="{id: '', name: $t('956b7313-91b5-49af-ba77-f2fc25f3a091'), type: PermissionsResourceType.Senders }"
                         :configurable-access-rights="[AccessRight.SendMessages]"
                         :configurable-permission-levels="[PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write]"
                         :default-access-rights="[AccessRight.SendMessages]"
