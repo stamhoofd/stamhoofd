@@ -33,6 +33,12 @@ export async function endFunctionsOfUsersWithoutRegistration() {
         return;
     }
 
+    // If period is ending within 15 days, also skip cleanup
+    if (period.endDate && period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 15)) {
+        console.warn('Current registration period is ending within 15 days or has ended, skipping cleanup.');
+        return;
+    }
+
     await FlagMomentCleanup.endFunctionsOfUsersWithoutRegistration();
     lastCleanupYear = currentYear;
     lastCleanupMonth = currentMonth;
