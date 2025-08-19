@@ -11,6 +11,10 @@
 
             <STList>
                 <STListItem v-for="email in emails" :key="email.id" :selectable="true" class="right-stack" @click="editEmail(email)">
+                    <template #left>
+                        <IconContainer icon="email-filled" class="" />
+                    </template>
+
                     <h3 class="style-title-list">
                         {{ email.name ? email.name : email.email }}
                     </h3>
@@ -43,7 +47,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { STList, STListItem, STNavigationBar, STToolbar, useOrganization, usePlatform } from '@stamhoofd/components';
+import { IconContainer, STList, STListItem, STNavigationBar, STToolbar, useOrganization, usePlatform } from '@stamhoofd/components';
 import { OrganizationEmail } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
