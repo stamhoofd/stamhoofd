@@ -16,7 +16,6 @@
         </TransitionFade>
     </template>
     <template v-else>
-        <!-- // todo: migrate-platform-period-id -->
         <p v-if="organization$?.period.period.id !== platform.period.id" class="info-box">
             {{ $t('ab0c7981-0d5f-4c36-bd3f-07ddc2a63759') }}
         </p>

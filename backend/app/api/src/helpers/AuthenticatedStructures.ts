@@ -102,7 +102,6 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    // todo: migrate-platform-period-id
     static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[], periods?: RegistrationPeriod[], options?: { forceGroupIds?: string[] }) {
         if (organizationRegistrationPeriods.length === 0) {
             return [];

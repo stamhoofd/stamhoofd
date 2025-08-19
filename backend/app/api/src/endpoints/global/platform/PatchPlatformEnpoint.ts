@@ -146,8 +146,6 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
         }
 
-        // todo: migrate-platform-period-id
-        // todo: should not be possible if userMode not platform?
         if (
             request.body.period
             && request.body.period.id !== platform.periodId
