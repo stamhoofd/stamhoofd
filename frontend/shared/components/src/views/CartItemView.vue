@@ -105,7 +105,7 @@
 
                 <NumberInput v-model="cartItem.amount" :suffix="suffix" :suffix-singular="suffixSingular" :max="maximumRemaining" :min="1" :stepper="true" />
 
-                <p v-if="stockText" class="style-description-smal" v-text="stockText" />
+                <p v-if="stockText" class="style-description-small" v-text="stockText" />
             </template>
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
