@@ -591,6 +591,10 @@
     "original": "Loopt automatisch af op {date}",
     "translation": "Expire automatiquement le {date}"
   },
+  "068b3219-9397-41fc-8ebf-77df845e74b8": {
+    "original": "Kies je betaalmethode",
+    "translation": "Choisissez votre méthode de paiement"
+  },
   "0696b0bc-d2e2-4dc5-88d3-7ee188953cdf": {
     "original": "Je betaalt deze inschrijvingen in naam van {organization}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.",
     "translation": "Vous payez ces inscriptions au nom de {organization}. Vous devez vous-même répercuter les coûts sur vos membres si vous le souhaitez."
@@ -1674,6 +1678,10 @@
   "1316502a-5502-49ec-96fe-93e60cb94268": {
     "original": "Filter op leden die een inschrijving (zowel huidig werkjaar of in een afgelopen werkjaar) heeft die aan deze voorwaarden voldoet.",
     "translation": "Filtrer sur les membres ayant une inscription (année associative en cours ou année associative passée) qui répond aux conditions."
+  },
+  "131d5fec-9960-4fc1-bcd8-8ddbc90e99c2": {
+    "original": "Bevestig jouw bestelling",
+    "translation": "Confirmez votre commande"
   },
   "131fbe93-acac-497e-a768-bbfccf3425f0": {
     "original": "Hello Bank! app",
@@ -12803,6 +12811,10 @@
     "original": "Beperking op leeftijdsgroep toevoegen",
     "translation": "Ajouter une restriction au groupe d'âge"
   },
+  "97c9795d-dede-48ca-af05-1e4791209e17": {
+    "original": "E-mailadres om je bevestigingsemail te ontvangen",
+    "translation": "Adresse e-mail pour recevoir votre e-mail de confirmation"
+  },
   "97dc1e85-339a-4153-9413-cca69959d731": {
     "original": "Leden",
     "translation": "Membres"
@@ -14791,6 +14803,10 @@
     "original": "Indienen kan tot",
     "translation": "Envoi possible jusqu'au"
   },
+  "b01571e1-077d-4874-b59a-fe380253bfd6": {
+    "original": "E-mailadres om je tickets te ontvangen",
+    "translation": "Adresse e-mail pour recevoir vos tickets"
+  },
   "b01c196c-a07b-45a7-af35-caef9fd237ac": {
     "original": "De postcode is verplicht",
     "translation": "Le code postal est obligatoire"
@@ -15294,6 +15310,10 @@
   "b56f4d0f-93c0-4f22-9597-735ee03cc9e2": {
     "original": "Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).",
     "translation": "La boutique en ligne propose des billets et des bons à la vente, chacun ayant son propre code QR et devant être scanné séparément. Idéal pour une fête ou un événement où l'accès est payant par personne. Moins idéal pour les grands groupes car vous devez alors scanner chaque ticket séparément (donc à éviter pour un repas festif)."
+  },
+  "b57b303a-b0e2-414f-be96-c61f40d64a87": {
+    "original": "Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.",
+    "translation": "Vous recevrez vos tickets à cette adresse e-mail. Merci de bien vérifier."
   },
   "b5822ffa-2c8b-4c88-bf4d-eb5566da56e7": {
     "original": "Nieuwe categorie",

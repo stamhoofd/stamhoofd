@@ -575,6 +575,10 @@
     "original": "Loopt automatisch af op {date}",
     "translation": "Automatically expires on {date}"
   },
+  "068b3219-9397-41fc-8ebf-77df845e74b8": {
+    "original": "Kies je betaalmethode",
+    "translation": "Choose your payment method"
+  },
   "0696b0bc-d2e2-4dc5-88d3-7ee188953cdf": {
     "original": "Je betaalt deze inschrijvingen in naam van {organization}. Je moet zelf de kosten aan je leden doorrekenen indien gewenst.",
     "translation": "You pay for these registrations in the name of {organization}. You must charge your members yourself if desired."
@@ -1634,6 +1638,10 @@
   "1316502a-5502-49ec-96fe-93e60cb94268": {
     "original": "Filter op leden die een inschrijving (zowel huidig werkjaar of in een afgelopen werkjaar) heeft die aan deze voorwaarden voldoet.",
     "translation": "Filter on members who have a registration (both current work year or in a past work year) that meets these conditions."
+  },
+  "131d5fec-9960-4fc1-bcd8-8ddbc90e99c2": {
+    "original": "Bevestig jouw bestelling",
+    "translation": "Confirm your order"
   },
   "13262228-81da-4b13-acb0-8a2bff210389": {
     "original": "Actie uitvoeren...",
@@ -12647,6 +12655,10 @@
     "original": "Beperking op leeftijdsgroep toevoegen",
     "translation": "Add restriction on age group"
   },
+  "97c9795d-dede-48ca-af05-1e4791209e17": {
+    "original": "E-mailadres om je bevestigingsemail te ontvangen",
+    "translation": "Email address to receive your confirmation email"
+  },
   "97dc1e85-339a-4153-9413-cca69959d731": {
     "original": "Leden",
     "translation": "Members"
@@ -14579,6 +14591,10 @@
     "original": "Indienen kan tot",
     "translation": "Submission possible until"
   },
+  "b01571e1-077d-4874-b59a-fe380253bfd6": {
+    "original": "E-mailadres om je tickets te ontvangen",
+    "translation": "Email address to receive your tickets"
+  },
   "b01c196c-a07b-45a7-af35-caef9fd237ac": {
     "original": "De postcode is verplicht",
     "translation": "The postcode is required"
@@ -15066,6 +15082,10 @@
   "b56f4d0f-93c0-4f22-9597-735ee03cc9e2": {
     "original": "Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).",
     "translation": "The webshop offers tickets and vouchers for sale, each with its own QR code and must be scanned separately. Ideal for a party or event where access is payable per person. Less ideal for large groups because you then have to scan each ticket separately (so best not to use for a feast)."
+  },
+  "b57b303a-b0e2-414f-be96-c61f40d64a87": {
+    "original": "Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.",
+    "translation": "Your tickets will be sent to this email address. Please double-check it."
   },
   "b5822ffa-2c8b-4c88-bf4d-eb5566da56e7": {
     "original": "Nieuwe categorie",
