@@ -561,26 +561,29 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         );
     }
 
-    all.push(
-        new GroupUIFilterBuilder({
-            name: $t(`3c904919-303b-40a9-a67c-3a406692ac87`),
-            description: $t(`4fb3dc46-fcd1-4aa4-a427-2f903aa231ef`),
-            builders: registrationFilters.value.filter(f => f.name !== 'Werkjaar'),
-            wrapper: {
-                registrations: {
-                    $elemMatch: {
-                        $and: [
-                            FilterWrapperMarker,
-                            {
-                                // todo: migrate-platform-period-id
-                                periodId: platform.period.id,
-                            },
-                        ],
+    const currentPeriodId = STAMHOOFD.userMode === 'platform' ? platform.period.id : organization.value?.period.period.id;
+
+    if (currentPeriodId) {
+        all.push(
+            new GroupUIFilterBuilder({
+                name: $t(`3c904919-303b-40a9-a67c-3a406692ac87`),
+                description: $t(`4fb3dc46-fcd1-4aa4-a427-2f903aa231ef`),
+                builders: registrationFilters.value.filter(f => f.name !== 'Werkjaar'),
+                wrapper: {
+                    registrations: {
+                        $elemMatch: {
+                            $and: [
+                                FilterWrapperMarker,
+                                {
+                                    periodId: currentPeriodId,
+                                },
+                            ],
+                        },
                     },
                 },
-            },
-        }),
-    );
+            }),
+        );
+    }
 
     if (auth.hasFullAccess()) {
         all.push(
