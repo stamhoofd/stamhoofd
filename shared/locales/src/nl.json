@@ -5554,5 +5554,10 @@
   "50be5122-c04e-4d53-a059-5c40e34a92b6": "Er is nog maar {1-item-or-person-or-ticket} van {product-price-name} beschikbaar, en die zit al in jouw winkelmandje",
   "a50f1798-62eb-4980-8678-17abe9bfded4": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar",
   "5e0f0a60-2cb9-4093-8f85-a3f37c62b27f": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al één in jouw winkelmandje zit",
-  "04301229-4cbe-4ea0-bfdf-03284120f09f": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al {4} in jouw winkelmandje zitten"
+  "04301229-4cbe-4ea0-bfdf-03284120f09f": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al {4} in jouw winkelmandje zitten",
+  "b01571e1-077d-4874-b59a-fe380253bfd6": "E-mailadres om je tickets te ontvangen",
+  "97c9795d-dede-48ca-af05-1e4791209e17": "E-mailadres om je bevestigingsemail te ontvangen",
+  "b57b303a-b0e2-414f-be96-c61f40d64a87": "Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.",
+  "068b3219-9397-41fc-8ebf-77df845e74b8": "Kies je betaalmethode",
+  "131d5fec-9960-4fc1-bcd8-8ddbc90e99c2": "Bevestig jouw bestelling"
 }

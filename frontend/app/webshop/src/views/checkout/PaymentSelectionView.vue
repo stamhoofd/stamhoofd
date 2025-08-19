@@ -45,9 +45,9 @@ const webshopManager = useWebshopManager();
 
 const title = computed(() => {
     if (checkout.value.totalPrice > 0) {
-        return $t('Kies je betaalmethode');
+        return $t('068b3219-9397-41fc-8ebf-77df845e74b8');
     }
-    return $t('Bevestig jouw bestelling');
+    return $t('131d5fec-9960-4fc1-bcd8-8ddbc90e99c2');
 });
 
 const selectedPaymentMethod = computed<PaymentMethod | null>({

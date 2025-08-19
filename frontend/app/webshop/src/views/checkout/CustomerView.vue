@@ -48,14 +48,14 @@ const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
-        return $t('E-mailadres om je tickets te ontvangen');
+        return $t('b01571e1-077d-4874-b59a-fe380253bfd6');
     }
-    return $t('E-mailadres om je bevestigingsemail te ontvangen');
+    return $t('97c9795d-dede-48ca-af05-1e4791209e17');
 });
 
 const emailDescription = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
-        return $t('Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.');
+        return $t('b57b303a-b0e2-414f-be96-c61f40d64a87');
     }
     return null;
 });
