@@ -1447,6 +1447,10 @@
     "original": "telefoonnummer van je eenheid",
     "translation": "numéro de téléphone de votre unité"
   },
+  "f7b7ac75-f7df-49cc-8961-b2478d9683e3": {
+    "original": "Je hebt nog geen toegangsrechten gekregen om berichten te versturen. Vraag aan een hoofdbeheerder om jou toegang te geven via de instellingen van Keeo.",
+    "translation": "Tu n’as pas encore obtenu les droits d’accès pour envoyer des messages. Demande à un administrateur principal de t’accorder cet accès via les paramètres de Keeo."
+  },
   "f8f36233-df20-42bd-b9a4-f53005107825": {
     "original": "Na een controle blijken de DNS-instellingen van de domeinnaam van een eenheid geldig te zijn.",
     "translation": "Après un contrôle, il s’avère que les paramètres DNS du nom de domaine d’une unité sont valides."

@@ -1167,6 +1167,10 @@
     "original": "telefoonnummer van je groep",
     "translation": "telephone number of your group"
   },
+  "f7b7ac75-f7df-49cc-8961-b2478d9683e3": {
+    "original": "Je hebt nog geen toegangsrechten gekregen om berichten te versturen. Vraag aan een hoofdbeheerder om jou toegang te geven via de instellingen van Ravot.",
+    "translation": "You do not have access rights to send messages yet. Please ask a main administrator to grant you access through the Ravot settings."
+  },
   "f8f36233-df20-42bd-b9a4-f53005107825": {
     "original": "Na een controle blijken de DNS-instellingen van de domeinnaam van een groep geldig te zijn.",
     "translation": "After a check, the DNS settings of a group's domain name appear to be valid."
