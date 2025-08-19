@@ -5,6 +5,7 @@ import { ProductType } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { CartItem } from './CartItem.js';
 import { Formatter } from '@stamhoofd/utility';
+import { error } from 'console';
 
 export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })
@@ -142,7 +143,6 @@ export class Cart extends AutoEncoder {
     }
 
     validate(webshop: Webshop, asAdmin = false) {
-        this.validateUitpasNumbers();
         const newItems: CartItem[] = [];
         const errors = new SimpleErrors();
         for (const item of this.items) {
@@ -178,6 +178,22 @@ export class Cart extends AutoEncoder {
         }
 
         this.items = newItems;
+
+        if (errors.errors.length === 0) {
+            // Only validate uitpas usage across items when all items are valid
+            try {
+                this.validateUitpasNumbers();
+            }
+            catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    errors.addError(e);
+                }
+                else {
+                    throw e;
+                }
+            }
+        }
+
         errors.throwIfNotEmpty();
     }
 }
