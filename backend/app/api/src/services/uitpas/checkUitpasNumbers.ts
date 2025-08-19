@@ -1,4 +1,5 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { DataValidator } from '@stamhoofd/utility';
 
 type UitpasNumberSuccessfulResponse = {
     socialTariff: {
@@ -53,6 +54,17 @@ function isUitpasNumberErrorResponse(
 }
 
 async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
+    // static check (using regex)
+    if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
+        throw new SimpleError({
+            code: 'invalid_uitpas_number',
+            message: `Invalid UiTPAS number: ${uitpasNumber}`,
+            human: $t(
+                `Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.`,
+            ),
+        });
+    }
+
     const baseUrl = 'https://api-test.uitpas.be'; // TO DO: Use the URL from environment variables
 
     const url = `${baseUrl}/passes/${uitpasNumber}`;
