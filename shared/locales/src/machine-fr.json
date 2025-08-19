@@ -323,6 +323,10 @@
     "original": "Kaarthouder",
     "translation": "Titulaire de la carte"
   },
+  "037e9189-33ef-44c1-bad2-ff3ea3da0629": {
+    "original": "Alle communicatie wordt via deze afzender verstuurd tenzij er voor een specifieke inschrijvingsgroep of webshop een andere afzender staat ingesteld",
+    "translation": "Toutes les communications seront envoyées via cet expéditeur, sauf si un autre a été défini pour un groupe d'inscription ou la boutique en ligne."
+  },
   "038031a7-0942-493a-9eb5-0cea9bb487b0": {
     "original": "Afhaalopmerkingen",
     "translation": "Remarques de retrait"
@@ -4323,6 +4327,10 @@
     "original": "Afbeelding",
     "translation": "Image"
   },
+  "31a32fe1-8e29-41aa-99a8-bf79ab90f93b": {
+    "original": "Dit is de standaard afzender",
+    "translation": "Ceci est l'expéditeur par défaut."
+  },
   "31a4cf98-1e98-491e-855c-2b5a5703b254": {
     "original": "Geannuleerde en verwijderde bestellingen worden niet meegerekend.",
     "translation": "Les commandes annulées et supprimées ne sont pas prises en compte."
@@ -6318,6 +6326,10 @@
   "4a3e388c-32f3-4f76-be22-9eb435ebb9f9": {
     "original": "Keur deze melding goed.",
     "translation": "Approuvez cette notification."
+  },
+  "4a58b661-087b-4951-9643-2b00352bba85": {
+    "original": "Toegangsrechten instellen",
+    "translation": "Configurer les droits d'accès"
   },
   "4a5ca65c-3a96-4ca0-991c-518a9e92adb7": {
     "original": "Aangerekend door",
@@ -13091,6 +13103,10 @@
     "original": "Personen",
     "translation": "Personnes"
   },
+  "9b4f3b56-e869-4442-bb5f-156c2b9271b0": {
+    "original": "De naam die ontvangers zien als ze een e-mail ontvangen in plaats van het volledige e-mailadres.",
+    "translation": "Le nom que les destinataires verront lorsqu'ils reçoivent un e-mail, à la place de l'adresse e-mail complète."
+  },
   "9b500fcb-d4a2-4147-8422-c474a1297b5f": {
     "original": "Ga naar volgende",
     "translation": "Aller au suivant"
@@ -13382,6 +13398,10 @@
   "9e90b5f1-bac8-4e6e-b171-d679b3959197": {
     "original": "e stuk",
     "translation": "exemplaire"
+  },
+  "9e99d02f-4498-4160-877d-dc14bbadc98f": {
+    "original": "Dan wordt alle communicatie hiermee verstuurd tenzij er voor een specifieke inschrijvingsgroep of webshop een andere afzender staat ingesteld",
+    "translation": "Toutes les communications seront envoyées via cet expéditeur, sauf si un autre est configuré pour un groupe d'inscription ou une boutique spécifique."
   },
   "9e9c8bc3-757f-4914-bbee-18427d5b3897": {
     "original": "De eigenaar van de rekening waarnaar de betaler heeft overgeschreven",
@@ -13806,6 +13826,10 @@
   "a3dda733-9414-421b-8094-940cc7645f19": {
     "original": "Takken",
     "translation": "Branches"
+  },
+  "a3e11da3-1894-4519-99a8-ac5fb32c555d": {
+    "original": "Naam",
+    "translation": "Nom"
   },
   "a3ea7b14-204b-44b9-abb5-8ced5fc847d1": {
     "original": "Volgende",
@@ -15154,6 +15178,10 @@
   "b3d75fdd-8231-4a1f-a1b3-5c6401d90a75": {
     "original": "Markeer als niet betaald",
     "translation": "Marquer comme non payé"
+  },
+  "b3dc156b-410d-4d3f-bd5c-5aa6f9c9e355": {
+    "original": "Stel in als standaard afzender",
+    "translation": "Définir comme expéditeur par défaut"
   },
   "b3f49e49-2db8-46e3-8a9b-bc05a4b989c0": {
     "original": "Wachtlijst bewerken",
@@ -17627,6 +17655,10 @@
     "original": "Momenteel is er niets beschikbaar.",
     "translation": "Actuellement, il n'y a rien de disponible."
   },
+  "d040c8bd-23d1-42c3-a609-5e2febc12f07": {
+    "original": "Stel in wie met dit e-mailadres kan versturen en wie verzonden berichten kan bekijken.",
+    "translation": "Définissez qui peut envoyer avec cette adresse e-mail et qui peut consulter les messages envoyés."
+  },
   "d049c682-f167-4dec-b909-4e1d4c443a94": {
     "original": "afzenders",
     "translation": "expéditeurs"
@@ -19083,6 +19115,10 @@
     "original": "Bedrijfsnaam",
     "translation": "Nom de l'entreprise"
   },
+  "e01618ed-7f4f-4a80-a926-3afb7b3806fc": {
+    "original": "Kies hier wie berichten van versturen en wie verstuurde berichten kan bekijken.",
+    "translation": "Sélectionnez ici qui peut envoyer des messages et qui peut consulter les messages envoyés."
+  },
   "e017ca18-1f4f-4afe-aca5-8eff19d20dc1": {
     "original": "Selecteer",
     "translation": "Sélectionner"
@@ -19786,6 +19822,10 @@
   "e83c36c6-d9fb-47fa-8351-e9b34a0a484d": {
     "original": "Nieuwe functionaliteiten klaarzetten...",
     "translation": "Préparation des nouvelles fonctionnalités…"
+  },
+  "e83fded1-6903-4459-9ef0-4fe9d7238bab": {
+    "original": "Kies hier wie deze inschrijvingsgroep kan bekijken, bewerken of beheren.",
+    "translation": "Indiquez ici qui peut consulter, modifier ou gérer ce groupe d'inscription."
   },
   "e8433d58-9e0f-4f18-b2b6-49b2a602db91": {
     "original": "Gekopieerd naar klembord",
