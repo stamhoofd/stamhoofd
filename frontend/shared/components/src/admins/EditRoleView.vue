@@ -88,6 +88,9 @@
                     {{ $t('Communicatie') }}
                 </h2>
                 <p>{{ $t('Beheer wie berichten mag versturen, vanaf welke afzenders, en wie reeds verzonden berichten kan bekijken.') }}</p>
+                <p class="info-box">
+                    {{ $t('De functie om verzonden berichten te bekijken is nog niet beschikbaar maar komt er binnenkort aan. Je stelt best dus al meteen alle rechten goed in.') }}
+                </p>
 
                 <STList>
                     <ResourcePermissionRow

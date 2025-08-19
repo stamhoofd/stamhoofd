@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct } from '@stamhoofd/structures';
+import { EmailPreview, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -29,7 +29,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate();
+        await Context.authenticate();
 
         if (!await Context.auth.canReadEmails(organization)) {
             // Fast fail before query
@@ -37,7 +37,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         const model = await Email.getByID(request.params.id);
-        if (!model || model.userId !== user.id || (model.organizationId !== (organization?.id ?? null))) {
+        if (!model || (model.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
                 code: 'not_found',
                 human: 'Email not found',
@@ -46,7 +46,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             });
         }
 
-        if (!await Context.auth.canAccessEmail(model)) {
+        if (!await Context.auth.canAccessEmail(model, PermissionLevel.Write)) {
             throw Context.auth.error();
         }
 

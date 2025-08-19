@@ -857,7 +857,14 @@ export class AdminPermissionChecker {
         return this.platformPermissions?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false;
     }
 
+    /**
+     * Fast check if this user can read at least one email in the system.
+     */
     async canReadEmails(organizationId: Organization | string | null) {
+        if (await this.canSendEmails(organizationId)) {
+            // A user can reads its own emails, so they can read.
+            return true;
+        }
         if (organizationId) {
             return (await this.getOrganizationPermissions(organizationId))?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
         }
