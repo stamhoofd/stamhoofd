@@ -1,6 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '../models';
 import { Group } from '../models/Group';
 import { Organization } from '../models/Organization';
@@ -30,13 +31,20 @@ export class GroupFactory extends Factory<Options, Group> {
         const group = new Group();
         group.organizationId = organization.id;
 
-        // todo: migrate-platform-period-id
         if (this.options.period) {
+            if (STAMHOOFD.userMode === 'organization' && this.options.period.organizationId !== group.organizationId) {
+                throw new SimpleError({
+                    code: 'invalid_period',
+                    message: 'Period has different organization id',
+                    statusCode: 400,
+                });
+            }
             group.periodId = this.options.period.id;
         }
         else {
             group.periodId = organization.periodId;
         }
+
         group.waitingListId = this.options.waitingListId ?? null;
 
         group.settings = GroupSettings.create({
