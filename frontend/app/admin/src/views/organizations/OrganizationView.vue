@@ -101,16 +101,8 @@
                         {{ $t('Aantal leden' ) }}
                     </h3>
                     <p v-copyable class="style-definition-text">
-                        <!-- // todo: migrate-platform-period-id -->
                         <MemberCountSpan
-                            :filter="{
-                                registrations: {
-                                    $elemMatch: {
-                                        organizationId: organization.id,
-                                        periodId: platform.period.id
-                                    }
-                                }
-                            }"
+                            :filter="memberCountFilter"
                         />
                     </p>
                 </STListItem>
@@ -193,7 +185,7 @@ import { AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncode
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, GlobalEventBus, MemberCountSpan, SetupStepRows, Toast, useAuth, useBackForward, useContext, usePlatform } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { appToUri, Organization } from '@stamhoofd/structures';
+import { appToUri, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EditOrganizationView from './EditOrganizationView.vue';
 import ViewOrganizationRecordCategoriesBox from './components/ViewOrganizationRecordCategoriesBox.vue';
@@ -212,6 +204,15 @@ const pop = usePop();
 const platform = usePlatform();
 const present = usePresent();
 const { goBack, goForward, hasNext, hasPrevious } = useBackForward('organization', props);
+
+const memberCountFilter: StamhoofdFilter = {
+    registrations: {
+        $elemMatch: {
+            organizationId: props.organization.id,
+            periodId: isPlatform ? platform.value.period.id : props.organization.period.period.id,
+        },
+    },
+};
 
 const title = computed(() => {
     return props.organization.name;
