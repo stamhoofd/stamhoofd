@@ -82,6 +82,58 @@
                 </STList>
             </div>
 
+            <div v-if="senders.length" class="container">
+                <hr>
+                <h2>
+                    {{ $t('Communicatie') }}
+                </h2>
+                <p>{{ $t('Beheer wie berichten mag versturen, vanaf welke afzenders, en wie reeds verzonden berichten kan bekijken.') }}</p>
+                <p class="info-box">
+                    {{ $t('De functie om verzonden berichten te bekijken is nog niet beschikbaar maar komt er binnenkort aan. Je stelt best dus al meteen alle rechten goed in.') }}
+                </p>
+
+                <STList>
+                    <ResourcePermissionRow
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="{id: '', name: $t('Alle afzenders'), type: PermissionsResourceType.Senders }"
+                        :configurable-access-rights="[AccessRight.SendMessages]"
+                        :configurable-permission-levels="[PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write]"
+                        :default-access-rights="[AccessRight.SendMessages]"
+                        :default-level="PermissionLevel.None"
+                        type="resource"
+                        @patch:role="addPatch"
+                    />
+                    <ResourcePermissionRow
+                        v-for="sender in senders"
+                        :key="sender.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="{id: sender.id, name: sender.name || sender.email, description: sender.name ? sender.email : '' , type: PermissionsResourceType.Senders }"
+                        :configurable-access-rights="[AccessRight.SendMessages]"
+                        :configurable-permission-levels="[PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write]"
+                        :default-access-rights="[AccessRight.SendMessages]"
+                        :default-level="PermissionLevel.None"
+                        type="resource"
+                        @patch:role="addPatch"
+                    />
+
+                    <ResourcePermissionRow
+                        v-for="resource in getUnlistedResources(PermissionsResourceType.Senders, patched, senders)"
+                        :key="resource.id"
+                        :role="patched"
+                        :inherited-roles="inheritedRoles"
+                        :resource="resource"
+                        :configurable-access-rights="[AccessRight.SendMessages]"
+                        :configurable-permission-levels="[PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write]"
+                        type="resource"
+                        :unlisted="true"
+                        @patch:role="addPatch"
+                    />
+                    <AccessRightPermissionRow :access-right="AccessRight.ManageEmailTemplates" :inherited-roles="inheritedRoles" :role="patched" @patch:role="addPatch" />
+                </STList>
+            </div>
+
             <div v-if="enableWebshopModule" class="container">
                 <hr><h2>{{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}</h2>
                 <p>{{ $t('0b8c6bb0-a953-45b6-8a2c-088d5468f743') }}</p>
@@ -239,6 +291,13 @@ const recordCategories = computed(() => {
     }
 
     return base;
+});
+
+const senders = computed(() => {
+    if (organization.value && props.scope !== 'admin') {
+        return organization.value?.privateMeta?.emails ?? [];
+    }
+    return platform.value.privateConfig?.emails ?? [];
 });
 
 const save = async () => {

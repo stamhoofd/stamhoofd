@@ -27,6 +27,9 @@ export class Email extends QueryableModel {
     organizationId: string | null = null;
 
     @column({ type: 'string', nullable: true })
+    senderId: string | null = null;
+
+    @column({ type: 'string', nullable: true })
     userId: string | null = null;
 
     @column({ type: 'json', decoder: EmailRecipientFilter })

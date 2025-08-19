@@ -86,7 +86,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, SegmentedControl, useAppContext, useAuth, useContext, useErrors, useOrganization, usePatchArray } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailTemplate, EmailTemplateType, Group } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -125,6 +125,7 @@ const templates = ref([]) as Ref<EmailTemplate[]>;
 const errors = useErrors();
 const { patched, addPatch, addPut, addDelete, patch, hasChanges } = usePatchArray(templates);
 const owner = useRequestOwner();
+const auth = useAuth();
 const context = useContext();
 const loading = ref(true);
 const organization = useOrganization();

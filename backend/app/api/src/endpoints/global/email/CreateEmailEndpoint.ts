@@ -1,9 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Email, RateLimiter } from '@stamhoofd/models';
+import { Email, Platform, RateLimiter } from '@stamhoofd/models';
 import { EmailPreview, EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -64,8 +65,11 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!Context.auth.canSendEmails(organization)) {
-            throw Context.auth.error();
+        if (!await Context.auth.canSendEmails(organization)) {
+            throw Context.auth.error({
+                message: 'Cannot send emails',
+                human: $t('Je hebt nog geen toegangsrechten gekregen om berichten te versturen. Vraag aan een hoofdbeheerder om jou toegang te geven via de instellingen van #platform.'),
+            });
         }
 
         const model = new Email();
@@ -79,8 +83,28 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.json = request.body.json;
         model.status = request.body.status;
         model.attachments = request.body.attachments;
-        model.fromAddress = request.body.fromAddress;
-        model.fromName = request.body.fromName;
+
+        const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
+        const sender = list.find(e => e.id === request.body.senderId);
+        if (sender) {
+            if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
+                throw Context.auth.error({
+                    message: 'Cannot send emails from this sender',
+                    human: $t('Je hebt geen toegangsrechten om emails te versturen naar deze afzender.'),
+                });
+            }
+            model.senderId = sender.id;
+            model.fromAddress = sender.email;
+            model.fromName = sender.name;
+        }
+        else {
+            throw new SimpleError({
+                code: 'invalid_sender',
+                human: 'Sender not found',
+                message: $t(`De afzender die je hebt gekozen bestaat niet meer. Probeer een andere afzender te kiezen.`),
+                statusCode: 400,
+            });
+        }
 
         model.validateAttachments();
 

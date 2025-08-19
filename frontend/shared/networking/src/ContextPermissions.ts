@@ -118,8 +118,16 @@ export class ContextPermissions {
         return this.permissions?.hasAccessRightForSomeResourceOfType(resourceType, right) ?? false;
     }
 
+    hasAccessForSomeResourceOfType(resourceType: PermissionsResourceType, level: PermissionLevel = PermissionLevel.Read) {
+        return this.permissions?.hasAccessForSomeResourceOfType(resourceType, level) ?? false;
+    }
+
     canManagePayments() {
         return this.hasAccessRight(AccessRight.OrganizationManagePayments) || this.hasAccessRight(AccessRight.OrganizationFinanceDirector);
+    }
+
+    canManageEmailTemplates() {
+        return this.hasAccessRight(AccessRight.ManageEmailTemplates);
     }
 
     canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read, organization?: Organization | null) {

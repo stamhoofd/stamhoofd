@@ -1,3 +1,5 @@
+import { PermissionsResourceType } from './PermissionsResourceType';
+
 /**
  * PermissionLevels are used to grant permissions to specific resources or system wide
  */
@@ -48,7 +50,13 @@ export function minimumPermissionLevel(...levels: PermissionLevel[]): Permission
     return min;
 }
 
-export function getPermissionLevelName(level: PermissionLevel): string {
+export function getPermissionLevelName(level: PermissionLevel, resourceType: PermissionsResourceType | null = null): string {
+    if (resourceType === PermissionsResourceType.Senders) {
+        switch (level) {
+            case PermissionLevel.Read: return $t(`Alle berichten bekijken`);
+            case PermissionLevel.Write: return $t(`Versturen, bewerken en bekijken`);
+        }
+    }
     switch (level) {
         case PermissionLevel.None: return $t(`e7aebbf1-8a3a-4288-932f-1678c7bb16ca`);
         case PermissionLevel.Read: return $t(`7afc105f-d34d-4b93-9b33-a6cc08c818ee`);

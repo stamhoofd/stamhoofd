@@ -3,7 +3,7 @@ import { ComponentWithProperties, ModalStackComponent, NavigationController, Pus
 import { AccountSwitcher, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, manualFeatureFlag, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { AccessRight, AppType, Organization, PermissionLevel, Webshop } from '@stamhoofd/structures';
+import { AccessRight, AppType, Organization, PermissionLevel, PermissionsResourceType, Webshop } from '@stamhoofd/structures';
 import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -481,8 +481,16 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
 
                             moreTab.items.unshift(settingsTab);
                         }
-                        else if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
-                            moreTab.items.unshift(financesTab);
+                        else {
+                            if (reactiveSession.auth.hasAccessRight(AccessRight.OrganizationManagePayments)) {
+                                moreTab.items.unshift(financesTab);
+                            }
+
+                            if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)) {
+                                if (manualFeatureFlag('communication', reactiveSession)) {
+                                    moreTab.items.unshift(communicationTab);
+                                }
+                            }
                         }
 
                         if (moreTab.items.length > 0) {
