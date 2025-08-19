@@ -7,6 +7,7 @@ import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceIt
 
 import { Context } from '../../../../helpers/Context';
 import { AuditLogService } from '../../../../services/AuditLogService';
+import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService';
 
 type Params = { id: string };
 type Query = undefined;
@@ -132,6 +133,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                 // TODO: validate before updating stock
                 order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
+                order.data.cart = await UitpasService.validateCart(organization.id, webshop.id, order.data.cart);
 
                 try {
                     await order.updateStock(null, true);
@@ -230,6 +232,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 const previousToPay = model.totalToPay;
                 const previousStatus = model.status;
 
+                const shouldReserveBefore = shouldReserveUitpasNumbers(model.status);
+
                 model.status = patch.status ?? model.status;
 
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
@@ -240,11 +244,14 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 const previousData = model.data.clone();
                 if (patch.data) {
                     model.data.patchOrPut(patch.data);
-
                     if (model.status !== OrderStatus.Deleted) {
                         // Make sure all data is up to date and validated (= possible corrections happen here too)
                         model.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
                     }
+                }
+
+                if ((patch.data || !shouldReserveBefore) && shouldReserveUitpasNumbers(model.status)) {
+                    model.data.cart = await UitpasService.validateCart(organization.id, webshop.id, model.data.cart, model.id);
                 }
 
                 if (model.status === OrderStatus.Deleted) {

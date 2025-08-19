@@ -106,7 +106,14 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
         if (uitpasEvent) {
             const uitpasTariffs = patchedProduct.value.prices.filter(p => !!p.uitpasBaseProductPriceId);
             for (const p of uitpasTariffs) {
-                const basePrice = patchedProduct.value.prices.filter(p => p.id === p.uitpasBaseProductPriceId)[0]?.price ?? 0;
+                const basePrices = patchedProduct.value.prices.filter(basePrice => basePrice.id === p.uitpasBaseProductPriceId);
+                if (basePrices.length !== 1) {
+                    console.error('Expected exactly one base price for uitpas tariff', p, basePrices);
+                    if (basePrices.length < 1) {
+                        continue; // Skip this tariff if the base price is not found
+                    }
+                }
+                const basePrice = basePrices[0].price;
                 const newReducedPrice = await getOfficialUitpasSocialTariff(uitpasEvent.url, basePrice);
                 const patch = ProductPrice.patch({ id: p.id, price: newReducedPrice });
                 const produchtPatch = Product.patch({ id: patchedProduct.value.id });

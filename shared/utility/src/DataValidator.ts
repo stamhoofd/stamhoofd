@@ -41,6 +41,20 @@ export class DataValidator {
         return char === '1';
     }
 
+    static formatUitpasNumber(text: string) {
+        const trimmed = this.cleanUitpasNumber(text);
+        // XXXX XXX XXX XXX
+        return Formatter.injectPattern(trimmed, [
+            { length: 4 },
+            ' ',
+            { length: 3 },
+            ' ',
+            { length: 3 },
+            ' ',
+            { length: 3 },
+        ]);
+    }
+
     static verifyBelgianNationalNumber(text: string) {
         const trimmed = text.replace(/[^0-9]+/g, ''); // keep A-Z for validation
         if (trimmed.length !== 11) {
@@ -79,6 +93,21 @@ export class DataValidator {
 
     static cleanBelgianNationalNumber(text: string) {
         return text.replace(/[^0-9]+/g, '');
+    }
+
+    static cleanUitpasNumber(text: string) {
+        return text.replace(/[^0-9]+/g, '');
+    }
+
+    static getUitpasNumberInputFormatter() {
+        return {
+            cleaner: (value: string) => {
+                return this.cleanUitpasNumber(value);
+            },
+            formatter: (value: string) => {
+                return this.formatUitpasNumber(value);
+            },
+        };
     }
 
     static getBelgianNationalNumberInputFormatter() {

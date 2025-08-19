@@ -64,6 +64,7 @@ async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
             ),
         });
     }
+
     const baseUrl = 'https://api-test.uitpas.be'; // TO DO: Use the URL from environment variables
 
     const url = `${baseUrl}/passes/${uitpasNumber}`;

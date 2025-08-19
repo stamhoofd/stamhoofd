@@ -1,9 +1,11 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 import { ProductType } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { CartItem } from './CartItem.js';
+import { Formatter } from '@stamhoofd/utility';
+import { error } from 'console';
 
 export class Cart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(CartItem) })
@@ -114,6 +116,32 @@ export class Cart extends AutoEncoder {
         errors.throwIfNotEmpty();
     }
 
+    validateUitpasNumbers() {
+        // avoid duplicate UiTPAS-numbers on the same UiTPAS-event
+        const officialUitpasSales = new Map<string, string[]>(); // Event URL -> UiTPAS numbers
+        for (const item of this.items) {
+            if (!item.product.uitpasEvent) {
+                continue; // skip unofficial flow
+            }
+            if (officialUitpasSales.has(item.product.uitpasEvent.url)) {
+                officialUitpasSales.get(item.product.uitpasEvent.url)!.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
+            }
+            else {
+                officialUitpasSales.set(item.product.uitpasEvent.url, item.uitpasNumbers.map(p => p.uitpasNumber));
+            }
+        }
+        for (const [, uitpasNumbers] of officialUitpasSales.entries()) {
+            if (uitpasNumbers.length !== Formatter.uniqueArray(uitpasNumbers).length) {
+                throw new SimpleError({
+                    code: 'duplicate_uitpas_numbers',
+                    message: 'Duplicate uitpas numbers used',
+                    human: $t('Een UiTPAS-nummer kan maar één keer gebruikt worden, per UiTPAS-evenement.'),
+                    field: 'cart.items.uitpasNumbers',
+                });
+            }
+        }
+    }
+
     validate(webshop: Webshop, asAdmin = false) {
         const newItems: CartItem[] = [];
         const errors = new SimpleErrors();
@@ -150,6 +178,22 @@ export class Cart extends AutoEncoder {
         }
 
         this.items = newItems;
+
+        if (errors.errors.length === 0) {
+            // Only validate uitpas usage across items when all items are valid
+            try {
+                this.validateUitpasNumbers();
+            }
+            catch (e) {
+                if (isSimpleError(e) || isSimpleErrors(e)) {
+                    errors.addError(e);
+                }
+                else {
+                    throw e;
+                }
+            }
+        }
+
         errors.throwIfNotEmpty();
     }
 }
