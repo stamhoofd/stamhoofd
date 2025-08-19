@@ -1,3 +1,6 @@
+import { AccessRight } from './AccessRight';
+import { PermissionLevel } from './PermissionLevel';
+
 /**
  * More granular access rights to specific things in the system
  */
@@ -23,4 +26,38 @@ export function getPermissionResourceTypeName(type: PermissionsResourceType, plu
         case PermissionsResourceType.RecordCategories: return plural ? $t(`b609c4cb-238c-4b27-bae5-9ee9f307ffb4`) : $t(`2ccc972d-a3a4-4ea4-8a47-20d7b57f035c`);
         case PermissionsResourceType.Senders: return plural ? $t(`d049c682-f167-4dec-b909-4e1d4c443a94`) : $t(`1407ad7f-146a-423f-8101-d6d3563e10cc`);
     }
+}
+
+export function getConfigurableAccessRightsForResourceType(type: PermissionsResourceType): AccessRight[] {
+    switch (type) {
+        case PermissionsResourceType.Senders:
+            return [AccessRight.SendMessages];
+    }
+
+    return [];
+}
+
+export function getConfigurablePermissionLevelsForResourceType(type: PermissionsResourceType): PermissionLevel[] {
+    switch (type) {
+        case PermissionsResourceType.Senders:
+            return [PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write];
+    }
+    return [PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write, PermissionLevel.Full];
+}
+
+export function getDefaultAccessRightsForResourceType(type: PermissionsResourceType): AccessRight[] {
+    switch (type) {
+        case PermissionsResourceType.Senders:
+            return [AccessRight.SendMessages];
+    }
+
+    return [];
+}
+
+export function getDefaultPermissionLevelForResourceType(type: PermissionsResourceType): PermissionLevel {
+    switch (type) {
+        case PermissionsResourceType.Senders:
+            return PermissionLevel.None;
+    }
+    return PermissionLevel.Full;
 }

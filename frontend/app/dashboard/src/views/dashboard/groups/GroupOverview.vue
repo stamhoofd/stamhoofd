@@ -418,7 +418,7 @@ async function editPermissions(animated = true) {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditResourceRolesView, {
-                description: 'Kies hier wie deze inschrijvingsgroep kan bekijken, bewerken of beheren.',
+                description: $t('Kies hier wie deze inschrijvingsgroep kan bekijken, bewerken of beheren.'),
                 resource: {
                     id: props.group.id,
                     name: props.group.settings.name,

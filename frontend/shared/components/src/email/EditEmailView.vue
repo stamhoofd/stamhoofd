@@ -14,14 +14,66 @@
 
         <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`70c99ed2-97be-4252-b7c4-6cd46d5c9513`)" />
 
-        <Checkbox v-model="isDefault">
-            <h3 class="style-title-list">
-                {{ $t('b1bd0cb8-0256-48e8-8b65-9a82314a49a4') }}
-            </h3>
-            <p class="style-description-small">
-                {{ $t('85f5de69-bc8a-4f8d-be68-e6b05f6affce') }}
-            </p>
-        </Checkbox>
+        <STList>
+            <STListItem v-if="!isDefault" :selectable="true" element-name="button" @click="isDefault = true">
+                <template #left>
+                    <IconContainer icon="email-filled" class="">
+                        <template #aside>
+                            <span class="icon attachment stroke small" />
+                        </template>
+                    </IconContainer>
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Stel in als standaard afzender') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Dan wordt alle communicatie hiermee verstuurd tenzij er voor een specifieke inschrijvingsgroep of webshop een andere afzender staat ingesteld') }}
+                </p>
+
+                <template #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+
+            <STListItem v-else :selectable="false">
+                <template #left>
+                    <IconContainer icon="email-filled" class="success">
+                        <template #aside>
+                            <span class="icon attachment stroke small" />
+                        </template>
+                    </IconContainer>
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Dit is de standaard afzender') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Alle communicatie wordt via deze afzender verstuurd tenzij er voor een specifieke inschrijvingsgroep of webshop een andere afzender staat ingesteld') }}
+                </p>
+            </STListItem>
+
+            <STListItem :selectable="true" element-name="button" @click="editPermissions">
+                <template #left>
+                    <IconContainer icon="privacy" class="">
+                        <template #aside>
+                            <span class="icon success small" />
+                        </template>
+                    </IconContainer>
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Toegangsrechten instellen') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Stel in wie met dit e-mailadres kan versturen en wie verzonden berichten kan bekijken.') }}
+                </p>
+
+                <template #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
 
         <template v-if="enableMemberModule && groups.length">
             <hr>
@@ -76,11 +128,10 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, EmailInput, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, useOrganization, usePatchArray, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, Checkbox, EditResourceRolesView, EmailInput, ErrorBox, IconContainer, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, useOrganization, usePatchArray, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, usePatchOrganizationPeriod, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { Group, GroupPrivateSettings, OrganizationEmail, OrganizationPrivateMetaData, OrganizationRegistrationPeriod, PermissionsResourceType, Platform, PlatformPrivateConfig, WebshopPreview, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { computed, onMounted, Ref, ref } from 'vue';
 
 const props = defineProps<{
@@ -103,6 +154,25 @@ const owner = useRequestOwner();
 const pop = usePop();
 const platformManager = usePlatformManager();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const present = usePresent();
+
+async function editPermissions(animated = true) {
+    await present({
+        animated,
+        adjustHistory: animated,
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(EditResourceRolesView, {
+                description: $t('Kies hier wie berichten van versturen en wie verstuurde berichten kan bekijken.'),
+                resource: {
+                    id: props.email.id,
+                    name: patched.value.name || patched.value.email, description: patched.value.name ? patched.value.email : '',
+                    type: PermissionsResourceType.Senders,
+                },
+            }),
+        ],
+    });
+}
 
 const name = computed({
     get: () => patched.value.name,

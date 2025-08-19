@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { ContextMenu, ContextMenuItem, useAuth, useEmitPatch } from '@stamhoofd/components';
-import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
+import { AccessRight, AccessRightHelper, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, getConfigurableAccessRightsForResourceType, getConfigurablePermissionLevelsForResourceType, getDefaultAccessRightsForResourceType, getDefaultPermissionLevelForResourceType, getPermissionLevelName, getPermissionLevelNumber, getPermissionResourceTypeName, maximumPermissionlevel } from '@stamhoofd/structures';
 import { Ref, computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -49,19 +49,24 @@ const props = withDefaults(defineProps<{
     role: PermissionRoleDetailed | Permissions;
     inheritedRoles?: (PermissionRoleDetailed | Permissions)[];
     type: 'resource' | 'role'; // whether we show the name of the role or the resource
-    configurableAccessRights?: AccessRight[];
-    configurablePermissionLevels?: PermissionLevel[];
+    configurableAccessRights?: AccessRight[] | null;
+    configurablePermissionLevels?: PermissionLevel[] | null;
     unlisted?: boolean;
     defaultLevel?: PermissionLevel | null;
-    defaultAccessRights?: AccessRight[];
+    defaultAccessRights?: AccessRight[] | null;
 }>(), {
     inheritedRoles: () => [],
-    configurableAccessRights: () => [],
-    configurablePermissionLevels: () => [PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write, PermissionLevel.Full],
+    configurableAccessRights: null,
+    configurablePermissionLevels: null,
     defaultLevel: null,
-    defaultAccessRights: () => [],
+    defaultAccessRights: null,
     unlisted: false,
 });
+
+const configurableAccessRights = props.configurableAccessRights ?? getConfigurableAccessRightsForResourceType(props.resource.type);
+const configurablePermissionLevels = props.configurablePermissionLevels ?? getConfigurablePermissionLevelsForResourceType(props.resource.type);
+const defaultLevel = props.defaultLevel ?? getDefaultPermissionLevelForResourceType(props.resource.type);
+const defaultAccessRights = props.defaultAccessRights ?? getDefaultAccessRightsForResourceType(props.resource.type);
 
 const emit = defineEmits(['patch:role']);
 const { patched: role, addPatch, createPatch } = useEmitPatch<PermissionRoleDetailed | Permissions>(props, emit, 'role');
@@ -157,7 +162,7 @@ const permissionLevel = computed({
 
 const accessRightsMap: Map<AccessRight, Ref<boolean>> = new Map();
 
-for (const accessRight of props.configurableAccessRights) {
+for (const accessRight of configurableAccessRights) {
     const hasAccessRight = computed({
         get: () => resourcePermissions?.value?.accessRights?.includes(accessRight) ?? false,
         set: (enable: boolean) => {
@@ -212,13 +217,13 @@ const selected = computed({
         }
 
         if (value) {
-            if (props.defaultLevel) {
-                permissionLevel.value = props.defaultLevel;
+            if (defaultLevel) {
+                permissionLevel.value = defaultLevel;
             }
             else {
-                permissionLevel.value = props.configurablePermissionLevels.find(l => l !== PermissionLevel.None) ?? PermissionLevel.Read;
+                permissionLevel.value = configurablePermissionLevels.find(l => l !== PermissionLevel.None) ?? PermissionLevel.Read;
             }
-            for (const accessRight of props.defaultAccessRights) {
+            for (const accessRight of defaultAccessRights) {
                 accessRightsMap.get(accessRight)!.value = true;
             }
         }
@@ -310,13 +315,13 @@ function contextMenuItemForLevel(level: PermissionLevel) {
 }
 
 const choosePermissions = async (event: MouseEvent) => {
-    const showAccessRights = props.configurableAccessRights;
+    const showAccessRights = configurableAccessRights;
 
     const contextMenu = new ContextMenu([
         // Base levels
-        ...(props.configurablePermissionLevels.length > 0
+        ...(configurablePermissionLevels.length > 0
             ? [
-                    props.configurablePermissionLevels.map((level) => {
+                    configurablePermissionLevels.map((level) => {
                         return contextMenuItemForLevel(level);
                     }),
                 ]
