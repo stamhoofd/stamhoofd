@@ -8,72 +8,77 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`a059bcec-d0a2-42c4-a7fc-0fade27c9b0e`)">
+        <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`a3e11da3-1894-4519-99a8-ac5fb32c555d`)">
             <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :placeholder="$t(`23302106-6c68-4b4a-8d48-6a7c0debdeb8`)">
         </STInputBox>
+        <p class="style-description-small">
+            {{ $t('9b4f3b56-e869-4442-bb5f-156c2b9271b0') }}
+        </p>
 
         <EmailInput v-model="emailAddress" :validator="errors.validator" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`70c99ed2-97be-4252-b7c4-6cd46d5c9513`)" />
 
-        <STList>
-            <STListItem v-if="!isDefault" :selectable="true" element-name="button" @click="isDefault = true">
-                <template #left>
-                    <IconContainer icon="email-filled" class="">
-                        <template #aside>
-                            <span class="icon attachment stroke small" />
-                        </template>
-                    </IconContainer>
-                </template>
+        <STInputBox class="max">
+            <STList>
+                <STListItem v-if="!isDefault" :selectable="true" element-name="button" @click="isDefault = true">
+                    <template #left>
+                        <IconContainer icon="email-filled" class="">
+                            <template #aside>
+                                <span class="icon attachment stroke small" />
+                            </template>
+                        </IconContainer>
+                    </template>
 
-                <h3 class="style-title-list">
-                    {{ $t('Stel in als standaard afzender') }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('Dan wordt alle communicatie hiermee verstuurd tenzij er voor een specifieke inschrijvingsgroep of webshop een andere afzender staat ingesteld') }}
-                </p>
+                    <h3 class="style-title-list">
+                        {{ $t('b3dc156b-410d-4d3f-bd5c-5aa6f9c9e355') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('9e99d02f-4498-4160-877d-dc14bbadc98f') }}
+                    </p>
 
-                <template #right>
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
 
-            <STListItem v-else :selectable="false">
-                <template #left>
-                    <IconContainer icon="email-filled" class="success">
-                        <template #aside>
-                            <span class="icon attachment stroke small" />
-                        </template>
-                    </IconContainer>
-                </template>
+                <STListItem v-else :selectable="false">
+                    <template #left>
+                        <IconContainer icon="email-filled" class="success">
+                            <template #aside>
+                                <span class="icon attachment stroke small" />
+                            </template>
+                        </IconContainer>
+                    </template>
 
-                <h3 class="style-title-list">
-                    {{ $t('Dit is de standaard afzender') }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('Alle communicatie wordt via deze afzender verstuurd tenzij er voor een specifieke inschrijvingsgroep of webshop een andere afzender staat ingesteld') }}
-                </p>
-            </STListItem>
+                    <h3 class="style-title-list">
+                        {{ $t('31a32fe1-8e29-41aa-99a8-bf79ab90f93b') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('037e9189-33ef-44c1-bad2-ff3ea3da0629') }}
+                    </p>
+                </STListItem>
 
-            <STListItem :selectable="true" element-name="button" @click="editPermissions">
-                <template #left>
-                    <IconContainer icon="privacy" class="">
-                        <template #aside>
-                            <span class="icon success small" />
-                        </template>
-                    </IconContainer>
-                </template>
+                <STListItem :selectable="true" element-name="button" @click="editPermissions">
+                    <template #left>
+                        <IconContainer icon="privacy" class="">
+                            <template #aside>
+                                <span class="icon success small" />
+                            </template>
+                        </IconContainer>
+                    </template>
 
-                <h3 class="style-title-list">
-                    {{ $t('Toegangsrechten instellen') }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('Stel in wie met dit e-mailadres kan versturen en wie verzonden berichten kan bekijken.') }}
-                </p>
+                    <h3 class="style-title-list">
+                        {{ $t('4a58b661-087b-4951-9643-2b00352bba85') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('d040c8bd-23d1-42c3-a609-5e2febc12f07') }}
+                    </p>
 
-                <template #right>
-                    <span class="icon arrow-right-small gray" />
-                </template>
-            </STListItem>
-        </STList>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
+        </STInputBox>
 
         <template v-if="enableMemberModule && groups.length">
             <hr>
@@ -163,7 +168,7 @@ async function editPermissions(animated = true) {
         modalDisplayStyle: 'popup',
         components: [
             new ComponentWithProperties(EditResourceRolesView, {
-                description: $t('Kies hier wie berichten van versturen en wie verstuurde berichten kan bekijken.'),
+                description: $t('e01618ed-7f4f-4a80-a926-3afb7b3806fc'),
                 resource: {
                     id: props.email.id,
                     name: patched.value.name || patched.value.email, description: patched.value.name ? patched.value.email : '',
