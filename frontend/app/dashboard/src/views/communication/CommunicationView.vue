@@ -1,6 +1,6 @@
 <template>
     <div class="st-view background">
-        <STNavigationBar :title="$t(`Communicatie`)" />
+        <STNavigationBar :title="$t(`7dfd0425-b8ff-4dec-8c6d-257d94eabbe7`)" />
 
         <main class="center">
             <h1>
