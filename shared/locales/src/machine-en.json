@@ -359,6 +359,10 @@
     "original": "Naam van het platform",
     "translation": "Name of the platform"
   },
+  "04301229-4cbe-4ea0-bfdf-03284120f09f": {
+    "original": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al {4} in jouw winkelmandje zitten",
+    "translation": "Only {5-items-or-persons-or-tickets} of {product-price-name} left, {4} of which are already in your shopping cart"
+  },
   "04392571-f6a2-470d-b2a1-90004ac27dbc": {
     "original": "Te betalen tegen {date}",
     "translation": "Payable by {date}"
@@ -975,6 +979,10 @@
     "original": "{count} leden passen in geen enkele groep. Kies hieronder in welke groep je deze toch wilt inschrijven.",
     "translation": "{count} members don't fit into any group. Please select a group below to register them."
   },
+  "0b3d6ea1-a70b-428c-9ba4-cc0c327ed415": {
+    "original": "Deze webshop heeft geregistreerde verkopen bij UiTPAS. Je kan de webshop enkel archiveren.",
+    "translation": "This webshop has sales registered with UiTPAS. You can only archive the webshop."
+  },
   "0b44456e-1338-4468-ba71-5aabc171555f": {
     "original": "Ga naar vorige lid",
     "translation": "Go to previous member"
@@ -1547,6 +1555,10 @@
     "original": "vanaf",
     "translation": "from"
   },
+  "1259b59f-6447-4da8-887e-848f05da346f": {
+    "original": "Winkelmandje",
+    "translation": "Shopping cart"
+  },
   "125db847-73bc-4494-9732-fe2ef4e55f66": {
     "original": "Om",
     "translation": "At"
@@ -1698,6 +1710,10 @@
   "13daa284-503c-4841-a2ec-16d89ab38cdc": {
     "original": "Wijzig status",
     "translation": "Change status"
+  },
+  "13e018ab-25db-4743-9267-f0724862dac9": {
+    "original": "Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.",
+    "translation": "The UiTPAS number you entered is invalid. Please check the number and try again."
   },
   "13f1507b-7ad1-4748-981f-8b7b12aa2dce": {
     "original": "vandaag",
@@ -4759,6 +4775,10 @@
     "original": "Alle leden",
     "translation": "All members"
   },
+  "37ba6753-ea29-4166-94dc-43538a5e7356": {
+    "original": "Vul een UiTPAS-nummer in.",
+    "translation": "Enter a UiTPAS number."
+  },
   "37d201fd-287d-4957-b559-b882744ea886": {
     "original": "Beperk tot leden met een registratie bij deze standaard leeftijdsgroepen.",
     "translation": "Limit to members with a registration with these standard age groups."
@@ -4770,6 +4790,10 @@
   "37e053fe-6652-49d0-80a6-9ac4995cfa8a": {
     "original": "Inschrijvingen openen",
     "translation": "Open registrations"
+  },
+  "380b897e-c3b8-418f-9c46-ef10724c6cf2": {
+    "original": "Er is nog maar {1-item-or-person-or-ticket} van {product-price-name} beschikbaar",
+    "translation": "Only {1-item-or-person-or-ticket} of {product-price-name} left"
   },
   "381ebb39-0c79-4919-aa9c-b68375a98ad4": {
     "original": "Verifieer",
@@ -5098,6 +5122,10 @@
   "3cfda9a5-3dbc-4490-9dcf-986aafc7b868": {
     "original": "De startdatum van de inschrijving moet na de startdatum van de groep zelf zijn",
     "translation": "The registration start date must be after the group's start date"
+  },
+  "3d08a166-11a7-4429-8ff7-84458bbe3e9a": {
+    "original": "Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.",
+    "translation": "An error occurred while registering the UiTPAS ticket sale. Please try again later."
   },
   "3d3a30bb-3628-413e-8d1a-3864b1dae8e1": {
     "original": "Vanaf",
@@ -5566,6 +5594,10 @@
   "43c1d02d-ca64-4809-95d6-50491c712cbb": {
     "original": "Korting als meerdere gezinsleden inschrijven voor dezelfde inschrijvingsgroep/activiteit.",
     "translation": "Discount if multiple family members register for the same registration group/activity."
+  },
+  "43c308e7-301b-46f0-abed-ae855fa49bed": {
+    "original": "Geef enkel UiTPAS-nummers als je gebruikt maakt van het UiTPAS sociaal tarief.",
+    "translation": "Only provide UiTPAS numbers if you are using the UiTPAS social rate."
   },
   "43cc054d-cf2f-432b-9259-e7764dc929e3": {
     "original": "Dit werkjaar is vergrendeld, je kan geen meldingen meer aanpassen in deze periode",
@@ -6755,6 +6787,10 @@
     "original": "Berichten versturen",
     "translation": "Send messages"
   },
+  "50be5122-c04e-4d53-a059-5c40e34a92b6": {
+    "original": "Er is nog maar {1-item-or-person-or-ticket} van {product-price-name} beschikbaar, en die zit al in jouw winkelmandje",
+    "translation": "Only {1-item-or-person-or-ticket} of {product-price-name} left, and it is already in your shopping cart"
+  },
   "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
     "original": "Door Stamhoofd en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
     "translation": "By connecting Stamhoofd and UiTPAS, you can receive an automatic refund for each sale with the UiTPAS discounted rate. First, you need to become an official UiTPAS organizer, so they know where to send the refund. Then you'll need to create an integration on the <button>Publiq</button> website. Enter the data of that integration below. Finally, you must link an event from UiTdatabank to each item in the webshop."
@@ -7531,6 +7567,10 @@
     "original": "We hebben de betaling ontvangen.",
     "translation": "We have received the payment."
   },
+  "5a535712-c618-43a3-8eed-59a547db6c91": {
+    "original": "Er zijn nog maar {5-items-or-persons-or-tickets} beschikbaar",
+    "translation": "Only {5-items-or-persons-or-tickets} left"
+  },
   "5a58b689-5269-40a0-907e-c977b293c2fa": {
     "original": "Kortingscode toepassen",
     "translation": "Apply discount code"
@@ -7847,6 +7887,10 @@
     "original": "Of",
     "translation": "Or"
   },
+  "5e0f0a60-2cb9-4093-8f85-a3f37c62b27f": {
+    "original": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al één in jouw winkelmandje zit",
+    "translation": "Only {5-items-or-persons-or-tickets} of {product-price-name} left, one of which is already in your shopping cart"
+  },
   "5e104255-3930-45ab-9a4b-1bd2135259ec": {
     "original": "Plusmama",
     "translation": "Stepmother"
@@ -8034,6 +8078,10 @@
   "5fcbcd43-cfec-4968-84b2-6efc406609bf": {
     "original": "Vader",
     "translation": "Father"
+  },
+  "5fd16c16-3986-484a-9cef-d009c01b93bf": {
+    "original": "Een UiTPAS-nummer kan maar één keer gebruikt worden, per UiTPAS-evenement.",
+    "translation": "A UiTPAS number can only be used once per UiTPAS event."
   },
   "5fd1f84b-ed82-4022-80d0-49caad220c88": {
     "original": "API-key {name} werd verwijderd",
@@ -8835,6 +8883,10 @@
     "original": "Vergrendel inschrijvingen",
     "translation": "Lock registrations"
   },
+  "6a33dbcd-25ae-462a-897c-d7e33a9acdd9": {
+    "original": "${product-name} is uitverkocht",
+    "translation": "${product-name} is sold out"
+  },
   "6a35dc73-d0b6-4785-acb8-0a49460abbf0": {
     "original": "Algemene korting",
     "translation": "General discount"
@@ -8990,6 +9042,10 @@
   "6ba4f526-8b64-4902-903b-7cb176684151": {
     "original": "Slim in- en uitschakelen",
     "translation": "Smart switching on and off"
+  },
+  "6bb156ba-1ab9-40d7-ad72-c71460b2d131": {
+    "original": "Ongeldige UiTPAS-nummer, kijk het nummer na.",
+    "translation": "Invalid UiTPAS number, please check the number."
   },
   "6bc5d58e-d6e4-44fd-a0b1-6f4477457915": {
     "original": "Deze gegevens komen op jouw betaalbewijs. Zorg dat ze in orde zijn, je kan ze later niet meer wijzigen.",
@@ -10659,6 +10715,10 @@
     "original": "één stuk",
     "translation": "one item"
   },
+  "805da469-0061-4c7f-b2fd-f0a8835cb21e": {
+    "original": "Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}",
+    "translation": "Your UiTPAS entitles you to a social rate of {specificPrice} instead of the standard social rate of {generalPrice}"
+  },
   "805f19ef-32b7-4029-8efc-9ffdb1730add": {
     "original": "Deze kortingscode is ongeldig",
     "translation": "This discount code is invalid"
@@ -10902,6 +10962,10 @@
   "83c3c1be-6cd2-4360-a2f1-c6e807d1b23e": {
     "original": "Geen dierlijke producten",
     "translation": "No animal products"
+  },
+  "83c472b8-4bc5-4282-bbc9-1c6a2d382171": {
+    "original": "Het kansentarief voor sommige UiTPAS-nummers kon niet worden opgehaald.",
+    "translation": "The reduced rate for some UiTPAS numbers could not be retrieved."
   },
   "83c99392-7efa-44d3-8531-1843c5fa7c4d": {
     "original": "Ongeldig tarief",
@@ -11819,6 +11883,10 @@
     "original": "Totaalprijs",
     "translation": "Total price"
   },
+  "8e07d5a3-f396-47a0-a6a1-4840fa3a896b": {
+    "original": "Er is nog maar {1-item-or-person-or-ticket} beschikbaar",
+    "translation": "Only {1-item-or-person-or-ticket} left"
+  },
   "8e0924af-042c-42ab-85e1-dda0a2106b98": {
     "original": "Unieke leden",
     "translation": "Unique members"
@@ -12735,6 +12803,10 @@
     "original": "Nieuw lid toevoegen",
     "translation": "Add new member"
   },
+  "9a0ad099-99e3-4341-beac-f14feb3fb9d1": {
+    "original": "Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.",
+    "translation": "The reduced rate for this UiTPAS is {correctPrice} instead of {orderPrice}."
+  },
   "9a1ec903-87bd-4776-9436-007caf94bcf3": {
     "original": "Dit zijn alle leden waarvoor we geen geschikte leeftijdsgroep konden vinden: omdat ze te oud of te jong zijn bijvoorbeeld. Pas de instellingen van jouw inschrijvingsgroepen eventueel aan.",
     "translation": "These are all the members for whom we could not find a suitable age group, for example because they are too old or too young. Adjust the settings of your registration groups if needed."
@@ -13599,6 +13671,10 @@
     "original": "Ben je zeker dat je dit tarief wilt verwijderen?",
     "translation": "Are you sure you want to delete this tariff?"
   },
+  "a50f1798-62eb-4980-8678-17abe9bfded4": {
+    "original": "Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar",
+    "translation": "Only {5-items-or-persons-or-tickets} of {product-price-name} left"
+  },
   "a5332744-e6e1-4af9-b05c-cbc21515c4d0": {
     "original": "Groepsnummer betalende groep",
     "translation": "Paying group number"
@@ -13770,6 +13846,10 @@
   "a68feeef-07a3-4406-86ef-e5ab1a168513": {
     "original": "Geslacht wijzigen naar {gender}",
     "translation": "Change gender to {gender}"
+  },
+  "a692b530-6f04-48a1-b2a0-75816ec408b0": {
+    "original": "Er is nog maar {1-item-or-person-or-ticket} beschikbaar, en die zit al in jouw winkelmandje",
+    "translation": "Only {1-item-or-person-or-ticket} left, and it is already in your shopping cart"
   },
   "a69c9d5b-7191-49d8-b21a-f196547dfc0e": {
     "original": "Of open zelf een andere app. Je kan de gegevens makkelijk kopiëren hierboven door erop te klikken.",
@@ -16143,6 +16223,10 @@
     "original": "Logboek",
     "translation": "Log"
   },
+  "c2da8c9e-1772-49ad-84e7-c59230a42efa": {
+    "original": "Vul een UiTPAS-nummer in",
+    "translation": "Enter a UiTPAS number"
+  },
   "c2dad537-31e8-412c-8002-c7210d6f33d0": {
     "original": "Nog geen API-keys aangemaakt",
     "translation": "No API keys created yet"
@@ -17067,6 +17151,10 @@
     "original": "Betalingen",
     "translation": "Payments"
   },
+  "cdb66c67-f212-48d1-a5bc-f969748f6bfa": {
+    "original": "Er zijn nog maar {5-items-or-persons-or-tickets} beschikbaar, waarvan er al {4} in jouw winkelmandje zitten",
+    "translation": "Only {5-items-or-persons-or-tickets} left, {4} of which are already in your shopping cart"
+  },
   "cdc1ea2a-5cc4-4c47-bbd1-eea90b7612be": {
     "original": "één minuut geleden",
     "translation": "one minute ago"
@@ -17714,6 +17802,10 @@
   "d5c7e037-e526-41d5-9151-d9e115b4b8de": {
     "original": "Dit is leeg maar werd wel ingevuld in een andere taal",
     "translation": "This is empty but was filled in another language"
+  },
+  "d5cbe857-9b30-4809-bfd1-b74a6938fdd4": {
+    "original": "Er zijn nog maar {5-items-or-persons-or-tickets} beschikbaar, waarvan er al één in jouw winkelmandje zit",
+    "translation": "Only {5-items-or-persons-or-tickets} left, one of which is already in your shopping cart"
   },
   "d5d2e25f-588e-496e-925f-f7e375c3888a": {
     "original": "Mijn vereniging",
@@ -20351,6 +20443,10 @@
     "original": "Aansluitingen aanrekenen",
     "translation": "Charge affiliations"
   },
+  "f3daff19-a227-4e45-b19a-c770bd7a6687": {
+    "original": "Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit UiTPAS-evenement.",
+    "translation": "One or more UiTPAS numbers have already been used for this UiTPAS event."
+  },
   "f3de2983-5c64-4653-b2c5-62c94eb3d04f": {
     "original": "Maken",
     "translation": "Create"
@@ -20846,6 +20942,10 @@
   "f90728f1-0e73-4027-9408-adfc38c9a4f0": {
     "original": "Tekst met feedback",
     "translation": "Feedback text"
+  },
+  "f9083abe-bb56-4e5d-9af6-f73a91c2666b": {
+    "original": "${product-price-name} is uitverkocht",
+    "translation": "${product-price-name} is sold out"
   },
   "f90bed26-2790-49b7-9e77-e02518022ee5": {
     "original": "het ingevoerde e-mailadres",
