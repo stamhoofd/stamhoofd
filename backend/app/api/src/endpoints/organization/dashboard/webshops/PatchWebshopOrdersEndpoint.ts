@@ -232,6 +232,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 const previousToPay = model.totalToPay;
                 const previousStatus = model.status;
 
+                const shouldReserveBefore = shouldReserveUitpasNumbers(model.status);
+
                 model.status = patch.status ?? model.status;
 
                 // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
@@ -248,7 +250,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     }
                 }
 
-                if (shouldReserveUitpasNumbers(model.status)) {
+                if ((patch.data || !shouldReserveBefore) && shouldReserveUitpasNumbers(model.status)) {
                     model.data.cart = await UitpasService.validateCart(organization.id, webshop.id, model.data.cart, model.id);
                 }
 
