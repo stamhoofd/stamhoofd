@@ -355,7 +355,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 organization.uri = request.body.uri;
             }
 
-            if (request.body.period && request.body.period.id !== organization.periodId) {
+            if (request.body.period) {
                 const organizationPeriod = await OrganizationRegistrationPeriod.getByID(request.body.period.id);
                 if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                     throw new SimpleError({
@@ -366,39 +366,49 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     });
                 }
 
-                // todo: migrate-platform-period-id
-                // todo: period should always have organization id if userMode not platform
-                const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
-                if (!period || (period.organizationId && period.organizationId !== organization.id)) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'The period you want to set does not exist (anymore)',
-                        human: $t('a3795bf6-ed50-4aa6-9caf-33820292c159'),
-                        field: 'period',
-                    });
-                }
+                if (organizationPeriod.periodId !== organization.periodId) {
+                    const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
+                    if (!period || (period.organizationId && period.organizationId !== organization.id)) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'The period you want to set does not exist (anymore)',
+                            human: $t('a3795bf6-ed50-4aa6-9caf-33820292c159'),
+                            field: 'period',
+                        });
+                    }
 
-                if (period.locked) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'The period you want to set is already closed',
-                        human: $t('b6bc2fef-71ac-43a1-b430-50945427a9e3'),
-                        field: 'period',
-                    });
-                }
+                    if (STAMHOOFD.userMode === 'organization' && period.organizationId === null) {
+                    // period should always have organization id if userMode is organization
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'The period has no organization id',
+                            human: $t('Deze periode is niet verbonden aan een organisatie'),
+                            field: 'period',
+                        });
+                    }
 
-                const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
-                if (period.startDate > new Date(Date.now() + maximumStart) && STAMHOOFD.environment !== 'development') {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'The period you want to set has not started yet',
-                        human: $t('e0fff936-3f3c-46b8-adcf-c723c33907a2'),
-                        field: 'period',
-                    });
-                }
+                    if (period.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'The period you want to set is already closed',
+                            human: $t('b6bc2fef-71ac-43a1-b430-50945427a9e3'),
+                            field: 'period',
+                        });
+                    }
 
-                organization.periodId = period.id;
-                shouldUpdateSetupSteps = true;
+                    const maximumStart = 1000 * 60 * 60 * 24 * 31 * 2; // 2 months in advance
+                    if (period.startDate > new Date(Date.now() + maximumStart) && STAMHOOFD.environment !== 'development') {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'The period you want to set has not started yet',
+                            human: $t('e0fff936-3f3c-46b8-adcf-c723c33907a2'),
+                            field: 'period',
+                        });
+                    }
+
+                    organization.periodId = period.id;
+                    shouldUpdateSetupSteps = true;
+                }
             }
 
             // Save the organization
