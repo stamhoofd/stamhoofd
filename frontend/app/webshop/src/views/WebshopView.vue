@@ -249,11 +249,6 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
         checkoutManager.saveCart();
 
         openCart(true);
-        // if (this.products.length === 1) {
-        // openCart(true)
-        // } else {
-        // new Toast(cartItem.product.name+" is toegevoegd aan je winkelmandje", "success green").setHide(2000).show()
-        // }
     }
     else {
         checkoutManager.cart.clear();

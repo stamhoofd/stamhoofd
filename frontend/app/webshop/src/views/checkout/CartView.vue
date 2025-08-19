@@ -54,7 +54,7 @@ import { useWebshopManager } from '../../composables/useWebshopManager';
 
 import { CheckoutStepsManager } from './CheckoutStepsManager';
 
-const title = 'Winkelmandje';
+const title = $t('Winkelmandje');
 const loading = ref(false);
 
 const errors = useErrors();
