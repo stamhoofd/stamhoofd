@@ -48,14 +48,14 @@ const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 
 const emailPlaceholder = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
-        return 'Voor tickets';
+        return $t('E-mailadres om je tickets te ontvangen');
     }
-    return 'Voor bevestigingsemail';
+    return $t('E-mailadres om je bevestigingsemail te ontvangen');
 });
 
 const emailDescription = computed(() => {
     if (webshop.value.meta.ticketType !== WebshopTicketType.None) {
-        return 'Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.';
+        return $t('Je ontvangt jouw tickets op dit e-mailadres. Kijk het goed na.');
     }
     return null;
 });

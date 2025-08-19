@@ -38,7 +38,6 @@ const loading = ref(false);
 const errors = useErrors();
 const popup = usePopup();
 const dismiss = useDismiss();
-const present = usePresent();
 const navigationActions = useNavigationActions();
 const navigationController = useNavigationController();
 const checkoutManager = useCheckoutManager();
@@ -46,9 +45,9 @@ const webshopManager = useWebshopManager();
 
 const title = computed(() => {
     if (checkout.value.totalPrice > 0) {
-        return 'Kies je betaalmethode';
+        return $t('Kies je betaalmethode');
     }
-    return 'Bevestig jouw bestelling';
+    return $t('Bevestig jouw bestelling');
 });
 
 const selectedPaymentMethod = computed<PaymentMethod | null>({
