@@ -67,17 +67,29 @@ const name = computed(() => {
 });
 
 const hasRegistration = computed(() => {
+    // If platform period is ending in 30 days, don't show message
+    let periodId = platform.value.period.id;
+    if (platform.value.period.endDate && platform.value.period.endDate < new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)) {
+        if (organization.value && organization.value.period.period.previousPeriodId === platform.value.period.id) {
+            // If the organization is in the next period, only show message if member not registered for that period
+            periodId = organization.value.period.period.id;
+        }
+        else {
+            return true;
+        }
+    }
+
     if (platformResponsibility.value) {
         // For platform responsibilities, a registration for a default age group is required
         return props.member.filterRegistrations({
-            periodId: platform.value.period.id,
+            periodId,
             organizationId: responsibilityOrganization.value?.id ?? undefined,
             types: [GroupType.Membership],
             defaultAgeGroupIds: platform.value.config.defaultAgeGroups.map(da => da.id),
         }).length > 0;
     }
     return props.member.filterRegistrations({
-        periodId: platform.value.period.id,
+        periodId,
         organizationId: responsibilityOrganization.value?.id ?? undefined,
         types: [GroupType.Membership],
 
