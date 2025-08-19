@@ -62,8 +62,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                         $in: tags,
                                     },
                                 },
-                                // todo: migrate-platform-period-id ?
-                                periodId: platform.periodId,
+                                periodId: platform.periodIdIfPlatform,
                             },
                         },
                     };
