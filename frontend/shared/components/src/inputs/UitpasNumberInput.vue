@@ -42,7 +42,7 @@ const props = withDefaults(
         disabled?: boolean;
         class?: string | null;
         required?: boolean;
-        placeholder?: string;
+        placeholder?: string | null;
         errorFields?: string;
         errorBox?: ErrorBox | null;
     }>(), {
@@ -50,9 +50,9 @@ const props = withDefaults(
         nullable: false,
         title: undefined,
         disabled: false,
-        class: undefined,
+        class: null,
         required: true,
-        placeholder: undefined,
+        placeholder: null,
         errorFields: 'uitpasNumber',
         errorBox: null,
     },
