@@ -270,7 +270,6 @@ export class Organization extends QueryableModel {
                 console.log('Automatically creating new organization registration period for organization ' + this.id + ' and period ' + this.periodId + ' - organization period is missing');
                 const created = new OrganizationRegistrationPeriod();
                 created.organizationId = this.id;
-                // todo: migrate-platform-period-id
                 created.periodId = this.periodId;
                 await created.save();
                 return created;

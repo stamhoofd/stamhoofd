@@ -9,11 +9,9 @@ import { MemberUserSyncer } from './MemberUserSyncer';
 import { SetupStepUpdater } from './SetupStepUpdater';
 
 export class PeriodHelper {
-    // todo: migrate-platform-period-id
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
             console.log('moveOrganizationToPeriod', organization.id, period.id);
-            // todo: migrate-platform-period-id
             await this.createOrganizationPeriodForPeriod(organization, period);
             organization.periodId = period.id;
             await organization.save();

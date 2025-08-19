@@ -25,7 +25,6 @@ const props = defineProps<{
 }>();
 
 const isCurrent = computed(() => {
-    // todo: migrate-platform-period-id
     return props.period.id === props.platform.period.id;
 });
 </script>

@@ -260,7 +260,6 @@ async function addConfig(event: MouseEvent) {
         availablePeriods.map((period) => {
             return new ContextMenuItem({
                 name: period.name,
-                // todo: migrate-platform-period-id
                 icon: period.id === platformManager.value.$platform.period.id ? 'dot' : undefined,
                 action: () => addConfigForPeriod(period),
             });
