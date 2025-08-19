@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" @save="save">
+    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 v-if="isNew">
             {{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}
         </h1>
@@ -117,17 +117,6 @@
                 </STListItem>
             </STList>
         </template>
-
-        <div v-if="!isNew" class="container">
-            <hr><h2>
-                {{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}
-            </h2>
-
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
-            </button>
-        </div>
     </SaveView>
 </template>
 
