@@ -376,7 +376,7 @@ export class UitpasService {
                 throw new SimpleError({
                     code: 'uitpas_number_already_used',
                     message: 'One or more uitpas numbers are already used',
-                    human: $t('Eén of meerdere UiTPAS-nummers zijn al gebruikt voor dit UiTPAS-evenement.'),
+                    human: $t('f3daff19-a227-4e45-b19a-c770bd7a6687'),
                     field: 'uitpasNumbers',
                 });
             }
@@ -388,7 +388,7 @@ export class UitpasService {
                     throw new SimpleError({
                         code: 'missing_uitpas_base_product_price',
                         message: `Missing UiTPAS base product price`,
-                        human: $t(`Er is een fout opgetreden bij het registreren van de UiTPAS ticket verkoop. Probeer het later opnieuw.`),
+                        human: $t(`3d08a166-11a7-4429-8ff7-84458bbe3e9a`),
                     });
                 }
 
@@ -398,7 +398,7 @@ export class UitpasService {
                     throw new SimpleError({
                         code: 'uitpas_social_tariff_price_mismatch',
                         message: 'UiTPAS wrong number of prices returned',
-                        human: $t('Het kansentarief voor sommige UiTPAS-nummers kon niet worden opgehaald.'),
+                        human: $t('83c472b8-4bc5-4282-bbc9-1c6a2d382171'),
                         field: 'uitpasNumbers',
                     });
                 }
@@ -411,7 +411,7 @@ export class UitpasService {
                         throw new SimpleError({
                             code: 'uitpas_social_tariff_price_mismatch',
                             message: 'UiTPAS social tariff have a different price',
-                            human: $t('Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.', { correctPrice: Formatter.price(verified[i].price), orderPrice: Formatter.price(item.uitpasNumbers[i].price) }),
+                            human: $t('9a0ad099-99e3-4341-beac-f14feb3fb9d1', { correctPrice: Formatter.price(verified[i].price), orderPrice: Formatter.price(item.uitpasNumbers[i].price) }),
                             field: 'uitpasNumbers.' + i.toString(),
                         });
                     }

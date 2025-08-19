@@ -127,7 +127,7 @@
                             && cartItem.calculatedPrices[index].price !== cartItem.productPrice.price"
                         class="style-description-small"
                     >
-                        {{ $t('Jouw UiTPAS geeft recht op een sociaal tarief van {specificPrice} in plaats van het standaard sociaal tarief van {generalPrice}', {
+                        {{ $t('805da469-0061-4c7f-b2fd-f0a8835cb21e', {
                             specificPrice: formatPrice(cartItem.calculatedPrices[index].price),
                             generalPrice: formatPrice(cartItem.productPrice.price)
                         }) }}

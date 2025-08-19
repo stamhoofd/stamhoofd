@@ -47,7 +47,7 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'webshop_has_registered_ticket_sales',
                 message: `Webshop ${webshop.id} has registered ticket sales`,
-                human: $t(`Deze webshop heeft geregistreerde verkopen bij UiTPAS. Je kan de webshop enkel archiveren.`),
+                human: $t(`0b3d6ea1-a70b-428c-9ba4-cc0c327ed415`),
             });
         }
 

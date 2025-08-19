@@ -54,28 +54,28 @@ export class CartStockHelper {
         const remainingStock = product.remainingStock + reserved;
         const remaining = Math.max(0, remainingStock - inCart);
 
-        let text = $t('Er is nog maar {1-item-or-person-or-ticket} beschikbaar', {
+        let text = $t('8e07d5a3-f396-47a0-a6a1-4840fa3a896b', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
         });
 
         if (inCart > 0) {
-            text = $t('Er is nog maar {1-item-or-person-or-ticket} beschikbaar, en die zit al in jouw winkelmandje', {
+            text = $t('a692b530-6f04-48a1-b2a0-75816ec408b0', {
                 '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
             });
         }
 
         if (remainingStock !== 1) {
-            text = $t('Er zijn nog maar {5-items-or-persons-or-tickets} beschikbaar', {
+            text = $t('5a535712-c618-43a3-8eed-59a547db6c91', {
                 '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
             });
 
             if (inCart === 1) {
-                text = $t('Er zijn nog maar {5-items-or-persons-or-tickets} beschikbaar, waarvan er al één in jouw winkelmandje zit', {
+                text = $t('d5cbe857-9b30-4809-bfd1-b74a6938fdd4', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                 });
             }
             else if (inCart > 0) {
-                text = $t('Er zijn nog maar {5-items-or-persons-or-tickets} beschikbaar, waarvan er al {4} in jouw winkelmandje zitten', {
+                text = $t('cdb66c67-f212-48d1-a5bc-f969748f6bfa', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     '4': inCart.toString(),
                 });
@@ -85,7 +85,7 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? $t('${product-name} is uitverkocht', { 'product-name': product.name }) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t('6a33dbcd-25ae-462a-897c-d7e33a9acdd9', { 'product-name': product.name }) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
         };
     }
 
@@ -120,32 +120,32 @@ export class CartStockHelper {
         const remainingStock = productPrice.remainingStock + reserved;
         const remaining = Math.max(0, remainingStock - inCart);
 
-        let text = $t('Er is nog maar {1-item-or-person-or-ticket} van {product-price-name} beschikbaar', {
+        let text = $t('380b897e-c3b8-418f-9c46-ef10724c6cf2', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
             'product-price-name': productPrice.name,
         });
 
         if (inCart > 0) {
-            text = $t('Er is nog maar {1-item-or-person-or-ticket} van {product-price-name} beschikbaar, en die zit al in jouw winkelmandje', {
+            text = $t('50be5122-c04e-4d53-a059-5c40e34a92b6', {
                 '1-item-or-person-or-ticket': product.getRemainingStockText(remainingStock),
                 'product-price-name': productPrice.name,
             });
         }
 
         if (remainingStock !== 1) {
-            text = $t('Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar', {
+            text = $t('a50f1798-62eb-4980-8678-17abe9bfded4', {
                 '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                 'product-price-name': productPrice.name,
             });
 
             if (inCart === 1) {
-                text = $t('Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al één in jouw winkelmandje zit', {
+                text = $t('5e0f0a60-2cb9-4093-8f85-a3f37c62b27f', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': productPrice.name,
                 });
             }
             else if (inCart > 0) {
-                text = $t('Er zijn nog maar {5-items-or-persons-or-tickets} van {product-price-name} beschikbaar, waarvan er al {4} in jouw winkelmandje zitten', {
+                text = $t('04301229-4cbe-4ea0-bfdf-03284120f09f', {
                     '5-items-or-persons-or-tickets': product.getRemainingStockText(remainingStock),
                     'product-price-name': productPrice.name,
                     '4': inCart.toString(),
@@ -156,7 +156,7 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? $t('${product-price-name} is uitverkocht', { 'product-price-name': productPrice.name }) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t('f9083abe-bb56-4e5d-9af6-f73a91c2666b', { 'product-price-name': productPrice.name }) : (remaining < 25 || (amount && remaining <= amount) ? text : null),
             shortText: remainingStock === 0 ? $t(`44ba544c-3db6-4f35-b7d1-b63fdcadd9ab`) : (remaining === 0 ? $t(`b1c82354-0aa6-4bef-bef6-84261180919a`) : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null)),
         };
     }

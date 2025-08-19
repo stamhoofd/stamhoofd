@@ -677,7 +677,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'uitpas_numbers_not_allowed',
                     message: 'UiTPAS numbers not allowed for this product',
-                    human: $t('Geef enkel UiTPAS-nummers als je gebruikt maakt van het UiTPAS sociaal tarief.'),
+                    human: $t('43c308e7-301b-46f0-abed-ae855fa49bed'),
                     field: 'cart.items.uitpasNumbers',
                 });
             }
@@ -690,7 +690,7 @@ export class CartItem extends AutoEncoder {
                 throw new SimpleError({
                     code: 'empty_uitpas_number',
                     message: 'Empty uitpas number',
-                    human: $t('Vul een UiTPAS-nummer in.'),
+                    human: $t('37ba6753-ea29-4166-94dc-43538a5e7356'),
                     field: 'uitpasNumbers.' + i.toString(),
                 });
             }
@@ -699,7 +699,7 @@ export class CartItem extends AutoEncoder {
         const errors = uitpasNumbers.filter(num => !DataValidator.isUitpasNumberValid(num)).map((value, i) => new SimpleError({
             code: 'invalid_uitpas_number',
             message: 'Invalid uitpas number',
-            human: $t('Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.'),
+            human: $t('13e018ab-25db-4743-9267-f0724862dac9'),
             field: 'uitpasNumbers.' + i.toString(),
         }));
         if (errors.length > 0) {

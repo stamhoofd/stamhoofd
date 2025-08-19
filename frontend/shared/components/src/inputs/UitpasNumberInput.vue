@@ -121,8 +121,8 @@ function validate(final = true, silent = false) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
                 message: unformatted.length === 0
-                    ? $t('Vul een UiTPAS-nummer in')
-                    : $t('Ongeldige UiTPAS-nummer, kijk het nummer na.'),
+                    ? $t('c2da8c9e-1772-49ad-84e7-c59230a42efa')
+                    : $t('6bb156ba-1ab9-40d7-ad72-c71460b2d131'),
                 field: props.errorFields,
             }));
         }
