@@ -72,12 +72,12 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
+import { useOrganizationManager, usePatchOrganizationPeriods, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
 import EditCategoryGroupsView from '../dashboard/groups/EditCategoryGroupsView.vue';
@@ -92,7 +92,8 @@ const organizationManager = useOrganizationManager();
 const present = usePresent();
 const auth = useAuth();
 const splitViewController = useSplitViewController();
-const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const patchOrganizationPeriods = usePatchOrganizationPeriods();
+const owner = useRequestOwner();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -276,16 +277,38 @@ async function upgradePeriod() {
     await openPeriod(platform.value.period);
 }
 
+async function getPeriods() {
+    try {
+        await organizationManager.value.loadPeriods(false, false, owner);
+    }
+    catch (e) {
+        console.error(e);
+        return [];
+    }
+
+    const periods = organizationManager.value.organization.periods?.organizationPeriods;
+    if (periods === undefined) {
+        return [organizationManager.value.organization.period];
+    }
+
+    const periodsCopy = [...periods];
+
+    periodsCopy.sort((a, b) => Sorter.byDateValue(a.period.startDate, b.period.startDate));
+
+    return periodsCopy;
+}
+
 async function editMe() {
     if (!$rootCategory.value) return;
+
     await present(new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(EditCategoryGroupsView, {
             category: $rootCategory.value,
-            period: period.value,
+            periodId: period.value.id,
+            periods: await getPeriods(),
             organization: $organization.value,
-            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                patch.id = period.value.id;
-                await patchOrganizationPeriod(patch);
+            saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                await patchOrganizationPeriods(patch);
             },
         }),
     }).setDisplayStyle('popup'));
