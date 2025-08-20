@@ -62,7 +62,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             const organization = await new OrganizationFactory({ }).create();
 
             // create period
-            const newPeriod = await new RegistrationPeriodFactory({ organizationId: organization.id }).create();
+            const newPeriod = await new RegistrationPeriodFactory({ organization }).create();
 
             // create organization registration period
             const newOrganizationPeriod = new OrganizationRegistrationPeriod();
@@ -125,7 +125,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             const newPeriod = await new RegistrationPeriodFactory({
-                organizationId: organization.id,
+                organization,
                 startDate,
                 endDate,
             }).create();
@@ -160,7 +160,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             const endDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
             const newPeriod = await new RegistrationPeriodFactory({
-                organizationId: organization.id,
+                organization,
                 startDate,
                 endDate,
             }).create();

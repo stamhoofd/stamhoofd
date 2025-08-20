@@ -1329,7 +1329,7 @@ describe('Endpoint.PatchOrganization', () => {
             const token = await Token.createToken(user);
 
             const otherOrganization = await new OrganizationFactory({ }).create();
-            const newPeriod = await new RegistrationPeriodFactory({ organizationId: otherOrganization.id }).create();
+            const newPeriod = await new RegistrationPeriodFactory({ organization: otherOrganization }).create();
             const newOrganizationPeriod = new OrganizationRegistrationPeriod();
             newOrganizationPeriod.organizationId = otherOrganization.id;
             newOrganizationPeriod.periodId = newPeriod.id;

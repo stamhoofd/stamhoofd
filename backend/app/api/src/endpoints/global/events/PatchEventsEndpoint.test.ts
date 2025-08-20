@@ -183,7 +183,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             await new RegistrationPeriodFactory({
                 startDate,
                 endDate,
-                organizationId: organization.id,
+                organization,
             }).create();
 
             const body: Body = new PatchableArray();
