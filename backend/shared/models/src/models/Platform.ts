@@ -89,17 +89,25 @@ export class Platform extends QueryableModel {
     }
 
     static async getForEditing(): Promise<Platform> {
-        // todo: migrate-platform-period-id
         return QueueHandler.schedule('Platform.getModel', async () => {
             // Build a new one
             let model = await this.getByID('1');
+
             if (!model) {
                 console.info('[Platform] Creating new platform');
 
                 // Create a new platform
                 model = new Platform();
                 model.id = '1';
-                model.periodId = (await RegistrationPeriod.all())[0].id;
+
+                if (STAMHOOFD.userMode === 'platform') {
+                    model.periodId = (await RegistrationPeriod.all())[0].id;
+                }
+                else {
+                    const period = await RegistrationPeriod.select().where('organizationId', null).first(true);
+                    model.periodId = period.id;
+                }
+
                 await model.save();
             }
 
