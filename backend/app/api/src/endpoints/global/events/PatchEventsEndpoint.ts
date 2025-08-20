@@ -33,7 +33,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async putEventGroup(event: Event, putGroup: GroupStruct) {
-        const period = await RegistrationPeriod.getByDate(event.startDate);
+        const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
 
         if (!period) {
             throw new SimpleError({
@@ -252,7 +252,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     patch.group.id = event.groupId;
                     patch.group.type = GroupType.EventRegistration;
 
-                    const period = await RegistrationPeriod.getByDate(event.startDate);
+                    const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
                     group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period);
                 }
                 else {
@@ -274,7 +274,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             else {
                 if (patch.startDate || patch.endDate) {
                     // Correct period id if needed
-                    const period = await RegistrationPeriod.getByDate(event.startDate);
+                    const period = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
                     if (event.groupId) {
                         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                             if (event.groupId) {
@@ -439,7 +439,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (type.maximum && (!event.existsInDatabase || ('typeId' in (await event.getChangedDatabaseProperties()).fields))) {
-            const currentPeriod = await RegistrationPeriod.getByDate(event.startDate);
+            const currentPeriod = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
             console.log('event.startDate', event.startDate);
             if (currentPeriod) {
                 const count = await SQL.select().from(

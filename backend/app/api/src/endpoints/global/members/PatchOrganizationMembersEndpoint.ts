@@ -306,7 +306,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         }
                     }
                     else {
-                        if (registration.periodId !== platform.periodId) {
+                        if (registration.periodId !== platform.periodIdIfPlatform) {
                             return false;
                         }
                     }

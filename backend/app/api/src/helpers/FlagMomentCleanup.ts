@@ -1,4 +1,4 @@
-import { Group, Member, MemberResponsibilityRecord, Platform, Registration } from '@stamhoofd/models';
+import { Group, Member, MemberResponsibilityRecord, Organization, Platform, Registration } from '@stamhoofd/models';
 import { SQL, SQLWhereExists } from '@stamhoofd/sql';
 import { GroupType } from '@stamhoofd/structures';
 import { MemberUserSyncer } from './MemberUserSyncer';
@@ -26,60 +26,113 @@ export class FlagMomentCleanup {
     }
 
     static async getActiveMemberResponsibilityRecordsForOrganizationWithoutRegistrationInCurrentPeriod() {
-        const platform = await Platform.getShared();
-        const currentPeriodId = platform.periodId;
-        const platformResponsibilityIds = platform.config.responsibilities.map(r => r.id);
+        if (STAMHOOFD.userMode === 'platform') {
+            const platform = await Platform.getShared();
+            const currentPeriodId = platform.periodId;
+            const platformResponsibilityIds = platform.config.responsibilities.map(r => r.id);
 
-        return await MemberResponsibilityRecord.select()
-            .whereNot('organizationId', null)
-            .where(
-                MemberResponsibilityRecord.whereActive,
-            )
-            .whereNot(
-                new SQLWhereExists(
-                    SQL.select()
-                        .from(Registration.table)
-                        .join(
-                            SQL.innerJoin(SQL.table(Group.table))
-                                .where(
-                                    SQL.column(Group.table, 'id'),
-                                    SQL.column(Registration.table, 'groupId'),
-                                ),
-                        )
-                        .where(
-                            SQL.column(Registration.table, 'memberId'),
-                            SQL.column(MemberResponsibilityRecord.table, 'memberId'),
-                        ).where(
-                            SQL.column(Registration.table, 'organizationId'),
-                            SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
-                        ).where(
-                            SQL.column(Registration.table, 'periodId'),
-                            currentPeriodId,
-                        ).where(
-                            SQL.column(Registration.table, 'deactivatedAt'),
-                            null,
-                        ).whereNot(
-                            SQL.column(Registration.table, 'registeredAt'),
-                            null,
-                        ).where(
-                            SQL.column(Group.table, 'type'),
-                            GroupType.Membership,
-                        ).where(
-                            SQL.where(
-                                SQL.column(Group.table, 'defaultAgeGroupId'),
-                                '!=',
+            return await MemberResponsibilityRecord.select()
+                .whereNot('organizationId', null)
+                .where(
+                    MemberResponsibilityRecord.whereActive,
+                )
+                .whereNot(
+                    new SQLWhereExists(
+                        SQL.select()
+                            .from(Registration.table)
+                            .join(
+                                SQL.innerJoin(SQL.table(Group.table))
+                                    .where(
+                                        SQL.column(Group.table, 'id'),
+                                        SQL.column(Registration.table, 'groupId'),
+                                    ),
+                            )
+                            .where(
+                                SQL.column(Registration.table, 'memberId'),
+                                SQL.column(MemberResponsibilityRecord.table, 'memberId'),
+                            ).where(
+                                SQL.column(Registration.table, 'organizationId'),
+                                SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
+                            ).where(
+                                SQL.column(Registration.table, 'periodId'),
+                                currentPeriodId,
+                            ).where(
+                                SQL.column(Registration.table, 'deactivatedAt'),
                                 null,
-                            ).or(
-                                SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'),
-                                '!=',
-                                platformResponsibilityIds,
+                            ).whereNot(
+                                SQL.column(Registration.table, 'registeredAt'),
+                                null,
+                            ).where(
+                                SQL.column(Group.table, 'type'),
+                                GroupType.Membership,
+                            ).where(
+                                SQL.where(
+                                    SQL.column(Group.table, 'defaultAgeGroupId'),
+                                    '!=',
+                                    null,
+                                ).or(
+                                    SQL.column(MemberResponsibilityRecord.table, 'responsibilityId'),
+                                    '!=',
+                                    platformResponsibilityIds,
+                                ),
+                            ).where(
+                                SQL.column(Group.table, 'deletedAt'),
+                                null,
                             ),
-                        ).where(
-                            SQL.column(Group.table, 'deletedAt'),
-                            null,
-                        ),
-                ),
-            )
-            .fetch();
+                    ),
+                )
+                .fetch();
+        }
+        else {
+            return await MemberResponsibilityRecord.select()
+                .join(SQL.innerJoin(
+                    SQL.table(Organization.table))
+                    .where(
+                        SQL.column(Organization.table, 'id'),
+                        SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
+                    ),
+                )
+                .whereNot('organizationId', null)
+                .whereNot(SQL.column(Organization.table, 'periodId'), null)
+                .where(
+                    MemberResponsibilityRecord.whereActive,
+                )
+                .whereNot(
+                    new SQLWhereExists(
+                        SQL.select()
+                            .from(Registration.table)
+                            .join(
+                                SQL.innerJoin(SQL.table(Group.table))
+                                    .where(
+                                        SQL.column(Group.table, 'id'),
+                                        SQL.column(Registration.table, 'groupId'),
+                                    ),
+                            )
+                            .where(
+                                SQL.column(Registration.table, 'memberId'),
+                                SQL.column(MemberResponsibilityRecord.table, 'memberId'),
+                            ).where(
+                                SQL.column(Registration.table, 'organizationId'),
+                                SQL.column(MemberResponsibilityRecord.table, 'organizationId'),
+                            ).where(
+                                SQL.column(Registration.table, 'periodId'),
+                                SQL.column(Organization.table, 'periodId'),
+                            ).where(
+                                SQL.column(Registration.table, 'deactivatedAt'),
+                                null,
+                            ).whereNot(
+                                SQL.column(Registration.table, 'registeredAt'),
+                                null,
+                            ).where(
+                                SQL.column(Group.table, 'type'),
+                                GroupType.Membership,
+                            ).where(
+                                SQL.column(Group.table, 'deletedAt'),
+                                null,
+                            ),
+                    ),
+                )
+                .fetch();
+        }
     }
 }

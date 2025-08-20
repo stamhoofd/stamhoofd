@@ -37,7 +37,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
     static async isCurrentRegistrationPeriod(organizationId: string | null, periodId: string) {
         if (organizationId === null) {
             const platform = await Platform.getSharedStruct();
-            return platform.period.id === periodId;
+            return platform.periodIdIfPlatform === periodId;
         }
 
         const organization = await Organization.getByID(organizationId);
