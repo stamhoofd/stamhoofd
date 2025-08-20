@@ -114,6 +114,9 @@ export { default as ShowSeatsView } from './src/views/ShowSeatsView.vue';
 export { default as DeleteView } from './src/views/DeleteView.vue';
 export { default as SMSView } from './src/views/SMSView.vue';
 
+// Periods
+export * from './src/periods';
+
 // Payment
 export * from './src/ColorHelper';
 export * from './src/views/PaymentHandler';
