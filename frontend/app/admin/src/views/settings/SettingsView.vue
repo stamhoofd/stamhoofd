@@ -391,7 +391,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
+import { AdminsView, DataPermissionSettingsView, EditEmailTemplatesView, EditRegistrationPeriodsView, EditResponsibilitiesView, EmailSettingsView, FinancialSupportSettingsView, RecordsConfigurationView, SSOSettingsView, Toast, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { DataPermissionsSettings, FinancialSupportSettings, LoginMethod, LoginProviderType, OrganizationLevelRecordsConfiguration, OrganizationRecordsConfiguration, Platform, PlatformConfig } from '@stamhoofd/structures';
 import { ComponentOptions } from 'vue';
@@ -404,7 +404,6 @@ import LabsView from './LabsView.vue';
 import EditPlatformMembershipTypesView from './membership-types/EditPlatformMembershipTypesView.vue';
 import OrganizationRecordConfigurationView from './organization-records/OrganizationRecordConfigurationView.vue';
 import EditPrivacyView from './privacy/EditPrivacyView.vue';
-import EditRegistrationPeriodsView from './registration-periods/EditRegistrationPeriodsView.vue';
 
 // todo translations
 enum Routes {
