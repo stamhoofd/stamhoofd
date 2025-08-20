@@ -53,9 +53,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const forceGroupIds: string[] = [];
 
         for (const patch of request.body.getPatches()) {
-            // todo: migrate-platform-period-id
-            // todo: check organization id also -> should not be able to patch periods of other organizations
             const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
+
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -65,11 +64,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 });
             }
 
-            // todo: migrate-platform-period-id
-            // todo: check organization id here also?
             const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
 
-            if (!period) {
+            if (!period || (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id)) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
@@ -291,6 +288,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
+        if (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id) {
+            throw new SimpleError({
+                code: 'invalid_period',
+                message: 'Period has different organization id',
+                statusCode: 400,
+            });
+        }
+
         if (period?.locked) {
             throw new SimpleError({
                 code: 'locked_period',
@@ -322,7 +327,6 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const organizationPeriod = new OrganizationRegistrationPeriod();
         organizationPeriod.id = struct.id;
         organizationPeriod.organizationId = organization.id;
-        // todo: migrate-platform-period-id
         organizationPeriod.periodId = struct.period.id;
         organizationPeriod.settings = struct.settings;
         await organizationPeriod.save();
@@ -408,7 +412,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         if (period) {
-            // todo: migrate-platform-period-id
+            if (STAMHOOFD.userMode === 'organization' && period.organizationId !== model.organizationId) {
+                throw new SimpleError({
+                    code: 'invalid_period',
+                    message: 'Period has different organization id',
+                    statusCode: 400,
+                });
+            }
+
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
 
@@ -480,12 +491,20 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.waitingListId = existing.id;
                 }
                 else {
-                    // todo: migrate-platform-period-id
                     const requiredPeriod = period ?? await RegistrationPeriod.getByID(model.periodId);
 
                     if (!requiredPeriod) {
                         throw new Error('Unexpected missing period when creating waiting list');
                     }
+
+                    if (STAMHOOFD.userMode === 'organization' && requiredPeriod.organizationId !== model.organizationId) {
+                        throw new SimpleError({
+                            code: 'invalid_period',
+                            message: 'Period has different organization id',
+                            statusCode: 400,
+                        });
+                    }
+
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.waitingList,
                         model.organizationId,
@@ -531,13 +550,20 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
+        if (STAMHOOFD.userMode === 'organization' && (period.organizationId !== organizationId)) {
+            throw new SimpleError({
+                code: 'invalid_period',
+                message: 'Period has different organization id',
+                statusCode: 400,
+            });
+        }
+
         const user = Context.auth.user;
 
         const model = new Group();
         model.id = struct.id;
         model.organizationId = organizationId;
         model.defaultAgeGroupId = await this.validateDefaultGroupId(struct.defaultAgeGroupId);
-        // todo: migrate-platform-period-id
         model.periodId = period.id;
         model.settings = struct.settings;
         model.privateSettings = struct.privateSettings ?? GroupPrivateSettings.create({});
