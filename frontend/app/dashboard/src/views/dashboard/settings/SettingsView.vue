@@ -78,6 +78,21 @@
                     </template>
                 </STListItem>
 
+                <STListItem v-if="!isPlatform" :selectable="true" class="left-center" @click="$navigate(Routes.OrganizationRegistrationPeriods)">
+                    <template #left>
+                        <img src="@stamhoofd/assets/images/illustrations/calendar.svg">
+                    </template>
+                    <h2 class="style-title-list">
+                        {{ $t('1cbf76ca-79d3-4f12-8f09-dc585f5e9da3') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ $t('ef07b66f-6b78-4c47-9599-d8847ea97aaa') }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.PaymentAccounts)">
                     <template #left>
                         <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
@@ -364,7 +379,7 @@
 </template>
 
 <script lang="ts" setup>
-import { AdminsView, BundleDiscountSettingsView, EditEmailTemplatesView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
+import { AdminsView, BundleDiscountSettingsView, EditEmailTemplatesView, EditRegistrationPeriodsView, EmailSettingsView, GeneralSettingsView, RecordsConfigurationView, SSOSettingsView, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useMembersPackage, useOrganization, usePlatform, useSalesDisabled } from '@stamhoofd/components';
 
 import { ArrayDecoder, AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
@@ -409,6 +424,7 @@ enum Routes {
     BalanceNotifications = 'openstaande-bedragen-notificaties',
     MembersImport = 'leden-importeren',
     Uitpas = 'uitpas',
+    OrganizationRegistrationPeriods = 'werkjaren',
 }
 
 const isPlatform = STAMHOOFD.userMode === 'platform';
@@ -558,6 +574,11 @@ defineRoutes([
         url: Routes.Uitpas,
         present: 'popup',
         component: UitpasSettingsView,
+    },
+    {
+        url: Routes.OrganizationRegistrationPeriods,
+        present: 'popup',
+        component: EditRegistrationPeriodsView as ComponentOptions,
     },
 ]);
 
