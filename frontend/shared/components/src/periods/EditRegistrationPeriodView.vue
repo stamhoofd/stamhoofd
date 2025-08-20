@@ -37,14 +37,12 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
-
 
 const props = defineProps<{
     period: RegistrationPeriod;

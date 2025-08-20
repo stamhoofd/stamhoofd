@@ -1,9 +1,8 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, Toast, useOrganization, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, StartNewRegistrationPeriodView, Toast, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, ref } from 'vue';
-import StartNewRegistrationPeriodView from './StartNewRegistrationPeriodView.vue';
 
 export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<void> }) {
     const $organization = useOrganization();
