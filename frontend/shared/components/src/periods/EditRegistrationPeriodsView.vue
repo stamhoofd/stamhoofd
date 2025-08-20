@@ -83,7 +83,7 @@ const sortedPeriods = computed(() => {
     return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
 });
 
-const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : organization.value.period.period);
+const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : patchedOrganization.value.period.period);
 
 const title = computed(() => $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb'));
 
