@@ -168,8 +168,21 @@ export async function startGroupCyclesToPeriodsMigration() {
         }
 
         if (allCycles.length === 0) {
-            // todo: should add period?
-            // throw new Error('No cycles found for organization: ' + organization.name);
+            // first check if already has a registration period for the organization
+            const registrationPeriod = await RegistrationPeriod.getByID(organization.periodId); ;
+            if (registrationPeriod && registrationPeriod.organizationId === organization.id) {
+                continue;
+            }
+
+            // create new registration period, every organization should have a registration period with an organization id
+            const period = await new RegistrationPeriodFactory({
+                organization,
+                startDate: new Date(2025, 0, 1, 0, 0, 0, 0),
+                endDate: new Date(2025, 11, 31, 59, 59, 59, 999),
+            }).create();
+
+            organization.periodId = period.id;
+            await organization.save();
             continue;
         }
 
