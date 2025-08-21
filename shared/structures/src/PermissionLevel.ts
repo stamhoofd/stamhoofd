@@ -1,4 +1,4 @@
-import { PermissionsResourceType } from './PermissionsResourceType';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
 
 /**
  * PermissionLevels are used to grant permissions to specific resources or system wide
