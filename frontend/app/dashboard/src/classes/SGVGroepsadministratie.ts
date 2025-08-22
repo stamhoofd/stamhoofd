@@ -751,36 +751,60 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
-        let lid = await this.fetchLid(match.sgvId)
+        let doAnotherPatch = true;
+        let patchCount = 0;
+        let lid;
+        let shouldMarkExternalSync = true;
+        let withHacks = false;
 
-        const patch = getPatch(match.stamhoofd, lid, this.groupNumber!, match.stamhoofd.groups, this.functies, report)
+        while(doAnotherPatch) {
+            patchCount++;
+            if (patchCount > 5) {
+                console.warn("Too many patches, breaking", lid)
+                shouldMarkExternalSync = false;
+                break;
+            }
+            lid = await this.fetchLid(match.sgvId)
 
-        if (patch.adressen && patch.adressen.length == 0) {
-            throw new SimpleError({
-                code: "",
-                message: "Je moet minstens één adres toevoegen in Stamhoofd voor we dat lid kunnen toevoegen in de groepsadministratie"
-            })
-        }
+            const {patch, needsMultiplePatches} = getPatch(match.stamhoofd, lid, this.groupNumber!, match.stamhoofd.groups, this.functies, report, withHacks)
+            doAnotherPatch = needsMultiplePatches;
 
-        if (!this.dryRun) {
-            try {
-                const updateResponse = await this.authenticatedServer.request<any>({
-                    method: "PATCH",
-                    path: "/lid/"+match.sgvId+"?bevestig=true",
-                    body: patch,
+            if (patch.adressen && patch.adressen.length == 0) {
+                throw new SimpleError({
+                    code: "",
+                    message: "Je moet minstens één adres toevoegen in Stamhoofd voor we dat lid kunnen toevoegen in de groepsadministratie"
                 })
-                match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
+            }
 
-                lid = updateResponse.data
-            } catch (e) {
-                console.error(e)
-                throw e;
+            if (!this.dryRun) {
+                try {
+                    const updateResponse = await this.authenticatedServer.request<any>({
+                        method: "PATCH",
+                        path: "/lid/"+match.sgvId+"?bevestig=true",
+                        body: patch,
+                    })
+                    match.stamhoofd.details.memberNumber = updateResponse.data.verbondsgegevens.lidnummer ?? null
+
+                    lid = updateResponse.data
+                } catch (e) {
+                    if (!withHacks && patchCount === 1) {
+                        // Try once with hacks
+                        withHacks = true;
+                        doAnotherPatch = true;
+                        console.warn("Retrying patch with hacks due to error", e)
+                        continue;
+                    }
+                    console.error(e)
+                    throw e;
+                }
             }
         }
 
         try {
             // Mark as synced in Stamhoofd
-            match.stamhoofd.details.lastExternalSync = new Date()
+            if (shouldMarkExternalSync) {
+                match.stamhoofd.details.lastExternalSync = new Date()
+            }
             await MemberManager.patchMembersDetails([match.stamhoofd])
         } catch (e) {
             console.error(e)
@@ -797,11 +821,12 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
      * Create a new one in SGV
      */
     async createLid(member: MemberWithRegistrations, report: SGVSyncReport) {
-        const post = getPatch(member, {
+        const {patch: post, needsMultiplePatches} = getPatch(member, {
             adressen: [],
             contacten: [],
             functies: []
-        }, this.groupNumber!, member.groups, this.functies, report)
+        }, this.groupNumber!, member.groups, this.functies, report);
+        let patchAfter = needsMultiplePatches;
 
         if (!post.adressen || post.adressen.length == 0) {
             throw new SimpleError({
@@ -828,10 +853,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     lid = updateResponse.data
 
                     // Do a patch for the remaining functies
-                    lid = await this.syncLid({
-                        stamhoofd: member,
-                        sgvId: lid.id
-                    }, report);
+                    patchAfter = true;
                 } else {
                     const updateResponse = await this.authenticatedServer.request<any>({
                         method: "POST",
@@ -847,6 +869,14 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     await MemberManager.patchMembersDetails([member])
 
                     lid = updateResponse.data
+                }
+
+                if (patchAfter) {
+                    // Do another patch to set everything correctly
+                    lid = await this.syncLid({
+                        stamhoofd: member,
+                        sgvId: lid.id
+                    }, report);
                 }
             } catch (e) {
                 console.error(e)

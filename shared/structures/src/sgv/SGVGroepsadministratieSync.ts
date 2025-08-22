@@ -135,7 +135,7 @@ export class SGVSyncReport {
 
         for (const member of this.skipped) {
             try {
-                const post = getPatch(member, {
+                const {patch: post} = getPatch(member, {
                     adressen: [],
                     contacten: [],
                     functies: []
@@ -176,7 +176,7 @@ export class SGVSyncReport {
 
 export function isMemberManaged(member: MemberWithRegistrations) {
     try {
-        const post = getPatch(member, {
+        const {patch: post} = getPatch(member, {
             adressen: [],
             contacten: [],
             functies: []
@@ -251,34 +251,22 @@ export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
     return patch
 }
 
-export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport): any {
+export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport, withHacks = true): {patch: any, needsMultiplePatches: boolean} {
     const details = member.details
     const newAddresses: any[] = []
     const newContacts: any[] = []
 
     let hasPostAdres = false
+    let needsMultiplePatches = false;
 
     const addressMap: Map<string, string> = new Map()
-
-    // Create an address mapping
-    if (details.address) {
-        const a = createOrUpdateAddress(details.address, lid.adressen, 1)
-        newAddresses.push(a)
-        addressMap.set(details.address.toString(), a.id)
-
-        if (!hasPostAdres) {
-            // Users own address is always postadres
-            a.postadres = true;
-            hasPostAdres = true;
-        }
-    }
 
     for (const [index, parent] of details.parents.entries()) {
         if (!parent.address) {
             throw new Error("Er ontbreekt een adres bij één van de ouders")
         }
         if (parent.address && !addressMap.has(parent.address.toString())) {
-            const a = createOrUpdateAddress(parent.address, lid.adressen, index + 1)
+            const a = createOrUpdateAddress(parent.address, lid.adressen, index + 1, lid.contacten ?? [])
             newAddresses.push(a)
             addressMap.set(parent.address.toString(), a.id)
 
@@ -295,8 +283,83 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         newContacts.push(createOrUpdateParent(parent, lid.contacten, addressMap))
     }
 
+    // Create an address mapping
+    if (details.address) {
+        const a = createOrUpdateAddress(details.address, lid.adressen, 1, lid.contacten ?? [])
+        newAddresses.push(a)
+        addressMap.set(details.address.toString(), a.id)
+
+        if (!hasPostAdres) {
+            // Users own address is always postadres
+            a.postadres = true;
+            hasPostAdres = true;
+        }
+    }
+
     if (!hasPostAdres && newAddresses.length > 0) {
-        newAddresses[0].postadres = true
+        // Prefer the address of one of the contacts if possible
+        if (newContacts.length) {
+            const id = newContacts[0].adres;
+            const object = newAddresses.find(a => a.id === id)
+            if (object) {
+                object.postadres = true
+                hasPostAdres = true
+            }
+        }
+
+        // Just set the first address as postadres
+        if (!hasPostAdres) {
+            console.warn('No postadres found, setting the first address as postadres')
+            newAddresses[0].postadres = true
+        }
+    }
+
+    if (lid && lid.adressen && Array.isArray(lid.adressen) && withHacks) {
+        // There is a bug in SGV that checks if a postadres is valid by looking if one of the contacts has it set as their address
+        // Sadly, this only checks the previous version of contacts, before the patch 😅
+        // So we'll need to check if this will occur, and in that case, split the patch in half and keep the old postadres.
+        // Note: this issue also occurs if the post adres does not change, but e.g. an address is deleted that was previously a contact address, but not a post adres. In that case the old postadres
+        // was also not valid, and the validation will trigger again. Solution is simply to keep the old post adres. In the next sync, we'll be able to change it because the contacts have changed to the correct.
+        // ids
+
+        const newPostadres = newAddresses.find(a => a.postadres);
+        let oldPostAdres = lid.adressen.find(a => a.postadres);
+
+        const willBeValidPostadres = !newPostadres || !lid.contacten || !Array.isArray(lid.contacten) || lid.contacten.length === 0 || !!lid.contacten.find((c: any) => c.adres === newPostadres.id);
+        
+        if (!willBeValidPostadres) {
+            console.warn('Detected postadres change that will break SGV, keeping old postadres', member.details.name)
+
+            if (lid.contacten && Array.isArray(lid.contacten) && lid.contacten.length && (!oldPostAdres || !lid.contacten.find((c: any) => c.adres === oldPostAdres.id))) {
+                // Special situation.
+                // We can't keep the old post address because it went into an invalid state and will also get rejected
+
+                // Use one of the previous addresses as the new post address
+                const id = lid.contacten.find((c: any) => !!c.adres)?.adres;
+                if (id) {
+                    console.warn('Detected special validatation case where we need to change the postadres', id)
+                    const newOld = lid.adressen.find((a: any) => a.id === id)
+                    if (newOld) {
+                        oldPostAdres = newOld
+                    }
+                }
+            }
+            
+            newPostadres.postadres = false;
+            const existing = newAddresses.find(a => a.id === oldPostAdres.id)
+            needsMultiplePatches = true;
+
+            if (existing) {
+                // Already in the patch, just set it
+                existing.postadres = true;
+            } else {
+                // Add the old postadres to the patch
+                newAddresses.push({
+                    ...oldPostAdres,
+                    postadres: true
+                })
+            }
+        }
     }
 
     if (!details.birthDay) {
@@ -425,7 +488,10 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         patch.email = details.email
     }
     
-    return patch
+    return {
+        patch,
+        needsMultiplePatches
+    }
 }
 
 export function isManaged(lid: any, groepFuncties: GroepFunctie[]): any {
@@ -704,8 +770,19 @@ function isSameParent(parent: Parent, sgv: any) {
 
 }
 
-function createOrUpdateAddress(address: Address, adressen: any, index: number): any {
-    const existingAddress = adressen.find(a => isSameAddress(address, a))
+function createOrUpdateAddress(address: Address, adressen: any, index: number, contacten?: any): any {
+    const existingAddresses = adressen.filter(a => isSameAddress(address, a))
+    let existingAddress = existingAddresses.length > 0 ? existingAddresses[0] : null
+
+    // This is a fix for duplicate addresses, to avoid a loop as a result of the postadres issue
+    if (existingAddresses.length > 1 && contacten && Array.isArray(contacten) && contacten.length > 0) {
+        // Prefer one that was previously used by a contact
+        const hasWithSameIdAsBefore = existingAddresses.find(a => contacten.find(c => c.adres === a.id))
+        if (hasWithSameIdAsBefore) {
+            existingAddress = hasWithSameIdAsBefore
+        }
+    }
+
     const updated = addressToSGV(address)
 
     if (existingAddress) {

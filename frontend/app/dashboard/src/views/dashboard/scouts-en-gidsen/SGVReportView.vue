@@ -247,7 +247,7 @@ export default class SGVReportView extends Mixins(NavigationMixin) {
         }
 
         if (Request.isNetworkError(error)) {
-            return 'Er was een internetprobleem of de groepsadministratie was tijdelijk onbereikbaar, gaf een interne foutmelding of reageerde niet.'
+            return 'De groepsadministratie gaf een interne foutmelding of reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Probeer later opnieuw.'
         }
         if (!isSimpleError(error) && !isSimpleErrors(error)) {
             return error.message
