@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -119,7 +119,17 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.recipientFilter) {
+            if (model.status !== EmailStatus.Draft) {
+                throw new SimpleError({
+                    code: 'not_draft',
+                    human: 'Email is not a draft',
+                    message: $t(`Je kan de ontvangerslijst alleen aanpassen als de e-mail nog een concept is`),
+                    statusCode: 400,
+                });
+            }
+
             model.recipientFilter = patchObject(model.recipientFilter, request.body.recipientFilter);
+            await model.invalidateRecipients();
             rebuild = true;
         }
 
@@ -133,10 +143,10 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (rebuild) {
             await model.buildExampleRecipient();
-            model.updateCount();
 
             // Force null - because we have stale data
             model.recipientCount = null;
+            model.updateCount();
         }
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {

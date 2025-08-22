@@ -756,6 +756,31 @@ export class Email extends QueryableModel {
         }).catch(console.error);
     }
 
+    async invalidateRecipients() {
+        const id = this.id;
+        await QueueHandler.schedule('email-build-recipients-' + this.id, async function ({ abort }) {
+            const upToDate = await Email.getByID(id);
+
+            if (!upToDate || !upToDate.id) {
+                return;
+            }
+
+            if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
+                return;
+            }
+
+            if (upToDate.status === EmailStatus.Sent) {
+                return;
+            }
+
+            abort.throwIfAborted();
+
+            // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
+            upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
+            await upToDate.save();
+        });
+    }
+
     async buildRecipients() {
         const id = this.id;
         await QueueHandler.schedule('email-build-recipients-' + this.id, async function ({ abort }) {
