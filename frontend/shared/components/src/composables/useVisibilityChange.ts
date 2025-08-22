@@ -1,7 +1,7 @@
 import { useFocused } from '@simonbackx/vue-app-navigation';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, watch } from 'vue';
 
-export function useVisibilityChange(callback: () => void | Promise<void>) {
+export function useVisibilityChange(callback: () => void | Promise<void>, onHide?: () => void | Promise<void>, immediate = false) {
     let wasVisible = true;
     let isMountedAndActive = false;
     const focused = useFocused();
@@ -25,6 +25,15 @@ export function useVisibilityChange(callback: () => void | Promise<void>) {
             const result = callback();
             if (result instanceof Promise) {
                 result.catch(console.error);
+            }
+        }
+        else {
+            console.log('[useVisibilityChange] hidden');
+            if (onHide) {
+                const result = onHide();
+                if (result instanceof Promise) {
+                    result.catch(console.error);
+                }
             }
         }
     }
@@ -62,20 +71,26 @@ export function useVisibilityChange(callback: () => void | Promise<void>) {
     onMounted(() => {
         isMountedAndActive = true;
         addListeners();
+        if (immediate) {
+            onVisibilityChange();
+        }
     });
 
     onActivated(() => {
         isMountedAndActive = true;
         addListeners();
+        onVisibilityChange();
     });
 
     onDeactivated(() => {
         isMountedAndActive = false;
         removeListeners();
+        onVisibilityChange();
     });
 
     onBeforeUnmount(() => {
         isMountedAndActive = false;
         removeListeners();
+        onVisibilityChange();
     });
 }

@@ -38,7 +38,7 @@
                         </button>
                     </div>
                     <template #right>
-                        <span v-if="patchedEmail.recipientCount === null && patchedEmail.recipientsErrors" class="icon error red" v-tooltip="$t('Er ging iets mis bij het aanmaken van de ontvangers: ') + ' ' + patchedEmail.recipientsErrors.getHuman()"/>
+                        <span v-if="patchedEmail.recipientCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('Er ging iets mis bij het aanmaken van de ontvangers: ') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
                         <span v-else-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
                         <span v-else class="style-placeholder-skeleton" />
                     </template>
@@ -107,23 +107,24 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, OrganizationEmail, PermissionsResourceType } from '@stamhoofd/structures';
+import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
+import { LoadingViewTransition } from '../containers';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import { useAuth, useContext, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
+import { GlobalEventBus } from '../EventBus';
+import { useAuth, useContext, useFeatureFlag, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
+import UploadFileButton from '../inputs/UploadFileButton.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
-import UploadFileButton from '../inputs/UploadFileButton.vue';
-import { LoadingViewTransition } from '../containers';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -182,6 +183,7 @@ const selectedRecipientOptions = ref(props.recipientFilterOptions.map((o) => {
 const groupByEmail = ref(false);
 const editorView = ref(null) as Ref<typeof EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
+const show = useShow();
 const pop = usePop();
 const present = usePresent();
 
@@ -328,7 +330,7 @@ useInterval(async () => {
         return;
     }
     await updateEmail();
-}, 1000);
+}, 2_000);
 
 async function createEmail() {
     try {
@@ -474,6 +476,8 @@ async function getHTML() {
     };
 }
 
+const communicationFeature = useFeatureFlag()('communication');
+
 async function send() {
     if (sending.value) {
         return;
@@ -503,7 +507,7 @@ async function send() {
 
     try {
         const { text, html } = await getHTML();
-        const resopnse = await context.value.authenticatedServer.request({
+        const response = await context.value.authenticatedServer.request({
             method: 'PATCH',
             path: '/email/' + email.value.id,
             body: Email.patch({
@@ -520,6 +524,10 @@ async function send() {
         });
 
         Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+
+        if (communicationFeature) {
+            await GlobalEventBus.sendEvent('selectTabById', 'communication');
+        }
         await pop({ force: true });
     }
     catch (e) {

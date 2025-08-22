@@ -436,6 +436,10 @@ class EmailStatic {
             const info = await transporter.sendMail(mail);
             console.log('Message sent:', to, data.subject, info.messageId, data.type);
 
+            if (STAMHOOFD.environment === 'development') {
+                await sleep(100);
+            }
+
             try {
                 data.callback?.(null);
             }

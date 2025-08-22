@@ -186,6 +186,9 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             model.send().catch(console.error);
+
+            // Preview the sending status
+            model.status = EmailStatus.Sending;
         }
 
         return new Response(await model.getPreviewStructure());

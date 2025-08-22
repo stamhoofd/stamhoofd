@@ -15,6 +15,7 @@ export function useEmailStatus() {
                     text: $t('f5eb4dcd-ddc1-4952-a40e-845cda2b88ce'),
                     icon: 'reverse',
                     theme: 'theme-secundary',
+                    progress: email.recipientCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.recipientCount) : undefined,
                 };
             case EmailStatus.Sent:
                 return {

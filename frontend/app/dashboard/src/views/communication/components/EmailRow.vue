@@ -1,7 +1,9 @@
 <template>
     <STListItem class="right-stack smartphone-wrap-left" :selectable="true">
         <p v-if="status" :class="'style-title-prefix-list ' + (status.theme ?? '')">
-            <span>{{ status.text }}</span><span v-if="status.icon" :class="'icon tiny ' + status.icon" />
+            <span>{{ status.text }}</span>
+            <ProgressRing v-if="status.progress" :radius="7" :stroke="2" :progress="status.progress" />
+            <span v-else-if="status.icon" :class="'icon tiny ' + status.icon" />
         </p>
         <h3 class="style-title-list large">
             {{ email.subject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8') }}
@@ -21,9 +23,11 @@
 </template>
 
 <script setup lang="ts">
-import { EmailPreview } from '@stamhoofd/structures';
+import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useEmailStatus } from '../hooks/useEmailStatus';
+import { ProgressRing, useInterval } from '@stamhoofd/components';
+import { useUpdateEmail } from '../hooks/useUpdateEmail';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -33,5 +37,15 @@ const getEmailStatus = useEmailStatus();
 const status = computed(() => {
     return getEmailStatus(props.email);
 });
+
+const { updateEmail } = useUpdateEmail(props.email);
+useInterval(async ({ stop }) => {
+    if (props.email.status !== EmailStatus.Sending) {
+        stop();
+        return;
+    }
+    console.log('Updating email', props.email.id);
+    await updateEmail();
+}, 5_000);
 
 </script>

@@ -229,14 +229,6 @@
     &.error {
         color: $color-error;
     }
-
-    > .icon:first-child:not(:last-child) {
-        margin-right: 5px;
-    }
-
-    > .icon:last-child:not(:first-child) {
-        margin-left: 5px;
-    }
 }
 
 .style-capitalize-first-letter {
@@ -543,7 +535,7 @@
     /**
         Small optimizations for modern browsers only
     */
-    &:has(> .icon) {
+    &:has(> .icon), &:has(> svg) {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -554,10 +546,10 @@
     /**
         Small optimizations for modern browsers only
     */
-    &:has(> .icon) {
+    &:has(> .icon), &:has(> svg) {
         display: flex;
         align-items: center;
-        gap: 1px;
+        gap: 4px;
     }
 }
 

@@ -4,7 +4,9 @@
 
         <main class="center">
             <p v-if="status" :class="'style-title-prefix ' + (status.theme ?? '')">
-                <span>{{ status.text }}</span><span v-if="status.icon" :class="'icon small ' + status.icon" />
+                <span>{{ status.text }}</span>
+                <ProgressRing v-if="status.progress" :radius="8" :stroke="2" :progress="status.progress" />
+                <span v-else-if="status.icon" :class="'icon small ' + status.icon" />
             </p>
             <h1>{{ title }}</h1>
 
@@ -94,10 +96,11 @@
 </template>
 
 <script lang="ts" setup>
-import { SafeHtmlBox } from '@stamhoofd/components';
+import { ProgressRing, SafeHtmlBox, useInterval } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus, replaceEmailHtml } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
+import { useUpdateEmail } from './hooks/useUpdateEmail';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -106,7 +109,6 @@ const props = defineProps<{
 const title = computed(() => {
     return props.email.subject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
 });
-
 const getEmailStatus = useEmailStatus();
 const status = computed(() => {
     return getEmailStatus(props.email);
@@ -118,6 +120,16 @@ const replacedHtml = computed(() => {
     }
     return replaceEmailHtml(props.email.html, props.email.exampleRecipient?.replacements || []);
 });
+
+const { updateEmail } = useUpdateEmail(props.email);
+useInterval(async ({ stop }) => {
+    if (props.email.status !== EmailStatus.Sending) {
+        stop();
+        return;
+    }
+    await updateEmail();
+}, 5_000);
+
 </script>
 
 <style lang="scss">
