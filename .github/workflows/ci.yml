@@ -37,11 +37,16 @@ jobs:
             models:
               - 'shared/**'
               - 'backend/shared/models/**'
+            sql:
+              - 'shared/structures/**'
+              - 'shared/utility/**'
+              - 'backend/shared/sql/**'
 
     outputs:
       changed_backend: ${{ steps.changed.outputs.backend }}
       changed_structures: ${{ steps.changed.outputs.structures }}
       changed_models: ${{ steps.changed.outputs.models }}
+      changed_sql: ${{ steps.changed.outputs.sql }}
       changed_frontend: ${{ steps.changed.outputs.frontend }}
 
   job_test_backend:
@@ -150,7 +155,7 @@ jobs:
     name: 'Backend SQL Tests'
     runs-on: ubuntu-latest
     needs: [job_setup]
-    if: needs.job_setup.outputs.changed_models == 'true'
+    if: needs.job_setup.outputs.changed_sql == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ env.NODE_VERSION }}
