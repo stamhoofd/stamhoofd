@@ -429,7 +429,18 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 try {
                     let customerId = organization.serverMeta.mollieCustomerId
 
-                    if (!organization.serverMeta.mollieCustomerId) {
+                    if (customerId) {
+                        // check still valid
+                        try {
+                            await mollieClient.customers.get(customerId);
+                        } catch (e) {
+                            console.error("Error getting customer", e)
+                            // Customer is not valid anymore, we need to create a new one
+                            customerId = undefined;
+                        }
+                    }
+
+                    if (!customerId) {
                         if (payment.method === PaymentMethod.Unknown) {
                             throw new SimpleError({
                                 code: "no_mollie_customer",
@@ -450,7 +461,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         console.log("Saving new mollie customer", mollieCustomer, "for organization", organization.id)
                         await organization.save()
                     }
-
+                    
                     const molliePayment = await mollieClient.payments.create({
                         amount: {
                             currency: 'EUR',
