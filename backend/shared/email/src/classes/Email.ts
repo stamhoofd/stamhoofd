@@ -326,7 +326,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to hard bounce or spam',
-                        human: data.to.length > 1 ? $t(`e3c3f519-562e-4ef4-b670-599ce4cb74ac`) : $t('Deze ontvanger komt voor op de gedeelde bounce of spamlijst. De ontvanger was eerder permanent onbereikbaar of heeft eerder een e-mail als spam gemarkeerd.'),
+                        human: data.to.length > 1 ? $t(`e3c3f519-562e-4ef4-b670-599ce4cb74ac`) : $t('Deze ontvanger komt voor op de gedeelde bounce of spamlijst. De ontvanger was eerder permanent onbereikbaar of heeft eerder een e-mail als spam gemarkeerd'),
                     }),
                 );
             }
@@ -349,9 +349,9 @@ class EmailStatic {
             try {
                 data.callback?.(
                     new SimpleError({
-                        code: 'all_filtered',
+                        code: 'email_skipped_whitelist',
                         message: 'All recipients are filtered due to environment',
-                        human: $t(`462d5e22-af11-40de-9e16-eda1b93ac0c7`),
+                        human: data.to.length > 1 ? $t(`462d5e22-af11-40de-9e16-eda1b93ac0c7`) : $t('Dit e-mailadres staat niet op een whitelist voor het versturen van e-mails in deze omgeving'),
                     }),
                 );
             }

@@ -677,14 +677,21 @@ export class Email extends QueryableModel {
             console.log('Finished sending email', upToDate.id);
             // Mark email as sent
 
-            if (upToDate.succeededCount === 0) {
+            if ((succeededCount + failedCount + softFailedCount) === 0) {
                 upToDate.status = EmailStatus.Failed;
+                upToDate.emailErrors = new SimpleErrors(
+                    new SimpleError({
+                        code: 'no_recipients',
+                        message: 'No recipients',
+                        human: $t(`Geen ontvangers gevonden`),
+                    }),
+                );
             }
             else {
                 upToDate.status = EmailStatus.Sent;
+                upToDate.emailErrors = null;
             }
 
-            upToDate.emailErrors = null;
             upToDate.succeededCount = succeededCount;
             upToDate.softFailedCount = softFailedCount;
             upToDate.failedCount = failedCount;

@@ -117,12 +117,12 @@ export const STExpect = {
     errorWithMessage: (message: string) => expect.objectContaining({ message }) as jest.Constructable,
     simpleError: (data: {
         code?: string;
-        message?: string;
+        message?: string | RegExp;
         field?: string;
     }) => {
         const d = {
             code: data.code ?? expect.any(String),
-            message: data.message ?? expect.any(String),
+            message: data.message ? expect.stringMatching(data.message) : expect.any(String),
             field: data.field ?? expect.anything(),
         };
 
@@ -133,7 +133,7 @@ export const STExpect = {
     },
     simpleErrors: (data: {
         code?: string;
-        message?: string;
+        message?: string | RegExp;
         field?: string;
     }[]) => {
         return expect.objectContaining({
