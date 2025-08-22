@@ -343,8 +343,6 @@ export class Email extends QueryableModel {
 
     async send(): Promise<Email | null> {
         this.throwIfNotReadyToSend();
-        await this.save();
-
         const id = this.id;
         return await QueueHandler.schedule('send-email', async function (this: unknown, { abort }) {
             let upToDate = await Email.getByID(id);
@@ -542,6 +540,7 @@ export class Email extends QueryableModel {
                     }
 
                     const sendingPromises: Promise<void>[] = [];
+                    let skipped = 0;
 
                     for (const recipient of recipients) {
                         if (recipientsSet.has(recipient.id)) {
@@ -563,6 +562,7 @@ export class Email extends QueryableModel {
                             await recipient.save();
 
                             await saveStatus();
+                            skipped++;
                             continue;
                         }
                         recipientsSet.add(recipient.email);
@@ -571,6 +571,7 @@ export class Email extends QueryableModel {
                             // Already sent
                             succeededCount += 1;
                             await saveStatus();
+                            skipped++;
                             continue;
                         }
 
@@ -646,7 +647,7 @@ export class Email extends QueryableModel {
                         sendingPromises.push(promise);
                     }
 
-                    if (sendingPromises.length > 0) {
+                    if (sendingPromises.length > 0 || skipped > 0) {
                         await Promise.all(sendingPromises);
                     }
                     else {
@@ -663,7 +664,7 @@ export class Email extends QueryableModel {
                 upToDate.softFailedCount = softFailedCount;
                 upToDate.failedCount = failedCount;
 
-                if (isAbortedError(e)) {
+                if (isAbortedError(e) || ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))) {
                     // Keep sending status: we'll resume after the reboot
                     await upToDate.save();
                     throw e;
