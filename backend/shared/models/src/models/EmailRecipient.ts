@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
+import { SimpleErrors } from '@simonbackx/simple-errors';
 
 export class EmailRecipient extends QueryableModel {
     static table = 'email_recipients';
@@ -44,8 +45,15 @@ export class EmailRecipient extends QueryableModel {
     @column({ type: 'json', decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = [];
 
+    /**
+     * @deprecated
+     * Legacy field
+     */
     @column({ type: 'string', nullable: true })
     failErrorMessage: string | null = null;
+
+    @column({ type: 'json', nullable: true, decoder: SimpleErrors })
+    failError: SimpleErrors | null = null;
 
     @column({ type: 'integer' })
     failCount = 0;

@@ -302,7 +302,7 @@ class EmailStatic {
             try {
                 data.callback?.(
                     new SimpleError({
-                        code: 'all_filtered',
+                        code: 'invalid_email_address',
                         message: 'Invalid email address',
                         human: $t(`cbbff442-758c-4f76-b8c2-26bb176fefcc`),
                     }),
@@ -326,7 +326,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to hard bounce or spam',
-                        human: $t(`e3c3f519-562e-4ef4-b670-599ce4cb74ac`),
+                        human: data.to.length > 1 ? $t(`e3c3f519-562e-4ef4-b670-599ce4cb74ac`) : $t('Deze ontvanger komt voor op de gedeelde bounce of spamlijst. De ontvanger was eerder permanent onbereikbaar of heeft eerder een e-mail als spam gemarkeerd.'),
                     }),
                 );
             }
