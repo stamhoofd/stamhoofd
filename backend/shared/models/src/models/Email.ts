@@ -31,6 +31,16 @@ function errorToSimpleErrors(e: unknown) {
     }
 }
 
+export function isSoftEmailRecipientError(error: SimpleErrors) {
+    if (error.hasCode('email_skipped_unsubscribed')) {
+        return true;
+    }
+    if (error.hasCode('email_skipped_duplicate_recipient')) {
+        return true;
+    }
+    return false;
+}
+
 export class Email extends QueryableModel {
     static table = 'emails';
 
@@ -534,7 +544,7 @@ export class Email extends QueryableModel {
                             recipient.failErrorMessage = 'Duplicate recipient';
                             recipient.failError = new SimpleErrors(
                                 new SimpleError({
-                                    code: 'duplicate_recipient',
+                                    code: 'email_skipped_duplicate_recipient',
                                     message: 'Duplicate recipient',
                                     human: $t('Dit e-mailadres staat meerdere keren tussen de ontvangers en werd daarom overgeslagen'),
                                 }),
@@ -591,7 +601,12 @@ export class Email extends QueryableModel {
                                     recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
                                     recipient.lastFailedAt = new Date();
 
-                                    failedCount += 1; // todo: soft count based on error code
+                                    if (isSoftEmailRecipientError(recipient.failError)) {
+                                        softFailedCount += 1;
+                                    }
+                                    else {
+                                        failedCount += 1;
+                                    }
                                     await recipient.save();
                                     await saveStatus();
                                 }

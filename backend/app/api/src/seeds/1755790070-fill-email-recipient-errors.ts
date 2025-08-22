@@ -53,6 +53,16 @@ function stringToError(message: string) {
         );
     }
 
+    if (message === 'Invalid email address') {
+        return new SimpleErrors(
+            new SimpleError({
+                code: 'invalid_email_address',
+                message: 'Invalid email address',
+                human: $t(`cbbff442-758c-4f76-b8c2-26bb176fefcc`),
+            }),
+        );
+    }
+
     return new SimpleErrors(
         new SimpleError({
             code: 'unknown_error',
