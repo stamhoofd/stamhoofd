@@ -966,7 +966,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     static shouldCheckIfMemberIsDuplicate(put: Member): boolean {
-        if (put.details.firstName.length <= 3 && put.details.lastName.length <= 3) {
+        if (put.details.firstName === '???') {
+            return false;
+        }
+
+        if (put.details.name.length <= 3) {
             return false;
         }
 
