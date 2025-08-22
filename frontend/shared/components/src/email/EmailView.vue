@@ -38,7 +38,8 @@
                         </button>
                     </div>
                     <template #right>
-                        <span v-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
+                        <span v-if="patchedEmail.recipientCount === null && patchedEmail.recipientsErrors" class="icon error red" v-tooltip="$t('Er ging iets mis bij het aanmaken van de ontvangers: ') + ' ' + patchedEmail.recipientsErrors.getHuman()"/>
+                        <span v-else-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
                         <span v-else class="style-placeholder-skeleton" />
                     </template>
                 </STListItem>

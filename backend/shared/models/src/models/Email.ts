@@ -211,6 +211,14 @@ export class Email extends QueryableModel {
             });
         }
 
+        if (this.recipientsErrors !== null && this.recipientsStatus !== EmailRecipientsStatus.Created) {
+            throw new SimpleError({
+                code: 'invalid_recipients',
+                message: 'Failed to build recipients (count)',
+                human: $t(`Er ging iets mis bij het aanmaken van de ontvangers. Probeer je selectie aan te passen. Neem contact op als het probleem zich blijft voordoen.`) + ' ' + this.recipientsErrors.getHuman(),
+            });
+        }
+
         this.validateAttachments();
     }
 
@@ -752,6 +760,18 @@ export class Email extends QueryableModel {
             catch (e) {
                 console.error('Failed to update count for email', id);
                 console.error(e);
+
+                // Check if we have a more reliable recipientCount in the meantime
+                upToDate = await Email.getByID(id);
+
+                if (!upToDate) {
+                    return;
+                }
+                if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
+                    return;
+                }
+                upToDate.recipientsErrors = errorToSimpleErrors(e);
+                await upToDate.save();
             }
         }).catch(console.error);
     }
