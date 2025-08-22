@@ -1,6 +1,6 @@
 <template>
     <div>
-        <label :class="{'checkbox': !onlyLine, 'checkbox-line': onlyLine, manual, 'with-text': hasDefaultSlot }">
+        <label :class="{'checkbox': !onlyLine, 'checkbox-line': onlyLine, manual, 'with-text': hasDefaultSlot }" @click="handleClick">
             <input ref="checkbox" v-model="checkboxValue" type="checkbox" :disabled="disabled" :indeterminate.prop="indeterminate">
             <div>
                 <div>
@@ -65,6 +65,13 @@ export default class Checkbox extends VueComponent {
                 }
             }
         });
+    }
+
+    handleClick(e: MouseEvent) {
+        if (e.shiftKey || e.ctrlKey || e.metaKey) {
+            e.preventDefault(); // prevent text-selection behavior
+            //this.checkboxValue = !this.checkboxValue;
+        }
     }
 }
 </script>

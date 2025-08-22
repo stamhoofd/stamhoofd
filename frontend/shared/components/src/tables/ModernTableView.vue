@@ -86,8 +86,8 @@
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
                         <div v-for="row of visibleRows" :key="row.id" v-long-press="(e: any) => onRightClickRow(row, e)" class="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
-                            <label v-if="showSelection" class="selection-column" @click.stop>
-                                <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="setSelectionValue(row, $event)" />
+                            <label v-if="showSelection" class="selection-column" @click.exact.stop>
+                                <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="toggleRow(row, $event)" />
                                 <Checkbox v-else :model-value="isAllSelected" />
                             </label>
                             <div v-if="showPrefix && prefixColumn" class="prefix-column" :data-style="prefixColumn.getStyleFor(row.value, true)" :data-align="prefixColumn.align">
@@ -746,16 +746,80 @@ const emit = defineEmits<{
     click: [value: Value];
 }>();
 
+let lastRowIndex: number | null = null;
+let shiftStack: number[] = [];
+/**
+ * Set shifted values to true or false
+ */
+let shiftMode = true;
+
+function toggleRow(row: VisibleRow<Value>, setValue: boolean | null = null) {
+    console.log('Toggle row', row, setValue);
+
+    lastRowIndex = row.currentIndex;
+    const v = setValue ?? !getSelectionValue(row);
+    shiftStack = [];
+    shiftMode = v;
+    setSelectionValue(row, v);
+}
+
 async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
+    console.log('Click row', row, event);
     if (event.metaKey || event.ctrlKey) {
         // Multi select rows
-        setSelectionValue(row, !getSelectionValue(row));
+        toggleRow(row);
+        event.preventDefault();
+        return;
+    }
+
+    // Shift has lower priority over ctrl/meta
+    if (event.shiftKey && row.currentIndex) {
+        // Select all between current selection and end selection
+        if (lastRowIndex === null) {
+            toggleRow(row);
+            return;
+        }
+        const s = lastRowIndex;
+        const e = row.currentIndex;
+        const startIndex = Math.min(s, e);
+        const endIndex = Math.max(s, e);
+
+        // Revert all shiftstack items
+        for (const index of shiftStack) {
+            const r = visibleRows.value.find(r => r.currentIndex === index);
+            if (r) {
+                setSelectionValue(r, !shiftMode);
+            }
+            else {
+                const v = values.value[index] ?? null;
+                if (v) {
+                    setInvisibleSelectionValue(v, !shiftMode);
+                }
+            }
+        }
+
+        shiftStack = [];
+        console.log('Select between', startIndex, endIndex);
+        for (let i = startIndex; i <= endIndex; i++) {
+            const r = visibleRows.value.find(r => r.currentIndex === i);
+            if (r) {
+                setSelectionValue(r, shiftMode);
+                shiftStack.push(i);
+            }
+            else {
+                const v = values.value[i] ?? null;
+                if (v) {
+                    setInvisibleSelectionValue(v, shiftMode);
+                    shiftStack.push(i);
+                }
+            }
+        }
         return;
     }
 
     if (!hasClickListener.value || (wrapColumns.value && showSelection.value)) {
         // On mobile, tapping a column means selecting it when we are in editing modus
-        setSelectionValue(row, !getSelectionValue(row));
+        toggleRow(row);
         return;
     }
 
@@ -1581,6 +1645,11 @@ function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
     if (!value) {
         return;
     }
+    setInvisibleSelectionValue(value, selected);
+    row.cachedSelectionValue = selected;
+}
+
+function setInvisibleSelectionValue(value: Value, selected: boolean) {
     if (selected) {
         if (markedRowsAreSelected.value) {
             markedRows.value.set(value.id, value);
@@ -1597,8 +1666,6 @@ function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
             markedRows.value.delete(value.id);
         }
     }
-
-    row.cachedSelectionValue = selected;
 }
 
 function getExpectedSelectionLength(): number {
