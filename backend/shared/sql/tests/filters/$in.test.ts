@@ -36,11 +36,11 @@ describe('$in', () => {
         await testError({
             filter: {
                 age: {
-                    $in: Array.from({ length: 101 }, (_, i) => i + 1),
+                    $in: Array.from({ length: 201 }, (_, i) => i + 1),
                 },
             },
             filters,
-            error: 'Too many values in $in filter, maximum is 100',
+            error: 'Too many values in $in filter, maximum is 200',
         });
     });
 

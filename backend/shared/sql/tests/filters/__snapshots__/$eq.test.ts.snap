@@ -5,7 +5,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -14,7 +14,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -23,7 +23,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -39,7 +39,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enab
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -48,7 +48,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -57,7 +57,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -80,7 +80,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -89,7 +89,7 @@ exports[`$eq JSON Can check JSON booleans: SQL Query for not match filter: {"set
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -112,7 +112,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for filter: {"settings.age
   "params": [
     10,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -135,7 +135,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -144,7 +144,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     9,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -153,7 +153,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     11,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -162,7 +162,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     0,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 
@@ -171,7 +171,7 @@ exports[`$eq JSON Can compare JSON numbers: SQL Query for not match filter: {"se
   "params": [
     1,
   ],
-  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) = ?",
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE JSON_VALUE(\`test_table\`.\`settings\`,"$.enabled" RETURNING UNSIGNED ERROR ON ERROR) <=> ?",
 }
 `;
 

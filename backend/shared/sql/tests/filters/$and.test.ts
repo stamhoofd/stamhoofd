@@ -114,7 +114,7 @@ describe('$and', () => {
     it('Children that are always true are removed from the $and', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
         };
 
         await test({

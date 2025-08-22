@@ -32,7 +32,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ?',
                 params: [
                     'rex',
                 ],
@@ -51,7 +51,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ?',
                 params: [
                     'rex',
                 ],
@@ -72,7 +72,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ?',
                 params: [
                     'rex',
                 ],
@@ -97,7 +97,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',
@@ -122,7 +122,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',
@@ -155,7 +155,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',
@@ -190,7 +190,7 @@ describe('Dot syntax', () => {
             ],
             filters,
             query: {
-                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) = ? OR JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) = ? OR JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) = ?',
+                query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR) <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING UNSIGNED ERROR ON ERROR) <=> ?',
                 params: [
                     12,
                     'rex',

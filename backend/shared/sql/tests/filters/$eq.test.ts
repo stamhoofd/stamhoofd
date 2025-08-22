@@ -153,6 +153,68 @@ describe('$eq', () => {
         });
     });
 
+    it('comparing a nullable value is converted to <=> to be consistent with mysql', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        };
+
+        await testMultiple({
+            testFilters: [
+                {
+                    name: 'John Doe',
+                },
+            ],
+            filters,
+            query: {
+                query: '`default`.`name` <=> ?',
+                params: ['john doe'],
+            },
+        });
+    });
+
+    it('comparing a non-nullable value is not converted to <=>', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
+        };
+
+        await testMultiple({
+            testFilters: [
+                {
+                    name: 'John Doe',
+                },
+            ],
+            filters,
+            query: {
+                query: '`default`.`name` = ?',
+                params: ['john doe'],
+            },
+        });
+    });
+
+    it('not comparing a nullable value is converted to a NOT <=> to be consistent with mysql', async () => {
+        const filters = {
+            ...baseSQLFilterCompilers,
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+        };
+
+        await testMultiple({
+            testFilters: [
+                {
+                    name: {
+                        $neq: 'John Doe',
+                    },
+                },
+            ],
+            filters,
+            query: {
+                query: 'NOT (`default`.`name` <=> ?)',
+                params: ['john doe'],
+            },
+        });
+    });
+
     it('does not allow numbers as boolean value', async () => {
         const filters = {
             ...baseSQLFilterCompilers,

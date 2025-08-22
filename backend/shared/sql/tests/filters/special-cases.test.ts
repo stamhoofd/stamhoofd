@@ -6,7 +6,7 @@ describe('Special filter cases', () => {
     it('Can combine $and with $or', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
@@ -59,7 +59,7 @@ describe('Special filter cases', () => {
     it('Cannot stack column filters', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
+            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         };
 
