@@ -509,6 +509,11 @@ export class Email extends QueryableModel {
                         // Save at most every 5 seconds
                         return;
                     }
+                    if (succeededCount < upToDate.succeededCount || softFailedCount < upToDate.softFailedCount || failedCount < upToDate.failedCount) {
+                        // Do not update on retries
+                        return;
+                    }
+
                     lastStatusSave = new Date();
                     isSavingStatus = true;
                     upToDate.succeededCount = succeededCount;
@@ -543,6 +548,8 @@ export class Email extends QueryableModel {
                     let skipped = 0;
 
                     for (const recipient of recipients) {
+                        idPointer = recipient.id;
+
                         if (recipientsSet.has(recipient.id)) {
                             console.error('Found duplicate recipient while sending email', recipient.id);
                             softFailedCount += 1;
@@ -574,8 +581,6 @@ export class Email extends QueryableModel {
                             skipped++;
                             continue;
                         }
-
-                        idPointer = recipient.id;
 
                         let promiseResolve: (value: void | PromiseLike<void>) => void;
                         const promise = new Promise<void>((resolve) => {
