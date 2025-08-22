@@ -8,6 +8,18 @@
             </p>
             <h1>{{ title }}</h1>
 
+            <template v-if="email.emailErrors && props.email.status === EmailStatus.Failed">
+                <div v-for="(error, index) in email.emailErrors.errors" :key="index" class="error-box">
+                    {{ error.getHuman() }}
+                </div>
+            </template>
+
+            <template v-if="email.recipientsErrors && props.email.recipientsStatus === EmailRecipientsStatus.NotCreated">
+                <div v-for="(error, index) in email.recipientsErrors.errors" :key="index" class="error-box">
+                    {{ error.getHuman() }}
+                </div>
+            </template>
+
             <STList>
                 <STListItem v-if="props.email.sentAt">
                     <template #left>
@@ -50,10 +62,25 @@
                         {{ $t('ddc9d375-901c-4b2d-a257-0449083a9bfd') }}
                     </h2>
 
+                    <p v-if="props.email.failedCount + props.email.softFailedCount > 1" class="style-description-small">
+                        {{ $t('{count} emails konden niet worden verzonden', {
+                            count: props.email.failedCount + props.email.softFailedCount
+                        }) }}
+                    </p>
+                    <p v-else-if="props.email.failedCount + props.email.softFailedCount === 1" class="style-description-small">
+                        {{ $t('Eén email kon niet worden verzonden') }}
+                    </p>
+                    <p v-else-if="props.email.succeededCount && props.email.recipientCount !== props.email.succeededCount" class="style-description-small">
+                        {{ $t('Waarvan reeds {count} verzonden', { count: props.email.succeededCount }) }}
+                    </p>
+
                     <template #right>
-                        <span>
+                        <p v-if="props.email.succeededCount && props.email.succeededCount !== props.email.recipientCount" class="style-description-small">
+                            {{ formatInteger(props.email.succeededCount) }} / {{ formatInteger(props.email.recipientCount) }}
+                        </p>
+                        <p v-else class="style-description-small">
                             {{ formatInteger(props.email.recipientCount) }}
-                        </span>
+                        </p>
                         <span class="icon small arrow-right-small" />
                     </template>
                 </STListItem>
@@ -68,7 +95,7 @@
 
 <script lang="ts" setup>
 import { SafeHtmlBox } from '@stamhoofd/components';
-import { EmailPreview, replaceEmailHtml } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipientsStatus, EmailStatus, replaceEmailHtml } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 

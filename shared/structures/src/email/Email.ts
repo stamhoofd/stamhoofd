@@ -11,6 +11,7 @@ import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform } from '../Platform.js';
 import { EmailTemplate } from './EmailTemplate.js';
+import { SimpleErrors } from '@simonbackx/simple-errors';
 
 export enum EmailRecipientFilterType {
     RegistrationMembers = 'RegistrationMembers',
@@ -89,8 +90,14 @@ export class Email extends AutoEncoder {
     @field({ decoder: new EnumDecoder(EmailStatus) })
     status = EmailStatus.Draft;
 
+    @field({ decoder: SimpleErrors, nullable: true, ...NextVersion })
+    emailErrors: SimpleErrors | null = null;
+
     @field({ decoder: new EnumDecoder(EmailRecipientsStatus) })
     recipientsStatus = EmailRecipientsStatus.NotCreated;
+
+    @field({ decoder: SimpleErrors, nullable: true, ...NextVersion })
+    recipientsErrors: SimpleErrors | null = null;
 
     @field({ decoder: AnyDecoder })
     json = {};
@@ -109,6 +116,18 @@ export class Email extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder, nullable: true })
     recipientCount: number | null = null;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    succeededCount = 0;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    softFailedCount = 0;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    failedCount = 0;
+
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    membersCount = 0;
 
     @field({ decoder: new ArrayDecoder(EmailAttachment) })
     attachments: EmailAttachment[] = [];

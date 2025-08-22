@@ -45,7 +45,7 @@ import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, SortItemDirection,
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
-import EmailView from './EmailView.vue';
+import EmailOverview from './EmailOverview.vue';
 
 type ObjectType = EmailPreview;
 
@@ -80,7 +80,7 @@ defineRoutes([
     {
         name: Routes.Email,
         url: '@id',
-        component: EmailView as ComponentOptions,
+        component: EmailOverview as ComponentOptions,
         params: {
             id: String,
         },

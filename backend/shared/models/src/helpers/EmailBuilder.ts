@@ -253,7 +253,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 if (email.callback) {
                     email.callback(
                         new SimpleError({
-                            code: 'email_hard_bounce',
+                            code: 'email_skipped_hard_bounce',
                             message: 'Recipient has hard bounced',
                             human: $t(`af49a569-ce88-48d9-ac37-81e594e16c03`),
                         }),
@@ -267,7 +267,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 if (email.callback) {
                     email.callback(
                         new SimpleError({
-                            code: 'email_spam',
+                            code: 'email_skipped_spam',
                             message: 'Recipient has marked as spam',
                             human: $t(`e6523f56-397e-4127-8bf7-8396f6f25a62`),
                         }),
@@ -282,8 +282,9 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 if (email.callback) {
                     email.callback(
                         new SimpleError({
-                            code: 'email_unsubscribed',
+                            code: 'email_skipped_unsubscribed',
                             message: unsubscribe.unsubscribedAll ? 'Recipient has unsubscribed' : (unsubscribe.hardBounce ? 'Recipient has hard bounced' : (unsubscribe.markedAsSpam ? 'Recipient has marked as spam' : 'Recipient has unsubscribed from marketing')),
+                            human: $t('De ontvanger heeft zich afgemeld voor e-mails'),
                         }),
                     );
                 }
