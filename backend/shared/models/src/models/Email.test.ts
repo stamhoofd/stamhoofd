@@ -109,7 +109,7 @@ describe('Model.Email', () => {
                 }),
             ],
         });
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -165,7 +165,7 @@ describe('Model.Email', () => {
         // It should automatically retry to send the email
         EmailMocker.broadcast.failNext(new Error('This is a simulated network error'));
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -212,7 +212,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await expect(model.send()).toReject();
+        await expect(model.queueForSending(true)).toReject();
         await model.refresh();
 
         // Check if it was sent correctly
@@ -256,7 +256,7 @@ describe('Model.Email', () => {
         EmailMocker.broadcast.failNext(new Error('This is a simulated network error 5'));
         EmailMocker.broadcast.failNext(new Error('This is a simulated network error 6'));
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -306,7 +306,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -346,7 +346,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -388,7 +388,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -437,7 +437,7 @@ describe('Model.Email', () => {
             ],
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -484,7 +484,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -528,7 +528,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -577,7 +577,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -628,7 +628,7 @@ describe('Model.Email', () => {
             fromName: 'My Platform',
         });
 
-        await model.send();
+        await model.queueForSending(true);
         await model.refresh();
 
         // Check if it was sent correctly
@@ -679,7 +679,7 @@ describe('Model.Email', () => {
                 subject: '{{fromAddress}}',
             });
 
-            await model.send();
+            await model.queueForSending(true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -735,7 +735,7 @@ describe('Model.Email', () => {
                 subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
             });
 
-            await model.send();
+            await model.queueForSending(true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -793,7 +793,7 @@ describe('Model.Email', () => {
                 subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
             });
 
-            await model.send();
+            await model.queueForSending(true);
             await model.refresh();
 
             // Check if it was sent correctly
@@ -843,7 +843,7 @@ describe('Model.Email', () => {
                 subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
             });
 
-            await model.send();
+            await model.queueForSending(true);
             await model.refresh();
 
             // Check if it was sent correctly

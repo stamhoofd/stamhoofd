@@ -535,7 +535,7 @@
     /**
         Small optimizations for modern browsers only
     */
-    &:has(> .icon), &:has(> svg) {
+    &.flex, &:has(> .icon), &:has(> svg) {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -546,7 +546,7 @@
     /**
         Small optimizations for modern browsers only
     */
-    &:has(> .icon), &:has(> svg) {
+    &.flex, &:has(> .icon), &:has(> svg) {
         display: flex;
         align-items: center;
         gap: 4px;

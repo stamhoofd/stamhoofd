@@ -6,7 +6,7 @@ import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
-import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
+import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
@@ -341,11 +341,10 @@ export class Email extends QueryableModel {
         return true;
     }
 
-    async send(): Promise<Email | null> {
-        this.throwIfNotReadyToSend();
+    async lock<T>(callback: (upToDate: Email, options: QueueHandlerOptions) => Promise<T> | T): Promise<T> {
         const id = this.id;
-        return await QueueHandler.schedule('send-email', async function (this: unknown, { abort }) {
-            let upToDate = await Email.getByID(id);
+        return await QueueHandler.schedule('lock-email-' + id, async (options) => {
+            const upToDate = await Email.getByID(id);
             if (!upToDate) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -353,371 +352,404 @@ export class Email extends QueryableModel {
                     human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
                 });
             }
-            if (upToDate.status === EmailStatus.Sent) {
-                // Already done
-                // In other cases -> queue has stopped and we can retry
-                return upToDate;
-            }
+            const c = await callback(upToDate, options);
+            this.copyFrom(upToDate);
+            return c;
+        });
+    }
 
-            if (upToDate.status === EmailStatus.Sending) {
-                // This is an automatic retry.
-                if (upToDate.emailType) {
-                    // Not eligible for retry
-                    upToDate.status = EmailStatus.Failed;
-                    await upToDate.save();
+    async queueForSending(waitForSending = false) {
+        await this.lock(async (upToDate) => {
+            if (upToDate.status === EmailStatus.Draft) {
+                upToDate.status = EmailStatus.Queued;
+            }
+            await upToDate.save();
+        });
+        if (waitForSending) {
+            await this.resumeSending();
+        }
+        else {
+            this.resumeSending().catch(console.error);
+        }
+    }
+
+    async resumeSending(): Promise<Email | null> {
+        this.throwIfNotReadyToSend();
+        const id = this.id;
+        return await QueueHandler.schedule('send-email', async ({ abort }) => {
+            return await this.lock(async function (upToDate: Email) {
+                if (upToDate.status === EmailStatus.Sent) {
+                    // Already done
+                    // In other cases -> queue has stopped and we can retry
                     return upToDate;
                 }
-                if (upToDate.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
-                    // Too long
-                    console.error('Email has been sending for too long. Marking as failed...', upToDate.id);
-                    upToDate.status = EmailStatus.Failed;
-                    await upToDate.save();
+
+                if (upToDate.status === EmailStatus.Sending) {
+                    // This is an automatic retry.
+                    if (upToDate.emailType) {
+                        // Not eligible for retry
+                        upToDate.status = EmailStatus.Failed;
+                        await upToDate.save();
+                        return upToDate;
+                    }
+                    if (upToDate.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
+                        // Too long
+                        console.error('Email has been sending for too long. Marking as failed...', upToDate.id);
+                        upToDate.status = EmailStatus.Failed;
+                        await upToDate.save();
+                        return upToDate;
+                    }
+                }
+                else if (upToDate.status !== EmailStatus.Queued) {
+                    console.error('Email is not queued or sending, cannot send', upToDate.id, upToDate.status);
                     return upToDate;
                 }
-            }
-            const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
-            let from = upToDate.getDefaultFromAddress(organization);
-            let replyTo: EmailInterfaceRecipient | null = upToDate.getFromAddress();
-            const attachments: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[] = [];
-            let succeededCount = 0;
-            let softFailedCount = 0;
-            let failedCount = 0;
+                const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
+                let from = upToDate.getDefaultFromAddress(organization);
+                let replyTo: EmailInterfaceRecipient | null = upToDate.getFromAddress();
+                const attachments: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[] = [];
+                let succeededCount = 0;
+                let softFailedCount = 0;
+                let failedCount = 0;
 
-            try {
-                upToDate.throwIfNotReadyToSend();
+                try {
+                    upToDate.throwIfNotReadyToSend();
 
-                if (!from) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        message: 'Missing from',
-                        human: $t(`e92cd077-b0f1-4b0a-82a0-8a8baa82e73a`),
-                    });
-                }
-
-                // Can we send from this e-mail or reply-to?
-                if (upToDate.fromAddress && await canSendFromEmail(upToDate.fromAddress, organization ?? null)) {
-                    from = upToDate.getFromAddress();
-                    replyTo = null;
-                }
-
-                abort.throwIfAborted();
-                upToDate.status = EmailStatus.Sending;
-                upToDate.sentAt = upToDate.sentAt ?? new Date();
-                await upToDate.save();
-
-                // Create recipients if not yet created
-                await upToDate.buildRecipients();
-                abort.throwIfAborted();
-
-                // Refresh model
-                upToDate = await Email.getByID(id);
-                if (!upToDate) {
-                    throw new SimpleError({
-                        code: 'not_found',
-                        message: 'Email not found',
-                        human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
-                    });
-                }
-
-                if (upToDate.recipientsStatus !== EmailRecipientsStatus.Created) {
-                    throw new SimpleError({
-                        code: 'recipients_not_created',
-                        message: 'Failed to create recipients',
-                        human: $t(`f660b2eb-e382-4d21-86e4-673ca7bc2d4a`),
-                    });
-                }
-
-                // Create a buffer of all attachments
-                for (const attachment of upToDate.attachments) {
-                    if (!attachment.content && !attachment.file) {
-                        console.warn('Attachment without content found, skipping', attachment);
-                        continue;
-                    }
-
-                    let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
-
-                    if (attachment.contentType === 'application/pdf') {
-                        // tmp solution for pdf only
-                        filename += '.pdf';
-                    }
-
-                    if (attachment.file?.name) {
-                        filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-                    }
-
-                    // Correct file name if needed
-                    if (attachment.filename) {
-                        filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-                    }
-
-                    if (attachment.content) {
-                        attachments.push({
-                            filename: filename,
-                            content: attachment.content,
-                            contentType: attachment.contentType ?? undefined,
-                            encoding: 'base64',
+                    if (!from) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            message: 'Missing from',
+                            human: $t(`e92cd077-b0f1-4b0a-82a0-8a8baa82e73a`),
                         });
                     }
-                    else {
-                        // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
-                        const withSigned = await attachment.file!.withSignedUrl();
-                        if (!withSigned || !withSigned.signedUrl) {
-                            throw new SimpleError({
-                                code: 'attachment_not_found',
-                                message: 'Attachment not found',
-                                human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
-                            });
+
+                    // Can we send from this e-mail or reply-to?
+                    if (upToDate.fromAddress && await canSendFromEmail(upToDate.fromAddress, organization ?? null)) {
+                        from = upToDate.getFromAddress();
+                        replyTo = null;
+                    }
+
+                    abort.throwIfAborted();
+                    upToDate.status = EmailStatus.Sending;
+                    upToDate.sentAt = upToDate.sentAt ?? new Date();
+                    await upToDate.save();
+
+                    // Create recipients if not yet created
+                    await upToDate.buildRecipients();
+                    abort.throwIfAborted();
+
+                    // Refresh model
+                    const c = (await Email.getByID(id))!;
+                    if (!c) {
+                        throw new SimpleError({
+                            code: 'not_found',
+                            message: 'Email not found',
+                            human: $t(`55899a7c-f3d4-43fe-a431-70a3a9e78e34`),
+                        });
+                    }
+                    upToDate.copyFrom(c);
+
+                    if (upToDate.recipientsStatus !== EmailRecipientsStatus.Created) {
+                        throw new SimpleError({
+                            code: 'recipients_not_created',
+                            message: 'Failed to create recipients',
+                            human: $t(`f660b2eb-e382-4d21-86e4-673ca7bc2d4a`),
+                        });
+                    }
+
+                    // Create a buffer of all attachments
+                    for (const attachment of upToDate.attachments) {
+                        if (!attachment.content && !attachment.file) {
+                            console.warn('Attachment without content found, skipping', attachment);
+                            continue;
                         }
 
-                        const filePath = withSigned.signedUrl;
-                        let fileBuffer: Buffer | null = null;
+                        let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
+
+                        if (attachment.contentType === 'application/pdf') {
+                            // tmp solution for pdf only
+                            filename += '.pdf';
+                        }
+
+                        if (attachment.file?.name) {
+                            filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                        }
+
+                        // Correct file name if needed
+                        if (attachment.filename) {
+                            filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                        }
+
+                        if (attachment.content) {
+                            attachments.push({
+                                filename: filename,
+                                content: attachment.content,
+                                contentType: attachment.contentType ?? undefined,
+                                encoding: 'base64',
+                            });
+                        }
+                        else {
+                            // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
+                            const withSigned = await attachment.file!.withSignedUrl();
+                            if (!withSigned || !withSigned.signedUrl) {
+                                throw new SimpleError({
+                                    code: 'attachment_not_found',
+                                    message: 'Attachment not found',
+                                    human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                                });
+                            }
+
+                            const filePath = withSigned.signedUrl;
+                            let fileBuffer: Buffer | null = null;
+                            try {
+                                const response = await fetch(filePath);
+                                fileBuffer = Buffer.from(await response.arrayBuffer());
+                            }
+                            catch (e) {
+                                throw new SimpleError({
+                                    code: 'attachment_not_found',
+                                    message: 'Attachment not found',
+                                    human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                                });
+                            }
+
+                            attachments.push({
+                                filename: filename,
+                                contentType: attachment.contentType ?? undefined,
+                                content: fileBuffer,
+                            });
+                        }
+                    }
+
+                    // Start actually sending in batches of recipients that are not yet sent
+                    let idPointer = '';
+                    const batchSize = 100;
+                    const recipientsSet = new Set<string>();
+                    let isSavingStatus = false;
+                    let lastStatusSave = new Date();
+
+                    async function saveStatus() {
+                        if (!upToDate) {
+                            return;
+                        }
+                        if (isSavingStatus) {
+                            return;
+                        }
+                        if ((new Date().getTime() - lastStatusSave.getTime()) < 1000 * 5) {
+                            // Save at most every 5 seconds
+                            return;
+                        }
+                        if (succeededCount < upToDate.succeededCount || softFailedCount < upToDate.softFailedCount || failedCount < upToDate.failedCount) {
+                            // Do not update on retries
+                            return;
+                        }
+
+                        lastStatusSave = new Date();
+                        isSavingStatus = true;
+                        upToDate.succeededCount = succeededCount;
+                        upToDate.softFailedCount = softFailedCount;
+                        upToDate.failedCount = failedCount;
+
                         try {
-                            const response = await fetch(filePath);
-                            fileBuffer = Buffer.from(await response.arrayBuffer());
+                            await upToDate.save();
                         }
-                        catch (e) {
-                            throw new SimpleError({
-                                code: 'attachment_not_found',
-                                message: 'Attachment not found',
-                                human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
-                            });
+                        finally {
+                            isSavingStatus = false;
+                        }
+                    }
+
+                    while (true) {
+                        abort.throwIfAborted();
+                        const data = await SQL.select()
+                            .from('email_recipients')
+                            .where('emailId', upToDate.id)
+                            .where('id', SQLWhereSign.Greater, idPointer)
+                            .orderBy(SQL.column('id'), 'ASC')
+                            .limit(batchSize)
+                            .fetch();
+
+                        const recipients = EmailRecipient.fromRows(data, 'email_recipients');
+
+                        if (recipients.length === 0) {
+                            break;
                         }
 
-                        attachments.push({
-                            filename: filename,
-                            contentType: attachment.contentType ?? undefined,
-                            content: fileBuffer,
-                        });
+                        const sendingPromises: Promise<void>[] = [];
+                        let skipped = 0;
+
+                        for (const recipient of recipients) {
+                            idPointer = recipient.id;
+
+                            if (recipientsSet.has(recipient.id)) {
+                                console.error('Found duplicate recipient while sending email', recipient.id);
+                                softFailedCount += 1;
+
+                                recipient.failCount += 1;
+                                recipient.failErrorMessage = 'Duplicate recipient';
+                                recipient.failError = new SimpleErrors(
+                                    new SimpleError({
+                                        code: 'email_skipped_duplicate_recipient',
+                                        message: 'Duplicate recipient',
+                                        human: $t('Dit e-mailadres staat meerdere keren tussen de ontvangers en werd daarom overgeslagen'),
+                                    }),
+                                );
+
+                                recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
+                                recipient.lastFailedAt = new Date();
+                                await recipient.save();
+
+                                await saveStatus();
+                                skipped++;
+                                continue;
+                            }
+                            recipientsSet.add(recipient.email);
+
+                            if (recipient.sentAt) {
+                                // Already sent
+                                succeededCount += 1;
+                                await saveStatus();
+                                skipped++;
+                                continue;
+                            }
+
+                            let promiseResolve: (value: void | PromiseLike<void>) => void;
+                            const promise = new Promise<void>((resolve) => {
+                                promiseResolve = resolve;
+                            });
+
+                            const virtualRecipient = recipient.getRecipient();
+
+                            let resolved = false;
+                            const callback = async (error: Error | null) => {
+                                if (resolved) {
+                                    return;
+                                }
+                                resolved = true;
+
+                                try {
+                                    if (error === null) {
+                                        // Mark saved
+                                        recipient.sentAt = new Date();
+
+                                        // Update repacements that have been generated
+                                        recipient.replacements = virtualRecipient.replacements;
+
+                                        succeededCount += 1;
+                                        await recipient.save();
+                                        await saveStatus();
+                                    }
+                                    else {
+                                        recipient.failCount += 1;
+                                        recipient.failErrorMessage = error.message;
+                                        recipient.failError = errorToSimpleErrors(error);
+                                        recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
+                                        recipient.lastFailedAt = new Date();
+
+                                        if (isSoftEmailRecipientError(recipient.failError)) {
+                                            softFailedCount += 1;
+                                        }
+                                        else {
+                                            failedCount += 1;
+                                        }
+                                        await recipient.save();
+                                        await saveStatus();
+                                    }
+                                }
+                                catch (e) {
+                                    console.error(e);
+                                }
+                                promiseResolve();
+                            };
+
+                            // Do send the email
+                            // Create e-mail builder
+                            const builder = await getEmailBuilder(organization ?? null, {
+                                recipients: [
+                                    virtualRecipient,
+                                ],
+                                from,
+                                replyTo,
+                                subject: upToDate.subject!,
+                                html: upToDate.html!,
+                                type: upToDate.emailType ? 'transactional' : 'broadcast',
+                                attachments,
+                                callback(error: Error | null) {
+                                    callback(error).catch(console.error);
+                                },
+                            });
+                            abort.throwIfAborted(); // do not schedule if aborted
+                            EmailClass.schedule(builder);
+                            sendingPromises.push(promise);
+                        }
+
+                        if (sendingPromises.length > 0 || skipped > 0) {
+                            await Promise.all(sendingPromises);
+                        }
+                        else {
+                            break;
+                        }
                     }
                 }
-
-                // Start actually sending in batches of recipients that are not yet sent
-                let idPointer = '';
-                const batchSize = 100;
-                const recipientsSet = new Set<string>();
-                let isSavingStatus = false;
-                let lastStatusSave = new Date();
-
-                async function saveStatus() {
+                catch (e) {
                     if (!upToDate) {
-                        return;
-                    }
-                    if (isSavingStatus) {
-                        return;
-                    }
-                    if ((new Date().getTime() - lastStatusSave.getTime()) < 1000 * 5) {
-                        // Save at most every 5 seconds
-                        return;
-                    }
-                    if (succeededCount < upToDate.succeededCount || softFailedCount < upToDate.softFailedCount || failedCount < upToDate.failedCount) {
-                        // Do not update on retries
-                        return;
+                        throw e;
                     }
 
-                    lastStatusSave = new Date();
-                    isSavingStatus = true;
                     upToDate.succeededCount = succeededCount;
                     upToDate.softFailedCount = softFailedCount;
                     upToDate.failedCount = failedCount;
 
-                    try {
+                    if (isAbortedError(e) || ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))) {
+                        // Keep sending status: we'll resume after the reboot
                         await upToDate.save();
-                    }
-                    finally {
-                        isSavingStatus = false;
-                    }
-                }
-
-                while (true) {
-                    abort.throwIfAborted();
-                    const data = await SQL.select()
-                        .from('email_recipients')
-                        .where('emailId', upToDate.id)
-                        .where('id', SQLWhereSign.Greater, idPointer)
-                        .orderBy(SQL.column('id'), 'ASC')
-                        .limit(batchSize)
-                        .fetch();
-
-                    const recipients = EmailRecipient.fromRows(data, 'email_recipients');
-
-                    if (recipients.length === 0) {
-                        break;
+                        throw e;
                     }
 
-                    const sendingPromises: Promise<void>[] = [];
-                    let skipped = 0;
-
-                    for (const recipient of recipients) {
-                        idPointer = recipient.id;
-
-                        if (recipientsSet.has(recipient.id)) {
-                            console.error('Found duplicate recipient while sending email', recipient.id);
-                            softFailedCount += 1;
-
-                            recipient.failCount += 1;
-                            recipient.failErrorMessage = 'Duplicate recipient';
-                            recipient.failError = new SimpleErrors(
-                                new SimpleError({
-                                    code: 'email_skipped_duplicate_recipient',
-                                    message: 'Duplicate recipient',
-                                    human: $t('Dit e-mailadres staat meerdere keren tussen de ontvangers en werd daarom overgeslagen'),
-                                }),
-                            );
-
-                            recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
-                            recipient.lastFailedAt = new Date();
-                            await recipient.save();
-
-                            await saveStatus();
-                            skipped++;
-                            continue;
-                        }
-                        recipientsSet.add(recipient.email);
-
-                        if (recipient.sentAt) {
-                            // Already sent
-                            succeededCount += 1;
-                            await saveStatus();
-                            skipped++;
-                            continue;
-                        }
-
-                        let promiseResolve: (value: void | PromiseLike<void>) => void;
-                        const promise = new Promise<void>((resolve) => {
-                            promiseResolve = resolve;
-                        });
-
-                        const virtualRecipient = recipient.getRecipient();
-
-                        let resolved = false;
-                        const callback = async (error: Error | null) => {
-                            if (resolved) {
-                                return;
-                            }
-                            resolved = true;
-
-                            try {
-                                if (error === null) {
-                                    // Mark saved
-                                    recipient.sentAt = new Date();
-
-                                    // Update repacements that have been generated
-                                    recipient.replacements = virtualRecipient.replacements;
-
-                                    succeededCount += 1;
-                                    await recipient.save();
-                                    await saveStatus();
-                                }
-                                else {
-                                    recipient.failCount += 1;
-                                    recipient.failErrorMessage = error.message;
-                                    recipient.failError = errorToSimpleErrors(error);
-                                    recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
-                                    recipient.lastFailedAt = new Date();
-
-                                    if (isSoftEmailRecipientError(recipient.failError)) {
-                                        softFailedCount += 1;
-                                    }
-                                    else {
-                                        failedCount += 1;
-                                    }
-                                    await recipient.save();
-                                    await saveStatus();
-                                }
-                            }
-                            catch (e) {
-                                console.error(e);
-                            }
-                            promiseResolve();
-                        };
-
-                        // Do send the email
-                        // Create e-mail builder
-                        const builder = await getEmailBuilder(organization ?? null, {
-                            recipients: [
-                                virtualRecipient,
-                            ],
-                            from,
-                            replyTo,
-                            subject: upToDate.subject!,
-                            html: upToDate.html!,
-                            type: upToDate.emailType ? 'transactional' : 'broadcast',
-                            attachments,
-                            callback(error: Error | null) {
-                                callback(error).catch(console.error);
-                            },
-                        });
-                        abort.throwIfAborted(); // do not schedule if aborted
-                        EmailClass.schedule(builder);
-                        sendingPromises.push(promise);
-                    }
-
-                    if (sendingPromises.length > 0 || skipped > 0) {
-                        await Promise.all(sendingPromises);
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
-            catch (e) {
-                if (!upToDate) {
+                    upToDate.emailErrors = errorToSimpleErrors(e);
+                    upToDate.status = EmailStatus.Failed;
+                    await upToDate.save();
                     throw e;
+                }
+
+                if (upToDate.recipientCount === 0 && upToDate.userId === null) {
+                    // We only delete automated emails (email type) if they have no recipients
+                    console.log('No recipients found for email ', upToDate.id, ' deleting...');
+                    await upToDate.delete();
+                    return null;
+                }
+
+                console.log('Finished sending email', upToDate.id);
+                // Mark email as sent
+
+                if ((succeededCount + failedCount + softFailedCount) === 0) {
+                    upToDate.status = EmailStatus.Failed;
+                    upToDate.emailErrors = new SimpleErrors(
+                        new SimpleError({
+                            code: 'no_recipients',
+                            message: 'No recipients',
+                            human: $t(`Geen ontvangers gevonden`),
+                        }),
+                    );
+                }
+                else {
+                    upToDate.status = EmailStatus.Sent;
+                    upToDate.emailErrors = null;
                 }
 
                 upToDate.succeededCount = succeededCount;
                 upToDate.softFailedCount = softFailedCount;
                 upToDate.failedCount = failedCount;
 
-                if (isAbortedError(e) || ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))) {
-                    // Keep sending status: we'll resume after the reboot
-                    await upToDate.save();
-                    throw e;
-                }
-
-                upToDate.emailErrors = errorToSimpleErrors(e);
-                upToDate.status = EmailStatus.Failed;
                 await upToDate.save();
-                throw e;
-            }
-
-            if (upToDate.recipientCount === 0 && upToDate.userId === null) {
-                // We only delete automated emails (email type) if they have no recipients
-                console.log('No recipients found for email ', upToDate.id, ' deleting...');
-                await upToDate.delete();
-                return null;
-            }
-
-            console.log('Finished sending email', upToDate.id);
-            // Mark email as sent
-
-            if ((succeededCount + failedCount + softFailedCount) === 0) {
-                upToDate.status = EmailStatus.Failed;
-                upToDate.emailErrors = new SimpleErrors(
-                    new SimpleError({
-                        code: 'no_recipients',
-                        message: 'No recipients',
-                        human: $t(`Geen ontvangers gevonden`),
-                    }),
-                );
-            }
-            else {
-                upToDate.status = EmailStatus.Sent;
-                upToDate.emailErrors = null;
-            }
-
-            upToDate.succeededCount = succeededCount;
-            upToDate.softFailedCount = softFailedCount;
-            upToDate.failedCount = failedCount;
-
-            await upToDate.save();
-            return upToDate;
+                return upToDate;
+            });
         });
     }
 
     updateCount() {
         const id = this.id;
-        QueueHandler.schedule('email-count-' + this.id, async function () {
+        QueueHandler.abort('email-count-' + this.id);
+        QueueHandler.schedule('email-count-' + this.id, async function ({ abort }) {
             let upToDate = await Email.getByID(id);
 
             if (!upToDate || upToDate.sentAt || !upToDate.id || upToDate.status !== EmailStatus.Draft) {
@@ -746,10 +778,12 @@ export class Email extends QueryableModel {
                         search: subfilter.search,
                     });
 
+                    abort.throwIfAborted();
                     const c = await loader.count(request, subfilter.subfilter);
 
                     count += c;
                 }
+                abort.throwIfAborted();
 
                 // Check if we have a more reliable recipientCount in the meantime
                 upToDate = await Email.getByID(id);
@@ -764,6 +798,9 @@ export class Email extends QueryableModel {
                 await upToDate.save();
             }
             catch (e) {
+                if (isAbortedError(e)) {
+                    return;
+                }
                 console.error('Failed to update count for email', id);
                 console.error(e);
 
@@ -780,31 +817,6 @@ export class Email extends QueryableModel {
                 await upToDate.save();
             }
         }).catch(console.error);
-    }
-
-    async invalidateRecipients() {
-        const id = this.id;
-        await QueueHandler.schedule('email-build-recipients-' + this.id, async function ({ abort }) {
-            const upToDate = await Email.getByID(id);
-
-            if (!upToDate || !upToDate.id) {
-                return;
-            }
-
-            if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
-                return;
-            }
-
-            if (upToDate.status === EmailStatus.Sent) {
-                return;
-            }
-
-            abort.throwIfAborted();
-
-            // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
-            upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
-            await upToDate.save();
-        });
     }
 
     async buildRecipients() {

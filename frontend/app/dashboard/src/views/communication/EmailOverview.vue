@@ -3,9 +3,9 @@
         <STNavigationBar :title="title" />
 
         <main class="center">
-            <p v-if="status" :class="'style-title-prefix ' + (status.theme ?? '')">
+            <p v-if="status" :class="'style-title-prefix flex ' + (status.theme ?? '')">
                 <span>{{ status.text }}</span>
-                <ProgressRing v-if="status.progress" :radius="8" :stroke="2" :progress="status.progress" />
+                <ProgressRing v-if="status.progress !== undefined" :radius="7" :stroke="2" :progress="status.progress" :loading="status.progress === 0" />
                 <span v-else-if="status.icon" :class="'icon small ' + status.icon" />
             </p>
             <h1>{{ title }}</h1>
@@ -98,7 +98,7 @@
 <script lang="ts" setup>
 import { ProgressRing, SafeHtmlBox, useInterval } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus, replaceEmailHtml } from '@stamhoofd/structures';
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
 
@@ -123,7 +123,7 @@ const replacedHtml = computed(() => {
 
 const { updateEmail } = useUpdateEmail(props.email);
 useInterval(async ({ stop }) => {
-    if (props.email.status !== EmailStatus.Sending) {
+    if (props.email.status !== EmailStatus.Sending && props.email.status !== EmailStatus.Queued) {
         stop();
         return;
     }

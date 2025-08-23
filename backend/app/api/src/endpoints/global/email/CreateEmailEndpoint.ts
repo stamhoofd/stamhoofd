@@ -120,8 +120,14 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await model.buildExampleRecipient();
         model.updateCount();
 
-        if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
-            model.send().catch(console.error);
+        if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {
+            if (!await Context.auth.canSendEmail(model)) {
+                throw Context.auth.error({
+                    message: 'Cannot send emails from this sender',
+                    human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
+                });
+            }
+            await model.queueForSending();
         }
 
         return new Response(await model.getPreviewStructure());

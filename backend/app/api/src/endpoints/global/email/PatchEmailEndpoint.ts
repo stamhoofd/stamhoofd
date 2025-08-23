@@ -129,7 +129,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             model.recipientFilter = patchObject(model.recipientFilter, request.body.recipientFilter);
-            await model.invalidateRecipients();
             rebuild = true;
         }
 
@@ -149,7 +148,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             model.updateCount();
         }
 
-        if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent) {
+        if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {
             if (!await Context.auth.canSendEmail(model)) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
@@ -185,10 +184,8 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 }
             }
 
-            model.send().catch(console.error);
-
             // Preview the sending status
-            model.status = EmailStatus.Sending;
+            await model.queueForSending();
         }
 
         return new Response(await model.getPreviewStructure());

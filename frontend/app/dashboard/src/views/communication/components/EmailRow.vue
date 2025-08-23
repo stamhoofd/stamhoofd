@@ -1,8 +1,8 @@
 <template>
     <STListItem class="right-stack smartphone-wrap-left" :selectable="true">
-        <p v-if="status" :class="'style-title-prefix-list ' + (status.theme ?? '')">
+        <p v-if="status" :class="'style-title-prefix-list flex ' + (status.theme ?? '')">
             <span>{{ status.text }}</span>
-            <ProgressRing v-if="status.progress" :radius="7" :stroke="2" :progress="status.progress" />
+            <ProgressRing v-if="status.progress !== undefined" :radius="7" :stroke="2" :progress="status.progress" :loading="status.progress === 0" />
             <span v-else-if="status.icon" :class="'icon tiny ' + status.icon" />
         </p>
         <h3 class="style-title-list large">
@@ -24,9 +24,9 @@
 
 <script setup lang="ts">
 import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useEmailStatus } from '../hooks/useEmailStatus';
-import { ProgressRing, useInterval } from '@stamhoofd/components';
+import { Spinner, ProgressRing, useInterval } from '@stamhoofd/components';
 import { useUpdateEmail } from '../hooks/useUpdateEmail';
 
 const props = defineProps<{
@@ -40,7 +40,7 @@ const status = computed(() => {
 
 const { updateEmail } = useUpdateEmail(props.email);
 useInterval(async ({ stop }) => {
-    if (props.email.status !== EmailStatus.Sending) {
+    if (props.email.status !== EmailStatus.Sending && props.email.status !== EmailStatus.Queued) {
         stop();
         return;
     }

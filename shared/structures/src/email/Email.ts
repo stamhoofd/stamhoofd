@@ -36,6 +36,10 @@ export function getExampleRecipient(type: EmailRecipientFilterType | null = null
 
 export enum EmailStatus {
     Draft = 'Draft',
+    /**
+     * Queued to be sent any moment now
+     */
+    Queued = 'Queued',
     Sending = 'Sending',
     Sent = 'Sent',
     Deleted = 'Deleted',

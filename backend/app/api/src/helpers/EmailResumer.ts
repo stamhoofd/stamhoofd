@@ -6,7 +6,7 @@ import { ContextInstance } from './Context';
 export async function resumeEmails() {
     const query = SQL.select()
         .from(SQL.table(Email.table))
-        .where(SQL.column('status'), EmailStatus.Sending);
+        .where(SQL.column('status'), [EmailStatus.Sending, EmailStatus.Queued]);
 
     const result = await query.fetch();
     const emails = Email.fromRows(result, Email.table);
@@ -28,7 +28,7 @@ export async function resumeEmails() {
 
         try {
             await ContextInstance.startForUser(user, organization, async () => {
-                await email.send();
+                await email.resumeSending();
             });
         }
         catch (e) {

@@ -17,6 +17,13 @@ export function useEmailStatus() {
                     theme: 'theme-secundary',
                     progress: email.recipientCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.recipientCount) : undefined,
                 };
+            case EmailStatus.Queued:
+                return {
+                    text: $t('In wachtrij om te verzenden'),
+                    icon: 'reverse',
+                    theme: 'theme-secundary',
+                    progress: 0,
+                };
             case EmailStatus.Sent:
                 return {
                     text: email.sentAt ? (Formatter.dateWithDay(email.sentAt, false)) : $t('5101ef12-a812-4748-91dd-778c0a3fe482'),
