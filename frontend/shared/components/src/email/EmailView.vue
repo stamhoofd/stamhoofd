@@ -74,7 +74,7 @@
                 <STList v-if="patchedEmail.attachments.length > 0">
                     <STListItem v-for="attachment in patchedEmail.attachments" :key="attachment.id" class="file-list-item">
                         <template #left>
-                            <span :class="'icon '+getFileIcon(attachment)" />
+                            <span :class="'icon '+attachment.icon" />
                         </template>
                         <h3 class="style-title-list" v-text="attachment.filename" />
                         <p class="style-description-small">
@@ -622,22 +622,6 @@ async function showToMenu(event: MouseEvent) {
     ]);
 
     menu.show({ button: event.currentTarget as HTMLElement }).catch(console.error);
-}
-
-function getFileIcon(file: EmailAttachment) {
-    if (file.filename.endsWith('.png') || file.filename.endsWith('.jpg') || file.filename.endsWith('.jpeg') || file.filename.endsWith('.gif')) {
-        return 'file-image';
-    }
-    if (file.filename.endsWith('.pdf')) {
-        return 'file-pdf color-pdf';
-    }
-    if (file.filename.endsWith('.xlsx') || file.filename.endsWith('.xls')) {
-        return 'file-excel color-excel';
-    }
-    if (file.filename.endsWith('.docx') || file.filename.endsWith('.doc')) {
-        return 'file-word color-word';
-    }
-    return 'file';
 }
 
 function deleteAttachment(attachment: EmailAttachment) {

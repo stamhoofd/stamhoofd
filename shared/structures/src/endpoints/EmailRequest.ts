@@ -185,6 +185,10 @@ export class EmailAttachment extends AutoEncoder {
         // Calculates bytes of base64 string
         return Math.ceil((this.content.length / 4) * 3) - (this.content.endsWith('==') ? 2 : this.content.endsWith('=') ? 1 : 0);
     }
+
+    get icon() {
+        return this.file?.icon ?? 'file';
+    }
 }
 
 export class EmailRequest extends AutoEncoder {

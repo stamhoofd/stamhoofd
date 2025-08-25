@@ -207,4 +207,48 @@ export class File implements Encodeable {
     static removeExtension(filename: string): string {
         return filename.split('.').slice(0, -1).join('.');
     }
+
+    get icon() {
+        if (!this.contentType) {
+            // Try based on extension
+            const extension = this.name?.split('.').pop()?.toLowerCase();
+            if (extension) {
+                switch (extension) {
+                    case 'png':
+                    case 'jpg':
+                    case 'jpeg':
+                    case 'gif':
+                    case 'webp':
+                    case 'svg':
+                        return 'file-image';
+                    case 'pdf':
+                        return 'file-pdf color-pdf';
+                    case 'xlsx':
+                    case 'xls':
+                        return 'file-excel color-excel';
+                    case 'docx':
+                    case 'doc':
+                        return 'file-word color-word';
+                }
+            }
+
+            return 'file';
+        }
+
+        if (this.contentType.startsWith('image/')) {
+            return 'file-image';
+        }
+
+        if (this.contentType === 'application/pdf') {
+            return 'file-pdf color-pdf';
+        }
+        if (this.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || this.contentType === 'application/vnd.ms-excel') {
+            return 'file-excel color-excel';
+        }
+        if (this.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || this.contentType === 'application/msword') {
+            return 'file-word color-word';
+        }
+
+        return 'file';
+    }
 }
