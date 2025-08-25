@@ -174,6 +174,7 @@ async function openRelatedMembers() {
                     },
                 },
                 customTitle: $t('Leden die dit bericht kregen'),
+                customEstimatedRows: props.email.membersCount || 0,
             }),
         ],
     });

@@ -30,6 +30,7 @@ const props = withDefaults(
         customFilter?: StamhoofdFilter | null;
         customTitle?: string | null;
         dateRange?: { start: Date; end: Date } | null;
+        customEstimatedRows?: number | null;
     }>(), {
         group: null,
         category: null,
@@ -38,6 +39,7 @@ const props = withDefaults(
         customTitle: null,
         responsibility: null,
         dateRange: null,
+        customEstimatedRows: null,
     },
 );
 
@@ -61,7 +63,7 @@ const estimatedRows = computed(() => {
     if (props.group) {
         return props.group.settings.registeredMembers;
     }
-    return 30;
+    return props.customEstimatedRows ?? 30;
 });
 
 const app = useAppContext();
