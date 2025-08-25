@@ -628,8 +628,8 @@
     "translation": "Charge an amount to the {count} selected groups."
   },
   "89a760d7-8995-458c-9635-da104971e95c": {
-    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via ‘Mijn account’. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
-    "translation": "Trial periods allow you to give new members the opportunity to register without paying. After a set period, they will then receive a payment request (paying earlier is always possible) and can pay via ‘My account’. If you unsubscribe members before the end of the trial period, the outstanding amount will also be removed."
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via ‘Mijn account’. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door KSA Nationaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Trial periods allow you to give new members the chance to register without (immediate) payment. After a set period, they will receive a payment request (they can always pay earlier if they want) and can pay via ‘My account’. Once the trial insurance has expired, these members will be included in the next invoice from KSA Nationaal. If you unregister members before the end of the trial period, the open amount will be removed as well."
   },
   "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
     "original": "Naam groep",
@@ -1006,6 +1006,10 @@
   "d687b491-be68-4e5b-9acb-e2c090951c23": {
     "original": "bv. jouwgroep.be",
     "translation": "e.g. jouwgroep.be"
+  },
+  "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
+    "original": "KSA Nationaal raadt een proefperiode van {days} aan.",
+    "translation": "KSA Nationaal recommends a trial period of {days}."
   },
   "d80e2291-5bb9-4799-9594-bcda54480efa": {
     "original": "Gebruikt jouw groep Ravot al?",

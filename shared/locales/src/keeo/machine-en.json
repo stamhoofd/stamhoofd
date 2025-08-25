@@ -767,6 +767,10 @@
     "original": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
     "translation": "Charge an amount to the {count} selected units."
   },
+  "89a760d7-8995-458c-9635-da104971e95c": {
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door FOS Open Scouting. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Trial periods allow you to give new members the chance to register without paying right away. After a set period, they'll receive a payment request (they can always pay earlier if they want) and will be able to pay through the member portal. Once the trial insurance has ended, these members will be included in the next invoice by FOS Open Scouting. If you unregister members before the end of the trial period, the open amount will also be removed."
+  },
   "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
     "original": "Naam eenheid",
     "translation": "Unit name"
@@ -1204,8 +1208,8 @@
     "translation": "e.g. yourunit.be"
   },
   "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
-    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij FOS Open Scouting.",
-    "translation": "New members automatically have a {days} trial period for connection to FOS Open Scouting."
+    "original": "FOS Open Scouting raadt een proefperiode van {days} aan.",
+    "translation": "FOS Open Scouting recommends a trial period of {days}."
   },
   "d80e2291-5bb9-4799-9594-bcda54480efa": {
     "original": "Gebruikt jouw eenheid Keeo al?",

@@ -771,6 +771,10 @@
     "original": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
     "translation": "Facturez un montant aux {count} unités sélectionnées."
   },
+  "89a760d7-8995-458c-9635-da104971e95c": {
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door FOS Open Scouting. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Grâce à une période d'essai, vous pouvez donner aux nouveaux membres la possibilité de s'inscrire sans payer immédiatement. Après la période définie, ils recevront une demande de paiement (il reste possible de payer à l'avance) et ils pourront payer via le portail des membres. Une fois que l'assurance d'essai a expiré, ces membres apparaîtront sur la première facture suivante de FOS Open Scouting. Si vous désinscrivez des membres avant la fin de la période d'essai, le montant ouvert sera également supprimé."
+  },
   "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
     "original": "Naam eenheid",
     "translation": "Nom de l'unité"
@@ -1212,8 +1216,8 @@
     "translation": "par ex. votreunité.be"
   },
   "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
-    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij FOS Open Scouting.",
-    "translation": "Les nouveaux membres ont automatiquement droit à une période d'essai de {days} pour l'adhésion à FOS Open Scouting."
+    "original": "FOS Open Scouting raadt een proefperiode van {days} aan.",
+    "translation": "FOS Open Scouting recommande une période d'essai de {days}."
   },
   "d80e2291-5bb9-4799-9594-bcda54480efa": {
     "original": "Gebruikt jouw eenheid Keeo al?",

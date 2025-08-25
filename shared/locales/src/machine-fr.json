@@ -11664,8 +11664,8 @@
     "translation": "Demander une contribution libre lors de l’inscription"
   },
   "89a760d7-8995-458c-9635-da104971e95c": {
-    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
-    "translation": "Via les périodes d'essai, vous pouvez donner aux nouveaux membres la possibilité de s'inscrire sans payer. Après une période définie, ils reçoivent ensuite une demande de paiement (un paiement anticipé est toujours possible) et peuvent payer via le portail des membres. Si vous désinscrivez des membres avant la fin de la période d'essai, le montant restant est également supprimé."
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door Stamhoofd. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Grâce à une période d'essai, vous pouvez permettre à de nouveaux membres de s'inscrire sans devoir payer immédiatement. Après la période définie, ils recevront une demande de paiement (il reste possible de payer plus tôt) et pourront régler leur paiement via le portail des membres. Une fois que l'assurance d'essai a expiré, ces membres apparaîtront sur la première facture suivante émise par Stamhoofd. Si vous désinscrivez un membre avant la fin de la période d'essai, le montant dû sera également annulé."
   },
   "89a8dbc1-731c-4529-b2c8-44db162941fb": {
     "original": "Knop om in te loggen",
@@ -14760,8 +14760,8 @@
     "translation": "Numéro"
   },
   "af49a569-ce88-48d9-ac37-81e594e16c03": {
-    "original": "Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.",
-    "translation": "Cette adresse e-mail est probablement invalide. Nous n'avons pas pu envoyer d'e-mails à cette adresse auparavant."
+    "original": "Dit e-mailadres werd overgeslagen omdat het waarschijnlijk ongeldig is. We konden eerder geen e-mails naar dit adres sturen.",
+    "translation": "Cette adresse e-mail a été ignorée car elle semble invalide. Nous n'avons pas pu envoyer de messages à cette adresse auparavant."
   },
   "af4a5122-ce11-4553-b589-490d6d4960cc": {
     "original": "Locatie:",
@@ -18180,8 +18180,8 @@
     "translation": "par ex. votreassociation.be"
   },
   "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
-    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij KSA Nationaal.",
-    "translation": "Les nouveaux membres ont automatiquement droit à une période d'essai de {days} pour l'affiliation à KSA National."
+    "original": "Stamhoofd raadt een proefperiode van {days} aan.",
+    "translation": "Stamhoofd recommande une période d'essai de {days}."
   },
   "d68cc8ee-9d6c-471a-a532-6ad566cf1ea1": {
     "original": "Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.",
@@ -21052,8 +21052,8 @@
     "translation": "Étiquette"
   },
   "f660b2eb-e382-4d21-86e4-673ca7bc2d4a": {
-    "original": "Er ging iets mis bij het aanmaken van de afzenders.",
-    "translation": "Une erreur s'est produite lors de la création des expéditeurs."
+    "original": "Er ging iets mis bij het aanmaken van de lijst met ontvangers.",
+    "translation": "Une erreur s'est produite lors de la création de la liste des destinataires."
   },
   "f664f209-fa11-4816-a8e9-4ff7f7277158": {
     "original": "Gelijk aan...",

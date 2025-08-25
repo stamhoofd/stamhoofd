@@ -11516,8 +11516,8 @@
     "translation": "Request a free contribution upon registration"
   },
   "89a760d7-8995-458c-9635-da104971e95c": {
-    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
-    "translation": "Trial periods allow you to give new members the opportunity to register without paying. After a set period, they will then receive a payment request (paying earlier is always possible) and can pay via the member portal. If you unsubscribe members before the end of the trial period, the outstanding amount will also be removed."
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door Stamhoofd. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Trial periods let you give new members the opportunity to register without (immediate) payment. After a set period, they receive a payment request (they can pay earlier if they wish) and they can pay through the member portal. Once the trial insurance has expired, these members will be included in the next invoice from Stamhoofd. If you unregister members before the end of the trial period, the open amount will be removed as well."
   },
   "89a8dbc1-731c-4529-b2c8-44db162941fb": {
     "original": "Knop om in te loggen",
@@ -14552,8 +14552,8 @@
     "translation": "Number"
   },
   "af49a569-ce88-48d9-ac37-81e594e16c03": {
-    "original": "Dit e-mailadres is waarschijnlijk ongeldig. We konden eerder geen e-mails naar dit adres sturen.",
-    "translation": "This email address is probably invalid. We were unable to send emails to this address before."
+    "original": "Dit e-mailadres werd overgeslagen omdat het waarschijnlijk ongeldig is. We konden eerder geen e-mails naar dit adres sturen.",
+    "translation": "This email address was skipped because it is probably invalid. We have not been able to send emails to this address before."
   },
   "af4a5122-ce11-4553-b589-490d6d4960cc": {
     "original": "Locatie:",
@@ -17916,8 +17916,8 @@
     "translation": "e.g. yourassociation.co.uk"
   },
   "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
-    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij KSA Nationaal.",
-    "translation": "New members automatically have a trial period of {days} for affiliation with KSA National."
+    "original": "Stamhoofd raadt een proefperiode van {days} aan.",
+    "translation": "Stamhoofd recommends a trial period of {days}."
   },
   "d68cc8ee-9d6c-471a-a532-6ad566cf1ea1": {
     "original": "Je kan kiezen wanneer deze vragen van toepassing zijn, en of deze stap overgeslagen kan worden.",
@@ -20740,8 +20740,8 @@
     "translation": "The start date cannot be before"
   },
   "f660b2eb-e382-4d21-86e4-673ca7bc2d4a": {
-    "original": "Er ging iets mis bij het aanmaken van de afzenders.",
-    "translation": "Something went wrong creating the senders."
+    "original": "Er ging iets mis bij het aanmaken van de lijst met ontvangers.",
+    "translation": "Something went wrong while creating the recipients list."
   },
   "f664f209-fa11-4816-a8e9-4ff7f7277158": {
     "original": "Gelijk aan...",

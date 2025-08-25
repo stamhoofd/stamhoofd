@@ -744,8 +744,8 @@
     "translation": "Facturez un montant aux {count} groupes sélectionnés."
   },
   "89a760d7-8995-458c-9635-da104971e95c": {
-    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via ‘Mijn account’. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
-    "translation": "Les périodes d'essai permettent aux nouveaux membres de s'inscrire sans payer. Après une période définie, ils reçoivent une demande de paiement (un paiement anticipé est toujours possible) et peuvent payer via « Mon compte ». Si vous désinscrivez des membres avant la fin de la période d'essai, le montant en suspens est également supprimé."
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via ‘Mijn account’. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door KSA Nationaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Grâce à une période d'essai, vous pouvez donner aux nouveaux membres la possibilité de s'inscrire sans devoir payer tout de suite. Après la période définie, ils recevront une demande de paiement (le paiement anticipé reste toujours possible) et pourront régler leur cotisation via \"Mon compte\". Une fois que l'assurance d'essai a expiré, ces membres seront repris sur la première facture suivante, émise par KSA Nationaal. Si un membre est désinscrit avant la fin de la période d'essai, le montant dû sera annulé."
   },
   "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
     "original": "Naam groep",
@@ -1202,6 +1202,10 @@
   "d687b491-be68-4e5b-9acb-e2c090951c23": {
     "original": "bv. jouwgroep.be",
     "translation": "par ex. votregroupe.be"
+  },
+  "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
+    "original": "KSA Nationaal raadt een proefperiode van {days} aan.",
+    "translation": "KSA Nationaal recommande une période d'essai de {days}."
   },
   "d80e2291-5bb9-4799-9594-bcda54480efa": {
     "original": "Gebruikt jouw groep Ravot al?",

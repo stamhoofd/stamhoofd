@@ -767,6 +767,10 @@
     "original": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
     "translation": "Facturez un montant aux {count} unités sélectionnées."
   },
+  "89a760d7-8995-458c-9635-da104971e95c": {
+    "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via het ledenportaal. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door GSB. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
+    "translation": "Grâce à une période d'essai, vous pouvez permettre à de nouveaux membres de s'inscrire sans devoir payer immédiatement. Une fois la période définie terminée, ils recevront une demande de paiement (il reste toujours possible de régler plus tôt) et pourront effectuer leur paiement via le portail des membres. Après l'expiration de l'assurance d'essai, ces membres apparaîtront sur la première facture suivante émise par GSB. Si vous désinscrivez un membre avant la fin de la période d'essai, le montant dû sera également annulé."
+  },
   "8ad6c316-22e5-4fbf-b326-25ce5bf640e1": {
     "original": "Naam eenheid",
     "translation": "Nom de l'unité"
@@ -1216,8 +1220,8 @@
     "translation": "par ex. votreunite.be"
   },
   "d68a6d63-d782-49e2-84a5-4f77dbfa2977": {
-    "original": "Nieuwe leden hebben automatisch recht op een proefperiode van {days} voor de aansluiting bij GSB.",
-    "translation": "Les nouveaux membres ont automatiquement droit à une période d'essai de {days} pour l'affiliation à la FSG."
+    "original": "GSB raadt een proefperiode van {days} aan.",
+    "translation": "GSB recommande une période d'essai de {days}."
   },
   "d80e2291-5bb9-4799-9594-bcda54480efa": {
     "original": "Gebruikt jouw eenheid Jamboree al?",
