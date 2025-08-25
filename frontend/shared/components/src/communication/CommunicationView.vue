@@ -32,7 +32,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen berichten gevonden`)" />
         </main>
     </div>
 </template>
