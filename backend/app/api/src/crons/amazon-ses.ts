@@ -132,7 +132,7 @@ async function handleComplaint(message: any) {
                 if (type === 'virus' || type === 'fraud') {
                     await saveLog({
                         id: b.feedbackId,
-                        email: source,
+                        email,
                         organization,
                         type: AuditLogType.EmailAddressFraudComplaint,
                         subType: type || 'unknown',
@@ -144,7 +144,7 @@ async function handleComplaint(message: any) {
                 else {
                     await saveLog({
                         id: b.feedbackId,
-                        email: source,
+                        email,
                         organization,
                         type: AuditLogType.EmailAddressMarkedAsSpam,
                         subType: type || 'unknown',
