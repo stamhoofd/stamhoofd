@@ -494,7 +494,7 @@ export class MemberDetails extends AutoEncoder {
             }
         }
 
-        if (this.gender === Gender.Male && group.settings.genderType == GroupGenderType.OnlyFemale) {
+        if ((this.gender === Gender.Male && group.settings.genderType === GroupGenderType.OnlyFemale) || (this.gender === Gender.Female && group.settings.genderType === GroupGenderType.OnlyMale)) {
             return {
                 message: $t(`99785e34-7587-4be9-bd43-b57dcb63b4a7`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
                 description: $t(`f1a4bbb9-1fa7-429b-b498-a902f68cb679`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
