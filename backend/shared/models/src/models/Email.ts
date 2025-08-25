@@ -897,10 +897,10 @@ export class Email extends QueryableModel {
                         const response = await loader.fetch(request, subfilter.subfilter);
 
                         for (const item of response.results) {
-                            if (!item.email) {
+                            if (!item.email && !item.memberId && !item.userId) {
                                 continue;
                             }
-                            count += 1;
+
                             const recipient = new EmailRecipient();
                             recipient.emailType = upToDate.emailType;
                             recipient.objectId = item.objectId;
@@ -921,6 +921,9 @@ export class Email extends QueryableModel {
 
                             if (!recipient.email) {
                                 countWithoutEmail += 1;
+                            }
+                            else {
+                                count += 1;
                             }
                         }
 

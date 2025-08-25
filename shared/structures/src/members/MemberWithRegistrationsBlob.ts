@@ -65,7 +65,21 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             value: Formatter.price(this.outstandingBalance),
         })); */
 
-        const createLoginDetailsReplacement = (email: string) => {
+        const createLoginDetailsReplacement = (email: string | null) => {
+            if (!email) {
+                if (this.details.securityCode) {
+                    return Replacement.create({
+                        token: 'loginDetails',
+                        value: '',
+                        html: `<p class="description"><em>De beveiligingscode voor ${Formatter.escapeHtml(this.firstName)} is <span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(this.details.securityCode, 4, '-'))}</span>.</em></p>`,
+                    });
+                }
+                return Replacement.create({
+                    token: 'loginDetails',
+                    value: '',
+                    html: '',
+                });
+            }
             const formattedEmail = Formatter.escapeHtml(email);
 
             let suffix = '';
@@ -138,6 +152,21 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     }),
                 );
             }
+        }
+
+        if (recipients.length === 0 && (subtypes === null || subtypes.includes('member'))) {
+            recipients.push(
+                EmailRecipient.create({
+                    objectId: this.id,
+                    memberId: this.id,
+                    firstName: this.details.firstName,
+                    lastName: this.details.lastName,
+                    replacements: [
+                        createLoginDetailsReplacement(this.details.email),
+                        ...shared,
+                    ],
+                }),
+            );
         }
 
         return recipients;
