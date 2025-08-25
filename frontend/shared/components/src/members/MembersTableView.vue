@@ -73,7 +73,7 @@ const auth = useAuth();
 const organization = useOrganization();
 const platform = usePlatform();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? organization?.value?.period?.period?.id ?? platform.value.period.id;
-const defaultFilter = app === 'admin' && !props.group
+const defaultFilter = app === 'admin' && !props.group && !props.customFilter
     ? {
             platformMemberships: {
                 $elemMatch: {
