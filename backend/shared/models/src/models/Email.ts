@@ -7,7 +7,7 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simon
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
-import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
 import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailTemplate } from './EmailTemplate';
@@ -205,6 +205,8 @@ export class Email extends QueryableModel {
         count(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<number>;
     }> = new Map();
 
+    static pendingNotificationCountUpdates: Map<string, { timer: NodeJS.Timeout | null; lastUpdate: Date | null }> = new Map();
+
     throwIfNotReadyToSend() {
         if (this.subject == null || this.subject.length == 0) {
             throw new SimpleError({
@@ -382,6 +384,135 @@ export class Email extends QueryableModel {
             const c = await callback(upToDate, options);
             this.copyFrom(upToDate);
             return c;
+        });
+    }
+
+    static async bumpNotificationCount(emailId: string, type: 'hard-bounce' | 'soft-bounce' | 'complaint') {
+        // Send an update query
+        const base = Email.update()
+            .where('id', emailId);
+
+        switch (type) {
+            case 'hard-bounce': {
+                base.set('hardBouncesCount', new SQLCalculation(
+                    SQL.column('hardBouncesCount'),
+                    new SQLPlusSign(),
+                    readDynamicSQLExpression(1),
+                ));
+                break;
+            }
+            case 'soft-bounce': {
+                base.set('softBouncesCount', new SQLCalculation(
+                    SQL.column('softBouncesCount'),
+                    new SQLPlusSign(),
+                    readDynamicSQLExpression(1),
+                ));
+                break;
+            }
+            case 'complaint': {
+                base.set('spamComplaintsCount', new SQLCalculation(
+                    SQL.column('spamComplaintsCount'),
+                    new SQLPlusSign(),
+                    readDynamicSQLExpression(1),
+                ));
+                break;
+            }
+        }
+
+        await base.update();
+
+        await this.checkNeedsNotificationCountUpdate(emailId, true);
+    }
+
+    static async checkNeedsNotificationCountUpdate(emailId: string, didUpdate = false) {
+        const existing = this.pendingNotificationCountUpdates.get(emailId);
+        const object = existing ?? {
+            timer: null,
+            lastUpdate: didUpdate ? new Date() : null,
+        };
+
+        if (didUpdate) {
+            object.lastUpdate = new Date();
+        }
+
+        if (existing) {
+            this.pendingNotificationCountUpdates.set(emailId, object);
+        }
+
+        if (object.lastUpdate && object.lastUpdate < new Date(Date.now() - 5 * 60 * 1000)) {
+            // After 5 minutes without notifications, run an update.
+            await this.updateNotificationsCounts(emailId);
+
+            // Stop here
+            return;
+        }
+
+        // Schedule a slow update of all counts
+        if (!object.timer) {
+            object.timer = setTimeout(() => {
+                object.timer = null;
+                this.checkNeedsNotificationCountUpdate(emailId).catch(console.error);
+            }, 1 * 60 * 1000);
+        }
+    }
+
+    static async updateNotificationsCounts(emailId: string) {
+        QueueHandler.cancel('updateNotificationsCounts-' + emailId);
+        return await QueueHandler.schedule('updateNotificationsCounts-' + emailId, async () => {
+            const query = SQL.select(
+                new SQLSelectAs(
+                    new SQLCount(
+                        SQL.column('hardBounceError'),
+                    ),
+                    new SQLAlias('data__hardBounces'),
+                ),
+                // If the current amount_due is negative, we can ignore that negative part if there is a future due item
+                new SQLSelectAs(
+                    new SQLCount(
+                        SQL.column('softBounceError'),
+                    ),
+                    new SQLAlias('data__softBounces'),
+                ),
+
+                new SQLSelectAs(
+                    new SQLCount(
+                        SQL.column('spamComplaintError'),
+                    ),
+                    new SQLAlias('data__complaints'),
+                ),
+            )
+                .from(EmailRecipient.table)
+                .where('emailId', emailId);
+
+            const result = await query.fetch();
+            if (result.length !== 1) {
+                console.error('Unexpected result', result);
+                return;
+            }
+            const row = result[0]['data'];
+            if (!row) {
+                console.error('Unexpected result row', result);
+                return;
+            }
+
+            const hardBounces = row['hardBounces'];
+            const softBounces = row['softBounces'];
+            const complaints = row['complaints'];
+
+            if (typeof hardBounces !== 'number' || typeof softBounces !== 'number' || typeof complaints !== 'number') {
+                console.error('Unexpected result values', row);
+                return;
+            }
+
+            console.log('Updating email notification counts', emailId, hardBounces, softBounces, complaints);
+
+            // Send an update query
+            await Email.update()
+                .where('id', emailId)
+                .set('hardBouncesCount', hardBounces)
+                .set('softBouncesCount', softBounces)
+                .set('spamComplaintsCount', complaints)
+                .update();
         });
     }
 

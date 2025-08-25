@@ -6,9 +6,10 @@ import {
 } from '@aws-sdk/client-sqs';
 import { registerCron } from '@stamhoofd/crons';
 import { Email, EmailAddress } from '@stamhoofd/email';
-import { AuditLog, Organization } from '@stamhoofd/models';
+import { AuditLog, EmailRecipient, Organization } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
 import { ForwardHandler } from '../helpers/ForwardHandler';
+import { Email as EmailModel } from '@stamhoofd/models';
 
 registerCron('checkComplaints', checkComplaints);
 registerCron('checkReplies', checkReplies);
@@ -52,13 +53,88 @@ async function saveLog({ email, organization, type, subType, subject, response, 
     await log.save();
 }
 
+async function storeEmailStatus({ headers, type, message }: { headers: Record<string, string>; type: 'hard-bounce' | 'soft-bounce' | 'complaint'; message: string }) {
+    const emailId = headers['x-email-id'];
+    const recipientId = headers['x-email-recipient-id'];
+
+    if (emailId && recipientId) {
+        // check
+        const emailRecipient = await EmailRecipient.select()
+            .where('id', recipientId)
+            .where('emailId', emailId)
+            .first(false);
+
+        if (!emailRecipient) {
+            console.log('[AWS FORWARDING] Invalid email or recipient id in headers', headers);
+            return;
+        }
+
+        let isNew = true;
+
+        switch (type) {
+            case 'hard-bounce': {
+                if (emailRecipient.hardBounceError) {
+                    isNew = false;
+                }
+                emailRecipient.hardBounceError = message;
+                break;
+            }
+            case 'soft-bounce': {
+                if (emailRecipient.softBounceError) {
+                    isNew = false;
+                }
+                emailRecipient.softBounceError = message;
+                break;
+            }
+            case 'complaint': {
+                if (emailRecipient.spamComplaintError) {
+                    isNew = false;
+                }
+                emailRecipient.spamComplaintError = message;
+                break;
+            }
+        }
+
+        console.log('[AWS FORWARDING] Marking email recipient ' + recipientId + ' for email ' + emailId + ' as ' + type);
+        if (await emailRecipient.save()) {
+            if (isNew) {
+                await EmailModel.bumpNotificationCount(emailId, type);
+            }
+        }
+    }
+}
+
+function readHeaders(message: any) {
+    try {
+        const mail = message.mail;
+        const headers: Record<string, string> = {};
+        if (mail && typeof mail === 'object' && mail !== null && Array.isArray(mail.headers)) {
+            for (const header of mail.headers) {
+                if (header.name && header.value) {
+                    headers[(header.name as string).toLowerCase()] = header.value;
+                }
+            }
+        }
+        else {
+            console.log('[AWS] Missing mail headers', message);
+        }
+        return headers;
+    }
+    catch (e) {
+        console.log('[AWS] Failed to read headers', e, message);
+        return {};
+    }
+}
+
 async function handleBounce(message: any) {
     if (message.bounce) {
+        console.log('[AWS BOUNCES] Handling bounce message', message);
+        const headers = readHeaders(message);
+
         const b = message.bounce;
         // Block all receivers that generate a permanent bounce
         const type = b.bounceType;
         const subtype = b.bounceSubType;
-
         const source = message.mail.source;
 
         // try to find organization that is responsible for this e-mail address
@@ -80,6 +156,12 @@ async function handleBounce(message: any) {
                 emailAddress.hardBounce = true;
                 await emailAddress.save();
 
+                await storeEmailStatus({
+                    headers,
+                    type: 'hard-bounce',
+                    message: recipient.diagnosticCode || 'Permanent bounce',
+                });
+
                 await saveLog({
                     id: b.feedbackId,
                     email,
@@ -95,6 +177,13 @@ async function handleBounce(message: any) {
                 type === 'Transient'
             ) {
                 const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
+
+                await storeEmailStatus({
+                    headers,
+                    type: 'soft-bounce',
+                    message: recipient.diagnosticCode || 'Soft bounce',
+                });
+
                 await saveLog({
                     id: b.feedbackId,
                     email,
@@ -116,6 +205,7 @@ async function handleBounce(message: any) {
 
 async function handleComplaint(message: any) {
     if (message.complaint) {
+        const headers = readHeaders(message);
         const b = message.complaint;
         const source = message.mail.source;
         const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
@@ -129,6 +219,12 @@ async function handleComplaint(message: any) {
             await emailAddress.save();
 
             if (type !== 'not-spam') {
+                await storeEmailStatus({
+                    headers,
+                    type: 'complaint',
+                    message: recipient.diagnosticCode || type || 'Complaint',
+                });
+
                 if (type === 'virus' || type === 'fraud') {
                     await saveLog({
                         id: b.feedbackId,
