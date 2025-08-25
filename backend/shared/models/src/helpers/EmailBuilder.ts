@@ -236,6 +236,7 @@ export type EmailBuilderOptions = {
     singleBcc?: EmailInterfaceRecipient;
     replaceAll?: { from: string; to: string }[]; // replace in all e-mails, not recipient dependent
     callback?: (error: Error | null) => void; // for each email
+    headers?: Record<string, string>;
 };
 
 /**
@@ -299,6 +300,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
             // Override headers
             recipient.headers = {
+                ...email.headers,
                 'List-Unsubscribe': STAMHOOFD.domains.defaultBroadcastEmail !== undefined ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`,
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
             };

@@ -712,6 +712,10 @@ export class Email extends QueryableModel {
                                 callback(error: Error | null) {
                                     callback(error).catch(console.error);
                                 },
+                                headers: {
+                                    'X-Email-Id': upToDate.id,
+                                    'X-Email-Recipient-Id': recipient.id,
+                                },
                             });
                             abort.throwIfAborted(); // do not schedule if aborted
                             EmailClass.schedule(builder);
