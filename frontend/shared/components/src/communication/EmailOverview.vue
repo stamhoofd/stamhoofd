@@ -55,7 +55,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="right-stack" @click="openRecipients">
+                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="right-stack" @click="navigate(Routes.Recipients)">
                     <template #left>
                         <span class="icon email-filled" />
                     </template>
@@ -87,7 +87,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="email.membersCount" :selectable="true" class="right-stack" @click="openRelatedMembers">
+                <STListItem v-if="email.membersCount" :selectable="true" class="right-stack" @click="navigate(Routes.Members)">
                     <template #left>
                         <span class="icon membership-filled" />
                     </template>
@@ -133,15 +133,15 @@
 </template>
 
 <script lang="ts" setup>
+import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ProgressRing, SafeHtmlBox, useInterval } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus, replaceEmailHtml } from '@stamhoofd/structures';
-import { computed } from 'vue';
-import { useEmailStatus } from './hooks/useEmailStatus';
-import { useUpdateEmail } from './hooks/useUpdateEmail';
 import { Formatter } from '@stamhoofd/utility';
-import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import { computed } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';
 import EmailRecipientsTableView from './EmailRecipientsTableView.vue';
+import { useEmailStatus } from './hooks/useEmailStatus';
+import { useUpdateEmail } from './hooks/useUpdateEmail';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -154,19 +154,19 @@ const getEmailStatus = useEmailStatus();
 const status = computed(() => {
     return getEmailStatus(props.email);
 });
-const show = useShow();
+const navigate = useNavigate();
 
-const replacedHtml = computed(() => {
-    if (!props.email.html) {
-        return props.email.html;
-    }
-    return replaceEmailHtml(props.email.html, props.email.exampleRecipient?.replacements || []);
-});
+enum Routes {
+    Members = 'leden',
+    Recipients = 'ontvangers',
+}
 
-async function openRelatedMembers() {
-    await show({
-        components: [
-            new ComponentWithProperties(MembersTableView, {
+defineRoutes([
+    {
+        url: Routes.Members,
+        component: MembersTableView,
+        paramsToProps: () => {
+            return {
                 customFilter: {
                     emails: {
                         $elemMatch: {
@@ -176,20 +176,26 @@ async function openRelatedMembers() {
                 },
                 customTitle: $t('Leden die dit bericht zien'),
                 customEstimatedRows: props.email.membersCount || 0,
-            }),
-        ],
-    });
-}
-
-async function openRecipients() {
-    await show({
-        components: [
-            new ComponentWithProperties(EmailRecipientsTableView, {
+            };
+        },
+    },
+    {
+        url: Routes.Recipients,
+        component: EmailRecipientsTableView,
+        paramsToProps: () => {
+            return {
                 email: props.email,
-            }),
-        ],
-    });
-}
+            };
+        },
+    },
+]);
+
+const replacedHtml = computed(() => {
+    if (!props.email.html) {
+        return props.email.html;
+    }
+    return replaceEmailHtml(props.email.html, props.email.exampleRecipient?.replacements || []);
+});
 
 const { updateEmail } = useUpdateEmail(props.email);
 useInterval(async ({ stop }) => {
