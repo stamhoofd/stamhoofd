@@ -24,6 +24,7 @@ import { EmailPreview, EmailRecipient, StamhoofdFilter } from '@stamhoofd/struct
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useEmailRecipientsObjectFetcher } from '../fetchers/useEmailRecipientsObjectFetcher';
+import EmailRecipientView from './EmailRecipientView.vue';
 
 type ObjectType = EmailRecipient;
 
@@ -142,7 +143,10 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 ];
 
-const Route = null;
+const Route = {
+    Component: EmailRecipientView,
+    objectKey: 'recipient',
+};
 
 const actions: TableAction<ObjectType>[] = [];
 </script>
