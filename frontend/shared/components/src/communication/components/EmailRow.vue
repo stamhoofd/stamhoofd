@@ -17,16 +17,17 @@
         </p>
 
         <template v-if="email.recipientCount" #right>
+            <span v-if="email.attachments.length" class="style-description-small"><span>{{ formatInteger(email.attachments.length) }}</span><span class="icon attachment tiny" /></span>
             <span class="style-description-small"><span>{{ formatInteger(email.recipientCount) }}</span><span class="icon email tiny" /></span>
         </template>
     </STListItem>
 </template>
 
 <script setup lang="ts">
+import { ProgressRing, useInterval } from '@stamhoofd/components';
 import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useEmailStatus } from '../hooks/useEmailStatus';
-import { Spinner, ProgressRing, useInterval } from '@stamhoofd/components';
 import { useUpdateEmail } from '../hooks/useUpdateEmail';
 
 const props = defineProps<{
