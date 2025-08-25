@@ -359,6 +359,7 @@ export class Email extends QueryableModel {
     }
 
     async queueForSending(waitForSending = false) {
+        this.throwIfNotReadyToSend();
         await this.lock(async (upToDate) => {
             if (upToDate.status === EmailStatus.Draft) {
                 upToDate.status = EmailStatus.Queued;
@@ -375,7 +376,6 @@ export class Email extends QueryableModel {
     }
 
     async resumeSending(): Promise<Email | null> {
-        this.throwIfNotReadyToSend();
         const id = this.id;
         return await QueueHandler.schedule('send-email', async ({ abort }) => {
             return await this.lock(async function (upToDate: Email) {
