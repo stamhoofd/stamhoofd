@@ -2,7 +2,7 @@ import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, Enu
 import { v4 as uuidv4 } from 'uuid';
 import { EditorSmartButton } from '../email/EditorSmartButton.js';
 import { EditorSmartVariable } from '../email/EditorSmartVariable.js';
-import { EmailAttachment, Recipient, Replacement } from '../endpoints/EmailRequest.js';
+import { EmailAttachment, Recipient, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
 import { MemberDetails } from '../members/MemberDetails.js';
@@ -240,4 +240,8 @@ export class EmailPreview extends Email {
 
     // todo: count stats
     // todo: bounce / spam stats
+
+    get replacedSubject() {
+        return replaceEmailText(this.subject || '', this.exampleRecipient?.replacements || []);
+    }
 }

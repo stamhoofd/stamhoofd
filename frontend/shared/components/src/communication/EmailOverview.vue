@@ -107,7 +107,7 @@ const props = defineProps<{
 }>();
 
 const title = computed(() => {
-    return props.email.subject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
+    return props.email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
 });
 const getEmailStatus = useEmailStatus();
 const status = computed(() => {
