@@ -61,7 +61,7 @@ export type SQLCurrentColumn = {
      * Type of this column, use to normalize values received from filters
      */
     type: SQLValueType;
-    checkPermission?: () => Promise<void>;
+    checkPermission?: (filter: StamhoofdFilter) => Promise<void>;
 };
 
 export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: SQLFilterDefinitions): SQLFilterCompiler {
@@ -71,7 +71,7 @@ export function createColumnFilter(column: SQLCurrentColumn, childDefinitions?: 
 
         return async (_: SQLCurrentColumn) => {
             if (column.checkPermission) {
-                await column.checkPermission();
+                await column.checkPermission(filter);
             }
             return await runner({
                 nullable: false,
@@ -92,7 +92,7 @@ export function createWildcardColumnFilter(getColumn: (key: string) => SQLCurren
             }
             const column = getColumn(key);
             if (column.checkPermission) {
-                await column.checkPermission();
+                await column.checkPermission(filter);
             }
             return await runner({
                 nullable: false,

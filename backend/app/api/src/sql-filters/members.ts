@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Member } from '@stamhoofd/models';
+import { Email, Member } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar, createWildcardColumnFilter, SQLJsonExtract } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context';
@@ -412,6 +412,47 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 null,
             ),
         organizationFilterCompilers,
+    ),
+    'emails': createExistsFilter(
+        SQL.select()
+            .from(
+                SQL.table('email_recipients'),
+            ).where(
+                SQL.column('memberId'),
+                SQL.column('members', 'id'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            id: createColumnFilter({
+                expression: SQL.column('emailId'),
+                type: SQLValueType.String,
+                nullable: false,
+                checkPermission: async (filter) => {
+                    if (typeof filter !== 'string') {
+                        throw new SimpleError({
+                            code: 'invalid_filter',
+                            message: 'This filter structure is not supported here.',
+                        });
+                    }
+                    const id = filter;
+                    const email = await Email.getByID(id);
+                    if (!email) {
+                        throw new SimpleError({
+                            code: 'not_found',
+                            message: 'This email does not exist.',
+                            human: $t('Deze e-mail bestaat niet (meer)'),
+                            statusCode: 404,
+                        });
+                    }
+                    if (!await Context.auth.canAccessEmail(email)) {
+                        throw Context.auth.error({
+                            message: 'No permissions to access this email.',
+                            human: $t('Je hebt niet voldoende toegangsrechten om te filteren op deze e-mail'),
+                        });
+                    }
+                },
+            }),
+        },
     ),
     'details': {
         ...baseSQLFilterCompilers,

@@ -75,12 +75,6 @@
                     <p v-else-if="email.succeededCount && email.emailRecipientsCount !== email.succeededCount" class="style-description-small">
                         {{ $t('Waarvan reeds {count} verzonden', { count: email.succeededCount }) }}
                     </p>
-                    <p v-if="email.otherRecipientsCount && email.otherRecipientsCount > 1" class="style-description-small">
-                        {{ $t('Er zijn {count} ontvangers zonder e-mailadres', { count: email.otherRecipientsCount }) }}
-                    </p>
-                    <p v-if="email.otherRecipientsCount && email.otherRecipientsCount === 1" class="style-description-small">
-                        {{ $t('Er is één ontvanger zonder e-mailadres') }}
-                    </p>
 
                     <template #right>
                         <p v-if="email.succeededCount && email.succeededCount !== email.emailRecipientsCount" class="style-description-small">
@@ -93,7 +87,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="email.membersCount" :selectable="true" class="right-stack">
+                <STListItem v-if="email.membersCount" :selectable="true" class="right-stack" @click="openRelatedMembers">
                     <template #left>
                         <span class="icon membership-filled" />
                     </template>
@@ -145,6 +139,8 @@ import { computed } from 'vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
 import { Formatter } from '@stamhoofd/utility';
+import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
+import MembersTableView from '../members/MembersTableView.vue';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -157,6 +153,7 @@ const getEmailStatus = useEmailStatus();
 const status = computed(() => {
     return getEmailStatus(props.email);
 });
+const show = useShow();
 
 const replacedHtml = computed(() => {
     if (!props.email.html) {
@@ -164,6 +161,23 @@ const replacedHtml = computed(() => {
     }
     return replaceEmailHtml(props.email.html, props.email.exampleRecipient?.replacements || []);
 });
+
+async function openRelatedMembers() {
+    await show({
+        components: [
+            new ComponentWithProperties(MembersTableView, {
+                customFilter: {
+                    emails: {
+                        $elemMatch: {
+                            id: props.email.id,
+                        },
+                    },
+                },
+                customTitle: $t('Leden die dit bericht kregen'),
+            }),
+        ],
+    });
+}
 
 const { updateEmail } = useUpdateEmail(props.email);
 useInterval(async ({ stop }) => {
