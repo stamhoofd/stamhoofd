@@ -23,8 +23,8 @@ export interface FetchLimitSettings {
 }
 
 export type FetchAllOptions<T> = {
-    onProgress?: (count: number, total: number) => void;
-    onResultsReceived?: (results: T[]) => void;
+    onProgress?: (count: number, total: number) => Promise<void> | void;
+    onResultsReceived?: (results: T[]) => Promise<void> | void;
     fetchLimitSettings?: FetchLimitSettings;
 };
 
@@ -67,11 +67,11 @@ export async function fetchAll<T>(initialRequest: LimitedFilteredRequest, object
         }
 
         if (options?.onProgress) {
-            options.onProgress(results.length, totalFilteredCount ?? results.length);
+            await options.onProgress(results.length, totalFilteredCount ?? results.length);
         }
 
         if (options?.onResultsReceived) {
-            options.onResultsReceived(results);
+            await options.onResultsReceived(results);
         }
     }
 

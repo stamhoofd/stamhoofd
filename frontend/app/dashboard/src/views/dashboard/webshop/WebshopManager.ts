@@ -1015,38 +1015,15 @@ export class WebshopManager {
         // #endregion
 
         let hadSuccessfulFetch = false;
-        let clearOrdersPromise: Promise<void> | undefined = undefined;
-
-        const triedClearOrdersPromise = new Promise<void>((resolve) => {
-            if (clearOrdersPromise) {
-                clearOrdersPromise
-                    .then(() => {
-                        console.log('Cleared orders from indexed db.');
-                    })
-                    .catch((e) => {
-                        // Clear only if we have internet access
-                        // ignore since some browsers don't support databases
-                        console.error('Failed clear orders from indexed db.');
-                        console.error(e);
-                    })
-                    .finally(resolve);
-                return;
-            }
-
-            resolve();
-        });
-
         const storeOrdersPromises: Promise<void>[] = [];
         let hasUpdatedOrders = false;
 
-        const onResultsReceivedHelper = async (orders: PrivateOrder[]): Promise<void> => {
+        const onResultsReceived = async (orders: PrivateOrder[]): Promise<void> => {
             if (isFetchAll && !hadSuccessfulFetch) {
                 hadSuccessfulFetch = true;
-                clearOrdersPromise = this.clearOrdersFromDatabase();
+                await this.clearOrdersFromDatabase();
+                await this.clearLastFetchedOrder();
             }
-
-            // prevent that orders get added to indexed db before the db was cleared
-            await triedClearOrdersPromise;
 
             if (orders.length > 0) {
                 if (!hasUpdatedOrders) {
@@ -1070,7 +1047,6 @@ export class WebshopManager {
                 const promises: Promise<unknown>[] = [
                     storeOrdersPromise,
                     // todo: this should be run sync?
-                    this.setlastFetchedOrder(orders[orders.length - 1]),
                 ];
 
                 if (nonDeletedOrders.length > 0) {
@@ -1084,12 +1060,10 @@ export class WebshopManager {
                 }
 
                 await Promise.all(promises.map(promise => promise.catch(console.error)));
-            }
-        };
 
-        // run async
-        const onResultsReceived: (orders: PrivateOrder[]) => void = (orders) => {
-            onResultsReceivedHelper(orders).catch(console.error);
+                // Only set the last fetched order if everything is stored correctly
+                await this.setlastFetchedOrder(orders[orders.length - 1]);
+            }
         };
 
         try {
