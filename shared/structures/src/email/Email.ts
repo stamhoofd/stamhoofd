@@ -137,6 +137,15 @@ export class Email extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 380 })
     membersCount = 0;
 
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    hardBouncesCount = 0;
+
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    softBouncesCount = 0;
+
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    spamComplaintsCount = 0;
+
     @field({ decoder: new ArrayDecoder(EmailAttachment) })
     attachments: EmailAttachment[] = [];
 
