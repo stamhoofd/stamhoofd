@@ -3,7 +3,7 @@
         ref="svg"
         :height="radius * 2"
         :width="radius * 2"
-        :style="`border-width: ${borderWidth}px; --circle-circumference: ${circumference.toFixed(4)}px;`"
+        :style="`border-width: ${borderWidth}px; --circle-circumference: ${circumference.toFixed(4)}px; opacity: ${opacity.toFixed(2)};`"
         :class="cachedLoading ? 'spinner' : ''"
     >
         <circle
@@ -37,9 +37,11 @@ const props = withDefaults(defineProps<{
     stroke: number;
     borderWidth?: number;
     loading?: boolean;
+    opacity?: number;
 }>(), {
     borderWidth: 0,
     loading: false,
+    opacity: 1,
 });
 
 const templateCircle = useTemplateRef('circle');
@@ -76,7 +78,7 @@ watch(() => props.loading, (newLoading) => {
 
                 // Don't start the animation yet
                 circle.style.animation = 'none';
-                svg.style.animation = 'none';
+                svg.style.animation = 'opacity 0.35s 0.35s';
 
                 // Force a reflow so the browser picks up the starting position before animating
                 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -106,11 +108,11 @@ watch(() => props.loading, (newLoading) => {
             const transform = svgComputedStyle.transform;
             const strokeDashoffset = computedStyle.strokeDashoffset;
 
-            circle.style.transition = 'none';
+            circle.style.transition = 'stroke 0.35s';
             circle.style.strokeDashoffset = strokeDashoffset;
             circle.style.animation = 'none';
 
-            svg.style.transition = 'none';
+            svg.style.transition = 'opacity 0.35s 0.35s';
             svg.style.transform = transform;
             svg.style.animation = 'none';
             lockedDashoffset.value = strokeDashoffset;
@@ -141,11 +143,11 @@ watch(() => props.loading, (newLoading) => {
 
 svg {
     border: 0px solid transparent;
-    transition: transform 0.35s;
+    transition: transform 0.35s, opacity 0.35s 0.35s;
 }
 
 circle {
-    transition: stroke-dashoffset 0.35s;
+    transition: stroke-dashoffset 0.35s, stroke 0.35s;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
     stroke-linecap: round;

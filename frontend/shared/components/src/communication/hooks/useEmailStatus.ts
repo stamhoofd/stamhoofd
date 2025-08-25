@@ -13,20 +13,19 @@ export function useEmailStatus() {
             case EmailStatus.Sending:
                 return {
                     text: $t('f5eb4dcd-ddc1-4952-a40e-845cda2b88ce'),
-                    icon: 'reverse',
                     theme: 'theme-secundary',
                     progress: email.recipientCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.recipientCount) : undefined,
                 };
             case EmailStatus.Queued:
                 return {
                     text: $t('In wachtrij om te verzenden'),
-                    icon: 'reverse',
                     theme: 'theme-secundary',
                     progress: 0,
                 };
             case EmailStatus.Sent:
                 return {
                     text: email.sentAt ? (Formatter.dateWithDay(email.sentAt, false)) : $t('5101ef12-a812-4748-91dd-778c0a3fe482'),
+                    progress: 1,
                 };
             case EmailStatus.Failed:
                 return {

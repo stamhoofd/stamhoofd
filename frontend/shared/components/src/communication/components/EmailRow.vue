@@ -2,7 +2,7 @@
     <STListItem class="right-stack smartphone-wrap-left" :selectable="true">
         <p v-if="status" :class="'style-title-prefix-list flex ' + (status.theme ?? '')">
             <span>{{ status.text }}</span>
-            <ProgressRing v-if="status.progress !== undefined" :radius="7" :stroke="2" :progress="status.progress" :loading="status.progress === 0" />
+            <ProgressRing v-if="status.progress !== undefined" :radius="7" :opacity="status.progress >= 1 ? 0 : 1" :stroke="2" :progress="status.progress" :loading="status.progress === 0" />
             <span v-else-if="status.icon" :class="'icon tiny ' + status.icon" />
         </p>
         <h3 class="style-title-list large">
