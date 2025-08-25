@@ -130,6 +130,24 @@ export class Email extends QueryableModel {
     @column({ type: 'integer' })
     membersCount = 0;
 
+    /**
+     * Does only include bounces AFTER sending the email
+     */
+    @column({ type: 'integer' })
+    hardBouncesCount = 0;
+
+    /**
+     * Does only include bounces AFTER sending the email
+     */
+    @column({ type: 'integer' })
+    softBouncesCount = 0;
+
+    /**
+     * Does only include bounces AFTER sending the email
+     */
+    @column({ type: 'integer' })
+    spamComplaintsCount = 0;
+
     @column({ type: 'string' })
     status = EmailStatus.Draft;
 
