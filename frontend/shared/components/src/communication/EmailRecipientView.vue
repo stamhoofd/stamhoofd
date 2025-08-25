@@ -49,20 +49,25 @@
                     </p>
                 </STListItem>
             </STList>
+
+            <EmailPreviewBox v-if="email && recipient.sentAt" :email="email" :recipient="recipient" />
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
-import { EmailRecipient } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipient } from '@stamhoofd/structures';
 import { useBackForward } from '../hooks';
+import EmailPreviewBox from './components/EmailPreviewBox.vue';
 
 const props = withDefaults(
     defineProps<{
         recipient: EmailRecipient;
+        email?: EmailPreview | null;
         getNext?: ((recipient: EmailRecipient) => EmailRecipient) | null;
         getPrevious?: ((recipient: EmailRecipient) => EmailRecipient) | null;
     }>(), {
+        email: null,
         getNext: null,
         getPrevious: null,
     },

@@ -146,6 +146,12 @@ const allColumns: Column<ObjectType, any>[] = [
 const Route = {
     Component: EmailRecipientView,
     objectKey: 'recipient',
+    getProperties: (object: ObjectType) => {
+        return {
+            email: props.email ?? undefined,
+            recipient: object,
+        };
+    },
 };
 
 const actions: TableAction<ObjectType>[] = [];
