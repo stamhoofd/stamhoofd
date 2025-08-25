@@ -198,7 +198,7 @@ async function sendTemplate({
 
     try {
         const upToDate = await ContextInstance.startForUser(systemUser, organization, async () => {
-            return await model.send();
+            return await model.queueForSending(true);
         });
 
         if (!upToDate) {

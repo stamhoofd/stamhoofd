@@ -366,11 +366,12 @@ export class Email extends QueryableModel {
             await upToDate.save();
         });
         if (waitForSending) {
-            await this.resumeSending();
+            return await this.resumeSending();
         }
         else {
             this.resumeSending().catch(console.error);
         }
+        return this;
     }
 
     async resumeSending(): Promise<Email | null> {
