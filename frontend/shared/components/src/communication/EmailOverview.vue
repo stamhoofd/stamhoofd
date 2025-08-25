@@ -173,7 +173,7 @@ async function openRelatedMembers() {
                         },
                     },
                 },
-                customTitle: $t('Leden die dit bericht kregen'),
+                customTitle: $t('Leden die dit bericht zien'),
                 customEstimatedRows: props.email.membersCount || 0,
             }),
         ],
