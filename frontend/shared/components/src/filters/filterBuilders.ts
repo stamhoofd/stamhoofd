@@ -1156,6 +1156,9 @@ export function useEmailRecipientsFilterBuilders() {
                 name: $t('Status'),
                 options: [
                     new MultipleChoiceUIFilterOption($t('Foutmelding bij versturen'), 'failError'),
+                    new MultipleChoiceUIFilterOption($t('Hard bounce'), 'hardBounce'),
+                    new MultipleChoiceUIFilterOption($t('Soft bounce'), 'softBounce'),
+                    new MultipleChoiceUIFilterOption($t('Spam complaint'), 'spam'),
                 ],
                 wrapFilter: (f) => {
                     const choices = Array.isArray(f) ? f : [f];
@@ -1164,6 +1167,30 @@ export function useEmailRecipientsFilterBuilders() {
                     if (choices.includes('failError')) {
                         conditions.push({
                             failError: {
+                                $neq: null,
+                            },
+                        });
+                    }
+
+                    if (choices.includes('hardBounce')) {
+                        conditions.push({
+                            hardBounceError: {
+                                $neq: null,
+                            },
+                        });
+                    }
+
+                    if (choices.includes('softBounce')) {
+                        conditions.push({
+                            softBounceError: {
+                                $neq: null,
+                            },
+                        });
+                    }
+
+                    if (choices.includes('spam')) {
+                        conditions.push({
+                            spamComplaintError: {
                                 $neq: null,
                             },
                         });
@@ -1179,6 +1206,36 @@ export function useEmailRecipientsFilterBuilders() {
                     return {
                         $or: conditions,
                     };
+                },
+                unwrapFilter: (f) => {
+                    if (typeof f !== 'object') return null;
+
+                    const results: string[] = [];
+                    const orConditions = (f as any).$or ? (f as any).$or : [f];
+
+                    for (const condition of orConditions) {
+                        if (condition.failError?.$neq === null) {
+                            results.push('failError');
+                        }
+                        else if (condition.hardBounceError?.$neq === null) {
+                            results.push('hardBounce');
+                        }
+                        else if (condition.softBounceError?.$neq === null) {
+                            results.push('softBounce');
+                        }
+                        else if (condition.spamComplaintError?.$neq === null) {
+                            results.push('spam');
+                        }
+                        else {
+                            return null;
+                        }
+                    }
+
+                    if (results.length) {
+                        return results;
+                    }
+
+                    return null;
                 },
             }),
 

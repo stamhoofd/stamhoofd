@@ -22,6 +22,27 @@
                 </div>
             </template>
 
+            <button v-if="email.spamComplaintsCount" class="error-box selectable" type="button" @click="navigate(Routes.Complaints)">
+                <span>{{ email.spamComplaintsCount > 1 ? $t('{count} ontvangers hebben hun email als spam gemarkeerd', {count: email.spamComplaintsCount}) : $t('Eén ontvanger heeft de email als spam gemarkeerd') }}</span>
+                <span class="button text">
+                    {{ $t('Bekijken') }}
+                </span>
+            </button>
+
+            <button v-if="email.hardBouncesCount" class="error-box selectable" type="button" @click="navigate(Routes.HardBounces)">
+                <span>{{ email.hardBouncesCount > 1 ? $t('{count} ontvangers konden de email niet ontvangen (hard bounce)', {count: email.hardBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (hard bounce)') }}</span>
+                <span class="button text">
+                    {{ $t('Bekijken') }}
+                </span>
+            </button>
+
+            <button v-if="email.softBouncesCount" class="warning-box selectable" type="button" @click="navigate(Routes.SoftBounces)">
+                <span>{{ email.softBouncesCount > 1 ? $t('{count} ontvangers konden de email niet ontvangen (soft bounce)', {count: email.softBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (soft bounce)') }}</span>
+                <span class="button text">
+                    {{ $t('Bekijken') }}
+                </span>
+            </button>
+
             <STList>
                 <STListItem v-if="email.sentAt">
                     <template #left>
@@ -140,6 +161,9 @@ const navigate = useNavigate();
 enum Routes {
     Members = 'leden',
     Recipients = 'ontvangers',
+    Complaints = 'complaints',
+    HardBounces = 'hard-bounces',
+    SoftBounces = 'soft-bounces',
 }
 
 defineRoutes([
@@ -166,6 +190,48 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 email: props.email,
+            };
+        },
+    },
+    {
+        url: Routes.Complaints,
+        component: EmailRecipientsTableView,
+        paramsToProps: () => {
+            return {
+                email: props.email,
+                filter: {
+                    spamComplaintError: {
+                        $neq: null,
+                    },
+                },
+            };
+        },
+    },
+    {
+        url: Routes.HardBounces,
+        component: EmailRecipientsTableView,
+        paramsToProps: () => {
+            return {
+                email: props.email,
+                filter: {
+                    hardBounceError: {
+                        $neq: null,
+                    },
+                },
+            };
+        },
+    },
+    {
+        url: Routes.SoftBounces,
+        component: EmailRecipientsTableView,
+        paramsToProps: () => {
+            return {
+                email: props.email,
+                filter: {
+                    softBounceError: {
+                        $neq: null,
+                    },
+                },
             };
         },
     },

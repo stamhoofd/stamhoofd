@@ -41,4 +41,19 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONObject,
         nullable: true,
     }),
+    spamComplaintError: createColumnFilter({
+        expression: SQL.column('spamComplaintError'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+    softBounceError: createColumnFilter({
+        expression: SQL.column('softBounceError'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+    hardBounceError: createColumnFilter({
+        expression: SQL.column('hardBounceError'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
 };

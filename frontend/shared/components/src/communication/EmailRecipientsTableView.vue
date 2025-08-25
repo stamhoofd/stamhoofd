@@ -31,9 +31,11 @@ type ObjectType = EmailRecipient;
 const props = withDefaults(
     defineProps<{
         email?: EmailPreview | null;
+        filter?: StamhoofdFilter | null;
     }>(),
     {
         email: null,
+        filter: null,
     },
 );
 
@@ -75,7 +77,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     };
 }
 
-const defaultFilter = null;
+const defaultFilter = props.filter; ;
 
 const objectFetcher = useEmailRecipientsObjectFetcher({
     requiredFilter: getRequiredFilter(),
@@ -104,7 +106,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EmailRecipient>({
         id: 'sentAt',
-        name: $t('Status'),
+        name: $t('Verzonden op'),
         getValue: e => e,
         format: (email) => {
             if (email.sentAt) {
@@ -140,6 +142,43 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 200,
         index: 2,
+    }),
+
+    new Column<ObjectType, EmailRecipient>({
+        id: 'notifications',
+        name: $t('Meldingen'),
+        description: $t('Na het versturen van een e-mail is het mogelijk dat we een bericht terug krijgen dat de e-mail niet kon worden bezorgd of als spam werd gemarkeerd. Dat verschijnt hier.'),
+        getValue: e => e,
+        format: (email) => {
+            if (email.spamComplaintError) {
+                return $t('Spam');
+            }
+
+            if (email.hardBounceError) {
+                return $t('E-mail kon permanent niet worden afgeleverd');
+            }
+
+            if (email.softBounceError) {
+                return $t('E-mail kon niet worden afgeleverd');
+            }
+
+            return $t('Geen');
+        },
+        getStyle: (email) => {
+            if (email.spamComplaintError || email.hardBounceError) {
+                return 'error';
+            }
+
+            if (email.softBounceError) {
+                return 'warning';
+            }
+
+            return 'success';
+        },
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        index: 3,
+        allowSorting: false,
     }),
 ];
 
