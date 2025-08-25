@@ -1,6 +1,6 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AccountSwitcher, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, manualFeatureFlag, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { CommunicationView, AccountSwitcher, AsyncComponent, AuditLogsView, AuthenticatedView, ContextNavigationBar, ContextProvider, CoverImageContainer, CustomHooksContainer, LoginView, ManageEventsView, manualFeatureFlag, NoPermissionsView, OrganizationLogo, OrganizationSwitcher, PromiseView, ReplaceRootEventBus, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, NetworkManager, OrganizationManager, PlatformManager, SessionContext, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { AccessRight, AppType, Organization, PermissionLevel, PermissionsResourceType, Webshop } from '@stamhoofd/structures';
@@ -13,7 +13,6 @@ import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';
 import { useGlobalRoutes } from './useGlobalRoutes';
 import OrganizationSelectionView from './views/login/OrganizationSelectionView.vue';
-import CommunicationView from './views/communication/CommunicationView.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
     return new ComponentWithProperties(ModalStackComponent, { root: component, initialPresents });

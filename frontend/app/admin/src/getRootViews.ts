@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuditLogsView, AuthenticatedView, ManageEventsView, manualFeatureFlag, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AsyncComponent, AuditLogsView, AuthenticatedView, CommunicationView, ManageEventsView, manualFeatureFlag, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
@@ -120,6 +120,15 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         component: settingsView,
     });
 
+    const communicationTab = new TabBarItem({
+        id: 'communication',
+        icon: 'email-filled',
+        name: $t(`a6304a41-8c83-419b-8e7e-c26f4a047c19`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(CommunicationView, {}),
+        }),
+    });
+
     return wrapContext(reactiveSession, 'admin', ({ platformManager }) => wrapWithModalStack(
         new ComponentWithProperties(AuthenticatedView, {
             root: wrapWithModalStack(
@@ -143,8 +152,20 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
                         if (reactiveSession.auth.hasFullAccess()) {
                             moreTab.items.push(settingsTab);
+
+                            if (manualFeatureFlag('communication', reactiveSession)) {
+                                moreTab.items.push(communicationTab);
+                            }
+
                             moreTab.items.push(financesTab);
                             moreTab.items.push(auditLogsTab);
+                        }
+                        else {
+                            if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)) {
+                                if (manualFeatureFlag('communication', reactiveSession)) {
+                                    moreTab.items.push(communicationTab);
+                                }
+                            }
                         }
 
                         if (manualFeatureFlag('event-notifications', reactiveSession) && reactiveSession.auth.hasAccessRightForSomeResourceOfType(PermissionsResourceType.OrganizationTags, AccessRight.OrganizationEventNotificationReviewer)) {

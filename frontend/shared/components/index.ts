@@ -29,6 +29,7 @@ export * from './src/quick-actions';
 export * from './src/setupSteps';
 export * from './src/bundle-discounts';
 export * from './src/export';
+export * from './src/communication';
 
 // Navigation
 export { default as BackButton } from './src/navigation/BackButton.vue';
