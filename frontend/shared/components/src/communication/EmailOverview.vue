@@ -55,7 +55,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="right-stack">
+                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="right-stack" @click="openRecipients">
                     <template #left>
                         <span class="icon email-filled" />
                     </template>
@@ -141,6 +141,7 @@ import { useUpdateEmail } from './hooks/useUpdateEmail';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentWithProperties, useShow } from '@simonbackx/vue-app-navigation';
 import MembersTableView from '../members/MembersTableView.vue';
+import EmailRecipientsTableView from './EmailRecipientsTableView.vue';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -175,6 +176,16 @@ async function openRelatedMembers() {
                 },
                 customTitle: $t('Leden die dit bericht zien'),
                 customEstimatedRows: props.email.membersCount || 0,
+            }),
+        ],
+    });
+}
+
+async function openRecipients() {
+    await show({
+        components: [
+            new ComponentWithProperties(EmailRecipientsTableView, {
+                email: props.email,
             }),
         ],
     });

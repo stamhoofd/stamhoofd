@@ -36,4 +36,9 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
+    failError: createColumnFilter({
+        expression: SQL.column('failError'),
+        type: SQLValueType.JSONObject,
+        nullable: true,
+    }),
 };

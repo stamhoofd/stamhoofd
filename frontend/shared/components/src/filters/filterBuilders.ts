@@ -1135,3 +1135,62 @@ export function useEventNotificationInMemoryFilterBuilders() {
         return all;
     };
 }
+
+/**
+ * These filters are compatible with the SQLFilter in the backend
+ */
+export function useEmailRecipientsFilterBuilders() {
+    return () => {
+        const all: UIFilterBuilders = [
+            new StringFilterBuilder({
+                name: $t('E-mailadres'),
+                key: 'email',
+            }),
+
+            new StringFilterBuilder({
+                name: $t('Naam'),
+                key: 'name',
+            }),
+
+            new MultipleChoiceFilterBuilder({
+                name: $t('Status'),
+                options: [
+                    new MultipleChoiceUIFilterOption($t('Foutmelding bij versturen'), 'failError'),
+                ],
+                wrapFilter: (f) => {
+                    const choices = Array.isArray(f) ? f : [f];
+                    const conditions: any[] = [];
+
+                    if (choices.includes('failError')) {
+                        conditions.push({
+                            failError: {
+                                $neq: null,
+                            },
+                        });
+                    }
+
+                    if (conditions.length === 0) {
+                        return {};
+                    }
+                    if (conditions.length === 1) {
+                        return conditions[0];
+                    }
+
+                    return {
+                        $or: conditions,
+                    };
+                },
+            }),
+
+        ];
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
+}

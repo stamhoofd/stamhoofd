@@ -1,5 +1,6 @@
 import { EmailRecipient } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { Formatter } from '@stamhoofd/utility';
 
 export const emailRecipientSorters: SQLSortDefinitions<EmailRecipient> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
@@ -17,6 +18,50 @@ export const emailRecipientSorters: SQLSortDefinitions<EmailRecipient> = {
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column('id'),
+                direction,
+            });
+        },
+    },
+    sentAt: {
+        getValue(a) {
+            return a.sentAt ? Formatter.dateTimeIso(a.sentAt, 'UTC') : null;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('sentAt'),
+                direction,
+            });
+        },
+    },
+    email: {
+        getValue(a) {
+            return a.email;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('email'),
+                direction,
+            });
+        },
+    },
+    firstName: {
+        getValue(a) {
+            return a.firstName;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('firstName'),
+                direction,
+            });
+        },
+    },
+    lastName: {
+        getValue(a) {
+            return a.lastName;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('lastName'),
                 direction,
             });
         },

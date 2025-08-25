@@ -205,6 +205,9 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     failCount = 0;
 
+    @field({ decoder: SimpleErrors, nullable: true, version: 380 })
+    failError: SimpleErrors | null = null;
+
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     hardBounceError: string | null = null;
 
@@ -228,6 +231,16 @@ export class EmailRecipient extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
+
+    get name() {
+        if (!this.firstName) {
+            return this.lastName;
+        }
+        if (!this.lastName) {
+            return this.firstName;
+        }
+        return this.firstName + ' ' + this.lastName;
+    }
 
     getDefaultReplacements() {
         return Recipient.create({
