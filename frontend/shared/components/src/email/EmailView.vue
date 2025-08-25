@@ -38,8 +38,8 @@
                         </button>
                     </div>
                     <template #right>
-                        <span v-if="patchedEmail.recipientCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('Er ging iets mis bij het aanmaken van de ontvangers: ') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
-                        <span v-else-if="patchedEmail.recipientCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.recipientCount) }}</span>
+                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('Er ging iets mis bij het aanmaken van de ontvangers: ') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
+                        <span v-else-if="patchedEmail.emailRecipientsCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.emailRecipientsCount) }}</span>
                         <span v-else class="style-placeholder-skeleton" />
                     </template>
                 </STListItem>
@@ -326,7 +326,7 @@ onMounted(() => {
 });
 
 useInterval(async () => {
-    if (!email.value || email.value.recipientCount !== null) {
+    if (!email.value || email.value.emailRecipientsCount !== null) {
         return;
     }
     await updateEmail();
@@ -492,11 +492,11 @@ async function send() {
         return;
     }
 
-    const recipientCount = email.value.recipientCount;
+    const emailRecipientsCount = email.value.emailRecipientsCount;
     let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
 
-    if (recipientCount) {
-        confirmText = recipientCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.recipientCount} ontvangers wilt versturen?`;
+    if (emailRecipientsCount) {
+        confirmText = emailRecipientsCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.emailRecipientsCount} ontvangers wilt versturen?`;
     }
 
     const isConfirm = await CenteredMessage.confirm(confirmText, $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`));

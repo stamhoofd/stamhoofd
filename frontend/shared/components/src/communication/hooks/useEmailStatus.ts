@@ -14,7 +14,7 @@ export function useEmailStatus() {
                 return {
                     text: $t('f5eb4dcd-ddc1-4952-a40e-845cda2b88ce'),
                     theme: 'theme-secundary',
-                    progress: email.recipientCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.recipientCount) : undefined,
+                    progress: email.emailRecipientsCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.emailRecipientsCount) : undefined,
                 };
             case EmailStatus.Queued:
                 return {

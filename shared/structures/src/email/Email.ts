@@ -118,8 +118,12 @@ export class Email extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     fromName: string | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true })
-    recipientCount: number | null = null;
+    @field({ decoder: IntegerDecoder, nullable: true, field: 'recipientCount' })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 380, field: 'emailRecipientsCount' })
+    emailRecipientsCount: number | null = null;
+
+    @field({ decoder: IntegerDecoder, nullable: true, version: 380 })
+    otherRecipientsCount: number | null = null;
 
     @field({ decoder: IntegerDecoder, version: 380 })
     succeededCount = 0;
@@ -176,7 +180,15 @@ export class EmailRecipient extends AutoEncoder {
     lastName: string | null = null;
 
     @field({ decoder: StringDecoder })
-    email: string;
+    @field({
+        decoder: StringDecoder,
+        nullable: true,
+        version: 380,
+        downgrade: function (newer: string | null) {
+            return newer ?? '';
+        },
+    })
+    email: string | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     memberId: string | null = null;
@@ -218,7 +230,10 @@ export class EmailRecipient extends AutoEncoder {
     updatedAt: Date = new Date();
 
     getDefaultReplacements() {
-        return Recipient.create(this).getDefaultReplacements();
+        return Recipient.create({
+            ...this,
+            email: this.email ?? '',
+        }).getDefaultReplacements();
     }
 
     getReplacements(organization: { meta: OrganizationMetaData; privateMeta: OrganizationPrivateMetaData | null; name: string } | null, platform: Platform) {
@@ -233,6 +248,7 @@ export class EmailRecipient extends AutoEncoder {
     getRecipient() {
         return Recipient.create({
             ...this,
+            email: this.email ?? '',
         });
     }
 }

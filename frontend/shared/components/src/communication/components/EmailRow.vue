@@ -16,9 +16,9 @@
             Vanaf {{ email.fromAddress }}
         </p>
 
-        <template v-if="email.recipientCount" #right>
+        <template v-if="email.emailRecipientsCount" #right>
             <span v-if="email.attachments.length" class="style-description-small"><span>{{ formatInteger(email.attachments.length) }}</span><span class="icon attachment tiny" /></span>
-            <span class="style-description-small"><span>{{ formatInteger(email.recipientCount) }}</span><span class="icon email tiny" /></span>
+            <span class="style-description-small"><span>{{ formatInteger(email.emailRecipientsCount) }}</span><span class="icon email tiny" /></span>
         </template>
     </STListItem>
 </template>

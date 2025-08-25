@@ -590,6 +590,22 @@ export class Email extends QueryableModel {
                         for (const recipient of recipients) {
                             idPointer = recipient.id;
 
+                            if (recipient.sentAt) {
+                                // Already sent
+                                if (recipient.email) {
+                                    recipientsSet.add(recipient.email);
+                                }
+                                succeededCount += 1;
+                                await saveStatus();
+                                skipped++;
+                                continue;
+                            }
+
+                            if (!recipient.email) {
+                                skipped++;
+                                continue;
+                            }
+
                             if (recipientsSet.has(recipient.id)) {
                                 console.error('Found duplicate recipient while sending email', recipient.id);
                                 softFailedCount += 1;
@@ -613,14 +629,6 @@ export class Email extends QueryableModel {
                                 continue;
                             }
                             recipientsSet.add(recipient.email);
-
-                            if (recipient.sentAt) {
-                                // Already sent
-                                succeededCount += 1;
-                                await saveStatus();
-                                skipped++;
-                                continue;
-                            }
 
                             let promiseResolve: (value: void | PromiseLike<void>) => void;
                             const promise = new Promise<void>((resolve) => {

@@ -55,7 +55,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="email.recipientCount" :selectable="true" class="right-stack">
+                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="right-stack">
                     <template #left>
                         <span class="icon email-filled" />
                     </template>
@@ -72,16 +72,22 @@
                     <p v-else-if="email.failedCount + email.softFailedCount === 1" class="style-description-small">
                         {{ $t('Eén email kon niet worden verzonden') }}
                     </p>
-                    <p v-else-if="email.succeededCount && email.recipientCount !== email.succeededCount" class="style-description-small">
+                    <p v-else-if="email.succeededCount && email.emailRecipientsCount !== email.succeededCount" class="style-description-small">
                         {{ $t('Waarvan reeds {count} verzonden', { count: email.succeededCount }) }}
+                    </p>
+                    <p v-if="email.otherRecipientsCount && email.otherRecipientsCount > 1" class="style-description-small">
+                        {{ $t('Er zijn {count} ontvangers zonder e-mailadres', { count: email.otherRecipientsCount }) }}
+                    </p>
+                    <p v-if="email.otherRecipientsCount && email.otherRecipientsCount === 1" class="style-description-small">
+                        {{ $t('Er is één ontvanger zonder e-mailadres') }}
                     </p>
 
                     <template #right>
-                        <p v-if="email.succeededCount && email.succeededCount !== email.recipientCount" class="style-description-small">
-                            {{ formatInteger(email.succeededCount) }} / {{ formatInteger(email.recipientCount) }}
+                        <p v-if="email.succeededCount && email.succeededCount !== email.emailRecipientsCount" class="style-description-small">
+                            {{ formatInteger(email.succeededCount) }} / {{ formatInteger(email.emailRecipientsCount) }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ formatInteger(email.recipientCount) }}
+                            {{ formatInteger(email.emailRecipientsCount) }}
                         </p>
                         <span class="icon small arrow-right-small" />
                     </template>
