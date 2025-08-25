@@ -94,13 +94,13 @@ export class Email extends AutoEncoder {
     @field({ decoder: new EnumDecoder(EmailStatus) })
     status = EmailStatus.Draft;
 
-    @field({ decoder: SimpleErrors, nullable: true, ...NextVersion })
+    @field({ decoder: SimpleErrors, nullable: true, version: 380 })
     emailErrors: SimpleErrors | null = null;
 
     @field({ decoder: new EnumDecoder(EmailRecipientsStatus) })
     recipientsStatus = EmailRecipientsStatus.NotCreated;
 
-    @field({ decoder: SimpleErrors, nullable: true, ...NextVersion })
+    @field({ decoder: SimpleErrors, nullable: true, version: 380 })
     recipientsErrors: SimpleErrors | null = null;
 
     @field({ decoder: AnyDecoder })
@@ -121,16 +121,16 @@ export class Email extends AutoEncoder {
     @field({ decoder: IntegerDecoder, nullable: true })
     recipientCount: number | null = null;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 380 })
     succeededCount = 0;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 380 })
     softFailedCount = 0;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 380 })
     failedCount = 0;
 
-    @field({ decoder: IntegerDecoder, ...NextVersion })
+    @field({ decoder: IntegerDecoder, version: 380 })
     membersCount = 0;
 
     @field({ decoder: new ArrayDecoder(EmailAttachment) })
@@ -178,6 +178,12 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: StringDecoder })
     email: string;
 
+    @field({ decoder: StringDecoder, nullable: true, version: 380 })
+    memberId: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 380 })
+    userId: string | null = null;
+
     @field({ decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = [];
 
@@ -186,6 +192,15 @@ export class EmailRecipient extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     failCount = 0;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 380 })
+    hardBounceError: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 380 })
+    softBounceError: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 380 })
+    spamComplaintError: string | null = null;
 
     @field({ decoder: DateDecoder, nullable: true })
     firstFailedAt: Date | null = null;

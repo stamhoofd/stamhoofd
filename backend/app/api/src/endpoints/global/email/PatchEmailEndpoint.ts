@@ -144,7 +144,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             await model.buildExampleRecipient();
 
             // Force null - because we have stale data
-            model.recipientCount = null;
+            model.emailRecipientsCount = null;
             model.updateCount();
         }
 

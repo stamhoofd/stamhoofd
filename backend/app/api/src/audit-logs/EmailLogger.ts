@@ -58,8 +58,8 @@ export const EmailLogger = new ModelLogger(Email, {
                 type: AuditLogReplacementType.Email,
             })],
             ['c', AuditLogReplacement.create({
-                value: Formatter.integer(model.recipientCount ?? 0),
-                count: model.recipientCount ?? 0,
+                value: Formatter.integer(model.emailRecipientsCount ?? 0),
+                count: model.emailRecipientsCount ?? 0,
             })],
         ]);
         if (options.data.recipient) {

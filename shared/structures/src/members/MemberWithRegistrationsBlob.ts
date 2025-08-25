@@ -85,6 +85,8 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             recipients.push(
                 EmailRecipient.create({
                     objectId: this.id,
+                    memberId: this.id,
+                    userId: this.users.find(u => u.email === this.details.email)?.id ?? this.users.find(u => !!this.details.alternativeEmails.find(e => e === u.email))?.id ?? null,
                     firstName: this.details.firstName,
                     lastName: this.details.lastName,
                     email: this.details.email,
@@ -102,6 +104,8 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     recipients.push(
                         EmailRecipient.create({
                             objectId: this.id,
+                            memberId: this.id,
+                            userId: this.users.find(u => u.email === parent.email)?.id ?? this.users.find(u => !!parent.alternativeEmails.find(e => e === u.email))?.id ?? null,
                             firstName: parent.firstName,
                             lastName: parent.lastName,
                             email: parent.email,
@@ -120,6 +124,8 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                 recipients.push(
                     EmailRecipient.create({
                         objectId: this.id,
+                        memberId: this.id,
+                        userId: this.users.find(u => u.email === unverifiedEmail)?.id ?? null,
                         email: unverifiedEmail,
                         replacements: [
                             Replacement.create({

@@ -39,8 +39,8 @@ export class EmailRecipient extends QueryableModel {
     @column({ type: 'string', nullable: true })
     lastName: string | null = null;
 
-    @column({ type: 'string' })
-    email: string;
+    @column({ type: 'string', nullable: true })
+    email: string | null = null;
 
     @column({ type: 'json', decoder: new ArrayDecoder(Replacement) })
     replacements: Replacement[] = [];
@@ -54,6 +54,42 @@ export class EmailRecipient extends QueryableModel {
 
     @column({ type: 'json', nullable: true, decoder: SimpleErrors })
     failError: SimpleErrors | null = null;
+
+    @column({ type: 'string', nullable: true })
+    organizationId: string | null = null;
+
+    /**
+     * When set, the member will be ablse to see this message in the member portal.
+     */
+    @column({ type: 'string', nullable: true })
+    memberId: string | null = null;
+
+    /**
+     * When set, the user will be able to see this message in the member portal.
+     */
+    @column({ type: 'string', nullable: true })
+    userId: string | null = null;
+
+    /**
+     * Set when the email was send, but we received a hard bounce for this specific email
+     * Contains the full output we received in the bounce
+     */
+    @column({ type: 'string', nullable: true })
+    hardBounceError: string | null = null;
+
+    /**
+     * Set when the email was send, but we received a soft bounce for this specific email
+     * Contains the full output we received in the bounce
+     */
+    @column({ type: 'string', nullable: true })
+    softBounceError: string | null = null;
+
+    /**
+     * Set when the email was send, but was marked as spam.
+     * The error message contains any relevant info we received from our provider. E.g. type of spam (virus, fraud, abuse...)
+     */
+    @column({ type: 'string', nullable: true })
+    spamComplaintError: string | null = null;
 
     @column({ type: 'integer' })
     failCount = 0;

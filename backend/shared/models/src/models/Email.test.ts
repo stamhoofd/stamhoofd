@@ -114,7 +114,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(2);
+        expect(model.emailRecipientsCount).toBe(2);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(1);
         expect(model.emailErrors).toBe(null);
@@ -170,7 +170,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(2);
+        expect(model.emailRecipientsCount).toBe(2);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(2);
         expect(model.failedCount).toBe(0);
@@ -222,7 +222,7 @@ describe('Model.Email', () => {
             message: 'This is a simulated error while fetching recipients',
         }]));
 
-        expect(model.recipientCount).toBe(null);
+        expect(model.emailRecipientsCount).toBe(null);
         expect(model.status).toBe(EmailStatus.Failed);
         expect(model.succeededCount).toBe(0);
         expect(model.failedCount).toBe(0);
@@ -261,7 +261,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(2);
+        expect(model.emailRecipientsCount).toBe(2);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(0);
         expect(model.failedCount).toBe(2);
@@ -311,7 +311,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -351,7 +351,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -393,7 +393,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(0);
         expect(model.failedCount).toBe(1);
@@ -442,7 +442,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -489,7 +489,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -533,7 +533,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -582,7 +582,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -633,7 +633,7 @@ describe('Model.Email', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-        expect(model.recipientCount).toBe(1);
+        expect(model.emailRecipientsCount).toBe(1);
         expect(model.status).toBe(EmailStatus.Sent);
         expect(model.succeededCount).toBe(1);
         expect(model.failedCount).toBe(0);
@@ -684,7 +684,7 @@ describe('Model.Email', () => {
 
             // Check if it was sent correctly
             expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-            expect(model.recipientCount).toBe(1);
+            expect(model.emailRecipientsCount).toBe(1);
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
@@ -740,7 +740,7 @@ describe('Model.Email', () => {
 
             // Check if it was sent correctly
             expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-            expect(model.recipientCount).toBe(1);
+            expect(model.emailRecipientsCount).toBe(1);
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
@@ -798,7 +798,7 @@ describe('Model.Email', () => {
 
             // Check if it was sent correctly
             expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-            expect(model.recipientCount).toBe(1);
+            expect(model.emailRecipientsCount).toBe(1);
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
@@ -848,7 +848,7 @@ describe('Model.Email', () => {
 
             // Check if it was sent correctly
             expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
-            expect(model.recipientCount).toBe(1);
+            expect(model.emailRecipientsCount).toBe(1);
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded

@@ -1,5 +1,5 @@
 import { CachedBalance, Email } from '@stamhoofd/models';
-import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
 
@@ -22,6 +22,8 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
             for (const email of contact.emails) {
                 const recipient = EmailRecipient.create({
                     objectId: balance.id, // Note: not set member, user or organization id here - should be the queryable balance id
+                    userId: balance.objectType === ReceivableBalanceType.user ? balance.object.id : null,
+                    memberId: balance.objectType === ReceivableBalanceType.member ? balance.object.id : null,
                     firstName: contact.firstName,
                     lastName: contact.lastName,
                     email,

@@ -57,11 +57,11 @@
 
                 <STListItem v-if="email.recipientCount" :selectable="true" class="right-stack">
                     <template #left>
-                        <span class="icon group" />
+                        <span class="icon email-filled" />
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('ddc9d375-901c-4b2d-a257-0449083a9bfd') }}
+                        {{ $t('E-mail ontvangers') }}
                     </h2>
 
                     <p v-if="email.failedCount + email.softFailedCount > 1" class="style-description-small">
@@ -86,12 +86,32 @@
                         <span class="icon small arrow-right-small" />
                     </template>
                 </STListItem>
+
+                <STListItem v-if="email.membersCount" :selectable="true" class="right-stack">
+                    <template #left>
+                        <span class="icon membership-filled" />
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Leden') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Deze leden kunnen het bericht ook nalezen in het ledenportaal.') }}
+                    </p>
+
+                    <template #right>
+                        <p class="style-description-small">
+                            {{ formatInteger(email.membersCount) }}
+                        </p>
+                        <span class="icon small arrow-right-small" />
+                    </template>
+                </STListItem>
             </STList>
 
             <div v-if="replacedHtml" class="email-preview-box">
                 <SafeHtmlBox :html="replacedHtml" />
 
-                <hr v-if="email.attachments.length > 0" class="email-attachments-spacer" />
+                <hr v-if="email.attachments.length > 0" class="email-attachments-spacer">
                 <STList v-if="email.attachments.length > 0" class="attachments-container">
                     <STListItem v-for="attachment in email.attachments" :key="attachment.id" class="file-list-item" :selectable="attachment.file" target="_blank" :href="attachment.file?.getPublicPath()" :download="attachment.file ? 1 : 0" :element-name="attachment.file ? 'a' : 'div'">
                         <template #left>

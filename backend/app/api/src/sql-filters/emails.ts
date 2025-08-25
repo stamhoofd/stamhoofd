@@ -47,8 +47,8 @@ export const emailFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
-    recipientCount: createColumnFilter({
-        expression: SQL.column('recipientCount'),
+    emailRecipientsCount: createColumnFilter({
+        expression: SQL.column('emailRecipientsCount'),
         type: SQLValueType.Number,
         nullable: true,
     }),

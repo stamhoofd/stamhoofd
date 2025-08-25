@@ -89,8 +89,17 @@ export class Email extends QueryableModel {
     @column({ type: 'string', nullable: true })
     fromName: string | null = null;
 
+    /**
+     * Amount of recipients with an email address
+     */
     @column({ type: 'integer', nullable: true })
-    recipientCount: number | null = null;
+    emailRecipientsCount: number | null = null;
+
+    /**
+     * Amount of recipients without an email address
+     */
+    @column({ type: 'integer', nullable: true })
+    otherRecipientsCount: number | null = null;
 
     /**
      * Amount of recipients that have successfully received the email.
@@ -712,7 +721,7 @@ export class Email extends QueryableModel {
                     throw e;
                 }
 
-                if (upToDate.recipientCount === 0 && upToDate.userId === null) {
+                if (upToDate.emailRecipientsCount === 0 && upToDate.userId === null) {
                     // We only delete automated emails (email type) if they have no recipients
                     console.log('No recipients found for email ', upToDate.id, ' deleting...');
                     await upToDate.delete();
@@ -786,7 +795,7 @@ export class Email extends QueryableModel {
                 }
                 abort.throwIfAborted();
 
-                // Check if we have a more reliable recipientCount in the meantime
+                // Check if we have a more reliable emailRecipientsCount in the meantime
                 upToDate = await Email.getByID(id);
 
                 if (!upToDate) {
@@ -795,7 +804,7 @@ export class Email extends QueryableModel {
                 if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
                     return;
                 }
-                upToDate.recipientCount = count;
+                upToDate.emailRecipientsCount = count;
                 await upToDate.save();
             }
             catch (e) {
@@ -805,7 +814,7 @@ export class Email extends QueryableModel {
                 console.error('Failed to update count for email', id);
                 console.error(e);
 
-                // Check if we have a more reliable recipientCount in the meantime
+                // Check if we have a more reliable emailRecipientsCount in the meantime
                 upToDate = await Email.getByID(id);
 
                 if (!upToDate) {
@@ -844,7 +853,10 @@ export class Email extends QueryableModel {
             upToDate.recipientsStatus = EmailRecipientsStatus.Creating;
             await upToDate.save();
 
+            const membersSet = new Set<string>();
+
             let count = 0;
+            let countWithoutEmail = 0;
 
             try {
                 // Delete all recipients
@@ -889,8 +901,19 @@ export class Email extends QueryableModel {
                             recipient.firstName = item.firstName;
                             recipient.lastName = item.lastName;
                             recipient.replacements = item.replacements;
+                            recipient.memberId = item.memberId ?? null;
+                            recipient.userId = item.userId ?? null;
+                            recipient.organizationId = upToDate.organizationId ?? null;
 
                             await recipient.save();
+
+                            if (recipient.memberId) {
+                                membersSet.add(recipient.memberId);
+                            }
+
+                            if (!recipient.email) {
+                                countWithoutEmail += 1;
+                            }
                         }
 
                         request = response.next ?? null;
@@ -898,8 +921,10 @@ export class Email extends QueryableModel {
                 }
 
                 upToDate.recipientsStatus = EmailRecipientsStatus.Created;
-                upToDate.recipientCount = count;
+                upToDate.emailRecipientsCount = count;
+                upToDate.otherRecipientsCount = countWithoutEmail;
                 upToDate.recipientsErrors = null;
+                upToDate.membersCount = membersSet.size;
                 await upToDate.save();
             }
             catch (e: unknown) {
