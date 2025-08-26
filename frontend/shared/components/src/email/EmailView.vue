@@ -125,6 +125,7 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
+import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -371,6 +372,7 @@ async function createEmail() {
 }
 
 const doThrottledPatch = throttle(patchEmail, 1000);
+const { patchEmail: doPatchEmail } = usePatchEmail();
 
 async function patchEmail() {
     if (!email.value) {
@@ -389,17 +391,7 @@ async function patchEmail() {
     patch.value = null;
 
     try {
-        const response = await context.value.authenticatedServer.request({
-            method: 'PATCH',
-            path: '/email/' + email.value.id,
-            body: _savingPatch,
-            decoder: EmailPreview as Decoder<EmailPreview>,
-            owner,
-            shouldRetry: false,
-        });
-
-        email.value = response.data;
-
+        await doPatchEmail(email.value, _savingPatch);
         savingPatch.value = null;
 
         // changed meanwhile

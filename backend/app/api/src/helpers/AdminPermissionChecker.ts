@@ -883,6 +883,10 @@ export class AdminPermissionChecker {
             return false;
         }
 
+        if (email.deletedAt) {
+            return false;
+        }
+
         if (email.userId === this.user.id) {
             // User can always read their own emails
             // Note; for sending we'll always need to use 'canSendEmailsFrom' externally

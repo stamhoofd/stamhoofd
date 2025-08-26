@@ -3,6 +3,13 @@ import { Formatter } from '@stamhoofd/utility';
 
 export function useEmailStatus() {
     return (email: EmailPreview) => {
+        if (email.deletedAt) {
+            return {
+                text: $t('Verwijderd'),
+                theme: 'theme-error',
+            };
+        }
+
         switch (email.status) {
             case EmailStatus.Draft:
                 return {

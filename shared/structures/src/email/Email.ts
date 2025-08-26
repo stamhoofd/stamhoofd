@@ -158,6 +158,9 @@ export class Email extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    deletedAt: Date | null = null;
+
     getTemplateType() {
         for (const filter of this.recipientFilter.filters) {
             const d = EmailTemplate.getSavedForRecipient(filter.type);

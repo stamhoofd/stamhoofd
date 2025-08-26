@@ -104,7 +104,8 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
             };
         }
 
-        const query = Email.select();
+        const query = Email.select()
+            .where('deletedAt', null);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));

@@ -16,7 +16,7 @@
                 </div>
             </template>
 
-            <template v-if="email.recipientsErrors && email.recipientsStatus === EmailRecipientsStatus.NotCreated">
+            <template v-if="email.status !== EmailStatus.Queued && email.status !== EmailStatus.Sending && email.recipientsErrors && email.recipientsStatus === EmailRecipientsStatus.NotCreated">
                 <div v-for="(error, index) in email.recipientsErrors.errors" :key="index" class="error-box">
                     {{ error.getHuman() }}
                 </div>
@@ -138,6 +138,78 @@
                 </STListItem>
             </STList>
 
+            <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued">
+                <hr>
+                <h2>{{ $t('Acties') }}</h2>
+
+                <STList>
+                    <STListItem v-if="email.status === EmailStatus.Failed" :selectable="true" element-name="button" @click="retrySending">
+                        <template #left>
+                            <IconContainer icon="email" class="secundary">
+                                <template #aside>
+                                    <span class="icon retry small stroke" />
+                                </template>
+                            </IconContainer>
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('Opnieuw proberen') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Probeer het bericht opnieuw te versturen') }}
+                        </p>
+
+                        <template #right>
+                            <Spinner v-if="isRetryingEmail" />
+                            <span v-else class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="button" @click="editEmail">
+                        <template #left>
+                            <IconContainer icon="email" class="primary">
+                                <template #aside>
+                                    <span class="icon edit small stroke" />
+                                </template>
+                            </IconContainer>
+                        </template>
+                        <h3 v-if="email.status !== EmailStatus.Draft" class="style-title-list">
+                            {{ $t('Wijzig inhoud') }}
+                        </h3>
+                        <h3 v-else class="style-title-list">
+                            {{ $t('Wijzig inhoud en versturen') }}
+                        </h3>
+                        <p v-if="email.status !== EmailStatus.Draft" class="style-description-small">
+                            {{ $t('Je kan de inhoud van een bericht wijzigen, maar dit heeft enkel invloed op het zichtbare bericht in het ledenportaal.') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem :selectable="true" element-name="button" @click="doDelete">
+                        <template #left>
+                            <IconContainer icon="email" class="error">
+                                <template #aside>
+                                    <span class="icon trash small stroke" />
+                                </template>
+                            </IconContainer>
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('Verwijderen') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Dit bericht zal niet langer zichtbaar zijn en heeft uiteraard geen effect op reeds verzonden e-mails. Je kan dit niet ongedaan maken.') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+                </STList>
+            </template>
+
+            <hr>
             <EmailPreviewBox :email="email" />
         </main>
     </div>
@@ -145,14 +217,15 @@
 
 <script lang="ts" setup>
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { ProgressRing, useInterval } from '@stamhoofd/components';
+import { CenteredMessage, IconContainer, ProgressRing, Spinner, Toast, useInterval } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import EmailRecipientsTableView from './EmailRecipientsTableView.vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
+import { usePatchEmail } from './hooks/usePatchEmail';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -166,6 +239,7 @@ const status = computed(() => {
     return getEmailStatus(props.email);
 });
 const navigate = useNavigate();
+const { patchEmail } = usePatchEmail();
 
 enum Routes {
     Members = 'leden',
@@ -268,10 +342,71 @@ defineRoutes([
 const { updateEmail } = useUpdateEmail(props.email);
 useInterval(async ({ stop }) => {
     if (props.email.status !== EmailStatus.Sending && props.email.status !== EmailStatus.Queued) {
-        stop();
+        if (props.email.status !== EmailStatus.Failed) {
+            // don't stop, otherwise the resume button won't work
+            stop();
+        }
         return;
     }
     await updateEmail();
 }, 5_000);
+
+const isRetryingEmail = ref(false);
+const isDeletingEmail = ref(false);
+async function retrySending() {
+    if (isRetryingEmail.value) {
+        return;
+    }
+    if (!await CenteredMessage.confirm(
+        $t('Deze e-mail opnieuw proberen te versturen?'),
+        $t('Ja, opnieuw proberen'),
+        $t('Een e-mail wordt nooit meerdere keren naar dezelfde persoon verstuurd'),
+    )) {
+        return;
+    }
+
+    isRetryingEmail.value = true;
+    try {
+        await patchEmail(props.email, EmailPreview.patch({
+            id: props.email.id,
+            status: EmailStatus.Queued,
+        }));
+    }
+    catch (e) {
+        // Handled by the hook
+        Toast.fromError(e).show();
+    }
+    isRetryingEmail.value = false;
+}
+
+async function doDelete() {
+    if (isDeletingEmail.value) {
+        return;
+    }
+    if (!await CenteredMessage.confirm(
+        $t('Dit bericht verwijderen?'),
+        $t('Ja, verwijderen'),
+    )) {
+        return;
+    }
+
+    isDeletingEmail.value = true;
+    try {
+        await patchEmail(props.email, EmailPreview.patch({
+            id: props.email.id,
+            deletedAt: new Date(),
+        }));
+    }
+    catch (e) {
+        // Handled by the hook
+        Toast.fromError(e).show();
+    }
+    isDeletingEmail.value = false;
+}
+
+async function editEmail() {
+    // todo
+}
+
 
 </script>

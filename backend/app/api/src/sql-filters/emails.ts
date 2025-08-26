@@ -92,4 +92,9 @@ export const emailFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    deletedAt: createColumnFilter({
+        expression: SQL.column('deletedAt'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
 };

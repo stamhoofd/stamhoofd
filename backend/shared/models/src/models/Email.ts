@@ -169,6 +169,12 @@ export class Email extends QueryableModel {
     sentAt: Date | null = null;
 
     @column({
+        type: 'datetime',
+        nullable: true,
+    })
+    deletedAt: Date | null = null;
+
+    @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
@@ -230,11 +236,19 @@ export class Email extends QueryableModel {
             });
         }
 
-        if (this.recipientsErrors !== null && this.recipientsStatus !== EmailRecipientsStatus.Created) {
+        if (this.status === EmailStatus.Draft && this.recipientsErrors !== null && this.recipientsStatus !== EmailRecipientsStatus.Created) {
             throw new SimpleError({
                 code: 'invalid_recipients',
                 message: 'Failed to build recipients (count)',
                 human: $t(`Er ging iets mis bij het aanmaken van de ontvangers. Probeer je selectie aan te passen. Neem contact op als het probleem zich blijft voordoen.`) + ' ' + this.recipientsErrors.getHuman(),
+            });
+        }
+
+        if (this.deletedAt) {
+            throw new SimpleError({
+                code: 'invalid_state',
+                message: 'Email is deleted',
+                human: $t(`Deze e-mail is verwijderd en kan niet verzonden worden.`),
             });
         }
 
@@ -510,6 +524,10 @@ export class Email extends QueryableModel {
         this.throwIfNotReadyToSend();
         await this.lock(async (upToDate) => {
             if (upToDate.status === EmailStatus.Draft) {
+                upToDate.status = EmailStatus.Queued;
+            }
+            if (upToDate.status === EmailStatus.Failed) {
+                // Retry failed email
                 upToDate.status = EmailStatus.Queued;
             }
             await upToDate.save();

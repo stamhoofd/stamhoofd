@@ -50,15 +50,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw Context.auth.error();
         }
 
-        if (model.status !== EmailStatus.Draft) {
-            throw new SimpleError({
-                code: 'not_draft',
-                human: 'Email is not a draft',
-                message: $t(`298b5a46-2899-4aa1-89df-9b634c20806b`),
-                statusCode: 400,
-            });
-        }
-
         let rebuild = false;
 
         if (request.body.subject !== undefined) {
@@ -66,6 +57,14 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.senderId !== undefined) {
+            if (model.status !== EmailStatus.Draft) {
+                throw new SimpleError({
+                    code: 'not_draft',
+                    human: 'Email is not a draft',
+                    message: $t(`298b5a46-2899-4aa1-89df-9b634c20806b`),
+                    statusCode: 400,
+                });
+            }
             const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
             const sender = list.find(e => e.id === request.body.senderId);
             if (sender) {
@@ -136,6 +135,13 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (request.body.attachments !== undefined) {
             model.attachments = patchObject(model.attachments, request.body.attachments);
             model.validateAttachments();
+        }
+
+        if (request.body.deletedAt !== undefined) {
+            if (!await Context.auth.canAccessEmail(model, PermissionLevel.Full)) {
+                throw Context.auth.error();
+            }
+            model.deletedAt = request.body.deletedAt;
         }
 
         await model.save();
