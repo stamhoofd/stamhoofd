@@ -72,39 +72,91 @@ export class RegistrationsActionBuilder {
     }
 
     getMoveAction(selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod): TableAction<PlatformMember>[] {
-        const period = selectedOrganizationRegistrationPeriod ?? this.organization.period;
+        const suggestedGroups: Group[] = [];
+
+        for (const r of this.registrations) {
+            const add = [r.group?.waitingList];
+            for (const a of add) {
+                if (a) {
+                    if (suggestedGroups.find(gg => gg.id === a.id)) {
+                        continue; // Already suggested
+                    }
+                    suggestedGroups.push(a);
+                }
+            }
+        }
+
+        const organization = this.organization;
+        const periods = organization.periods && this.context.auth.hasFullAccess() ? organization.periods.organizationPeriods.filter(p => !p.period.locked) : [selectedOrganizationRegistrationPeriod ?? organization.period];
+
+        const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
+            return [
+                new MenuTableAction({
+                    name: $t(`93d604bc-fddf-434d-a993-e6e456d32231`),
+                    groupIndex: 1,
+                    enabled: period.waitingLists.length > 0,
+                    description: addPeriodDescription ? period.period.name : undefined,
+                    childActions: () => [
+                        ...period.waitingLists.map((g) => {
+                            return new InMemoryTableAction({
+                                name: g.settings.name.toString(),
+                                needsSelection: true,
+                                allowAutoSelectAll: false,
+                                handler: async (members: PlatformMember[]) => {
+                                    await this.moveRegistrations(members, g);
+                                },
+                            });
+                        }),
+                    ],
+                }),
+                ...this.getActionsForCategory(period.adminCategoryTree, group => this.moveRegistrations(group)).map((r) => {
+                    if (addPeriodDescription) {
+                        r.description = period.period.name;
+                    }
+                    return r;
+                }),
+            ];
+        };
 
         return [
             new MenuTableAction({
-                name: $t(`9d928561-b64b-46c2-a2c9-c6997384a451`),
+                name: $t(`507c48cb-35ae-4c94-bc7a-4611360409c8`),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 enabled: this.hasWrite,
-                childActions: () => [
-                    new MenuTableAction({
-                        name: $t(`72aa2f8d-23dc-4056-98af-a7fc32c9c0ef`),
-                        groupIndex: 0,
-                        enabled: this.organization.period.waitingLists.length > 0,
-                        childActions: () => [
-                            ...this.organization.period.waitingLists.map((g) => {
-                                return new InMemoryTableAction({
-                                    name: g.settings.name.toString(),
-                                    needsSelection: true,
-                                    allowAutoSelectAll: false,
-                                    handler: async () => {
-                                        await this.moveRegistrations(g);
-                                    },
+                childActions: () => {
+                    const base = suggestedGroups.map((g) => {
+                        return new InMemoryTableAction({
+                            name: g.settings.name.toString(),
+                            needsSelection: true,
+                            groupIndex: 0,
+                            allowAutoSelectAll: false,
+                            handler: async (members: PlatformMember[]) => {
+                                await this.moveRegistrations(members, g);
+                            },
+                        });
+                    });
+
+                    if (periods.length > 1) {
+                        return [
+                            ...periods.map((period) => {
+                                return new MenuTableAction({
+                                    name: period.period.name,
+                                    groupIndex: 1,
+                                    childActions: () => getForPeriod(period, false),
                                 });
                             }),
-                        ],
-                    }),
-                    ...this.getActionsForCategory(period.adminCategoryTree, group => this.moveRegistrations(group)).map((r) => {
-                        r.description = period.period.name;
-                        return r;
-                    }),
-                ],
+                            ...base,
+                        ];
+                    }
+
+                    return [
+                        ...base,
+                        ...getForPeriod(periods[0], true),
+                    ];
+                },
             }),
         ];
     }
