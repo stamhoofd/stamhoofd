@@ -106,13 +106,14 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
+import { AutoEncoderPatchType, Decoder, encodeObject, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import { Ref, computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
+import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import { LoadingViewTransition } from '../containers';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
@@ -125,7 +126,6 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
-import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -347,15 +347,14 @@ useInterval(async () => {
     await updateEmail();
 }, 2_000);
 
+let initialEmail: EmailPreview | null = null;
+
 async function createEmail() {
     if (props.editEmail) {
+        initialEmail = props.editEmail.clone();
         email.value = props.editEmail;
         creatingEmail.value = false;
         groupByEmail.value = props.editEmail.recipientFilter.groupByEmail;
-
-        if (props.editEmail.subject) {
-            subject.value = props.editEmail.subject;
-        }
 
         await nextTick();
 
@@ -380,13 +379,10 @@ async function createEmail() {
             shouldRetry: false,
         });
 
+        initialEmail = response.data.clone();
         email.value = response.data;
         creatingEmail.value = false;
         groupByEmail.value = response.data.recipientFilter.groupByEmail;
-
-        if (response.data.subject) {
-            subject.value = response.data.subject;
-        }
 
         await nextTick();
 
@@ -415,7 +411,19 @@ async function patchEmail(async = false) {
         return;
     }
 
-    const _savingPatch = patch.value;
+    let _savingPatch = patch.value;
+
+    try {
+        const { text, html } = await getHTML();
+        _savingPatch = _savingPatch.patch({
+            text,
+            html,
+        });
+    }
+    catch (e) {
+        console.error('failed to set text and html', e);
+    }
+
     savingPatch.value = _savingPatch;
     patch.value = null;
 
@@ -518,8 +526,6 @@ async function send() {
 
     if (!willSend.value) {
         // Just save the patch
-        const { text, html } = await getHTML();
-        addPatch({ text, html, json: editor.value?.getJSON() });
         try {
             await patchEmail(false);
             await pop({ force: true });
@@ -560,7 +566,6 @@ async function send() {
             body: Email.patch({
                 ...patch.value,
                 status: EmailStatus.Sending,
-                subject: subject.value,
                 text,
                 html,
                 json: editor.value?.getJSON(),
@@ -642,31 +647,6 @@ async function showToMenu(event: MouseEvent) {
                 ]),
             })];
         }),
-        /* [
-            new ContextMenuItem({
-                name: groupByEmail.value ? "Eén e-mail per e-mailadres" : "Aparte e-mails per lid (aanbevolen)",
-                childMenu: new ContextMenu([
-                    [
-                        new ContextMenuItem({
-                            name: "Aparte e-mails per lid (aanbevolen)",
-                            description: 'Als hetzelfde e-mailadres bij meerdere leden hoort, krijgt dat e-mailadres één e-mail per lid',
-                            selected: !groupByEmail.value,
-                            action: () => {
-                                groupByEmail.value = false
-                            }
-                        }),
-                        new ContextMenuItem({
-                            name: "Eén e-mail per e-mailadres",
-                            description: 'Dubbele e-mailadressen ontvangen maar één e-mail, maar daardoor zijn bepaalde slimme tekstvervangingen niet beschikbaar (zoals de naam van het lid).',
-                            selected: groupByEmail.value,
-                            action: () => {
-                                groupByEmail.value = true
-                            }
-                        }),
-                    ]
-                ])
-            })
-        ] */
     ]);
 
     menu.show({ button: event.currentTarget as HTMLElement }).catch(console.error);
@@ -765,4 +745,37 @@ async function openTemplates() {
         modalDisplayStyle: 'popup',
     });
 }
+
+const shouldNavigateAway = async () => {
+    if (sending.value || savingPatch.value) {
+        return false;
+    }
+
+    if (props.editEmail) {
+        if (sending.value || savingPatch.value) {
+            return false;
+        }
+
+        if (patch.value === null) {
+            return true;
+        }
+    }
+
+    if (patch.value === null) {
+        if (!initialEmail) {
+            return true;
+        }
+        // encode object is added for reliable sorting the keys to compare
+        const json = JSON.stringify(encodeObject(editor.value?.getJSON() ?? {}, { version: 0 }));
+        if (initialEmail.subject === subject.value && JSON.stringify(encodeObject(initialEmail.json, { version: 0 })) === json && initialEmail.attachments.length === patchedEmail.value?.attachments.length) {
+            return true;
+        }
+        console.log('has changes because of json/subject', json, initialEmail.json);
+    }
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
