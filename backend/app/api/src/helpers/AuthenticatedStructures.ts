@@ -604,7 +604,7 @@ export class AuthenticatedStructures {
 
             const registration = memberBlob.registrations.find(r => r.id === id);
             if (!registration) {
-                throw new Error('Registration not found');
+                throw new Error('Registration not found: ' + id);
             }
 
             return RegistrationWithMemberBlob.create({
