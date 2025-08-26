@@ -3,6 +3,10 @@
         <SaveView v-if="!loadingOrganizer && patchedPeriod" :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
             <h1>
                 {{ title }}
+
+                <span v-if="patchedGroup.settings.period && patchedGroup.settings.period.id !== patchedPeriod.period.id" class="title-suffix">
+                    {{ patchedGroup.settings.period.nameShort }}
+                </span>
             </h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -652,9 +656,13 @@ const availableWaitingLists = computed(() => {
 
     return base.map((list) => {
         const usedByGroups = patchedPeriod.value.groups.filter(g => g.waitingList?.id === list.id);
+        let d = usedByGroups?.length ? $t(`4f6627be-b20b-48b0-a2f7-8fc68d2465b2`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`);
+        if (list.periodId !== patchedPeriod.value.period.id && list.settings.period) {
+            d = list.settings.period.nameShort + '\n' + d;
+        }
         return {
             list,
-            description: usedByGroups?.length ? $t(`4f6627be-b20b-48b0-a2f7-8fc68d2465b2`, { groupNames: Formatter.joinLast(usedByGroups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') }) : $t(`daef5a57-e4f0-41f4-b05f-7946913947ef`),
+            description: d,
         };
     });
 });
@@ -1213,6 +1221,16 @@ function isPropertyEnabled(name: MemberProperty) {
 }
 
 async function editWaitingList(waitingList: Group) {
+    const found = !!patchedPeriod.value.groups.find(w => w.id === waitingList.id);
+    if (!found) {
+        props.period.groups.push(waitingList);
+        const f2  = !!patchedPeriod.value.groups.find(w => w.id === waitingList.id);
+        if (!f2) {
+            console.log('not found');
+            return;
+        }
+    }
+
     await present({
         components: [
             new ComponentWithProperties(EditGroupView, {
