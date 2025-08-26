@@ -1,10 +1,15 @@
 import { Formatter } from './Formatter';
+import { StringCompare } from './StringCompare';
 
 export class DataValidator {
     static readonly UITPAS_NUMBER_REGEX = /^\d{10,13}$/;
 
     static isEmailValid(str: string) {
-        const blockList = ['gmail.be', 'gmail.nl', 'hotmail.c', 'hotmail.co', 'gmail.co', 'gmail.c', 'gmail.co', 'gmal.com', 'glail.com', 'gmail.col', 'gamil.com', 'gmail.con', 'icloud.be'];
+        const blockList = [
+            'gmail.be',
+            'gmail.nl',
+            'icloud.be',
+        ];
         const regex = /^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
         if (!regex.test(str)) {
@@ -15,6 +20,31 @@ export class DataValidator {
             if (str.endsWith('@' + l)) {
                 return false;
             }
+        }
+
+        const domain = str.split('@')[1];
+        if (domain.length > 255) {
+            return false;
+        }
+
+        const typo = ['gmail.com', 'hotmail.com', 'hotmail.fr', 'hotmail.be', 'yahoo.com', 'live.com', 'outlook.com', 'icloud.com', 'skynet.be', 'telenet.be', 'proximus.be', 'scarlet.be', 'vodafone.be', 'orange.be'];
+        let foundInvalid = false;
+        for (const t of typo) {
+            if (domain === t) {
+                return true;
+            }
+            if (StringCompare.typoCount(domain, t) === 1) {
+                foundInvalid = true;
+            }
+        }
+
+        if (foundInvalid) {
+            return false;
+        }
+
+        const tld = domain.split('.').pop();
+        if (!tld || tld.length < 2) {
+            return false;
         }
 
         return true;
