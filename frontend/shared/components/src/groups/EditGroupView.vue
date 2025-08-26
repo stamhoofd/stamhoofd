@@ -341,9 +341,7 @@
                         <h3 class="style-title-list">
                             {{ list.settings.name }}
                         </h3>
-                        <p class="style-description-small">
-                            {{ waitingListDescription }}
-                        </p>
+                        <p class="style-description-small pre-wrap" v-text="waitingListDescription" />
 
                         <template #right>
                             <button class="button icon edit gray" type="button" @click="editWaitingList(list)" />
