@@ -138,8 +138,6 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
             query.limit(q.limit);
         }
 
-        console.log('Building query for GetAdminEmailsEndpoint', query.getSQL());
-
         return query;
     }
 

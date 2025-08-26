@@ -52,6 +52,31 @@ export const emailFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: true,
     }),
+    failedCount: createColumnFilter({
+        expression: SQL.column('failedCount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+    softFailedCount: createColumnFilter({
+        expression: SQL.column('softFailedCount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+    hardBouncesCount: createColumnFilter({
+        expression: SQL.column('hardBouncesCount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+    softBouncesCount: createColumnFilter({
+        expression: SQL.column('softBouncesCount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+    spamComplaintsCount: createColumnFilter({
+        expression: SQL.column('spamComplaintsCount'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
@@ -60,6 +85,11 @@ export const emailFilterCompilers: SQLFilterDefinitions = {
     sentAt: createColumnFilter({
         expression: SQL.column('sentAt'),
         type: SQLValueType.Datetime,
+        nullable: true,
+    }),
+    senderId: createColumnFilter({
+        expression: SQL.column('senderId'),
+        type: SQLValueType.String,
         nullable: true,
     }),
 };

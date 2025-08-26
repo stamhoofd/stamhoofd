@@ -12,6 +12,36 @@
         :Route="Route"
         :default-filter="defaultFilter"
     >
+        <p v-if="props.filterType === 'complaints'" class="style-description-block">
+            <I18nComponent :t="$t('Hieronder zie je alle ontvangers die een spammelding hebben ingediend voor een e-mail die je hebt verstuurd. Dit kan gebeuren als iemand de e-mail als spam markeert in zijn of haar e-mailprogramma. <button>Meer info</button>')">
+                <template #button="{content}">
+                    <a class="inline-link" :href="$domains.getDocs('spam-complaints')" target="_blank">
+                        {{ content }}
+                    </a>
+                </template>
+            </I18nComponent>
+        </p>
+
+        <p v-if="props.filterType === 'hard-bounces'" class="style-description-block">
+            <I18nComponent :t="$t('Bij een hard bounce komt een e-mail na het versturen terug omwille van een permanente reden, bv. als het e-mailadres niet bestaat. <button>Meer info</button>')">
+                <template #button="{content}">
+                    <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
+                        {{ content }}
+                    </a>
+                </template>
+            </I18nComponent>
+        </p>
+
+        <p v-if="props.filterType === 'soft-bounces'" class="style-description-block">
+            <I18nComponent :t="$t('Bij een soft bounce komt een e-mail na het versturen terug omwille van een tijdelijke reden, bv. een volle inbox. <button>Meer info</button>')">
+                <template #button="{content}">
+                    <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
+                        {{ content }}
+                    </a>
+                </template>
+            </I18nComponent>
+        </p>
+
         <template #empty>
             {{ $t('4fa242b7-c05d-44d4-ada5-fb60e91af818') }}
         </template>
@@ -25,21 +55,37 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useEmailRecipientsObjectFetcher } from '../fetchers/useEmailRecipientsObjectFetcher';
 import EmailRecipientView from './EmailRecipientView.vue';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 type ObjectType = EmailRecipient;
 
 const props = withDefaults(
     defineProps<{
+        filterType?: null | 'complaints' | 'hard-bounces' | 'soft-bounces' | 'failed';
         email?: EmailPreview | null;
         filter?: StamhoofdFilter | null;
     }>(),
     {
         email: null,
         filter: null,
+        filterType: null,
     },
 );
 
 const title = computed(() => {
+    if (props.filterType === 'complaints') {
+        return $t('Spammeldingen');
+    }
+    if (props.filterType === 'hard-bounces') {
+        return $t('Hard bounces');
+    }
+    if (props.filterType === 'soft-bounces') {
+        return $t('Soft bounces');
+    }
+    if (props.filterType === 'failed') {
+        return $t('Mislukte berichten');
+    }
+
     if (props.email) {
         return $t('Ontvangers van ‘{emailSubject}’', { emailSubject: props.email.replacedSubject });
     }

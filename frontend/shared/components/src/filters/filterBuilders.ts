@@ -2,13 +2,14 @@ import { AppType, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, Do
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
-import { useContext, usePlatform } from '../hooks';
+import { useContext, useOrganization, usePlatform } from '../hooks';
 import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
+import { IntegerDecoder } from '@simonbackx/simple-encoding';
 
 export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -245,6 +246,9 @@ export function getOrganizationCompanyFilterBuilders() {
 }
 
 export function useEmailFilterBuilders() {
+    const organization = useOrganization();
+    const platform = usePlatform();
+
     return () => {
         const all: UIFilterBuilder[] = [
             new DateFilterBuilder({
@@ -255,6 +259,50 @@ export function useEmailFilterBuilders() {
                 name: $t(`69b8f1cf-5531-4df5-bca1-0026fa2c8edb`),
                 key: 'sentAt',
             }),
+            new NumberFilterBuilder({
+                name: $t('Aantal emailontvangers'),
+                key: 'emailRecipientsCount',
+            }),
+            new NumberFilterBuilder({
+                name: $t('Aantal belangrijke mislukte verzendingen'),
+                key: 'failedCount',
+            }),
+            new NumberFilterBuilder({
+                name: $t('Aantal minder belangrijke mislukte verzendingen'),
+                key: 'softFailedCount',
+            }),
+            new NumberFilterBuilder({
+                name: $t('Aantal hard bounces'),
+                key: 'hardBouncesCount',
+            }),
+            new NumberFilterBuilder({
+                name: $t('Aantal soft bounces'),
+                key: 'softBouncesCount',
+            }),
+            new NumberFilterBuilder({
+                name: $t('Aantal spammeldingen'),
+                key: 'spamComplaintsCount',
+            }),
+            new MultipleChoiceFilterBuilder({
+                name: $t(`Verstuurd vanaf`),
+                options: [
+                    ...(organization.value ? (organization.value.privateMeta?.emails ?? []) : (platform.value.privateConfig?.emails ?? [])).map(e => new MultipleChoiceUIFilterOption(e.name || e.email, e.id)),
+                ],
+                wrapper: {
+                    senderId: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+            new StringFilterBuilder({
+                name: $t(`Onderwerp`),
+                key: 'subject',
+            }),
+            new StringFilterBuilder({
+                name: $t(`Inhoud`),
+                key: 'text',
+            }),
+
         ];
 
         // Recursive: self referencing groups

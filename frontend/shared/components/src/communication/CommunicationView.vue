@@ -32,7 +32,14 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen berichten gevonden`)" />
+            <p v-if="errorMessage" class="error-box with-button">
+                {{ errorMessage }}
+
+                <button class="button text" type="button" @click="refresh">
+                    {{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}
+                </button>
+            </p>
+            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t(`Geen berichten gevonden`)" />
         </main>
     </div>
 </template>
@@ -46,31 +53,17 @@ import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
 import EmailOverview from './EmailOverview.vue';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 type ObjectType = EmailPreview;
 
 const searchQuery = ref('');
-
-const selectedYear = ref(null) as Ref<number | null>;
-const years = computed(() => {
-    const currentYear = Formatter.year(new Date());
-    return [null, currentYear, currentYear - 1, currentYear - 2];
-});
 const $navigate = useNavigate();
 const { presentPositionableSheet } = usePositionableSheet();
 
 const buildFilters = useEmailFilterBuilders();
 const filterBuilders = buildFilters();
 const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
-
-const yearLabels = computed(() => {
-    return years.value.map((y) => {
-        if (y === null) {
-            return $t(`4cb84435-bf36-4b83-9f0d-6028181eae84`);
-        }
-        return y.toString();
-    });
-});
 
 enum Routes {
     Email = 'bericht',
@@ -130,9 +123,37 @@ fetcher.sort = [{
     order: SortItemDirection.DESC,
 }];
 
+const errorMessage = computed(() => {
+    if (fetcher.errorState) {
+        const errors = fetcher.errorState;
+
+        let simpleErrors!: SimpleErrors;
+        if (isSimpleError(errors)) {
+            simpleErrors = new SimpleErrors(errors);
+        }
+        else if (isSimpleErrors(errors)) {
+            simpleErrors = errors;
+        }
+        else {
+            simpleErrors = new SimpleErrors(new SimpleError({
+                code: 'unknown_error',
+                message: errors.message,
+            }));
+        }
+
+        return simpleErrors.getHuman();
+    }
+
+    return null;
+});
+
 useVisibilityChange(() => {
     fetcher.reset();
 });
+
+function refresh() {
+    fetcher.reset();
+}
 
 const groupedEmails = computed(() => {
     return groupData(fetcher.objects);

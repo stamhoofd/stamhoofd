@@ -197,6 +197,7 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 email: props.email,
+                filterType: 'complaints',
                 filter: {
                     spamComplaintError: {
                         $neq: null,
@@ -211,6 +212,7 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 email: props.email,
+                filterType: 'hard-bounces',
                 filter: {
                     hardBounceError: {
                         $neq: null,
@@ -225,6 +227,7 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 email: props.email,
+                filterType: 'soft-bounces',
                 filter: {
                     softBounceError: {
                         $neq: null,
@@ -239,6 +242,7 @@ defineRoutes([
         paramsToProps: () => {
             return {
                 email: props.email,
+                filterType: 'failed',
                 filter: {
                     failError: {
                         $neq: null,
