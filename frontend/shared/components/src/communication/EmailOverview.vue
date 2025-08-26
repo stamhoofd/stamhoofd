@@ -43,6 +43,18 @@
                 </span>
             </button>
 
+            <p v-if="email.failedCount + email.softFailedCount > 0" :class="email.failedCount > 0 ? 'error-box selectable' : 'warning-box selectable'" type="button" @click="navigate(Routes.Failed)">
+                <span v-if="email.failedCount + email.softFailedCount === 1">
+                    {{ $t('Eén email kon niet worden verzonden') }}
+                </span>
+                <span v-else>{{ $t('{count} emails konden niet worden verzonden', {
+                    count: email.failedCount + email.softFailedCount
+                }) }}</span>
+                <span class="button text">
+                    {{ $t('Bekijken') }}
+                </span>
+            </p>
+
             <STList>
                 <STListItem v-if="email.sentAt">
                     <template #left>
@@ -85,23 +97,8 @@
                         {{ $t('E-mail ontvangers') }}
                     </h2>
 
-                    <p v-if="email.failedCount + email.softFailedCount > 1" class="style-description-small">
-                        {{ $t('{count} emails konden niet worden verzonden', {
-                            count: email.failedCount + email.softFailedCount
-                        }) }}
-                    </p>
-                    <p v-else-if="email.failedCount + email.softFailedCount === 1" class="style-description-small">
-                        {{ $t('Eén email kon niet worden verzonden') }}
-                    </p>
-                    <p v-else-if="email.succeededCount && email.emailRecipientsCount !== email.succeededCount" class="style-description-small">
-                        {{ $t('Waarvan reeds {count} verzonden', { count: email.succeededCount }) }}
-                    </p>
-
                     <template #right>
-                        <p v-if="email.succeededCount && email.succeededCount !== email.emailRecipientsCount" class="style-description-small">
-                            {{ formatInteger(email.succeededCount) }} / {{ formatInteger(email.emailRecipientsCount) }}
-                        </p>
-                        <p v-else class="style-description-small">
+                        <p class="style-description-small">
                             {{ formatInteger(email.emailRecipientsCount) }}
                         </p>
                         <span class="icon small arrow-right-small" />
@@ -164,6 +161,7 @@ enum Routes {
     Complaints = 'complaints',
     HardBounces = 'hard-bounces',
     SoftBounces = 'soft-bounces',
+    Failed = 'mislukt',
 }
 
 defineRoutes([
@@ -229,6 +227,20 @@ defineRoutes([
                 email: props.email,
                 filter: {
                     softBounceError: {
+                        $neq: null,
+                    },
+                },
+            };
+        },
+    },
+    {
+        url: Routes.Failed,
+        component: EmailRecipientsTableView,
+        paramsToProps: () => {
+            return {
+                email: props.email,
+                filter: {
+                    failError: {
                         $neq: null,
                     },
                 },
