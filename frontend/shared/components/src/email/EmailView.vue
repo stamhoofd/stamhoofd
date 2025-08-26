@@ -130,10 +130,12 @@ import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
     recipientFilterOptions: (RecipientChooseOneOption | RecipientMultipleChoiceOption)[];
-    emailId?: string | null;
+    senderId?: string | null;
+    editEmail?: EmailPreview | null;
 }>(), {
     defaultSubject: '',
-    emailId: null,
+    senderId: null,
+    editEmail: null,
 });
 
 export type RecipientChooseOneOption = {
@@ -340,9 +342,7 @@ async function createEmail() {
             path: '/email',
             body: Email.create({
                 recipientFilter: recipientFilter.value,
-                senderId: senders.value.length > 0 ? senders.value[0].id : null,
-                // fromAddress: senders.value.length > 0 ? (senders.value.find(e => e.id === props.emailId) ?? senders.value.find(e => e.default) ?? senders.value[0]).email : null,
-                // fromName: senders.value.length > 0 ? (senders.value.find(e => e.id === props.emailId) ?? senders.value.find(e => e.default) ?? senders.value[0]).name : null,
+                senderId: props.senderId ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
             }),
