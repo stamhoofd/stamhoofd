@@ -13,6 +13,7 @@
                 <li>{{ $t('c5d21881-b70a-489e-bce9-5bb3d24b6f76') }}</li>
                 <li>{{ $t('0ab03598-06c3-433b-a8c6-39daa3aa16f1') }}</li>
                 <li>{{ $t('9063147f-5dee-4da0-8928-69d7dcb352c4') }}</li>
+                <li>{{ $t('Alle wachtlijsten worden gedupliceerd in het nieuwe werkjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige werkjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.') }}</li>
             </ul>
         </main>
 

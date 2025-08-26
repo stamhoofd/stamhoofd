@@ -185,10 +185,25 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             }
 
             // Force close
-            newGroup.status = GroupStatus.Closed;
+            if (group.type !== GroupType.WaitingList) {
+                newGroup.status = GroupStatus.Closed;
+            }
 
             groupMap.set(group.id, newGroup.id);
             newOrganizationPeriod.groups.push(newGroup);
+        }
+
+        // Fix waiting list ids
+        for (const group of newOrganizationPeriod.groups) {
+            if (group.waitingList) {
+                const newId = groupMap.get(group.waitingList.id) ?? null;
+                if (newId) {
+                    group.waitingList = newOrganizationPeriod.groups.find(g => g.id === newId) ?? null;
+                }
+                else {
+                    group.waitingList = null;
+                }
+            }
         }
 
         for (const category of this.settings.categories) {
