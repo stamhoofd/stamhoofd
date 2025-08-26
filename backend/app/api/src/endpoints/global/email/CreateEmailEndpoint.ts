@@ -130,6 +130,24 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await model.queueForSending();
         }
 
+        // Delete open drafts with the same content, from the same user
+        const duplicates = await Email.select()
+            .where('userId', user.id)
+            .where('organizationId', model.organizationId)
+            .where('status', EmailStatus.Draft)
+            .where('subject', model.subject)
+            .where('html', model.html)
+            .where('text', model.text)
+            .where('deletedAt', null)
+            .whereNot('id', model.id)
+            .limit(100)
+            .fetch();
+
+        for (const duplicate of duplicates) {
+            duplicate.deletedAt = new Date();
+            await duplicate.save();
+        }
+
         return new Response(await model.getPreviewStructure());
     }
 }
