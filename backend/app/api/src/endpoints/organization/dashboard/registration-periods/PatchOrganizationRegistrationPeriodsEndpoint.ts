@@ -531,6 +531,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.type = struct.type;
         model.settings.period = period.getBaseStructure();
         model.settings.endDate = period.endDate;
+        model.settings.registeredMembers = 0;
+        model.settings.reservedMembers = 0;
 
         // Note: start date is curomizable, as long as it stays between period start and end
         if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
