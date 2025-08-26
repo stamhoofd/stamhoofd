@@ -9,7 +9,6 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoice
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
-import { IntegerDecoder } from '@simonbackx/simple-encoding';
 
 export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
