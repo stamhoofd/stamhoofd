@@ -56,7 +56,7 @@
             </p>
 
             <STList>
-                <STListItem v-if="email.sentAt">
+                <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent">
                     <template #left>
                         <span class="icon clock" />
                     </template>
