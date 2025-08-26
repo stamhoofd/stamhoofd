@@ -57,14 +57,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.senderId !== undefined) {
-            if (model.status !== EmailStatus.Draft) {
-                throw new SimpleError({
-                    code: 'not_draft',
-                    human: 'Email is not a draft',
-                    message: $t(`298b5a46-2899-4aa1-89df-9b634c20806b`),
-                    statusCode: 400,
-                });
-            }
             const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
             const sender = list.find(e => e.id === request.body.senderId);
             if (sender) {
@@ -77,6 +69,11 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 model.senderId = sender.id;
                 model.fromAddress = sender.email;
                 model.fromName = sender.name;
+
+                // Check if we still have write access to the email
+                if (!await Context.auth.canAccessEmail(model, PermissionLevel.Write)) {
+                    throw Context.auth.error();
+                }
             }
             else {
                 throw new SimpleError({

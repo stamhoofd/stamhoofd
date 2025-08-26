@@ -343,7 +343,7 @@ defineRoutes([
 const { updateEmail } = useUpdateEmail(props.email);
 useInterval(async ({ stop }) => {
     if (props.email.status !== EmailStatus.Sending && props.email.status !== EmailStatus.Queued) {
-        if (props.email.status !== EmailStatus.Failed) {
+        if (props.email.status !== EmailStatus.Failed && props.email.status !== EmailStatus.Draft) {
             // don't stop, otherwise the resume button won't work
             stop();
         }
@@ -413,10 +413,10 @@ async function editEmail() {
                     recipientFilterOptions: [],
                     editEmail: props.email,
                 }),
-            })
-        ]
-    })
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
-
 
 </script>

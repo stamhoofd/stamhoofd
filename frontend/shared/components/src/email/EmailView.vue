@@ -1,8 +1,8 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending" :save-text="$t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b')" :replacements="replacements" :title="$t(`3338f8ad-c4d7-4d09-9254-70bc3f0449a9`)" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="willSend ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Opslaan')" :replacements="replacements" :title="title" @save="send">
             <h1 class="style-navigation-title">
-                {{ $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8') }}
+                {{ title }}
             </h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -25,7 +25,7 @@
 
             <!-- List -->
             <template #list>
-                <STListItem class="no-padding right-stack">
+                <STListItem v-if="!props.editEmail" class="no-padding right-stack">
                     <div class="list-input-box">
                         <span>{{ $t('17a71942-a3d7-4d19-97bb-307cabffc1d6') }}:</span>
 
@@ -160,6 +160,7 @@ export type RecipientMultipleChoiceOption = {
     build: (selectedIds: string[]) => EmailRecipientSubfilter[];
 };
 
+const title = props.editEmail ? $t('Bericht bewerken') : $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8');
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
@@ -186,7 +187,6 @@ const selectedRecipientOptions = ref(props.recipientFilterOptions.map((o) => {
 const groupByEmail = ref(false);
 const editorView = ref(null) as Ref<typeof EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
-const show = useShow();
 const pop = usePop();
 const present = usePresent();
 
@@ -282,6 +282,10 @@ const toDescription = computed(() => {
 });
 
 watch([selectedRecipientOptions, groupByEmail], () => {
+    if (props.editEmail) {
+        // Only when creating a new email
+        return;
+    }
     addPatch({ recipientFilter: recipientFilter.value });
 }, { deep: true });
 
@@ -299,8 +303,16 @@ const senderId = computed({
     },
 });
 
+const willSend = computed(() => {
+    return (!props.editEmail || props.editEmail.status === EmailStatus.Draft);
+});
+
 watch(patch, (newValue, oldValue) => {
     if (newValue === null) {
+        return;
+    }
+    if (props.editEmail && props.editEmail.status !== EmailStatus.Draft) {
+        // Only auto save when creating a new email or editing a draft
         return;
     }
     doThrottledPatch();
@@ -388,10 +400,10 @@ async function createEmail() {
     }
 }
 
-const doThrottledPatch = throttle(patchEmail, 1000);
+const doThrottledPatch = throttle(() => patchEmail(true), 1000);
 const { patchEmail: doPatchEmail } = usePatchEmail();
 
-async function patchEmail() {
+async function patchEmail(async = false) {
     if (!email.value) {
         return;
     }
@@ -412,7 +424,7 @@ async function patchEmail() {
         savingPatch.value = null;
 
         // changed meanwhile
-        if (patch.value) {
+        if (patch.value && async) {
             // do again
             patchEmail().catch(console.error);
         }
@@ -420,8 +432,20 @@ async function patchEmail() {
     catch (e) {
         console.error(e);
         Toast.fromError(e).setHide(20000).show();
+        if (!async) {
+            // Keep patch
+            if (patch.value) {
+                patch.value = _savingPatch.patch(patch.value);
+            }
+            else {
+                patch.value = _savingPatch;
+            }
+            throw e;
+        }
     }
-    savingPatch.value = null;
+    finally {
+        savingPatch.value = null;
+    }
 }
 
 const updating = ref(false);
@@ -448,7 +472,7 @@ async function updateEmail() {
             shouldRetry: true,
         });
 
-        email.value = response.data;
+        email.value.deepSet(response.data);
     }
     catch (e) {
         console.error(e);
@@ -492,6 +516,20 @@ async function send() {
         return;
     }
 
+    if (!willSend.value) {
+        // Just save the patch
+        const { text, html } = await getHTML();
+        addPatch({ text, html, json: editor.value?.getJSON() });
+        try {
+            await patchEmail(false);
+            await pop({ force: true });
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+        }
+        return;
+    }
+
     if (savingPatch.value) {
         Toast.info($t(`a6d49891-5af9-4dee-8dba-57ad854fb955`)).show();
         return;
@@ -532,6 +570,7 @@ async function send() {
             shouldRetry: false,
         });
 
+        email.value.deepSet(response.data);
         Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
 
         if (communicationFeature) {
