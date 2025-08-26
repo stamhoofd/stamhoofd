@@ -130,11 +130,11 @@ import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
     recipientFilterOptions: (RecipientChooseOneOption | RecipientMultipleChoiceOption)[];
-    senderId?: string | null;
+    defaultSenderId?: string | null;
     editEmail?: EmailPreview | null;
 }>(), {
     defaultSubject: '',
-    senderId: null,
+    defaultSenderId: null,
     editEmail: null,
 });
 
@@ -336,13 +336,30 @@ useInterval(async () => {
 }, 2_000);
 
 async function createEmail() {
+    if (props.editEmail) {
+        email.value = props.editEmail;
+        creatingEmail.value = false;
+        groupByEmail.value = props.editEmail.recipientFilter.groupByEmail;
+
+        if (props.editEmail.subject) {
+            subject.value = props.editEmail.subject;
+        }
+
+        await nextTick();
+
+        if (props.editEmail.json) {
+            editor.value?.commands.setContent(props.editEmail.json);
+        }
+        return;
+    }
+
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/email',
             body: Email.create({
                 recipientFilter: recipientFilter.value,
-                senderId: props.senderId ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
+                senderId: props.defaultSenderId ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
             }),

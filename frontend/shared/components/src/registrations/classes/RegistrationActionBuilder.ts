@@ -564,7 +564,7 @@ export class RegistrationActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EmailView, {
                 recipientFilterOptions: options,
-                senderId: this.groups.length === 1 ? this.groups[0].privateSettings?.defaultEmailId : null,
+                defaultSenderId: this.groups.length === 1 ? this.groups[0].privateSettings?.defaultEmailId : null,
             }),
         });
         await this.present({

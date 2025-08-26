@@ -291,7 +291,7 @@ export class OrderActionBuilder {
         const displayedComponent = new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(EmailView, {
                 recipientFilterOptions: options,
-                senderId: this.webshopManager.preview?.privateMeta.defaultEmailId,
+                defaultSenderId: this.webshopManager.preview?.privateMeta.defaultEmailId,
             }),
         });
         await this.present({

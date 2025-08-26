@@ -216,8 +216,8 @@
 </template>
 
 <script lang="ts" setup>
-import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, IconContainer, ProgressRing, Spinner, Toast, useInterval } from '@stamhoofd/components';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useInterval } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';
@@ -240,6 +240,7 @@ const status = computed(() => {
 });
 const navigate = useNavigate();
 const { patchEmail } = usePatchEmail();
+const present = usePresent();
 
 enum Routes {
     Members = 'leden',
@@ -405,7 +406,16 @@ async function doDelete() {
 }
 
 async function editEmail() {
-    // todo
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EmailView, {
+                    recipientFilterOptions: [],
+                    editEmail: props.email,
+                }),
+            })
+        ]
+    })
 }
 
 
