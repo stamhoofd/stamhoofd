@@ -691,7 +691,6 @@ export class Email extends QueryableModel {
                     // Start actually sending in batches of recipients that are not yet sent
                     let idPointer = '';
                     const batchSize = 100;
-                    const recipientsSet = new Set<string>();
                     let isSavingStatus = false;
                     let lastStatusSave = new Date();
 
@@ -748,10 +747,6 @@ export class Email extends QueryableModel {
                             idPointer = recipient.id;
 
                             if (recipient.sentAt) {
-                                // Already sent
-                                if (recipient.email) {
-                                    recipientsSet.add(recipient.email);
-                                }
                                 succeededCount += 1;
                                 await saveStatus();
                                 skipped++;
@@ -762,30 +757,6 @@ export class Email extends QueryableModel {
                                 skipped++;
                                 continue;
                             }
-
-                            if (recipientsSet.has(recipient.id)) {
-                                console.error('Found duplicate recipient while sending email', recipient.id);
-                                softFailedCount += 1;
-
-                                recipient.failCount += 1;
-                                recipient.failErrorMessage = 'Duplicate recipient';
-                                recipient.failError = new SimpleErrors(
-                                    new SimpleError({
-                                        code: 'email_skipped_duplicate_recipient',
-                                        message: 'Duplicate recipient',
-                                        human: $t('Dit e-mailadres staat meerdere keren tussen de ontvangers en werd daarom overgeslagen'),
-                                    }),
-                                );
-
-                                recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
-                                recipient.lastFailedAt = new Date();
-                                await recipient.save();
-
-                                await saveStatus();
-                                skipped++;
-                                continue;
-                            }
-                            recipientsSet.add(recipient.email);
 
                             let promiseResolve: (value: void | PromiseLike<void>) => void;
                             const promise = new Promise<void>((resolve) => {
