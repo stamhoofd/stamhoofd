@@ -275,6 +275,29 @@ export class EmailRecipient extends AutoEncoder {
     }
 }
 
+export function bounceErrorToHuman(message: string) {
+    message = message.toLowerCase();
+    if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*full/)) {
+        return $t('De inbox van deze persoon zit vol');
+    }
+
+    if (message.includes('failed to establish connection') || message.includes('connection timed out')) {
+        return $t('Mogelijks ongeldig e-mailadres');
+    }
+
+    if (message.includes('unable to lookup dns')) {
+        return $t('Mogelijks ongeldig e-mailadres (waarschijnlijk typefout in domeinnaam)');
+    }
+
+    if (message.includes('hop count exceeded')) {
+        return $t('Mogelijks een doorverwijzingslus of ongeldig e-mailadres');
+    }
+
+    if (message.includes('recipient address rejected: access denied') || message.includes('user does not exist') || message.includes('user unknown') || message.includes('the email account that you tried to reach does not exist')) {
+        return $t('Onbestaand e-mailadres');
+    }
+}
+
 export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;

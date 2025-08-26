@@ -12,6 +12,36 @@
                 {{ title }}
             </h1>
 
+            <p v-if="recipient.spamComplaintError" class="error-box">
+                <I18nComponent :t="$t('Deze ontvanger heeft deze e-mail als spam gemarkeerd. Deze persoon werd daardoor automatisch geblokkeerd en zal geen e-mails meer ontvangen. <button>Meer info</button>')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="$domains.getDocs('spam-complaints')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
+            </p>
+
+            <p v-if="recipient.hardBounceError" class="error-box">
+                <I18nComponent :t="$t('De e-mail kwam automatisch terug omwille van een permanente reden (zie onder). Deze persoon werd daardoor automatisch geblokkeerd en zal geen e-mails meer ontvangen. <button>Meer info</button>')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
+            </p>
+
+            <p v-if="recipient.softBounceError" class="warning-box">
+                <I18nComponent :t="$t('De e-mail kwam automatisch terug omwille van een tijdelijke reden (zie onder). <button>Meer info</button>')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
+            </p>
+
             <STList class="info">
                 <STListItem v-if="recipient.name">
                     <h3 class="style-definition-label">
@@ -48,6 +78,28 @@
                         {{ recipient.failError.getHuman() }}
                     </p>
                 </STListItem>
+
+                <STListItem v-if="recipient.hardBounceError" class="theme-error">
+                    <h3 class="style-definition-label">
+                        <span>{{ $t('Hard bounce') }}</span><span class="icon error tiny" />
+                    </h3>
+                    <template v-if="bounceErrorToHuman(recipient.hardBounceError)">
+                        <p class="style-definition-text pre-wrap" v-text="bounceErrorToHuman(recipient.hardBounceError)" />
+                        <p class="style-description-small pre-wrap" v-text="recipient.hardBounceError" />
+                    </template>
+                    <p v-else class="style-definition-text pre-wrap" v-text="recipient.hardBounceError" />
+                </STListItem>
+
+                <STListItem v-if="recipient.softBounceError" class="theme-warning">
+                    <h3 class="style-definition-label">
+                        <span>{{ $t('Soft bounce') }}</span><span class="icon warning yellow tiny" />
+                    </h3>
+                    <template v-if="bounceErrorToHuman(recipient.softBounceError)">
+                        <p class="style-definition-text pre-wrap" v-text="bounceErrorToHuman(recipient.softBounceError)" />
+                        <p class="style-description-small pre-wrap" v-text="recipient.softBounceError" />
+                    </template>
+                    <p v-else class="style-definition-text pre-wrap" v-text="recipient.softBounceError" />
+                </STListItem>
             </STList>
 
             <EmailPreviewBox v-if="email && recipient.sentAt" :email="email" :recipient="recipient" />
@@ -56,9 +108,10 @@
 </template>
 
 <script setup lang="ts">
-import { EmailPreview, EmailRecipient } from '@stamhoofd/structures';
+import { bounceErrorToHuman, EmailPreview, EmailRecipient } from '@stamhoofd/structures';
 import { useBackForward } from '../hooks';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 const props = withDefaults(
     defineProps<{
