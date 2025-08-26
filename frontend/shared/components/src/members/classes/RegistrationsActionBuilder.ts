@@ -103,7 +103,7 @@ export class RegistrationsActionBuilder {
                                 needsSelection: true,
                                 allowAutoSelectAll: false,
                                 handler: async (members: PlatformMember[]) => {
-                                    await this.moveRegistrations(members, g);
+                                    await this.moveRegistrations(g);
                                 },
                             });
                         }),
@@ -134,7 +134,7 @@ export class RegistrationsActionBuilder {
                             groupIndex: 0,
                             allowAutoSelectAll: false,
                             handler: async (members: PlatformMember[]) => {
-                                await this.moveRegistrations(members, g);
+                                await this.moveRegistrations(g);
                             },
                         });
                     });
