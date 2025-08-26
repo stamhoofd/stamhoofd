@@ -275,6 +275,16 @@ export class EmailRecipient extends AutoEncoder {
     }
 }
 
+export function isSoftEmailRecipientError(error: SimpleErrors) {
+    if (error.hasCode('email_skipped_unsubscribed')) {
+        return true;
+    }
+    if (error.hasCode('email_skipped_duplicate_recipient')) {
+        return true;
+    }
+    return false;
+}
+
 export function bounceErrorToHuman(message: string) {
     message = message.toLowerCase();
     if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*full/)) {

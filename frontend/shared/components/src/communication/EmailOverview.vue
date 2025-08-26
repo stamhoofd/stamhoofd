@@ -43,12 +43,24 @@
                 </span>
             </button>
 
-            <p v-if="email.failedCount + email.softFailedCount > 0" :class="email.failedCount > 0 ? 'error-box selectable' : 'warning-box selectable'" type="button" @click="navigate(Routes.Failed)">
-                <span v-if="email.failedCount + email.softFailedCount === 1">
+            <p v-if="email.failedCount > 0" class="error-box selectable" type="button" @click="navigate(Routes.Failed)">
+                <span v-if="email.failedCount === 1">
                     {{ $t('Eén email kon niet worden verzonden') }}
                 </span>
                 <span v-else>{{ $t('{count} emails konden niet worden verzonden', {
-                    count: email.failedCount + email.softFailedCount
+                    count: email.failedCount
+                }) }}</span>
+                <span class="button text">
+                    {{ $t('Bekijken') }}
+                </span>
+            </p>
+
+            <p v-if="email.softFailedCount > 0" class="warning-box selectable" type="button" @click="navigate(Routes.Failed)">
+                <span v-if="email.softFailedCount === 1">
+                    {{ $t('Eén email werd overgeslagen') }}
+                </span>
+                <span v-else>{{ $t('{count} emails werden overgeslagen', {
+                    count: email.softFailedCount
                 }) }}</span>
                 <span class="button text">
                     {{ $t('Bekijken') }}

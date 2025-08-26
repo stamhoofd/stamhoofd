@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, SortItemDirection, StamhoofdFilter, isSoftEmailRecipientError } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -29,16 +29,6 @@ function errorToSimpleErrors(e: unknown) {
             }),
         );
     }
-}
-
-export function isSoftEmailRecipientError(error: SimpleErrors) {
-    if (error.hasCode('email_skipped_unsubscribed')) {
-        return true;
-    }
-    if (error.hasCode('email_skipped_duplicate_recipient')) {
-        return true;
-    }
-    return false;
 }
 
 export class Email extends QueryableModel {

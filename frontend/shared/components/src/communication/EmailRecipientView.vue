@@ -70,7 +70,16 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="recipient.failError" class="theme-error">
+                <STListItem v-if="recipient.failError && isSoftEmailRecipientError(recipient.failError)" class="theme-warning">
+                    <h3 class="style-definition-label">
+                        <span style="color: var(--color-primary-dark);">{{ $t('Overgeslagen bij versturen') }}</span><span class="icon warning tiny" />
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ recipient.failError.getHuman() }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-else-if="recipient.failError" class="theme-error">
                     <h3 class="style-definition-label">
                         <span>{{ $t('Fout bij versturen') }}</span><span class="icon error tiny" />
                     </h3>
@@ -92,7 +101,7 @@
 
                 <STListItem v-if="recipient.softBounceError" class="theme-warning">
                     <h3 class="style-definition-label">
-                        <span>{{ $t('Soft bounce') }}</span><span class="icon warning yellow tiny" />
+                        <span style="color: var(--color-primary-dark);">{{ $t('Soft bounce') }}</span><span class="icon warning yellow tiny" />
                     </h3>
                     <template v-if="bounceErrorToHuman(recipient.softBounceError)">
                         <p class="style-definition-text pre-wrap" v-text="bounceErrorToHuman(recipient.softBounceError)" />
@@ -108,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { bounceErrorToHuman, EmailPreview, EmailRecipient } from '@stamhoofd/structures';
+import { bounceErrorToHuman, EmailPreview, EmailRecipient, isSoftEmailRecipientError } from '@stamhoofd/structures';
 import { useBackForward } from '../hooks';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';

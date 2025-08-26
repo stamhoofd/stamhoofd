@@ -56,6 +56,7 @@ import { computed, Ref, ref } from 'vue';
 import { useEmailRecipientsObjectFetcher } from '../fetchers/useEmailRecipientsObjectFetcher';
 import EmailRecipientView from './EmailRecipientView.vue';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import { isSoftEmailRecipientError } from '@stamhoofd/structures';
 
 type ObjectType = EmailRecipient;
 
@@ -152,7 +153,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EmailRecipient>({
         id: 'sentAt',
-        name: $t('Verzonden op'),
+        name: $t('Verzonden om'),
         getValue: e => e,
         format: (email) => {
             if (email.sentAt) {
@@ -177,6 +178,10 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: (email) => {
             if (email.sentAt) {
                 return 'success';
+            }
+
+            if (email.failError && isSoftEmailRecipientError(email.failError)) {
+                return 'warn';
             }
 
             if (email.failError) {
