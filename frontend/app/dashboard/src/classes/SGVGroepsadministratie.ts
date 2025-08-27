@@ -1,10 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { Request, RequestMiddleware, RequestResult, Server } from '@simonbackx/simple-networking';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { Request, RequestInitializer, RequestMiddleware, RequestResult, Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationMixin } from '@simonbackx/vue-app-navigation';
 import { Toast } from '@stamhoofd/components';
-import { AppManager, sleep, UrlHelper } from '@stamhoofd/networking';
-import { createStamhoofdFunctie, getDefaultGroepFuncties, getPatch, getStamhoofdFunctie, GroepFunctie, isManaged, MemberWithRegistrations, Organization, OrganizationPrivateMetaData, schrappen, SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
+import { AppManager, SessionManager, sleep, UrlHelper } from '@stamhoofd/networking';
+import { createStamhoofdFunctie, getDefaultGroepFuncties, getPatch, getStamhoofdFunctie, GroepFunctie, isManaged, MemberWithRegistrations, Organization, OrganizationPrivateMetaData, schrappen, SGVFoutenDecoder, SGVFunctie, SGVGFunctieResponse, SGVGroep, SGVGroepResponse, SGVLedenResponse, SGVLid, SGVLidMatch, SGVLidMatchVerify, SGVMemberError, SGVProfielResponse, SGVReportIssue, SGVSyncReport, SGVZoekenResponse, SGVZoekLid } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import SGVOldMembersView from '../views/dashboard/scouts-en-gidsen/SGVOldMembersView.vue';
@@ -168,7 +168,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     // Search the group
     async getGroup(): Promise<SGVGroep[]> {
-        const response = await this.authenticatedServer.request({
+        const response = await this.tryRequest({
             method: "GET",
             path: "/groep",
             decoder: SGVGroepResponse as Decoder<SGVGroepResponse>
@@ -201,7 +201,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // Temporary replaced because of issue in API that misses normal member functies
         this.functies = [...getDefaultGroepFuncties()]
 
-        const response = await this.authenticatedServer.request({
+        const response = await this.tryRequest({
             method: "GET",
             path: "/functie",
             query: {
@@ -215,7 +215,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const stamhoofdFunctie = getStamhoofdFunctie(list);
         if (!stamhoofdFunctie) {
             // Create Stamhoofd functie
-            const response = await this.authenticatedServer.request({
+            const response = await this.tryRequest({
                 method: "POST",
                 path: "/functie",
                 body: createStamhoofdFunctie(this.groupNumber),
@@ -229,7 +229,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async getProfiel() {
-        const response = await this.authenticatedServer.request({
+        const response = await this.tryRequest({
             method: "GET",
             path: "/lid/profiel",
             decoder: SGVProfielResponse as Decoder<SGVProfielResponse>
@@ -251,7 +251,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
     }
 
     async setManagedFilter() {
-        await this.authenticatedServer.request({
+        await this.tryRequest({
             method: "PATCH",
             path: "/ledenlijst/filter/huidige",
             body: {
@@ -278,7 +278,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
      * Voor we een lid als 'nieuw' beschouwen moeten we echt zeker zijn
      */
     async zoekGelijkaardig(member: MemberWithRegistrations): Promise<SGVZoekLid | undefined> {
-        const response = await this.authenticatedServer.request({
+        const response = await this.tryRequest({
             method: "GET",
             path: "/zoeken/gelijkaardig",
             query: {
@@ -342,7 +342,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         while (offset < total) {
             // prevent brute force attack, spread the load
             await sleep(100);
-            const response = await this.authenticatedServer.request({
+            const response = await this.tryRequest({
                 method: "GET",
                 path: "/ledenlijst",
                 query: {
@@ -643,7 +643,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async schrapLid(lid: SGVLid, report: SGVSyncReport) {
         // Fetch full member from SGV
-        const response = await this.authenticatedServer.request<any>({
+        const response = await this.tryRequest<any>({
             method: "GET",
             path: "/lid/"+lid.id
         })
@@ -656,7 +656,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         if (!this.dryRun) {
 
             try {
-                await this.authenticatedServer.request<any>({
+                await this.tryRequest<any>({
                     method: "PATCH",
                     path: "/lid/"+lid.id+"?bevestig=true",
                     body: patch
@@ -741,13 +741,75 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
         }
         // Fetch full member from SGV
-        const response = await this.authenticatedServer.request<any>({
+        const response = await this.tryRequest<any>({
             method: "GET",
             path: "/lid/"+sgvId
         })
         await sleep(200);
 
         return response.data;
+    }
+
+    async tryRequest<T>(request: RequestInitializer<T>): Promise<RequestResult<T>> {
+        try {
+            return await this.authenticatedServer.request(request)
+        } catch (e) {
+            if (!Request.isNetworkError(e)) {
+                await this.reportIssue(SGVReportIssue.create({
+                    method: request.method,
+                    path: request.path,
+                    query: request.query,
+                    body: request.body,
+                    error: this.getErrorMessage(e)
+                }));
+            }
+            throw e;
+        }
+    }
+
+    async reportIssue(issue: SGVReportIssue) {
+        try {
+            const session = SessionManager.currentSession!;
+            await session.authenticatedServer.request({
+                method: "POST",
+                path: "/sgv/report-issue",
+                body: issue
+            });
+
+        } catch (e) {
+            console.error('Failed to report issue', issue, e)
+        }
+    }
+
+    getErrorMessage(error: unknown): string {
+        if (typeof error === 'string') {
+            return error
+        }
+        if (error === null || typeof error !== 'object') {
+            return 'Er is een onbekende fout opgetreden'
+        }
+
+        if (error instanceof SGVMemberError) {
+            return this.getErrorMessage(error.error)
+        }
+
+        if (Request.isNetworkError(error)) {
+            return 'De groepsadministratie gaf een interne foutmelding of reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Probeer later opnieuw.'
+        }
+        if (!isSimpleError(error) && !isSimpleErrors(error)) {
+            if ('message' in error && typeof error.message === 'string') {
+                if (error.message.startsWith('<!DOCTYPE') || error.message.startsWith('<html') || error.message.length > 1000) {
+                    return 'De groepsadministratie gaf een interne foutmelding of reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Probeer later opnieuw.'
+                }
+
+                return error.message
+            }
+            return 'Er is een onleesbare fout opgetreden'
+        }
+        if (error.hasCode('SGVError')) {
+            return 'De groepsadministratie gaf volgende foutmelding terug: ' + error.getHuman()
+        }
+        return error.getHuman()
     }
 
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
@@ -778,7 +840,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
             if (!this.dryRun) {
                 try {
-                    const updateResponse = await this.authenticatedServer.request<any>({
+                    const updateResponse = await this.tryRequest<any>({
                         method: "PATCH",
                         path: "/lid/"+match.sgvId+"?bevestig=true",
                         body: patch,
@@ -837,7 +899,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 if (post.functies && post.functies.length > 1) {
                     // SGV doesn't support adding multiple functies in one go for new members (...)
                     post.functies = [post.functies[0]]
-                    const updateResponse = await this.authenticatedServer.request<any>({
+                    const updateResponse = await this.tryRequest<any>({
                         method: "POST",
                         path: "/lid?bevestig=true",
                         body: post
@@ -848,7 +910,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     // Do a patch for the remaining functies
                     patchAfter = true;
                 } else {
-                    const updateResponse = await this.authenticatedServer.request<any>({
+                    const updateResponse = await this.tryRequest<any>({
                         method: "POST",
                         path: "/lid?bevestig=true",
                         body: post
@@ -908,10 +970,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // We use our own proxy server to https://login.scoutsengidsenvlaanderen.be, because the CORS headers are not set correctly
         // As soon as SGV has fixed this, we can switch back to https://login.scoutsengidsenvlaanderen.be
         //return new Server("https://login.sgv.stamhoofd.app")
+        if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
+            return new Server("https://login-sgv.api.staging.stamhoofd.app")
+        }
         return new Server("https://login.scoutsengidsenvlaanderen.be")
     }
 
     get server() {
+        if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
+            return new Server("https://groepsadmin-sgv.api.staging.stamhoofd.app")
+        }
         return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
     }
 

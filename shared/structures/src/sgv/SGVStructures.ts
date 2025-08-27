@@ -1,9 +1,29 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, Decoder, field, IntegerDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import { Country,CountryDecoder } from '../addresses/CountryDecoder';
 import { MemberWithRegistrations } from '../members/MemberWithRegistrations';
+
+export class SGVReportIssue extends AutoEncoder {
+    @field({ decoder: StringDecoder, nullable: true })
+    method: string | null = null;
+
+    /**
+     * Called path
+     */
+    @field({ decoder: StringDecoder, nullable: true })
+    path: string | null = null;
+
+    @field({ decoder: AnyDecoder, nullable: true })
+    body: any = null;
+
+    @field({ decoder: AnyDecoder, nullable: true })
+    query: any = null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    error: string | null = null;
+}
 
 export class SGVFoutDecoder implements Decoder<SimpleError> {
 
