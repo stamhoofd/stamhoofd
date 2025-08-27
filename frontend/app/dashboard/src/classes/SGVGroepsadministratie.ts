@@ -50,7 +50,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         try {
             const response: RequestResult<any> = await this.loginServer.request({
                 method: "POST",
-                path: "/auth/realms/scouts/protocol/openid-connect/token",
+                path: "/realms/scouts/protocol/openid-connect/token",
                 body: {
                     client_id: this.clientId,
                     code: code,
@@ -91,7 +91,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         try {
             const response: RequestResult<any> = await this.loginServer.request({
                 method: "POST",
-                path: "/auth/realms/scouts/protocol/openid-connect/token",
+                path: "/realms/scouts/protocol/openid-connect/token",
                 body: {
                     client_id: this.clientId,
                     refresh_token: this.token.refreshToken,
@@ -752,7 +752,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async tryRequest<T>(request: RequestInitializer<T>): Promise<RequestResult<T>> {
         try {
-            return await this.authenticatedServer.request(request)
+            return await this.authenticatedServer.request({
+                ...request,
+                timeout: 120_000
+            })
         } catch (e) {
             if (!Request.isNetworkError(e)) {
                 await this.reportIssue(SGVReportIssue.create({
@@ -806,10 +809,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             }
             return 'Er is een onleesbare fout opgetreden'
         }
-        if (error.hasCode('SGVError')) {
-            return 'De groepsadministratie gaf volgende foutmelding terug: ' + error.getHuman()
-        }
-        return error.getHuman()
+        return error.message
     }
 
     async syncLid(match: SGVLidMatch, report: SGVSyncReport) {
@@ -978,7 +978,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     get server() {
         if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
-            return new Server("https://groepsadmin-sgv.api.staging.stamhoofd.app")
+            return new Server("https://groepsadmin-sgv.api.staging.stamhoofd.app/groepsadmin/rest-ga")
         }
         return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
     }

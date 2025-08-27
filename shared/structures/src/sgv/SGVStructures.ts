@@ -68,12 +68,14 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
             try {
                 return new SimpleErrors(new SimpleError({
                     code: "SGVError",
-                    message: "De groepsadministratie gaf een onbekende foutmelding terug aan Stamhoofd: "+JSON.stringify(data.data)
+                    message: JSON.stringify(data.data),
+                    human: "De groepsadministratie gaf een onbekende foutmelding terug aan Stamhoofd: "+JSON.stringify(data.data)
                 }))
             } catch (e) {
                 return new SimpleErrors(new SimpleError({
                     code: "SGVError",
-                    message: "De groepsadministratie gaf een onbekende foutmelding terug aan Stamhoofd. Kijk even na of er niet ergens foutieve gegevens ingevuld staan, dat de groepsadministratie online is en dat je zelf wel deze leden kan bewerken in de groepsadministratie."
+                    message: data.data+"",
+                    human: "De groepsadministratie gaf een onbekende foutmelding terug aan Stamhoofd. Kijk even na of er niet ergens foutieve gegevens ingevuld staan, dat de groepsadministratie online is en dat je zelf wel deze leden kan bewerken in de groepsadministratie."
                 }))
             }
             
