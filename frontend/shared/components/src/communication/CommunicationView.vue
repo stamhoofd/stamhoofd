@@ -148,6 +148,10 @@ const errorMessage = computed(() => {
 });
 
 useVisibilityChange(() => {
+    if (fetcher.objects.length > fetcher.limit) {
+        // Do not update when coming back because we would loose scroll position
+        return;
+    }
     fetcher.reset();
 });
 
