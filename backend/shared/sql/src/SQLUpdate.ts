@@ -66,7 +66,6 @@ export class SQLUpdate extends Whereable(EmptyClass) implements SQLExpression {
 
     async update(): Promise<{ changedRows: number }> {
         const { query, params } = normalizeSQLQuery(this.getSQL());
-        console.log(query, params);
         const result = await Database.update(query, params);
         return result[0];
     }
