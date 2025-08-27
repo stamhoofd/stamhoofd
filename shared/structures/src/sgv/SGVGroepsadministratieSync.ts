@@ -257,7 +257,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
     const newContacts: any[] = []
 
     let hasPostAdres = false
-    let needsMultiplePatches = false;
+    const needsMultiplePatches = false;
 
     const addressMap: Map<string, string> = new Map()
 
@@ -311,54 +311,6 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         if (!hasPostAdres) {
             console.warn('No postadres found, setting the first address as postadres')
             newAddresses[0].postadres = true
-        }
-    }
-
-    if (lid && lid.adressen && Array.isArray(lid.adressen) && withHacks) {
-        // There is a bug in SGV that checks if a postadres is valid by looking if one of the contacts has it set as their address
-        // Sadly, this only checks the previous version of contacts, before the patch 😅
-        // So we'll need to check if this will occur, and in that case, split the patch in half and keep the old postadres.
-        // Note: this issue also occurs if the post adres does not change, but e.g. an address is deleted that was previously a contact address, but not a post adres. In that case the old postadres
-        // was also not valid, and the validation will trigger again. Solution is simply to keep the old post adres. In the next sync, we'll be able to change it because the contacts have changed to the correct.
-        // ids
-
-        const newPostadres = newAddresses.find(a => a.postadres);
-        let oldPostAdres = lid.adressen.find(a => a.postadres);
-
-        const willBeValidPostadres = !newPostadres || !lid.contacten || !Array.isArray(lid.contacten) || lid.contacten.length === 0 || !!lid.contacten.find((c: any) => c.adres === newPostadres.id);
-        
-        if (!willBeValidPostadres) {
-            console.warn('Detected postadres change that will break SGV, keeping old postadres', member.details.name)
-
-            if (lid.contacten && Array.isArray(lid.contacten) && lid.contacten.length && (!oldPostAdres || !lid.contacten.find((c: any) => c.adres === oldPostAdres.id))) {
-                // Special situation.
-                // We can't keep the old post address because it went into an invalid state and will also get rejected
-
-                // Use one of the previous addresses as the new post address
-                const id = lid.contacten.find((c: any) => !!c.adres)?.adres;
-                if (id) {
-                    console.warn('Detected special validatation case where we need to change the postadres', id)
-                    const newOld = lid.adressen.find((a: any) => a.id === id)
-                    if (newOld) {
-                        oldPostAdres = newOld
-                    }
-                }
-            }
-            
-            newPostadres.postadres = false;
-            const existing = newAddresses.find(a => a.id === oldPostAdres.id)
-            needsMultiplePatches = true;
-
-            if (existing) {
-                // Already in the patch, just set it
-                existing.postadres = true;
-            } else {
-                // Add the old postadres to the patch
-                newAddresses.push({
-                    ...oldPostAdres,
-                    postadres: true
-                })
-            }
         }
     }
 
