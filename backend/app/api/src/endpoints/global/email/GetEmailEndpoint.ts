@@ -30,14 +30,14 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate();
+        await Context.authenticate();
 
         if (!await Context.auth.canReadEmails(organization)) {
             throw Context.auth.error();
         }
 
         const model = await Email.getByID(request.params.id);
-        if (!model || model.userId !== user.id || (model.organizationId !== (organization?.id ?? null))) {
+        if (!model || (model.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
                 code: 'not_found',
                 human: 'Email not found',
