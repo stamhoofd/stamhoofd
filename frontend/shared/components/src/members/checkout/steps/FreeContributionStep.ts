@@ -25,6 +25,10 @@ export class FreeContributionStep implements ViewStep {
             return false;
         }
 
+        if (this.checkout.totalPrice === 0) {
+            return false;
+        }
+
         if (this.checkout.cart.items.find(item => item.member.patchedMember.details.requiresFinancialSupport?.value === true)) {
             return false;
         }
