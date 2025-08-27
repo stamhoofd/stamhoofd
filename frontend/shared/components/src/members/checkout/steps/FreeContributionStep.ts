@@ -20,6 +20,11 @@ export class FreeContributionStep implements ViewStep {
             return false;
         }
 
+        if (this.checkout.cart.items.length === 0) {
+            // Just paying for outstanding balances
+            return false;
+        }
+
         if (this.checkout.cart.items.find(item => item.member.patchedMember.details.requiresFinancialSupport?.value === true)) {
             return false;
         }
