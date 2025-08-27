@@ -10,7 +10,7 @@ import { Group } from '../../Group.js';
 import { GroupOption, GroupOptionMenu, GroupPrice, WaitingListType } from '../../GroupSettings.js';
 import { GroupType } from '../../GroupType.js';
 import { type Organization } from '../../Organization.js';
-import { PlatformMembershipTypeBehaviour } from '../../Platform.js';
+import { Platform, PlatformMembershipTypeBehaviour } from '../../Platform.js';
 import { PriceBreakdown } from '../../PriceBreakdown.js';
 import { StockReservation } from '../../StockReservation.js';
 import { TranslatedString } from '../../TranslatedString.js';
@@ -643,27 +643,55 @@ export class RegisterItem implements ObjectWithRecords {
         return !!this.member.member.registrations.find(r => r.groupId === this.group.id && r.registeredAt === null && r.canRegister);
     }
 
-    doesMeetRequireGroupIds() {
+    getRequireGroupIdsError() {
         if (this.group.settings.requireGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
                 return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireGroupIds.includes(r.groupId);
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireGroupIds.includes(item.group.id))) {
-                return false;
+                const requiredGroups = this.group.settings.requireGroupIds.map(id => this.organization.period.groups.find(g => g.id === id)).filter(g => !!g).map(g => g!.settings.name.toString());
+
+                if (requiredGroups.length && requiredGroups.length === this.group.settings.requireGroupIds.length) {
+                    return $t('{firstName} moet ingeschreven zijn voor {aOrB} om voor {group} te kunnen inschrijven', {
+                        firstName: this.member.patchedMember.details.firstName,
+                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('of') + ' '),
+                        group: this.group.settings.name.toString(),
+                    });
+                }
+
+                if (this.group.settings.requireGroupIds.length > 1) {
+                    return $t('{firstName} moet ingeschreven zijn voor bepaalde groepen om voor {group} te kunnen inschrijven', {
+                        firstName: this.member.patchedMember.details.firstName,
+                        group: this.group.settings.name.toString(),
+                    });
+                }
+                return $t('{firstName} moet ingeschreven zijn voor een bepaalde groep om voor {group} te kunnen inschrijven', {
+                    firstName: this.member.patchedMember.details.firstName,
+                    group: this.group.settings.name.toString(),
+                });
             }
         }
 
+        return null;
+    }
+
+    getRequireDefaultAgeGroupIdsError() {
         if (this.group.settings.requireDefaultAgeGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
                 return r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.isActivePeriodId(r.group.periodId) && !this.willReplace(r.id) && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId);
             });
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
-                return false;
+                const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => Platform.shared.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
+                return $t('{firstName} moet ingeschreven zijn voor {aOrB} om voor {group} te kunnen inschrijven', {
+                    firstName: this.member.patchedMember.details.firstName,
+                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('of') + ' ') : $t('een bepaalde standaard leeftijdsgroep'),
+                    group: this.group.settings.name.toString(),
+                });
             }
         }
-        return true;
+        return null;
     }
 
     doesMeetRequireOrganizationIds() {
@@ -940,6 +968,13 @@ export class RegisterItem implements ObjectWithRecords {
         if (periodId === this.organization.period.period.id) {
             return true;
         }
+
+        // If the organization period is ending within 2 months, also check the next period id
+        // todo
+
+        // If the organization period has only been active for less than 2 months, also check the previous period id
+        // todo
+
         return false;
     }
 
@@ -1142,13 +1177,21 @@ export class RegisterItem implements ObjectWithRecords {
             }
 
             // Check if registrations are limited
-            if (!this.doesMeetRequireGroupIds()) {
+            const requireGroupIdsError = this.getRequireGroupIdsError();
+            if (requireGroupIdsError) {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireGroupIds',
-                    human: $t(`6deb2a31-fcc5-4961-bcd8-01cb8332411b`, {
-                        member: this.member.patchedMember.name,
-                    }),
+                    human: requireGroupIdsError,
+                });
+            }
+
+            const defaultAgeGroupError = this.getRequireDefaultAgeGroupIdsError();
+            if (defaultAgeGroupError) {
+                throw new SimpleError({
+                    code: 'not_matching',
+                    message: 'Not matching: requireDefaultAgeGroupIds',
+                    human: defaultAgeGroupError,
                 });
             }
 
