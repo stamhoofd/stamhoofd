@@ -68,7 +68,7 @@ describe('Unit.RegisterItem', () => {
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
-            expect(() => item.validate()).toThrow('Not matching: requireGroupIds');
+            expect(() => item.validate()).toThrow('Not matching: requireDefaultAgeGroupIds');
         });
 
         it('should be valid if it has default age group registration', () => {
@@ -159,7 +159,7 @@ describe('Unit.RegisterItem', () => {
             const member = family.members[0];
             const item = RegisterItem.defaultFor(member, group, organization);
 
-            expect(() => item.validate()).toThrow('Not matching: requireGroupIds');
+            expect(() => item.validate()).toThrow('Not matching: requireDefaultAgeGroupIds');
         });
 
         it('should be valid if registration is different period but it is the active period', () => {
