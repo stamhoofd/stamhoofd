@@ -26,6 +26,9 @@ export class Platform extends QueryableModel {
     previousPeriodId: string | null = null;
 
     @column({ type: 'string', nullable: true })
+    nextPeriodId: string | null = null;
+
+    @column({ type: 'string', nullable: true })
     membershipOrganizationId: string | null = null;
 
     @column({ type: 'json', decoder: PlatformPrivateConfig })
@@ -56,6 +59,7 @@ export class Platform extends QueryableModel {
     async setPreviousPeriodId() {
         const period = await RegistrationPeriod.getByID(this.periodId);
         this.previousPeriodId = period?.previousPeriodId ?? null;
+        this.nextPeriodId = period?.nextPeriodId ?? null;
     }
 
     static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {

@@ -92,9 +92,8 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 }
             }
 
-            await period.setPreviousPeriodId();
-
             await period.save();
+            await period.updatePreviousNextPeriods();
             periods.push(period);
         }
 
@@ -138,7 +137,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 model.settings = patchObject(model.settings, patch.settings);
             }
 
-            await model.setPreviousPeriodId();
+            await model.updatePreviousNextPeriods();
             await model.save();
 
             // Schedule patch of all groups in this period
@@ -156,23 +155,13 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                 });
             }
 
-            // Get before deleting the model
-            const updateWhere = await RegistrationPeriod.where({ previousPeriodId: model.id });
-
             // Now delete the model
             await model.delete();
-
-            // Update all previous period ids
-            await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                for (const period of updateWhere) {
-                    await period.setPreviousPeriodId();
-                    await period.save();
-                }
-            });
+            await RegistrationPeriod.updatePreviousNextPeriods(model.organizationId);
         }
 
         // Clear platform cache
-        Platform.clearCache();
+        await Platform.clearCache();
 
         return new Response(
             periods.map(p => p.getStructure()),

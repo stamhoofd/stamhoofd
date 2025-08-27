@@ -12,6 +12,8 @@ import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
 import { Event } from './Event.js';
+import { Organization } from './Organization.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum GroupStatus {
     Open = 'Open',
@@ -249,8 +251,37 @@ export class Group extends AutoEncoder {
         return this.settings.squarePhoto ?? this.settings.coverPhoto;
     }
 
-    getRecommendedFilter(recommendOrganizationId?: string | null): StamhoofdFilter {
+    /**
+     * Return the period ids that we consider as active for a given
+     * group and organization combination.
+     */
+    getActivePeriodIds(organization: Organization | null) {
+        const periods = new Set<string>();
+        periods.add(this.periodId);
+
+        if (organization) {
+            periods.add(organization.period.period.id);
+
+            // If the organization period is ending within 2 months, also check the next period id
+            const twoMonthsFromNow = Formatter.luxon().plus({ months: 2 }).toJSDate();
+            if (organization.period.period.endDate <= twoMonthsFromNow && organization.period.period.nextPeriodId) {
+                periods.add(organization.period.period.nextPeriodId);
+            }
+            // If the organization period has only been active for less than 2 months, also check the previous period id
+            const twoMonthsAgo = Formatter.luxon().minus({ months: 2 }).toJSDate();
+            if (organization.period.period.startDate >= twoMonthsAgo && organization.period.period.previousPeriodId) {
+                periods.add(organization.period.period.previousPeriodId);
+            }
+        }
+
+        return periods;
+    }
+
+    getRecommendedFilter(organization?: Organization | null): StamhoofdFilter {
         const filter: StamhoofdFilter = [];
+
+        const periodIds = [...this.getActivePeriodIds(organization ?? null)];
+        const periodIdFilter = periodIds.length === 1 ? { periodId: periodIds[0] } : { periodId: { $in: periodIds } };
 
         if (this.settings.minAge !== null) {
             filter.push({
@@ -296,12 +327,16 @@ export class Group extends AutoEncoder {
             filter.push({
                 registrations: {
                     $elemMatch: {
-                        periodId: this.periodId,
-                        group: {
-                            defaultAgeGroupId: {
-                                $in: this.settings.requireDefaultAgeGroupIds,
+                        $and: [
+                            periodIdFilter,
+                            {
+                                group: {
+                                    defaultAgeGroupId: {
+                                        $in: this.settings.requireDefaultAgeGroupIds,
+                                    },
+                                },
                             },
-                        },
+                        ],
                     },
                 },
             });
@@ -354,12 +389,16 @@ export class Group extends AutoEncoder {
             }
         }
 
-        if (recommendOrganizationId && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(recommendOrganizationId))) {
+        if (organization && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(organization.id))) {
             filter.push({
                 registrations: {
                     $elemMatch: {
-                        periodId: this.periodId,
-                        organizationId: recommendOrganizationId,
+                        $and: [
+                            periodIdFilter,
+                            {
+                                organizationId: organization.id,
+                            },
+                        ],
                     },
                 },
             });
@@ -368,10 +407,14 @@ export class Group extends AutoEncoder {
             filter.push({
                 registrations: {
                     $elemMatch: {
-                        periodId: this.periodId,
-                        organizationId: {
-                            $in: this.settings.requireOrganizationIds,
-                        },
+                        $and: [
+                            periodIdFilter,
+                            {
+                                organizationId: {
+                                    $in: this.settings.requireOrganizationIds,
+                                },
+                            },
+                        ],
                     },
                 },
             });
@@ -381,12 +424,16 @@ export class Group extends AutoEncoder {
             filter.push({
                 registrations: {
                     $elemMatch: {
-                        periodId: this.periodId,
-                        organization: {
-                            tags: {
-                                $in: this.settings.requireOrganizationTags,
+                        $and: [
+                            periodIdFilter,
+                            {
+                                organization: {
+                                    tags: {
+                                        $in: this.settings.requireOrganizationTags,
+                                    },
+                                },
                             },
-                        },
+                        ],
                     },
                 },
             });

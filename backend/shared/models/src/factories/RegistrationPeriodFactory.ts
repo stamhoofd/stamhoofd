@@ -7,6 +7,7 @@ class Options {
     startDate?: Date;
     endDate?: Date;
     previousPeriodId?: string;
+    nextPeriodId?: string;
     locked?: boolean;
     organization?: Organization;
 }
@@ -20,6 +21,9 @@ export class RegistrationPeriodFactory extends Factory<Options, RegistrationPeri
         period.endDate = this.options.endDate ?? new Date(2024, 11, 31, 59, 59, 59, 999);
         if (this.options.previousPeriodId) {
             period.previousPeriodId = this.options.previousPeriodId;
+        }
+        if (this.options.nextPeriodId) {
+            period.nextPeriodId = this.options.nextPeriodId;
         }
         period.settings = RegistrationPeriodSettings.create({});
         period.locked = this.options.locked ?? false;

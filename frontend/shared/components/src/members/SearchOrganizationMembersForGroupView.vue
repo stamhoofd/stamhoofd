@@ -75,7 +75,7 @@ const saving = ref(false);
 const auth = useAuth();
 
 const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilterBuilders();
-const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(auth.hasSomePlatformAccess() ? (contextOrganization.value?.id ?? null) : null))) as Ref<null | UIFilter>;
+const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(auth.hasSomePlatformAccess() ? (contextOrganization.value ?? null) : null))) as Ref<null | UIFilter>;
 
 async function editFilter(event: MouseEvent) {
     if (!filterBuilders) {

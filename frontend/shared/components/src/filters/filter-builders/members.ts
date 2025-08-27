@@ -572,7 +572,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                         $and: [
                             FilterWrapperMarker,
                             {
-                                periodId: platform.period.id,
+                                periodId: organization.value?.period.period.id ?? platform.period.id,
                             },
                         ],
                     },

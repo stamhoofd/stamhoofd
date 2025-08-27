@@ -1151,7 +1151,7 @@ export class PlatformMember implements ObjectWithRecords {
             if (registration.organizationId !== organization.id) {
                 continue;
             }
-            if (registration.group.periodId !== organization.period.period.id && registration.group.periodId !== organization.period.period.previousPeriodId) {
+            if (registration.group.periodId !== organization.period.period.id && registration.group.periodId !== organization.period.period.previousPeriodId && registration.group.periodId !== organization.period.period.nextPeriodId) {
                 continue;
             }
             if (registration.group.type === GroupType.Membership && registration.registeredAt !== null && registration.deactivatedAt === null) {

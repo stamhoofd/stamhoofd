@@ -534,7 +534,7 @@ const memberFetcher = useMembersObjectFetcher();
 async function fetchAllMembers() {
     const selectedPeriod = period.value.period;
     // only get members for selected period + previous period
-    const periodIds = [selectedPeriod.id, selectedPeriod.previousPeriodId];
+    const periodIds = [selectedPeriod.id, selectedPeriod.previousPeriodId, selectedPeriod.nextPeriodId].filter((id): id is string => !!id);
 
     const initialRequest: LimitedFilteredRequest = new LimitedFilteredRequest({
         filter: {

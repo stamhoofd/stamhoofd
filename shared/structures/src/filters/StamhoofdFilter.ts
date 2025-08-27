@@ -147,16 +147,14 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
 
         const remaining = filter.slice();
         let pendingMarkerValue: StamhoofdFilter | undefined = undefined;
+        let didContainMarker = false;
 
         // Order should not matter in an Array
         for (const item of wrap) {
             // Check if we find a match
             if (item === FilterWrapperMarker) {
-                // Usage like this is dangerous and unpredictable
-                console.warn('FilterWrapperMarker in array is not supported as this requires checking in any possible permutation of the array.');
-                return {
-                    match: false,
-                };
+                didContainMarker = true;
+                continue;
             }
 
             let found = false;
@@ -191,6 +189,13 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
                     match: false,
                 };
             }
+        }
+
+        if (didContainMarker && !pendingMarkerValue) {
+            return {
+                match: true,
+                markerValue: remaining,
+            };
         }
 
         if (remaining.length > 0) {

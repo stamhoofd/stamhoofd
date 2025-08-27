@@ -962,20 +962,8 @@ export class RegisterItem implements ObjectWithRecords {
      * This allows organizations to switch to a new period earlier and disable allowing registrations of the previous organization as being valid.
      */
     isActivePeriodId(periodId: string) {
-        if (periodId === this.group.periodId) {
-            return true;
-        }
-        if (periodId === this.organization.period.period.id) {
-            return true;
-        }
-
-        // If the organization period is ending within 2 months, also check the next period id
-        // todo
-
-        // If the organization period has only been active for less than 2 months, also check the previous period id
-        // todo
-
-        return false;
+        const activePeriodIds = this.group.getActivePeriodIds(this.organization);
+        return activePeriodIds.has(periodId);
     }
 
     validatePeriod(group: Group, type: 'move' | 'register', admin = false) {

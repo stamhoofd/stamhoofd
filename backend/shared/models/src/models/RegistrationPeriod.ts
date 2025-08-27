@@ -17,6 +17,9 @@ export class RegistrationPeriod extends QueryableModel {
     previousPeriodId: string | null = null;
 
     @column({ type: 'string', nullable: true })
+    nextPeriodId: string | null = null;
+
+    @column({ type: 'string', nullable: true })
     organizationId: string | null = null;
 
     @column({ type: 'datetime' })
@@ -74,12 +77,25 @@ export class RegistrationPeriod extends QueryableModel {
         return RegistrationPeriod.fromRow(result[this.table]) ?? null;
     }
 
-    async setPreviousPeriodId() {
-        const allPeriods = await RegistrationPeriod.where({ organizationId: this.organizationId });
+    async updatePreviousNextPeriods() {
+        return await RegistrationPeriod.updatePreviousNextPeriods(this.organizationId, this);
+    }
+
+    static async updatePreviousNextPeriods(organizationId: string | null, existingReference?: RegistrationPeriod) {
+        const allPeriods = await RegistrationPeriod.select().where('organizationId', organizationId).fetch();
 
         // Include self if not yet in database
-        if (!this.existsInDatabase) {
-            allPeriods.push(this);
+        if (existingReference) {
+            if (!existingReference.existsInDatabase) {
+                allPeriods.push(existingReference);
+            }
+            else {
+            // Replace self with this
+                const index = allPeriods.findIndex(p => p.id === existingReference.id);
+                if (index !== -1) {
+                    allPeriods[index] = existingReference;
+                }
+            }
         }
 
         // Sort by start date
@@ -89,12 +105,18 @@ export class RegistrationPeriod extends QueryableModel {
         let previousPeriod: RegistrationPeriod | null = null;
 
         for (const period of allPeriods) {
-            if (period.id === this.id) {
-                break;
+            period.previousPeriodId = previousPeriod?.id ?? null;
+            period.nextPeriodId = null;
+
+            if (previousPeriod) {
+                previousPeriod.nextPeriodId = period.id;
             }
             previousPeriod = period;
         }
 
-        this.previousPeriodId = previousPeriod?.id ?? null;
+        // Save all
+        for (const period of allPeriods) {
+            await period.save();
+        }
     }
 }
