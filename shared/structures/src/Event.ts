@@ -73,10 +73,10 @@ export class EventMeta extends AutoEncoder {
     @field({ decoder: Image, nullable: true })
     coverPhoto: Image | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 382 })
     minAge: number | null = null;
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 382 })
     maxAge: number | null = null;
 }
 

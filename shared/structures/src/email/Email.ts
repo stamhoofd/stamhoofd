@@ -158,7 +158,7 @@ export class Email extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 382 })
     deletedAt: Date | null = null;
 
     getTemplateType() {
