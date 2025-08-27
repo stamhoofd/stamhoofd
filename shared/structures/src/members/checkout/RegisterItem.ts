@@ -710,7 +710,7 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     isExistingMemberOrFamily() {
-        return this.member.isExistingMember(this.group.organizationId) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.group.organizationId)));
+        return this.member.isExistingMember(this.organization) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.organization)));
     }
 
     get description() {

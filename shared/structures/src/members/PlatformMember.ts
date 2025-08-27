@@ -1146,18 +1146,14 @@ export class PlatformMember implements ObjectWithRecords {
         };
     }
 
-    isExistingMember(organizationId: string): boolean {
-        const member = this.member;
-        if (member.registrations.length === 0) {
-            return false;
-        }
-
-        const organization = this.organizations.find(o => o.id === organizationId);
-        if (!organization) {
-            return false;
-        }
-
-        for (const registration of member.registrations) {
+    isExistingMember(organization: Organization): boolean {
+        for (const registration of this.member.registrations) {
+            if (registration.organizationId !== organization.id) {
+                continue;
+            }
+            if (registration.group.periodId !== organization.period.period.id && registration.group.periodId !== organization.period.period.previousPeriodId) {
+                continue;
+            }
             if (registration.group.type === GroupType.Membership && registration.registeredAt !== null && registration.deactivatedAt === null) {
                 return true;
             }
