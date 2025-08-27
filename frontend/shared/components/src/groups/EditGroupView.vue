@@ -219,15 +219,15 @@
                 <template v-if="isPropertyEnabled('birthDay')">
                     <div class="split-inputs">
                         <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
-                            <AgeInput v-model="minAge" :year="patchedPeriod.period.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                            <AgeInput v-model="minAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
                         </STInputBox>
 
                         <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
-                            <AgeInput v-model="maxAge" :year="patchedPeriod.period.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                            <AgeInput v-model="maxAge" :year="patchedGroup.settings.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
                         </STInputBox>
                     </div>
                     <p class="style-description-small">
-                        *{{ $t('912639c7-e301-463e-b2d3-16b912848330') }}{{ patchedPeriod.period.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                        *{{ $t('912639c7-e301-463e-b2d3-16b912848330') }}{{ patchedGroup.settings.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
                             {{ $t('49030aa4-f77c-4db5-b976-2125675aae66') }}
                         </template>
                     </p>

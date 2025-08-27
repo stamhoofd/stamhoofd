@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from './addresses/Address.js';
@@ -72,6 +72,12 @@ export class EventMeta extends AutoEncoder {
 
     @field({ decoder: Image, nullable: true })
     coverPhoto: Image | null = null;
+
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    minAge: number | null = null;
+
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    maxAge: number | null = null;
 }
 
 export class Event extends AutoEncoder {

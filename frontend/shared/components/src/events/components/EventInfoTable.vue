@@ -37,6 +37,39 @@
             </h2>
         </STListItem>
 
+        <STListItem v-if="event.group && (event.meta.minAge !== null || event.meta.maxAge !== null)">
+            <template #left>
+                <span class="icon membership-filled" />
+            </template>
+
+            <h2 v-if="event.meta.minAge !== null && event.meta.maxAge !== null && event.meta.minAge === event.meta.maxAge" class="style-title-list">
+                {{ $t('{x} jaar oud (geboren in {xxxx})', {
+                    x: event.meta.minAge,
+                    xxxx: (event.startDate.getFullYear() - event.meta.minAge),
+                }) }}
+            </h2>
+            <h2 v-else-if="event.meta.minAge !== null && event.meta.maxAge !== null" class="style-title-list">
+                {{ $t('Tussen {x} en {y} jaar (geboren tussen {yyyy} en {xxxx})', {
+                    x: event.meta.minAge,
+                    xxxx: (event.startDate.getFullYear() - event.meta.minAge),
+                    y: event.meta.maxAge,
+                    yyyy: (event.startDate.getFullYear() - event.meta.maxAge),
+                }) }}
+            </h2>
+            <h2 v-else-if="event.meta.minAge !== null" class="style-title-list">
+                {{ $t('Vanaf {x} jaar (geboren voor of in {xxxx})', {
+                    x: event.meta.minAge,
+                    xxxx: (event.startDate.getFullYear() - event.meta.minAge)
+                }) }}
+            </h2>
+            <h2 v-else-if="event.meta.maxAge !== null" class="style-title-list">
+                {{ $t('Tot {x} jaar (geboren na of in {xxxx})', {
+                    x: event.meta.maxAge,
+                    xxxx: (event.startDate.getFullYear() - event.meta.maxAge)
+                }) }}
+            </h2>
+        </STListItem>
+
         <STListItem v-if="event.group" :selectable="!differentOrganization && !event.group.closed" class="right-stack" @click="!differentOrganization && !event.group.closed ? openGroup() : undefined">
             <template #left>
                 <span class="icon edit" />

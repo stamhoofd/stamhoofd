@@ -388,6 +388,7 @@ export class PlatformFamily {
         const defaultGroupIds = new Set<string>();
         const organizationIds = new Set<string>();
         const organizationTags = new Set<string>();
+        const ages = new Set<number>();
 
         for (const member of this.members) {
             for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: true })) {
@@ -401,6 +402,18 @@ export class PlatformFamily {
                 if (organization) {
                     for (const tag of organization.meta.tags) {
                         organizationTags.add(tag);
+                    }
+                }
+
+                if (member.patchedMember.details.age) {
+                    const d = member.patchedMember.details.trackedAgeForYear(new Date().getFullYear());
+                    if (d !== null) {
+                        ages.add(d);
+                    }
+
+                    const d2 = member.patchedMember.details.trackedAgeForYear(new Date(Date.now() + 1000 * 60 * 60 * 24 * 31 * 6).getFullYear());
+                    if (d2 !== null) {
+                        ages.add(d2);
                     }
                 }
             }
@@ -420,6 +433,26 @@ export class PlatformFamily {
                 $in: [null, ...organizationTags.values()],
             },
         });
+
+        if (ages.size) {
+            filter.push({
+                $or: [...ages].sort().map(age => ({
+                    $and: [
+                        {
+                            $or: [
+                                { minAge: { $lte: age } },
+                            ],
+                        },
+                        {
+                            $or: [
+                                { maxAge: null },
+                                { maxAge: { $gte: age } },
+                            ],
+                        },
+                    ],
+                })),
+            });
+        }
 
         return filter;
     }

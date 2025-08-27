@@ -164,6 +164,26 @@
             <ImageComponent :image="coverPhoto" :auto-height="true" />
         </JumpToContainer>
 
+        <JumpToContainer :visible="forceShowAge || minAge !== null || maxAge !== null">
+            <hr>
+            <h2>{{ $t('Leeftijdsrestricties') }}</h2>
+
+            <div class="split-inputs">
+                <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
+                    <AgeInput v-model="minAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                </STInputBox>
+
+                <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`c0cab705-c129-4a72-8860-c33ef91ec630`)">
+                    <AgeInput v-model="maxAge" :year="event.startDate.getFullYear()" :nullable="true" :placeholder="$t(`f5f56168-1922-4a23-b376-20a7738bfa66`)" />
+                </STInputBox>
+            </div>
+            <p class="style-description-small">
+                *{{ $t('912639c7-e301-463e-b2d3-16b912848330') }}{{ event.startDate.getFullYear() }}.<template v-if="externalOrganization?.address.country === Country.Belgium">
+                    {{ $t('49030aa4-f77c-4db5-b976-2125675aae66') }}
+                </template>
+            </p>
+        </JumpToContainer>
+
         <hr><STList>
             <STListItem v-if="defaultAgeGroupIds === null && isNationalActivity" :selectable="true" element-name="button" @click="addDefaultAgeGroupRestriction">
                 <template #left>
@@ -216,6 +236,16 @@
                     </h3>
                 </UploadButton>
             </STListItem>
+
+            <STListItem v-if="!(forceShowAge || minAge !== null || maxAge !== null)" :selectable="true" element-name="button" @click="addAgeRestriction">
+                <template #left>
+                    <span class="icon membership-filled gray" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Leeftijdsrestrictie toevoegen') }}
+                </h3>
+            </STListItem>
         </STList>
     </SaveView>
 </template>
@@ -224,8 +254,8 @@
 import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, CenteredMessage, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
-import { AccessRight, Event, EventLocation, EventMeta, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
+import { AddressInput, AgeInput, CenteredMessage, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AccessRight, Country, Event, EventLocation, EventMeta, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
 import JumpToContainer from '../containers/JumpToContainer.vue';
@@ -252,6 +282,7 @@ const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
 const title = computed(() => props.isNew ? $t(`008c80e4-a46f-4e1c-8f45-d383008b2e10`) : $t(`e4bff2f3-d273-4755-b617-f792a01f8325`));
 const saving = ref(false);
 const deleting = ref(false);
+const forceShowAge = ref(props.event.meta.minAge !== null || props.event.meta.maxAge !== null);
 
 const context = useContext();
 const pop = usePop();
@@ -259,6 +290,7 @@ const organization = useOrganization();
 const present = usePresent();
 const platform = usePlatform();
 const eventPermissions = useEventPermissions();
+const patchedPeriod = computed(() => organization.value?.period.period ?? platform.value.period);
 
 const { externalOrganization, choose: chooseOrganizer } = useExternalOrganization(
     computed({
@@ -343,6 +375,24 @@ const startDate = computed({
 const endDate = computed({
     get: () => patched.value.endDate,
     set: endDate => addPatch({ endDate }),
+});
+
+const minAge = computed({
+    get: () => patched.value.meta.minAge,
+    set: minAge => addPatch({
+        meta: EventMeta.patch({
+            minAge,
+        }),
+    }),
+});
+
+const maxAge = computed({
+    get: () => patched.value.meta.maxAge,
+    set: maxAge => addPatch({
+        meta: EventMeta.patch({
+            maxAge,
+        }),
+    }),
 });
 
 const typeId = computed({
@@ -539,6 +589,10 @@ const resolutions = [
         width: 100,
     }),
 ];
+
+function addAgeRestriction() {
+    forceShowAge.value = true;
+}
 
 function addLocation() {
     location.value = EventLocation.create({});

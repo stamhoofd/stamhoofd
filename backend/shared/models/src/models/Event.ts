@@ -87,6 +87,8 @@ export class Event extends QueryableModel {
         group.settings.requireGroupIds = this.meta.groups?.map(g => g.id) ?? [];
         group.settings.startDate = this.startDate;
         group.settings.endDate = this.endDate;
+        group.settings.minAge = this.meta.minAge ?? null;
+        group.settings.maxAge = this.meta.maxAge ?? null;
 
         if (group.type === GroupType.EventRegistration) {
             // Don't change the name of the waiting list

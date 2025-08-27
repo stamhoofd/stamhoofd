@@ -690,7 +690,13 @@ export class GroupSettings extends AutoEncoder {
             else {
                 who += $t(`77019f85-9898-4fda-8ae3-d6ac3bc9ad3b`);
             }
-            who += ' ' + (this.minYear) + ' - ' + (this.maxYear);
+
+            if (this.minYear === this.maxYear) {
+                who += ' ' + (this.minYear);
+            }
+            else {
+                who += ' ' + (this.minYear) + ' - ' + (this.maxYear);
+            }
         }
         else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {

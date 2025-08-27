@@ -9,6 +9,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoice
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
+import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 
 export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -614,6 +615,28 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
 
         all.push(typeFilter);
     }
+
+    const ageFilter = new SimpleNumberFilterBuilder({
+        name: $t(`Leeftijd`),
+        wrapper: {
+            $and: [
+                {
+                    $or: [
+                        // null not required, because null always < anything
+                        { minAge: { $lte: FilterWrapperMarker } },
+                    ],
+                },
+                {
+                    $or: [
+                        { maxAge: null },
+                        { maxAge: { $gte: FilterWrapperMarker } },
+                    ],
+                },
+            ],
+        },
+    });
+
+    all.push(ageFilter);
 
     all.unshift(
         new GroupUIFilterBuilder({

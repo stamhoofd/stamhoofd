@@ -470,7 +470,7 @@ export class MemberDetails extends AutoEncoder {
 
     getMatchingError(group: Group): { message: string; description: string } | null {
         if (group.settings.minAge || group.settings.maxAge) {
-            const age = this.trackedAgeForYear(Formatter.luxon(group.settings.period?.startDate ?? new Date()).year);
+            const age = this.trackedAgeForYear(Formatter.luxon(group.settings.startDate ?? new Date()).year);
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
