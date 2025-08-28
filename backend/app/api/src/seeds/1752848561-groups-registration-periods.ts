@@ -392,7 +392,7 @@ type PeriodSpan = {
 
 function getPeriodSpans() {
     const results: PeriodSpan[] = [];
-    const monthSpans: number[] = [12, 6];
+    const monthSpans: number[] = [12];
 
     for (const monthSpan of monthSpans) {
         for (let i = 0; i < monthSpan; i++) {
