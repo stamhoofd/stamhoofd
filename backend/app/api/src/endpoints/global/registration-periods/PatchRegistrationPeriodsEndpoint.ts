@@ -70,6 +70,14 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         const periods: RegistrationPeriod[] = [];
 
         for (const { put } of request.body.getPuts()) {
+            if (put.endDate < put.startDate) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: $t('De einddatum moet na de startdatum liggen.'),
+                    field: 'endDate',
+                });
+            }
+
             const period = new RegistrationPeriod();
             period.id = put.id;
             period.customName = put.customName;
@@ -127,6 +135,15 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (patch.endDate !== undefined) {
                 model.endDate = patch.endDate;
+            }
+
+            // only check if start or end date is patched
+            if ((patch.startDate || patch.endDate) && model.endDate < model.startDate) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: $t('De einddatum moet na de startdatum liggen.'),
+                    field: 'endDate',
+                });
             }
 
             if (patch.locked !== undefined) {
