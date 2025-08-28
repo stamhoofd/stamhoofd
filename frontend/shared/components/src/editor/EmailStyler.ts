@@ -139,9 +139,19 @@ ${element.innerHTML}
             }
         }
 
+        // Add newlines to block elements
+        const blockElements = element.querySelectorAll('p, h1, h2, h3, h4, hr, table');
+        for (const el of blockElements) {
+            el.insertAdjacentText('afterend', '\n');
+        }
+
+        let text = element.innerText.trim();
+        text = text.replace(/\n[^\S\n]+/g, '\n'); // Remove spaces after newlines
+        text = text.replace(/\n{3,}/g, '\n\n'); // Remove more than 2 newlines and replace it with just 2
+
         return {
             html,
-            text: element.innerText,
+            text,
         };
     }
 }
