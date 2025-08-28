@@ -132,18 +132,27 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         for (let previousPeriodIndex = 0; previousPeriodIndex < cycleSettingEntries.length; previousPeriodIndex++) {
             const [cycle, cycleInformation] = cycleSettingEntries[previousPeriodIndex];
             const newGroup = createPreviousGroup({ originalGroup, period: archivePeriod, cycleInformation, index: previousPeriodIndex });
-            if (!dryRun) {
-                await newGroup.save();
-            }
 
-            await migrateRegistrations({ organization, period: archivePeriod, originalGroup, newGroup, cycle }, dryRun);
+            const registrationCount = await Registration.select()
+                .where('groupId', originalGroup.id)
+                .andWhere('cycle', cycle)
+                .count();
 
-            const allPreviousGroups = groupMap.get(originalGroupId);
-            if (allPreviousGroups) {
-                allPreviousGroups.push(newGroup);
-            }
-            else {
-                groupMap.set(originalGroupId, [newGroup]);
+            // only create group if there are registrations
+            if (registrationCount > 0) {
+                if (!dryRun) {
+                    await newGroup.save();
+                }
+
+                await migrateRegistrations({ organization, period: archivePeriod, originalGroup, newGroup, cycle }, dryRun);
+
+                const allPreviousGroups = groupMap.get(originalGroupId);
+                if (allPreviousGroups) {
+                    allPreviousGroups.push(newGroup);
+                }
+                else {
+                    groupMap.set(originalGroupId, [newGroup]);
+                }
             }
         }
     }
@@ -206,10 +215,8 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         return GroupCategory.create({
             settings: GroupCategorySettings.create({
                 name: originalGroup!.settings.name.toString(),
-                // todo: is this correct?
                 public: false,
                 maximumRegistrations: null,
-                // todo: should be locked?
             }),
             groupIds,
         });
@@ -246,10 +253,8 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
                     const newCategory = GroupCategory.create({
                         settings: GroupCategorySettings.create({
                             name: originalGroup.settings.name.toString(),
-                            // todo: is this correct?
                             public: false,
                             maximumRegistrations: null,
-                            // todo: should be locked?
                         }),
                         groupIds,
                     });
