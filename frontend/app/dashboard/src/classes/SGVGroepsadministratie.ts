@@ -61,7 +61,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     "Content-Type": "application/x-www-form-urlencoded",
                     Accept: "application/json"
                 },
-                overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
+                //overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
             })
 
             this.token = {
@@ -102,7 +102,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     "Content-Type": "application/x-www-form-urlencoded",
                     Accept: "application/json"
                 },
-                overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
+                //overrideXMLHttpRequest: AppManager.shared.overrideXMLHttpRequest
             })
 
             this.token = {
@@ -1020,7 +1020,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             await this.refreshToken()
         }
 
-        request.overrideXMLHttpRequest = AppManager.shared.overrideXMLHttpRequest
+        //request.overrideXMLHttpRequest = AppManager.shared.overrideXMLHttpRequest
         request.errorDecoder = new SGVFoutenDecoder()
         request.headers["Authorization"] = "Bearer " + this.token.accessToken;
         request.headers["Accept"] = "application/json";
