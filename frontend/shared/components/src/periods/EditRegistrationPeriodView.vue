@@ -15,11 +15,11 @@
         </p>
 
         <div class="split-inputs">
-            <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`33a674c2-6981-442b-9bd4-01f71da7a159`)">
+            <STInputBox error-fields="startDate" :error-box="errors.errorBox" :title="$t(`33a674c2-6981-442b-9bd4-01f71da7a159`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
             </STInputBox>
 
-            <STInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
+            <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
                 <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
             </STInputBox>
         </div>
@@ -43,10 +43,11 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, usePlatform, useValidation } from '@stamhoofd/components';
 import { RegistrationPeriod } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -66,12 +67,39 @@ const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.period);
 
+useValidation(errors.validator, validate);
+
+function validate() {
+    if (patched.value.startDate.getTime() >= patched.value.endDate.getTime()) {
+        const message = $t('De einddatum moet na de startdatum liggen.');
+
+        // prevent the error from flickering
+        if (errors.errorBox?.errors.message !== message) {
+            errors.errorBox = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                field: 'endDate',
+                message,
+            }));
+        }
+
+        return false;
+    }
+
+    errors.errorBox = null;
+    return true;
+}
+
 const save = async () => {
     if (saving.value || deleting.value) {
         return;
     }
     saving.value = true;
     try {
+        if (!await errors.validator.validate()) {
+            saving.value = false;
+            return;
+        }
+        // validatePeriod();
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }
@@ -127,6 +155,8 @@ const endDate = computed({
     get: () => patched.value.endDate,
     set: endDate => addPatch({ endDate }),
 });
+
+watch([startDate, endDate], validate);
 
 const isValidCustomName = computed(() => {
     if (!customName.value) {
