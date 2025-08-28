@@ -14,6 +14,9 @@ export class RegistrationPeriod extends QueryableModel {
     id!: string;
 
     @column({ type: 'string', nullable: true })
+    customName: string | null = null;
+
+    @column({ type: 'string', nullable: true })
     previousPeriodId: string | null = null;
 
     @column({ type: 'string', nullable: true })

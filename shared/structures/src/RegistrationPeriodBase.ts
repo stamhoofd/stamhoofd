@@ -6,6 +6,9 @@ export class RegistrationPeriodBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    customName: string | null = null;
+
     @field({ decoder: DateDecoder })
     startDate = new Date();
 
@@ -22,10 +25,18 @@ export class RegistrationPeriodBase extends AutoEncoder {
     nextPeriodId: string | null = null;
 
     get name() {
+        if (this.customName) {
+            return this.customName;
+        }
+
         return $t(`dff05b27-5ad9-416c-b344-f890a4e68255`) + ' ' + Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
 
     get nameShort() {
+        if (this.customName) {
+            return this.customName;
+        }
+
         return Formatter.year(this.startDate) + ' - ' + Formatter.year(this.endDate);
     }
 
