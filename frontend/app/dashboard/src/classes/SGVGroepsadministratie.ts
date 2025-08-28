@@ -984,17 +984,17 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         // We use our own proxy server to https://login.scoutsengidsenvlaanderen.be, because the CORS headers are not set correctly
         // As soon as SGV has fixed this, we can switch back to https://login.scoutsengidsenvlaanderen.be
         //return new Server("https://login.sgv.stamhoofd.app")
-        if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
-            return new Server("https://login-sgv.api.staging.stamhoofd.app")
-        }
-        return new Server("https://login.scoutsengidsenvlaanderen.be")
+        //if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
+        return new Server("https://login-sgv.api.staging.stamhoofd.app")
+        //}
+        //return new Server("https://login.scoutsengidsenvlaanderen.be")
     }
 
     get server() {
-        if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
-            return new Server("https://groepsadmin-sgv.api.staging.stamhoofd.app/groepsadmin/rest-ga")
-        }
-        return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
+        //if (SessionManager.currentSession?.user?.email?.endsWith('@stamhoofd.be')) {
+        return new Server("https://groepsadmin-sgv.api.staging.stamhoofd.app/groepsadmin/rest-ga")
+        //}
+        //return new Server("https://groepsadmin.scoutsengidsenvlaanderen.be/groepsadmin/rest-ga")
     }
 
     get authenticatedServer() {
