@@ -754,9 +754,23 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         try {
             return await this.authenticatedServer.request({
                 ...request,
-                timeout: 120_000
+                timeout: 30_000
             })
         } catch (e) {
+            if (Request.isTimeout(e)) {
+                await this.reportIssue(SGVReportIssue.create({
+                    method: request.method,
+                    path: request.path,
+                    query: request.query,
+                    body: request.body,
+                    error: 'Timeout after 30 seconds'
+                }));
+
+                throw new SimpleError({
+                    code: "sgv_timeout",
+                    message: "De groepsadministratie reageerde niet binnen 30 seconden. Mogelijks is de groepsadministratie even gedeeltelijk onbereikbaar of heb je een onstabiele internetverbinding. Probeer het later opnieuw."
+                })
+            }
             if (!Request.isNetworkError(e)) {
                 await this.reportIssue(SGVReportIssue.create({
                     method: request.method,
