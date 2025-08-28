@@ -31,7 +31,7 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
         const organization = await Context.setUserOrganizationScope();
         const { user } = await Context.authenticate();
 
-        const memberIds = await Member.getMemberIdsWithRegistrationForUser(user);
+        const memberIds = await Member.getMemberIdsForUser(user);
 
         const balanceItemModels = await BalanceItem.balanceItemsForUsersAndMembers(organization?.id ?? null, [user.id], memberIds);
 

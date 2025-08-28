@@ -4,9 +4,8 @@
 
         <main class="center">
             <h1>
-                {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
+                {{ $t('Berichten') }}
             </h1>
-            <p>{{ $t(`feae4831-c229-4b2a-8dc1-c65184cbdfec`) }}</p>
 
             <div class="input-with-buttons">
                 <div>
@@ -52,7 +51,7 @@ import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, SortItemDirection,
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
-import EmailOverview from './EmailOverview.vue';
+import MemberEmailOverview from './MemberEmailOverview.vue';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 type ObjectType = EmailPreview;
@@ -73,7 +72,7 @@ defineRoutes([
     {
         name: Routes.Email,
         url: '@id',
-        component: EmailOverview as ComponentOptions,
+        component: MemberEmailOverview as ComponentOptions,
         params: {
             id: String,
         },
@@ -111,7 +110,7 @@ defineRoutes([
     },
 ]);
 
-const objectFetcher = useEmailsObjectFetcher(false, {
+const objectFetcher = useEmailsObjectFetcher(true, {
     get requiredFilter() {
         return getRequiredFilter();
     },
@@ -119,7 +118,7 @@ const objectFetcher = useEmailsObjectFetcher(false, {
 
 const fetcher = useInfiniteObjectFetcher<ObjectType>(objectFetcher);
 fetcher.sort = [{
-    key: 'createdAt',
+    key: 'sentAt',
     order: SortItemDirection.DESC,
 }];
 

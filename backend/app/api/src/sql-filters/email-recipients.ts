@@ -7,6 +7,11 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    memberId: createColumnFilter({
+        expression: SQL.column('memberId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     email: createColumnFilter({
         expression: SQL.column('email'),
         type: SQLValueType.String,

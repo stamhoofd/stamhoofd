@@ -1,7 +1,27 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { emailRecipientsFilterCompilers } from './email-recipients';
+
+export const userEmailFilterCompilers: SQLFilterDefinitions = {
+    ...baseSQLFilterCompilers,
+    id: createColumnFilter({
+        expression: SQL.column('id'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+    sentAt: createColumnFilter({
+        expression: SQL.column('sentAt'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
+    senderId: createColumnFilter({
+        expression: SQL.column('senderId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+};
 
 export const emailFilterCompilers: SQLFilterDefinitions = {
-    ...baseSQLFilterCompilers,
+    ...userEmailFilterCompilers,
     id: createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
@@ -97,4 +117,17 @@ export const emailFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
+    recipients: createExistsFilter(
+        SQL.select()
+            .from(
+                SQL.table('email_recipients'),
+            )
+            .where(
+                SQL.column('emailId'),
+                SQL.parentColumn('id'),
+            ),
+        {
+            ...emailRecipientsFilterCompilers,
+        },
+    ),
 };

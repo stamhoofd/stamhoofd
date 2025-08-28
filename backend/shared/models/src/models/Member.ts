@@ -315,7 +315,7 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
-    static async getMemberIdsWithRegistrationForUser(user: User): Promise<string[]> {
+    static async getMemberIdsForUser(user: User): Promise<string[]> {
         const query = SQL
             .select('id')
             .from(Member.table)
@@ -339,7 +339,7 @@ export class Member extends QueryableModel {
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrations[]> {
-        return this.getBlobByIds(...(await this.getMemberIdsWithRegistrationForUser(user)));
+        return this.getBlobByIds(...(await this.getMemberIdsForUser(user)));
     }
 
     static getRegistrationWithTinyMemberStructure(registration: RegistrationWithMember & { group: import('./Group').Group }): RegistrationWithTinyMember {

@@ -12,6 +12,7 @@ import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '..
 import { EmailRecipient } from './EmailRecipient';
 import { EmailTemplate } from './EmailTemplate';
 import { Organization } from './Organization';
+import { User } from './User';
 
 function errorToSimpleErrors(e: unknown) {
     if (isSimpleErrors(e)) {
@@ -1155,6 +1156,46 @@ export class Email extends QueryableModel {
         const emailRecipient = await EmailRecipient.select()
             .where('emailId', this.id)
             .first(false);
+
+        let recipientRow: EmailRecipientStruct | undefined;
+
+        if (emailRecipient) {
+            recipientRow = emailRecipient.getStructure();
+        }
+
+        if (!recipientRow) {
+            recipientRow = getExampleRecipient();
+        }
+
+        const virtualRecipient = recipientRow.getRecipient();
+
+        await fillRecipientReplacements(virtualRecipient, {
+            organization: this.organizationId ? (await Organization.getByID(this.organizationId))! : null,
+            from: this.getFromAddress(),
+            replyTo: null,
+        });
+
+        recipientRow.replacements = virtualRecipient.replacements;
+
+        return EmailPreview.create({
+            ...this,
+            exampleRecipient: recipientRow,
+        });
+    }
+
+    async getPreviewStructureForUser(user: User, memberIds: string[]) {
+        const emailRecipients = await EmailRecipient.select()
+            .where('emailId', this.id)
+            .where('memberId', memberIds)
+            .fetch();
+
+        let emailRecipient = emailRecipients[0];
+        for (const r of emailRecipients) {
+            if (r.userId === user.id || r.email === user.email) {
+                emailRecipient = r;
+                break;
+            }
+        }
 
         let recipientRow: EmailRecipientStruct | undefined;
 

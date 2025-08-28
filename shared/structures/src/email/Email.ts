@@ -315,21 +315,6 @@ export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;
 
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(EditorSmartVariable), optional: true })
-    smartVariables: EditorSmartVariable[] = [];
-
-    /**
-     * @deprecated
-     */
-    @field({ decoder: new ArrayDecoder(EditorSmartButton), optional: true })
-    smartButtons: EditorSmartButton[] = [];
-
-    // todo: count stats
-    // todo: bounce / spam stats
-
     get replacedSubject() {
         return replaceEmailText(this.subject || '', this.exampleRecipient?.replacements || []);
     }

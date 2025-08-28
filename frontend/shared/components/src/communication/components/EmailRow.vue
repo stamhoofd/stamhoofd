@@ -21,6 +21,7 @@
             <span v-if="email.spamComplaintsCount + email.hardBouncesCount + email.softBouncesCount + email.softFailedCount + email.failedCount > 0" class="style-description-small"><span>{{ formatInteger(email.spamComplaintsCount + email.hardBouncesCount + email.softBouncesCount + email.softFailedCount + email.failedCount) }}</span><span class="icon warning tiny" /></span>
             <span v-if="email.attachments.length" class="style-description-small"><span>{{ formatInteger(email.attachments.length) }}</span><span class="icon attachment tiny" /></span>
             <span class="style-description-small"><span>{{ formatInteger(email.emailRecipientsCount) }}</span><span class="icon email tiny" /></span>
+            <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
 </template>

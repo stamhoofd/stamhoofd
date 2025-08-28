@@ -10,6 +10,7 @@ import { computed } from 'vue';
 import CartView from './views/cart/CartView.vue';
 import EventsOverview from './views/events/EventsOverview.vue';
 import StartView from './views/start/StartView.vue';
+import MemberCommunicationView from './views/communication/MemberCommunicationView.vue';
 
 export function wrapWithModalStack(...components: ComponentWithProperties[]) {
     return new ComponentWithProperties(ModalStackComponent, { initialComponents: components });
@@ -89,6 +90,15 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
         }),
     });
 
+    const communicationTab = new TabBarItem({
+        id: 'communication',
+        icon: 'email-filled',
+        name: $t(`Berichten`),
+        component: new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(MemberCommunicationView, {}),
+        }),
+    });
+
     return wrapContext(session, 'registration', ({ platformManager }) => new ComponentWithProperties(AuthenticatedView, {
         root: wrapWithModalStack(
             new ComponentWithProperties(PromiseView, {
@@ -99,6 +109,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                     await $memberManager.loadDocuments();
 
                     const enableEvents = platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', session);
+                    const enableCommunication = manualFeatureFlag('communication', session);
 
                     return new ComponentWithProperties(TabBarController, {
                         tabs: [
@@ -109,6 +120,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                                 component: startView,
                             }),
                             ...(enableEvents ? [calendarTab] : []),
+                            ...(enableCommunication ? [communicationTab] : []),
                             new TabBarItem({
                                 id: 'cart',
                                 icon: 'basket',

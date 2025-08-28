@@ -11,7 +11,7 @@ function extendSort(list: SortList): SortList {
     ]);
 }
 
-export function useEmailsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
+export function useEmailsObjectFetcher(user: boolean = false, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
     const context = useContext();
 
     return {
@@ -21,7 +21,7 @@ export function useEmailsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectT
             console.log('Emails.fetch', data);
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
-                path: '/email',
+                path: user ? '/user/email' : '/email',
                 decoder: new PaginatedResponseDecoder(new ArrayDecoder(EmailPreview as Decoder<EmailPreview>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                 query: data,
                 shouldRetry: false,
