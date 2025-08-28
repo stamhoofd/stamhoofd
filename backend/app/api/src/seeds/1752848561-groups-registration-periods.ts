@@ -134,12 +134,14 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         Group[]>();
 
     for (const originalGroup of groups) {
+        // archived groups should be migrated to the archive period
+        const currentGroupPeriod = originalGroup.status === GroupStatus.Archived ? archivePeriod : currentPeriod;
         const currentCycle = originalGroup.cycle;
         const originalGroupId: string = originalGroup.id;
-        originalGroup.periodId = currentPeriod.id;
+        originalGroup.periodId = currentGroupPeriod.id;
 
         // first migrate registrations for the current cycle
-        await migrateRegistrations({ organization, period: currentPeriod, originalGroup, newGroup: originalGroup, cycle: currentCycle }, dryRun);
+        await migrateRegistrations({ organization, period: currentGroupPeriod, originalGroup, newGroup: originalGroup, cycle: currentCycle }, dryRun);
 
         const cycleSettingEntries = [...originalGroup.settings.cycleSettings.entries()].filter(([cycle]) => {
             return cycle !== currentCycle;
@@ -167,19 +169,6 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
             }
         }
     }
-
-    // add archived groups to archive category
-    const archivedGroupIds = [...new Set(groups.filter(g => g.status === GroupStatus.Archived).map(g => g.id))];
-    const hasArchivedGroups = archivedGroupIds.length > 0;
-
-    const archiveCategory = GroupCategory.create({
-        settings: GroupCategorySettings.create({
-            name: 'Archief',
-            description: 'Gearchiveerde groepen',
-            public: false,
-        }),
-        groupIds: [...archivedGroupIds],
-    });
 
     // #region create categories for current period
     const nonArchivedGroupIds = [...new Set(groups.filter(g => g.status !== GroupStatus.Archived).map(g => g.id))];
@@ -213,14 +202,9 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         throw new Error('No root category found');
     }
 
-    // add archive category to root category
-    if (hasArchivedGroups) {
-        rootCategoryData.category.categoryIds.push(archiveCategory.id);
-    }
-
     currentOrganizationRegistrationPeriod.settings.rootCategoryId = rootCategoryData.category.id;
 
-    const currentPeriodCategories = newCategoriesData.map(c => c.category).concat(hasArchivedGroups ? [archiveCategory] : []);
+    const currentPeriodCategories = newCategoriesData.map(c => c.category);
     currentOrganizationRegistrationPeriod.settings.categories = currentPeriodCategories;
 
     if (currentOrganizationRegistrationPeriod.settings.categories.length === 0) {
@@ -230,6 +214,37 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
     if (!dryRun) {
         await currentOrganizationRegistrationPeriod.save();
     }
+    // #endregion
+
+    // #region archived category
+    const archivedGroupIds = [...new Set(groups.filter(g => g.status === GroupStatus.Archived).map(g => g.id))];
+    const hasArchivedGroups = archivedGroupIds.length > 0;
+
+    const archiveSubCategories = archivedGroupIds.map((originalGroupId) => {
+        const originalGroup = groups.find(g => g.id === originalGroupId)!;
+        const childGroups = groupMap.get(originalGroupId) ?? [];
+        const groupIds = [originalGroup, ...childGroups].map(g => g.id);
+
+        return GroupCategory.create({
+            settings: GroupCategorySettings.create({
+                name: originalGroup!.settings.name.toString(),
+                // todo: is this correct?
+                public: false,
+                maximumRegistrations: null,
+                // todo: should be locked?
+            }),
+            groupIds,
+        });
+    });
+
+    const archiveCategory = GroupCategory.create({
+        settings: GroupCategorySettings.create({
+            name: 'Archief',
+            description: 'Gearchiveerde groepen',
+            public: false,
+        }),
+        categoryIds: archiveSubCategories.map(c => c.id),
+    });
     // #endregion
 
     // #region create categories for previous periods
@@ -245,6 +260,8 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
             // create category for each original group
             const newCategories = originalCategory.groupIds.flatMap((originalGroupId: string) => {
                 const childGroups = groupMap.get(originalGroupId);
+
+                // if(originalCategory)
                 if (childGroups && childGroups.length) {
                     const originalGroup = groups.find(g => g.id === originalGroupId)!;
                     const groupIds = childGroups.map(g => g.id);
@@ -304,8 +321,13 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         throw new Error(`No root category found for archive period (${previousRootCategoryId})`);
     }
 
+    // add archive category to root category
+    if (hasArchivedGroups) {
+        previousRootCategoryData.category.categoryIds.push(archiveCategory.id);
+    }
+
     archiveOrganizationPeriod.settings.rootCategoryId = previousRootCategoryData.category.id;
-    archiveOrganizationPeriod.settings.categories = allPreviousPeriodCategories;
+    archiveOrganizationPeriod.settings.categories = hasArchivedGroups ? [...allPreviousPeriodCategories, archiveCategory, ...archiveSubCategories] : allPreviousPeriodCategories;
 
     if (archiveOrganizationPeriod.settings.categories.length === 0) {
         throw new Error('No categories found for archive period');
