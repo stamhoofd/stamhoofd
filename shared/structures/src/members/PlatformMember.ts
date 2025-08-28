@@ -538,6 +538,12 @@ export class PlatformMember implements ObjectWithRecords {
     family: PlatformFamily;
     isNew = false;
 
+    /**
+     * If you create a member yourself, you automatically get full access granted.
+     * The frontend can't calculate this on its own because it is only temporary.
+     */
+    hasFullAccess = false;
+
     get id() {
         return this.member.id;
     }
@@ -546,12 +552,14 @@ export class PlatformMember implements ObjectWithRecords {
         member: MemberWithRegistrationsBlob;
         family: PlatformFamily;
         isNew?: boolean;
+        hasFullAccess?: boolean;
         patch?: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
     }) {
         this.member = data.member;
         this.patch = data.patch ?? MemberWithRegistrationsBlob.patch({ id: this.member.id });
         this.family = data.family;
         this.isNew = data.isNew ?? false;
+        this.hasFullAccess = (data.hasFullAccess ?? false) || this.isNew;
     }
 
     clone() {
@@ -564,6 +572,7 @@ export class PlatformMember implements ObjectWithRecords {
             member: this.member.clone(),
             family,
             isNew: this.isNew,
+            hasFullAccess: this.hasFullAccess,
             patch: this.patch.clone(),
         });
 

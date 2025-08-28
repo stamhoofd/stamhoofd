@@ -207,6 +207,10 @@ export class ContextPermissions {
     }
 
     canAccessPlatformMember(member: PlatformMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (member.hasFullAccess || member.isNew) {
+            return true;
+        }
+
         if (this.hasFullPlatformAccess()) {
             return true;
         }
