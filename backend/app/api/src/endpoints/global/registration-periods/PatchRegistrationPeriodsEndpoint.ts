@@ -1,12 +1,11 @@
 import { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder, patchObject } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { AuditLogSource, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context';
 import { PeriodHelper } from '../../../helpers/PeriodHelper';
-import { AuditLogService } from '../../../services/AuditLogService';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -73,6 +72,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         for (const { put } of request.body.getPuts()) {
             const period = new RegistrationPeriod();
             period.id = put.id;
+            period.customName = put.customName;
             period.startDate = put.startDate;
             period.endDate = put.endDate;
             period.locked = put.locked;
@@ -135,6 +135,10 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (patch.settings !== undefined) {
                 model.settings = patchObject(model.settings, patch.settings);
+            }
+
+            if (patch.customName !== undefined) {
+                model.customName = patch.customName;
             }
 
             await model.updatePreviousNextPeriods();
