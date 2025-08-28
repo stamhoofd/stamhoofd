@@ -332,7 +332,7 @@ export class Member extends QueryableModel {
             );
 
         const data = await query.fetch();
-        return data.map(r => r.members.id as string);
+        return Formatter.uniqueArray(data.map(r => r.members.id as string));
     }
 
     /**

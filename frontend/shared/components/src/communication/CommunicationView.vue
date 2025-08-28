@@ -111,7 +111,7 @@ defineRoutes([
     },
 ]);
 
-const objectFetcher = useEmailsObjectFetcher(false, {
+const objectFetcher = useEmailsObjectFetcher({
     get requiredFilter() {
         return getRequiredFilter();
     },

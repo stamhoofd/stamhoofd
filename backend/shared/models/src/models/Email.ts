@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, getExampleRecipient, LimitedFilteredRequest, PaginatedResponse, SortItemDirection, StamhoofdFilter, isSoftEmailRecipientError } from '@stamhoofd/structures';
+import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -8,7 +8,7 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder } from '../helpers/EmailBuilder';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailTemplate } from './EmailTemplate';
 import { Organization } from './Organization';
@@ -759,6 +759,11 @@ export class Email extends QueryableModel {
                                 continue;
                             }
 
+                            if (recipient.duplicateOfRecipientId) {
+                                skipped++;
+                                continue;
+                            }
+
                             let promiseResolve: (value: void | PromiseLike<void>) => void;
                             const promise = new Promise<void>((resolve) => {
                                 promiseResolve = resolve;
@@ -989,12 +994,15 @@ export class Email extends QueryableModel {
 
             abort.throwIfAborted();
 
+            console.log('Building recipients for email', id);
+
             // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
 
             upToDate.recipientsStatus = EmailRecipientsStatus.Creating;
             await upToDate.save();
 
             const membersSet = new Set<string>();
+            const emailsSet = new Set<string>();
 
             let count = 0;
             let countWithoutEmail = 0;
@@ -1034,6 +1042,39 @@ export class Email extends QueryableModel {
                                 continue;
                             }
 
+                            item.replacements = removeUnusedReplacements(upToDate.html ?? '', item.replacements);
+
+                            let duplicateOfRecipientId: string | null = null;
+                            if (item.email && emailsSet.has(item.email)) {
+                                console.log('Found duplicate email recipient', item.email);
+
+                                // Try to merge
+                                const existing = await EmailRecipient.select()
+                                    .where('emailId', upToDate.id)
+                                    .where('email', item.email)
+                                    .fetch();
+
+                                for (const other of existing) {
+                                    const merged = mergeReplacementsIfEqual(other.replacements, item.replacements);
+                                    if (merged !== false) {
+                                        console.log('Found duplicate email recipient', item.email, other.id);
+                                        duplicateOfRecipientId = other.id;
+
+                                        other.replacements = merged;
+                                        other.firstName = other.firstName || item.firstName;
+                                        other.lastName = other.lastName || item.lastName;
+                                        await other.save();
+
+                                        item.replacements = merged;
+
+                                        break;
+                                    }
+                                    else {
+                                        console.log('Could not merge duplicate email recipient', item.email, other.id, 'keeping both', other.replacements, item.replacements);
+                                    }
+                                }
+                            }
+
                             const recipient = new EmailRecipient();
                             recipient.emailType = upToDate.emailType;
                             recipient.objectId = item.objectId;
@@ -1045,6 +1086,7 @@ export class Email extends QueryableModel {
                             recipient.memberId = item.memberId ?? null;
                             recipient.userId = item.userId ?? null;
                             recipient.organizationId = upToDate.organizationId ?? null;
+                            recipient.duplicateOfRecipientId = duplicateOfRecipientId;
 
                             await recipient.save();
 
@@ -1052,7 +1094,11 @@ export class Email extends QueryableModel {
                                 membersSet.add(recipient.memberId);
                             }
 
-                            if (!recipient.email) {
+                            if (recipient.email) {
+                                emailsSet.add(recipient.email);
+                            }
+
+                            if (!recipient.email || duplicateOfRecipientId) {
                                 countWithoutEmail += 1;
                             }
                             else {
@@ -1183,43 +1229,77 @@ export class Email extends QueryableModel {
         });
     }
 
-    async getPreviewStructureForUser(user: User, memberIds: string[]) {
+    async getStructureForUser(user: User, memberIds: string[]) {
         const emailRecipients = await EmailRecipient.select()
             .where('emailId', this.id)
             .where('memberId', memberIds)
             .fetch();
 
-        let emailRecipient = emailRecipients[0];
-        for (const r of emailRecipients) {
-            if (r.userId === user.id || r.email === user.email) {
-                emailRecipient = r;
-                break;
+        const recipientsMap: Map<string, EmailRecipient> = new Map();
+        for (const memberId of memberIds) {
+            const preferred = emailRecipients.find(e => e.memberId === memberId && (e.userId === user.id || e.email === user.email));
+            if (preferred) {
+                recipientsMap.set(preferred.duplicateOfRecipientId ?? preferred.id, preferred);
+                continue;
+            }
+
+            const byMember = emailRecipients.find(e => e.memberId === memberId && e.userId === null && e.email === null);
+            if (byMember) {
+                recipientsMap.set(byMember.duplicateOfRecipientId ?? byMember.id, byMember);
+                continue;
             }
         }
 
-        let recipientRow: EmailRecipientStruct | undefined;
+        // Remove duplicates that are marked as the same recipient
+        const cleanedRecipients: EmailRecipient[] = [...recipientsMap.values()];
 
-        if (emailRecipient) {
-            recipientRow = emailRecipient.getStructure();
-        }
+        console.log('Found recipients for user', user.id, cleanedRecipients.length, cleanedRecipients.map(r => r.id));
 
-        if (!recipientRow) {
-            recipientRow = getExampleRecipient();
-        }
+        const virtualRecipients = cleanedRecipients.map((r) => {
+            const struct = r.getStructure();
+            const recipient = struct.getRecipient();
 
-        const virtualRecipient = recipientRow.getRecipient();
-
-        await fillRecipientReplacements(virtualRecipient, {
-            organization: this.organizationId ? (await Organization.getByID(this.organizationId))! : null,
-            from: this.getFromAddress(),
-            replyTo: null,
+            return {
+                struct,
+                recipient,
+            };
         });
+        const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
+        for (const { struct, recipient } of virtualRecipients) {
+            await fillRecipientReplacements(recipient, {
+                organization,
+                from: this.getFromAddress(),
+                replyTo: null,
+            });
+            struct.replacements = [
+                Replacement.create({
+                    token: 'greeting',
+                    value: $t('Beste,'),
+                }),
+                Replacement.create({
+                    token: 'loginDetails',
+                    value: '',
+                }),
+                ...recipient.replacements,
+            ];
+        }
 
-        recipientRow.replacements = virtualRecipient.replacements;
-
-        return EmailPreview.create({
+        return EmailWithRecipients.create({
             ...this,
-            exampleRecipient: recipientRow,
+            recipients: virtualRecipients.map(r => r.struct),
+
+            // Remove private-like data
+            softBouncesCount: 0,
+            failedCount: 0,
+            emailErrors: null,
+            recipientsErrors: null,
+            succeededCount: 1,
+            emailRecipientsCount: 1,
+            hardBouncesCount: 0,
+            spamComplaintsCount: 0,
+            recipientFilter: EmailRecipientFilter.create({}),
+            membersCount: 1,
+            otherRecipientsCount: 0,
         });
     }
 }

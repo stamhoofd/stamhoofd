@@ -23,12 +23,12 @@
 
 <script lang="ts" setup>
 import { SafeHtmlBox } from '@stamhoofd/components';
-import { EmailPreview, EmailRecipient, replaceEmailHtml } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipient, EmailWithRecipients, replaceEmailHtml } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
-    email: EmailPreview;
+    email: EmailPreview | EmailWithRecipients;
     recipient?: EmailRecipient | null;
 }>(), {
     recipient: null,

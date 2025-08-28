@@ -55,7 +55,8 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
             }
         }
 
-        const query = EmailRecipient.select();
+        const query = EmailRecipient.select()
+            .where('duplicateOfRecipientId', null);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));

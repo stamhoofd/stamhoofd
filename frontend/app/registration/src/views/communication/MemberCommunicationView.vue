@@ -44,17 +44,16 @@
 </template>
 
 <script setup lang="ts">
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useEmailFilterBuilders, useInfiniteObjectFetcher, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
-import { useEmailsObjectFetcher } from '@stamhoofd/components/src/fetchers/useEmailsObjectFetcher';
-import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useEmailFilterBuilders, useInfiniteObjectFetcher, usePositionableSheet, useUserEmailsObjectFetcher, useVisibilityChange } from '@stamhoofd/components';
+import { EmailWithRecipients, isEmptyFilter, LimitedFilteredRequest, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
 import MemberEmailOverview from './MemberEmailOverview.vue';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
-type ObjectType = EmailPreview;
+type ObjectType = EmailWithRecipients;
 
 const searchQuery = ref('');
 const $navigate = useNavigate();
@@ -110,7 +109,7 @@ defineRoutes([
     },
 ]);
 
-const objectFetcher = useEmailsObjectFetcher(true, {
+const objectFetcher = useUserEmailsObjectFetcher({
     get requiredFilter() {
         return getRequiredFilter();
     },
@@ -172,7 +171,7 @@ function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
 }
 
-async function onClickEmail(email: EmailPreview) {
+async function onClickEmail(email: ObjectType) {
     await $navigate(Routes.Email, { properties: { email } });
 }
 
@@ -209,10 +208,10 @@ function createDefaultUIFilter(): UIFilter | null {
     return filterBuilders[0].fromFilter(filter);
 }
 
-function groupData(emails: EmailPreview[]) {
+function groupData(emails: ObjectType[]) {
     const queue: {
         title: string;
-        emails: EmailPreview[];
+        emails: ObjectType[];
     }[] = [];
 
     for (const email of emails) {
