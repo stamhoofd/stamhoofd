@@ -51,7 +51,7 @@ export class SGVReportIssueEndpoint extends Endpoint<Params, Query, Body, Respon
             Email.sendInternal({
                 to: "hallo@stamhoofd.be",
                 subject: "Probleem met synchronisatie groepsadministratie gedetecteerd",
-                text: "Hieronder de details van het probleem\n\n" + 'Organization: ' + organization.name + ' (' + organization.id + ')\n' + 'User: ' + user.id + ' (' + user.email + ')\n' + 'Method: ' + request.body.method + '\nPath: ' + request.body.path + 'Timestamp: ' + new Date().toISOString() +'\n\nStamhoofd',
+                text: "Hieronder de details van het probleem\n\n" + 'Organization: ' + organization.name + ' (' + organization.id + ')\n' + 'User: ' + user.id + ' (' + user.email + ')\n' + 'Method: ' + request.body.method + '\nPath: ' + request.body.path + '\nTimestamp: ' + new Date().toISOString() +'\n\nStamhoofd',
                 type: "transactional"
             }, new I18n("nl", "BE"))
         }
