@@ -70,7 +70,7 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.period);
 useValidation(errors.validator, validate);
 
 function validate() {
-    if (patched.value.startDate.getTime() >= patched.value.endDate.getTime()) {
+    if (patched.value.endDate.getTime() < patched.value.startDate.getTime()) {
         const message = $t('De einddatum moet na de startdatum liggen.');
 
         // prevent the error from flickering
@@ -99,7 +99,6 @@ const save = async () => {
             saving.value = false;
             return;
         }
-        // validatePeriod();
         await props.saveHandler(patch.value);
         await pop({ force: true });
     }
@@ -166,9 +165,14 @@ const isValidCustomName = computed(() => {
     const startYear = startDate.value.getFullYear();
     const endYear = endDate.value.getFullYear();
 
+    // skip extreme cases
+    if (startYear < 1900 || endYear > 9999 || startYear > endYear) {
+        return true;
+    }
+
     // should contain year between start and end dates (start and end dates included)
     for (let i = startYear; i <= endYear; i++) {
-        if (customName.value.includes(i.toString())) {
+        if (customName.value.includes(i.toString().substring(2))) {
             return true;
         }
     }
