@@ -20,7 +20,7 @@
             </STInputBox>
 
             <STInputBox error-fields="endDate" :error-box="errors.errorBox" :title="$t(`f852932e-380e-4b9a-916b-2bc008d8c08a`)">
-                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" />
+                <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59, seconds: 59}" :min="startDate" />
             </STInputBox>
         </div>
 
