@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
-import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationPeriod, User, UserFactory } from '@stamhoofd/models';
-import { CycleInformation, GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, PermissionLevel, Permissions, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { CycleInformation, GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -13,12 +13,6 @@ export default new Migration(async () => {
         return;
     }
 
-    // todo: remove!!!
-    if (STAMHOOFD.environment === 'development') {
-        // temporary for testing
-        await createGlobalAdmin();
-    }
-
     const dryRun = false;
     await start(dryRun);
 
@@ -26,22 +20,6 @@ export default new Migration(async () => {
         throw new Error('Migration did not finish because of dryRun');
     }
 });
-
-async function createGlobalAdmin() {
-    const users = await User.select().where('email', 'admin@test.be').fetch();
-
-    if (users.length < 10) {
-        for (const user of users) {
-            await user.delete();
-        }
-    }
-
-    await new UserFactory({
-        email: 'admin@test.be',
-        password: 'stamhoofd',
-        globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-    }).create();
-}
 
 const cycleIfMigrated = -99;
 
@@ -504,7 +482,6 @@ function findBestPeriodMatch(cyclePeriod: { startDate: Date; endDate: Date }): {
         return { year: bestMatch.year, periodSpan: bestMatch.periodSpan };
     }
 
-    // todo?
     return { year: defaultYear, periodSpan: periodSpans[0] };
 }
 
