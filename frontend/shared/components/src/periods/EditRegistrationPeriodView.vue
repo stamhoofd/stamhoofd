@@ -6,6 +6,14 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
+        <STInputBox :title="$t('Naam')" error-fields="notes" :error-box="errors.errorBox" class="max">
+            <input v-model="customName" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="200" :placeholder="patched.name">
+        </STInputBox>
+
+        <p v-if="!isValidCustomName" class="warning-box">
+            {{ $t('Voeg bij voorkeur een jaartal toe aan de naam.') }}
+        </p>
+
         <div class="split-inputs">
             <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`33a674c2-6981-442b-9bd4-01f71da7a159`)">
                 <DateSelection v-model="startDate" :time="{hours: 0, minutes: 0, seconds: 0}" />
@@ -98,6 +106,18 @@ const doDelete = async () => {
     deleting.value = false;
 };
 
+const customName = computed({
+    get: () => patched.value.customName,
+    set: (value: string) => {
+        if (!value || value.trim().length === 0) {
+            addPatch({ customName: null });
+        }
+        else {
+            addPatch({ customName: value });
+        }
+    },
+});
+
 const startDate = computed({
     get: () => patched.value.startDate,
     set: startDate => addPatch({ startDate }),
@@ -106,6 +126,24 @@ const startDate = computed({
 const endDate = computed({
     get: () => patched.value.endDate,
     set: endDate => addPatch({ endDate }),
+});
+
+const isValidCustomName = computed(() => {
+    if (!customName.value) {
+        return true;
+    }
+
+    const startYear = startDate.value.getFullYear();
+    const endYear = endDate.value.getFullYear();
+
+    // should contain year between start and end dates (start and end dates included)
+    for (let i = startYear; i <= endYear; i++) {
+        if (customName.value.includes(i.toString())) {
+            return true;
+        }
+    }
+
+    return false;
 });
 
 const locked = computed({
