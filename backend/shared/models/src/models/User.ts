@@ -228,12 +228,18 @@ export class User extends QueryableModel {
         await Database.update(query, [this.id, other.id]);
 
         // Update payments
-        const query2 = 'UPDATE payments SET userId = ? WHERE userId = ?';
+        const query2 = 'UPDATE payments SET payingUserId = ? WHERE payingUserId = ?';
         await Database.update(query2, [this.id, other.id]);
 
         // Update orders
         const query3 = 'UPDATE webshop_orders SET userId = ? WHERE userId = ?';
         await Database.update(query3, [this.id, other.id]);
+
+        // Update emails
+        await Database.update('UPDATE emails SET userId = ? WHERE userId = ?', [this.id, other.id]);
+
+        // Update email recipients
+        await Database.update('UPDATE email_recipients SET userId = ? WHERE userId = ?', [this.id, other.id]);
 
         await other.delete();
     }
