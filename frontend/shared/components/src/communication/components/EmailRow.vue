@@ -8,11 +8,12 @@
         <h3 class="style-title-list large">
             {{ email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8') }}
         </h3>
+        <p v-if="email.snippet" class="style-description-small pre-wrap style-limit-lines" v-text="email.snippet" />
 
-        <p v-if="email.fromName" v-tooltip="email.fromAddress" class="style-description-small">
+        <p v-if="email.fromName" v-tooltip="email.fromAddress" class="style-interactive-small">
             Van {{ email.fromName }}
         </p>
-        <p v-else-if="email.fromAddress" class="style-description-small">
+        <p v-else-if="email.fromAddress" class="style-interactive-small">
             Vanaf {{ email.fromAddress }}
         </p>
 

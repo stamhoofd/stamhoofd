@@ -333,4 +333,56 @@ export class EmailPreview extends Email {
     get replacedSubject() {
         return replaceEmailText(this.subject || '', this.exampleRecipient?.replacements || []);
     }
+
+    get snippet() {
+        if (!this.text) {
+            return '';
+        }
+
+        // Trim starting/ending whitespaces and newline from this.text
+        let stripped = this.text.trim();
+
+        // Remove duplicate newlines
+        stripped = stripped.replace(/\n+/g, '\n');
+
+        // Remove certain strings:
+        // {{greeting}}
+        // Dag {{firstName}},
+        // Beste,
+
+        const stripStrings = ['{{greeting}}', 'Dag {{firstName}},', 'Beste,', 'Beste {{firstName}},', 'Geachte,', 'Hallo,'];
+
+        if (this.subject) {
+            stripStrings.push(this.subject);
+        }
+
+        for (const str of stripStrings) {
+            if (stripped.startsWith(str)) {
+                stripped = stripped.substring(str.length).trim();
+            }
+        }
+
+        // Remove all (https?://...) links, including the parentheses
+        stripped = stripped.replace(/\(https?:\/\/[^\s)]+\)/g, '').trim();
+
+        // Remove all ({{something}}) replacements, including the parentheses - these are often buttons or urls
+        stripped = stripped.replace(/\(\{\{[^\s)]+\}\}\)/g, '').trim();
+
+        // Remove all links that are on their own line
+        stripped = stripped.replace(/^\s*https?:\/\/[^\s)]+\s*$/gm, '').trim();
+
+        // Remove duplicate spaces
+        stripped = stripped.replace(/[ \t]+/g, ' ');
+
+        // Limit to first 2 lines
+        const lines = stripped.split('\n').slice(0, 4);
+        stripped = lines.join(' ');
+
+        stripped = replaceEmailText(stripped, this.exampleRecipient?.replacements || []);
+        if (stripped.length < 50) {
+            // Not worth showing, probably something confusing
+            return '';
+        }
+        return stripped;
+    }
 }
