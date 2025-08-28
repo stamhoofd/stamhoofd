@@ -71,6 +71,12 @@ export class EmailRecipient extends QueryableModel {
     userId: string | null = null;
 
     /**
+     * Won't get send if it is a duplicate of another email recipient.
+     */
+    @column({ type: 'string', nullable: true })
+    duplicateOfRecipientId: string | null = null;
+
+    /**
      * Set when the email was send, but we received a hard bounce for this specific email
      * Contains the full output we received in the bounce
      */

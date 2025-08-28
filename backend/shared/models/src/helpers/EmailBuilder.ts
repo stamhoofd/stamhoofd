@@ -379,6 +379,95 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     return builder;
 }
 
+export function mergeReplacement(replacementA: Replacement, replacementB: Replacement): Replacement | false {
+    if (replacementA.token !== replacementB.token) {
+        return false;
+    }
+
+    if (replacementA.token === 'greeting') {
+        // Just take the first one
+        return replacementA;
+    }
+
+    if (replacementA.token === 'unsubscribeUrl') {
+        return replacementA;
+    }
+
+    if (replacementA.token === 'signInUrl') {
+        return replacementA;
+    }
+
+    if (replacementA.token === 'loginDetails') {
+        return Replacement.create({
+            token: replacementA.token,
+            value: replacementA.value && replacementB ? (replacementA.value + '\n' + replacementB.value) : (replacementA.value || replacementB.value),
+            html: replacementA.html && replacementB ? (replacementA.html + '\n' + replacementB.html) : (replacementA.html || replacementB.html),
+        });
+    }
+
+    if (replacementA.token === 'loginDetails') {
+        return replacementA;
+    }
+
+    return false;
+}
+
+/**
+ * Remove duplicates
+ */
+export function cleanReplacements(replacements: Replacement[]) {
+    const foundIds: Set<string> = new Set();
+    const cleaned: Replacement[] = [];
+    for (const r of replacements) {
+        if (foundIds.has(r.token)) {
+            continue;
+        }
+        foundIds.add(r.token);
+        cleaned.push(r);
+    }
+    return cleaned;
+}
+
+export function removeUnusedReplacements(html: string, replacements: Replacement[]) {
+    const cleaned: Replacement[] = [];
+    for (const r of replacements) {
+        if (html.includes(`{{${r.token}}}`)) {
+            cleaned.push(r);
+        }
+    }
+    return cleaned;
+}
+
+export function mergeReplacementsIfEqual(replacementsA: Replacement[], replacementsB: Replacement[]): Replacement[] | false {
+    replacementsA = cleanReplacements(replacementsA);
+    replacementsB = cleanReplacements(replacementsB);
+
+    if (replacementsA.length !== replacementsB.length) {
+        return false;
+    }
+
+    const merged: Replacement[] = [];
+    for (const rA of replacementsA) {
+        const rB = replacementsB.find(r => r.token === rA.token);
+        if (!rB) {
+            return false;
+        }
+
+        if (rA.html === rB.html && rA.value === rB.value) {
+            merged.push(rA);
+            continue;
+        }
+
+        const m = mergeReplacement(rA, rB);
+        if (!m) {
+            return false;
+        }
+        merged.push(m);
+    }
+
+    return merged;
+}
+
 export async function fillRecipientReplacements(recipient: Recipient, options: {
     organization: Organization | null;
     platform?: PlatformStruct;

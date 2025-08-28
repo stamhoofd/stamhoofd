@@ -33,21 +33,36 @@
                 </STListItem>
             </STList>
 
-            <EmailPreviewBox :email="email" />
+            <ScrollableSegmentedControl v-if="email.recipients.length > 1" v-model="selectedRecipient" :items="props.email.recipients" :labels="props.email.recipients.map(r => r.firstName ?? r.memberId ?? r.id)" />
+            <EmailPreviewBox :email="email" :recipient="selectedRecipient" />
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { EmailPreviewBox } from '@stamhoofd/components';
-import { EmailPreview, EmailStatus } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { EmailPreviewBox, ScrollableSegmentedControl } from '@stamhoofd/components';
+import { EmailStatus, EmailWithRecipients } from '@stamhoofd/structures';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
-    email: EmailPreview;
+    email: EmailWithRecipients;
 }>();
 
 const title = computed(() => {
     return props.email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
 });
+
+const selectedRecipientId = ref<string | null>(null);
+const selectedRecipient = computed({
+    get: () => {
+        if (!selectedRecipientId.value) {
+            return props.email.recipients[0] ?? null;
+        }
+        return props.email.recipients.find(r => r.id === selectedRecipientId.value) ?? props.email.recipients[0] ?? null;
+    },
+    set: (val) => {
+        selectedRecipientId.value = val?.id ?? null;
+    },
+});
+
 </script>

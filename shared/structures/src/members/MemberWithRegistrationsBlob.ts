@@ -112,6 +112,23 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             );
         }
 
+        // Always add one without email and user. This one will be visible in the member portal by default if no userId/email match is found
+        if (subtypes === null || subtypes.includes('member')) {
+            recipients.push(
+                EmailRecipient.create({
+                    objectId: this.id,
+                    memberId: this.id,
+                    firstName: this.details.firstName,
+                    lastName: this.details.lastName,
+                    email: null,
+                    replacements: [
+                        createLoginDetailsReplacement(null),
+                        ...shared,
+                    ],
+                }),
+            );
+        }
+
         if (subtypes === null || subtypes.includes('parents')) {
             for (const parent of this.details.parents) {
                 if (parent.email) {
