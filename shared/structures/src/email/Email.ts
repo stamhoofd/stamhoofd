@@ -30,9 +30,9 @@ export enum EmailRecipientFilterType {
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
     return MemberWithRegistrationsBlob.create({
         details: MemberDetails.create({
-            firstName: 'Jan',
-            lastName: 'Janssens',
-            email: 'jan.janssens@voorbeeld-emailadres.com',
+            firstName: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
+            lastName: $t(`e028c78a-166d-4531-b03b-99a573f1661b`),
+            email: $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`),
         }),
     }).getEmailRecipients(['member'])[0];
 }

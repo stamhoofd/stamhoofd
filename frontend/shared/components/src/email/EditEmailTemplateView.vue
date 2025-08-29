@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplate, Replacement, getExampleRecipient } from '@stamhoofd/structures';
+import { EmailTemplate, Replacement } from '@stamhoofd/structures';
 import { Ref, computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
@@ -70,7 +70,6 @@ const subject = computed({
     set: subject => addPatch({ subject }),
 });
 
-const exampleRecipient = computed(() => EmailTemplate.getRecipientType(patched.value.type) ? getExampleRecipient(EmailTemplate.getRecipientType(patched.value.type)) : null);
 const replacements = computed(() => {
     const base: Replacement[] = [...EmailTemplate.getSupportedReplacementsForType(patched.value.type)];
 
@@ -85,9 +84,6 @@ const replacements = computed(() => {
         base.unshift(...defaultReplacements);
     }
 
-    if (exampleRecipient.value) {
-        return [...exampleRecipient.value.replacements, ...exampleRecipient.value.getDefaultReplacements(), ...base];
-    }
     return base;
 });
 
