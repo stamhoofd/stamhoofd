@@ -1,8 +1,9 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="willSend ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Opslaan')" :replacements="replacements" :title="title" @save="send">
-            <h1 class="style-navigation-title">
-                {{ title }}
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" save-icon-mobile="send" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="willSend ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Opslaan')" :replacements="replacements" :title="title" @save="send">
+            <h1 class="style-navigation-title with-icons">
+                <span>{{ title }}</span>
+                <ProgressRing :radius="7" :stroke="2" :loading="true" :opacity="showLoading ? 1 : 0" />
             </h1>
 
             <STErrorsDefault :error-box="errors.errorBox" />
@@ -120,12 +121,13 @@ import { EmailStyler } from '../editor/EmailStyler';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { GlobalEventBus } from '../EventBus';
-import { useAuth, useContext, useFeatureFlag, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useFeatureFlag, useHoldValueForMinimumDuration, useInterval, useIsMobile, useOrganization, usePlatform } from '../hooks';
 import UploadFileButton from '../inputs/UploadFileButton.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
+import ProgressRing from '../icons/ProgressRing.vue';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -160,7 +162,10 @@ export type RecipientMultipleChoiceOption = {
     build: (selectedIds: string[]) => EmailRecipientSubfilter[];
 };
 
-const title = props.editEmail ? $t('Bericht bewerken') : $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8');
+const willSend = computed(() => {
+    return (!props.editEmail || props.editEmail.status === EmailStatus.Draft);
+});
+const title = computed(() => props.editEmail ? (willSend.value ? $t('Bericht versturen') : $t('Bericht bewerken')) : $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8'));
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
@@ -173,6 +178,12 @@ const $isMobile = useIsMobile();
 const email = ref(null) as Ref<EmailPreview | null>;
 const context = useContext();
 const owner = useRequestOwner();
+const patch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
+const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
+const sending = ref(false);
+const showLoading = useHoldValueForMinimumDuration(computed(() => {
+    return (willSend.value && !!savingPatch.value);
+}), 1_000);
 
 const selectedRecipientOptions = ref(props.recipientFilterOptions.map((o) => {
     if (o.defaultSelection) {
@@ -202,10 +213,6 @@ const senders = computed(() => {
         return auth.hasResourceAccessRight(PermissionsResourceType.Senders, e.id, AccessRight.SendMessages);
     });
 });
-
-const patch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
-const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
-const sending = ref(false);
 
 const patchedEmail = computed(() => {
     if (savingPatch.value) {
@@ -301,10 +308,6 @@ const senderId = computed({
     set: (id) => {
         addPatch({ senderId: id });
     },
-});
-
-const willSend = computed(() => {
-    return (!props.editEmail || props.editEmail.status === EmailStatus.Draft);
 });
 
 watch(patch, (newValue, oldValue) => {
