@@ -56,15 +56,21 @@
                         {{ $t('Andere start eind/datum dan werkjaar') }}
                     </h3>
 
-                    <div v-if="hasCustomDates" class="split-inputs option" @click.stop.prevent>
-                        <STInputBox :title="$t('Startdatum')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
-                        </STInputBox>
+                    <template v-if="hasCustomDates">
+                        <div class="split-inputs option" @click.stop.prevent>
+                            <STInputBox :title="$t('Startdatum')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                                <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
+                            </STInputBox>
+                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('Tijdstip')" />
+                        </div>
 
-                        <STInputBox :title="$t('Einddatum')" error-fields="settings.endDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
-                        </STInputBox>
-                    </div>
+                        <div class="split-inputs option" @click.stop.prevent>
+                            <STInputBox :title="$t('Einddatum')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                                <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
+                            </STInputBox>
+                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('Tijdstip')" />
+                        </div>
+                    </template>
                 </STListItem>
             </STList>
 
