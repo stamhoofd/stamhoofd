@@ -18,12 +18,12 @@
         <p v-if="email.snippet" class="style-description-small pre-wrap style-limit-lines" v-text="email.snippet" />
 
         <p v-if="email.fromName" v-tooltip="email.fromAddress" class="style-interactive-small">
-            Van {{ email.fromName }} <template v-if="!organization && email.organization">
+            {{ email.fromName }} <template v-if="!organization && email.organization">
                 ({{ email.organization.name }})
             </template>
         </p>
         <p v-else-if="email.fromAddress" class="style-interactive-small">
-            Vanaf {{ email.fromAddress }} <template v-if="!organization && email.organization">
+            {{ email.fromAddress }} <template v-if="!organization && email.organization">
                 ({{ email.organization.name }})
             </template>
         </p>
