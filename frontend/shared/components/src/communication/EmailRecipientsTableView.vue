@@ -111,6 +111,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (props.email) {
         return {
             emailId: props.email.id,
+            duplicateOfRecipientId: null,
             email: {
                 $neq: null,
             },
@@ -118,6 +119,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     }
 
     return {
+        duplicateOfRecipientId: null,
         email: {
             $neq: null,
         },
