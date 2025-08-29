@@ -1,6 +1,6 @@
 <template>
     <div v-if="replacedHtml" class="email-preview-box">
-        <SafeHtmlBox :html="replacedHtml" />
+        <SafeHtmlBox :html="replacedHtml" :allow-clicks="allowClicks" />
 
         <hr v-if="email.attachments.length > 0" class="email-attachments-spacer">
         <STList v-if="email.attachments.length > 0" class="attachments-container">
@@ -23,15 +23,17 @@
 
 <script lang="ts" setup>
 import { SafeHtmlBox } from '@stamhoofd/components';
-import { EmailPreview, EmailRecipient, replaceEmailHtml } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipient, EmailWithRecipients, replaceEmailHtml } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
-    email: EmailPreview;
+    email: EmailPreview | EmailWithRecipients;
     recipient?: EmailRecipient | null;
+    allowClicks?: boolean;
 }>(), {
     recipient: null,
+    allowClicks: false,
 });
 
 const replacedHtml = computed(() => {

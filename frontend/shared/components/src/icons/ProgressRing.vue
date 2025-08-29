@@ -33,7 +33,7 @@ import { computed, ref, useTemplateRef, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
     radius: number;
-    progress: number;
+    progress?: number;
     stroke: number;
     borderWidth?: number;
     loading?: boolean;
@@ -42,6 +42,7 @@ const props = withDefaults(defineProps<{
     borderWidth: 0,
     loading: false,
     opacity: 1,
+    progress: 0,
 });
 
 const templateCircle = useTemplateRef('circle');

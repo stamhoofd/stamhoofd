@@ -7,9 +7,9 @@ import { DateFilterBuilder } from './DateUIFilter';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
+import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
-import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 
 export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -246,6 +246,27 @@ export function getOrganizationCompanyFilterBuilders() {
 }
 
 export function useEmailFilterBuilders() {
+    return () => {
+        const all: UIFilterBuilder[] = [
+            new DateFilterBuilder({
+                name: $t(`69b8f1cf-5531-4df5-bca1-0026fa2c8edb`),
+                key: 'sentAt',
+            }),
+
+        ];
+
+        // Recursive: self referencing groups
+        all.unshift(
+            new GroupUIFilterBuilder({
+                builders: all,
+            }),
+        );
+
+        return all;
+    };
+}
+
+export function useAdminEmailFilterBuilders() {
     const organization = useOrganization();
     const platform = usePlatform();
 

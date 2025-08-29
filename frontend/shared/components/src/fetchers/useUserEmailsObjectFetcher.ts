@@ -1,9 +1,9 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { assertSort, EmailPreview, LimitedFilteredRequest, PaginatedResponseDecoder, SortList } from '@stamhoofd/structures';
+import { assertSort, EmailWithRecipients, LimitedFilteredRequest, PaginatedResponseDecoder, SortList } from '@stamhoofd/structures';
 import { useContext } from '../hooks';
 import { ObjectFetcher } from '../tables';
 
-type ObjectType = EmailPreview;
+type ObjectType = EmailWithRecipients;
 
 function extendSort(list: SortList): SortList {
     return assertSort(list, [
@@ -11,25 +11,25 @@ function extendSort(list: SortList): SortList {
     ]);
 }
 
-export function useEmailsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
+export function useUserEmailsObjectFetcher(overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
     const context = useContext();
 
     return {
         extendSort,
 
         async fetch(data: LimitedFilteredRequest): Promise<{ results: ObjectType[]; next?: LimitedFilteredRequest }> {
-            console.log('Emails.fetch', data);
+            console.log('EmailWithRecipients.fetch', data);
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
-                path: '/email',
-                decoder: new PaginatedResponseDecoder(new ArrayDecoder(EmailPreview as Decoder<EmailPreview>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                path: '/user/email',
+                decoder: new PaginatedResponseDecoder(new ArrayDecoder(EmailWithRecipients as Decoder<EmailWithRecipients>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                 query: data,
                 shouldRetry: false,
                 owner: this,
                 timeout: 30 * 1000,
             });
 
-            console.log('[Done] Emails.fetch', data, response.data);
+            console.log('[Done] EmailWithRecipients.fetch', data, response.data);
             return response.data;
         },
 

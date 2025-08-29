@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { assertSort, CountFilteredRequest, EmailPreview, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, EmailWithRecipients, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -12,7 +12,7 @@ import { emailSorters } from '../../../sql-sorters/emails';
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<EmailPreview[], LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<EmailWithRecipients[], LimitedFilteredRequest>;
 
 const filterCompilers: SQLFilterDefinitions = emailFilterCompilers;
 const sorters: SQLSortDefinitions<Email> = emailSorters;
@@ -128,8 +128,8 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         }
 
-        return new PaginatedResponse<EmailPreview[], LimitedFilteredRequest>({
-            results: await Promise.all(emails.map(email => email.getPreviewStructureForUser(user, memberIds))),
+        return new PaginatedResponse<EmailWithRecipients[], LimitedFilteredRequest>({
+            results: await Promise.all(emails.map(email => email.getStructureForUser(user, memberIds))),
             next,
         });
     }

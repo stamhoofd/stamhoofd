@@ -31,7 +31,7 @@ export function useEmailStatus() {
                 };
             case EmailStatus.Sent:
                 return {
-                    text: email.sentAt ? (Formatter.dateWithDay(email.sentAt, false)) : $t('5101ef12-a812-4748-91dd-778c0a3fe482'),
+                    text: email.sentAt ? (Formatter.dateTimeWithDay(email.sentAt, false, false)) : $t('5101ef12-a812-4748-91dd-778c0a3fe482'),
                     progress: 1,
                 };
             case EmailStatus.Failed:

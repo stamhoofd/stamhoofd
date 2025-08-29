@@ -13,7 +13,8 @@
 
             <template v-if="$isMobile || $isIOS || $isAndroid" #right>
                 <LoadingButton :loading="loading">
-                    <button class="button navigation highlight" :disabled="disabled" type="submit">
+                     <button v-if="saveIconMobile" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" v-tooltip="saveText"/>
+                    <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
                         {{ saveText }}
                     </button>
                 </LoadingButton>
@@ -162,6 +163,7 @@ const props = withDefaults(
         title?: string;
         saveText?: string;
         saveIcon?: string | null;
+        saveIconMobile?: string | null;
         cancelText?: string;
         replacements?: Replacement[];
     }>(),
@@ -171,6 +173,7 @@ const props = withDefaults(
         title: '',
         saveText: () => $t(`14abcd1e-7e65-4e84-be4c-ab2e162ae44d`),
         saveIcon: null,
+        saveIconMobile: null,
         cancelText: () => $t(`4e1dc79e-b09c-41ec-aa8d-a2d052761bfe`),
         replacements: () => [],
     },

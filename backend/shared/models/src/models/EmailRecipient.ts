@@ -1,10 +1,12 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement } from '@stamhoofd/structures';
+import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement, TinyMember } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { SimpleErrors } from '@simonbackx/simple-errors';
+import { Formatter } from '@stamhoofd/utility';
+import { Member } from './Member';
 
 export class EmailRecipient extends QueryableModel {
     static table = 'email_recipients';
@@ -71,6 +73,12 @@ export class EmailRecipient extends QueryableModel {
     userId: string | null = null;
 
     /**
+     * Won't get send if it is a duplicate of another email recipient.
+     */
+    @column({ type: 'string', nullable: true })
+    duplicateOfRecipientId: string | null = null;
+
+    /**
      * Set when the email was send, but we received a hard bounce for this specific email
      * Contains the full output we received in the bounce
      */
@@ -134,11 +142,32 @@ export class EmailRecipient extends QueryableModel {
     })
     updatedAt: Date;
 
-    getStructure() {
+    async getStructure() {
+        return (await EmailRecipient.getStructures([this]))[0];
+    }
+
+    getStructureWithoutRelations() {
         return EmailRecipientStruct.create(this);
     }
 
+    static async getStructures(models: EmailRecipient[]) {
+        const memberIds = Formatter.uniqueArray(models.map(m => m.memberId).filter(m => m) as string[]);
+        const members = await Member.getByIDs(...memberIds);
+        return models.map((m) => {
+            const struct = EmailRecipientStruct.create(m);
+
+            if (m.memberId) {
+                const member = members.find(me => me.id === m.memberId);
+                if (member) {
+                    struct.member = TinyMember.create(member);
+                }
+            }
+
+            return struct;
+        });
+    }
+
     getRecipient() {
-        return this.getStructure().getRecipient();
+        return this.getStructureWithoutRelations().getRecipient();
     }
 }

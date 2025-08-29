@@ -1,10 +1,11 @@
-export { default as AccountSwitcher } from "./AccountSwitcher.vue"
-export * from "./appContext.ts"
-export { default as ContextLogo } from "./ContextLogo.vue"
-export { default as ContextNavigationBar } from "./ContextNavigationBar.vue"
-export { default as OrganizationAvatar } from "./OrganizationAvatar.vue"
-export { default as OrganizationLogo } from "./OrganizationLogo.vue"
-export { default as PlatformLogo } from "./PlatformLogo.vue"
-export { default as OrganizationSwitcher } from "./OrganizationSwitcher.vue"
-export { default as VersionFooter } from "./VersionFooter.vue"
-export * from "./hooks/useContextOptions.ts"
+export { default as AccountSwitcher } from './AccountSwitcher.vue';
+export * from './appContext.ts';
+export { default as ContextLogo } from './ContextLogo.vue';
+export { default as ContextNavigationBar } from './ContextNavigationBar.vue';
+export { default as OrganizationAvatar } from './OrganizationAvatar.vue';
+export { default as OrganizationLogo } from './OrganizationLogo.vue';
+export { default as PlatformLogo } from './PlatformLogo.vue';
+export { default as OrganizationSwitcher } from './OrganizationSwitcher.vue';
+export { default as VersionFooter } from './VersionFooter.vue';
+export * from './hooks/useContextOptions.ts';
+export { default as PlatformAvatar } from './PlatformAvatar.vue';

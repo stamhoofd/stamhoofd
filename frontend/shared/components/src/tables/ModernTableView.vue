@@ -35,7 +35,7 @@
         <main>
             <div class="container">
                 <h1 class="style-navigation-title with-icons">
-                    {{ title }}
+                    <span>{{ title }}</span>
                     <button v-if="props.tableObjectFetcher.totalCount !== null && props.tableObjectFetcher.objectFetcher.isOffline" v-tooltip="$t('02e77c23-5f98-44fb-86f5-ff9d511af299')" type="button" class="button icon earth-off red" @click="refreshOnline" />
                     <span v-if="titleSuffix" class="title-suffix">
                         {{ titleSuffix }}

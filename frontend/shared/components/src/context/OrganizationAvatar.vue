@@ -10,17 +10,17 @@
 </template>
 
 <script lang="ts" setup>
-import { Organization } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { BaseOrganization } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 
-import { ImageComponent } from "@stamhoofd/components";
-import { computed } from "vue";
+import { ImageComponent } from '@stamhoofd/components';
+import { computed } from 'vue';
 const props = defineProps<{
-    organization: Organization
-}>()
+    organization: BaseOrganization;
+}>();
 
-const letters = computed(() => Formatter.firstLetters(props.organization.name, 3))
-const logo = computed(() => props.organization.meta.squareLogo)
+const letters = computed(() => Formatter.firstLetters(props.organization.name, 3));
+const logo = computed(() => props.organization.meta.squareLogo);
 </script>
 
 <style lang="scss">

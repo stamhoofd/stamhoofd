@@ -7,7 +7,6 @@
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
-        :prefix-column="allColumns[0]"
         :estimated-rows="estimatedRows"
         :Route="Route"
         :default-filter="defaultFilter"
@@ -111,6 +110,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (props.email) {
         return {
             emailId: props.email.id,
+            duplicateOfRecipientId: null,
             email: {
                 $neq: null,
             },
@@ -118,6 +118,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     }
 
     return {
+        duplicateOfRecipientId: null,
         email: {
             $neq: null,
         },

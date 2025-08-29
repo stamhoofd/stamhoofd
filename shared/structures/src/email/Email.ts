@@ -12,6 +12,9 @@ import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform } from '../Platform.js';
 import { EmailTemplate } from './EmailTemplate.js';
 import { SimpleErrors } from '@simonbackx/simple-errors';
+import { User } from '../User.js';
+import { BaseOrganization } from '../Organization.js';
+import { TinyMember } from '../members/Member.js';
 
 export enum EmailRecipientFilterType {
     RegistrationMembers = 'RegistrationMembers',
@@ -27,9 +30,9 @@ export enum EmailRecipientFilterType {
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
     return MemberWithRegistrationsBlob.create({
         details: MemberDetails.create({
-            firstName: 'Jan',
-            lastName: 'Janssens',
-            email: 'jan.janssens@voorbeeld-emailadres.com',
+            firstName: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
+            lastName: $t(`e028c78a-166d-4531-b03b-99a573f1661b`),
+            email: $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`),
         }),
     }).getEmailRecipients(['member'])[0];
 }
@@ -84,6 +87,9 @@ export class Email extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 379 })
     senderId: string | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    organizationId: string | null = null;
 
     @field({ decoder: EmailRecipientFilter })
     recipientFilter = EmailRecipientFilter.create({});
@@ -170,6 +176,62 @@ export class Email extends AutoEncoder {
         }
         return null;
     }
+
+    getSubjectFor(recipient: EmailRecipient | null) {
+        return replaceEmailText(this.subject || '', recipient?.replacements || []);
+    }
+
+    getSnippetFor(recipient: EmailRecipient | null) {
+        if (!this.text) {
+            return '';
+        }
+
+        // Trim starting/ending whitespaces and newline from this.text
+        let stripped = this.text.trim();
+
+        // Remove duplicate newlines
+        stripped = stripped.replace(/\n+/g, '\n');
+
+        // Remove certain strings:
+        // {{greeting}}
+        // Dag {{firstName}},
+        // Beste,
+
+        const stripStrings = ['{{greeting}}', 'Dag {{firstName}},', 'Beste,', 'Beste {{firstName}},', 'Geachte,', 'Hallo,'];
+
+        if (this.subject) {
+            stripStrings.push(this.subject);
+        }
+
+        for (const str of stripStrings) {
+            if (stripped.startsWith(str)) {
+                stripped = stripped.substring(str.length).trim();
+            }
+        }
+
+        // Remove all (https?://...) links, including the parentheses
+        stripped = stripped.replace(/\(https?:\/\/[^\s)]+\)/g, '').trim();
+
+        // Remove all ({{something}}) replacements, including the parentheses - these are often buttons or urls
+        stripped = stripped.replace(/\(\{\{[^\s)]+\}\}\)/g, '').trim();
+
+        // Remove all links that are on their own line
+        stripped = stripped.replace(/^\s*https?:\/\/[^\s)]+\s*$/gm, '').trim();
+
+        // Remove duplicate spaces
+        stripped = stripped.replace(/[ \t]+/g, ' ');
+
+        // Limit to first 2 lines
+        const lines = stripped.split('\n').slice(0, 4);
+        stripped = lines.join(' ');
+
+        stripped = replaceEmailText(stripped, recipient?.replacements || []);
+        if (stripped.length < 50) {
+            // Not worth showing, probably something confusing
+            return '';
+        }
+        return stripped;
+    }
 }
 
 export class EmailRecipient extends AutoEncoder {
@@ -204,6 +266,9 @@ export class EmailRecipient extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     memberId: string | null = null;
+
+    @field({ decoder: TinyMember, nullable: true, ...NextVersion })
+    member: TinyMember | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     userId: string | null = null;
@@ -315,59 +380,37 @@ export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;
 
+    @field({ decoder: User, nullable: true, ...NextVersion })
+    user: User | null = null;
+
+    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    organization: BaseOrganization | null = null;
+
     get replacedSubject() {
-        return replaceEmailText(this.subject || '', this.exampleRecipient?.replacements || []);
+        return this.getSubjectFor(this.exampleRecipient);
     }
 
     get snippet() {
-        if (!this.text) {
-            return '';
-        }
+        return this.getSnippetFor(this.exampleRecipient);
+    }
+}
 
-        // Trim starting/ending whitespaces and newline from this.text
-        let stripped = this.text.trim();
+export class EmailWithRecipients extends Email {
+    @field({ decoder: new ArrayDecoder(EmailRecipient) })
+    recipients: EmailRecipient[] = [];
 
-        // Remove duplicate newlines
-        stripped = stripped.replace(/\n+/g, '\n');
+    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    organization: BaseOrganization | null = null;
 
-        // Remove certain strings:
-        // {{greeting}}
-        // Dag {{firstName}},
-        // Beste,
+    get exampleRecipient() {
+        return this.recipients[0] ?? null;
+    }
 
-        const stripStrings = ['{{greeting}}', 'Dag {{firstName}},', 'Beste,', 'Beste {{firstName}},', 'Geachte,', 'Hallo,'];
+    get replacedSubject() {
+        return this.getSubjectFor(this.exampleRecipient);
+    }
 
-        if (this.subject) {
-            stripStrings.push(this.subject);
-        }
-
-        for (const str of stripStrings) {
-            if (stripped.startsWith(str)) {
-                stripped = stripped.substring(str.length).trim();
-            }
-        }
-
-        // Remove all (https?://...) links, including the parentheses
-        stripped = stripped.replace(/\(https?:\/\/[^\s)]+\)/g, '').trim();
-
-        // Remove all ({{something}}) replacements, including the parentheses - these are often buttons or urls
-        stripped = stripped.replace(/\(\{\{[^\s)]+\}\}\)/g, '').trim();
-
-        // Remove all links that are on their own line
-        stripped = stripped.replace(/^\s*https?:\/\/[^\s)]+\s*$/gm, '').trim();
-
-        // Remove duplicate spaces
-        stripped = stripped.replace(/[ \t]+/g, ' ');
-
-        // Limit to first 2 lines
-        const lines = stripped.split('\n').slice(0, 4);
-        stripped = lines.join(' ');
-
-        stripped = replaceEmailText(stripped, this.exampleRecipient?.replacements || []);
-        if (stripped.length < 50) {
-            // Not worth showing, probably something confusing
-            return '';
-        }
-        return stripped;
+    get snippet() {
+        return this.getSnippetFor(this.exampleRecipient);
     }
 }
