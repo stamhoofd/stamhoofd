@@ -159,31 +159,12 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                         userId: this.users.find(u => u.email === unverifiedEmail)?.id ?? null,
                         email: unverifiedEmail,
                         replacements: [
-                            Replacement.create({
-                                token: 'email',
-                                value: unverifiedEmail.toLowerCase(),
-                            }),
                             createLoginDetailsReplacement(unverifiedEmail),
                             ...shared,
                         ],
                     }),
                 );
             }
-        }
-
-        if (recipients.length === 0 && (subtypes === null || subtypes.includes('member'))) {
-            recipients.push(
-                EmailRecipient.create({
-                    objectId: this.id,
-                    memberId: this.id,
-                    firstName: this.details.firstName,
-                    lastName: this.details.lastName,
-                    replacements: [
-                        createLoginDetailsReplacement(this.details.email),
-                        ...shared,
-                    ],
-                }),
-            );
         }
 
         return recipients;
