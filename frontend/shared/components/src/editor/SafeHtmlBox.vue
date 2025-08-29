@@ -1,19 +1,32 @@
 <template>
-    <iframe ref="iframeRef" sandbox="allow-same-origin" />
+    <iframe ref="iframeRef" :sandbox="sandbox" />
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useResizeObserver } from '../inputs/hooks/useResizeObserver';
 
-const props = defineProps<{
-    html: string;
-}>();
+const props = withDefaults(
+    defineProps<{
+        html: string;
+        allowClicks?: boolean;
+    }>(), {
+        allowClicks: false,
+    },
+);
 const iframe = useTemplateRef<HTMLIFrameElement>('iframeRef');
 const mainElement = computed(() => iframe.value?.parentElement ?? null);
 const iframeDocument = ref<Document | null>(null);
 const iframeDocumentHtml = computed(() => iframeDocument.value?.documentElement ?? null);
 const iframeDocumentBody = computed(() => iframeDocument.value?.body ?? null);
+
+const sandbox = computed(() => {
+    let s = 'allow-same-origin';
+    if (props.allowClicks) {
+        s += ' allow-popups-to-escape-sandbox allow-popups';
+    }
+    return s;
+});
 
 // Make sure the iframe width and height matches the width and height of main
 function updateSize() {
@@ -99,11 +112,19 @@ function onLoad() {
     const f = iframe.value;
     if (f) {
         iframeDocument.value = f.contentDocument;
-
         const iframeDoc = f.contentDocument;
-        iframeDoc?.addEventListener('click', (e) => {
-            e.preventDefault(); // block link navigation
-        });
+
+        if (!props.allowClicks) {
+            iframeDoc?.addEventListener('click', (e) => {
+                e.preventDefault(); // block link navigation
+            });
+        }
+        else if (iframeDoc) {
+            for (const a of iframeDoc.querySelectorAll('a')) {
+                a.setAttribute('target', '_blank');
+            }
+        }
+
         // Disable overflow scrolling behaviour on iOS / Mac (bouncy scroll on the iframe)
         if (iframeDoc) {
             iframeDoc.body.style.overflow = 'hidden';
