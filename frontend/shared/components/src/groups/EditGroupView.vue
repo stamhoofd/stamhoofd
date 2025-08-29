@@ -46,6 +46,34 @@
                 {{ $t('a20a78e9-60c4-425b-a416-5874d0ec4b11') }}
             </p>
 
+            <STList v-if="nonPatchedGroup.settings.hasCustomDates">
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="hasCustomDates" />
+                    </template>
+
+                    <h3 class="style-title-list">
+                        {{ $t('Andere start eind/datum dan werkjaar') }}
+                    </h3>
+
+                    <template v-if="hasCustomDates">
+                        <div class="split-inputs option" @click.stop.prevent>
+                            <STInputBox :title="$t('Startdatum')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                                <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
+                            </STInputBox>
+                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('Tijdstip')" />
+                        </div>
+
+                        <div class="split-inputs option" @click.stop.prevent>
+                            <STInputBox :title="$t('Einddatum')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                                <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
+                            </STInputBox>
+                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('Tijdstip')" />
+                        </div>
+                    </template>
+                </STListItem>
+            </STList>
+
             <template v-if="patchedGroup.type === GroupType.EventRegistration && isMultiOrganization">
                 <hr><h2>{{ $t('55e86a73-d637-4ca0-82ac-abd27d60705f') }}</h2>
                 <p>{{ $t('e1c25751-832f-455b-a5dd-a1b30b742433') }}</p>
@@ -315,7 +343,7 @@
                 </STList>
             </div>
 
-            <div class="container" v-if="type === GroupType.Membership || type === GroupType.EventRegistration || waitingList">
+            <div v-if="type === GroupType.Membership || type === GroupType.EventRegistration || waitingList" class="container">
                 <hr><h2>{{ $t('a56bcf08-214d-421b-9cc0-336d2b5ab0ea') }}</h2>
                 <p>{{ $t('fb860b93-1b92-43ba-9e3d-1f6573725f23') }}</p>
                 <p class="style-description-block">
@@ -471,11 +499,17 @@
                         {{ $t('d68a6d63-d782-49e2-84a5-4f77dbfa2977', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
                     </p>
 
-                    <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                        <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
-                    </STInputBox>
-                    <p class="style-description-small">
-                        {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
+                    <template v-if="!hasCustomDates">
+                        <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                            <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
+                        </STInputBox>
+
+                        <p class="style-description-small">
+                            {{ $t('db636f2c-371d-4209-bd44-eaa6984c2813') }}
+                        </p>
+                    </template>
+                    <p v-else-if="trialDays && patchedGroup.settings.startDate.getTime() !== patchedPeriod.period.startDate.getTime()" class="info-box">
+                        {{ $t('De proefperiode begint pas te lopen vanaf de startdatum van de inschrijvingsgroep op {start}.', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
                     </p>
                 </template>
             </template>
@@ -541,6 +575,7 @@ const props = withDefaults(
 const platform = usePlatform();
 const organization = useOrganization();
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
+const nonPatchedGroup = props.period.groups.find(group => group.id === props.groupId)!;
 const patchedGroup = computed(() => patchedPeriod.value.groups.find(group => group.id === props.groupId)!);
 const groupBeforePatch = computed(() => props.period.groups.find(group => group.id === props.groupId)!);
 if (!groupBeforePatch.value) {
@@ -800,11 +835,29 @@ const genderType = computed({
     }),
 });
 
+const hasCustomDates = computed({
+    get: () => patchedGroup.value.settings.hasCustomDates,
+    set: hasCustomDates => addGroupPatch({
+        settings: GroupSettings.patch({
+            hasCustomDates,
+        }),
+    }),
+});
+
 const startDate = computed({
     get: () => patchedGroup.value.settings.startDate,
     set: startDate => addGroupPatch({
         settings: GroupSettings.patch({
             startDate,
+        }),
+    }),
+});
+
+const endDate = computed({
+    get: () => patchedGroup.value.settings.endDate,
+    set: endDate => addGroupPatch({
+        settings: GroupSettings.patch({
+            endDate,
         }),
     }),
 });
@@ -1222,7 +1275,7 @@ async function editWaitingList(waitingList: Group) {
     const found = !!patchedPeriod.value.groups.find(w => w.id === waitingList.id);
     if (!found) {
         props.period.groups.push(waitingList);
-        const f2  = !!patchedPeriod.value.groups.find(w => w.id === waitingList.id);
+        const f2 = !!patchedPeriod.value.groups.find(w => w.id === waitingList.id);
         if (!f2) {
             console.log('not found');
             return;
