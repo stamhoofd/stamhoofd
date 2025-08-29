@@ -17,6 +17,16 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    firstName: createColumnFilter({
+        expression: SQL.column('firstName'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+    lastName: createColumnFilter({
+        expression: SQL.column('lastName'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     name: createColumnFilter({
         expression: new SQLConcat(
             SQL.column('firstName'),
@@ -28,6 +38,11 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
     }),
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
+    duplicateOfRecipientId: createColumnFilter({
+        expression: SQL.column('duplicateOfRecipientId'),
         type: SQLValueType.String,
         nullable: true,
     }),
