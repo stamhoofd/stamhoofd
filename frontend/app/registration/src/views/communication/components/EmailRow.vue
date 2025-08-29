@@ -19,10 +19,10 @@
 </template>
 
 <script setup lang="ts">
-import { EmailPreview } from '@stamhoofd/structures';
+import { EmailPreview, EmailWithRecipients } from '@stamhoofd/structures';
 
 defineProps<{
-    email: EmailPreview;
+    email: EmailPreview | EmailWithRecipients;
 }>();
 
 </script>
