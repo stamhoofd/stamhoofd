@@ -15,21 +15,18 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('39a982c1-916a-43da-857d-a15f67c96c62') }}: {{ formatDateTime(email.sentAt) }}
+                        {{ formatDateTime(email.sentAt) }}
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.fromName || email.fromAddress">
+                <STListItem v-if="email.fromName">
                     <template #left>
                         <span class="icon email small" />
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ email.fromName || email.fromAddress }}
-                    </h2>
-                    <p v-if="email.fromName" class="style-description-small">
                         {{ email.fromAddress }}
-                    </p>
+                    </h2>
                 </STListItem>
             </STList>
 
