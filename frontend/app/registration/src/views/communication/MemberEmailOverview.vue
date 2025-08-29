@@ -33,7 +33,7 @@
                 </STListItem>
             </STList>
 
-            <ScrollableSegmentedControl v-if="email.recipients.length > 1" v-model="selectedRecipient" :items="props.email.recipients" :labels="props.email.recipients.map(r => r.firstName ?? r.memberId ?? r.id)" />
+            <ScrollableSegmentedControl v-if="email.recipients.length > 1" v-model="selectedRecipient" :items="props.email.recipients" :labels="props.email.recipients.map(r => r.member?.firstName ?? (r.id))" />
             <EmailPreviewBox :email="email" :recipient="selectedRecipient" :allow-clicks="true" />
         </main>
     </div>
