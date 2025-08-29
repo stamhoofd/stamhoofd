@@ -11,7 +11,7 @@
             <STList>
                 <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent">
                     <template #left>
-                        <span class="icon clock" />
+                        <span class="icon calendar-grid small" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -21,11 +21,11 @@
 
                 <STListItem v-if="email.fromName || email.fromAddress">
                     <template #left>
-                        <span class="icon user" />
+                        <span class="icon email small" />
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('a4a8cb20-8351-445a-bb59-91867679eead') }}: {{ email.fromName || email.fromAddress }}
+                        {{ email.fromName || email.fromAddress }}
                     </h2>
                     <p v-if="email.fromName" class="style-description-small">
                         {{ email.fromAddress }}
@@ -34,7 +34,7 @@
             </STList>
 
             <ScrollableSegmentedControl v-if="email.recipients.length > 1" v-model="selectedRecipient" :items="props.email.recipients" :labels="props.email.recipients.map(r => r.firstName ?? r.memberId ?? r.id)" />
-            <EmailPreviewBox :email="email" :recipient="selectedRecipient" />
+            <EmailPreviewBox :email="email" :recipient="selectedRecipient" :allow-clicks="true" />
         </main>
     </div>
 </template>
