@@ -68,18 +68,18 @@
             </p>
 
             <STList>
-                <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent">
+                <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent" class="left-center">
                     <template #left>
-                        <span class="icon clock" />
+                        <span class="icon calendar-grid small" />
                     </template>
 
                     <h2 class="style-title-list">
                         {{ $t('39a982c1-916a-43da-857d-a15f67c96c62') }}: {{ formatDateTime(email.sentAt) }}
                     </h2>
                 </STListItem>
-                <STListItem v-else>
+                <STListItem v-else class="left-center">
                     <template #left>
-                        <span class="icon clock" />
+                        <span class="icon calendar-grid small" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -89,7 +89,7 @@
 
                 <STListItem v-if="email.fromName || email.fromAddress">
                     <template #left>
-                        <span class="icon user" />
+                        <span class="icon user small" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -100,9 +100,9 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="right-stack" @click="navigate(Routes.Recipients)">
+                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="left-center  right-stack" @click="navigate(Routes.Recipients)">
                     <template #left>
-                        <span class="icon email-filled" />
+                        <span class="icon email small" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -117,9 +117,9 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="email.membersCount" :selectable="true" class="right-stack" @click="navigate(Routes.Members)">
+                <STListItem v-if="email.membersCount" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                     <template #left>
-                        <span class="icon membership-filled" />
+                        <span class="icon membership-filled small" />
                     </template>
 
                     <h2 class="style-title-list">
