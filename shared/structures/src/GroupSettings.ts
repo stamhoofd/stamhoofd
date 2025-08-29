@@ -612,7 +612,7 @@ export class GroupSettings extends AutoEncoder {
     cycleSettings: Map<number, CycleInformation> = new Map();
 
     @field({ decoder: BooleanDecoder, ...NextVersion })
-    hasCustomStartAndEnd = false;
+    hasCustomDates = false;
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {

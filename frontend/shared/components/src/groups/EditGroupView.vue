@@ -49,14 +49,14 @@
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Checkbox v-model="hasCustomStartAndEnd" />
+                        <Checkbox v-model="hasCustomDates" />
                     </template>
 
                     <h3 class="style-title-list">
                         {{ $t('Andere start eind/datum dan werkjaar') }}
                     </h3>
 
-                    <div v-if="hasCustomStartAndEnd" class="split-inputs option" @click.stop.prevent>
+                    <div v-if="hasCustomDates" class="split-inputs option" @click.stop.prevent>
                         <STInputBox :title="$t('Startdatum')" error-fields="settings.startDate" :error-box="errors.errorBox">
                             <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
                         </STInputBox>
@@ -493,7 +493,7 @@
                         {{ $t('d68a6d63-d782-49e2-84a5-4f77dbfa2977', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
                     </p>
 
-                    <template v-if="!hasCustomStartAndEnd">
+                    <template v-if="!hasCustomDates">
                         <STInputBox :title="$t('5ecd5e10-f233-4a6c-8acd-c1abff128a21')" error-fields="settings.startDate" :error-box="errors.errorBox">
                             <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
                         </STInputBox>
@@ -828,11 +828,11 @@ const genderType = computed({
     }),
 });
 
-const hasCustomStartAndEnd = computed({
-    get: () => patchedGroup.value.settings.hasCustomStartAndEnd,
-    set: hasCustomStartAndEnd => addGroupPatch({
+const hasCustomDates = computed({
+    get: () => patchedGroup.value.settings.hasCustomDates,
+    set: hasCustomDates => addGroupPatch({
         settings: GroupSettings.patch({
-            hasCustomStartAndEnd,
+            hasCustomDates,
         }),
     }),
 });

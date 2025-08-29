@@ -412,7 +412,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.settings.startDate = period.startDate;
                 }
 
-                if (!model.settings.hasCustomStartAndEnd) {
+                if (!model.settings.hasCustomDates) {
                     model.settings.endDate = period.endDate;
                 }
             }
@@ -533,7 +533,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.type = struct.type;
         model.settings.period = period.getBaseStructure();
 
-        if (!model.settings.hasCustomStartAndEnd) {
+        if (!model.settings.hasCustomDates) {
             model.settings.endDate = period.endDate;
         }
 
