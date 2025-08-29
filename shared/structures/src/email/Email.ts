@@ -88,6 +88,9 @@ export class Email extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 379 })
     senderId: string | null = null;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    organizationId: string | null = null;
+
     @field({ decoder: EmailRecipientFilter })
     recipientFilter = EmailRecipientFilter.create({});
 
@@ -381,7 +384,7 @@ export class EmailPreview extends Email {
     user: User | null = null;
 
     @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
-    organization: BaseOrganization;
+    organization: BaseOrganization | null = null;
 
     get replacedSubject() {
         return this.getSubjectFor(this.exampleRecipient);
@@ -395,6 +398,9 @@ export class EmailPreview extends Email {
 export class EmailWithRecipients extends Email {
     @field({ decoder: new ArrayDecoder(EmailRecipient) })
     recipients: EmailRecipient[] = [];
+
+    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    organization: BaseOrganization | null = null;
 
     get exampleRecipient() {
         return this.recipients[0] ?? null;

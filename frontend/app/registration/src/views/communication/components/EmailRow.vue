@@ -1,7 +1,14 @@
 <template>
-    <STListItem class="right-stack smartphone-wrap-left" :selectable="true">
+    <STListItem v-color="!organization ? (email.organization?.meta.color) : null" class="right-stack" :selectable="true">
+        <template v-if="!organization && email.organization" #left>
+            <OrganizationAvatar :organization="email.organization" />
+        </template>
+        <template v-else-if="!organization && !email.organizationId" #left>
+            <PlatformAvatar />
+        </template>
+
         <p class="style-title-prefix-list flex">
-            {{ email.fromName || email.fromAddress }}
+            {{ !organization && email.organization && email.fromName && (email.organization.name !== email.fromName) ? `${email.organization.name} (${email.fromName || email.organization?.name || email.fromAddress })` : email.fromName || email.organization?.name || email.fromAddress }}
         </p>
         <h3 class="style-title-list large">
             {{ email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8') }}
@@ -19,10 +26,12 @@
 </template>
 
 <script setup lang="ts">
+import { PlatformAvatar, OrganizationAvatar, useOrganization } from '@stamhoofd/components';
 import { EmailPreview, EmailWithRecipients } from '@stamhoofd/structures';
 
 defineProps<{
     email: EmailPreview | EmailWithRecipients;
 }>();
+const organization = useOrganization();
 
 </script>
