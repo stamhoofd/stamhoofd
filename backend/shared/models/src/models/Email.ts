@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { User as UserStruct, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -1223,8 +1223,17 @@ export class Email extends QueryableModel {
 
         recipientRow.replacements = virtualRecipient.replacements;
 
+        let user: UserStruct | null = null;
+        if (this.userId) {
+            const u = await User.getByID(this.userId);
+            if (u) {
+                user = u.getStructure();
+            }
+        }
+
         return EmailPreview.create({
             ...this,
+            user,
             exampleRecipient: recipientRow,
         });
     }
