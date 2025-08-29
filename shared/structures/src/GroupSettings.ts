@@ -548,6 +548,12 @@ export class GroupSettings extends AutoEncoder {
     requireGroupIds: string[] = [];
 
     /**
+     * Prevent members from these groups from registering for this group.
+     */
+    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    preventGroupIds: string[] = [];
+
+    /**
      * Require that the member is already registered for one of these groups before allowing to register for this group.
      * If it is empty, then it is not enforced
      */

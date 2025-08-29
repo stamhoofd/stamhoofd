@@ -1,6 +1,8 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Formatter } from '@stamhoofd/utility';
+import { Event } from './Event.js';
 import { StamhoofdFilter } from './filters/StamhoofdFilter.js';
 import { GroupCategory } from './GroupCategory.js';
 import { GroupGenderType } from './GroupGenderType.js';
@@ -8,12 +10,10 @@ import { GroupPrivateSettings } from './GroupPrivateSettings.js';
 import { GroupSettings, WaitingListType } from './GroupSettings.js';
 import { GroupType } from './GroupType.js';
 import { Gender } from './members/Gender.js';
+import { Organization } from './Organization.js';
 import { PermissionLevel } from './PermissionLevel.js';
 import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
-import { Event } from './Event.js';
-import { Organization } from './Organization.js';
-import { Formatter } from '@stamhoofd/utility';
 
 export enum GroupStatus {
     Open = 'Open',
@@ -317,6 +317,21 @@ export class Group extends AutoEncoder {
                     $elemMatch: {
                         groupId: {
                             $in: this.settings.requireGroupIds,
+                        },
+                    },
+                },
+            });
+        }
+
+        if (this.settings.preventGroupIds.length) {
+            filter.push({
+                registrations: {
+                    $elemMatch: {
+                        groupId: {
+                            $not: {
+                                $in: this.settings.preventGroupIds,
+                            },
+
                         },
                     },
                 },
