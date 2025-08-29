@@ -467,16 +467,30 @@ export function mergeReplacementsIfEqual(replacementsA: Replacement[], replaceme
  */
 export function stripSensitiveRecipientReplacements(recipient: Recipient | EmailRecipient, options: {
     organization: Organization | null;
+    willFill?: boolean;
 }) {
     const { organization } = options;
-    // Remove unsubscribeUrl if present
-    recipient.replacements = recipient.replacements.filter(r => r.token !== 'unsubscribeUrl');
+    // Remove unsubscribeUrl and signInUrl if present
+    recipient.replacements = recipient.replacements.filter(r => r.token !== 'unsubscribeUrl' && r.token !== 'signInUrl');
+
+    if (options.willFill) {
+        // Also strip loginDetails, balanceTable and outstandingBalance
+        recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance' && r.token !== 'loginDetails');
+        return;
+    }
 
     // Add dummy unsubscribeUrl
     const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/unsubscribe?token=example';
     recipient.replacements.push(Replacement.create({
         token: 'unsubscribeUrl',
         value: dummyUnsubscribeUrl,
+    }));
+
+    // dummy signInUrl
+    const dummySignInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login';
+    recipient.replacements.push(Replacement.create({
+        token: 'signInUrl',
+        value: dummySignInUrl,
     }));
 
     // Strip security codes (because we list ALL security codes, also from members a viewer might not have access to)
@@ -529,6 +543,7 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
     from: EmailInterfaceRecipient | null;
     replyTo: EmailInterfaceRecipient | null;
     forPreview?: boolean;
+    forceRefresh?: boolean;
 }) {
     if (!options.platform) {
         options.platform = await Platform.getSharedPrivateStruct();
@@ -575,6 +590,11 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
         }));
     }
 
+    if (options.forceRefresh) {
+        // Remove loginDetails to force refresh
+        recipient.replacements = recipient.replacements.filter(r => r.token !== 'loginDetails');
+    }
+
     if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
         const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
 
@@ -619,6 +639,11 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
                 }),
             );
         }
+    }
+
+    if (options.forceRefresh) {
+        // Remove loginDetails to force refresh
+        recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance');
     }
 
     // Load balance of this user

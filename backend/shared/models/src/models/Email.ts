@@ -8,7 +8,7 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay } from '../helpers/EmailBuilder';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailTemplate } from './EmailTemplate';
 import { Organization } from './Organization';
@@ -1224,13 +1224,14 @@ export class Email extends QueryableModel {
 
         const virtualRecipient = recipientRow.getRecipient();
         const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
+
         await fillRecipientReplacements(virtualRecipient, {
             organization,
             from: this.getFromAddress(),
             replyTo: null,
             forPreview: true,
+            forceRefresh: !this.sentAt,
         });
-
         recipientRow.replacements = virtualRecipient.replacements;
 
         let user: UserStruct | null = null;
@@ -1259,6 +1260,7 @@ export class Email extends QueryableModel {
             .where('emailId', this.id)
             .where('memberId', memberIds)
             .fetch();
+        const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
 
         const recipientsMap: Map<string, EmailRecipient> = new Map();
         for (const memberId of memberIds) {
@@ -1273,13 +1275,16 @@ export class Email extends QueryableModel {
                 recipientsMap.set(byMember.duplicateOfRecipientId ?? byMember.id, byMember);
                 continue;
             }
+            const anyData = emailRecipients.find(e => e.memberId === memberId);
+            if (anyData) {
+                recipientsMap.set(anyData.duplicateOfRecipientId ?? anyData.id, anyData);
+                continue;
+            }
         }
 
         // Remove duplicates that are marked as the same recipient
         const cleanedRecipients: EmailRecipient[] = [...recipientsMap.values()];
         const structures = await EmailRecipient.getStructures(cleanedRecipients);
-
-        console.log('Found recipients for user', user.id, cleanedRecipients.length, cleanedRecipients.map(r => r.id));
 
         const virtualRecipients = structures.map((struct) => {
             const recipient = struct.getRecipient();
@@ -1289,13 +1294,24 @@ export class Email extends QueryableModel {
                 recipient,
             };
         });
-        const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
         for (const { struct, recipient } of virtualRecipients) {
+            if (!(struct.userId === user.id || struct.email === user.email) && !((struct.userId === null && struct.email === null))) {
+                stripSensitiveRecipientReplacements(recipient, {
+                    organization,
+                    willFill: true,
+                });
+            }
+
+            recipient.email = user.email;
+            recipient.userId = user.id;
+
+            // We always refresh the data when we display it on the web (so everything is up to date)
             await fillRecipientReplacements(recipient, {
                 organization,
                 from: this.getFromAddress(),
                 replyTo: null,
                 forPreview: false,
+                forceRefresh: true,
             });
             stripRecipientReplacementsForWebDisplay(recipient, {
                 organization,
