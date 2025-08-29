@@ -46,7 +46,7 @@
                 {{ $t('a20a78e9-60c4-425b-a416-5874d0ec4b11') }}
             </p>
 
-            <STList>
+            <STList v-if="nonPatchedGroup.settings.hasCustomDates">
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Checkbox v-model="hasCustomDates" />
@@ -575,6 +575,7 @@ const props = withDefaults(
 const platform = usePlatform();
 const organization = useOrganization();
 const { patched: patchedPeriod, hasChanges, addPatch, patch } = usePatch(props.period);
+const nonPatchedGroup = props.period.groups.find(group => group.id === props.groupId)!;
 const patchedGroup = computed(() => patchedPeriod.value.groups.find(group => group.id === props.groupId)!);
 const groupBeforePatch = computed(() => props.period.groups.find(group => group.id === props.groupId)!);
 if (!groupBeforePatch.value) {
