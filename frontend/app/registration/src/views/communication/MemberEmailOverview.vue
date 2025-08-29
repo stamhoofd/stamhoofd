@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { EmailPreviewBox, ScrollableSegmentedControl } from '@stamhoofd/components';
+import { useOrganization, EmailPreviewBox, ScrollableSegmentedControl } from '@stamhoofd/components';
 import { EmailStatus, EmailWithRecipients } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
