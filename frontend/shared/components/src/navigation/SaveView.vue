@@ -18,7 +18,8 @@
                         <button v-tooltip="$t('ea84aed8-48ce-4a43-b391-0a4a16782909')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
-                        <button class="button navigation highlight" :disabled="disabled" type="submit">
+                        <button v-if="saveIconMobile" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" v-tooltip="saveText" />
+                        <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
                             {{ saveText }}
                         </button>
                     </LoadingButton>
@@ -89,6 +90,7 @@ withDefaults(
         saveIcon?: string | null;
         saveButtonClass?: string | null;
         saveIconRight?: string | null;
+        saveIconMobile?: string | null;
         saveBadge?: string | number | null;
         cancelText?: string | null;
         preferLargeButton?: boolean;
@@ -105,6 +107,7 @@ withDefaults(
         saveIcon: null,
         saveButtonClass: 'primary',
         saveIconRight: null,
+        saveIconMobile: null,
         saveBadge: null,
         cancelText: () => $t(`80651252-e037-46b2-8272-a1a030c54653`),
         preferLargeButton: false,
