@@ -587,7 +587,7 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
                 if (members.length > 0) {
                     for (const member of members) {
                         suffixes.push(
-                            $t('De beveiligingscode voor {firstName} is {securityCode}', {
+                            $t('De beveiligingscode voor {firstName} is {securityCode}.', {
                                 firstName: Formatter.escapeHtml(member.firstName),
                                 securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
                             }),
@@ -598,14 +598,14 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
                     console.log('No member found for user', recipientUser.id);
                 }
             }
-            const suffix = suffixes.length > 0 ? ('. ' + suffixes.join('. ')) : '';
+            const suffix = suffixes.length > 0 ? (' ' + suffixes.join(' ')) : '';
             recipient.replacements.push(
                 Replacement.create({
                     token: 'loginDetails',
                     value: '',
                     html: recipientUser.hasAccount()
-                        ? `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen op {email}', { email: emailEscaped })}${suffix}</em></p>`
-                        : `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken op het e-mailadres {email}', { email: emailEscaped })}${suffix}</em></p>`,
+                        ? `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen op {email}.', { email: emailEscaped })}${suffix}</em></p>`
+                        : `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken op het e-mailadres {email}.', { email: emailEscaped })}${suffix}</em></p>`,
                 }),
             );
         }
