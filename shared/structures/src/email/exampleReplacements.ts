@@ -194,9 +194,9 @@ function getReplacements() {
         }),
         loginDetails: Replacement.create({
             token: 'loginDetails',
-            html: `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen op {email}', {
+            html: `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen op {email}.', {
                 email: '<strong>' + $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`) + '</strong>' },
-            )}. ${$t('De beveiligingscode voor {firstName} is {securityCode}', {
+            )} ${$t('De beveiligingscode voor {firstName} is {securityCode}.', {
                 firstName: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
                 securityCode: `<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>`,
             })}</em></p>`,
