@@ -12,6 +12,9 @@ import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform } from '../Platform.js';
 import { EmailTemplate } from './EmailTemplate.js';
 import { SimpleErrors } from '@simonbackx/simple-errors';
+import { User } from '../User.js';
+import { BaseOrganization } from '../Organization.js';
+import { TinyMember } from '../members/Member.js';
 
 export enum EmailRecipientFilterType {
     RegistrationMembers = 'RegistrationMembers',
@@ -261,6 +264,9 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     memberId: string | null = null;
 
+    @field({ decoder: TinyMember, nullable: true, ...NextVersion })
+    member: TinyMember | null = null;
+
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     userId: string | null = null;
 
@@ -370,6 +376,12 @@ export function bounceErrorToHuman(message: string) {
 export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;
+
+    @field({ decoder: User, nullable: true, ...NextVersion })
+    user: User | null = null;
+
+    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    organization: BaseOrganization;
 
     get replacedSubject() {
         return this.getSubjectFor(this.exampleRecipient);
