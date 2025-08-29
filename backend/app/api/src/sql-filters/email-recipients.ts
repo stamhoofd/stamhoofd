@@ -12,6 +12,11 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    userId: createColumnFilter({
+        expression: SQL.column('userId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     email: createColumnFilter({
         expression: SQL.column('email'),
         type: SQLValueType.String,
