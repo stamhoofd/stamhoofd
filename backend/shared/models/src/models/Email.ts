@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { User as UserStruct, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, Replacement, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { User as UserStruct, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, Replacement, SortItemDirection, StamhoofdFilter, BaseOrganization } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -1214,9 +1214,9 @@ export class Email extends QueryableModel {
         }
 
         const virtualRecipient = recipientRow.getRecipient();
-
+        const organization = this.organizationId ? (await Organization.getByID(this.organizationId))! : null;
         await fillRecipientReplacements(virtualRecipient, {
-            organization: this.organizationId ? (await Organization.getByID(this.organizationId))! : null,
+            organization,
             from: this.getFromAddress(),
             replyTo: null,
         });
@@ -1231,9 +1231,15 @@ export class Email extends QueryableModel {
             }
         }
 
+        let organizationStruct: BaseOrganization | null = null;
+        if (organization) {
+            organizationStruct = organization.getBaseStructure();
+        }
+
         return EmailPreview.create({
             ...this,
             user,
+            organization: organizationStruct,
             exampleRecipient: recipientRow,
         });
     }
@@ -1293,8 +1299,14 @@ export class Email extends QueryableModel {
             ];
         }
 
+        let organizationStruct: BaseOrganization | null = null;
+        if (organization) {
+            organizationStruct = organization.getBaseStructure();
+        }
+
         return EmailWithRecipients.create({
             ...this,
+            organization: organizationStruct,
             recipients: structures,
 
             // Remove private-like data

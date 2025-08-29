@@ -89,15 +89,15 @@
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.fromName || email.fromAddress" v-tooltip="$t('Afzender van het bericht')">
+                <STListItem v-if="email.fromName || email.organization?.name || email.fromAddress" v-tooltip="$t('Afzender van het bericht')">
                     <template #left>
                         <span class="icon email small" />
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ email.fromName || email.fromAddress }}
+                        {{ !organization && email.organization && email.fromName && (email.organization.name !== email.fromName) ? `${email.organization.name} (${email.fromName || email.organization?.name || email.fromAddress })` : email.fromName || email.organization?.name || email.fromAddress }}
                     </h2>
-                    <p v-if="email.fromName" class="style-description-small">
+                    <p v-if="email.fromName || email.organization" class="style-description-small">
                         {{ email.fromAddress }}
                     </p>
                 </STListItem>
@@ -180,13 +180,12 @@
 
                     <STListItem :selectable="true" element-name="button" @click="editEmail">
                         <template #left>
-                            <IconContainer icon="email" class="primary" v-if="email.status !== EmailStatus.Draft">
+                            <IconContainer v-if="email.status !== EmailStatus.Draft" icon="email" class="primary">
                                 <template #aside>
                                     <span class="icon edit stroke small" />
                                 </template>
                             </IconContainer>
-                            <IconContainer icon="send" class="primary" v-else>
-                            </IconContainer>
+                            <IconContainer v-else icon="send" class="primary" />
                         </template>
                         <h3 v-if="email.status !== EmailStatus.Draft" class="style-title-list">
                             {{ $t('Wijzig inhoud') }}
@@ -231,7 +230,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useInterval, useUser } from '@stamhoofd/components';
+import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useInterval, useOrganization, useUser } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';
@@ -240,6 +239,8 @@ import EmailRecipientsTableView from './EmailRecipientsTableView.vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
 import { useUpdateEmail } from './hooks/useUpdateEmail';
 import { usePatchEmail } from './hooks/usePatchEmail';
+import OrganizationAvatar from '../context/OrganizationAvatar.vue';
+import PlatformAvatar from '../context/PlatformAvatar.vue';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -256,6 +257,7 @@ const navigate = useNavigate();
 const { patchEmail } = usePatchEmail();
 const present = usePresent();
 const user = useUser();
+const organization = useOrganization();
 
 enum Routes {
     Members = 'leden',

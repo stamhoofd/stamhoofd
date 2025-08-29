@@ -1,10 +1,10 @@
 <template>
-    <div class="st-view">
+    <div v-color="email.organization?.meta.color" class="st-view">
         <STNavigationBar :title="title" />
 
         <main class="center">
             <p class="style-title-prefix flex">
-                {{ email.fromName || email.fromAddress }}
+                {{ !organization && email.organization && email.fromName && (email.organization.name !== email.fromName) ? `${email.organization.name} (${email.fromName || email.organization?.name || email.fromAddress })` : email.fromName || email.organization?.name || email.fromAddress }}
             </p>
             <h1>{{ title }}</h1>
 
@@ -44,6 +44,7 @@ import { computed, ref } from 'vue';
 const props = defineProps<{
     email: EmailWithRecipients;
 }>();
+const organization = useOrganization();
 
 const title = computed(() => {
     return props.email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
