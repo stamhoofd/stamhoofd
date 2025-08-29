@@ -487,7 +487,7 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
         return Replacement.create({
             ...r,
             // Strip <span class="style-inline-code">(.*)</span> and replace content with XXXX-XXXX-XXXX-XXXX
-            html: r.html ? r.html.replace(/<span class="style-inline-code">.*?<\/span>/g, '<span class="style-inline-code">•••• (' + $t('wel aanwezig in bericht') + ')</span>') : r.html,
+            html: r.html ? r.html.replace(/<span class="style-inline-code">.*?<\/span>/g, '<span class="style-inline-code">••••</span>') : r.html,
         });
     });
 }
@@ -589,7 +589,7 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
                         suffixes.push(
                             $t('De beveiligingscode voor {firstName} is {securityCode}', {
                                 firstName: Formatter.escapeHtml(member.firstName),
-                                securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '•••• (' + $t('wel aanwezig in bericht') + ')' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+                                securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
                             }),
                         );
                     }
