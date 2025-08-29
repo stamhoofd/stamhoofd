@@ -58,11 +58,11 @@
 
                     <div v-if="hasCustomStartAndEnd" class="split-inputs option" @click.stop.prevent>
                         <STInputBox :title="$t('Startdatum')" error-fields="settings.startDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" :min="patchedPeriod.period.startDate" :max="patchedPeriod.period.endDate" />
+                            <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
                         </STInputBox>
 
                         <STInputBox :title="$t('Einddatum')" error-fields="settings.endDate" :error-box="errors.errorBox">
-                            <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="minEndDate" :max="patchedPeriod.period.endDate" />
+                            <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
                         </STInputBox>
                     </div>
                 </STListItem>
@@ -844,13 +844,6 @@ const startDate = computed({
             startDate,
         }),
     }),
-});
-
-const minEndDate = computed(() => {
-    const startDateCopy = new Date(startDate.value);
-    // start date +1 day
-    startDateCopy.setDate(startDateCopy.getDate() + 1);
-    return startDateCopy;
 });
 
 const endDate = computed({
