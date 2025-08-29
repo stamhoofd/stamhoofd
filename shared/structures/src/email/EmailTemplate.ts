@@ -197,19 +197,6 @@ export class EmailTemplate extends AutoEncoder {
         return false;
     }
 
-    static getRecipientType(type: EmailTemplateType): EmailRecipientFilterType | null {
-        if (type === EmailTemplateType.SavedMembersEmail) {
-            return EmailRecipientFilterType.Members;
-        }
-
-        if (type === EmailTemplateType.DefaultMembersEmail) {
-            return EmailRecipientFilterType.Members;
-        }
-
-        // Use custom getSupportedReplacementsForType for this type
-        return null;
-    }
-
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail: return $t(`8c609752-6cc2-4721-9bfc-8235eae583f5`);
@@ -514,6 +501,7 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.firstNameMember,
                 ExampleReplacements.all.lastNameMember,
                 ExampleReplacements.all.outstandingBalance,
+                ExampleReplacements.all.loginDetails,
                 ExampleReplacements.all.balanceTable,
             ];
         }

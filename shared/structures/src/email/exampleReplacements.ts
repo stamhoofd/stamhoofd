@@ -194,7 +194,12 @@ function getReplacements() {
         }),
         loginDetails: Replacement.create({
             token: 'loginDetails',
-            html: `<p class="description"><em>${$t('2fa762f2-c061-4c40-83cb-6ddc3e5f0f7a')} <strong>${Formatter.escapeHtml($t(`e46ce65d-10a9-4d37-bd26-8979079c46a5`))}</strong></em></p>`,
+            html: `<p class="description"><em>${$t('Je kan op het ledenportaal inloggen op {email}', {
+                email: '<strong>' + $t(`46e8393a-144d-477e-9b9e-c79616e4b9a7`) + '</strong>' },
+            )}. ${$t('De beveiligingscode voor {firstName} is {securityCode}', {
+                firstName: $t(`65c9a375-fbca-4a27-9a42-01d49f7f9588`),
+                securityCode: `<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>`,
+            })}</em></p>`,
         }),
         mailDomain: Replacement.create({
             token: 'mailDomain',

@@ -8,7 +8,7 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements } from '../helpers/EmailBuilder';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay } from '../helpers/EmailBuilder';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailTemplate } from './EmailTemplate';
 import { Organization } from './Organization';
@@ -1172,13 +1172,21 @@ export class Email extends QueryableModel {
 
                         for (const item of response.results) {
                             const recipient = new EmailRecipient();
+                            recipient.emailType = upToDate.emailType;
                             recipient.emailId = upToDate.id;
+                            recipient.objectId = item.objectId;
                             recipient.email = item.email;
                             recipient.firstName = item.firstName;
                             recipient.lastName = item.lastName;
                             recipient.replacements = item.replacements;
+                            recipient.memberId = item.memberId ?? null;
+                            recipient.userId = item.userId ?? null;
+                            recipient.organizationId = upToDate.organizationId ?? null;
                             await recipient.save();
-                            return;
+
+                            if (recipient.email || recipient.userId) {
+                                return;
+                            }
                         }
 
                         request = null;
@@ -1201,6 +1209,7 @@ export class Email extends QueryableModel {
     async getPreviewStructure() {
         const emailRecipient = await EmailRecipient.select()
             .where('emailId', this.id)
+            .where('email', '!=', null)
             .first(false);
 
         let recipientRow: EmailRecipientStruct | undefined;
@@ -1219,6 +1228,7 @@ export class Email extends QueryableModel {
             organization,
             from: this.getFromAddress(),
             replyTo: null,
+            forPreview: true,
         });
 
         recipientRow.replacements = virtualRecipient.replacements;
@@ -1285,18 +1295,12 @@ export class Email extends QueryableModel {
                 organization,
                 from: this.getFromAddress(),
                 replyTo: null,
+                forPreview: false,
             });
-            struct.replacements = [
-                Replacement.create({
-                    token: 'greeting',
-                    value: $t('Beste,'),
-                }),
-                Replacement.create({
-                    token: 'loginDetails',
-                    value: '',
-                }),
-                ...recipient.replacements,
-            ];
+            stripRecipientReplacementsForWebDisplay(recipient, {
+                organization,
+            });
+            struct.replacements = recipient.replacements;
         }
 
         let organizationStruct: BaseOrganization | null = null;

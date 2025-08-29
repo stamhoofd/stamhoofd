@@ -115,7 +115,7 @@
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="left-center  right-stack" @click="navigate(Routes.Recipients)">
+                <STListItem v-if="email.emailRecipientsCount" :selectable="email.status !== EmailStatus.Draft" class="left-center  right-stack" @click="email.status !== EmailStatus.Draft ? navigate(Routes.Recipients) : undefined">
                     <template #left>
                         <span class="icon search" />
                     </template>
@@ -128,11 +128,11 @@
                         <p class="style-description-small">
                             {{ formatInteger(email.emailRecipientsCount) }}
                         </p>
-                        <span class="icon small arrow-right-small" />
+                        <span class="icon small arrow-right-small" v-if="email.status !== EmailStatus.Draft" />
                     </template>
                 </STListItem>
 
-                <STListItem v-if="email.membersCount" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
+                <STListItem v-if="email.membersCount && email.status !== EmailStatus.Draft" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                     <template #left>
                         <span class="icon search" />
                     </template>

@@ -3,7 +3,7 @@ import { assertSort, CountFilteredRequest, EmailRecipient as EmailRecipientStruc
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailRecipient } from '@stamhoofd/models';
+import { cleanRecipientReplacements, EmailRecipient, stripSensitiveRecipientReplacements } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context';
 import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients';
@@ -126,7 +126,12 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         return new PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>({
-            results: await EmailRecipient.getStructures(recipients),
+            results: (await EmailRecipient.getStructures(recipients)).map((r) => {
+                stripSensitiveRecipientReplacements(r, {
+                    organization: Context.organization ?? null,
+                });
+                return r;
+            }),
             next,
         });
     }

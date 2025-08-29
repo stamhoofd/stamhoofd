@@ -65,36 +65,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             value: Formatter.price(this.outstandingBalance),
         })); */
 
-        const createLoginDetailsReplacement = (email: string | null) => {
-            if (!email) {
-                if (this.details.securityCode) {
-                    return Replacement.create({
-                        token: 'loginDetails',
-                        value: '',
-                        html: `<p class="description"><em>De beveiligingscode voor ${Formatter.escapeHtml(this.firstName)} is <span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(this.details.securityCode, 4, '-'))}</span>.</em></p>`,
-                    });
-                }
-                return Replacement.create({
-                    token: 'loginDetails',
-                    value: '',
-                    html: '',
-                });
-            }
-            const formattedEmail = Formatter.escapeHtml(email);
-
-            let suffix = '';
-
-            if (this.details.securityCode) {
-                suffix = ` De beveiligingscode voor ${Formatter.escapeHtml(this.firstName)} is <span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(this.details.securityCode, 4, '-'))}</span>.`;
-            }
-
-            return Replacement.create({
-                token: 'loginDetails',
-                value: '',
-                html: this.hasAccount(email) ? `<p class="description"><em>${$t('467951bf-92b1-417b-a56b-19ce254c3571')} <strong>${formattedEmail}</strong>.${suffix}</em></p>` : `<p class="description"><em>${$t('3c710008-5f1f-477b-9ba3-b355d47bf858')} <strong>${formattedEmail}</strong>${$t('adc70733-1f21-4e69-9b90-e56d5a80a6d6')}${suffix}</em></p>`,
-            });
-        };
-
         if (this.details.email && (subtypes === null || subtypes.includes('member'))) {
             recipients.push(
                 EmailRecipient.create({
@@ -105,7 +75,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     lastName: this.details.lastName,
                     email: this.details.email,
                     replacements: [
-                        createLoginDetailsReplacement(this.details.email),
                         ...shared,
                     ],
                 }),
@@ -122,7 +91,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     lastName: this.details.lastName,
                     email: null,
                     replacements: [
-                        createLoginDetailsReplacement(null),
                         ...shared,
                     ],
                 }),
@@ -141,7 +109,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                             lastName: parent.lastName,
                             email: parent.email,
                             replacements: [
-                                createLoginDetailsReplacement(parent.email),
                                 ...shared,
                             ],
                         }),
@@ -159,7 +126,6 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                         userId: this.users.find(u => u.email === unverifiedEmail)?.id ?? null,
                         email: unverifiedEmail,
                         replacements: [
-                            createLoginDetailsReplacement(unverifiedEmail),
                             ...shared,
                         ],
                     }),
