@@ -7,7 +7,6 @@
         :column-configuration-id="configurationId"
         :actions="actions"
         :all-columns="allColumns"
-        :prefix-column="allColumns[0]"
         :estimated-rows="estimatedRows"
         :Route="Route"
         :default-filter="defaultFilter"
