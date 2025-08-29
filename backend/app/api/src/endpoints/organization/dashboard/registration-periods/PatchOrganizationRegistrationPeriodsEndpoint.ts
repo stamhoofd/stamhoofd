@@ -411,13 +411,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.settings.endDate = period.endDate;
 
                     // Note: start date is customizable, as long as it stays between period start and end
-                    if (model.settings.startDate < period.startDate) {
+                    if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
                         model.settings.startDate = period.startDate;
                     }
                 }
 
-                if (model.settings.startDate > period.endDate) {
-                    model.settings.startDate = period.startDate;
+                if (model.settings.startDate > model.settings.endDate) {
+                    model.settings.startDate = model.settings.endDate;
                 }
             }
         }
@@ -539,14 +539,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         if (!model.settings.hasCustomDates) {
             model.settings.endDate = period.endDate;
+
             // Note: start date is customizable, as long as it stays between period start and end
-            if (model.settings.startDate < period.startDate) {
+            if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
                 model.settings.startDate = period.startDate;
             }
         }
 
-        if (model.settings.startDate > period.endDate) {
-            model.settings.startDate = period.startDate;
+        if (model.settings.startDate > model.settings.endDate) {
+            model.settings.startDate = model.settings.endDate;
         }
 
         model.settings.registeredMembers = 0;
