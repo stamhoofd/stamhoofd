@@ -396,8 +396,3 @@ export class EmailWithRecipients extends Email {
         return this.getSnippetFor(this.exampleRecipient);
     }
 }
-
-export function stripUnsubscribeParagraph(html: string) {
-    // Remove <p>.*?{{unsubscribeUrl}}.*?</p> including newlines
-    return html.replace(/<p[^>]*>.*?\{\{unsubscribeUrl\}\}.*?<\/p>/gs, '').trim();
-}
