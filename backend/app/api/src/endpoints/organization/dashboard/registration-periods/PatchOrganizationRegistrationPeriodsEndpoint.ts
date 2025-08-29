@@ -1,5 +1,5 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, SetupStepType, Version } from '@stamhoofd/structures';
+import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -407,12 +407,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             model.settings.period = period.getBaseStructure();
 
             if (model.type !== GroupType.EventRegistration) {
-                // Note: start date is curomizable, as long as it stays between period start and end
+                // Note: start date is customizable, as long as it stays between period start and end
                 if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
                     model.settings.startDate = period.startDate;
                 }
 
-                model.settings.endDate = period.endDate;
+                if (!model.settings.hasCustomStartAndEnd) {
+                    model.settings.endDate = period.endDate;
+                }
             }
         }
 
@@ -530,11 +532,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.status = struct.status;
         model.type = struct.type;
         model.settings.period = period.getBaseStructure();
-        model.settings.endDate = period.endDate;
+
+        if (!model.settings.hasCustomStartAndEnd) {
+            model.settings.endDate = period.endDate;
+        }
+
         model.settings.registeredMembers = 0;
         model.settings.reservedMembers = 0;
 
-        // Note: start date is curomizable, as long as it stays between period start and end
+        // Note: start date is customizable, as long as it stays between period start and end
         if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
             model.settings.startDate = period.startDate;
         }
