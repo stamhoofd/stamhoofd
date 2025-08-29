@@ -1,6 +1,17 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="title" />
+        <STNavigationBar :title="title">
+            <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued" #right>
+                <LoadingButton v-if="email.status === EmailStatus.Failed" :loading="isRetryingEmail">
+                    <button v-tooltip="$t('Opnieuw proberen')" type="button" class="button icon retry" @click="retrySending" />
+                </LoadingButton>
+                <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('Inhoud aanpassen en versturen')" type="button" class="button icon send" @click="editEmail" />
+                <button v-else v-tooltip="$t('Inhoud aanpassen')" type="button" class="button icon edit" @click="editEmail" />
+                <LoadingButton :loading="isDeletingEmail">
+                    <button v-tooltip="$t('Verwijderen')" type="button" class="button icon trash" @click="doDelete" />
+                </LoadingButton>
+            </template>
+        </STNavigationBar>
 
         <main class="center">
             <p v-if="status" :class="'style-title-prefix flex ' + (status.theme ?? '')">
@@ -68,16 +79,7 @@
             </p>
 
             <STList>
-                <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent" class="left-center">
-                    <template #left>
-                        <span class="icon calendar-grid small" />
-                    </template>
-
-                    <h2 class="style-title-list">
-                        {{ $t('39a982c1-916a-43da-857d-a15f67c96c62') }}: {{ formatDateTime(email.sentAt) }}
-                    </h2>
-                </STListItem>
-                <STListItem v-else class="left-center">
+                <STListItem v-if="!(email.sentAt && email.status === EmailStatus.Sent)" class="left-center">
                     <template #left>
                         <span class="icon calendar-grid small" />
                     </template>
@@ -87,22 +89,35 @@
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.fromName || email.fromAddress">
+                <STListItem v-if="email.fromName || email.fromAddress" v-tooltip="$t('Afzender van het bericht')">
                     <template #left>
-                        <span class="icon user small" />
+                        <span class="icon email small" />
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('a4a8cb20-8351-445a-bb59-91867679eead') }}: {{ email.fromName || email.fromAddress }}
+                        {{ email.fromName || email.fromAddress }}
                     </h2>
                     <p v-if="email.fromName" class="style-description-small">
                         {{ email.fromAddress }}
                     </p>
                 </STListItem>
 
+                <STListItem v-if="email.user && (!user || email.user.id !== user.id)">
+                    <template #left>
+                        <span class="icon user small" />
+                    </template>
+
+                    <h2 v-if="email.user.name" class="style-title-list">
+                        {{ $t('Verstuurd door') }}: {{ email.user.name }} ({{ email.user.email }})<span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
+                    </h2>
+                    <h2 v-else class="style-title-list">
+                        {{ $t('Verstuurd door') }}: {{ email.user.email }}<span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
+                    </h2>
+                </STListItem>
+
                 <STListItem v-if="email.emailRecipientsCount" :selectable="true" class="left-center  right-stack" @click="navigate(Routes.Recipients)">
                     <template #left>
-                        <span class="icon email small" />
+                        <span class="icon search" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -119,15 +134,12 @@
 
                 <STListItem v-if="email.membersCount" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Members)">
                     <template #left>
-                        <span class="icon membership-filled small" />
+                        <span class="icon search" />
                     </template>
 
                     <h2 class="style-title-list">
                         {{ $t('Leden') }}
                     </h2>
-                    <p class="style-description-small">
-                        {{ $t('Deze leden kunnen het bericht ook nalezen in het ledenportaal.') }}
-                    </p>
 
                     <template #right>
                         <p class="style-description-small">
@@ -137,6 +149,8 @@
                     </template>
                 </STListItem>
             </STList>
+
+            <EmailPreviewBox :email="email" />
 
             <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued">
                 <hr>
@@ -166,10 +180,12 @@
 
                     <STListItem :selectable="true" element-name="button" @click="editEmail">
                         <template #left>
-                            <IconContainer icon="email" class="primary">
+                            <IconContainer icon="email" class="primary" v-if="email.status !== EmailStatus.Draft">
                                 <template #aside>
-                                    <span class="icon edit small stroke" />
+                                    <span class="icon edit stroke small" />
                                 </template>
+                            </IconContainer>
+                            <IconContainer icon="send" class="primary" v-else>
                             </IconContainer>
                         </template>
                         <h3 v-if="email.status !== EmailStatus.Draft" class="style-title-list">
@@ -203,21 +219,19 @@
                         </p>
 
                         <template #right>
-                            <span class="icon arrow-right-small gray" />
+                            <Spinner v-if="isDeletingEmail" />
+                            <span v-else class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
                 </STList>
             </template>
-
-            <hr>
-            <EmailPreviewBox :email="email" />
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useInterval } from '@stamhoofd/components';
+import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useInterval, useUser } from '@stamhoofd/components';
 import { EmailPreview, EmailRecipientsStatus, EmailStatus } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';
@@ -241,6 +255,7 @@ const status = computed(() => {
 const navigate = useNavigate();
 const { patchEmail } = usePatchEmail();
 const present = usePresent();
+const user = useUser();
 
 enum Routes {
     Members = 'leden',
