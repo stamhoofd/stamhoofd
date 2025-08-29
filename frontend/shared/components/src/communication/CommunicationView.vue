@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useEmailFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAdminEmailFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
 import { useEmailsObjectFetcher } from '@stamhoofd/components/src/fetchers/useEmailsObjectFetcher';
 import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -61,7 +61,7 @@ const searchQuery = ref('');
 const $navigate = useNavigate();
 const { presentPositionableSheet } = usePositionableSheet();
 
-const buildFilters = useEmailFilterBuilders();
+const buildFilters = useAdminEmailFilterBuilders();
 const filterBuilders = buildFilters();
 const organization = useOrganization();
 const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
