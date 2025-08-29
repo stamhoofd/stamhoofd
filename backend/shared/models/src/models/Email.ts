@@ -1206,7 +1206,7 @@ export class Email extends QueryableModel {
         let recipientRow: EmailRecipientStruct | undefined;
 
         if (emailRecipient) {
-            recipientRow = emailRecipient.getStructure();
+            recipientRow = await emailRecipient.getStructure();
         }
 
         if (!recipientRow) {
@@ -1252,11 +1252,11 @@ export class Email extends QueryableModel {
 
         // Remove duplicates that are marked as the same recipient
         const cleanedRecipients: EmailRecipient[] = [...recipientsMap.values()];
+        const structures = await EmailRecipient.getStructures(cleanedRecipients);
 
         console.log('Found recipients for user', user.id, cleanedRecipients.length, cleanedRecipients.map(r => r.id));
 
-        const virtualRecipients = cleanedRecipients.map((r) => {
-            const struct = r.getStructure();
+        const virtualRecipients = structures.map((struct) => {
             const recipient = struct.getRecipient();
 
             return {
@@ -1286,7 +1286,7 @@ export class Email extends QueryableModel {
 
         return EmailWithRecipients.create({
             ...this,
-            recipients: virtualRecipients.map(r => r.struct),
+            recipients: structures,
 
             // Remove private-like data
             softBouncesCount: 0,

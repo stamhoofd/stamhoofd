@@ -126,7 +126,7 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         return new PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>({
-            results: recipients.map(r => r.getStructure()),
+            results: await EmailRecipient.getStructures(recipients),
             next,
         });
     }
