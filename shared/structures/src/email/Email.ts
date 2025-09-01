@@ -88,7 +88,7 @@ export class Email extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 379 })
     senderId: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 383 })
     organizationId: string | null = null;
 
     @field({ decoder: EmailRecipientFilter })
@@ -267,7 +267,7 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
     memberId: string | null = null;
 
-    @field({ decoder: TinyMember, nullable: true, ...NextVersion })
+    @field({ decoder: TinyMember, nullable: true, version: 383 })
     member: TinyMember | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
@@ -380,10 +380,10 @@ export class EmailPreview extends Email {
     @field({ decoder: EmailRecipient, nullable: true })
     exampleRecipient: EmailRecipient | null = null;
 
-    @field({ decoder: User, nullable: true, ...NextVersion })
+    @field({ decoder: User, nullable: true, version: 383 })
     user: User | null = null;
 
-    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    @field({ decoder: BaseOrganization, nullable: true, version: 383 })
     organization: BaseOrganization | null = null;
 
     get replacedSubject() {
@@ -399,7 +399,7 @@ export class EmailWithRecipients extends Email {
     @field({ decoder: new ArrayDecoder(EmailRecipient) })
     recipients: EmailRecipient[] = [];
 
-    @field({ decoder: BaseOrganization, nullable: true, ...NextVersion })
+    @field({ decoder: BaseOrganization, nullable: true, version: 383 })
     organization: BaseOrganization | null = null;
 
     get exampleRecipient() {

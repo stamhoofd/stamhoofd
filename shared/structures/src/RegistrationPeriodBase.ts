@@ -6,7 +6,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 383 })
     customName: string | null = null;
 
     @field({ decoder: DateDecoder })
