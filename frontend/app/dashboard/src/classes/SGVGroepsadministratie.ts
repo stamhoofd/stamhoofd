@@ -853,7 +853,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         let patchCount = 0;
         let lid;
         let shouldMarkExternalSync = true;
-        const withHacks = false;
+        let withHacks = false;
 
         while(doAnotherPatch) {
             patchCount++;
@@ -886,6 +886,11 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     lid = updateResponse.data
                 } catch (e) {
                     // todo: retry with hackss if is
+                    if (isSimpleError(e) && e.hasCode('sgv_internal_error') && withHacks == false && patchCount <= 2) {
+                        withHacks = true;
+                        doAnotherPatch = true;
+                        continue;
+                    }
                     console.error(e)
                     throw e;
                 }

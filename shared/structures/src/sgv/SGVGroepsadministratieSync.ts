@@ -251,7 +251,7 @@ export function schrappen(lid: any, groepFuncties: GroepFunctie[]): any {
     return patch
 }
 
-export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport, withHacks = true): {patch: any, needsMultiplePatches: boolean} {
+export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer: string, groups: Group[], groepFuncties: GroepFunctie[], report?: SGVSyncReport, withHacks = false): {patch: any, needsMultiplePatches: boolean} {
     const details = member.details
     const newAddresses: any[] = []
     const newContacts: any[] = []
@@ -397,6 +397,13 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         report?.markUnmanaged(member, lid)
     }
 
+    if (withHacks && lid.persoonsgegevens) {
+        // Remove 'rijksregisternummeringevuld', 'lidtenlaste' fields from lid.persoonsgegevens
+        delete lid.persoonsgegevens.rijksregisternummeringevuld;
+        delete lid.persoonsgegevens.lidtenlaste;
+    }
+    
+
     // Construct the patch: compare and check the fields that need changes
     const patch: any = {
         persoonsgegevens: {
@@ -431,6 +438,14 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
     if (!lid.contacten || !deepEqual(lid.contacten, newContacts)) {
         // Skip updates
         patch.contacten = newContacts
+
+        if (withHacks) {
+            // Remove 'rijksregisternummeringevuld', 'lidtenlaste' fields from every contact
+            for (const contact of patch.contacten) {
+                delete contact.rijksregisternummeringevuld;
+                delete contact.lidtenlaste;
+            }
+        }
     }
 
     const patchSections = lid.links && Array.isArray(lid.links) ? (lid?.links?.find(l => l.method === "PATCH")?.sections ?? []) : []
@@ -788,6 +803,7 @@ function createOrUpdateParent(parent: Parent, contacten: any, adressen: Map<stri
 
     if (existingContact) {
         // Override fields
+        delete existingContact.rijksregisternummeringevuld;
         return Object.assign({}, existingContact, updated)
     } else {
         updated.id = (new Date().getTime())+""+Math.floor((Math.random()*100000))
