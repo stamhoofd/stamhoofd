@@ -252,10 +252,10 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         const profiel = await this.getProfiel()
 
         // Check if this user has access to all the needed groups...
-        if (!profiel.functies.find(f => (f.code == 'VGA' || f.code == 'GRL' || 'AVGA') && f.isActive && f.groep === this.groupNumber)) {
+        if (!profiel.functies.find(f => (f.code == 'VGA' || 'AVGA') && f.isActive && f.groep === this.groupNumber)) {
             throw new SimpleError({
                 code: "permission_denied",
-                message: "Log in met een account met minstens de functies (Adjunct) Verantwoordelijke Groepsadministratie (VGA) of groepsleiding in de groepsadministratie."
+                message: "Je kan enkel synchroniseren vanaf een account in de groepsadministratie met de functie (Adjunct) Verantwoordelijke Groepsadministratie (VGA)."
             })
         }
         await this.getFuncties()
