@@ -122,7 +122,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
     async setGroupIfNeeded() {
         if (!this.groupNumber) {
-            const groups = await this.getGroup()
+            let groups = await this.getGroup()
             if (groups.length === 0) {
                 throw new SimpleError({
                     code: "",
@@ -130,11 +130,22 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 })
             }
             if (groups.length > 1) {
+                if (OrganizationManager.organization.privateMeta?.externalGroupNumber) {
+                    const preferredGroup = groups.find(g => g.groepsnummer === OrganizationManager.organization.privateMeta?.externalGroupNumber)
+                    if (preferredGroup) {
+                        groups = [preferredGroup];
+                    }
+                }
+            }
+
+            if (groups.length > 1) {
+                // not fixed? throw
                 throw new SimpleError({
                     code: "",
                     message: "We vonden meerdere scoutsgroepen die verbonden zijn met dit groepsadministratie account én waarmee de naam of adres overeenkomt met die van jouw groep in Stamhoofd. Daardoor konden we niet automatisch de juiste groep selecteren. Neem contact op via hallo@stamhoofd.be om dit op te lossen."
                 })
             }
+
             this.group = groups[0]
             this.groupNumber = this.group.groepsnummer
 
