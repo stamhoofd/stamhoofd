@@ -3,7 +3,7 @@ import { assertSort, CountFilteredRequest, EmailRecipient as EmailRecipientStruc
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { cleanRecipientReplacements, EmailRecipient, fillRecipientReplacements, stripSensitiveRecipientReplacements } from '@stamhoofd/models';
+import { EmailRecipient, fillRecipientReplacements } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Context } from '../../../helpers/Context';
 import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients';
