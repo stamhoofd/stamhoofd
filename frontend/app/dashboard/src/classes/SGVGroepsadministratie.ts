@@ -782,6 +782,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     message: "De groepsadministratie reageerde niet binnen 30 seconden. Mogelijks is de groepsadministratie even gedeeltelijk onbereikbaar of heb je een onstabiele internetverbinding. Probeer het later opnieuw."
                 })
             }
+
             if (!Request.isNetworkError(e)) {
                 await this.reportIssue(SGVReportIssue.create({
                     method: request.method,
@@ -791,6 +792,16 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                     error: this.getErrorMessage(e)
                 }));
             }
+
+            if (e instanceof SyntaxError && /Unexpected token/.test(e.message)) {
+                console.log("This error came from JSON.parse due to invalid syntax.");
+
+                throw new SimpleError({
+                    code: "sgv_internal_error",
+                    message: "De groepsadministratie gaf een interne foutmelding. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie. Probeer later opnieuw."
+                })
+            }
+
             throw e;
         }
     }
@@ -822,12 +833,12 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
 
         if (Request.isNetworkError(error)) {
-            return 'De groepsadministratie gaf een interne foutmelding of reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Probeer later opnieuw.'
+            return "De groepsadministratie reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie. Probeer later opnieuw."
         }
         if (!isSimpleError(error) && !isSimpleErrors(error)) {
             if ('message' in error && typeof error.message === 'string') {
                 if (error.message.startsWith('<!DOCTYPE') || error.message.startsWith('<html') || error.message.length > 1000) {
-                    return 'De groepsadministratie gaf een interne foutmelding of reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Probeer later opnieuw.'
+                    return "De groepsadministratie gaf een interne foutmelding. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie. Probeer later opnieuw."
                 }
 
                 return error.message
@@ -874,6 +885,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
                     lid = updateResponse.data
                 } catch (e) {
+                    // todo: retry with hackss if is
                     console.error(e)
                     throw e;
                 }
