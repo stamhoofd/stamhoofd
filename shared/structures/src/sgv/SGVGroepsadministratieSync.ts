@@ -284,7 +284,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
     }
 
     // Create an address mapping
-    if (details.address) {
+    if (details.address && !addressMap.has(details.address.toString())) {
         const a = createOrUpdateAddress(details.address, lid.adressen, 1, lid.contacten ?? [])
         newAddresses.push(a)
         addressMap.set(details.address.toString(), a.id)
