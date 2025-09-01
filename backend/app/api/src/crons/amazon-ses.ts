@@ -211,14 +211,40 @@ async function handleComplaint(message: any) {
         const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
 
         const type: 'abuse' | 'auth-failure' | 'fraud' | 'not-spam' | 'other' | 'virus' = b.complaintFeedbackType;
+        const subType = b.complaintSubType;
 
         for (const recipient of b.complainedRecipients) {
             const email = recipient.emailAddress;
             const emailAddress = await EmailAddress.getOrCreate(email, organization?.id ?? null);
-            emailAddress.markedAsSpam = type !== 'not-spam';
+            if (subType === 'OnAccountSuppressionList') {
+                if (!emailAddress.markedAsSpam && !emailAddress.hardBounce) {
+                    emailAddress.hardBounce = true;
+                }
+            }
+            else {
+                emailAddress.markedAsSpam = type !== 'not-spam';
+            }
             await emailAddress.save();
 
-            if (type !== 'not-spam') {
+            if (subType === 'OnAccountSuppressionList') {
+                await storeEmailStatus({
+                    headers,
+                    type: 'hard-bounce',
+                    message: 'On suppression list',
+                });
+
+                await saveLog({
+                    id: b.feedbackId,
+                    email,
+                    organization,
+                    type: AuditLogType.EmailAddressHardBounced,
+                    subType: type || 'unknown',
+                    sender: source,
+                    response: 'On suppression list',
+                    subject: message.mail.commonHeaders?.subject || '',
+                });
+            }
+            else if (type !== 'not-spam') {
                 await storeEmailStatus({
                     headers,
                     type: 'complaint',
