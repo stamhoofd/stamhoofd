@@ -33,6 +33,17 @@
             <p class="info-box">
                 Gaat er iets mis of heb je problemen bij de synchronisatie? Laat ons dan zeker iets weten via {{ $t('shared.emails.general') }}
             </p>
+
+            <STList v-if="organization.privateMeta?.externalGroupNumber" class="info">
+                <STListItem>
+                    <h3 class="style-definition-label">
+                        Groepsnummer
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ organization.privateMeta?.externalGroupNumber }}
+                    </p>
+                </STListItem>
+            </STList>
         </main>
 
         <STToolbar>
