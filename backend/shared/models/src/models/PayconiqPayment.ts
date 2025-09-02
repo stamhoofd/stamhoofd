@@ -162,8 +162,8 @@ export class PayconiqPayment extends QueryableModel {
         return new Promise((resolve, reject) => {
             const jsonData = JSON.stringify(data);
 
-            // Payconiq switches to Wero on 2025-09-21
-            const isWero = Date.now() > new Date('2025-09-21T02:00:00+02:00').getTime();
+            // Payconiq switches to Wero on 2025-10-19
+            const isWero = Date.now() > new Date('2025-10-19T02:00:00+02:00').getTime();
             let hostname = !testMode ? 'api.payconiq.com' : 'api.ext.payconiq.com';
             if (isWero) {
                 hostname = !testMode ? 'merchant.api.bancontact.net' : 'merchant.api.preprod.bancontact.net';
