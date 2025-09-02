@@ -511,12 +511,15 @@ function limitDateTime(dateTime: DateTime): DateTime | null {
     if (dateTime > max) {
         if (isFull(dateTime.year.toString(), yearConfig)) {
             dateTime = max;
-            dateTime = setTime(dateTime);
 
-            if (dateTime > max) {
-                // To fix infinite loop, we'll need to decrease the day with 1
-                dateTime = dateTime.minus({ day: 1 });
+            if (props.time !== null) {
                 dateTime = setTime(dateTime);
+
+                if (dateTime > max) {
+                // To fix infinite loop, we'll need to decrease the day with 1
+                    dateTime = dateTime.minus({ day: 1 });
+                    dateTime = setTime(dateTime);
+                }
             }
         }
         else {
@@ -527,12 +530,15 @@ function limitDateTime(dateTime: DateTime): DateTime | null {
     if (dateTime < min) {
         if (isFull(dateTime.year.toString(), yearConfig)) {
             dateTime = min;
-            dateTime = setTime(dateTime);
 
-            if (dateTime < min) {
-                // To fix infinite loop, we'll need to increase the day with 1
-                dateTime = dateTime.plus({ day: 1 });
+            if (props.time !== null) {
                 dateTime = setTime(dateTime);
+
+                if (dateTime < min) {
+                // To fix infinite loop, we'll need to increase the day with 1
+                    dateTime = dateTime.plus({ day: 1 });
+                    dateTime = setTime(dateTime);
+                }
             }
         }
         else {
@@ -573,6 +579,7 @@ function openContextMenu(autoDismiss = true) {
         allowClear: !props.required,
         min: props.min,
         max: props.max,
+        time: props.time,
         setDate: (value: Date | null) => {
             emitDateTime(value ? Formatter.luxon(value) : null);
         },

@@ -75,11 +75,13 @@ const props = withDefaults(defineProps<{
     max?: Date | null;
     autoDismiss?: boolean;
     allowClear?: boolean;
+    time?: { hours: number; minutes: number; seconds: number; millisecond?: number } | null;
 }>(), {
     min: null,
     max: null,
     autoDismiss: true,
     allowClear: false,
+    time: null,
 });
 
 const pop = usePop();
@@ -101,11 +103,31 @@ onMounted(() => {
 });
 
 function isDisabled(day: { value: DateTime }) {
-    if (luxonMin.value && day.value < luxonMin.value) {
-        return true;
+    if (props.time) {
+        const dateTime = day.value.set({
+            hour: props.time.hours,
+            minute: props.time.minutes,
+            second: props.time.seconds,
+            millisecond: props.time.millisecond ?? 0,
+        });
+
+        if (luxonMin.value && dateTime < luxonMin.value) {
+            return true;
+        }
+        if (luxonMax.value && dateTime > luxonMax.value) {
+            return true;
+        }
+        return false;
     }
-    if (luxonMax.value && day.value > luxonMax.value) {
-        return true;
+
+    const dateTime = day.value;
+
+    // if no specific time set => not disabled if same date
+    if (luxonMin.value && dateTime < luxonMin.value) {
+        return dateTime.day !== luxonMin.value.day || dateTime.month !== luxonMin.value.month || dateTime.year !== luxonMin.value.year;
+    }
+    if (luxonMax.value && dateTime > luxonMax.value) {
+        return dateTime.day !== luxonMax.value.day || dateTime.month !== luxonMax.value.month || dateTime.year !== luxonMax.value.year;
     }
     return false;
 }
