@@ -341,9 +341,17 @@ function getRequiredFilter(): StamhoofdFilter | null {
 
     // filter on organization tag ids, if organization lvl
     if (org) {
-        filters['organizationTagIds'] = {
-            $in: [null, ...org.meta.tags],
-        };
+        filters['$or'] = [
+            {
+                organizationTagIds: {
+                    $in: [null, ...org.meta.tags],
+                },
+            }, {
+                group: {
+                    organizationId: org.id,
+                },
+            },
+        ];
     }
 
     return filters;
