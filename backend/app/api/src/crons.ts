@@ -625,25 +625,37 @@ async function chargeServiceFees() {
             continue;
         }
 
-        const totalFees = payments.reduce((sum, payment) => sum + payment.serviceFeeManual - payment.serviceFeeManualCharged, 0);
+        // Group payments by Formatter.dateNumber(p.createdAt)
+        const groupedPayments: Map<string, Payment[]> = new Map();
+        for (const payment of payments) {
+            const date = Formatter.dateNumber(payment.createdAt);
+            if (!groupedPayments.has(date)) {
+                groupedPayments.set(date, []);
+            }
+            groupedPayments.get(date)!.push(payment);
+        }
 
-        const days = Formatter.uniqueArray(payments.map(p => Formatter.dateNumber(p.createdAt)))
+        for (const [_, payments] of groupedPayments) {
+            const totalFees = payments.reduce((sum, payment) => sum + payment.serviceFeeManual - payment.serviceFeeManualCharged, 0);
 
-        const name = "Servicekosten op " + Formatter.joinLast(days, ', ', ' en ')
-        const item = STInvoiceItem.create({
-            name,
-            amount: 1,
-            unitPrice: totalFees,
-            canUseCredits: true
-        })
+            const days = Formatter.uniqueArray(payments.map(p => Formatter.dateNumber(p.createdAt)))
 
-        console.log("Scheduling service fee charge for ", organization.id, item)
-        await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
-            await STPendingInvoice.addItems(organization, [item])
-        });
+            const name = "Servicekosten op " + Formatter.joinLast(days, ', ', ' en ')
+            const item = STInvoiceItem.create({
+                name,
+                amount: 1,
+                unitPrice: totalFees,
+                canUseCredits: true
+            })
 
-        const query = `UPDATE \`${Payment.table}\` SET serviceFeeManualCharged = serviceFeeManual WHERE id IN (?)`
-        await Database.update(query, [payments.map(p => p.id)]);
+            console.log("Scheduling service fee charge for ", organization.id, item)
+            await QueueHandler.schedule("billing/invoices-"+organization.id, async () => {
+                await STPendingInvoice.addItems(organization, [item])
+            });
+
+            const query = `UPDATE \`${Payment.table}\` SET serviceFeeManualCharged = serviceFeeManual WHERE id IN (?)`
+            await Database.update(query, [payments.map(p => p.id)]);
+        }
     }
 }
 
