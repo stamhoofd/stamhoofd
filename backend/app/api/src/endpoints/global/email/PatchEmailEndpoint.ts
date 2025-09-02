@@ -78,8 +78,8 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             else {
                 throw new SimpleError({
                     code: 'invalid_sender',
-                    human: 'Sender not found',
-                    message: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
+                    message: 'Sender not found',
+                    human: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
                     statusCode: 400,
                 });
             }
@@ -95,8 +95,8 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             else {
                 throw new SimpleError({
                     code: 'invalid_sender',
-                    human: 'Sender not found',
-                    message: $t(`f08cccb3-faf9-473f-b729-16120fadec9c`),
+                    message: 'Sender not found',
+                    human: $t(`f08cccb3-faf9-473f-b729-16120fadec9c`),
                     statusCode: 400,
                 });
             }

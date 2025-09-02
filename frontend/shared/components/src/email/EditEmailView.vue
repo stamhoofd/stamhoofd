@@ -248,6 +248,14 @@ class SelectableWebshop {
 }
 
 async function deleteMe() {
+    if (saving.value) {
+        return;
+    }
+    if (!await CenteredMessage.confirm($t('Deze afzender verwijderen?'), $t('Ja, verwijderen'), $t('Je kan dit niet ongedaan maken.'))) {
+        return;
+    }
+    saving.value = true;
+
     const arr: PatchableArrayAutoEncoder<OrganizationEmail> = new PatchableArray();
     arr.addDelete(props.email.id);
 

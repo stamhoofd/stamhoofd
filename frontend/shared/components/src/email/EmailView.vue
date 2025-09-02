@@ -56,6 +56,7 @@
 
                         <div class="input-icon-container right icon arrow-down-small gray" :class="{'no-padding': !auth.hasFullAccess()}">
                             <select v-model="senderId" class="list-input">
+                                <option :value="null" disabled>{{ $t('Maak een keuze') }}</option>
                                 <option v-for="e in senders" :key="e.id" :value="e.id">
                                     {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
                                 </option>
@@ -296,6 +297,19 @@ watch([selectedRecipientOptions, groupByEmail], () => {
     addPatch({ recipientFilter: recipientFilter.value });
 }, { deep: true });
 
+const sendersLength = computed(() => senders.value.length);
+watch([sendersLength], () => {
+    if (!senderId.value && senders.value.length > 0) {
+        senderId.value = senders.value.find(s => s.default)?.id ?? senders.value[0].id;
+    }
+    if (senderId.value) {
+        const exists = senders.value.find(s => s.id === senderId.value);
+        if (!exists) {
+            senderId.value = senders.value.find(s => s.default)?.id ?? senders.value[0].id;
+        }
+    }
+}, { deep: false });
+
 const subject = computed({
     get: () => patchedEmail.value?.subject || '',
     set: (subject) => {
@@ -373,7 +387,7 @@ async function createEmail() {
             path: '/email',
             body: Email.create({
                 recipientFilter: recipientFilter.value,
-                senderId: props.defaultSenderId ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
+                senderId: (props.defaultSenderId ? senders.value.find(s => s.id === props.defaultSenderId)?.id : null) ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
             }),

@@ -98,12 +98,14 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             model.fromName = sender.name;
         }
         else {
-            throw new SimpleError({
-                code: 'invalid_sender',
-                human: 'Sender not found',
-                message: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
-                statusCode: 400,
-            });
+            if (request.body.senderId) {
+                throw new SimpleError({
+                    code: 'invalid_sender',
+                    message: 'Sender not found',
+                    human: $t(`94adb4e0-2ef1-4ee8-9f02-5a76efa51c1d`),
+                    statusCode: 400,
+                });
+            }
         }
 
         model.validateAttachments();
