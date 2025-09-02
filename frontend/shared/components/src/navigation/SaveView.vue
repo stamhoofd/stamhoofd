@@ -1,7 +1,7 @@
 <template>
     <LoadingViewTransition :loading="loadingView" :error-box="errorBox">
         <form class="st-view" @submit.prevent="$emit('save')">
-            <STNavigationBar :title="title" :disable-pop="true" :disable-dismiss="true">
+            <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
                     <button v-else-if="$isAndroid" class="button icon close" type="button" @click="pop()" />
@@ -18,7 +18,7 @@
                         <button v-tooltip="$t('ea84aed8-48ce-4a43-b391-0a4a16782909')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
-                        <button v-if="saveIconMobile" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" v-tooltip="saveText" />
+                        <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" />
                         <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
                             {{ saveText }}
                         </button>
@@ -65,18 +65,17 @@
 
 <script lang="ts" setup>
 import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
+import { TranslatedString } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
 import { ErrorBox } from '../errors/ErrorBox';
+import { useKeyDown } from '../hooks';
+import { defineEditorContext } from '../inputs/hooks/useEditorContext';
 import BackButton from './BackButton.vue';
 import LoadingButton from './LoadingButton.vue';
 import STButtonToolbar from './STButtonToolbar.vue';
 import STNavigationBar from './STNavigationBar.vue';
 import STToolbar from './STToolbar.vue';
-import { useKeyDown } from '../hooks';
-import { defineEditorContext } from '../inputs/hooks/useEditorContext';
-import { EditorLanguageButton } from '../inputs';
-import { TranslatedString } from '@stamhoofd/structures';
 
 withDefaults(
     defineProps<{
