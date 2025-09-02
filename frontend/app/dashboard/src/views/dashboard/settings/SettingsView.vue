@@ -241,7 +241,7 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('cce92c4c-1cdf-4a22-9f1a-89f888046cde') }}</h2>
+            <hr><h2>{{ $t('Berichten en e-mails') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -249,7 +249,7 @@
                         <img src="@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('7766ee8a-cd92-4d6f-a3fa-f79504fbcdda') }}
+                        {{ $t('Afzenders') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('5c0e8dda-122a-4ec9-a3ca-f8dcb2593fc7') }}

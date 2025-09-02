@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`Afzender`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 v-if="isNew">
             {{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}
         </h1>
