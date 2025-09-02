@@ -561,7 +561,7 @@ async function chargeServiceFees() {
         serviceFeeManualCharged: 0,
         createdAt: {
             sign: "<",
-            value: Formatter.dateIso(new Date())
+            value: Formatter.dateIso(STAMHOOFD.environment !== "development" ? new Date() : new Date(Date.now() + 1000 * 60 * 60 * 24))
         }
     }, {
         limit: 200,

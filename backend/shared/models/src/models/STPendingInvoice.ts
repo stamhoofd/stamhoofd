@@ -105,6 +105,13 @@ export class STPendingInvoice extends Model {
                 pendingInvoice.meta.items = STInvoiceItem.compress(pendingInvoice.meta.items)
             }
             await pendingInvoice.save()
+        } else if (pendingInvoice) {
+             // Can we compress
+            if (pendingInvoice.invoiceId === null) {
+                console.log("Compressing pending invoice items "+pendingInvoice.id)
+                pendingInvoice.meta.items = STInvoiceItem.compress(pendingInvoice.meta.items)
+                await pendingInvoice.save()
+            }
         }
         return pendingInvoice
     }
@@ -199,6 +206,7 @@ export class STPendingInvoice extends Model {
                 human: "Er is nog geen domiciliëring of automatische afrekening ingesteld"
             })
         }
+    
         // Step 1: create the invoice
         const invoice = STInvoice.createFor(organization)
 

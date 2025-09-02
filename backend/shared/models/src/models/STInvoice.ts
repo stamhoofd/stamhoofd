@@ -270,6 +270,7 @@ export class STInvoice extends Model {
                     if (!found) {
                         newItems.push(item)
                     } else {
+
                         if (found.price !== item.price) {
                             console.warn("Price mismatch for item "+item.id+" in pending invoice "+pendingInvoice.id)
 
@@ -278,6 +279,8 @@ export class STInvoice extends Model {
                             } else {
                                 // Update remaining amount
                                 const c = item.clone()
+                                c.firstFailedPayment = null;
+                                c.paymentFailedCount = 0;
                                 c.amount -= found.amount
 
                                 if (c.amount > 0) {
@@ -568,6 +571,12 @@ export class STInvoice extends Model {
                 // Also update the packages in the pending invoice itself
                 for (const item of pendingInvoice.meta.items) {
                     const pack = item.package
+
+                    if (!item.firstFailedPayment) {
+                        item.firstFailedPayment = new Date()
+                    }
+                    item.paymentFailedCount = (item.paymentFailedCount ?? 0) + 1
+
                     if (pack) {
                         const pp = packages.find(p => p.id === pack.id)
                         if (pp) {
@@ -606,7 +615,7 @@ export class STInvoice extends Model {
                             to: invoicingTo,
                             bcc: "simon@stamhoofd.be",
                             subject: "Betaling mislukt voor "+organization.name,
-                            text: "Dag "+organization.name+", \n\nDe automatische betaling via domiciliëring van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betaalinstellingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                            text: "Dag "+organization.name+", \n\nDe betaling van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betaalinstellingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         }, organization.i18n)
                     } else {
                         console.warn("No invoicing e-mail found for "+organization.name)

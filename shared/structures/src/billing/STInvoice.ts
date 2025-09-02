@@ -34,6 +34,12 @@ export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: BooleanDecoder, version: 155 })
     canUseCredits = true
 
+    @field({ decoder: DateDecoder, nullable: true, optional: true })
+    firstFailedPayment: Date | null = null
+    
+    @field({ decoder: IntegerDecoder, optional: true  })
+    paymentFailedCount = 0
+
     get price(): number {
         return this.unitPrice * this.amount
     }
@@ -138,6 +144,12 @@ export class STInvoiceItem extends AutoEncoder {
     }
 
     merge(other: STInvoiceItem): void {
+        if (other.paymentFailedCount > this.paymentFailedCount) {
+            this.paymentFailedCount = other.paymentFailedCount
+        }
+        if (other.firstFailedPayment && (!this.firstFailedPayment || other.firstFailedPayment < this.firstFailedPayment)) {
+            this.firstFailedPayment = other.firstFailedPayment
+        }
         if (other.unitPrice !== this.unitPrice) {
             if (other.amount === 1 && this.amount === 1) {
                 this.unitPrice += other.unitPrice
@@ -147,9 +159,6 @@ export class STInvoiceItem extends AutoEncoder {
             throw new Error("Cannot merge items with different unit prices and amount greater than 1");
         }
         this.amount += other.amount
-
-        // Other package will be more up to date
-        this.package = other.package
     }
 
     /// Only compress an invoice when it is marked as paid and for a pending invoice when it doesn't has an invoice

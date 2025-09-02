@@ -128,8 +128,8 @@ export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
     charge() {
         this.show(
             new ComponentWithProperties(PackageConfirmView, {
-                allowMandate: !this.isPaymentFailed,
-                isManualPayment: true
+                allowMandate: false,
+                isManualPayment: true,
             })
         )
     }
