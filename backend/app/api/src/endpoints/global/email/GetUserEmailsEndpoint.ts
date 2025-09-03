@@ -60,7 +60,8 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const query = Email.select()
             .where('deletedAt', null)
-            .where('status', EmailStatus.Sent);
+            .where('status', EmailStatus.Sent)
+            .where('showInMemberPortal', true);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));

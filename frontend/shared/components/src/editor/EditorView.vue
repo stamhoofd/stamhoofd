@@ -13,7 +13,7 @@
 
             <template v-if="$isMobile || $isIOS || $isAndroid" #right>
                 <LoadingButton :loading="loading">
-                     <button v-if="saveIconMobile" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" v-tooltip="saveText"/>
+                    <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" />
                     <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
                         {{ saveText }}
                     </button>
@@ -71,10 +71,10 @@
         <STToolbar v-if="!$isMobile && !$isIOS && !$isAndroid">
             <template #right>
                 <div class="editor-button-bar">
-                    <button class="button icon text-style" :class="{ 'is-active': showTextStyles }" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
+                    <button class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
                     <hr><button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('52395130-fb1f-4508-951a-067dd6324575')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
                     <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-                    <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click.prevent="openLinkEditor()" @mousedown.stop />
+                    <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click.prevent="openLinkEditor()" @mousedown.stop />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.native.stop>
                         <div class="button icon image" type="button" :v-tooltip="$t('91b1faf7-de10-46f3-9338-5930134da354')" />
                     </UploadButton>
@@ -93,7 +93,7 @@
             <button class="button icon text-style" type="button" :v-tooltip="$t('24c13e07-66e8-421d-9dde-c69758395be8')" @click.prevent="openTextStyles($event)" @mousedown.stop />
             <button v-if="smartVariables.length > 0" class="button icon wand" type="button" :v-tooltip="$t('130a074e-ce12-4bf1-9898-c49a3c00006e')" @click.prevent="showSmartVariableMenu" @mousedown.stop />
             <button class="button icon hr" type="button" :v-tooltip="$t('6ec5c3ba-7b6d-4ceb-9950-e152bed49b0a')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
-            <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click="openLinkEditor()" @mousedown.stop />
+            <button class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" :v-tooltip="$t('f501785a-7e57-4184-8cf0-a3413ad2f2a4')" @click="openLinkEditor()" @mousedown.stop />
             <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.prevent>
                 <div class="button icon image" type="button" :v-tooltip="$t('91b1faf7-de10-46f3-9338-5930134da354')" />
             </UploadButton>

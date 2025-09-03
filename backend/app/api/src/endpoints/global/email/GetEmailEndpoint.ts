@@ -40,8 +40,8 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         if (!model || (model.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
                 code: 'not_found',
-                human: 'Email not found',
-                message: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
+                message: 'Email not found',
+                human: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
                 statusCode: 404,
             });
         }

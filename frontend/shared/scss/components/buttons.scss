@@ -247,6 +247,7 @@
         white-space: nowrap;
         transition: opacity 0.2s ease-out, color 0.2s;
         position: relative;
+        z-index: 1;
 
         &:after {
             // Increase touch area by 15pixels
@@ -261,6 +262,94 @@
         &:active {
             opacity: 0.15;
             transition: opacity 0s, color 0.2s;
+        }
+
+        &.enabled {
+            &:after {
+                content: "";
+                position: absolute;
+                left: 0px;
+                right: 0px;
+                height: 34px;
+                top: 50% !important;
+                bottom: auto !important;
+                transform: translate(0%, -50%);
+                background-color: var(--color-current-background-shade, #{$color-background-shade});
+                border-radius: $border-radius;
+                z-index: -1;
+                will-change: opacity;
+                opacity: 1;
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+
+                // Inner shadow
+                box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        &:is(a), &:is(button), label & {
+            @media (pointer: coarse) {
+                &:before {
+                    transition: opacity 0.2s ease-out;
+                }
+
+                &:active {
+                    &:before {
+                        opacity: 0.15;
+                        transition: opacity 0s;
+                    }
+                }
+            }
+
+            @media (pointer: fine) {
+                opacity: 1;
+
+                &:after {
+                    content: "";
+                    position: absolute;
+                    left: 0px;
+                    right: 0px;
+                    height: 34px;
+                    top: 50% !important;
+                    bottom: auto !important;
+                    transform: translate(0%, -50%);
+                    background-color: var(--color-current-background-shade, #{$color-background-shade});
+                    border-radius: $border-radius;
+                    z-index: -1;
+                    will-change: opacity;
+                    opacity: 0;
+                    transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                }
+
+                &:before {
+                    transition: color 0.2s ease-out;
+                }
+
+                &:active {
+                    &:before {
+                        color: $color-dark;
+                        transition: color 0s;
+                    }
+                }
+
+                &:before {
+                    z-index: 1;
+                }
+
+                &.active, &:hover, &:active {
+                    &:after {
+                        opacity: 1;
+                        transform: translate(0%, -50%);
+                        transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+                    }
+                }
+
+                &:active {
+                    &:after {
+                        background-color: $color-gray-3;
+                    }
+                }
+                
+            }
         }
     }
 
@@ -474,13 +563,16 @@
                 height: 34px;
                 top: 50% !important;
                 bottom: auto !important;
-                background-color: $color-background-shade;
+                background-color: var(--color-current-background-shade, #{$color-background-shade});
                 border-radius: $border-radius;
                 transform: translate(-50%, -50%);
                 z-index: 0;
                 will-change: opacity;
                 opacity: 1;
                 transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+
+                // Inner shadow
+                box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
             }
 
             &:before {
@@ -536,7 +628,7 @@
                     height: 34px;
                     top: 50% !important;
                     bottom: auto !important;
-                    background-color: $color-background-shade;
+                    background-color: var(--color-current-background-shade, #{$color-background-shade});
                     border-radius: $border-radius;
                     transform: translate(-50%, -50%);
                     z-index: 0;

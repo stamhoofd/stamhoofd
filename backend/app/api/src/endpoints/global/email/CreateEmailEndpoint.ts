@@ -83,6 +83,14 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.json = request.body.json;
         model.status = request.body.status;
         model.attachments = request.body.attachments;
+        model.sendAsEmail = request.body.sendAsEmail ?? true;
+        model.showInMemberPortal = request.body.showInMemberPortal ?? false;
+
+        if (model.showInMemberPortal) {
+            if (!model.recipientFilter.canShowInMemberPortal) {
+                model.showInMemberPortal = false;
+            }
+        }
 
         const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
         const sender = list.find(e => e.id === request.body.senderId);

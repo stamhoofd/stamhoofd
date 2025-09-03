@@ -1,8 +1,26 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" save-icon-mobile="send" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="willSend ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Opslaan')" :replacements="replacements" :title="title" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" save-icon-mobile="send" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Publiceren')) : $t('Opslaan')" :replacements="replacements" :title="title" @save="send">
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
+
+                <button v-if="patchedEmail.recipientFilter.canShowInMemberPortal" 
+                    v-tooltip="showInMemberPortal ? $t('Tonen in ledenportaal') : $t('Onzichtbaar in ledenportaal')" 
+                    class="button icon small" 
+                    :class="{'earth': showInMemberPortal, 'earth-off': !showInMemberPortal}"
+                    type="button" 
+                    @click="showInMemberPortal = !showInMemberPortal"
+                    />
+
+                <button v-if="patchedEmail.recipientFilter.canShowInMemberPortal" 
+                    v-tooltip="sendAsEmail ? $t('Versturen via e-mail') : $t('Niet versturen via e-mail')" 
+                    class="button icon small" 
+                    :class="{'send': sendAsEmail, 'send-off': !sendAsEmail}"
+                    type="button" 
+                    :disabled="!willSend"
+                    @click="sendAsEmail = !sendAsEmail"
+                    />
+
                 <ProgressRing :radius="7" :stroke="2" :loading="true" :opacity="showLoading ? 1 : 0" />
             </h1>
 
@@ -21,7 +39,9 @@
                     </span>
                 </UploadFileButton>
 
-                <hr v-if="canOpenTemplates"><button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
+                <hr v-if="canOpenTemplates || patchedEmail.recipientFilter.canShowInMemberPortal">
+                <button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
+
             </template>
 
             <!-- List -->
@@ -50,13 +70,16 @@
                         <input id="mail-subject" v-model="subject" class="list-input" type="text" :placeholder="$t(`13b42902-e159-4e6a-8562-e87c9c691c8b`)">
                     </div>
                 </STListItem>
+
                 <STListItem v-if="senders.length > 0" class="no-padding" element-name="label">
                     <div class="list-input-box">
                         <span>{{ $t('01b5d104-748c-4801-a369-4eab05809fcf') }}:</span>
 
                         <div class="input-icon-container right icon arrow-down-small gray" :class="{'no-padding': !auth.hasFullAccess()}">
                             <select v-model="senderId" class="list-input">
-                                <option :value="null" disabled>{{ $t('Maak een keuze') }}</option>
+                                <option :value="null" disabled>
+                                    {{ $t('Maak een keuze') }}
+                                </option>
                                 <option v-for="e in senders" :key="e.id" :value="e.id">
                                     {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
                                 </option>
@@ -166,7 +189,7 @@ export type RecipientMultipleChoiceOption = {
 const willSend = computed(() => {
     return (!props.editEmail || props.editEmail.status === EmailStatus.Draft);
 });
-const title = computed(() => props.editEmail ? (willSend.value ? $t('Bericht versturen') : $t('Bericht bewerken')) : $t('59367bfa-a918-4475-8d90-d9e3d6c71ad8'));
+const title = computed(() => props.editEmail ? (willSend.value ? $t('Bericht versturen') : $t('Bericht bewerken')) : $t('Nieuw bericht'));
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
@@ -321,6 +344,20 @@ const senderId = computed({
     get: () => email.value?.senderId ?? null,
     set: (id) => {
         addPatch({ senderId: id });
+    },
+});
+
+const showInMemberPortal = computed({
+    get: () => patchedEmail.value?.showInMemberPortal ?? true,
+    set: (show) => {
+        addPatch({ showInMemberPortal: show });
+    },
+});
+
+const sendAsEmail = computed({
+    get: () => patchedEmail.value?.sendAsEmail ?? true,
+    set: (send) => {
+        addPatch({ sendAsEmail: send });
     },
 });
 
@@ -562,14 +599,23 @@ async function send() {
         return;
     }
 
+     if (!sendAsEmail.value && !showInMemberPortal.value) {
+        Toast.info($t(`Kies of je het bericht wilt publiceren in het ledenportaal en/of versturen via e-mail via de knoppen bovenaan`)).show();
+        return;
+    }
+
     const emailRecipientsCount = email.value.emailRecipientsCount;
     let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
 
     if (emailRecipientsCount) {
-        confirmText = emailRecipientsCount === 1 ? `Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?` : `Ben je zeker dat je de e-mail naar ${email.value.emailRecipientsCount} ontvangers wilt versturen?`;
+        confirmText = emailRecipientsCount === 1 ? $t('Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?') : $t('Ben je zeker dat je de e-mail naar {count} ontvangers wilt versturen?', {count: emailRecipientsCount} );
     }
 
-    const isConfirm = await CenteredMessage.confirm(confirmText, $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`));
+    if (!sendAsEmail.value) {
+        confirmText = $t(`Ben je zeker dat je dit bericht in het ledenportaal wilt publiceren?`);
+    }
+
+    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`) : $t('Publiceren'));
 
     if (!isConfirm) return;
 

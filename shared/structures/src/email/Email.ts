@@ -77,8 +77,21 @@ export class EmailRecipientFilter extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EmailRecipientSubfilter) })
     filters: EmailRecipientSubfilter[] = [];
 
-    @field({ decoder: BooleanDecoder })
+    /**
+     * @deprecated.
+     * This doesn't do anything and is replaced by automatic email grouping.
+     */
+    @field({ decoder: BooleanDecoder, optional: true })
     groupByEmail = false;
+
+    get canShowInMemberPortal() {
+        for (const filter of this.filters) {
+            if (filter.type === EmailRecipientFilterType.Members || filter.type === EmailRecipientFilterType.MemberParents || filter.type === EmailRecipientFilterType.MemberUnverified || filter.type === EmailRecipientFilterType.RegistrationMembers || filter.type === EmailRecipientFilterType.RegistrationParents || filter.type === EmailRecipientFilterType.RegistrationUnverified) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 export class Email extends AutoEncoder {
@@ -166,6 +179,12 @@ export class Email extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true, version: 382 })
     deletedAt: Date | null = null;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    sendAsEmail = true;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    showInMemberPortal = false;
 
     getTemplateType() {
         for (const filter of this.recipientFilter.filters) {

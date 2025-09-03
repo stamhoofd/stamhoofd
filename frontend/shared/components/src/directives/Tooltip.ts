@@ -1,16 +1,16 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 
-import { ModalStackEventBus } from "../..";
-import Tooltip from "../overlays/Tooltip.vue";
-import type {ObjectDirective} from "vue";
+import { ModalStackEventBus } from '../..';
+import Tooltip from '../overlays/Tooltip.vue';
+import type { ObjectDirective } from 'vue';
 
-const TooltipDirective: ObjectDirective<HTMLElement & {$tooltipDisplayedComponent: null|ComponentWithProperties}, string> = {
+const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedComponent: null | ComponentWithProperties } & { $tooltipBindingValue: string | undefined }, string> = {
     beforeMount(el, binding) {
         let isMouseHover = false;
         const displayedComponent: ComponentWithProperties | null = el.$tooltipDisplayedComponent ?? null;
         el.$tooltipDisplayedComponent = displayedComponent;
 
-        if (!binding.value || typeof binding.value !== "string") {
+        if (!binding.value || typeof binding.value !== 'string') {
             return;
         }
 
@@ -19,10 +19,12 @@ const TooltipDirective: ObjectDirective<HTMLElement & {$tooltipDisplayedComponen
             return;
         }
 
+        el.$tooltipBindingValue = binding.value;
+
         // Add a hover listener
         el.addEventListener(
-            "mouseover",
-            (_event) => {                
+            'mouseover',
+            (_event) => {
                 if (!isMouseHover) {
                     isMouseHover = true;
 
@@ -32,58 +34,65 @@ const TooltipDirective: ObjectDirective<HTMLElement & {$tooltipDisplayedComponen
 
                             // Present
                             el.$tooltipDisplayedComponent = new ComponentWithProperties(Tooltip, {
-                                text: binding.value,
+                                text: el.$tooltipBindingValue ?? binding.value,
                                 x: rect.left,
                                 y: rect.bottom,
-                                xPlacement: "right",
-                                yPlacement: "bottom",
+                                xPlacement: 'right',
+                                yPlacement: 'bottom',
                                 wrapHeight: rect.height,
                             });
 
-                            ModalStackEventBus.sendEvent("present", {
+                            ModalStackEventBus.sendEvent('present', {
                                 components: [
-                                    el.$tooltipDisplayedComponent
+                                    el.$tooltipDisplayedComponent,
                                 ],
-                                modalDisplayStyle: "overlay",
-                            }).catch(console.error)
+                                modalDisplayStyle: 'overlay',
+                            }).catch(console.error);
                         }
                     }, 200);
                 }
             },
-            { passive: true }
+            { passive: true },
         );
         el.addEventListener(
-            "mouseleave",
+            'mouseleave',
             (_event) => {
                 isMouseHover = false;
 
                 if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
                     try {
-                        (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({force: true})
-                    } catch (e) {
+                        (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({ force: true });
+                    }
+                    catch (e) {
                         // Ignore
                         console.error(e);
                     }
-                } else {
-                    console.error("Tooltip $tooltipDisplayedComponent.vnode not set", el.$tooltipDisplayedComponent);
+                }
+                else {
+                    console.error('Tooltip $tooltipDisplayedComponent.vnode not set', el.$tooltipDisplayedComponent);
                 }
                 el.$tooltipDisplayedComponent = null;
             },
-            { passive: true }
+            { passive: true },
         );
+    },
+
+    updated(el, binding) {
+        el.$tooltipBindingValue = binding.value;
     },
 
     unmounted(el, binding, vnode) {
         if (el.$tooltipDisplayedComponent && el.$tooltipDisplayedComponent.vnode) {
             try {
-                (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({force: true})
-            } catch (e) {
+                (el.$tooltipDisplayedComponent.vnode.component!.proxy as any).pop({ force: true });
+            }
+            catch (e) {
                 // Ignore
                 console.error(e);
             }
         }
         el.$tooltipDisplayedComponent = null;
-    }
+    },
 };
 
 export default TooltipDirective;

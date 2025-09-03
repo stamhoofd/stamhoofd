@@ -13,7 +13,9 @@
             <span v-else-if="status.icon" :class="'icon tiny ' + status.icon" />
         </p>
         <h3 class="style-title-list large">
-            {{ email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8') }}
+            <span>{{ email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8') }}</span>
+            <span v-if="email.status !== EmailStatus.Draft && !email.sendAsEmail" v-tooltip="$t('Niet verzonden als e-mail')" class="icon small send-off" />
+            <span v-if="email.status !== EmailStatus.Draft && !email.showInMemberPortal" v-tooltip="$t('Niet zichtbaar in ledenportaal')" class="icon small earth-off" />
         </h3>
         <p v-if="email.snippet" class="style-description-small pre-wrap style-limit-lines" v-text="email.snippet" />
 
