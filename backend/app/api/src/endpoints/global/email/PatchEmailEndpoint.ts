@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
-import { EmailPreview, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
+import { EmailPreview, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -40,8 +40,8 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (!model || (model.organizationId !== (organization?.id ?? null))) {
             throw new SimpleError({
                 code: 'not_found',
-                human: 'Email not found',
-                message: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
+                message: 'Email not found',
+                human: $t(`9ddb6616-f62d-4c91-82a9-e5cf398e4c4a`),
                 statusCode: 404,
             });
         }
@@ -118,14 +118,37 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             if (model.status !== EmailStatus.Draft) {
                 throw new SimpleError({
                     code: 'not_draft',
-                    human: 'Email is not a draft',
-                    message: $t(`Je kan de ontvangerslijst alleen aanpassen als de e-mail nog een concept is`),
+                    message: 'Email is not a draft',
+                    human: $t(`Je kan de ontvangerslijst alleen aanpassen als de e-mail nog een concept is`),
                     statusCode: 400,
                 });
             }
 
             model.recipientFilter = patchObject(model.recipientFilter, request.body.recipientFilter);
             rebuild = true;
+        }
+
+        if (request.body.sendAsEmail !== undefined) {
+            if (model.status !== EmailStatus.Draft) {
+                throw new SimpleError({
+                    code: 'not_draft',
+                    message: 'Email is not a draft',
+                    human: $t(`Je kan enkel wijzigen of een bericht via e-mail verzonden wordt als het bericht nog niet werd verzonden.`),
+                    statusCode: 400,
+                });
+            }
+
+            model.sendAsEmail = request.body.sendAsEmail ?? true;
+        }
+
+        if (request.body.showInMemberPortal !== undefined) {
+            model.showInMemberPortal = request.body.showInMemberPortal ?? false;
+
+            if (model.showInMemberPortal) {
+                if (!model.recipientFilter.canShowInMemberPortal) {
+                    model.showInMemberPortal = false;
+                }
+            }
         }
 
         // Attachments
@@ -157,34 +180,6 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     message: 'Cannot send emails from this sender',
                     human: $t('1b509614-30b0-484c-af72-57d4bc9ea788'),
                 });
-            }
-
-            model.throwIfNotReadyToSend();
-
-            const replacement = '{{unsubscribeUrl}}';
-
-            if (model.html) {
-                // Check email contains an unsubscribe button
-                if (!model.html.includes(replacement)) {
-                    throw new SimpleError({
-                        code: 'missing_unsubscribe_button',
-                        message: 'Missing unsubscribe button',
-                        human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
-                        field: 'html',
-                    });
-                }
-            }
-
-            if (model.text) {
-                // Check email contains an unsubscribe button
-                if (!model.text.includes(replacement)) {
-                    throw new SimpleError({
-                        code: 'missing_unsubscribe_button',
-                        message: 'Missing unsubscribe button',
-                        human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
-                        field: 'text',
-                    });
-                }
             }
 
             // Preview the sending status

@@ -13,6 +13,7 @@ import { EmailRecipient } from './EmailRecipient';
 import { EmailTemplate } from './EmailTemplate';
 import { Organization } from './Organization';
 import { User } from './User';
+import { Platform } from './Platform';
 
 function errorToSimpleErrors(e: unknown) {
     if (isSimpleErrors(e)) {
@@ -50,6 +51,23 @@ export class Email extends QueryableModel {
 
     @column({ type: 'string', nullable: true })
     userId: string | null = null;
+
+    /**
+     * Send the message as an email.
+     * You can't edit this after the message has been published.
+     *
+     * If false, when sending the message, it will switch to 'Sent' directly without adjusting the email_recipients directly.
+     */
+    @column({ type: 'boolean' })
+    sendAsEmail = true;
+
+    /**
+     * Show the message in the member portal
+     *
+     * Note: status should be 'Sent' for the message to be visible
+     */
+    @column({ type: 'boolean' })
+    showInMemberPortal = true;
 
     @column({ type: 'json', decoder: EmailRecipientFilter })
     recipientFilter: EmailRecipientFilter = EmailRecipientFilter.create({});
@@ -254,6 +272,43 @@ export class Email extends QueryableModel {
         }
 
         this.validateAttachments();
+    }
+
+    throwIfNoUnsubscribeButton() {
+        if (this.sendAsEmail === false) {
+            return;
+        }
+
+        if (this.emailType) {
+            // System email, no need for unsubscribe button
+            return;
+        }
+
+        const replacement = '{{unsubscribeUrl}}';
+
+        if (this.html) {
+            // Check email contains an unsubscribe button
+            if (!this.html.includes(replacement)) {
+                throw new SimpleError({
+                    code: 'missing_unsubscribe_button',
+                    message: 'Missing unsubscribe button',
+                    human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
+                    field: 'html',
+                });
+            }
+        }
+
+        if (this.text) {
+            // Check email contains an unsubscribe button
+            if (!this.text.includes(replacement)) {
+                throw new SimpleError({
+                    code: 'missing_unsubscribe_button',
+                    message: 'Missing unsubscribe button',
+                    human: $t(`dd55e04b-e5d9-4d9a-befc-443eef4175a8`),
+                    field: 'text',
+                });
+            }
+        }
     }
 
     validateAttachments() {
@@ -526,6 +581,7 @@ export class Email extends QueryableModel {
 
     async queueForSending(waitForSending = false) {
         this.throwIfNotReadyToSend();
+        this.throwIfNoUnsubscribeButton();
         await this.lock(async (upToDate) => {
             if (upToDate.status === EmailStatus.Draft) {
                 upToDate.status = EmailStatus.Queued;
@@ -585,6 +641,7 @@ export class Email extends QueryableModel {
 
                 try {
                     upToDate.throwIfNotReadyToSend();
+                    upToDate.throwIfNoUnsubscribeButton();
 
                     if (!from) {
                         throw new SimpleError({
@@ -629,223 +686,225 @@ export class Email extends QueryableModel {
                     }
 
                     // Create a buffer of all attachments
-                    for (const attachment of upToDate.attachments) {
-                        if (!attachment.content && !attachment.file) {
-                            console.warn('Attachment without content found, skipping', attachment);
-                            continue;
-                        }
+                    if (upToDate.sendAsEmail === true) {
+                        for (const attachment of upToDate.attachments) {
+                            if (!attachment.content && !attachment.file) {
+                                console.warn('Attachment without content found, skipping', attachment);
+                                continue;
+                            }
 
-                        let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
+                            let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
 
-                        if (attachment.contentType === 'application/pdf') {
+                            if (attachment.contentType === 'application/pdf') {
                             // tmp solution for pdf only
-                            filename += '.pdf';
-                        }
+                                filename += '.pdf';
+                            }
 
-                        if (attachment.file?.name) {
-                            filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-                        }
+                            if (attachment.file?.name) {
+                                filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                            }
 
-                        // Correct file name if needed
-                        if (attachment.filename) {
-                            filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-                        }
+                            // Correct file name if needed
+                            if (attachment.filename) {
+                                filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                            }
 
-                        if (attachment.content) {
-                            attachments.push({
-                                filename: filename,
-                                content: attachment.content,
-                                contentType: attachment.contentType ?? undefined,
-                                encoding: 'base64',
-                            });
-                        }
-                        else {
+                            if (attachment.content) {
+                                attachments.push({
+                                    filename: filename,
+                                    content: attachment.content,
+                                    contentType: attachment.contentType ?? undefined,
+                                    encoding: 'base64',
+                                });
+                            }
+                            else {
                             // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
-                            const withSigned = await attachment.file!.withSignedUrl();
-                            if (!withSigned || !withSigned.signedUrl) {
-                                throw new SimpleError({
-                                    code: 'attachment_not_found',
-                                    message: 'Attachment not found',
-                                    human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
-                                });
-                            }
-
-                            const filePath = withSigned.signedUrl;
-                            let fileBuffer: Buffer | null = null;
-                            try {
-                                const response = await fetch(filePath);
-                                fileBuffer = Buffer.from(await response.arrayBuffer());
-                            }
-                            catch (e) {
-                                throw new SimpleError({
-                                    code: 'attachment_not_found',
-                                    message: 'Attachment not found',
-                                    human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
-                                });
-                            }
-
-                            attachments.push({
-                                filename: filename,
-                                contentType: attachment.contentType ?? undefined,
-                                content: fileBuffer,
-                            });
-                        }
-                    }
-
-                    // Start actually sending in batches of recipients that are not yet sent
-                    let idPointer = '';
-                    const batchSize = 100;
-                    let isSavingStatus = false;
-                    let lastStatusSave = new Date();
-
-                    async function saveStatus() {
-                        if (!upToDate) {
-                            return;
-                        }
-                        if (isSavingStatus) {
-                            return;
-                        }
-                        if ((new Date().getTime() - lastStatusSave.getTime()) < 1000 * 5) {
-                            // Save at most every 5 seconds
-                            return;
-                        }
-                        if (succeededCount < upToDate.succeededCount || softFailedCount < upToDate.softFailedCount || failedCount < upToDate.failedCount) {
-                            // Do not update on retries
-                            return;
-                        }
-
-                        lastStatusSave = new Date();
-                        isSavingStatus = true;
-                        upToDate.succeededCount = succeededCount;
-                        upToDate.softFailedCount = softFailedCount;
-                        upToDate.failedCount = failedCount;
-
-                        try {
-                            await upToDate.save();
-                        }
-                        finally {
-                            isSavingStatus = false;
-                        }
-                    }
-
-                    while (true) {
-                        abort.throwIfAborted();
-                        const data = await SQL.select()
-                            .from('email_recipients')
-                            .where('emailId', upToDate.id)
-                            .where('id', SQLWhereSign.Greater, idPointer)
-                            .orderBy(SQL.column('id'), 'ASC')
-                            .limit(batchSize)
-                            .fetch();
-
-                        const recipients = EmailRecipient.fromRows(data, 'email_recipients');
-
-                        if (recipients.length === 0) {
-                            break;
-                        }
-
-                        const sendingPromises: Promise<void>[] = [];
-                        let skipped = 0;
-
-                        for (const recipient of recipients) {
-                            idPointer = recipient.id;
-
-                            if (recipient.sentAt) {
-                                succeededCount += 1;
-                                await saveStatus();
-                                skipped++;
-                                continue;
-                            }
-
-                            if (!recipient.email) {
-                                skipped++;
-                                continue;
-                            }
-
-                            if (recipient.duplicateOfRecipientId) {
-                                skipped++;
-                                continue;
-                            }
-
-                            let promiseResolve: (value: void | PromiseLike<void>) => void;
-                            const promise = new Promise<void>((resolve) => {
-                                promiseResolve = resolve;
-                            });
-
-                            const virtualRecipient = recipient.getRecipient();
-
-                            let resolved = false;
-                            const callback = async (error: Error | null) => {
-                                if (resolved) {
-                                    return;
+                                const withSigned = await attachment.file!.withSignedUrl();
+                                if (!withSigned || !withSigned.signedUrl) {
+                                    throw new SimpleError({
+                                        code: 'attachment_not_found',
+                                        message: 'Attachment not found',
+                                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                                    });
                                 }
-                                resolved = true;
 
+                                const filePath = withSigned.signedUrl;
+                                let fileBuffer: Buffer | null = null;
                                 try {
-                                    if (error === null) {
-                                        // Mark saved
-                                        recipient.sentAt = new Date();
-
-                                        // Update repacements that have been generated
-                                        recipient.replacements = virtualRecipient.replacements;
-
-                                        succeededCount += 1;
-                                        await recipient.save();
-                                        await saveStatus();
-                                    }
-                                    else {
-                                        recipient.failCount += 1;
-                                        recipient.failErrorMessage = error.message;
-                                        recipient.failError = errorToSimpleErrors(error);
-                                        recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
-                                        recipient.lastFailedAt = new Date();
-
-                                        if (isSoftEmailRecipientError(recipient.failError)) {
-                                            softFailedCount += 1;
-                                        }
-                                        else {
-                                            failedCount += 1;
-                                        }
-                                        await recipient.save();
-                                        await saveStatus();
-                                    }
+                                    const response = await fetch(filePath);
+                                    fileBuffer = Buffer.from(await response.arrayBuffer());
                                 }
                                 catch (e) {
-                                    console.error(e);
+                                    throw new SimpleError({
+                                        code: 'attachment_not_found',
+                                        message: 'Attachment not found',
+                                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                                    });
                                 }
-                                promiseResolve();
-                            };
 
-                            // Do send the email
-                            // Create e-mail builder
-                            const builder = await getEmailBuilder(organization ?? null, {
-                                recipients: [
-                                    virtualRecipient,
-                                ],
-                                from,
-                                replyTo,
-                                subject: upToDate.subject!,
-                                html: upToDate.html!,
-                                type: upToDate.emailType ? 'transactional' : 'broadcast',
-                                attachments,
-                                callback(error: Error | null) {
-                                    callback(error).catch(console.error);
-                                },
-                                headers: {
-                                    'X-Email-Id': upToDate.id,
-                                    'X-Email-Recipient-Id': recipient.id,
-                                },
-                            });
-                            abort.throwIfAborted(); // do not schedule if aborted
-                            EmailClass.schedule(builder);
-                            sendingPromises.push(promise);
+                                attachments.push({
+                                    filename: filename,
+                                    contentType: attachment.contentType ?? undefined,
+                                    content: fileBuffer,
+                                });
+                            }
                         }
 
-                        if (sendingPromises.length > 0 || skipped > 0) {
-                            await Promise.all(sendingPromises);
+                        // Start actually sending in batches of recipients that are not yet sent
+                        let idPointer = '';
+                        const batchSize = 100;
+                        let isSavingStatus = false;
+                        let lastStatusSave = new Date();
+
+                        async function saveStatus() {
+                            if (!upToDate) {
+                                return;
+                            }
+                            if (isSavingStatus) {
+                                return;
+                            }
+                            if ((new Date().getTime() - lastStatusSave.getTime()) < 1000 * 5) {
+                            // Save at most every 5 seconds
+                                return;
+                            }
+                            if (succeededCount < upToDate.succeededCount || softFailedCount < upToDate.softFailedCount || failedCount < upToDate.failedCount) {
+                            // Do not update on retries
+                                return;
+                            }
+
+                            lastStatusSave = new Date();
+                            isSavingStatus = true;
+                            upToDate.succeededCount = succeededCount;
+                            upToDate.softFailedCount = softFailedCount;
+                            upToDate.failedCount = failedCount;
+
+                            try {
+                                await upToDate.save();
+                            }
+                            finally {
+                                isSavingStatus = false;
+                            }
                         }
-                        else {
-                            break;
+
+                        while (true) {
+                            abort.throwIfAborted();
+                            const data = await SQL.select()
+                                .from('email_recipients')
+                                .where('emailId', upToDate.id)
+                                .where('id', SQLWhereSign.Greater, idPointer)
+                                .orderBy(SQL.column('id'), 'ASC')
+                                .limit(batchSize)
+                                .fetch();
+
+                            const recipients = EmailRecipient.fromRows(data, 'email_recipients');
+
+                            if (recipients.length === 0) {
+                                break;
+                            }
+
+                            const sendingPromises: Promise<void>[] = [];
+                            let skipped = 0;
+
+                            for (const recipient of recipients) {
+                                idPointer = recipient.id;
+
+                                if (recipient.sentAt) {
+                                    succeededCount += 1;
+                                    await saveStatus();
+                                    skipped++;
+                                    continue;
+                                }
+
+                                if (!recipient.email) {
+                                    skipped++;
+                                    continue;
+                                }
+
+                                if (recipient.duplicateOfRecipientId) {
+                                    skipped++;
+                                    continue;
+                                }
+
+                                let promiseResolve: (value: void | PromiseLike<void>) => void;
+                                const promise = new Promise<void>((resolve) => {
+                                    promiseResolve = resolve;
+                                });
+
+                                const virtualRecipient = recipient.getRecipient();
+
+                                let resolved = false;
+                                const callback = async (error: Error | null) => {
+                                    if (resolved) {
+                                        return;
+                                    }
+                                    resolved = true;
+
+                                    try {
+                                        if (error === null) {
+                                        // Mark saved
+                                            recipient.sentAt = new Date();
+
+                                            // Update repacements that have been generated
+                                            recipient.replacements = virtualRecipient.replacements;
+
+                                            succeededCount += 1;
+                                            await recipient.save();
+                                            await saveStatus();
+                                        }
+                                        else {
+                                            recipient.failCount += 1;
+                                            recipient.failErrorMessage = error.message;
+                                            recipient.failError = errorToSimpleErrors(error);
+                                            recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
+                                            recipient.lastFailedAt = new Date();
+
+                                            if (isSoftEmailRecipientError(recipient.failError)) {
+                                                softFailedCount += 1;
+                                            }
+                                            else {
+                                                failedCount += 1;
+                                            }
+                                            await recipient.save();
+                                            await saveStatus();
+                                        }
+                                    }
+                                    catch (e) {
+                                        console.error(e);
+                                    }
+                                    promiseResolve();
+                                };
+
+                                // Do send the email
+                                // Create e-mail builder
+                                const builder = await getEmailBuilder(organization ?? null, {
+                                    recipients: [
+                                        virtualRecipient,
+                                    ],
+                                    from,
+                                    replyTo,
+                                    subject: upToDate.subject!,
+                                    html: upToDate.html!,
+                                    type: upToDate.emailType ? 'transactional' : 'broadcast',
+                                    attachments,
+                                    callback(error: Error | null) {
+                                        callback(error).catch(console.error);
+                                    },
+                                    headers: {
+                                        'X-Email-Id': upToDate.id,
+                                        'X-Email-Recipient-Id': recipient.id,
+                                    },
+                                });
+                                abort.throwIfAborted(); // do not schedule if aborted
+                                EmailClass.schedule(builder);
+                                sendingPromises.push(promise);
+                            }
+
+                            if (sendingPromises.length > 0 || skipped > 0) {
+                                await Promise.all(sendingPromises);
+                            }
+                            else {
+                                break;
+                            }
                         }
                     }
                 }
@@ -870,7 +929,7 @@ export class Email extends QueryableModel {
                     throw e;
                 }
 
-                if (upToDate.emailRecipientsCount === 0 && upToDate.userId === null) {
+                if (upToDate.sendAsEmail && upToDate.emailRecipientsCount === 0 && upToDate.userId === null) {
                     // We only delete automated emails (email type) if they have no recipients
                     console.log('No recipients found for email ', upToDate.id, ' deleting...');
                     await upToDate.delete();
@@ -880,7 +939,7 @@ export class Email extends QueryableModel {
                 console.log('Finished sending email', upToDate.id);
                 // Mark email as sent
 
-                if ((succeededCount + failedCount + softFailedCount) === 0) {
+                if (upToDate.sendAsEmail && (succeededCount + failedCount + softFailedCount) === 0) {
                     upToDate.status = EmailStatus.Failed;
                     upToDate.emailErrors = new SimpleErrors(
                         new SimpleError({
@@ -996,6 +1055,15 @@ export class Email extends QueryableModel {
             }
 
             abort.throwIfAborted();
+            const organization = upToDate.organizationId ? (await Organization.getByID(upToDate.organizationId) ?? null) : null;
+            if (upToDate.organizationId && !organization) {
+                throw new SimpleError({
+                    code: 'organization_not_found',
+                    message: 'Organization not found',
+                    human: $t(`f3c6e2b1-2f3a-4e2f-8f7a-1e5f3d3c8e2a`),
+                });
+            }
+            const platform = await Platform.getSharedPrivateStruct();
 
             console.log('Building recipients for email', id);
 
@@ -1090,6 +1158,14 @@ export class Email extends QueryableModel {
                             recipient.userId = item.userId ?? null;
                             recipient.organizationId = upToDate.organizationId ?? null;
                             recipient.duplicateOfRecipientId = duplicateOfRecipientId;
+
+                            await fillRecipientReplacements(recipient, {
+                                platform,
+                                organization,
+                                from: upToDate.getFromAddress(),
+                                replyTo: null,
+                                forPreview: false,
+                            });
 
                             await recipient.save();
 

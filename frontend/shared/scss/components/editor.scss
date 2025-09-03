@@ -33,6 +33,12 @@
         bottom: 0;
         border: $border-width solid $color-border;
         background: var(--color-current-background-shade);
+
+        > * {
+            --color-current-background: #{$color-background-shade};
+            --color-current-background-shade: #{$color-background-shade-darker};
+        }
+
         border-radius: $border-radius-modals;
         transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-start;
 
@@ -44,7 +50,7 @@
         }
 
         >.button {
-            padding: 10px 5px;
+            padding: 12px 5px;
         }
     }
 

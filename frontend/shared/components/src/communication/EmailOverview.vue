@@ -108,14 +108,40 @@
                     </template>
 
                     <h2 v-if="email.user.name" class="style-title-list">
-                        {{ $t('Verstuurd door') }}: {{ email.user.name }} ({{ email.user.email }})<span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
+                        <span>{{ $t('Gepubliceerd door') }}: {{ email.user.name }} ({{ email.user.email }})</span><span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
                     </h2>
                     <h2 v-else class="style-title-list">
-                        {{ $t('Verstuurd door') }}: {{ email.user.email }}<span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
+                        <span>{{ $t('Gepubliceerd door') }}: {{ email.user.email }}</span><span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.emailRecipientsCount" :selectable="email.status !== EmailStatus.Draft" class="left-center  right-stack" @click="email.status !== EmailStatus.Draft ? navigate(Routes.Recipients) : undefined">
+                <STListItem v-if="!email.sendAsEmail && email.showInMemberPortal">
+                    <template #left>
+                        <span class="icon send-off small" />
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Niet verzonden als e-mail') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Dit bericht is enkel zichtbaar in het ledenportaal') }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="email.sendAsEmail && !email.showInMemberPortal">
+                    <template #left>
+                        <span class="icon earth-off small" />
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Niet zichtbaar in ledenportaal') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Dit bericht is enkel verzonden als e-mail') }}
+                    </p>
+                </STListItem>
+
+                <STListItem v-if="email.sendAsEmail && email.emailRecipientsCount" :selectable="email.status !== EmailStatus.Draft" class="left-center  right-stack" @click="email.status !== EmailStatus.Draft ? navigate(Routes.Recipients) : undefined">
                     <template #left>
                         <span class="icon search" />
                     </template>
@@ -128,7 +154,7 @@
                         <p class="style-description-small">
                             {{ formatInteger(email.emailRecipientsCount) }}
                         </p>
-                        <span class="icon small arrow-right-small" v-if="email.status !== EmailStatus.Draft" />
+                        <span v-if="email.status !== EmailStatus.Draft" class="icon small arrow-right-small" />
                     </template>
                 </STListItem>
 
