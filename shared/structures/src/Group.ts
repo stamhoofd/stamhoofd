@@ -13,7 +13,7 @@ import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { StockReservation } from './StockReservation.js';
 import { Event } from './Event.js';
 import { Organization } from './Organization.js';
-import { Formatter } from '@stamhoofd/utility';
+import { getActivePeriodIds } from './getActivePeriods.js';
 
 export enum GroupStatus {
     Open = 'Open',
@@ -256,25 +256,7 @@ export class Group extends AutoEncoder {
      * group and organization combination.
      */
     getActivePeriodIds(organization: Organization | null) {
-        const periods = new Set<string>();
-        periods.add(this.periodId);
-
-        if (organization) {
-            periods.add(organization.period.period.id);
-
-            // If the organization period is ending within 2 months, also check the next period id
-            const twoMonthsFromNow = Formatter.luxon().plus({ months: 2 }).toJSDate();
-            if (organization.period.period.endDate <= twoMonthsFromNow && organization.period.period.nextPeriodId) {
-                periods.add(organization.period.period.nextPeriodId);
-            }
-            // If the organization period has only been active for less than 2 months, also check the previous period id
-            const twoMonthsAgo = Formatter.luxon().minus({ months: 2 }).toJSDate();
-            if (organization.period.period.startDate >= twoMonthsAgo && organization.period.period.previousPeriodId) {
-                periods.add(organization.period.period.previousPeriodId);
-            }
-        }
-
-        return periods;
+        return getActivePeriodIds(this.periodId, organization);
     }
 
     getRecommendedFilter(organization?: Organization | null): StamhoofdFilter {

@@ -31,6 +31,7 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
+import { getActivePeriodIds } from '../getActivePeriods.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];
@@ -389,9 +390,17 @@ export class PlatformFamily {
         const organizationIds = new Set<string>();
         const organizationTags = new Set<string>();
         const ages = new Set<number>();
+        const periodIds = getActivePeriodIds(null, null, this.platform);
+        for (const org of this.organizations) {
+            const ids = getActivePeriodIds(null, org);
+            for (const id of ids) {
+                periodIds.add(id);
+            }
+        }
+        const periodIdsArray = [...periodIds];
 
         for (const member of this.members) {
-            for (const group of member.filterGroups({ types: [GroupType.Membership], currentPeriod: true, includePending: true })) {
+            for (const group of member.filterGroups({ types: [GroupType.Membership], periodIds: periodIdsArray, includePending: true })) {
                 groups.add(group.id);
                 if (group.defaultAgeGroupId) {
                     defaultGroupIds.add(group.defaultAgeGroupId);
@@ -440,6 +449,7 @@ export class PlatformFamily {
                     $and: [
                         {
                             $or: [
+                                { minAge: null },
                                 { minAge: { $lte: age } },
                             ],
                         },
@@ -862,17 +872,17 @@ export class PlatformMember implements ObjectWithRecords {
      * @param filters.organizationId - Only show registrations for this organization
      * @returns
      */
-    filterRegistrations(filters: { 
-        groups?: Group[] | null; 
-        groupIds?: string[] | null; 
-        defaultAgeGroupIds?: string[]; 
-        canRegister?: boolean; 
-        periodId?: string; 
+    filterRegistrations(filters: {
+        groups?: Group[] | null;
+        groupIds?: string[] | null;
+        defaultAgeGroupIds?: string[];
+        canRegister?: boolean;
+        periodId?: string;
         periodIds?: string[];
-        includeFuture?: boolean; 
-        currentPeriod?: boolean; 
-        types?: GroupType[]; 
-        organizationId?: string 
+        includeFuture?: boolean;
+        currentPeriod?: boolean;
+        types?: GroupType[];
+        organizationId?: string;
     }) {
         return this.patchedMember.registrations.filter((r) => {
             if (r.registeredAt === null || r.deactivatedAt !== null) {
@@ -928,16 +938,16 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
-    filterGroups(filters: { 
-        groups?: Group[] | null; 
-        canRegister?: boolean; 
-        periodId?: string; 
+    filterGroups(filters: {
+        groups?: Group[] | null;
+        canRegister?: boolean;
+        periodId?: string;
         periodIds?: string[];
-        currentPeriod?: boolean; 
-        includeFuture?: boolean; 
-        includePending?: boolean; 
-        types?: GroupType[]; 
-        organizationId?: string 
+        currentPeriod?: boolean;
+        includeFuture?: boolean;
+        includePending?: boolean;
+        types?: GroupType[];
+        organizationId?: string;
     }) {
         const registrations = this.filterRegistrations(filters);
         const base: Group[] = [];
@@ -1017,14 +1027,14 @@ export class PlatformMember implements ObjectWithRecords {
         return configurations;
     }
 
-    filterOrganizations(filters: { 
-        groups?: Group[] | null; 
-        canRegister?: boolean; 
-        periodId?: string; 
+    filterOrganizations(filters: {
+        groups?: Group[] | null;
+        canRegister?: boolean;
+        periodId?: string;
         periodIds?: string[];
-        withResponsibilities?: boolean; 
-        currentPeriod?: boolean; 
-        types?: GroupType[] 
+        withResponsibilities?: boolean;
+        currentPeriod?: boolean;
+        types?: GroupType[];
     }) {
         const registrations = this.filterRegistrations(filters);
         const base: Organization[] = [];
