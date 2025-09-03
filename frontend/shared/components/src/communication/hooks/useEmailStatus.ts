@@ -18,12 +18,26 @@ export function useEmailStatus() {
                     theme: 'theme-secundary',
                 };
             case EmailStatus.Sending:
+                if (!email.sendAsEmail) {
+                    return {
+                        text: $t('Bezig met publiceren'),
+                        theme: 'theme-secundary',
+                        progress: email.emailRecipientsCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.emailRecipientsCount) : undefined,
+                    };
+                }
                 return {
                     text: $t('f5eb4dcd-ddc1-4952-a40e-845cda2b88ce'),
                     theme: 'theme-secundary',
                     progress: email.emailRecipientsCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.emailRecipientsCount) : undefined,
                 };
             case EmailStatus.Queued:
+                if (!email.sendAsEmail) {
+                    return {
+                        text: $t('In wachtrij om te publiceren'),
+                        theme: 'theme-secundary',
+                        progress: 0,
+                    };
+                }
                 return {
                     text: $t('In wachtrij om te verzenden'),
                     theme: 'theme-secundary',

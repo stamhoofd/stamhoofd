@@ -1,10 +1,10 @@
 import { Email, EmailAddress, EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
-import { BalanceItem as BalanceItemStruct, EmailRecipient, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
+import { BalanceItem as BalanceItemStruct, EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, ReceivableBalanceType, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
+import { EmailRecipient, CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;
@@ -465,7 +465,7 @@ export function mergeReplacementsIfEqual(replacementsA: Replacement[], replaceme
  * Filter replacements for display in the backend.
  * @param options.forPreview if true, it will hide sensitive information in the preview that could leak information to admin users
  */
-export function stripSensitiveRecipientReplacements(recipient: Recipient | EmailRecipient, options: {
+export function stripSensitiveRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
     organization: Organization | null;
     willFill?: boolean;
 }) {
@@ -509,7 +509,7 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
 /**
  * Fill and hide replacements that don't make sense for web display to the user
  */
-export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | EmailRecipient, options: {
+export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
     organization: Organization | null;
 }) {
     const { organization } = options;
@@ -537,7 +537,7 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
 /**
  * @param options.forPreview if true, it will hide sensitive information in the preview that could leak information to admin users
  */
-export async function fillRecipientReplacements(recipient: Recipient, options: {
+export async function fillRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
     organization: Organization | null;
     platform?: PlatformStruct;
     from: EmailInterfaceRecipient | null;
@@ -571,17 +571,24 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
     }
     else {
         // Default signInUrl
-        let signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipient.email);
-
-        recipientUser = recipient.userId ? await User.select().where('id', recipient.userId).first(false) : await User.getForAuthentication(organization?.id ?? null, recipient.email, { allowWithoutAccount: true });
+        recipientUser = recipient.userId ? await User.select().where('id', recipient.userId).first(false) : await User.getForAuthentication(organization?.id ?? null, recipient.email!, { allowWithoutAccount: true });
         if (STAMHOOFD.userMode !== 'platform' && recipientUser && recipientUser.organizationId && recipientUser.organizationId !== (organization?.id ?? null)) {
             console.warn('User organization does not match current organization, ignoring userId', recipient.userId, recipientUser.organizationId, organization?.id ?? null);
             recipientUser = null;
         }
 
+        let signInUrl: string;
         if (!recipientUser || !recipientUser.hasAccount()) {
             // We can create a special token
-            signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipient.email);
+            if (recipientUser) {
+                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipientUser?.email);
+            }
+            else {
+                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/account-aanmaken';
+            }
+        }
+        else {
+            signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? organization.getHost() : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipientUser.email);
         }
 
         recipient.replacements.push(Replacement.create({
@@ -596,9 +603,8 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
     }
 
     if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
-        const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
-
         if (recipientUser) {
+            const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
             const suffixes: string[] = [];
             if (STAMHOOFD.userMode === 'platform') {
                 const { Member } = await import('../models/Member');
@@ -630,14 +636,26 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
             );
         }
         else {
-            console.log('No user found for email', recipient.email);
-            recipient.replacements.push(
-                Replacement.create({
-                    token: 'loginDetails',
-                    value: '',
-                    html: `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken op het e-mailadres {email}', { email: emailEscaped })}</em></p>`,
-                }),
-            );
+            if (recipient.email) {
+                const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
+                console.log('No user found for email', recipient.email);
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'loginDetails',
+                        value: '',
+                        html: `<p class="description"><em>${$t('Je kan op het ledenportaal een nieuw account aanmaken op het e-mailadres {email}', { email: emailEscaped })}</em></p>`,
+                    }),
+                );
+            }
+            else {
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'loginDetails',
+                        value: '',
+                        html: '',
+                    }),
+                );
+            }
         }
     }
 
@@ -700,7 +718,12 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
         }
     }
 
-    recipient.replacements.push(...recipient.getDefaultReplacements());
+    if (recipient instanceof EmailRecipient) {
+        recipient.replacements.push(...recipient.getRecipient().getDefaultReplacements());
+    }
+    else {
+        recipient.replacements.push(...recipient.getDefaultReplacements());
+    }
 
     if (organization) {
         const extra = organization.meta.getEmailReplacements(organization);
@@ -710,4 +733,7 @@ export async function fillRecipientReplacements(recipient: Recipient, options: {
     // Defaults
     const extra = platform.config.getEmailReplacements(platform);
     recipient.replacements.push(...extra);
+
+    // Remove duplicates
+    cleanReplacements(recipient.replacements);
 }
