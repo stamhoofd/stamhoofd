@@ -119,7 +119,7 @@ onMounted(async () => {
 useVisibilityChange(async () => {
     await fetchMembers();
     await organizationManager.value.forceUpdate();
-});
+}, undefined, undefined, { onFocusChange: true });
 
 async function fetchMembers() {
     const responsibilities = organizationBasedResponsibilities.value;

@@ -43,7 +43,7 @@ const $setupSteps = computed(() => organization$.value?.period.setupSteps);
 const $areAllComplete = computed(() => $setupSteps.value?.areAllComplete() ?? false);
 
 onActivated(() => forceUpdateOrganization());
-useVisibilityChange(() => forceUpdateOrganization());
+useVisibilityChange(() => forceUpdateOrganization(), undefined, undefined, { onFocusChange: true });
 
 async function forceUpdateOrganization() {
     await organizationManager.value.forceUpdate();

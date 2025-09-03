@@ -1,18 +1,25 @@
 import { useFocused } from '@simonbackx/vue-app-navigation';
 import { onActivated, onBeforeUnmount, onDeactivated, onMounted, watch } from 'vue';
 
-export function useVisibilityChange(callback: () => void | Promise<void>, onHide?: () => void | Promise<void>, immediate = false) {
+export function useVisibilityChange(
+    callback: () => void | Promise<void>,
+    onHide?: () => void | Promise<void>,
+    immediate = false,
+    options: { onFocusChange?: boolean } = {},
+) {
     let wasVisible = true;
     let isMountedAndActive = false;
-    const focused = useFocused();
+    const focused = options?.onFocusChange ? useFocused() : { value: true };
 
     function isVisible() {
         return document.visibilityState === 'visible' && !document.hidden && focused.value && isMountedAndActive;
     }
 
-    watch(focused, () => {
-        onVisibilityChange();
-    });
+    if (options.onFocusChange ?? true) {
+        watch(focused, () => {
+            onVisibilityChange();
+        });
+    }
 
     function onVisibilityChange() {
         const v = isVisible();
