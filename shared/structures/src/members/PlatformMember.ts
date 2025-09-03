@@ -449,7 +449,6 @@ export class PlatformFamily {
                     $and: [
                         {
                             $or: [
-                                { minAge: null },
                                 { minAge: { $lte: age } },
                             ],
                         },
