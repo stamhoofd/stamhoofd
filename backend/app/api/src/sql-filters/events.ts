@@ -54,12 +54,12 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
     }),
     'minAge': createColumnFilter({
         expression: SQL.jsonValue(SQL.column('meta'), '$.value.minAge'),
-        type: SQLValueType.Number,
+        type: SQLValueType.JSONNumber,
         nullable: true,
     }),
     'maxAge': createColumnFilter({
         expression: SQL.jsonValue(SQL.column('meta'), '$.value.maxAge'),
-        type: SQLValueType.Number,
+        type: SQLValueType.JSONNumber,
         nullable: true,
     }),
     'meta.visible': createColumnFilter({
