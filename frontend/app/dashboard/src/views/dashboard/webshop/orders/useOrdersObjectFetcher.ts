@@ -1,10 +1,10 @@
+import { SimpleError } from '@simonbackx/simple-errors';
+import { Request } from '@simonbackx/simple-networking';
 import { ObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { WebshopManager } from '../WebshopManager';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
-import { Request } from '@simonbackx/simple-networking';
-import { SimpleError } from '@simonbackx/simple-errors';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -197,7 +197,7 @@ async function addTickets(manager: WebshopManager, arrayBuffer: PrivateOrderWith
             order.tickets.push(ticket);
         }
         else {
-            console.warn('Couldn\'t find order for ticket', ticket);
+            console.warn('Couldn\'t find order for ticket with id', ticket.id);
         }
     }
 }
