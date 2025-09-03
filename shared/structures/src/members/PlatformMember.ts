@@ -855,13 +855,25 @@ export class PlatformMember implements ObjectWithRecords {
      * @param filters.groupIds - Only show registrations for these group ids
      * @param filters.canRegister - Only show registrations for which the member can register
      * @param filters.periodId - Only show registrations for this period
+     * @param filters.periodIds - Only show registrations for these periods
      * @param filters.currentPeriod - Only show registrations for the current period
      * @param filters.includeFuture - Used in combination with currentPeriod. If true, also show registrations that start in the future. Defaults to true.
      * @param filters.types - Only show registrations for these group types
      * @param filters.organizationId - Only show registrations for this organization
      * @returns
      */
-    filterRegistrations(filters: { groups?: Group[] | null; groupIds?: string[] | null; defaultAgeGroupIds?: string[]; canRegister?: boolean; periodId?: string; includeFuture?: boolean; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterRegistrations(filters: { 
+        groups?: Group[] | null; 
+        groupIds?: string[] | null; 
+        defaultAgeGroupIds?: string[]; 
+        canRegister?: boolean; 
+        periodId?: string; 
+        periodIds?: string[];
+        includeFuture?: boolean; 
+        currentPeriod?: boolean; 
+        types?: GroupType[]; 
+        organizationId?: string 
+    }) {
         return this.patchedMember.registrations.filter((r) => {
             if (r.registeredAt === null || r.deactivatedAt !== null) {
                 return false;
@@ -904,6 +916,10 @@ export class PlatformMember implements ObjectWithRecords {
                 return false;
             }
 
+            if (filters.periodIds && !filters.periodIds.includes(r.group.periodId)) {
+                return false;
+            }
+
             if (filters.canRegister !== undefined && r.canRegister !== filters.canRegister) {
                 return false;
             }
@@ -912,7 +928,17 @@ export class PlatformMember implements ObjectWithRecords {
         });
     }
 
-    filterGroups(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; includeFuture?: boolean; includePending?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterGroups(filters: { 
+        groups?: Group[] | null; 
+        canRegister?: boolean; 
+        periodId?: string; 
+        periodIds?: string[];
+        currentPeriod?: boolean; 
+        includeFuture?: boolean; 
+        includePending?: boolean; 
+        types?: GroupType[]; 
+        organizationId?: string 
+    }) {
         const registrations = this.filterRegistrations(filters);
         const base: Group[] = [];
 
@@ -933,6 +959,10 @@ export class PlatformMember implements ObjectWithRecords {
                     }
 
                     if (filters.periodId && item.group.periodId !== filters.periodId) {
+                        continue;
+                    }
+
+                    if (filters.periodIds && !filters.periodIds.includes(item.group.periodId)) {
                         continue;
                     }
 
@@ -987,7 +1017,15 @@ export class PlatformMember implements ObjectWithRecords {
         return configurations;
     }
 
-    filterOrganizations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; withResponsibilities?: boolean; currentPeriod?: boolean; types?: GroupType[] }) {
+    filterOrganizations(filters: { 
+        groups?: Group[] | null; 
+        canRegister?: boolean; 
+        periodId?: string; 
+        periodIds?: string[];
+        withResponsibilities?: boolean; 
+        currentPeriod?: boolean; 
+        types?: GroupType[] 
+    }) {
         const registrations = this.filterRegistrations(filters);
         const base: Organization[] = [];
 
@@ -1010,6 +1048,10 @@ export class PlatformMember implements ObjectWithRecords {
                 }
 
                 if (filters.periodId && item.group.periodId !== filters.periodId) {
+                    continue;
+                }
+
+                if (filters.periodIds && !filters.periodIds.includes(item.group.periodId)) {
                     continue;
                 }
 

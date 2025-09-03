@@ -709,7 +709,8 @@ export class RegisterItem implements ObjectWithRecords {
 
     doesMeetRequireOrganizationTags() {
         if (this.group.settings.requireOrganizationTags.length > 0) {
-            const hasOrganization = this.member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] }).find((organization) => {
+            const periodIds = [...this.group.getActivePeriodIds(this.organization)];
+            const hasOrganization = this.member.filterOrganizations({ periodIds, types: [GroupType.Membership] }).find((organization) => {
                 return organization.meta.matchTags(this.group.settings.requireOrganizationTags);
             });
 
