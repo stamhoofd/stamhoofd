@@ -2,11 +2,11 @@
     <ContextMenuView v-bind="$attrs" :auto-dismiss="autoDismiss">
         <aside ref="aside" class="date-selection-view">
             <header>
-                <button type="button" class="button icon gray arrow-left" @click="previousMonth" />
+                <button type="button" class="button icon gray arrow-left" :disabled="isPreviousMonthDisabled" @click="previousMonth" />
                 <h1>
                     <div class="input-icon-container right icon arrow-down-small gray">
                         <select v-model="month" data-testid="select-month" @mousedown.stop>
-                            <option v-for="monthNumber in 12" :key="monthNumber" :value="monthNumber">
+                            <option v-for="monthNumber in 12" :key="monthNumber" :value="monthNumber" :disabled="isMonthDisabled(luxonSelectedDay.year, monthNumber)">
                                 {{ monthText(monthNumber) }}
                             </option>
                         </select>
@@ -15,13 +15,13 @@
                     <div class="input-icon-container right icon arrow-down-small gray">
                         <!-- key is added here because the select should be recreated when the offset changes, otherwise we get DOM issues and it looks like the wrong value is selected -->
                         <select :key="nowYear" v-model="currentYear" data-testid="select-year" @mousedown.stop>
-                            <option v-for="year in 105" :key="nowYear - year + 5" :value="nowYear - year + 5">
+                            <option v-for="year in 105" :key="nowYear - year + 5" :value="nowYear - year + 5" :disabled="isYearDisabled(nowYear - year + 5)">
                                 {{ nowYear - year + 5 }}
                             </option>
                         </select>
                     </div>
                 </h1>
-                <button type="button" class="button icon gray arrow-right" @click="nextMonth" />
+                <button type="button" class="button icon gray arrow-right" :disabled="isNextMonthDisabled" @click="nextMonth" />
             </header>
             <div class="days">
                 <div class="days">
@@ -101,6 +101,63 @@ onMounted(() => {
         });
     }
 });
+
+function setTime(dateTime: DateTime): DateTime {
+    if (props.time) {
+        return dateTime.set({
+            hour: props.time.hours,
+            minute: props.time.minutes,
+            second: props.time.seconds,
+            millisecond: props.time.millisecond ?? 0,
+        });
+    }
+
+    return dateTime;
+}
+
+function isYearDisabled(year: number) {
+    if (luxonMin.value !== null) {
+        if (year < luxonMin.value.year) {
+            return true;
+        }
+    }
+
+    if (luxonMax.value !== null) {
+        if (year > luxonMax.value.year) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const isPreviousMonthDisabled = computed(() => {
+    const dateTime = luxonSelectedDay.value.minus({ month: 1 });
+    return isMonthDisabled(dateTime.year, dateTime.month);
+});
+
+const isNextMonthDisabled = computed(() => {
+    const dateTime = luxonSelectedDay.value.plus({ month: 1 });
+    return isMonthDisabled(dateTime.year, dateTime.month);
+});
+
+function isMonthDisabled(year: number, month: number) {
+    const dateTime = setTime(DateTime.fromObject({ year, month, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: Formatter.timezone }).setZone(Formatter.timezone));
+
+    if (luxonMin.value !== null) {
+        if (dateTime.endOf('month') < luxonMin.value) {
+            return true;
+        }
+    }
+
+    if (luxonMax.value !== null) {
+        if (dateTime.startOf('month') > luxonMax.value) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 function isDisabled(day: { value: DateTime }) {
     if (props.time) {
