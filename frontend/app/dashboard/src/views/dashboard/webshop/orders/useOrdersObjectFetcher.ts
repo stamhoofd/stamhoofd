@@ -62,6 +62,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         },
 
         async fetch(data: LimitedFilteredRequest) {
+            console.log('Orders(IndexedDb).fetch', data);
             const arrayBuffer: PrivateOrderWithTickets[] = [];
             const filters = [data.filter];
 
@@ -97,6 +98,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 throw new Error('Sorting first by id and other keys is not supported');
             }
 
+            console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
+
             await manager.streamOrders({
                 callback: (order) => {
                     arrayBuffer.push(
@@ -108,6 +111,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 sortItem,
             });
 
+            console.log('Orders(IndexedDb).fetch', 'addTickets');
             await addTickets(manager, arrayBuffer);
 
             const lastItem = arrayBuffer[arrayBuffer.length - 1];
@@ -130,6 +134,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
+            console.log('[Done] Orders(IndexedDb).fetch', { results: arrayBuffer, next });
+
             if (!data.pageFilter && arrayBuffer.length === 0 && this.isOffline) {
                 // First page load failed
                 throw new SimpleError({
@@ -141,6 +147,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             return { results: arrayBuffer, next };
         },
         async fetchCount(data: CountFilteredRequest): Promise<number> {
+            console.log('Orders(IndexedDb).fetchCount', data);
             let count = 0;
 
             const filters = [data.filter];
@@ -160,6 +167,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 },
                 filter,
             });
+            console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 
             return count;
         },
