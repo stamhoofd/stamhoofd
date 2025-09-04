@@ -18,7 +18,7 @@
                             {{ product.name }}
                         </h3>
                         <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.location" class="style-description-small" v-text="product.location.name" />
-                        <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.dateRange" class="style-description-small" v-text="formatDateRange(product.dateRange)" />
+                        <p v-if="(product.type == 'Ticket' || product.type == 'Voucher') && product.dateRange" class="style-description-small" v-text="doFormatDateRange(product.dateRange)" />
 
                         <template #right>
                             <span v-if="isProductSelected(product)" class="icon success primary" />
@@ -91,7 +91,7 @@ export default class ChooseProductView extends Mixins(NavigationMixin) {
         });
     }
 
-    formatDateRange(dateRange: ProductDateRange) {
+    doFormatDateRange(dateRange: ProductDateRange) {
         return Formatter.capitalizeFirstLetter(dateRange.toString());
     }
 
