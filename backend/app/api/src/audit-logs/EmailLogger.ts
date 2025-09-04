@@ -1,42 +1,50 @@
-import { Email, EmailRecipient } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus, replaceEmailHtml } from '@stamhoofd/structures';
+import { Email } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ModelLogger } from './ModelLogger';
 
 export const EmailLogger = new ModelLogger(Email, {
-    async optionsGenerator(event) {
-        if (event.type === 'deleted') {
-            return;
-        }
+    skipKeys: ['json', 'text', 'status', 'userId', 'createdAt', 'updatedAt', 'deletedAt', 'recipientFilter', 'emailRecipientsCount', 'otherRecipientsCount', 'succeededCount', 'softFailedCount', 'failedCount', 'membersCount', 'hardBouncesCount', 'softBouncesCount', 'spamComplaintsCount', 'recipientsStatus', 'recipientsErrors', 'emailErrors', 'sentAt'],
 
+    async optionsGenerator(event) {
         let oldStatus = EmailStatus.Draft;
 
         if (event.type === 'updated') {
             oldStatus = event.originalFields.status as EmailStatus;
         }
 
-        const newStatus = event.model.status as EmailStatus;
-        if (newStatus === oldStatus) {
-            return;
-        }
-
-        if (newStatus !== EmailStatus.Sent && newStatus !== EmailStatus.Sending) {
-            return;
-        }
-
-        if (newStatus === EmailStatus.Sent) {
-            const recipient = await EmailRecipient.select().where('emailId', event.model.id).whereNot('sentAt', null).first(false);
-            // Get first recipient
+        if (event.type === 'deleted' || (event.type === 'updated' && event.model.deletedAt && !event.getOldModel().deletedAt)) {
             return {
-                type: AuditLogType.EmailSent,
+                type: AuditLogType.EmailDeleted,
                 data: {
-                    recipient,
                 },
                 generatePatchList: false,
             };
         }
 
-        if (event.model.emailType) {
+        const newStatus = event.model.status as EmailStatus;
+        if (newStatus === oldStatus || (newStatus !== EmailStatus.Sent && newStatus !== EmailStatus.Sending)) {
+            if (newStatus === EmailStatus.Draft) {
+                return;
+            }
+            return {
+                type: AuditLogType.EmailEdited,
+                data: {
+                },
+                generatePatchList: true,
+            };
+        }
+
+        if (newStatus === EmailStatus.Sent) {
+            return {
+                type: event.model.sendAsEmail ? AuditLogType.EmailSent : AuditLogType.EmailPublished,
+                data: {
+                },
+                generatePatchList: false,
+            };
+        }
+
+        if (event.model.emailType || !event.model.sendAsEmail) {
             // don't log the scheduled part of automated emails
             return;
         }
@@ -44,7 +52,6 @@ export const EmailLogger = new ModelLogger(Email, {
         return {
             type: AuditLogType.EmailSending,
             data: {
-                recipient: null,
             },
             generatePatchList: false,
         };
@@ -54,7 +61,7 @@ export const EmailLogger = new ModelLogger(Email, {
         const map = new Map([
             ['e', AuditLogReplacement.create({
                 id: model.id,
-                value: replaceEmailHtml(model.subject ?? '', options.data.recipient?.replacements ?? []),
+                value: model.subject ?? '',
                 type: AuditLogReplacementType.Email,
             })],
             ['c', AuditLogReplacement.create({
@@ -62,10 +69,8 @@ export const EmailLogger = new ModelLogger(Email, {
                 count: model.emailRecipientsCount ?? 0,
             })],
         ]);
-        if (options.data.recipient) {
-            map.set('html', AuditLogReplacement.html(
-                replaceEmailHtml(model.html ?? '', options.data.recipient?.replacements ?? []),
-            ));
+        if (model.html) {
+            map.set('html', AuditLogReplacement.html(model.html));
         }
         return map;
     },
