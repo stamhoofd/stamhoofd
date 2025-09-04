@@ -939,7 +939,7 @@ export class Email extends QueryableModel {
                 console.log('Finished sending email', upToDate.id);
                 // Mark email as sent
 
-                if (upToDate.sendAsEmail && (succeededCount + failedCount + softFailedCount) === 0) {
+                if (upToDate.sendAsEmail && !upToDate.showInMemberPortal && (succeededCount + failedCount + softFailedCount) === 0) {
                     upToDate.status = EmailStatus.Failed;
                     upToDate.emailErrors = new SimpleErrors(
                         new SimpleError({

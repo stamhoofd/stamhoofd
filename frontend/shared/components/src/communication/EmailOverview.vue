@@ -115,7 +115,7 @@
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="!email.sendAsEmail && email.showInMemberPortal">
+                <STListItem v-if="email.status !== EmailStatus.Draft && !email.sendAsEmail && email.showInMemberPortal">
                     <template #left>
                         <span class="icon send-off small" />
                     </template>
@@ -128,9 +128,9 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="email.sendAsEmail && !email.showInMemberPortal">
+                <STListItem v-if="email.status !== EmailStatus.Draft && email.sendAsEmail && !email.showInMemberPortal && email.recipientFilter.canShowInMemberPortal">
                     <template #left>
-                        <span class="icon earth-off small" />
+                        <span class="icon eye-off small" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -228,6 +228,22 @@
                         </template>
                     </STListItem>
 
+                    <STListItem v-if="email.status !== EmailStatus.Draft && email.recipientFilter.canShowInMemberPortal" :selectable="true" element-name="button" @click="editSendSettings">
+                        <template #left>
+                            <IconContainer icon="eye-off" class="primary" />
+                        </template>
+                        <h3 class="style-title-list">
+                            {{ $t('Wijzig zichtbaarheid') }}
+                        </h3>
+                        <p class="style-description-small">
+                            {{ $t('Stel in of het bericht zichtbaar is in het ledenportaal of niet.') }}
+                        </p>
+
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
                     <STListItem :selectable="true" element-name="button" @click="doDelete">
                         <template #left>
                             <IconContainer icon="email" class="error">
@@ -263,10 +279,9 @@ import MembersTableView from '../members/MembersTableView.vue';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import EmailRecipientsTableView from './EmailRecipientsTableView.vue';
 import { useEmailStatus } from './hooks/useEmailStatus';
-import { useUpdateEmail } from './hooks/useUpdateEmail';
 import { usePatchEmail } from './hooks/usePatchEmail';
-import OrganizationAvatar from '../context/OrganizationAvatar.vue';
-import PlatformAvatar from '../context/PlatformAvatar.vue';
+import { useUpdateEmail } from './hooks/useUpdateEmail';
+import EmailSendSettingsView from '../email/EmailSendSettingsView.vue';
 
 const props = defineProps<{
     email: EmailPreview;
@@ -307,7 +322,7 @@ defineRoutes([
                         },
                     },
                 },
-                customTitle: $t('Leden die dit bericht zien'),
+                customTitle: $t('Leden'),
                 customEstimatedRows: props.email.membersCount || 0,
             };
         },
@@ -455,6 +470,20 @@ async function editEmail() {
                 root: new ComponentWithProperties(EmailView, {
                     recipientFilterOptions: [],
                     editEmail: props.email,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function editSendSettings() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(EmailSendSettingsView, {
+                    editEmail: props.email,
+                    willSend: false,
                 }),
             }),
         ],
