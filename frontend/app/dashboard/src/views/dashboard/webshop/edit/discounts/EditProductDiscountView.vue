@@ -8,8 +8,7 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-
-        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
+        <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
         <hr><h2>{{ $t('f177a8e3-ae76-4894-af0a-56936b79100f') }}</h2>
         <p v-if="discounts.length > 1">
@@ -98,6 +97,14 @@
             <input v-model="cartLabel" class="input" type="text" autocomplete="off" :placeholder="$t(`9e0461d2-7439-4588-837c-750de6946287`)">
         </STInputBox>
 
+        <hr>
+        <h2>{{ $t('Combineren') }}</h2>
+        <p>{{ $t('In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Stamhoofd kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.') }}</p>
+
+        <Checkbox v-model="allowMultipleDiscountsToSameItem">
+            {{ $t('Meerdere kortingen op hetzelfde stuk toestaan') }}
+        </Checkbox>
+
         <div v-if="!isNew" class="container">
             <hr><h2>
                 {{ $t('f86309f9-1830-4aff-858c-a8b9d52053b4') }}
@@ -115,10 +122,10 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Dropdown, PermyriadInput, PriceInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
-import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductSelector } from '@stamhoofd/structures';
+import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductsSelector } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
-import ProductSelectorBox from './ProductSelectorBox.vue';
+import ProductsSelectorBox from './ProductsSelectorBox.vue';
 
 const props = defineProps<{
     productDiscount: ProductDiscountSettings;
@@ -135,7 +142,7 @@ const { patch: patchProductDiscount, patched: patchedProductDiscount, addPatch, 
 const cachedDiscountType = ref<Map<string, 'percentageDiscount' | 'discountPerPiece'>>(new Map());
 const productSelector = computed(() => patchedProductDiscount.value.product);
 
-function patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
+function patchProductSelector(patch: AutoEncoderPatchType<ProductsSelector>) {
     addPatch(ProductDiscountSettings.patch({
         product: patch,
     }));
@@ -156,6 +163,15 @@ const cartLabel = computed({
     set: (cartLabel: string) => {
         addPatch(ProductDiscountSettings.patch({
             cartLabel: cartLabel || null,
+        }));
+    },
+});
+
+const allowMultipleDiscountsToSameItem = computed({
+    get: () => patchedProductDiscount.value.allowMultipleDiscountsToSameItem,
+    set: (allow: boolean) => {
+        addPatch(ProductDiscountSettings.patch({
+            allowMultipleDiscountsToSameItem: allow,
         }));
     },
 });

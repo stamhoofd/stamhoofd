@@ -112,7 +112,7 @@
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, Checkbox, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, useErrors, usePatch } from '@stamhoofd/components';
-import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscountSettings, ProductSelector } from '@stamhoofd/structures';
+import { Discount, DiscountRequirement, GeneralDiscount, PrivateWebshop, ProductDiscountSettings, ProductSelector, ProductsSelector } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 import EditDiscountRequirementView from './EditDiscountRequirementView.vue';
@@ -179,8 +179,12 @@ function addProductDiscountPatch(d: PatchableArrayAutoEncoder<ProductDiscountSet
 
 function addRequirement() {
     const requirement = DiscountRequirement.create({
-        product: ProductSelector.create({
-            productId: props.webshop.products[0].id,
+        product: ProductsSelector.create({
+            products: [
+                ProductSelector.create({
+                    productId: props.webshop.products[0].id,
+                }),
+            ],
         }),
     });
     const arr: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray();
@@ -220,8 +224,12 @@ function editRequirement(discountRequirement: DiscountRequirement) {
 
 function addProductDiscount() {
     const productDiscount = ProductDiscountSettings.create({
-        product: ProductSelector.create({
-            productId: props.webshop.products[0].id,
+        product: ProductsSelector.create({
+            products: [
+                ProductSelector.create({
+                    productId: props.webshop.products[0].id,
+                }),
+            ],
         }),
     });
     const arr: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray();

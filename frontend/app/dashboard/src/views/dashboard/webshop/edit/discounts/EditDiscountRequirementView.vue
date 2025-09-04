@@ -8,8 +8,7 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-
-        <ProductSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
+        <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
         <STInputBox error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
             <NumberInput v-model="amount" :min="1" :stepper="true" />
@@ -32,10 +31,10 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, NumberInput, SaveView, STErrorsDefault, STInputBox, useErrors, usePatch } from '@stamhoofd/components';
-import { DiscountRequirement, PrivateWebshop, ProductSelector } from '@stamhoofd/structures';
+import { DiscountRequirement, PrivateWebshop, ProductsSelector } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-import ProductSelectorBox from './ProductSelectorBox.vue';
+import ProductsSelectorBox from './ProductsSelectorBox.vue';
 
 const props = defineProps<{
     discountRequirement: DiscountRequirement;
@@ -51,7 +50,7 @@ const { patch: patchDiscountRequirement, patched: patchedDiscountRequirement, ad
 
 const productSelector = computed(() => patchedDiscountRequirement.value.product);
 
-function patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
+function patchProductSelector(patch: AutoEncoderPatchType<ProductsSelector>) {
     addPatch(DiscountRequirement.patch({
         product: patch,
     }));
@@ -99,8 +98,3 @@ defineExpose({
     shouldNavigateAway,
 });
 </script>
-
-<style lang="scss">
-@use "@stamhoofd/scss/base/variables.scss" as *;
-
-</style>
