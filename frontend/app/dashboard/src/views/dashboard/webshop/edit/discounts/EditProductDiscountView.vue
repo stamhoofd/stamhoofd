@@ -9,7 +9,7 @@
         
         <STErrorsDefault :error-box="errorBox" />
 
-        <ProductSelectorBox :productSelector="productSelector" @patch="patchProductSelector" :webshop="webshop" :validator="validator" />
+        <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="validator" @patch="patchProductSelector" />
 
         <hr>
         <h2>Korting</h2>
@@ -19,17 +19,21 @@
 
         <div v-for="(d, index) in discounts" :key="d.id">
             <STInputBox :title="discounts.length === 1 ? 'Korting' : 'Korting op '+(index+1)+'e stuk' + ((repeatBehaviour === 'RepeatLast' && index === discounts.length - 1) ? ' en verder' : '')" :error-box="errorBox" class="max">
-                <button slot="right" class="button icon trash gray" type="button" @click="removeDiscount(d)" v-if="discounts.length > 1" />
+                <button v-if="discounts.length > 1" slot="right" class="button icon trash gray" type="button" @click="removeDiscount(d)" />
 
                 <div class="split-inputs">
                     <div>
-                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :value="getDiscountDiscountPerPiece(d)" @input="setDiscountDiscountPerPiece(d, $event)" :min="0" :required="true" />
-                        <PermyriadInput v-else :value="getDiscountPercentageDiscount(d)" @input="setDiscountPercentageDiscount(d, $event)" :required="true" />
+                        <PriceInput v-if="getDiscountType(d) == 'discountPerPiece'" :value="getDiscountDiscountPerPiece(d)" :min="0" :required="true" @input="setDiscountDiscountPerPiece(d, $event)" />
+                        <PermyriadInput v-else :value="getDiscountPercentageDiscount(d)" :required="true" @input="setDiscountPercentageDiscount(d, $event)" />
                     </div>
                     <div>
                         <Dropdown :value="getDiscountType(d)" @change="setDiscountType(d, $event)">
-                            <option value="percentageDiscount">Percentage</option>
-                            <option value="discountPerPiece">Bedrag</option>
+                            <option value="percentageDiscount">
+                                Percentage
+                            </option>
+                            <option value="discountPerPiece">
+                                Bedrag
+                            </option>
                         </Dropdown>
                     </div>
                 </div>
@@ -66,7 +70,7 @@
             </STListItem>
             <STListItem :selectable="true" element-name="label" class="left-center">
                 <Radio slot="left" v-model="repeatBehaviour" value="RepeatLast" />
-                <h3 class="style-title-list" v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'">
+                <h3 v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'" class="style-title-list">
                     Laatste korting herhalen
                 </h3>
                 <h3 v-else>
@@ -77,7 +81,7 @@
                 </p>
             </STListItem>
 
-            <STListItem :selectable="true" element-name="label" class="left-center" v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'">
+            <STListItem v-if="discounts.length > 1 || repeatBehaviour == 'RepeatPattern'" :selectable="true" element-name="label" class="left-center">
                 <Radio slot="left" v-model="repeatBehaviour" value="RepeatPattern" />
                 <h3 class="style-title-list">
                     Patroon herhalen
@@ -102,6 +106,14 @@
             >
         </STInputBox>
 
+        <hr>
+        <h2>Combineren</h2>
+        <p>In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Stamhoofd kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.</p>
+
+        <Checkbox v-model="allowMultipleDiscountsToSameItem">
+            Meerdere kortingen op hetzelfde stuk toestaan
+        </Checkbox>
+
         <div v-if="!isNew" class="container">
             <hr>
             <h2>
@@ -119,12 +131,12 @@
 <script lang="ts">
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator, Dropdown, Radio } from "@stamhoofd/components";
-import { ProductDiscountSettings, PrivateWebshop, ProductSelector, Version, ProductDiscount, ProductDiscountRepeatBehaviour } from '@stamhoofd/structures';
+import { CenteredMessage, Checkbox, Dropdown, ErrorBox, NumberInput, PermyriadInput, PriceInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
+import { PrivateWebshop, ProductDiscount, ProductDiscountRepeatBehaviour, ProductDiscountSettings, ProductsSelector, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
-import ProductSelectorBox from './ProductSelectorBox.vue';
+import ProductsSelectorBox from './ProductsSelectorBox.vue';
 
 @Component({
     components: {
@@ -137,7 +149,7 @@ import ProductSelectorBox from './ProductSelectorBox.vue';
         PermyriadInput,
         PriceInput,
         Checkbox,
-        ProductSelectorBox,
+        ProductsSelectorBox,
         Dropdown,
         Radio
     },
@@ -177,7 +189,7 @@ export default class EditProductDiscountView extends Mixins(NavigationMixin) {
         return this.patchedProductDiscount.product
     }
 
-    patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
+    patchProductSelector(patch: AutoEncoderPatchType<ProductsSelector>) {
         this.addPatch(ProductDiscountSettings.patch({
             product: patch
         }))
@@ -198,6 +210,16 @@ export default class EditProductDiscountView extends Mixins(NavigationMixin) {
     set repeatBehaviour(repeatBehaviour: ProductDiscountRepeatBehaviour) {
         this.addPatch(ProductDiscountSettings.patch({
             repeatBehaviour
+        }))
+    }
+
+    get allowMultipleDiscountsToSameItem() {
+        return this.patchedProductDiscount.allowMultipleDiscountsToSameItem
+    }
+
+    set allowMultipleDiscountsToSameItem(allow: boolean) {
+        this.addPatch(ProductDiscountSettings.patch({
+            allowMultipleDiscountsToSameItem: allow
         }))
     }
 
@@ -298,7 +320,7 @@ export default class EditProductDiscountView extends Mixins(NavigationMixin) {
             return
         }
 
-       const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray()
+        const p: PatchableArrayAutoEncoder<ProductDiscountSettings> = new PatchableArray()
         p.addDelete(this.productDiscount.id)
         this.saveHandler(p)
         this.pop({ force: true })

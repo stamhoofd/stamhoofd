@@ -5,7 +5,7 @@
 
         <hr>
         <h2>Algemene kortingen</h2>
-        <p>Algemene kortingen worden automatisch toegepast op alle bestellingen, eventueel onder bepaalde voorwaarden.</p>
+        <p>Algemene kortingen worden automatisch toegepast op alle bestellingen, eventueel onder bepaalde voorwaarden. Opgelet, als je meerdere algemene kortingen toevoegt, worden ze apart uitgerekend en samengeteld.</p>
         
         <STList v-if="defaultDiscounts.length">
             <STListItem v-for="discount of defaultDiscounts" :key="discount.id" class="right-description right-stack" :selectable="true" @click="editDiscount(discount)">

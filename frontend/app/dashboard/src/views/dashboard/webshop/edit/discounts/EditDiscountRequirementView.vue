@@ -9,7 +9,7 @@
         
         <STErrorsDefault :error-box="errorBox" />
 
-        <ProductSelectorBox :productSelector="productSelector" @patch="patchProductSelector" :webshop="webshop" :validator="validator" />
+        <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="validator" @patch="patchProductSelector" />
 
         <STInputBox title="Aantal" error-fields="amount" :error-box="errorBox" class="max">
             <NumberInput
@@ -37,11 +37,11 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, patchContainsChanges } from '@simonbackx/simple-encoding';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, Checkbox, ErrorBox, NumberInput, PermyriadInput, PriceInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { DiscountRequirement, PrivateWebshop, ProductSelector, Version } from '@stamhoofd/structures';
+import { DiscountRequirement, PrivateWebshop, ProductsSelector, Version } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../../classes/OrganizationManager';
-import ProductSelectorBox from './ProductSelectorBox.vue';
+import ProductsSelectorBox from './ProductsSelectorBox.vue';
 
 @Component({
     components: {
@@ -54,7 +54,7 @@ import ProductSelectorBox from './ProductSelectorBox.vue';
         PermyriadInput,
         PriceInput,
         Checkbox,
-        ProductSelectorBox
+        ProductsSelectorBox
     },
 })
 export default class EditDiscountRequirementView extends Mixins(NavigationMixin) {
@@ -91,7 +91,7 @@ export default class EditDiscountRequirementView extends Mixins(NavigationMixin)
         return this.patchedDiscountRequirement.product
     }
 
-    patchProductSelector(patch: AutoEncoderPatchType<ProductSelector>) {
+    patchProductSelector(patch: AutoEncoderPatchType<ProductsSelector>) {
         this.addPatch(DiscountRequirement.patch({
             product: patch
         }))
@@ -127,7 +127,7 @@ export default class EditDiscountRequirementView extends Mixins(NavigationMixin)
             return
         }
 
-       const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray()
+        const p: PatchableArrayAutoEncoder<DiscountRequirement> = new PatchableArray()
         p.addDelete(this.discountRequirement.id)
         this.saveHandler(p)
         this.pop({ force: true })

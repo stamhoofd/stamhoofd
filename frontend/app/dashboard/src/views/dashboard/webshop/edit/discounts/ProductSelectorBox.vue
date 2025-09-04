@@ -4,15 +4,15 @@
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="product">
                     <STListItem :selectable="true">
-                        <div slot="left" v-if="product.images[0]" class="product-selector-image-preview">
-                            <ImageComponent :image="product.images[0]" :autoHeight="true" />
+                        <div v-if="product.images[0]" slot="left" class="product-selector-image-preview">
+                            <ImageComponent :image="product.images[0]" :auto-height="true" />
                         </div>
                         
                         <h2 class="style-title-list">
                             {{ product.name }}
                         </h2>
 
-                        <span class="icon arrow-down-small gray" slot="right" />
+                        <span slot="right" class="icon arrow-down-small gray" />
                     </STListItem>
                 </STList>
                 <div v-else>
@@ -21,10 +21,10 @@
             </div>
         </STInputBox>
 
-        <STInputBox title="Prijskeuzes" error-fields="productPriceIds" :error-box="errorBox" class="max" v-if="product && product.prices.length > 1">
+        <STInputBox v-if="product && product.prices.length > 1" title="Prijskeuzes" error-fields="productPriceIds" :error-box="errorBox" class="max">
             <STList>
                 <STListItem v-for="price of product.prices" :key="price.id" :selectable="true" element-name="label">
-                     <Checkbox slot="left" :checked="isPriceSelected(price)" @change="setPriceSelected(price, $event)" />
+                    <Checkbox slot="left" :checked="isPriceSelected(price)" @change="setPriceSelected(price, $event)" />
 
                     <h2 class="style-title-list">
                         {{ price.name || 'Naamloos' }}
@@ -33,17 +33,17 @@
             </STList>
         </STInputBox>
 
-        <STInputBox :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max" v-for="optionMenu of product.optionMenus" :key="optionMenu.id">
+        <STInputBox v-for="optionMenu of product.optionMenus" :key="optionMenu.id" :title="optionMenu.name || 'Naamloos'" :error-fields="'optionMenu.'+optionMenu.id" :error-box="errorBox" class="max">
             <STList>
                 <STListItem v-for="option of optionMenu.options" :key="option.id" :selectable="true" element-name="label">
-                     <Checkbox slot="left" :checked="isOptionSelected(optionMenu, option)" @change="setOptionSelected(optionMenu, option, $event)" />
+                    <Checkbox slot="left" :checked="isOptionSelected(optionMenu, option)" @change="setOptionSelected(optionMenu, option, $event)" />
 
                     <h2 class="style-title-list">
                         {{ option.name || 'Naamloos' }}
                     </h2>
 
-                     <button class="button text" type="button" slot="right" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)" v-if="optionMenu.multipleChoice">
-                        <span>{{getRequirementName(getOptionRequirement(optionMenu, option))}}</span>
+                    <button v-if="optionMenu.multipleChoice" slot="right" class="button text" type="button" @click.stop.prevent="showRequirementMenu(optionMenu, option, $event)">
+                        <span>{{ getRequirementName(getOptionRequirement(optionMenu, option)) }}</span>
                         <span class="icon arrow-down-small" />
                     </button>
                 </STListItem>
@@ -57,10 +57,9 @@ import { AutoEncoderPatchType } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, ContextMenu, ContextMenuItem, ErrorBox, ImageComponent, STInputBox, STList, STListItem, Validator } from "@stamhoofd/components";
-import { Option, OptionMenu, OptionSelectionRequirementHelper } from "@stamhoofd/structures";
-import { OptionSelectionRequirement } from "@stamhoofd/structures";
-import { PrivateWebshop, Product, ProductPrice, ProductSelector } from '@stamhoofd/structures';
+import { Option, OptionMenu, OptionSelectionRequirement, OptionSelectionRequirementHelper, PrivateWebshop, Product, ProductPrice, ProductSelector } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
 import ChooseProductView from "./ChooseProductView.vue";
 
 

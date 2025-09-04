@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field,IntegerDecoder, MapDecoder, StringDecoder } from "@simonbackx/simple-encoding";
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, Data, EncodeContext, EnumDecoder, field,IntegerDecoder, MapDecoder, PlainObject, StringDecoder } from "@simonbackx/simple-encoding";
 import { Formatter } from "@stamhoofd/utility";
 import { v4 as uuidv4 } from "uuid";
 
@@ -135,12 +135,67 @@ export class ProductSelector extends AutoEncoder {
     }
 }
 
+export class ProductsSelector extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(ProductSelector) })
+    products: ProductSelector[] = []
+
+    doesMatch(cartItem: CartItem) {
+        for (const product of this.products) {
+            if (product.doesMatch(cartItem)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    getName(webshop: Webshop, isAdmin = false): {name: string, footnote: string} {
+        const names: string[] = [];
+        const footnotes: string[] = [];
+
+        for (const product of this.products) {
+            const n = product.getName(webshop, isAdmin)
+            names.push(n.name)
+            if (n.footnote) {
+                footnotes.push(n.footnote)
+            }
+        }
+
+        return {
+            name: Formatter.joinLast(names, ', ', ' of '),
+            footnote: footnotes.join('\n')
+        }
+    }
+
+    static override decode<T extends typeof AutoEncoder>(this: T, data: Data): InstanceType<T> {
+        if (data.optionalField('productId') && !data.optionalField('products')) {
+            // Soft version upgrade: decode as ProductSelector
+            const ps = ProductSelector.decode(data);
+            const pss = ProductsSelector.create({
+                products: [ps]
+            })
+            return pss as InstanceType<T>;
+        }
+        const decoded = super.decode<T>(data);
+
+        return decoded;
+    }
+
+    override encode(context: EncodeContext): PlainObject {
+        if (this.products.length === 1) {
+            // Soft version upgrade: encode as ProductSelector
+            return this.products[0].encode(context);
+        }
+        return super.encode(context);
+    }
+}
+
 export class DiscountRequirement extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
     
-    @field({ decoder: ProductSelector })
-    product: ProductSelector;
+    @field({ decoder: ProductsSelector })
+    product: ProductsSelector;
 
     /**
      * Minimum amount to trigger this requirement
@@ -239,8 +294,8 @@ export class ProductDiscountSettings extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
     
-    @field({ decoder: ProductSelector })
-    product: ProductSelector;
+    @field({ decoder: ProductsSelector })
+    product: ProductsSelector;
 
     @field({ decoder: new ArrayDecoder(ProductDiscount) })
     discounts = [ProductDiscount.create({})]
@@ -250,6 +305,9 @@ export class ProductDiscountSettings extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 238 })
     cartLabel: string|null = null;
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    allowMultipleDiscountsToSameItem = true;
 
     getApplicableDiscounts(offset: number, amount: number): ProductDiscount[] {
         const d = this.discounts.slice()
@@ -380,12 +438,22 @@ export class ProductDiscountTracker {
 
     sortQueue() {
         // Sort queue from highest price to lowest price
-        this.cartItemQueue.sort((a, b) => b.price.discountedPrice - a.price.discountedPrice)
+        this.cartItemQueue.sort((a, b) => {
+            return b.price.discountedPrice - a.price.discountedPrice;
+        })
+    }
+
+    get filteredQueue() {
+        if (this.discount.allowMultipleDiscountsToSameItem) {
+            return this.cartItemQueue;
+        }
+        return this.cartItemQueue.filter(i => i.price.fixedDiscount === 0 && i.price.percentageDiscount === 0);
     }
 
     apply() {
         // Make sure we use the next one in the discount applicable discounts
         this.sortQueue()
+        this.cartItemQueue = this.filteredQueue;
         const item = this.cartItemQueue.shift()
         if (item) {
             const discount = this.getNextDiscount();
@@ -411,7 +479,7 @@ export class ProductDiscountTracker {
         let potential = 0;
 
         this.sortQueue()
-        for (const item of this.cartItemQueue) {
+        for (const item of this.filteredQueue) {
             const d = this.getNextDiscount(offset);
             if (d) {
                 potential += d.calculatePotential(item.price)
