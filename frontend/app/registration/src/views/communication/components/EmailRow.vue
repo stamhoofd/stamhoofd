@@ -4,7 +4,7 @@
             <OrganizationAvatar :organization="email.organization" />
         </template>
         <template v-else-if="!organization && !email.organizationId" #left>
-            <PlatformAvatar />
+            <PlatformOrganizationAvatar />
         </template>
 
         <p class="style-title-prefix-list flex">
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { PlatformAvatar, OrganizationAvatar, useOrganization } from '@stamhoofd/components';
+import { PlatformOrganizationAvatar, OrganizationAvatar, useOrganization } from '@stamhoofd/components';
 import { EmailPreview, EmailWithRecipients } from '@stamhoofd/structures';
 
 defineProps<{

@@ -434,6 +434,9 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: Image, nullable: true, ...NextVersion })
     organizationLogo: Image | null = null;
 
+    @field({ decoder: Image, nullable: true, ...NextVersion })
+    organizationLogoDark: Image | null = null;
+
     @field({ decoder: Image, nullable: true, version: 348 })
     logoDocuments: Image | null = null;
 

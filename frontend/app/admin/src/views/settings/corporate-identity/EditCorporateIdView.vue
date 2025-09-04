@@ -20,6 +20,22 @@
 
         <ImageInput v-model="logoDocuments" :placeholder="patched.config.horizontalLogo ?? patched.config.squareLogo" :validator="errors.validator" :resolutions="printLogoResolutions" :required="false" :title="$t(`15d34e79-b5e5-4e99-b407-516e11fdb1d4`)" />
 
+        <div>
+            <div class="split-inputs">
+                <div>
+                    <ImageInput v-model="organizationLogo" :placeholder="patched.config.squareLogo ?? patched.config.horizontalLogo" :validator="errors.validator" :resolutions="organizationLogoResolutions" :required="false" :title="$t(`Logo organisatie`)" />
+
+                    <p class="style-description-small">
+                        {{ $t('Wordt gebruikt voor berichten die vanaf het platform worden verstuurd') }}
+                    </p>
+                </div>
+
+                <div>
+                    <ImageInput v-model="organizationLogoDark" :placeholder="patched.config.squareLogoDark ?? patched.config.horizontalLogoDark" :validator="errors.validator" :resolutions="organizationLogoResolutions" :required="false" :dark="true" :title="$t(`Logo organisatie (dark mode)`)" />
+                </div>
+            </div>
+        </div>
+
         <hr><h2 class="style-with-button">
             <div>{{ $t('b8a111c0-5f3d-480b-833a-6d7f05bf134d') }}</div>
             <div>
@@ -77,14 +93,13 @@ import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ColorInput, ErrorBox, ImageComponent, ImageInput, LogoEditor, NumberInput, STInputBox, Toast, UploadButton, useErrors, usePatch, usePlatform, WYSIWYGTextInput } from '@stamhoofd/components';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { usePlatformManager } from '@stamhoofd/networking';
-import { DarkMode, Image, Platform, PlatformConfig, ResolutionRequest } from '@stamhoofd/structures';
+import { DarkMode, Image, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
-
 
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);
@@ -124,6 +139,16 @@ const shopFooterText = computed({
 const logoDocuments = computed({
     get: () => patched.value.config.logoDocuments,
     set: (value: Image | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ logoDocuments: value }) })),
+});
+
+const organizationLogo = computed({
+    get: () => patched.value.config.organizationLogo,
+    set: (value: Image | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ organizationLogo: value }) })),
+});
+
+const organizationLogoDark = computed({
+    get: () => patched.value.config.organizationLogoDark,
+    set: (value: Image | null) => addPatch(Platform.patch({ config: PlatformConfig.patch({ organizationLogoDark: value }) })),
 });
 
 const coverBottomLeftOverlayWidth = computed({
@@ -168,6 +193,34 @@ const shouldNavigateAway = async () => {
     }
     return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };
+
+const organizationLogoResolutions = [
+    ResolutionRequest.create({
+        height: 50,
+        width: 50,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70,
+        width: 70,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 50 * 3,
+        width: 50 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70 * 3,
+        width: 70 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+    ResolutionRequest.create({
+        height: 70 * 3,
+        width: 70 * 3,
+        fit: ResolutionFit.Inside,
+    }),
+];
 
 const resolutions = [
     ResolutionRequest.create({

@@ -4,7 +4,7 @@
             <OrganizationAvatar :organization="email.organization" />
         </template>
         <template v-else-if="!organization && !email.organizationId" #left>
-            <PlatformAvatar />
+            <PlatformOrganizationAvatar />
         </template>
 
         <p v-if="status" :class="'style-title-prefix-list flex ' + (status.theme ?? '')">
@@ -44,7 +44,7 @@ import { computed } from 'vue';
 import { useEmailStatus } from '../hooks/useEmailStatus';
 import { useUpdateEmail } from '../hooks/useUpdateEmail';
 import OrganizationAvatar from '../../context/OrganizationAvatar.vue';
-import PlatformAvatar from '../../context/PlatformAvatar.vue';
+import PlatformOrganizationAvatar from '../../context/PlatformOrganizationAvatar.vue';
 
 const props = defineProps<{
     email: EmailPreview;
