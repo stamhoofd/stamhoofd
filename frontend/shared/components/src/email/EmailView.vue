@@ -1,26 +1,8 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" save-icon-mobile="send" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Publiceren')) : $t('Opslaan')" :replacements="replacements" :title="title" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('Versturen') + '…') : (willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Publiceren')) : $t('Opslaan'))" :replacements="replacements" :title="title" @save="send">
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
-
-                <button v-if="patchedEmail.recipientFilter.canShowInMemberPortal" 
-                    v-tooltip="showInMemberPortal ? $t('Tonen in ledenportaal') : $t('Onzichtbaar in ledenportaal')" 
-                    class="button icon small" 
-                    :class="{'earth': showInMemberPortal, 'earth-off': !showInMemberPortal}"
-                    type="button" 
-                    @click="showInMemberPortal = !showInMemberPortal"
-                    />
-
-                <button v-if="patchedEmail.recipientFilter.canShowInMemberPortal" 
-                    v-tooltip="sendAsEmail ? $t('Versturen via e-mail') : $t('Niet versturen via e-mail')" 
-                    class="button icon small" 
-                    :class="{'send': sendAsEmail, 'send-off': !sendAsEmail}"
-                    type="button" 
-                    :disabled="!willSend"
-                    @click="sendAsEmail = !sendAsEmail"
-                    />
-
                 <ProgressRing :radius="7" :stroke="2" :loading="true" :opacity="showLoading ? 1 : 0" />
             </h1>
 
@@ -39,9 +21,8 @@
                     </span>
                 </UploadFileButton>
 
-                <hr v-if="canOpenTemplates || patchedEmail.recipientFilter.canShowInMemberPortal">
+                <hr v-if="canOpenTemplates">
                 <button v-if="canOpenTemplates" v-tooltip="$t('20bacd85-5b82-4396-bbd5-b6d88e7d90e4')" class="button icon email-template" type="button" @click="openTemplates" />
-
             </template>
 
             <!-- List -->
@@ -132,7 +113,7 @@
 
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, encodeObject, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
@@ -152,6 +133,7 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import EmailSettingsView from './EmailSettingsView.vue';
 import ProgressRing from '../icons/ProgressRing.vue';
+import EmailSendSettingsView from './EmailSendSettingsView.vue';
 
 const props = withDefaults(defineProps<{
     defaultSubject?: string;
@@ -202,6 +184,7 @@ const $isMobile = useIsMobile();
 const email = ref(null) as Ref<EmailPreview | null>;
 const context = useContext();
 const owner = useRequestOwner();
+const show = useShow();
 const patch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
 const savingPatch = ref(null) as Ref<AutoEncoderPatchType<Email> | null>;
 const sending = ref(false);
@@ -219,7 +202,6 @@ const selectedRecipientOptions = ref(props.recipientFilterOptions.map((o) => {
     return [o.options[0].id];
 }));
 
-const groupByEmail = ref(false);
 const editorView = ref(null) as Ref<typeof EditorView | null>;
 const editor = computed(() => editorView.value?.editor);
 const pop = usePop();
@@ -274,8 +256,6 @@ const recipientFilter = computed(() => {
             ...buildFilter,
         );
     }
-
-    filter.groupByEmail = groupByEmail.value;
     return filter;
 });
 
@@ -312,7 +292,7 @@ const toDescription = computed(() => {
     }).join(', ');
 });
 
-watch([selectedRecipientOptions, groupByEmail], () => {
+watch([selectedRecipientOptions], () => {
     if (props.editEmail) {
         // Only when creating a new email
         return;
@@ -408,7 +388,6 @@ async function createEmail() {
         initialEmail = props.editEmail.clone();
         email.value = props.editEmail;
         creatingEmail.value = false;
-        groupByEmail.value = props.editEmail.recipientFilter.groupByEmail;
 
         await nextTick();
 
@@ -424,6 +403,7 @@ async function createEmail() {
             path: '/email',
             body: Email.create({
                 recipientFilter: recipientFilter.value,
+                showInMemberPortal: recipientFilter.value.canShowInMemberPortal,
                 senderId: (props.defaultSenderId ? senders.value.find(s => s.id === props.defaultSenderId)?.id : null) ?? senders.value.find(s => s.default)?.id ?? (senders.value.length > 0 ? senders.value[0].id : null),
                 status: EmailStatus.Draft,
                 subject: props.defaultSubject,
@@ -436,7 +416,6 @@ async function createEmail() {
         initialEmail = response.data.clone();
         email.value = response.data;
         creatingEmail.value = false;
-        groupByEmail.value = response.data.recipientFilter.groupByEmail;
 
         await nextTick();
 
@@ -572,6 +551,9 @@ async function getHTML() {
 }
 
 const communicationFeature = useFeatureFlag()('communication');
+const hasMoreSettings = computed(() => {
+    return willSend.value && !!patchedEmail.value?.recipientFilter.canShowInMemberPortal;
+});
 
 async function send() {
     if (sending.value) {
@@ -599,7 +581,37 @@ async function send() {
         return;
     }
 
-     if (!sendAsEmail.value && !showInMemberPortal.value) {
+    if (subject.value.trim().length === 0) {
+        Toast.error($t(`Vul een onderwerp in`)).show();
+        return;
+    }
+
+    if (hasMoreSettings.value) {
+        // Just save the patch
+        try {
+            await patchEmail(false);
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+            return;
+        }
+
+        // Make sure patchedEmail is up to date
+        await nextTick();
+
+        // Open EmailSendSettingsView instead
+        await show({
+            components: [
+                new ComponentWithProperties(EmailSendSettingsView, {
+                    editEmail: patchedEmail.value,
+                    willSend: willSend.value,
+                }),
+            ],
+        });
+        return;
+    }
+
+    if (!sendAsEmail.value && !showInMemberPortal.value) {
         Toast.info($t(`Kies of je het bericht wilt publiceren in het ledenportaal en/of versturen via e-mail via de knoppen bovenaan`)).show();
         return;
     }
@@ -608,7 +620,7 @@ async function send() {
     let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
 
     if (emailRecipientsCount) {
-        confirmText = emailRecipientsCount === 1 ? $t('Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?') : $t('Ben je zeker dat je de e-mail naar {count} ontvangers wilt versturen?', {count: emailRecipientsCount} );
+        confirmText = emailRecipientsCount === 1 ? $t('Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?') : $t('Ben je zeker dat je de e-mail naar {count} ontvangers wilt versturen?', { count: emailRecipientsCount });
     }
 
     if (!sendAsEmail.value) {
@@ -648,7 +660,7 @@ async function send() {
     }
     catch (e) {
         console.error(e);
-        Toast.fromError(e).show();
+        errors.errorBox = new ErrorBox(e);
     }
     sending.value = false;
 }
