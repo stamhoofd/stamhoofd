@@ -1,5 +1,5 @@
 import { ComponentWithProperties, ModalStackComponent, NavigationController, PushOptions, setTitleSuffix, SplitViewController } from '@simonbackx/vue-app-navigation';
-import { AsyncComponent, AuditLogsView, AuthenticatedView, CommunicationView, ManageEventsView, manualFeatureFlag, MembersTableView, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
+import { AsyncComponent, AuditLogsView, AuthenticatedView, CommunicationView, ManageEventsView, manualFeatureFlag, NoPermissionsView, TabBarController, TabBarItem, TabBarItemGroup } from '@stamhoofd/components';
 import { getNonAutoLoginRoot, wrapContext } from '@stamhoofd/dashboard';
 import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { SessionContext, SessionManager } from '@stamhoofd/networking';
@@ -7,6 +7,7 @@ import { AccessRight, PermissionsResourceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EventNotificationsTableView from './views/event-notifications/EventNotificationsTableView.vue';
 import ChargeMembershipsView from './views/finances/ChargeMembershipsView.vue';
+import MembersMenu from './views/members/MembersMenu.vue';
 import OrganizationsMenu from './views/organizations/OrganizationsMenu.vue';
 
 export function wrapWithModalStack(component: ComponentWithProperties, initialPresents?: PushOptions[]) {
@@ -46,8 +47,8 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
         root: AsyncComponent(() => import('./views/settings/SettingsView.vue'), {}),
     });
 
-    const membersTableView = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(MembersTableView, {}),
+    const membersTableView = new ComponentWithProperties(SplitViewController, {
+        root: new ComponentWithProperties(MembersMenu, {}),
     });
 
     const organizationsTableView = new ComponentWithProperties(SplitViewController, {
