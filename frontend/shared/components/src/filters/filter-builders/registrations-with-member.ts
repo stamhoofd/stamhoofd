@@ -44,7 +44,21 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                     },
                 ],
             }));
-        }
+
+            all.push(new MultipleChoiceFilterBuilder({
+                name: $t('6705ae0e-8239-4bc0-895d-10128cb5c6c4'),
+                options: [...$platform.value.config.defaultAgeGroups.map((group) => {
+                    return new MultipleChoiceUIFilterOption(group.name, group.id);
+                }), new MultipleChoiceUIFilterOption($t('Geen'), null)],
+                wrapper: {
+                    group: {
+                        defaultAgeGroupId: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                },
+            }));
+        };
 
         const originalFilters = createMemberWithRegistrationsBlobFilterBuilders({
             organization,

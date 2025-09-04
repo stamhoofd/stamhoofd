@@ -92,6 +92,14 @@ function getDefaultFilter(): StamhoofdFilter {
                             },
                         } },
                 },
+                $not: {
+                    group: {
+                        defaultAgeGroupId: {
+                            $in: [null],
+                        },
+                    },
+                },
+
             };
 
             if (!props.periodId && !props.group) {
