@@ -81,7 +81,7 @@ function getDefaultFilter(): StamhoofdFilter {
             return null;
         }
         else {
-            return {
+            const filter: StamhoofdFilter = {
                 member: {
                     $elemMatch: {
                         platformMemberships: {
@@ -93,6 +93,12 @@ function getDefaultFilter(): StamhoofdFilter {
                         } },
                 },
             };
+
+            if (!props.periodId && !props.group) {
+                filter.periodId = filterPeriodId;
+            }
+
+            return filter;
         };
     }
 
