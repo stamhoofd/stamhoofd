@@ -1,6 +1,6 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import { ExcelExportType, LimitedFilteredRequest, PlatformMember, PlatformRegistration, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, LimitedFilteredRequest, PlatformMember, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
@@ -132,6 +132,47 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             key: 'member',
             getPropertyValue: (registration: PlatformRegistration) => registration.member,
         })),
+        {
+            id: 'organization',
+            name: $t(`afd7843d-f355-445b-a158-ddacf469a5b1`),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: registration.member.organizations.find(o => o.id === registration.organizationId)?.name ?? '',
+                };
+            },
+        },
+        {
+            id: 'uri',
+            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
+            width: 30,
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: registration.member.organizations.find(o => o.id === registration.organizationId)?.uri ?? '',
+                };
+            },
+        },
+        {
+            id: 'group',
+            name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: registration.group.settings.name.toString(),
+                };
+            },
+        },
+        {
+            id: 'defaultAgeGroup',
+            name: $t(`0ef2bbb3-0b3c-411a-8901-a454cff1f839`),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                const defaultAgeGroupId = registration.group.defaultAgeGroupId;
+                return {
+                    value: PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`),
+                };
+            },
+        },
     ],
 };
 

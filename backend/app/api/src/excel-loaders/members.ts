@@ -10,6 +10,14 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 
 export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
     {
+        id: 'id',
+        name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
+        width: 40,
+        getValue: ({ patchedMember: object }: PlatformMember) => ({
+            value: object.id,
+        }),
+    },
+    {
         id: 'memberNumber',
         name: $t(`cc1cf4a7-0bd2-4fa7-8ff2-0a12470a738d`),
         width: 20,
@@ -135,60 +143,6 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
         }),
     },
     {
-        id: 'organization',
-        name: $t(`afd7843d-f355-445b-a158-ddacf469a5b1`),
-        width: 40,
-        getValue: (member: PlatformMember) => {
-            const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-            const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
-
-            return {
-                value: str,
-            };
-        },
-    },
-    {
-        id: 'uri',
-        name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
-        width: 30,
-        getValue: (member: PlatformMember) => {
-            const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-            const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
-
-            return {
-                value: str,
-            };
-        },
-    },
-    {
-        id: 'group',
-        name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
-        width: 40,
-        getValue: (member: PlatformMember) => {
-            const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
-            const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name.toString())).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
-
-            return {
-                value: str,
-            };
-        },
-    },
-    {
-        id: 'defaultAgeGroup',
-        name: $t(`0ef2bbb3-0b3c-411a-8901-a454cff1f839`),
-        width: 40,
-        getValue: (member: PlatformMember) => {
-            const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
-            const defaultAgeGroupIds = Formatter.uniqueArray(groups.filter(o => o.group.defaultAgeGroupId));
-            const defaultAgeGroups = defaultAgeGroupIds.map(o => PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`));
-            const str = Formatter.joinLast(Formatter.uniqueArray(defaultAgeGroups).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
-
-            return {
-                value: str,
-            };
-        },
-    },
-    {
         id: 'nationalRegisterNumber',
         name: $t(`00881b27-7501-4c56-98de-55618be2bf11`),
         width: 30,
@@ -251,16 +205,61 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
     id: 'members',
     name: $t(`fb35c140-e936-4e91-aa92-ef4dfc59fb51`),
     columns: [
-        {
-            id: 'id',
-            name: $t(`29360811-3663-496c-8d8f-c9fdf9467a74`),
-            width: 40,
-            getValue: ({ patchedMember: object }: PlatformMember) => ({
-                value: object.id,
-            }),
-        },
-
         ...baseMemberColumns,
+        {
+            id: 'organization',
+            name: $t(`afd7843d-f355-445b-a158-ddacf469a5b1`),
+            width: 40,
+            getValue: (member: PlatformMember) => {
+                const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
+                const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                return {
+                    value: str,
+                };
+            },
+        },
+        {
+            id: 'uri',
+            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
+            width: 30,
+            getValue: (member: PlatformMember) => {
+                const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
+                const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                return {
+                    value: str,
+                };
+            },
+        },
+        {
+            id: 'group',
+            name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
+            width: 40,
+            getValue: (member: PlatformMember) => {
+                const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
+                const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name.toString())).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                return {
+                    value: str,
+                };
+            },
+        },
+        {
+            id: 'defaultAgeGroup',
+            name: $t(`0ef2bbb3-0b3c-411a-8901-a454cff1f839`),
+            width: 40,
+            getValue: (member: PlatformMember) => {
+                const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
+                const defaultAgeGroupIds = Formatter.uniqueArray(groups.filter(o => o.group.defaultAgeGroupId));
+                const defaultAgeGroups = defaultAgeGroupIds.map(o => PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`));
+                const str = Formatter.joinLast(Formatter.uniqueArray(defaultAgeGroups).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+                return {
+                    value: str,
+                };
+            },
+        },
 
         // Registration records
         {
