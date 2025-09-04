@@ -1,9 +1,11 @@
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import { useAppContext } from '../../context';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
@@ -12,6 +14,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
     const $platform = usePlatform();
     const $user = useUser();
     const auth = useAuth();
+    const app = useAppContext();
 
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
@@ -25,6 +28,23 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
             name: $t('ae9274f4-87fd-4221-bd81-3ff8b609eb4b'),
             key: 'registeredAt',
         }));
+
+        if (app === 'admin') {
+            all.push(new MultipleChoiceFilterBuilder({
+                name: $t('322dd34f-a4ec-4065-be53-040725915e20'),
+                options: ($platform.value.periods ?? []).map((period) => {
+                    return new MultipleChoiceUIFilterOption(period.nameShort, period.id);
+                }),
+                wrapper: {
+                    periodId: { $in: FilterWrapperMarker },
+                },
+                additionalUnwrappers: [
+                    {
+                        periodId: FilterWrapperMarker,
+                    },
+                ],
+            }));
+        }
 
         const originalFilters = createMemberWithRegistrationsBlobFilterBuilders({
             organization,
