@@ -173,4 +173,5 @@ export default {
     'reviewTime.uitpasNumber': 'UiTPAS-nummer',
     'reviewTimes': 'laatst nagekeken',
     'updatedAt': 'laatst gewijzigd op',
+    'showInMemberPortal': 'tonen in ledenportaal'
 };

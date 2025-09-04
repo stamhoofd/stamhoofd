@@ -103,6 +103,9 @@ export enum AuditLogType {
     // Email
     EmailSent = 'EmailSent',
     EmailSending = 'EmailSending',
+    EmailPublished = 'EmailPublished',
+    EmailEdited = 'EmailEdited',
+    EmailDeleted = 'EmailDeleted',
 
     // Marked as spam events
     EmailAddressMarkedAsSpam = 'EmailAddressMarkedAsSpam',
@@ -215,7 +218,14 @@ export function getAuditLogTypeName(type: AuditLogType): string {
         case AuditLogType.EmailSent:
             return `Succesvol verzonden e-mails`;
         case AuditLogType.EmailSending:
-            return `E-mails gestart met verzenden`;
+            return `E-mail gestart met verzenden`;
+        case AuditLogType.EmailPublished:
+            return `Gepubliceerde berichten`;
+        case AuditLogType.EmailEdited:
+            return `Wijzigingen aan berichten`;
+        case AuditLogType.EmailDeleted:
+            return `Verwijderde berichten`;
+
         case AuditLogType.EmailAddressMarkedAsSpam:
             return `E-mailadressen gemarkeerd als spam`;
         case AuditLogType.EmailAddressHardBounced:
@@ -349,9 +359,16 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`membership-filled`, `trash red stroke`];
 
         case AuditLogType.EmailSent:
-            return [`email`, `success primary stroke`];
+            return [`email`, `send primary stroke`];
         case AuditLogType.EmailSending:
             return [`email`, `clock stroke`];
+        case AuditLogType.EmailPublished:
+            return [`email`, `earth primary`];
+        case AuditLogType.EmailEdited:
+            return [`email`, `edit stroke`];
+        case AuditLogType.EmailDeleted:
+            return [`email`, `trash red stroke`];
+
         case AuditLogType.EmailAddressMarkedAsSpam:
             return [`email`, `error red stroke`];
         case AuditLogType.EmailAddressHardBounced:
@@ -496,6 +513,15 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.EmailSent:
             return `E-mail {{e}} werd succesvol verzonden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
 
+        case AuditLogType.EmailPublished:
+            return `Bericht {{e}} werd succesvol gepubliceerd`;
+
+        case AuditLogType.EmailEdited:
+            return `Bericht {{e}} werd gewijzigd`;
+
+        case AuditLogType.EmailDeleted:
+            return `Bericht {{e}} werd verwijderd`;
+
         case AuditLogType.EmailSending:
             return `E-mail {{e}} werd ingepland om te verzenden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
 
@@ -622,6 +648,9 @@ function getTypeReplacements(type: AuditLogType): string[] {
 
         case AuditLogType.EmailSent:
         case AuditLogType.EmailSending:
+        case AuditLogType.EmailPublished:
+        case AuditLogType.EmailEdited:
+        case AuditLogType.EmailDeleted:
             return ['e'];
 
         case AuditLogType.EmailAddressMarkedAsSpam:
