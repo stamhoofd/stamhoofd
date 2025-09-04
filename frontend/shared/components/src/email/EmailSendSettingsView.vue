@@ -23,7 +23,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Toon bericht in het ledenportaal') }}
+                    {{ $t('Toon in het ledenportaal') }}
                 </h3>
                 <p class="style-description-small">
                     {{ $t('Leden kunnen het bericht terugvinden in hun ledenportaal onder het tabblad ‘Berichten’') }}
@@ -36,7 +36,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Bericht versturen als e-mail') }}
+                    {{ $t('Versturen als e-mail') }}
                 </h3>
                 <p class="style-description-small">
                     {{ $t('Het bericht wordt ook als e-mail verzonden') }}
