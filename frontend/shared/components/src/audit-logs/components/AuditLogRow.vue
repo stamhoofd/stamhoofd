@@ -1,7 +1,7 @@
 <template>
     <STListItem class="right-stack" @contextmenu.prevent="canFilter ? showContext($event) : undefined">
         <template #left>
-            <IconContainer :icon="log.icon" class="gray">
+            <IconContainer :icon="log.icon" :class="log.subIcon && log.subIcon.includes('primary') ? 'primary' : (log.subIcon && log.subIcon.includes('green') ? 'theme-success' : (log.subIcon && log.subIcon.includes('red') ? 'theme-error' : 'gray'))">
                 <template v-if="log.subIcon" #aside>
                     <ProgressIcon :icon="log.subIcon" />
                 </template>
