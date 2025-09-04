@@ -21,6 +21,7 @@
     box-sizing: content-box;
     overflow: hidden;
     white-space: nowrap;
+    flex-shrink: 0;
     
     display: inline; // fallback
     display: inline-flex; // needed for proper vertical alignemnt of icons
