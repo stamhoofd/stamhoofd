@@ -12,7 +12,7 @@ import { ImageComponent, Logo, usePlatform } from '@stamhoofd/components';
 import { computed } from 'vue';
 
 const platform = usePlatform();
-const logo = computed(() => platform.value.config.squareLogo ?? platform.value.config.horizontalLogo);
-const logoDark = computed(() => platform.value.config.squareLogoDark ?? platform.value.config.horizontalLogoDark);
+const logo = computed(() => platform.value.config.organizationLogo ?? platform.value.config.squareLogo ?? platform.value.config.horizontalLogo);
+const logoDark = computed(() => platform.value.config.organizationLogoDark ?? platform.value.config.squareLogoDark ?? platform.value.config.horizontalLogoDark);
 
 </script>

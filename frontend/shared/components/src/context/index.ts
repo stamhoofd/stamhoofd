@@ -9,3 +9,4 @@ export { default as OrganizationSwitcher } from './OrganizationSwitcher.vue';
 export { default as VersionFooter } from './VersionFooter.vue';
 export * from './hooks/useContextOptions.ts';
 export { default as PlatformAvatar } from './PlatformAvatar.vue';
+export { default as PlatformOrganizationAvatar } from './PlatformOrganizationAvatar.vue';
