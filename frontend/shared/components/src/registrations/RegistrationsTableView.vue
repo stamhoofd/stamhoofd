@@ -73,18 +73,31 @@ const auth = useAuth();
 const platform = usePlatform();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
 
-const defaultFilter: StamhoofdFilter = app === 'admin' && !props.group
-    ? { member: {
-            $elemMatch: {
-                platformMemberships: {
+const defaultFilter: StamhoofdFilter = getDefaultFilter();
+
+function getDefaultFilter(): StamhoofdFilter {
+    if (app === 'admin') {
+        if (props.group) {
+            return null;
+        }
+        else {
+            return {
+                member: {
                     $elemMatch: {
-                        endDate: {
-                            $gt: { $: '$now' },
-                        },
-                    },
-                } },
-        } }
-    : null;
+                        platformMemberships: {
+                            $elemMatch: {
+                                endDate: {
+                                    $gt: { $: '$now' },
+                                },
+                            },
+                        } },
+                },
+            };
+        };
+    }
+
+    return null;
+}
 
 const organizationRegistrationPeriod = computed(() => {
     const periodId = filterPeriodId;
@@ -135,6 +148,12 @@ function getRequiredFilter(): StamhoofdFilter | null {
                 organizationId: props.organization.id,
                 periodId: props.periodId,
                 deactivatedAt: null,
+                group: {
+                    $elemMatch: {
+                        deletedAt: null,
+                    },
+
+                },
             };
         }
 
@@ -142,10 +161,22 @@ function getRequiredFilter(): StamhoofdFilter | null {
             return {
                 periodId: props.periodId,
                 deactivatedAt: null,
+                group: {
+                    $elemMatch: {
+                        deletedAt: null,
+                    },
+
+                },
             };
         }
         return {
             deactivatedAt: null,
+            group: {
+                $elemMatch: {
+                    deletedAt: null,
+                },
+
+            },
         };
     }
 
@@ -184,6 +215,11 @@ function getRequiredFilter(): StamhoofdFilter | null {
                         $in: groups.map(g => g.id),
                     },
                     deactivatedAt: null,
+                    group: {
+                        $elemMatch: {
+                            deletedAt: null,
+                        },
+                    },
                 },
         ...extra,
     ];
