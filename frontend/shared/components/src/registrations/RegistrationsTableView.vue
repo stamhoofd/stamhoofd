@@ -74,15 +74,16 @@ const platform = usePlatform();
 const filterPeriodId = props.periodId ?? props.group?.periodId ?? props.organization?.period?.period?.id ?? platform.value.period.id;
 
 const defaultFilter: StamhoofdFilter = app === 'admin' && !props.group
-    ? {
-            platformMemberships: {
-                $elemMatch: {
-                    endDate: {
-                        $gt: { $: '$now' },
+    ? { member: {
+            $elemMatch: {
+                platformMemberships: {
+                    $elemMatch: {
+                        endDate: {
+                            $gt: { $: '$now' },
+                        },
                     },
-                },
-            },
-        }
+                } },
+        } }
     : null;
 
 const organizationRegistrationPeriod = computed(() => {
