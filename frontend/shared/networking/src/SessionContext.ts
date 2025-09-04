@@ -516,7 +516,7 @@ export class SessionContext implements RequestMiddleware {
         }
 
         if (this.organization) {
-            if (this.auth.permissions && !this.organization.privateMeta) {
+            if (this.auth.permissions && !this.auth.permissions.isEmpty && !this.organization.privateMeta) {
                 // Private meta is missing while we have permissions for this organization: requires a refetch
                 return false;
             }
@@ -691,7 +691,7 @@ export class SessionContext implements RequestMiddleware {
             shouldRetry,
         });
 
-        if (this.hasToken() && this.organizationPermissions && !response.data.privateMeta) {
+        if (this.hasToken() && this.auth.permissions && !this.auth.permissions.isEmpty && !response.data.privateMeta) {
             console.error('Missing privateMeta in authenticated organization response');
 
             // Critical issue: log out
@@ -700,7 +700,11 @@ export class SessionContext implements RequestMiddleware {
                 message: 'Something went wrong',
                 human: $t(`6ef5e456-73f7-4baf-845c-4321094bbc6b`),
             }));
-            throw new Error('Missing privateMeta in authenticated organization response');
+            throw new SimpleError({
+                code: 'failed',
+                message: 'Something went wrong',
+                human: $t(`6ef5e456-73f7-4baf-845c-4321094bbc6b`),
+            });
         }
 
         this.updateOrganization(response.data);
@@ -750,7 +754,7 @@ export class SessionContext implements RequestMiddleware {
                 }
             }
 
-            if (this.organization && ((force && !fetchedOrganization) || (this.organizationPermissions && !this.organization.privateMeta))) {
+            if (this.organization && ((force && !fetchedOrganization) || (this.auth.permissions && !this.auth.permissions.isEmpty && !this.organization.privateMeta))) {
                 fetchedOrganization = true;
                 await this.fetchOrganization(shouldRetry);
             }
