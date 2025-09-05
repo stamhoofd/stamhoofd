@@ -52,27 +52,27 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
             enabled: false,
         }),
+        new SelectableColumn({
+            id: 'group',
+            name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
+            enabled: (!organization || organization.id === platform.membershipOrganizationId),
+        }),
         ...((!organization || organization.id === platform.membershipOrganizationId)
             ? [
                     new SelectableColumn({
-                        id: 'group',
-                        name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
-                        enabled: false,
-                    }),
-                    new SelectableColumn({
                         id: 'organization',
                         name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
-                        enabled: false,
+                        enabled: true,
                     }),
                     new SelectableColumn({
                         id: 'uri',
                         name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
-                        enabled: false,
+                        enabled: true,
                     }),
                     new SelectableColumn({
                         id: 'defaultAgeGroup',
                         name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
-                        enabled: false,
+                        enabled: true,
                     }),
                 ]
             : []),
