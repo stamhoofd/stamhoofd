@@ -651,7 +651,12 @@ async function send() {
         });
 
         email.value.deepSet(response.data);
-        Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+        if (email.value.sendAsEmail) {
+            Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+        }
+        else {
+            Toast.success($t('Jouw bericht wordt zo gepubliceerd')).show();
+        }
 
         if (communicationFeature) {
             await GlobalEventBus.sendEvent('selectTabById', 'communication');

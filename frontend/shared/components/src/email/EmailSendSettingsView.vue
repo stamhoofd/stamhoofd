@@ -137,7 +137,12 @@ async function save() {
         patch.value = EmailPreview.patch({});
 
         if (props.willSend) {
-            Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+            if (props.editEmail.sendAsEmail) {
+                Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
+            }
+            else {
+                Toast.success($t('Jouw bericht wordt zo gepubliceerd')).show();
+            }
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
         }
         await dismiss({ force: true });
