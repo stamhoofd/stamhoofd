@@ -123,7 +123,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             .setMaxExecutionTime(15 * 1000)
             .from(
                 SQL.table('registrations'),
-            );
+            )
+            .where('registeredAt', '!=', null);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
