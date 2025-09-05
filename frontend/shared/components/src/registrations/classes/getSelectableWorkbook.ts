@@ -53,12 +53,35 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             enabled: false,
         }),
         new SelectableColumn({
+            id: 'member.id',
+            name: $t('ID lid'),
+            description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
+            enabled: false,
+        }),
+        new SelectableColumn({
+            id: 'member.memberNumber',
+            name: $t(`Lidnummer`),
+        }),
+        new SelectableColumn({
+            id: 'member.firstName',
+            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+        }),
+        new SelectableColumn({
+            id: 'member.lastName',
+            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+        }),
+        new SelectableColumn({
             id: 'group',
             name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
             enabled: (!organization || organization.id === platform.membershipOrganizationId),
         }),
         ...((!organization || organization.id === platform.membershipOrganizationId)
             ? [
+                    new SelectableColumn({
+                        id: 'defaultAgeGroup',
+                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+                        enabled: true,
+                    }),
                     new SelectableColumn({
                         id: 'organization',
                         name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
@@ -67,11 +90,6 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     new SelectableColumn({
                         id: 'uri',
                         name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
-                        enabled: true,
-                    }),
-                    new SelectableColumn({
-                        id: 'defaultAgeGroup',
-                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
                         enabled: true,
                     }),
                 ]
@@ -88,7 +106,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         sheets: [
             new SelectableSheet({
                 id: 'registrations',
-                name: $t(`97dc1e85-339a-4153-9413-cca69959d731`),
+                name: $t(`Inschrijvingen`),
                 columns: columns.filter(column => column !== null),
             }),
         ],
@@ -116,25 +134,6 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
 
     const columns: SelectableColumn[] = [
         new SelectableColumn({
-            id: 'member.id',
-            name: $t('ID lid'),
-            description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
-            enabled: false,
-        }),
-        // todo: only if platform?
-        new SelectableColumn({
-            id: 'member.memberNumber',
-            name: $t(`Lidnummer`),
-        }),
-        new SelectableColumn({
-            id: 'member.firstName',
-            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
-        }),
-        new SelectableColumn({
-            id: 'member.lastName',
-            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
-        }),
-        new SelectableColumn({
             id: 'member.birthDay',
             name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
         }),
@@ -146,19 +145,23 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
         new SelectableColumn({
             id: 'member.gender',
             name: $t(`3048ad16-fd3b-480e-b458-10365339926b`),
+            enabled: false,
         }),
         new SelectableColumn({
             id: 'member.phone',
             name: $t(`de70b659-718d-445a-9dca-4d14e0a7a4ec`),
+            enabled: false,
         }),
         new SelectableColumn({
             id: 'member.email',
             name: $t(`7400cdce-dfb4-40e7-996b-4817385be8d8`),
+            enabled: false,
         }),
         new SelectableColumn({
             id: 'member.address',
             name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
             description: $t(`01e99208-dce7-4109-8cf2-3cc74c4df45c`),
+            enabled: false,
         }),
         new SelectableColumn({
             id: 'member.securityCode',
@@ -175,6 +178,7 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.uitpasNumber',
             name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
+            enabled: false,
         }), [AccessRight.MemberReadFinancialData]),
 
         new SelectableColumn({
@@ -185,6 +189,7 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.nationalRegisterNumber',
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
+            enabled: false,
         }), [AccessRight.MemberManageNRN]),
 
         ...[1, 2].flatMap((parentNumber, parentIndex) => {
@@ -268,6 +273,7 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
                     name: record.name.toString(),
                     category: category.name.toString(),
                     description: record.description.toString(),
+                    enabled: false,
                 });
             });
         }),
