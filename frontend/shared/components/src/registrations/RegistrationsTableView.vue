@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, Organization, PlatformRegistration, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, mergeFilters, Organization, PlatformRegistration, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
@@ -81,17 +81,7 @@ function getDefaultFilter(): StamhoofdFilter {
             return null;
         }
         else {
-            const filter: StamhoofdFilter = {
-                member: {
-                    $elemMatch: {
-                        platformMemberships: {
-                            $elemMatch: {
-                                endDate: {
-                                    $gt: { $: '$now' },
-                                },
-                            },
-                        } },
-                },
+            let filter: StamhoofdFilter = {
                 $not: {
                     group: {
                         defaultAgeGroupId: {
@@ -103,7 +93,26 @@ function getDefaultFilter(): StamhoofdFilter {
             };
 
             if (!props.periodId && !props.group) {
-                filter.periodId = filterPeriodId;
+                filter = mergeFilters([
+                    filter,
+                    { periodId: filterPeriodId },
+                ]);
+            }
+            else {
+                filter = mergeFilters([
+                    filter,
+                    { member: {
+                        $elemMatch: {
+                            platformMemberships: {
+                                $elemMatch: {
+                                    endDate: {
+                                        $gt: { $: '$now' },
+                                    },
+                                },
+                            },
+                        },
+                    } },
+                ]);
             }
 
             return filter;
