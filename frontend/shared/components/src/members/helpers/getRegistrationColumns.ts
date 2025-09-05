@@ -1,6 +1,6 @@
 import { Column } from '@stamhoofd/components';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MembershipStatus, Organization, PermissionLevel, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
@@ -28,6 +28,41 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 200,
             grow: true,
         }),
+
+        new Column<ObjectType, Group>({
+            id: 'group.name',
+            allowSorting: false,
+            name: $t('Inschrijvingsgroep'),
+            getValue: (registration) => {
+                return registration.group;
+            },
+            format: (g) => {
+                return g.settings.name.toString();
+            },
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: !group,
+        }),
+
+        new Column<ObjectType, string | null>({
+            id: 'group.defaultAgeGroup',
+            allowSorting: false,
+            name: $t('Standaard leeftijdsgroep'),
+            getValue: (registration) => {
+                return registration.group.defaultAgeGroupId;
+            },
+            format: (g) => {
+                if (!g) {
+                    return $t('Geen');
+                }
+                return Platform.shared.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('Onbekend');
+            },
+            getStyle: g => !g ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: !group,
+        }),
+
         new Column<ObjectType, Date | null>({
             id: 'member.birthDay',
             name: $t(`7d7b5a21-105a-41a1-b511-8639b59024a4`),
@@ -44,6 +79,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`ba6f46a9-2598-4da2-beb2-fdf9ba890bfd`))) : $t(`af93c340-950c-4f6c-be6a-6bb847ec2d41`),
             minimumWidth: 50,
             recommendedWidth: 120,
+            enabled: false,
         }),
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'member.membership',
@@ -90,6 +126,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             minimumWidth: 120,
             recommendedWidth: 140,
             allowSorting: false,
+            enabled: false,
         }),
         dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
@@ -154,20 +191,19 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         }),
     ].filter(column => column !== null);
 
-    if (group) {
-        if (group.settings.prices.length > 1) {
-            allColumns.push(
-                new Column<ObjectType, string>({
-                    id: 'groupPrice',
-                    allowSorting: false,
-                    name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
-                    getValue: registration => registration.groupPrice.name.toString(),
-                    minimumWidth: 100,
-                    recommendedWidth: 300,
-                }),
-            );
-        }
+    allColumns.push(
+        new Column<ObjectType, string>({
+            id: 'groupPrice',
+            allowSorting: false,
+            name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
+            getValue: registration => registration.groupPrice.name.toString(),
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: !!group,
+        }),
+    );
 
+    if (group) {
         for (const optionMenu of group.settings.optionMenus) {
             allColumns.push(
                 new Column<ObjectType, RegisterItemOption | null>({
@@ -296,13 +332,13 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
     if (app === 'admin' || (group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration && auth.hasSomePlatformAccess())) {
         allColumns.push(
-            new Column<ObjectType, Organization[]>({
+            new Column<ObjectType, Organization | undefined>({
                 id: 'organization',
                 allowSorting: false,
                 name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
-                getValue: registration => registration.member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('1a16a32a-7ee4-455d-af3d-6073821efa8f'),
-                getStyle: organizations => organizations.length === 0 ? 'gray' : '',
+                getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
+                format: organization => organization?.name ?? $t('Onbekend'),
+                getStyle: organization => !organization ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
                 enabled: app === 'admin',
@@ -310,15 +346,15 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         );
 
         allColumns.push(
-            new Column<ObjectType, Organization[]>({
+            new Column<ObjectType, Organization | undefined>({
                 id: 'uri',
                 allowSorting: false,
                 name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
-                getValue: registration => registration.member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331'),
-                getStyle: organizations => organizations.length === 0 ? 'gray' : '',
-                minimumWidth: 100,
-                recommendedWidth: 300,
+                getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
+                format: organization => organization?.uri ?? $t('Onbekend'),
+                getStyle: organization => !organization ? 'gray' : '',
+                minimumWidth: 50,
+                recommendedWidth: 100,
                 enabled: false,
             }),
         );
@@ -489,33 +525,6 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                     const memberGroups = registration.member.filterGroups({ groups: groups, periodId: filterPeriodId });
                     const getIndex = g => groups.findIndex(_g => _g.id === g.id);
                     return memberGroups.sort((a, b) => Sorter.byNumberValue(getIndex(b), getIndex(a)));
-                },
-                format: (groups) => {
-                    if (groups.length === 0) {
-                        return $t(`60abecdc-9f60-4e4a-a994-95e3fec67a5a`);
-                    }
-                    return groups.map(g => g.settings.name).join(', ');
-                },
-                getStyle: groups => groups.length === 0 ? 'gray' : '',
-                minimumWidth: 100,
-                recommendedWidth: 300,
-                enabled: false,
-            }),
-        );
-    }
-
-    if (!group && !category) {
-        allColumns.push(
-            new Column<ObjectType, Group[]>({
-                id: 'category',
-                allowSorting: false,
-                name: $t('b467444b-879a-4bce-b604-f7e890008c4f'),
-                getValue: (registration) => {
-                    let memberGroups = registration.member.filterGroups({ periodId: filterPeriodId, types: [GroupType.Membership, GroupType.WaitingList] });
-                    if (app === 'admin') {
-                        memberGroups = memberGroups.filter(g => g.defaultAgeGroupId !== null);
-                    }
-                    return memberGroups.sort((a, b) => Sorter.byStringValue(a.settings.name.toString(), b.settings.name.toString()));
                 },
                 format: (groups) => {
                     if (groups.length === 0) {
