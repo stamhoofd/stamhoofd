@@ -168,6 +168,11 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 const defaultAgeGroupId = registration.group.defaultAgeGroupId;
+                if (!defaultAgeGroupId) {
+                    return {
+                        value: '',
+                    };
+                }
                 return {
                     value: PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`),
                 };
