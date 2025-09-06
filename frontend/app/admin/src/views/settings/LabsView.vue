@@ -8,9 +8,6 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p class="info-box">
-            {{ $t('bf96ea88-45a7-48ff-8d90-278388585046') }}
-        </p>
 
         <hr><h2>
             {{ $t('8f9e2384-e2d3-46b7-a83e-3baed2b40936') }}
