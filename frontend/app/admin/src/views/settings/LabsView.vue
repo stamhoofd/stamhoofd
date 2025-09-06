@@ -31,15 +31,6 @@
         <Checkbox :model-value="getFeatureFlag('event-notifications')" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
             {{ $t('caf486c6-818a-4d2b-9fdb-728c6af71481') }}
         </Checkbox>
-
-        <Checkbox :model-value="getFeatureFlag('table-registrations')" @update:model-value="setFeatureFlag('table-registrations', !!$event)">
-            {{ $t('331da9e3-2c97-4c70-a3d5-aa0ddb9625ad') }}
-        </Checkbox>
-
-        <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
-            UiTPAS-kansentarief op webshops (onvolledig)
-        </Checkbox>
-
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
             {{ $t('e85a86ee-7751-4791-984b-f67dc1106f6b') }}
         </Checkbox>
@@ -48,17 +39,30 @@
             {{ $t('f0815834-0750-41d6-aa93-26203b2aedb6') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
-            {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
-        </Checkbox>
-
         <Checkbox :model-value="getFeatureFlag('event-webshops')" @update:model-value="setFeatureFlag('event-webshops', !!$event)">
             {{ $t('c22cb870-b859-4de9-9540-1d2d796a50f3') }}
         </Checkbox>
 
-        <Checkbox :model-value="getFeatureFlag('communication')" @update:model-value="setFeatureFlag('communication', !!$event)">
-            Communicatiemodule (onvolledig)
-        </Checkbox>
+        <template v-if="isRootAdmin">
+            <hr>
+            <h2>Stamhoofd flags</h2>
+
+            <Checkbox :model-value="getFeatureFlag('table-registrations')" @update:model-value="setFeatureFlag('table-registrations', !!$event)">
+                {{ $t('331da9e3-2c97-4c70-a3d5-aa0ddb9625ad') }}
+            </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('uitpas')" @update:model-value="setFeatureFlag('uitpas', !!$event)">
+                UiTPAS-kansentarief op webshops (onvolledig)
+            </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
+                {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
+            </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('communication')" @update:model-value="setFeatureFlag('communication', !!$event)">
+                Communicatiemodule (onvolledig)
+            </Checkbox>
+        </template>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
 
@@ -85,7 +89,7 @@
 <script lang="ts" setup>
 import { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, Toast, useErrors, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, CheckboxListItem, ErrorBox, LoginMethodConfigView, Toast, useErrors, useIsRootAdmin, usePatch, usePlatform } from '@stamhoofd/components';
 import { usePlatformManager } from '@stamhoofd/networking';
 import { LoginMethod, LoginMethodConfig, PlatformConfig } from '@stamhoofd/structures';
 import { ref } from 'vue';
@@ -94,6 +98,7 @@ const platformManager = usePlatformManager();
 const platform = usePlatform();
 const errors = useErrors();
 const pop = usePop();
+const isRootAdmin = useIsRootAdmin();
 
 const present = usePresent();
 
