@@ -247,6 +247,7 @@ defineRoutes([
                 paramsToProps: () => {
                     return {
                         group: props.group,
+                        organization: organization.value,
                     };
                 },
             }
