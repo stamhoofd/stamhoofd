@@ -8,20 +8,14 @@
                 {{ $t('2aaf6529-b504-45f9-848e-8fe2b52738ec') }}
             </p>
 
-            <STList v-if="visibleWebshops.length > 0">
-                <STListItem
-                    v-for="webshop in visibleWebshops" :key="webshop.id" element-name="button" :selectable="true" :class="{
-                        selected: isSelected(webshop),
-                    }" @click="openWebshop(webshop)"
-                >
-                    <h2 class="style-title-list">
-                        {{ webshop.meta.name }}
-                    </h2>
-                    <template #right>
-                        <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon small" />
-                    </template>
-                </STListItem>
-            </STList>
+            <button
+                v-for="webshop in visibleWebshops" :key="webshop.id" class="menu-button button" :class="{
+                    selected: isSelected(webshop),
+                }" type="button" @click="openWebshop(webshop)"
+            >
+                <span>{{ webshop.meta.name }}</span>
+                <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon small" />
+            </button>
 
             <template
                 v-if="
@@ -29,26 +23,21 @@
                         ((fullAccess && hasWebshopArchive) || canCreateWebshops)
                 "
             >
-                <hr>
-                <STList>
-                    <STListItem v-if="fullAccess && hasWebshopArchive" element-name="button" :selectable="true" :class="{ selected: checkRoute(Routes.Archive) }" @click="$navigate(Routes.Archive)">
-                        <template #left>
-                            <span class="icon archive" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}
-                        </h2>
-                    </STListItem>
+                <template v-if="fullAccess && hasWebshopArchive">
+                    <hr>
+                    <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Archive) }" @click="$navigate(Routes.Archive)">
+                        <span class="icon archive" />
+                        <span>{{ $t('c51b35d1-228b-4ce3-8b27-312b5620b662') }}</span>
+                    </button>
+                </template>
 
-                    <STListItem v-if="canCreateWebshops" element-name="button" :selectable="true" @click="addWebshop()">
-                        <template #left>
-                            <span class="icon add" />
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('e38c0b49-b038-4c9c-9653-fe1e4a078226') }}
-                        </h2>
-                    </STListItem>
-                </STList>
+                <template v-if="canCreateWebshops">
+                    <hr>
+                    <button class="menu-button button" type="button" @click="addWebshop()">
+                        <span class="icon add" />
+                        <span>{{ $t('e38c0b49-b038-4c9c-9653-fe1e4a078226') }}</span>
+                    </button>
+                </template>
             </template>
         </main>
     </div>
