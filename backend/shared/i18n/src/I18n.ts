@@ -53,12 +53,21 @@ export class I18n {
         return map;
     }
 
+    static get validLocales() {
+        // todo: make platform specific
+        return (STAMHOOFD.locales ?? {
+            [Country.Belgium]: [Language.Dutch],
+        }) as Partial<Record<Country, Language[]>>;
+    }
+
     static isValidLocale(locale: string) {
         if (locale.length == 5 && locale.substr(2, 1) == '-') {
             const l = locale.substr(0, 2).toLowerCase() as Language;
             const c = locale.substr(3, 2).toUpperCase();
 
-            return languages.includes(l) && (countries as string[]).includes(c);
+            if (languages.includes(l) && (countries as string[]).includes(c)) {
+                return this.validLocales[c as Country]?.includes(l) ?? false;
+            }
         }
         return false;
     }
@@ -94,29 +103,30 @@ export class I18n {
         if (I18n.isValidLocale(this.locale)) {
             return;
         }
+        const validLocales = I18n.validLocales;
 
-        // Check language is valid
-        if (!languages.includes(this.language)) {
-            this.language = I18n.defaultLanguage;
-
-            if (I18n.isValidLocale(this.locale)) {
-                return;
+        if (!(this.country in validLocales)) {
+            // Find first coutnry with same language
+            for (const country of countries) {
+                if (validLocales[country]?.includes(this.language)) {
+                    this.country = country;
+                    return;
+                }
             }
-            this.country = I18n.defaultCountry;
+
+            // Fallback
+            this.country = countries[0];
+            this.language = validLocales[this.country]![0];
             return;
         }
 
-        // Loop countries until valid
-        this.country = I18n.defaultCountry;
-        while (!I18n.isValidLocale(this.locale)) {
-            const index = countries.indexOf(this.country);
-            if (index === countries.length - 1) {
-                // Last country
-                this.language = I18n.defaultLanguage;
-                this.country = I18n.defaultCountry;
+        if (!validLocales[this.country]?.includes(this.language)) {
+            if (validLocales[this.country]?.includes(Language.English)) {
+                this.language = Language.English;
                 return;
             }
-            this.country = countries[index + 1];
+
+            this.language = validLocales[this.country]![0];
         }
     }
 
