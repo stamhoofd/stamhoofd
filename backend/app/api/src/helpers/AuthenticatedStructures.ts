@@ -456,6 +456,9 @@ export class AuthenticatedStructures {
 
         const memberBlobs: MemberWithRegistrationsBlob[] = [];
         for (const member of members) {
+            const filtered: (Registration & {
+                group: Group;
+            })[] = [];
             for (const registration of member.registrations) {
                 if (includeContextOrganization || registration.organizationId !== Context.auth.organization?.id) {
                     const found = organizations.get(registration.id);
@@ -464,8 +467,11 @@ export class AuthenticatedStructures {
                         organizations.set(organization.id, organization);
                     }
                 }
+                if (organizations.get(registration.organizationId)?.active || (Context.auth.organization && Context.auth.organization.active && registration.organizationId === Context.auth.organization.id) || await Context.auth.hasFullAccess(registration.organizationId)) {
+                    filtered.push(registration);
+                }
             }
-            member.registrations = member.registrations.filter(r => (Context.auth.organization && Context.auth.organization.active && r.organizationId === Context.auth.organization.id) || (organizations.get(r.organizationId)?.active ?? false));
+            member.registrations = filtered;
             const balancesPermission = await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id);
 
             let memberBalances: GenericBalance[] = [];
@@ -521,7 +527,13 @@ export class AuthenticatedStructures {
             }
         }
 
-        const activeOrganizations = [...organizations.values()].filter(o => o.active);
+        const activeOrganizations: Organization[] = [];
+
+        for (const organization of organizations.values()) {
+            if (organization.active || await Context.auth.hasFullAccess(organization.id)) {
+                activeOrganizations.push(organization);
+            }
+        }
         const organizationStructs = await this.organizations(activeOrganizations);
 
         // Load missing groups
