@@ -223,6 +223,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 if (!registration.waitingList) {
                     registration.canRegister = false
                 }
+                if (registration.waitingList) {
+                    registration.registeredAt = null
+                }
                 registration.cycle = patchRegistration.cycle ?? registration.cycle
                 registration.groupId = patchRegistration.groupId ?? registration.groupId
 

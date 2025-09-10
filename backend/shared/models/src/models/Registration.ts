@@ -154,7 +154,7 @@ export class Registration extends Model {
     }
 
     async markValid(this: Registration) {
-        if (this.registeredAt !== null) {
+        if (this.registeredAt !== null && !this.waitingList) {
             await this.save();
             return false;
         }
