@@ -2,7 +2,7 @@
     <SaveView :error-box="errors.errorBox" :loading="saving" :title="title" :disabled="total == 0" :save-text="$t('e3f37ccd-a27c-4455-96f4-e33b74ae879e')" save-icon-right="arrow-right" @save="save">
         <h1>{{ title }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
-        <SelectBalanceItemsList :items="items" :list="list" :is-payable="isPayable" @patch="addPatch" />
+        <SelectBalanceItemsList :items="items" :list="list" :is-payable="isPayable" :can-customize-item-value="canCustomizeItemValue" @patch="addPatch" />
     </SaveView>
 </template>
 
@@ -12,14 +12,15 @@ import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
+import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 
 const props = defineProps<{
     title: string;
     items: BalanceItem[];
     isPayable: boolean;
     saveHandler: (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => void | Promise<void>;
+    canCustomizeItemValue?: (item: BalanceItem) => boolean;
 }>();
 
 const list = ref([] as BalanceItemPaymentDetailed[]);

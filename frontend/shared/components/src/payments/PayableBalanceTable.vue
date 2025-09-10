@@ -24,9 +24,9 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, useDismiss, useShow } from '@simonbackx/vue-app-navigation';
-import { GlobalEventBus, NavigationActions, SelectBalanceItemsView, Toast, useAppContext, useOrganizationCart } from '@stamhoofd/components';
+import { GlobalEventBus, NavigationActions, SelectBalanceItemsView, Toast, useAppContext, useOrganizationCart, usePlatform } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
-import { BalanceItemCartItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemCartItem, BalanceItemPaymentDetailed, DetailedPayableBalance, RegisterCheckout } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalancePriceBreakdown from './BalancePriceBreakdown.vue';
 import GroupedBalanceList from './GroupedBalanceList.vue';
@@ -42,6 +42,7 @@ const app = useAppContext();
 const memberManager = useMemberManager();
 const dismiss = useDismiss();
 const show = useShow();
+const platform = usePlatform();
 
 const filteredItems = items;
 
@@ -62,6 +63,9 @@ async function checkout() {
                         title: $t(`9a9fcc54-b73c-4c9f-ba2e-56ae8c3f150d`),
                         items: items.value,
                         isPayable: true,
+                        canCustomizeItemValue: (item: BalanceItem) => {
+                            return item.organizationId !== platform.value.membershipOrganizationId;
+                        },
                         saveHandler: async (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => {
                             // First clear
                             for (const g of filteredItems.value) {

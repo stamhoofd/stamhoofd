@@ -34,16 +34,20 @@
 
 <script setup lang="ts">
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PriceBreakdownBox, PriceInput, STInputBox, usePlatform } from '@stamhoofd/components';
+import { PriceBreakdownBox, PriceInput, STInputBox } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     items: BalanceItem[];
     list: BalanceItemPaymentDetailed[];
     isPayable: boolean;
-}>();
+    canCustomizeItemValue?: (item: BalanceItem) => boolean;
+}>(), {
+    canCustomizeItemValue: () => true,
+});
+
 const customizeItemValues = ref(new Set<string>());
 
 onMounted(async () => {
@@ -72,12 +76,6 @@ onMounted(async () => {
         }
     }
 });
-
-const platform = usePlatform();
-
-function canCustomizeItemValue(item: BalanceItem) {
-    return item.organizationId !== platform.value.membershipOrganizationId;
-}
 
 const emit = defineEmits<{ (e: 'patch', patch: PatchableArrayAutoEncoder<BalanceItemPaymentDetailed>): void }>();
 
