@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group, Member, Platform } from '@stamhoofd/models';
-import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { Group, Member, Platform, Registration } from '@stamhoofd/models';
+import { SQL, SQLExpression, SQLSelect, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -11,7 +11,7 @@ import { RegistrationWithMemberBlob } from '@stamhoofd/structures/dist/src/membe
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../helpers/Context';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper';
-import { registrationFilterCompilers } from '../../../sql-filters/registrations';
+import { groupJoin, registrationFilterCompilers } from '../../../sql-filters/registrations';
 import { registrationSorters } from '../../../sql-sorters/registrations';
 import { GetMembersEndpoint } from '../members/GetMembersEndpoint';
 import { validateGroupFilter } from '../members/helpers/validateGroupFilter';
@@ -38,6 +38,29 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             return [true, params as Params];
         }
         return [false];
+    }
+
+    static selectRegistrationWithGroup(...columns: (SQLExpression | string)[]): SQLSelect<Registration & { group: Group }> {
+        const transformer = (row: SQLResultNamespacedRow): Registration & { group: Group } => {
+            const d = Registration.fromRow(row[Registration.table]);
+
+            if (!d) {
+                console.error('Could not transform row', row, 'into model', Registration.table, 'check if the primary key is returned in the query');
+                throw new Error('Missing data for model ' + Registration.table);
+            }
+
+            const g = Group.fromRow(row[Group.table]);
+            if (!g) {
+                console.error('Could not transform row', row, 'into model', Group.table, 'check if the primary key is returned in the query');
+                throw new Error('Missing data for model ' + Group.table);
+            }
+
+            return d.setRelation(Registration.group, g);
+        };
+
+        const select = new SQLSelect(transformer, ...(columns.length === 0 ? [SQL.wildcard(), SQL.wildcard(Group.table)] : columns));
+        select.join(groupJoin);
+        return select.from(SQL.table(Registration.table));
     }
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
@@ -115,15 +138,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        const query = SQL
-            .select(
-                SQL.column('registrations', 'id'),
-                SQL.column('registrations', 'memberId'),
-            )
+        const query = this.selectRegistrationWithGroup()
             .setMaxExecutionTime(15 * 1000)
-            .from(
-                SQL.table('registrations'),
-            )
             .where('registeredAt', '!=', null);
 
         if (scopeFilter) {
@@ -161,7 +177,9 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
         const query = await GetRegistrationsEndpoint.buildQuery(requestQuery, permissionLevel);
-        let data: SQLResultNamespacedRow[];
+        let data: (Registration & {
+            group: Group;
+        })[];
 
         try {
             data = await query.fetch();
@@ -177,14 +195,13 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             throw error;
         }
 
-        const registrationData = data.map((r) => {
-            if (typeof r.registrations.memberId === 'string' && typeof r.registrations.id === 'string') {
-                return { memberId: r.registrations.memberId, id: r.registrations.id };
+        for (const registration of data) {
+            if (!await Context.auth.canAccessRegistration(registration, permissionLevel)) {
+                throw Context.auth.error();
             }
-            throw new Error('Expected string');
-        });
+        }
 
-        const members = await Member.getBlobByIds(...registrationData.map(r => r.memberId));
+        const members = await Member.getBlobByIds(...data.map(r => r.memberId));
 
         for (const member of members) {
             if (!await Context.auth.canAccessMember(member, permissionLevel)) {
@@ -192,7 +209,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        const registrationsBlob = await AuthenticatedStructures.registrationsBlob(registrationData, members);
+        const registrationsBlob = await AuthenticatedStructures.registrationsBlob(data, members);
 
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
             request: requestQuery,

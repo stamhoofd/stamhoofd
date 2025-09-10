@@ -588,30 +588,44 @@ export class AuthenticatedStructures {
         return (await this.eventNotifications([eventNotification]))[0];
     }
 
-    static async registrationsBlob(registrationData: {
-        memberId: string;
-        id: string;
-    }[], members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
+    static async registrationsBlob(registrations: (Registration & { group: Group })[], members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
         const membersBlob = await this.membersBlob(members, includeContextOrganization, includeUser);
 
         const memberBlobs = membersBlob.members;
 
-        const registrationWithMemberBlobs = registrationData.map(({ id, memberId }) => {
-            const memberBlob = memberBlobs.find(m => m.id === memberId);
+        const registrationWithMemberBlobs = await Promise.all(registrations.map(async (registration) => {
+            const memberBlob = memberBlobs.find(m => m.id === registration.memberId);
             if (!memberBlob) {
                 throw new Error('Member not found');
             }
 
-            const registration = memberBlob.registrations.find(r => r.id === id);
-            if (!registration) {
-                throw new Error('Registration not found: ' + id);
+            let r = memberBlob.registrations.find(r => r.id === registration.id);
+
+            if (!r) {
+                const member = members.find(m => m.id === registration.memberId);
+                const balancesPermission = member ? (await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id)) : false;
+                r = registration.getStructure();
+                r.balances = balancesPermission
+                    ? ((await CachedBalance.getForObjects([registration.id], null)).map((b) => {
+                            return GenericBalance.create(b);
+                        }))
+                    : [];
+                r.group = await this.group(registration.group);
+
+                memberBlob.registrations.push(r);
+
+                // Add organization if missing
+                if (!membersBlob.organizations.find(o => o.id === r!.organizationId)) {
+                    const organization = await Context.auth.getOrganization(r!.organizationId);
+                    membersBlob.organizations.push(organization.getBaseStructure());
+                }
             }
 
             return RegistrationWithMemberBlob.create({
-                ...registration,
+                ...r,
                 member: memberBlob,
             });
-        });
+        }));
 
         return RegistrationsBlob.create({
             registrations: registrationWithMemberBlobs,

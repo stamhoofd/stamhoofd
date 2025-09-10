@@ -5,7 +5,7 @@ import { memberFilterCompilers } from './members';
 
 export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 
-const groupJoin = SQL.join(Group.table).where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId'));
+export const groupJoin = SQL.join(Group.table).where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId'));
 
 export const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
