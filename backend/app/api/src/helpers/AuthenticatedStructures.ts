@@ -605,7 +605,8 @@ export class AuthenticatedStructures {
 
         const memberBlobs = membersBlob.members;
 
-        const registrationWithMemberBlobs = await Promise.all(registrations.map(async (registration) => {
+        const registrationWithMemberBlobs: RegistrationWithMemberBlob[] = [];
+        for (const registration of registrations) {
             const memberBlob = memberBlobs.find(m => m.id === registration.memberId);
             if (!memberBlob) {
                 throw new Error('Member not found');
@@ -633,11 +634,12 @@ export class AuthenticatedStructures {
                 }
             }
 
-            return RegistrationWithMemberBlob.create({
+            const struct = RegistrationWithMemberBlob.create({
                 ...r,
                 member: memberBlob,
             });
-        }));
+            registrationWithMemberBlobs.push(struct);
+        }
 
         return RegistrationsBlob.create({
             registrations: registrationWithMemberBlobs,
