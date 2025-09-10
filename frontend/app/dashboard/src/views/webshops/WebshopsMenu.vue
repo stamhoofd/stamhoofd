@@ -17,6 +17,14 @@
                 <span v-if="isWebshopOpen(webshop)" class="icon dot green right-icon small" />
             </button>
 
+            <hr>
+            <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.WebshopIdeas) }" @click="$navigate(Routes.WebshopIdeas)">
+                <span class="icon book small" />
+                <span>
+                    {{ $t("Inspiratie") }}
+                </span>
+            </button>
+
             <template
                 v-if="
                     enableWebshopModule &&
@@ -114,6 +122,7 @@ enum Routes {
     Webshop = 'webshop',
     AddWebshop = 'addWebshop',
     Archive = 'archive',
+    WebshopIdeas = 'webshopIdeas',
 }
 
 defineRoutes([
@@ -188,6 +197,14 @@ defineRoutes([
         show: 'detail',
         component: async () =>
             (await import('../dashboard/webshop/WebshopArchiveView.vue'))
+                .default,
+    },
+    {
+        url: 'inspiratie',
+        name: Routes.WebshopIdeas,
+        show: 'detail',
+        component: async () =>
+            (await import('..//webshops/WebshopIdeasView.vue'))
                 .default,
     },
 ]);

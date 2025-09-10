@@ -1,10 +1,10 @@
 <template>
     <div id="settings-view" class="st-view background">
-        <STNavigationBar :title="$t('Webshop ideeën')" />
+        <STNavigationBar :title="$t('Inspiratie')" />
 
         <main class="center">
             <h1>
-                {{ $t('Webshop ideeën') }}
+                {{ $t('Inspiratie voor Webshops') }}
             </h1>
 
             <p>{{ $t("Hier vind je inspiratie voor de volgende webshop van je vereniging. Als je op een idee klikt krijg je meer informatie zoals interessante links.") }}</p>
