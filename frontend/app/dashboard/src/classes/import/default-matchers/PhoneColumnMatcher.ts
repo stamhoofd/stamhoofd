@@ -1,8 +1,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from "@simonbackx/simple-errors";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { Country, Parent, ParentType } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
-import { PhoneNumber } from "libphonenumber-js/types";
+import { PhoneNumber } from "libphonenumber-js";
 import XLSX from "xlsx";
 
 import { ColumnMatcher } from "../ColumnMatcher";
