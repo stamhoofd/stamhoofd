@@ -48,7 +48,7 @@
                 </template>
             </p>
             <p v-else class="warning-box">
-                Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf dat domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Stamhoofd. Stamhoofd zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.
+                Jouw domeinnaam is nog niet actief voor het versturen van e-mails vanaf die domeinnaam, maar je kan in tussentijd wel al e-mails versturen via Stamhoofd. Stamhoofd zorgt dat antwoorden op die e-mails wel bij jullie terecht komen.
             </p>
 
             <template v-if="enableMemberModule">
