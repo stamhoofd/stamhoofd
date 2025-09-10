@@ -619,7 +619,7 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
 
     get memberCountWarning(): string | null {
         if (this.renewPackages.some(p => p.meta.type === STPackageType.Members)) {
-            return 'Vergeet niet eerst een nieuwe inschrijvingsperiode te starten voor alle groepen, zodat reeds ingeschreven leden niet opnieuw worden aangerekend. Groepen die je niet verderzet, kan je archiveren. Dit geldt ook voor activiteiten.';
+            return 'Vergeet niet eerst een nieuwe inschrijvingsperiode te starten voor alle inschrijvingsgroepen, zodat ingeschreven leden van vorig jaar niet meteen opnieuw worden aangerekend (op zich geen verschil als je ledenaantal niet zakt). Inschrijvingsgroepen (zoals activiteiten) die je niet (meteen) verderzet, kan je archiveren.';
         }
 
         return null;
