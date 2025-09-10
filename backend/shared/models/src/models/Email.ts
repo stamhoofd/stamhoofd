@@ -376,6 +376,9 @@ export class Email extends QueryableModel {
     }
 
     async lock<T>(callback: (upToDate: Email, options: QueueHandlerOptions) => Promise<T> | T): Promise<T> {
+        if (!this.id) {
+            await this.save();
+        }
         const id = this.id;
         return await QueueHandler.schedule('lock-email-' + id, async (options) => {
             const upToDate = await Email.getByID(id);
