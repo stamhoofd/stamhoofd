@@ -278,6 +278,10 @@
                     </STListItem>
                 </STList>
             </template>
+
+            <p v-if="memberCountWarning" class="warning-box">
+                {{ memberCountWarning }}
+            </p>
         </main>
 
         <STToolbar>
@@ -310,7 +314,7 @@ import { SimpleError } from "@simonbackx/simple-errors";
 import { ComponentWithProperties, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { AddressInput, BackButton, CenteredMessage, Checkbox, CompanyNumberInput, ErrorBox, LoadingButton, PaymentSelectionList, Radio, Spinner, STErrorsDefault, STInputBox, STList, STListItem, STNavigationBar, STToolbar, Validator, VATNumberInput } from "@stamhoofd/components";
 import { SessionManager } from "@stamhoofd/networking";
-import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPackageBundle, STPackageBundleHelper, User, Version } from "@stamhoofd/structures";
+import { Address, Country, Organization, OrganizationMetaData, OrganizationPatch, PaymentMethod, STInvoice, STInvoiceResponse, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType, User, Version } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop, Watch } from "vue-property-decorator";
 
@@ -611,6 +615,14 @@ export default class PackageConfirmView extends Mixins(NavigationMixin) {
             return [PaymentMethod.iDEAL, PaymentMethod.Bancontact, PaymentMethod.CreditCard, ...extra]
         }
         return [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.CreditCard, ...extra]
+    }
+
+    get memberCountWarning(): string | null {
+        if (this.renewPackages.some(p => p.meta.type === STPackageType.Members)) {
+            return 'Vergeet niet eerst een nieuwe inschrijvingsperiode te starten voor alle groepen, zodat reeds ingeschreven leden niet opnieuw worden aangerekend. Groepen die je niet verderzet, kan je archiveren. Dit geldt ook voor activiteiten.';
+        }
+
+        return null;
     }
     
     async checkout() {
