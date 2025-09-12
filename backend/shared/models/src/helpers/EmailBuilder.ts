@@ -631,7 +631,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
                     value: '',
                     html: recipientUser.hasAccount()
                         ? `<p class="description"><em>${$t('5403b466-98fe-48ac-beff-38acf7c9734d', { email: emailEscaped })}${suffix}</em></p>`
-                        : `<p class="description"><em>${$t('18a411e7-8fec-4d99-bde1-0cbc9c3f5cf8', { email: emailEscaped })}${suffix}</em></p>`,
+                        : `<p class="description"><em>${$t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: emailEscaped })}${suffix}</em></p>`,
                 }),
             );
         }
