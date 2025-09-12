@@ -108,8 +108,24 @@ export class EmailMocker {
         return this.failedEmails.length;
     }
 
+    static async getSucceededCount() {
+        return await EmailMocker.transactional.getSucceededCount() + await EmailMocker.broadcast.getSucceededCount();
+    }
+
+    static async getFailedCount() {
+        return await EmailMocker.transactional.getFailedCount() + await EmailMocker.broadcast.getFailedCount();
+    }
+
     getSucceededEmail(index: number) {
         return this.sentEmails[index];
+    }
+
+    static getSucceededEmail(index: number) {
+        const transactionalCount = EmailMocker.transactional.sentEmails.length;
+        if (index < transactionalCount) {
+            return EmailMocker.transactional.getSucceededEmail(index);
+        }
+        return EmailMocker.broadcast.getSucceededEmail(index - transactionalCount);
     }
 
     async getSucceededEmails() {
