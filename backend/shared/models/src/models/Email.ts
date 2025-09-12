@@ -1113,7 +1113,26 @@ export class Email extends QueryableModel {
                                 continue;
                             }
 
-                            item.replacements = removeUnusedReplacements(upToDate.html ?? '', item.replacements);
+                            const recipient = new EmailRecipient();
+                            recipient.emailType = upToDate.emailType;
+                            recipient.objectId = item.objectId;
+                            recipient.emailId = upToDate.id;
+                            recipient.email = item.email;
+                            recipient.firstName = item.firstName;
+                            recipient.lastName = item.lastName;
+                            recipient.replacements = item.replacements;
+                            recipient.memberId = item.memberId ?? null;
+                            recipient.userId = item.userId ?? null;
+                            recipient.organizationId = upToDate.organizationId ?? null;
+
+                            await fillRecipientReplacements(recipient, {
+                                platform,
+                                organization,
+                                from: upToDate.getFromAddress(),
+                                replyTo: null,
+                                forPreview: false,
+                            });
+                            recipient.replacements = removeUnusedReplacements(upToDate.html ?? '', recipient.replacements);
 
                             let duplicateOfRecipientId: string | null = null;
                             if (item.email && emailsSet.has(item.email)) {
@@ -1126,9 +1145,9 @@ export class Email extends QueryableModel {
                                     .fetch();
 
                                 for (const other of existing) {
-                                    const merged = mergeReplacementsIfEqual(other.replacements, item.replacements);
+                                    const merged = mergeReplacementsIfEqual(other.replacements, recipient.replacements);
                                     if (merged !== false) {
-                                        console.log('Found duplicate email recipient', item.email, other.id);
+                                        console.log('Found mergeable duplicate email recipient', item.email, other.id);
                                         duplicateOfRecipientId = other.id;
 
                                         other.replacements = merged;
@@ -1136,7 +1155,7 @@ export class Email extends QueryableModel {
                                         other.lastName = other.lastName || item.lastName;
                                         await other.save();
 
-                                        item.replacements = merged;
+                                        recipient.replacements = merged;
 
                                         break;
                                     }
@@ -1145,27 +1164,7 @@ export class Email extends QueryableModel {
                                     }
                                 }
                             }
-
-                            const recipient = new EmailRecipient();
-                            recipient.emailType = upToDate.emailType;
-                            recipient.objectId = item.objectId;
-                            recipient.emailId = upToDate.id;
-                            recipient.email = item.email;
-                            recipient.firstName = item.firstName;
-                            recipient.lastName = item.lastName;
-                            recipient.replacements = item.replacements;
-                            recipient.memberId = item.memberId ?? null;
-                            recipient.userId = item.userId ?? null;
-                            recipient.organizationId = upToDate.organizationId ?? null;
                             recipient.duplicateOfRecipientId = duplicateOfRecipientId;
-
-                            await fillRecipientReplacements(recipient, {
-                                platform,
-                                organization,
-                                from: upToDate.getFromAddress(),
-                                replyTo: null,
-                                forPreview: false,
-                            });
 
                             await recipient.save();
 
