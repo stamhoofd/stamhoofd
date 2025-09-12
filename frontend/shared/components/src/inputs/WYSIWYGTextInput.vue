@@ -37,10 +37,8 @@
 <script lang="ts">
 import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
 import { RichText } from '@stamhoofd/structures';
-import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
-import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
@@ -143,17 +141,16 @@ export default class WYSIWYGTextInput extends VueComponent {
                     heading: {
                         levels: [this.headingStartLevel as any, this.headingStartLevel + 1 as any],
                     },
+                    link: {
+                        openOnClick: false,
+                        protocols: ['mailto'],
+                    },
                 }),
                 Placeholder.configure({
                     placeholder: this.placeholder,
                 }),
                 WarningBox.configure({}),
                 Typography.configure({}),
-                Link.configure({
-                    openOnClick: false,
-                    protocols: ['mailto'],
-                }),
-                Underline,
             ],
             onSelectionUpdate: ({ editor }) => {
                 if (this.showLinkEditor) {
