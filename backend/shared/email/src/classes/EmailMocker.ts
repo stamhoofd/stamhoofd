@@ -133,6 +133,11 @@ export class EmailMocker {
         return this.sentEmails;
     }
 
+    static async getSucceededEmails() {
+        await Email.wait();
+        return [...EmailMocker.transactional.sentEmails, ...EmailMocker.broadcast.sentEmails];
+    }
+
     async getFailedEmails() {
         await Email.wait();
         return this.failedEmails;

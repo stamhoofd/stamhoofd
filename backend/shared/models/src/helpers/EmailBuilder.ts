@@ -423,7 +423,7 @@ export function cleanReplacements(replacements: Replacement[]) {
 
 export function removeUnusedReplacements(html: string, replacements: Replacement[]) {
     const cleaned: Replacement[] = [];
-    for (const r of replacements) {
+    for (const r of cleanReplacements(replacements)) {
         if (html.includes(`{{${r.token}}}`)) {
             cleaned.push(r);
         }

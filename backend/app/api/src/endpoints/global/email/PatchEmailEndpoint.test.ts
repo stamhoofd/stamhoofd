@@ -1,18 +1,19 @@
 /* eslint-disable jest/no-conditional-expect */
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
-import { Email, EmailRecipient, MemberFactory, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
+import { Email, EmailRecipient, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AccessRight, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchEmailEndpoint } from './PatchEmailEndpoint';
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 
 // Import recipient loaders to initialize them
+import { Formatter } from '@stamhoofd/utility';
 import '../../../email-recipient-loaders/members';
-import '../../../email-recipient-loaders/registrations';
 import '../../../email-recipient-loaders/orders';
 import '../../../email-recipient-loaders/receivable-balances';
-import { Formatter } from '@stamhoofd/utility';
+import '../../../email-recipient-loaders/registrations';
+import { EmailMocker } from '@stamhoofd/email';
 
 const baseUrl = `/v${Version}/email`;
 
@@ -544,9 +545,6 @@ describe('Endpoint.PatchEmailEndpoint', () => {
     });
 
     test('Should send email to members list with correct replacements and recipients', async () => {
-        // First, we need to import the GroupFactory to create groups that the user has access to
-        const { GroupFactory } = await import('@stamhoofd/models');
-
         // Create test groups
         const testGroup = await new GroupFactory({
             organization,
@@ -603,9 +601,6 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         memberWithoutEmail.details.email = null;
         await memberWithoutEmail.save();
 
-        // Create registrations for both members in the test group so they can be found by the recipient loader
-        const { RegistrationFactory } = await import('@stamhoofd/models');
-
         await new RegistrationFactory({
             member: memberWithEmail,
             group: testGroup,
@@ -630,10 +625,13 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         <title>Test Email</title>
         </head>
         <body>
+        <p>{{greeting}}</p>
         <p>Hello {{firstName}} {{lastName}}, this is a test email.</p>
         <p>Login details: {{loginDetails}}</p>
         <p>Unsubscribe: <a href="{{unsubscribeUrl}}">Click here</a></p>
         <p>Member firstname: {{firstNameMember}}</p>
+        <p>Balance table: {{balanceTable}}</p>
+        <p>Outstanding balance: {{outstandingBalance}}</p>
         </body>
         </html>`;
         email.json = {};
@@ -655,9 +653,6 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         });
 
         await email.save();
-
-        // Instead of using the queue system (which has context issues), test the recipient loading directly
-        // This tests the core functionality without the complexity of the queue system
 
         // First try to build recipients with proper context by calling through the endpoint
         const body = EmailStruct.patch({
@@ -735,6 +730,313 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             // Check lastNameMember is not present, because it is not used in the html
             const lastNameMember = recipient.replacements.find(r => r.token === 'lastNameMember');
             expect(lastNameMember).toBeUndefined();
+        }
+    });
+
+    test('Should merge identical emails', async () => {
+        // When you have two members with the same email address
+        // test that we only send a single email to this email address as long as we don't include replacements
+        // that are different between the members (like firstNameMember)
+
+        // Create test groups
+        const testGroup = await new GroupFactory({
+            organization,
+        }).create();
+
+        // Update the user to have group permissions
+        if (!user.permissions) {
+            user.permissions = UserPermissions.create({});
+        }
+
+        // Get existing organization permissions
+        // Create new organization permissions if they don't exist
+        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
+            level: PermissionLevel.None,
+            resources: new Map([
+                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
+                    resourceName: sender.name!,
+                    level: PermissionLevel.None,
+                    accessRights: [AccessRight.SendMessages],
+                })]])],
+                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
+                    resourceName: testGroup.settings.name.toString(),
+                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                    accessRights: [],
+                })]])],
+            ]),
+        }));
+        await user.save();
+
+        const member1 = await new MemberFactory({
+            organization,
+        }).create();
+        member1.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+
+        await member1.save();
+
+        const member2 = await new MemberFactory({
+            organization,
+        }).create();
+        member2.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+        await member2.save();
+
+        await new RegistrationFactory({
+            member: member1,
+            group: testGroup,
+        }).create();
+
+        await new RegistrationFactory({
+            member: member2,
+            group: testGroup,
+        }).create();
+
+        const email = new Email();
+        email.subject = 'Test Email with Replacements {{firstName}}';
+        email.status = EmailStatus.Draft;
+        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.html = `<!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8" />
+        <title>Test Email</title>
+        </head>
+        <body>
+        <p>Hello {{firstName}} {{lastName}}, this is a test email.</p>
+        <p>Login details: {{loginDetails}}</p>
+        <p>Unsubscribe: <a href="{{unsubscribeUrl}}">Click here</a></p>
+        </body>
+        </html>`;
+        email.json = {};
+
+        email.userId = user.id;
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+
+        // Set up recipient filter to target our specific members
+        email.recipientFilter = EmailRecipientFilter.create({
+            filters: [
+                EmailRecipientSubfilter.create({
+                    type: EmailRecipientFilterType.MemberParents,
+                    filter: {
+                        id: { $in: [member1.id, member2.id] },
+                    },
+                }),
+            ],
+        });
+
+        await email.save();
+
+        // First try to build recipients with proper context by calling through the endpoint
+        const body = EmailStruct.patch({
+            id: email.id,
+            status: EmailStatus.Sending,
+        });
+
+        // This should start the recipient building process in the background
+        const response = await patchEmail(body, token, organization);
+        expect(response.status).toBe(200);
+
+        // Wait for the background process to complete (or fail)
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Refresh the email to check the status
+        await email.refresh();
+
+        expect(email.status).toBe(EmailStatus.Sent);
+
+        // Check that EmailRecipient records were created correctly
+        const recipients = await EmailRecipient.select()
+            .where('emailId', email.id)
+            .fetch();
+
+        expect(recipients).toHaveLength(2);
+
+        // No recipients with null, because we only targeted parents
+        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        expect(recipientsWithoutEmail).toHaveLength(0);
+
+        const recipientsWithEmail = recipients.filter(r => r.email === 'identical-email@test.com');
+        expect(recipientsWithEmail).toHaveLength(2);
+
+        // Check sentAt, only one
+        const sentRecipients = recipients.filter(r => r.sentAt !== null);
+        expect(sentRecipients).toHaveLength(1);
+
+        // Check one with duplicateOfId set
+        const duplicateRecipients = recipientsWithEmail.filter(r => r.duplicateOfRecipientId !== null);
+        expect(duplicateRecipients).toHaveLength(1);
+        expect(duplicateRecipients[0].duplicateOfRecipientId).toBe(sentRecipients[0].id);
+
+        // Check only one email is sent
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+    });
+
+    test('Should not merge emails to same email with different replacements', async () => {
+        // When you have two members with the same email address
+        // test that we only send a single email to this email address as long as we don't include replacements
+        // that are different between the members (like firstNameMember)
+
+        // Create test groups
+        const testGroup = await new GroupFactory({
+            organization,
+        }).create();
+
+        // Update the user to have group permissions
+        if (!user.permissions) {
+            user.permissions = UserPermissions.create({});
+        }
+
+        // Get existing organization permissions
+        // Create new organization permissions if they don't exist
+        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
+            level: PermissionLevel.None,
+            resources: new Map([
+                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
+                    resourceName: sender.name!,
+                    level: PermissionLevel.None,
+                    accessRights: [AccessRight.SendMessages],
+                })]])],
+                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
+                    resourceName: testGroup.settings.name.toString(),
+                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                    accessRights: [],
+                })]])],
+            ]),
+        }));
+        await user.save();
+
+        const member1 = await new MemberFactory({
+            organization,
+        }).create();
+        member1.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+
+        await member1.save();
+
+        const member2 = await new MemberFactory({
+            organization,
+        }).create();
+        member2.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+        await member2.save();
+
+        await new RegistrationFactory({
+            member: member1,
+            group: testGroup,
+        }).create();
+
+        await new RegistrationFactory({
+            member: member2,
+            group: testGroup,
+        }).create();
+
+        const email = new Email();
+        email.subject = 'Test Email with Replacements {{firstName}}';
+        email.status = EmailStatus.Draft;
+        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.html = `<!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8" />
+        <title>Test Email</title>
+        </head>
+        <body>
+        <p>Hello {{firstName}} {{lastName}}, this is a test email.</p>
+        <p>Login details: {{loginDetails}}</p>
+        <p>Unsubscribe: <a href="{{unsubscribeUrl}}">Click here</a></p>
+        <p>Member firstname: {{firstNameMember}}</p>
+        </body>
+        </html>`;
+        email.json = {};
+
+        email.userId = user.id;
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+
+        // Set up recipient filter to target our specific members
+        email.recipientFilter = EmailRecipientFilter.create({
+            filters: [
+                EmailRecipientSubfilter.create({
+                    type: EmailRecipientFilterType.MemberParents,
+                    filter: {
+                        id: { $in: [member1.id, member2.id] },
+                    },
+                }),
+            ],
+        });
+
+        await email.save();
+
+        // First try to build recipients with proper context by calling through the endpoint
+        const body = EmailStruct.patch({
+            id: email.id,
+            status: EmailStatus.Sending,
+        });
+
+        // This should start the recipient building process in the background
+        const response = await patchEmail(body, token, organization);
+        expect(response.status).toBe(200);
+
+        // Wait for the background process to complete (or fail)
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Refresh the email to check the status
+        await email.refresh();
+
+        expect(email.status).toBe(EmailStatus.Sent);
+
+        // Check that EmailRecipient records were created correctly
+        const recipients = await EmailRecipient.select()
+            .where('emailId', email.id)
+            .fetch();
+
+        expect(recipients).toHaveLength(2);
+
+        // No recipients with null, because we only targeted parents
+        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        expect(recipientsWithoutEmail).toHaveLength(0);
+
+        const recipientsWithEmail = recipients.filter(r => r.email === 'identical-email@test.com');
+        expect(recipientsWithEmail).toHaveLength(2);
+
+        // Check sentAt, only one
+        const sentRecipients = recipients.filter(r => r.sentAt !== null);
+        expect(sentRecipients).toHaveLength(2);
+
+        // Check one with duplicateOfId set
+        const duplicateRecipients = recipientsWithEmail.filter(r => r.duplicateOfRecipientId !== null);
+        expect(duplicateRecipients).toHaveLength(0);
+
+        // Check only one email is sent
+        expect(await EmailMocker.getSucceededCount()).toBe(2);
+
+        // Check content of each email is correct for each member. One should contain member1.firstName, other member2.firstName
+        const sentEmails = await EmailMocker.getSucceededEmails();
+        expect(sentEmails).toHaveLength(2);
+        const emailWithMember1FirstName = sentEmails.find(e => e.html?.includes(member1.details.firstName!));
+        const emailWithMember2FirstName = sentEmails.find(e => e.html?.includes(member2.details.firstName!));
+        expect(emailWithMember1FirstName).toBeDefined();
+        expect(emailWithMember2FirstName).toBeDefined();
+
+        expect(emailWithMember1FirstName).not.toBe(emailWithMember2FirstName);
+
+        // Check all emails contain Identical Email (name of the parent) in the body
+        for (const sentEmail of sentEmails) {
+            expect(sentEmail.html).toContain('Identical Email');
         }
     });
 });
