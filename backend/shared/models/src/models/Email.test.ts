@@ -37,13 +37,14 @@ async function buildEmail(data: {
     });
 
     model.subject = data.subject ?? 'This is a test email';
-    model.html = data.html ?? '<p>This is a test email</p>';
-    model.text = data.text ?? 'This is a test email';
+    model.html = data.html ?? '<p>This is a test email</p> {{unsubscribeUrl}}';
+    model.text = data.text ?? 'This is a test email {{unsubscribeUrl}}';
     model.json = data.json ?? {};
     model.status = data.status ?? EmailStatus.Draft;
     model.attachments = [];
     model.fromAddress = data.fromAddress ?? 'test@stamhoofd.be';
     model.fromName = data.fromName ?? null;
+    model.emailType = data.emailType ?? null;
 
     await model.save();
 
@@ -79,13 +80,14 @@ async function buildFailEmail(data: {
     });
 
     model.subject = data.subject ?? 'This is a test email';
-    model.html = data.html ?? '<p>This is a test email</p>';
-    model.text = data.text ?? 'This is a test email';
+    model.html = data.html ?? '<p>This is a test email</p> {{unsubscribeUrl}}';
+    model.text = data.text ?? 'This is a test email {{unsubscribeUrl}}';
     model.json = data.json ?? {};
     model.status = data.status ?? EmailStatus.Draft;
     model.attachments = [];
     model.fromAddress = data.fromAddress ?? 'test@stamhoofd.be';
     model.fromName = data.fromName ?? null;
+    model.emailType = data.emailType ?? null;
 
     await model.save();
 
@@ -120,8 +122,8 @@ describe('Model.Email', () => {
         expect(model.emailErrors).toBe(null);
         expect(model.recipientsErrors).toBe(null);
         expect(model.status).toBe(EmailStatus.Sent);
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0); // never tried to send any failed emails (whitelist)
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0); // never tried to send any failed emails (whitelist)
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -177,8 +179,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(2);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(1); // One retry
+        expect(await EmailMocker.getSucceededCount()).toBe(2);
+        expect(await EmailMocker.getFailedCount()).toBe(1); // One retry
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -229,8 +231,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(0);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0); // One retry
+        expect(await EmailMocker.getSucceededCount()).toBe(0);
+        expect(await EmailMocker.getFailedCount()).toBe(0); // One retry
     }, 15_000);
 
     it('Marks email recipient as failed if fails three times', async () => {
@@ -268,8 +270,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(0);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(6); // Two retries for each recipient
+        expect(await EmailMocker.getSucceededCount()).toBe(0);
+        expect(await EmailMocker.getFailedCount()).toBe(6); // Two retries for each recipient
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -318,8 +320,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -332,7 +334,7 @@ describe('Model.Email', () => {
         ]);
 
         // Check to header
-        expect(EmailMocker.broadcast.getSucceededEmail(0).to).toEqual('example@domain.be');
+        expect(EmailMocker.getSucceededEmail(0).to).toEqual('example@domain.be');
     }, 15_000);
 
     it('Includes recipient names in mail header', async () => {
@@ -358,8 +360,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -374,7 +376,7 @@ describe('Model.Email', () => {
         ]);
 
         // Check to header
-        expect(EmailMocker.broadcast.getSucceededEmail(0).to).toEqual('"John Von Doe" <example@domain.be>');
+        expect(EmailMocker.getSucceededEmail(0).to).toEqual('"John Von Doe" <example@domain.be>');
     }, 15_000);
 
     it('Skips invalid email addresses', async () => {
@@ -400,8 +402,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(0);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(0);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -449,8 +451,8 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Load recipietns
         const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
@@ -496,11 +498,11 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Check to header
-        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+        expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
             to: 'example@domain.be',
             from: '"My Platform" <info@my-platform.com>',
             replyTo: undefined,
@@ -540,11 +542,11 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Check to header
-        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+        expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
             to: 'example@domain.be',
             from: '"My Platform" <noreply@broadcast.my-platform.com>', // domain has changed here
             replyTo: '"My Platform" <info@other-platform.com>', // Reply to should be set
@@ -589,11 +591,11 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Check to header
-        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+        expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
             to: 'example@domain.be',
             from: '"My Platform" <noreply-uritest@broadcast.my-platform.com>', // domain has changed here
             replyTo: '"My Platform" <info@my-platform.com>', // Reply to should be set
@@ -640,11 +642,11 @@ describe('Model.Email', () => {
         expect(model.softFailedCount).toBe(0);
 
         // Both have succeeded
-        expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-        expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+        expect(await EmailMocker.getFailedCount()).toBe(0);
 
         // Check to header
-        expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+        expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
             to: 'example@domain.be',
             from: '"My Platform" <info@my-platform.com>', // domain has changed here
             replyTo: undefined,
@@ -677,6 +679,7 @@ describe('Model.Email', () => {
                 html: '{{fromAddress}}',
                 text: '{{fromAddress}}',
                 subject: '{{fromAddress}}',
+                emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
             await model.queueForSending(true);
@@ -688,11 +691,11 @@ describe('Model.Email', () => {
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
-            expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-            expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+            expect(await EmailMocker.getSucceededCount()).toBe(1);
+            expect(await EmailMocker.getFailedCount()).toBe(0);
 
             // Check to header
-            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
                 to: 'example@domain.be',
                 from: '"Custom Name" <noreply-' + organization.uri + '@broadcast.my-platform.com>',
                 replyTo: '"Custom Name" <custom@customdomain.com>', // domain has changed here
@@ -733,6 +736,7 @@ describe('Model.Email', () => {
                 html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
             await model.queueForSending(true);
@@ -744,11 +748,11 @@ describe('Model.Email', () => {
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
-            expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-            expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+            expect(await EmailMocker.getSucceededCount()).toBe(1);
+            expect(await EmailMocker.getFailedCount()).toBe(0);
 
             // Check to header
-            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
                 subject: `${brightYellow};${expectedContrastColor};${organization.name};${organization.name}`,
                 html: `${brightYellow};${expectedContrastColor};${organization.name};${organization.name}`,
                 text: `${brightYellow};${expectedContrastColor};${organization.name};${organization.name}`,
@@ -791,6 +795,7 @@ describe('Model.Email', () => {
                 html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
             await model.queueForSending(true);
@@ -802,11 +807,11 @@ describe('Model.Email', () => {
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
-            expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-            expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+            expect(await EmailMocker.getSucceededCount()).toBe(1);
+            expect(await EmailMocker.getFailedCount()).toBe(0);
 
             // Check to header
-            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
                 subject: `${brightBlue};${expectedContrastColor};${organization.name};Custom Name`,
                 html: `${brightBlue};${expectedContrastColor};${organization.name};Custom Name`,
                 text: `${brightBlue};${expectedContrastColor};${organization.name};Custom Name`,
@@ -841,6 +846,7 @@ describe('Model.Email', () => {
                 html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
             await model.queueForSending(true);
@@ -852,11 +858,11 @@ describe('Model.Email', () => {
             expect(model.status).toBe(EmailStatus.Sent);
 
             // Both have succeeded
-            expect(await EmailMocker.broadcast.getSucceededCount()).toBe(1);
-            expect(await EmailMocker.broadcast.getFailedCount()).toBe(0);
+            expect(await EmailMocker.getSucceededCount()).toBe(1);
+            expect(await EmailMocker.getFailedCount()).toBe(0);
 
             // Check to header
-            expect(EmailMocker.broadcast.getSucceededEmail(0)).toMatchObject({
+            expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
                 subject: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
                 html: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
                 text: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
