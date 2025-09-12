@@ -1,5 +1,5 @@
 <template>
-    <EditorView ref="editorView" class="mail-view" :save-text="$t('a103aa7c-4693-4bd2-b903-d14b70bfd602')" :replacements="replacements" :title="$t(`6a972ca2-8a5f-4e9d-bb26-b59e1f7165a2`)" @save="save">
+    <EditorView ref="editorView" class="mail-view" :email-block="emailBlock" :save-text="$t('a103aa7c-4693-4bd2-b903-d14b70bfd602')" :replacements="replacements" :title="$t(`6a972ca2-8a5f-4e9d-bb26-b59e1f7165a2`)" @save="save">
         <p v-if="prefix" class="style-title-prefix" v-text="prefix" />
         <h1 v-if="isNew" class="style-navigation-title">
             {{ $t('8af02386-a68c-46c0-bb86-91b2177f1ba6') }}
@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { EmailTemplate, Replacement } from '@stamhoofd/structures';
+import { EmailTemplate, EmailTemplateType, Replacement } from '@stamhoofd/structures';
 import { Ref, computed, nextTick, onMounted, ref } from 'vue';
 import EditorView from '../editor/EditorView.vue';
 import { EmailStyler } from '../editor/EmailStyler';
@@ -85,6 +85,10 @@ const replacements = computed(() => {
     }
 
     return base;
+});
+
+const emailBlock = computed(() => {
+    return patched.value.type === EmailTemplateType.SavedMembersEmail || patched.value.type === EmailTemplateType.DefaultMembersEmail;
 });
 
 async function getHTML() {

@@ -127,6 +127,7 @@ import { DescriptiveText } from './EditorDescriptiveText';
 import { SmartButtonInlineNode, SmartButtonNode } from './EditorSmartButton';
 import { SmartVariableNode, SmartVariableNodeBlock } from './EditorSmartVariable';
 import TextStyleButtonsView from './TextStyleButtonsView.vue';
+import { EmailBlock } from './EditorEmailBlock';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -164,6 +165,7 @@ const props = withDefaults(
         saveIconMobile?: string | null;
         cancelText?: string;
         replacements?: Replacement[];
+        emailBlock?: boolean;
     }>(),
     {
         loading: false,
@@ -174,6 +176,7 @@ const props = withDefaults(
         saveIconMobile: null,
         cancelText: () => $t(`4e1dc79e-b09c-41ec-aa8d-a2d052761bfe`),
         replacements: () => [],
+        emailBlock: false,
     },
 );
 
@@ -209,6 +212,9 @@ function buildEditor(content: Content = '') {
                     openOnClick: false,
                     protocols: ['mailto'],
                 },
+                trailingNode: {
+                    notAfter: ['emailBlock'],
+                },
             }),
             Typography.configure({}),
             SmartVariableNode.configure({
@@ -225,6 +231,7 @@ function buildEditor(content: Content = '') {
             }),
             DescriptiveText,
             CustomImage,
+            EmailBlock,
         ],
         onSelectionUpdate: ({ editor }) => {
             if (showLinkEditor.value) {
@@ -543,6 +550,21 @@ async function showSmartVariableMenu(event: MouseEvent) {
                     }),
                 ]
             : []),
+        ...(props.emailBlock
+            ? [
+                    [new ContextMenuItem({
+                        icon: 'email',
+                        name: 'Emailonly',
+                        description: 'Inhoud die enkel zichtbaar is in e-mails, niet op het ledenportaal',
+                        action: () => {
+                            editor.value.chain().focus().toggleEmailBlock().run();
+
+                            return true;
+                        },
+                    }),
+                    ],
+                ]
+            : []),
     ]);
     menu.show({ button: event.currentTarget as any, yPlacement: 'top' }).catch(console.error);
 }
@@ -717,8 +739,9 @@ defineExpose({
                 &:after {
                     content: "";
                     display: block;
-                    height: 1px;
+                    height: 2px;
                     background: $color-border;
+                    border-radius: 1px;
                     width: 100%;
                 }
 
@@ -727,6 +750,64 @@ defineExpose({
                         background: $color-primary;
                         box-shadow: 0 0 0 1px $color-primary;
                         border-radius: 4px;
+                    }
+                }
+            }
+
+            .email-only {
+                display: block;
+                padding: 2px var(--st-horizontal-padding, 15px) 5px var(--st-horizontal-padding, 15px);
+                margin: 1px calc(-1 * var(--st-horizontal-padding, 15px));
+                position: relative;
+                background: $color-background;
+                border-top: 2px dashed $color-border;
+                border-bottom: 2px dashed $color-border;
+
+                &:last-child {
+                    border-bottom-color: transparent;
+                }
+
+                &:has(> .content > hr:first-child) {
+                    margin-top: 20px;
+
+                    > .content > hr:first-child {
+                        padding-top: 10px;
+                    }
+                }
+
+                > .label {
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    max-width: 100%;
+                    font-size: 13px;
+                    font-weight: $font-weight-semibold;
+                    background: $color-gray-3;
+                    padding: 7px;
+                    text-align: center;
+                    opacity: 1;
+                    pointer-events: none;
+
+                    display: flex;
+                    color: $color-dark;
+                    gap: 4px;
+                    border-radius: $border-radius;
+                }
+
+                &:hover, &:focus-within {
+                    background: $color-background-shade;
+                    border-bottom-color: transparent;
+                    border-top-color: transparent;
+
+                    > .label {
+                        opacity: 0.8;
+                        background-color: transparent;
+                    }
+
+                    @media (max-width: 400px) {
+                        > .label > span:last-child {
+                            display: none;
+                        }
                     }
                 }
             }

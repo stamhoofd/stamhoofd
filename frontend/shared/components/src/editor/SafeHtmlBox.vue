@@ -57,7 +57,24 @@ function updateSize() {
 
 function cleanHtml(html: string) {
     if (html.startsWith('<!DOCTYPE html>')) {
-        // inject meta tag        return html;
+        // Inject <style> tag
+        const headCloseIndex = html.indexOf('</head>');
+        if (headCloseIndex !== -1) {
+            const styleTag = `
+                <style>
+                    body {
+                        padding: 0;
+                        margin: 0;
+                    }
+                    .email-only {
+                        display: none;
+                    }
+                </style>
+            `;
+            // Inject before </head>
+            return html.slice(0, headCloseIndex) + styleTag + html.slice(headCloseIndex);
+        }
+        return html;
     }
 
     // Add body and html tag, with 0 padding
@@ -70,6 +87,9 @@ function cleanHtml(html: string) {
                     body {
                         padding: 0;
                         margin: 0;
+                    }
+                    .email-only {
+                        display: none;
                     }
                 </style>
             </head>
