@@ -1,9 +1,10 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { Email, EmailRecipient, MemberFactory, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { EmailStatus, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { EmailStatus, LimitedFilteredRequest, Replacement } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { GetUserEmailsEndpoint } from './GetUserEmailsEndpoint';
+import { Formatter } from '@stamhoofd/utility';
 
 const baseUrl = `/user/email`;
 
@@ -316,6 +317,283 @@ describe('Endpoint.GetUserEmails', () => {
 
         expect(response.body.results).toHaveLength(3);
         expect(response.body.next).toBeDefined(); // Should have next page
+    });
+
+    test('Should return correct recipient when email has multiple recipients matching same user', async () => {
+        // Create an email
+        const email = new Email();
+        email.subject = 'Multiple Recipients Email';
+        email.status = EmailStatus.Sent;
+        email.text = 'Email with multiple recipients';
+        email.html = '<p>Email with multiple recipients</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.showInMemberPortal = true;
+        email.sentAt = new Date();
+        await email.save();
+
+        // Create multiple recipients for the same user/member combination
+        // First recipient: exact match (userId and email match)
+        const exactMatchRecipient = new EmailRecipient();
+        exactMatchRecipient.emailId = email.id;
+        exactMatchRecipient.memberId = member.id;
+        exactMatchRecipient.userId = user.id;
+        exactMatchRecipient.email = user.email;
+        exactMatchRecipient.firstName = 'Exact';
+        exactMatchRecipient.lastName = 'Match';
+        exactMatchRecipient.sentAt = new Date();
+        await exactMatchRecipient.save();
+
+        // Second recipient: member match only (no userId or email)
+        const memberOnlyRecipient = new EmailRecipient();
+        memberOnlyRecipient.emailId = email.id;
+        memberOnlyRecipient.memberId = member.id;
+        memberOnlyRecipient.userId = null;
+        memberOnlyRecipient.email = null;
+        memberOnlyRecipient.firstName = 'Member';
+        memberOnlyRecipient.lastName = 'Only';
+        memberOnlyRecipient.sentAt = new Date();
+        await memberOnlyRecipient.save();
+
+        // Third recipient: any data but same member
+        const anyDataRecipient = new EmailRecipient();
+        anyDataRecipient.emailId = email.id;
+        anyDataRecipient.memberId = member.id;
+        anyDataRecipient.userId = null; // No specific user
+        anyDataRecipient.email = 'other@example.com'; // Different email
+        anyDataRecipient.firstName = 'Any';
+        anyDataRecipient.lastName = 'Data';
+        anyDataRecipient.sentAt = new Date();
+        await anyDataRecipient.save();
+
+        // Search specifically for this email to avoid interference from other tests
+        const searchQuery = new LimitedFilteredRequest({
+            limit: 10,
+            search: 'Multiple Recipients Email',
+        });
+
+        const response = await getUserEmails(searchQuery);
+
+        expect(response.body.results).toHaveLength(1);
+        const emailResult = response.body.results[0];
+
+        // Should prefer the exact match recipient
+        expect(emailResult.recipients).toHaveLength(1);
+        expect(emailResult.recipients[0].firstName).toBe('Exact');
+        expect(emailResult.recipients[0].lastName).toBe('Match');
+    });
+
+    test('Should return generic data when recipient has no matching user id or email', async () => {
+        // Create an email
+        const email = new Email();
+        email.subject = 'Generic Recipient Email';
+        email.status = EmailStatus.Sent;
+        email.text = 'Email with generic recipient';
+        email.html = '<p>Email with generic recipient</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.showInMemberPortal = true;
+        email.sentAt = new Date();
+        await email.save();
+
+        // Create a recipient with no userId or email (generic member data)
+        const genericRecipient = new EmailRecipient();
+        genericRecipient.emailId = email.id;
+        genericRecipient.memberId = member.id;
+        genericRecipient.userId = null; // No specific user
+        genericRecipient.email = null; // No specific email
+        genericRecipient.firstName = 'Generic';
+        genericRecipient.lastName = 'Member';
+        genericRecipient.sentAt = new Date();
+        await genericRecipient.save();
+
+        // Search specifically for this email to avoid interference from other tests
+        const searchQuery = new LimitedFilteredRequest({
+            limit: 10,
+            search: 'Generic Recipient Email',
+        });
+
+        const response = await getUserEmails(searchQuery);
+
+        expect(response.body.results).toHaveLength(1);
+        const emailResult = response.body.results[0];
+
+        // Should return the generic recipient data
+        expect(emailResult.recipients).toHaveLength(1);
+        expect(emailResult.recipients[0].firstName).toBe('Generic');
+        expect(emailResult.recipients[0].lastName).toBe('Member');
+        // The original recipient struct keeps its original userId and email
+        expect(emailResult.recipients[0].userId).toBe(null); // Original was null
+        expect(emailResult.recipients[0].email).toBe(null); // Original was null
+        // But replacements should be generated for the current user (tested below)
+        expect(emailResult.recipients[0].replacements).toBeDefined();
+    });
+
+    test('Should strip sensitive information from email replacements for non-matching recipients', async () => {
+        // Create another user that will have sensitive data
+        const sensitiveUser = await new UserFactory({
+            organization,
+        }).create();
+
+        // Create an email
+        const email = new Email();
+        email.subject = 'Sensitive Data Email';
+        email.status = EmailStatus.Sent;
+        email.text = 'Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}';
+        email.html = '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.showInMemberPortal = true;
+        email.sentAt = new Date();
+        await email.save();
+
+        // Create a recipient for the sensitive user (with different user data than our test user)
+        const sensitiveRecipient = new EmailRecipient();
+        sensitiveRecipient.emailId = email.id;
+        sensitiveRecipient.memberId = member.id; // Same member as our test user
+        sensitiveRecipient.userId = sensitiveUser.id; // Different user ID
+        sensitiveRecipient.email = sensitiveUser.email; // Different email
+        sensitiveRecipient.firstName = member.details.firstName;
+        sensitiveRecipient.lastName = member.details.lastName;
+        sensitiveRecipient.sentAt = new Date();
+
+        // Add sensitive replacements that should be stripped by the API
+        sensitiveRecipient.replacements = [
+            Replacement.create({
+                token: 'loginDetails',
+                value: '',
+                html: `<p class="description"><em>Login with <strong>${sensitiveUser.email}</strong> Alice Security Code: <span class="style-inline-code">ABCD-EFGH-IJKL-MNOP</span></em></p>`,
+            }),
+            Replacement.create({
+                token: 'unsubscribeUrl',
+                value: 'https://example.com/unsubscribe?token=secret-token-12345',
+            }),
+            Replacement.create({
+                token: 'signInUrl',
+                value: 'https://example.com/login?token=private-signin-token-67890',
+            }),
+            Replacement.create({
+                token: 'outstandingBalance',
+                value: '€ 150.00',
+            }),
+            Replacement.create({
+                token: 'balanceTable',
+                html: '<table><tr><td>Private balance information</td><td>€ 150.00</td></tr></table>',
+            }),
+        ];
+
+        await sensitiveRecipient.save();
+
+        // Search specifically for this email to avoid interference from other tests
+        const searchQuery = new LimitedFilteredRequest({
+            limit: 10,
+            search: 'Sensitive Data Email',
+        });
+
+        const response = await getUserEmails(searchQuery);
+
+        expect(response.body.results).toHaveLength(1);
+        const emailResult = response.body.results[0];
+
+        expect(emailResult.recipients).toHaveLength(1);
+        const recipient = emailResult.recipients[0];
+
+        // The original recipient struct keeps its original userId and email from the sensitive user
+        expect(recipient.userId).toBe(sensitiveUser.id); // Original userId
+        expect(recipient.email).toBe(sensitiveUser.email); // Original email
+
+        // Verify that sensitive data has been properly processed
+        expect(recipient.replacements).toBeDefined();
+        expect(Array.isArray(recipient.replacements)).toBe(true);
+
+        // The system should:
+        // 1. Strip sensitive replacements from the original recipient (done with willFill: true)
+        // 2. Create new appropriate replacements for the current viewing user (done with fillRecipientReplacements)
+        // 3. Apply web display filtering (done with stripRecipientReplacementsForWebDisplay)
+
+        // The original sensitive data (ABCD-EFGH-IJKL-MNOP, secret-token-12345, private-signin-token-67890)
+        // should be completely gone because:
+        // - stripSensitiveRecipientReplacements removes the original replacements
+        // - fillRecipientReplacements creates new ones for the current user
+        // - stripRecipientReplacementsForWebDisplay makes them safe for web display
+
+        const allReplacementsString = JSON.stringify(recipient.replacements);
+        expect(allReplacementsString).not.toContain('ABCD-EFGH-IJKL-MNOP'); // Original security code should be gone
+        expect(allReplacementsString).not.toContain('secret-token-12345'); // Original sensitive unsubscribe token should be gone
+        expect(allReplacementsString).not.toContain('private-signin-token-67890'); // Original sensitive signin token should be gone
+
+        // Verify that safe, current-user-appropriate replacements are created
+        const loginDetailsReplacement = recipient.replacements.find(r => r.token === 'loginDetails');
+        const unsubscribeUrlReplacement = recipient.replacements.find(r => r.token === 'unsubscribeUrl');
+
+        // loginDetails should exist and be empty/generic for web display
+        expect(loginDetailsReplacement).toBeDefined();
+        expect(loginDetailsReplacement!.value).toBe(''); // Should be empty for web display
+
+        // unsubscribeUrl should exist and be safe for web display
+        expect(unsubscribeUrlReplacement).toBeDefined();
+        expect(unsubscribeUrlReplacement!.value).toMatch(/^https:\/\//); // Should still be a valid URL
+        expect(unsubscribeUrlReplacement!.value).not.toContain('secret-token-12345'); // Original sensitive token should be gone
+
+        // This tests that Email.getStructureForUser properly handles sensitive data by:
+        // 1. Removing original sensitive replacements from other users' data
+        // 2. Creating fresh, appropriate replacements for the current viewer
+        // 3. Ensuring web safety of all replacement values
+
+        // Check outstandingBalance replacement
+        const balanceReplacement = recipient.replacements.find(r => r.token === 'outstandingBalance');
+        expect(balanceReplacement).toBeDefined();
+        expect(balanceReplacement!.value).toBe(Formatter.price(0)); // Should be corrected to the new user
+
+        // Check balanceTable replacement
+        const balanceTableReplacement = recipient.replacements.find(r => r.token === 'balanceTable');
+        expect(balanceTableReplacement).toBeDefined();
+        expect(balanceTableReplacement!.html).toBe('<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>');
+    });
+
+    test('Should not return emails from other members the user does not have access to', async () => {
+        // Create another user and member
+        const otherUser = await new UserFactory({
+            organization,
+        }).create();
+
+        const otherMember = await new MemberFactory({
+            organization,
+            user: otherUser,
+        }).create();
+
+        // Create an email
+        const email = new Email();
+        email.subject = 'Email for Other Member';
+        email.status = EmailStatus.Sent;
+        email.text = 'This email is for another member';
+        email.html = '<p>This email is for another member</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.showInMemberPortal = true;
+        email.sentAt = new Date();
+        await email.save();
+
+        // Create an email recipient linked to the OTHER member
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.emailId = email.id;
+        emailRecipient.memberId = otherMember.id; // Different member
+        emailRecipient.userId = otherUser.id;
+        emailRecipient.email = otherUser.email;
+        emailRecipient.firstName = otherMember.details.firstName;
+        emailRecipient.lastName = otherMember.details.lastName;
+        emailRecipient.sentAt = new Date();
+        await emailRecipient.save();
+
+        const response = await getUserEmails();
+
+        // Should not include emails sent to other members
+        expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
+
+        // Test that is IS included if we request the same data via the 'otherUser' token
+        const otherUserToken = await Token.createToken(otherUser);
+        const responseForOtherUser = await getUserEmails(new LimitedFilteredRequest({ limit: 10 }), otherUserToken);
+        expect(responseForOtherUser.body.results.find(e => e.id === email.id)).toBeDefined();
     });
 
     test('Should throw error when not authenticated', async () => {
