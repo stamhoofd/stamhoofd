@@ -106,9 +106,7 @@
 import { EditorSmartButton, EditorSmartVariable, Image, Replacement, ResolutionRequest } from '@stamhoofd/structures';
 import { Content, JSONContent } from '@tiptap/core';
 import { Image as ImageExtension } from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
 import Typography from '@tiptap/extension-typography';
-import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 
@@ -145,7 +143,7 @@ const CustomImage = ImageExtension.extend({
     name: 'customImage',
     addAttributes() {
         return {
-            ...this.parent?.(),
+            ...(this as any).parent?.(),
             width: {
                 default: null,
             },
@@ -206,7 +204,12 @@ function buildEditor(content: Content = '') {
     return new Editor({
         content,
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                link: {
+                    openOnClick: false,
+                    protocols: ['mailto'],
+                },
+            }),
             Typography.configure({}),
             SmartVariableNode.configure({
                 smartVariables: smartVariables.value.filter(s => !s.html),
@@ -220,11 +223,6 @@ function buildEditor(content: Content = '') {
             SmartButtonInlineNode.configure({
                 smartButtons: smartButtons.value,
             }),
-            Link.configure({
-                openOnClick: false,
-                protocols: ['mailto'],
-            }),
-            Underline,
             DescriptiveText,
             CustomImage,
         ],

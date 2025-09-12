@@ -1,16 +1,16 @@
-import { EditorSmartButton } from '@stamhoofd/structures'
-import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core'
+import { EditorSmartButton } from '@stamhoofd/structures';
+import { mergeAttributes, Node, nodeInputRule } from '@tiptap/core';
 
 export type SmartButtonNodeOptions = {
-    HTMLAttributes: Record<string, any>,
-    smartButtons: EditorSmartButton[]
-}
+    HTMLAttributes: Record<string, any>;
+    smartButtons: EditorSmartButton[];
+};
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         smartButtonNode: {
-            insertSmartButton: (smartButton: EditorSmartButton, options?: { updateSelection?: boolean }) => ReturnType,
-        }
+            insertSmartButton: (smartButton: EditorSmartButton, options?: { updateSelection?: boolean }) => ReturnType;
+        };
     }
 }
 
@@ -21,9 +21,9 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
     addOptions() {
         return {
             HTMLAttributes: {},
-            smartButtons: []
-        }
-    }, 
+            smartButtons: [],
+        };
+    },
 
     group: 'block',
 
@@ -32,27 +32,27 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
     draggable: true,
 
     atom: false,
-    content: "text*",
+    content: 'text*',
 
     // disallows all marks
     marks: '',
-     
+
     addCommands() {
         return {
             insertSmartButton: (smartButton: EditorSmartButton, options?: { updateSelection?: boolean }) => ({ commands }) => {
-                return commands.insertContent({ type: smartButton.type === 'block' ? 'smartButton' : 'smartButtonInline', attrs: { id: smartButton.id }, content: [{ type: "text", text: smartButton.text }] }, options)
+                return commands.insertContent({ type: smartButton.type === 'block' ? 'smartButton' : 'smartButtonInline', attrs: { id: smartButton.id }, content: [{ type: 'text', text: smartButton.text }] }, options);
             },
-        }
+        };
     },
 
     addInputRules() {
-        return this.options.smartButtons.filter(b => b.type === 'block').map(s => {
+        return this.options.smartButtons.filter(b => b.type === 'block').map((s) => {
             return nodeInputRule({
                 find: new RegExp(`\\{\\{${s.id}\\}\\}$`),
                 type: this.type,
-                getAttributes: () => { return { id: s.id } }
-            })
-        })
+                getAttributes: () => { return { id: s.id }; },
+            });
+        });
     },
 
     addAttributes() {
@@ -60,50 +60,50 @@ export const SmartButtonNode = Node.create<SmartButtonNodeOptions>({
             id: {
                 default: null,
                 parseHTML: element => element.getAttribute('data-id'),
-                renderHTML: attributes => {
+                renderHTML: (attributes) => {
                     if (!attributes.id) {
-                        return {}
+                        return {};
                     }
 
                     return {
                         'data-id': attributes.id,
-                    }
+                    };
                 },
             },
-        }
+        };
     },
 
     parseHTML() {
         return [
             {
                 tag: `div[data-type="${this.name}"]`,
-            }
-        ]
+            },
+        ];
     },
 
     renderHTML({ node, HTMLAttributes }) {
-        const button = this.options.smartButtons.find(s => s.id === node.attrs.id)
+        const button = this.options.smartButtons.find(s => s.id === node.attrs.id);
 
         return [
             // We need the extra div because display: block is required (and button should be display inline block)
             'div',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
             mergeAttributes({ 'data-type': this.name }, this.options.HTMLAttributes, HTMLAttributes),
             [
-                "span",
-                mergeAttributes({ href: "{{"+(button?.id ?? "")+"}}", class: "button primary" }, this.options.HTMLAttributes, HTMLAttributes),
-                0
+                'span',
+                mergeAttributes({ href: '{{' + (button?.id ?? '') + '}}', class: 'button primary' }, this.options.HTMLAttributes, HTMLAttributes),
+                0,
             ],
-        ]
+        ];
     },
 
     /**
      * Text when copying to the clipboard
      */
     renderText({ node }) {
-        return "{{"+node.attrs.id+"}}"
+        return '{{' + node.attrs.id + '}}';
     },
-})
+});
 
 export const SmartButtonInlineNode = Node.create<SmartButtonNodeOptions>({
     priority: 1000,
@@ -112,9 +112,9 @@ export const SmartButtonInlineNode = Node.create<SmartButtonNodeOptions>({
     addOptions() {
         return {
             HTMLAttributes: {},
-            smartButtons: []
-        }
-    }, 
+            smartButtons: [],
+        };
+    },
 
     group: 'inline',
 
@@ -122,17 +122,16 @@ export const SmartButtonInlineNode = Node.create<SmartButtonNodeOptions>({
     draggable: true,
     inline: true,
     atom: false,
-    content: "inline+",
-    keepOnSplit: false,
+    content: 'inline+',
 
     addInputRules() {
-        return this.options.smartButtons.filter(b => b.type === 'inline').map(s => {
+        return this.options.smartButtons.filter(b => b.type === 'inline').map((s) => {
             return nodeInputRule({
                 find: new RegExp(`\\{\\{${s.id}\\}\\}$`),
                 type: this.type,
-                getAttributes: () => { return { id: s.id } }
-            })
-        })
+                getAttributes: () => { return { id: s.id }; },
+            });
+        });
     },
 
     addAttributes() {
@@ -140,34 +139,34 @@ export const SmartButtonInlineNode = Node.create<SmartButtonNodeOptions>({
             id: {
                 default: null,
                 parseHTML: element => element.getAttribute('data-id'),
-                renderHTML: attributes => {
+                renderHTML: (attributes) => {
                     if (!attributes.id) {
-                        return {}
+                        return {};
                     }
 
                     return {
                         'data-id': attributes.id,
-                    }
+                    };
                 },
             },
-        }
+        };
     },
 
     parseHTML() {
         return [
             {
                 tag: `span[data-type="${this.name}"]`,
-            }
-        ]
+            },
+        ];
     },
 
     renderHTML({ node, HTMLAttributes }) {
-        const button = this.options.smartButtons.find(s => s.id === node.attrs.id)
+        const button = this.options.smartButtons.find(s => s.id === node.attrs.id);
 
         return [
-            "span",
-            mergeAttributes({ 'data-type': this.name, href: "{{"+(button?.id ?? "")+"}}" }, this.options.HTMLAttributes, HTMLAttributes),
-            0
+            'span',
+            mergeAttributes({ 'data-type': this.name, 'href': '{{' + (button?.id ?? '') + '}}' }, this.options.HTMLAttributes, HTMLAttributes),
+            0,
         ];
     },
 
@@ -175,6 +174,6 @@ export const SmartButtonInlineNode = Node.create<SmartButtonNodeOptions>({
      * Text when copying to the clipboard
      */
     renderText({ node }) {
-        return "{{"+node.attrs.id+"}}"
+        return '{{' + node.attrs.id + '}}';
     },
-})
+});
