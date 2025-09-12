@@ -5,7 +5,7 @@ export function useEmailStatus() {
     return (email: EmailPreview) => {
         if (email.deletedAt) {
             return {
-                text: $t('Verwijderd'),
+                text: $t('94337d0a-0522-43be-b337-73ddcf7fdd45'),
                 theme: 'theme-error',
             };
         }
@@ -20,7 +20,7 @@ export function useEmailStatus() {
             case EmailStatus.Sending:
                 if (!email.sendAsEmail) {
                     return {
-                        text: $t('Bezig met publiceren'),
+                        text: $t('f30a5ed7-b35f-4a96-9a6a-bc27022d85ff'),
                         theme: 'theme-secundary',
                         progress: email.emailRecipientsCount ? Math.min(1, (email.succeededCount + email.failedCount + email.softFailedCount) / email.emailRecipientsCount) : undefined,
                     };
@@ -33,13 +33,13 @@ export function useEmailStatus() {
             case EmailStatus.Queued:
                 if (!email.sendAsEmail) {
                     return {
-                        text: $t('In wachtrij om te publiceren'),
+                        text: $t('926052ce-f1bd-4bbc-9c86-314bdba8d244'),
                         theme: 'theme-secundary',
                         progress: 0,
                     };
                 }
                 return {
-                    text: $t('In wachtrij om te verzenden'),
+                    text: $t('742236ac-6217-4060-99b6-ec62ffdbd4fb'),
                     theme: 'theme-secundary',
                     progress: 0,
                 };

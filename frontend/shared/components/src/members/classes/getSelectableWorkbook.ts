@@ -31,7 +31,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // todo: only if platform?
         new SelectableColumn({
             id: 'memberNumber',
-            name: $t(`Lidnummer`),
+            name: $t(`7c4ca473-3c49-45fb-bdd2-b87399a69e62`),
         }),
         new SelectableColumn({
             id: 'firstName',

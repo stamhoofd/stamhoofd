@@ -32,7 +32,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         new Column<ObjectType, Group>({
             id: 'group.name',
             allowSorting: false,
-            name: $t('Inschrijvingsgroep'),
+            name: $t('c3d036e9-60ec-48e1-85a8-e801dc305466'),
             getValue: (registration) => {
                 return registration.group;
             },
@@ -47,15 +47,15 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         new Column<ObjectType, string | null>({
             id: 'group.defaultAgeGroup',
             allowSorting: false,
-            name: $t('Standaard leeftijdsgroep'),
+            name: $t('aa592704-705f-47f8-97ed-805b46c87e40'),
             getValue: (registration) => {
                 return registration.group.defaultAgeGroupId;
             },
             format: (g) => {
                 if (!g) {
-                    return $t('Geen');
+                    return $t('3ef9e622-426f-4913-89a0-0ce08f4542d4');
                 }
-                return Platform.shared.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('Onbekend');
+                return Platform.shared.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb');
             },
             getStyle: g => !g ? 'gray' : '',
             minimumWidth: 100,
@@ -337,7 +337,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 allowSorting: false,
                 name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
-                format: organization => organization?.name ?? $t('Onbekend'),
+                format: organization => organization?.name ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
                 getStyle: organization => !organization ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -351,7 +351,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 allowSorting: false,
                 name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
-                format: organization => organization?.uri ?? $t('Onbekend'),
+                format: organization => organization?.uri ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
                 getStyle: organization => !organization ? 'gray' : '',
                 minimumWidth: 50,
                 recommendedWidth: 100,

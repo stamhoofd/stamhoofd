@@ -12,7 +12,7 @@
         :default-filter="defaultFilter"
     >
         <p v-if="props.filterType === 'complaints'" class="style-description-block">
-            <I18nComponent :t="$t('Hieronder zie je alle ontvangers die een spammelding hebben ingediend voor een e-mail die je hebt verstuurd. Dit kan gebeuren als iemand de e-mail als spam markeert in zijn of haar e-mailprogramma. <button>Meer info</button>')">
+            <I18nComponent :t="$t('8b0c0037-883c-4b8d-aeb6-cda8b3f40b52')">
                 <template #button="{content}">
                     <a class="inline-link" :href="$domains.getDocs('spam-complaints')" target="_blank">
                         {{ content }}
@@ -22,7 +22,7 @@
         </p>
 
         <p v-if="props.filterType === 'hard-bounces'" class="style-description-block">
-            <I18nComponent :t="$t('Bij een hard bounce komt een e-mail na het versturen terug omwille van een permanente reden, bv. als het e-mailadres niet bestaat. <button>Meer info</button>')">
+            <I18nComponent :t="$t('f6bfb25a-c045-46bc-a6d2-ea475f3bb600')">
                 <template #button="{content}">
                     <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
                         {{ content }}
@@ -32,7 +32,7 @@
         </p>
 
         <p v-if="props.filterType === 'soft-bounces'" class="style-description-block">
-            <I18nComponent :t="$t('Bij een soft bounce komt een e-mail na het versturen terug omwille van een tijdelijke reden, bv. een volle inbox. <button>Meer info</button>')">
+            <I18nComponent :t="$t('ff205726-520f-48f1-a631-a03f735eed68')">
                 <template #button="{content}">
                     <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
                         {{ content }}
@@ -74,22 +74,22 @@ const props = withDefaults(
 
 const title = computed(() => {
     if (props.filterType === 'complaints') {
-        return $t('Spammeldingen');
+        return $t('516a8610-8374-4e6d-bf68-1a45b67b0124');
     }
     if (props.filterType === 'hard-bounces') {
-        return $t('Hard bounces');
+        return $t('800c4591-92bb-45f8-9040-5fb1d05dd2b4');
     }
     if (props.filterType === 'soft-bounces') {
-        return $t('Soft bounces');
+        return $t('cda7f8f5-dfe5-4ac4-a69c-35301da62120');
     }
     if (props.filterType === 'failed') {
-        return $t('Mislukte berichten');
+        return $t('2df0c254-5bfd-4cda-9da4-90352ee2a75f');
     }
 
     if (props.email) {
-        return $t('Ontvangers van ‘{emailSubject}’', { emailSubject: props.email.replacedSubject });
+        return $t('d9b3ba62-99cb-4851-9553-87b5e5f34106', { emailSubject: props.email.replacedSubject });
     }
-    return $t('Alle ontvangers');
+    return $t('13191887-8762-4b8b-a656-12cf86594579');
 });
 
 const estimatedRows = computed(() => {
@@ -136,7 +136,7 @@ const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string | null>({
         id: 'email',
-        name: $t('E-mailadres'),
+        name: $t('237d0720-13f0-4029-8bf2-4de7e0a9a358'),
         getValue: e => e.email || '',
         minimumWidth: 200,
         recommendedWidth: 300,
@@ -145,7 +145,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string | null>({
         id: 'name',
-        name: $t('Naam'),
+        name: $t('45ebf52f-e5ba-4995-a3d8-e300f5a9e707'),
         getValue: e => e.name || '',
         minimumWidth: 150,
         recommendedWidth: 200,
@@ -154,27 +154,27 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EmailRecipient>({
         id: 'sentAt',
-        name: $t('Verzonden om'),
+        name: $t('b57f80e3-ac03-4238-a489-f92cdceb1086'),
         getValue: e => e,
         format: (email) => {
             if (email.sentAt) {
-                return $t('Verzonden om {time}', { time: Formatter.time(email.sentAt) });
+                return $t('9f8924bc-bd3e-4379-ac34-92a57b577c7a', { time: Formatter.time(email.sentAt) });
             }
 
             if (email.failError) {
                 if (email.failError.hasCode('email_skipped_hard_bounce')) {
-                    return $t('Eerdere hard bounce');
+                    return $t('c1470365-cafb-4d5d-94c2-bcead6aa77e7');
                 }
                 if (email.failError.hasCode('email_skipped_spam')) {
-                    return $t('Eerdere spammelding');
+                    return $t('536208f5-b4db-40e1-9198-2224e2eb9883');
                 }
                 if (email.failError.hasCode('email_skipped_unsubscribed')) {
-                    return $t('Afgemeld voor deze e-mails');
+                    return $t('8050a561-db7c-4c23-9930-c8474fd37586');
                 }
                 return email.failError.human;
             }
 
-            return $t('In wachtrij');
+            return $t('520e00ad-230c-4004-86bc-20694e56c2af');
         },
         getStyle: (email) => {
             if (email.sentAt) {
@@ -198,23 +198,23 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, EmailRecipient>({
         id: 'notifications',
-        name: $t('Meldingen'),
-        description: $t('Na het versturen van een e-mail is het mogelijk dat we een bericht terug krijgen dat de e-mail niet kon worden bezorgd of als spam werd gemarkeerd. Dat verschijnt hier.'),
+        name: $t('1eafb06a-5385-42fd-8f1a-2bbaaf735e53'),
+        description: $t('409621cb-c4e4-4d3e-bfcc-a1f607e2c907'),
         getValue: e => e,
         format: (email) => {
             if (email.spamComplaintError) {
-                return $t('Spam');
+                return $t('c096947a-d82c-4478-95b3-b3411da84361');
             }
 
             if (email.hardBounceError) {
-                return $t('E-mail kon permanent niet worden afgeleverd');
+                return $t('32f0884a-f2fc-4563-8403-b67c482823d3');
             }
 
             if (email.softBounceError) {
-                return $t('E-mail kon niet worden afgeleverd');
+                return $t('793bf19f-ba89-4a0f-9999-06f554194db6');
             }
 
-            return $t('Geen');
+            return $t('3ef9e622-426f-4913-89a0-0ce08f4542d4');
         },
         getStyle: (email) => {
             if (email.spamComplaintError || email.hardBounceError) {

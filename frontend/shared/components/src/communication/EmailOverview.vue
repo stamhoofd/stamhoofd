@@ -3,12 +3,12 @@
         <STNavigationBar :title="title">
             <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued" #right>
                 <LoadingButton v-if="email.status === EmailStatus.Failed" :loading="isRetryingEmail">
-                    <button v-tooltip="$t('Opnieuw proberen')" type="button" class="button icon retry" @click="retrySending" />
+                    <button v-tooltip="$t('314810ef-ff16-4b22-b8a5-399d5d820a4a')" type="button" class="button icon retry" @click="retrySending" />
                 </LoadingButton>
-                <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('Inhoud aanpassen en versturen')" type="button" class="button icon send" @click="editEmail" />
-                <button v-else v-tooltip="$t('Inhoud aanpassen')" type="button" class="button icon edit" @click="editEmail" />
+                <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('2b799708-dc8a-4ab5-ad15-11c89bfa23da')" type="button" class="button icon send" @click="editEmail" />
+                <button v-else v-tooltip="$t('a7c3d104-58c1-41ac-8a33-febe6f474215')" type="button" class="button icon edit" @click="editEmail" />
                 <LoadingButton :loading="isDeletingEmail">
-                    <button v-tooltip="$t('Verwijderen')" type="button" class="button icon trash" @click="doDelete" />
+                    <button v-tooltip="$t('d67c7c61-5387-48a5-b63b-a78682a54fd8')" type="button" class="button icon trash" @click="doDelete" />
                 </LoadingButton>
             </template>
         </STNavigationBar>
@@ -34,47 +34,47 @@
             </template>
 
             <button v-if="email.spamComplaintsCount" class="error-box selectable" type="button" @click="navigate(Routes.Complaints)">
-                <span>{{ email.spamComplaintsCount > 1 ? $t('{count} ontvangers hebben hun email als spam gemarkeerd', {count: email.spamComplaintsCount}) : $t('Eén ontvanger heeft de email als spam gemarkeerd') }}</span>
+                <span>{{ email.spamComplaintsCount > 1 ? $t('1b19e64e-c1ab-4755-bef6-a9f3f5b551d6', {count: email.spamComplaintsCount}) : $t('Eén ontvanger heeft de email als spam gemarkeerd') }}</span>
                 <span class="button text">
-                    {{ $t('Bekijken') }}
+                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
                 </span>
             </button>
 
             <button v-if="email.hardBouncesCount" class="error-box selectable" type="button" @click="navigate(Routes.HardBounces)">
-                <span>{{ email.hardBouncesCount > 1 ? $t('{count} ontvangers konden de email niet ontvangen (hard bounce)', {count: email.hardBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (hard bounce)') }}</span>
+                <span>{{ email.hardBouncesCount > 1 ? $t('0cd6f68d-48b9-46af-a290-bee4aa0c853c', {count: email.hardBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (hard bounce)') }}</span>
                 <span class="button text">
-                    {{ $t('Bekijken') }}
+                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
                 </span>
             </button>
 
             <button v-if="email.softBouncesCount" class="warning-box selectable" type="button" @click="navigate(Routes.SoftBounces)">
-                <span>{{ email.softBouncesCount > 1 ? $t('{count} ontvangers konden de email niet ontvangen (soft bounce)', {count: email.softBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (soft bounce)') }}</span>
+                <span>{{ email.softBouncesCount > 1 ? $t('2bcd25b3-fda7-41e2-bf92-e7c1bd2780f2', {count: email.softBouncesCount}) : $t('Eén ontvanger kon de email niet ontvangen (soft bounce)') }}</span>
                 <span class="button text">
-                    {{ $t('Bekijken') }}
+                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
                 </span>
             </button>
 
             <p v-if="email.failedCount > 0" class="error-box selectable" type="button" @click="navigate(Routes.Failed)">
                 <span v-if="email.failedCount === 1">
-                    {{ $t('Eén email kon niet worden verzonden') }}
+                    {{ $t('49e5596f-9e08-4766-b159-2678580a00c3') }}
                 </span>
-                <span v-else>{{ $t('{count} emails konden niet worden verzonden', {
+                <span v-else>{{ $t('faed0d06-516e-4a4e-8737-6f33f59c4af4', {
                     count: email.failedCount
                 }) }}</span>
                 <span class="button text">
-                    {{ $t('Bekijken') }}
+                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
                 </span>
             </p>
 
             <p v-if="email.softFailedCount > 0" class="warning-box selectable" type="button" @click="navigate(Routes.Failed)">
                 <span v-if="email.softFailedCount === 1">
-                    {{ $t('Eén email werd overgeslagen') }}
+                    {{ $t('de176a16-fcf1-499c-aa77-0323d18a687d') }}
                 </span>
-                <span v-else>{{ $t('{count} emails werden overgeslagen', {
+                <span v-else>{{ $t('47503212-d717-45d2-b067-da0813374113', {
                     count: email.softFailedCount
                 }) }}</span>
                 <span class="button text">
-                    {{ $t('Bekijken') }}
+                    {{ $t('0415018c-c90d-489a-901f-a4729b8c1d24') }}
                 </span>
             </p>
 
@@ -89,7 +89,7 @@
                     </h2>
                 </STListItem>
 
-                <STListItem v-if="email.fromName || email.organization?.name || email.fromAddress" v-tooltip="$t('Afzender van het bericht')">
+                <STListItem v-if="email.fromName || email.organization?.name || email.fromAddress" v-tooltip="$t('26e90995-ce5d-48ff-96e8-21e39e489d14')">
                     <template #left>
                         <span class="icon email small" />
                     </template>
@@ -108,10 +108,10 @@
                     </template>
 
                     <h2 v-if="email.user.name" class="style-title-list">
-                        <span>{{ $t('Gepubliceerd door') }}: {{ email.user.name }} ({{ email.user.email }})</span><span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
+                        <span>{{ $t('9e736403-a321-4462-8c8d-c7234fa1633c') }}: {{ email.user.name }} ({{ email.user.email }})</span><span v-tooltip="$t('089accda-4b1f-4767-8e46-d7f71c24068a')" class="icon eye-off tiny" />
                     </h2>
                     <h2 v-else class="style-title-list">
-                        <span>{{ $t('Gepubliceerd door') }}: {{ email.user.email }}</span><span v-tooltip="$t('Dit is enkel zichtbaar voor beheerders')" class="icon eye-off tiny" />
+                        <span>{{ $t('9e736403-a321-4462-8c8d-c7234fa1633c') }}: {{ email.user.email }}</span><span v-tooltip="$t('089accda-4b1f-4767-8e46-d7f71c24068a')" class="icon eye-off tiny" />
                     </h2>
                 </STListItem>
 
@@ -121,10 +121,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Niet verzonden als e-mail') }}
+                        {{ $t('a7685897-9158-4a82-bee1-9b74187ec599') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('Dit bericht is enkel zichtbaar in het ledenportaal') }}
+                        {{ $t('0cc07b8f-9eaf-413a-9c2d-17363611f2d4') }}
                     </p>
                 </STListItem>
 
@@ -134,10 +134,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Niet zichtbaar in ledenportaal') }}
+                        {{ $t('e32d4a22-592a-4917-b115-35ee6ca50290') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('Dit bericht is enkel verzonden als e-mail') }}
+                        {{ $t('c07ff2d7-46c5-429d-bcff-c77c16017611') }}
                     </p>
                 </STListItem>
 
@@ -147,7 +147,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('E-mail ontvangers') }}
+                        {{ $t('221a0568-b308-4803-bd53-cb633f726f10') }}
                     </h2>
 
                     <template #right>
@@ -164,7 +164,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Leden') }}
+                        {{ $t('19da8d23-acea-43c2-bfdd-742447ca57f1') }}
                     </h2>
 
                     <template #right>
@@ -180,7 +180,7 @@
 
             <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued">
                 <hr>
-                <h2>{{ $t('Acties') }}</h2>
+                <h2>{{ $t('7c093146-6de1-413b-bbda-2ada3fd63dea') }}</h2>
 
                 <STList>
                     <STListItem v-if="email.status === EmailStatus.Failed" :selectable="true" element-name="button" @click="retrySending">
@@ -192,10 +192,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Opnieuw proberen') }}
+                            {{ $t('314810ef-ff16-4b22-b8a5-399d5d820a4a') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Probeer het bericht opnieuw te versturen') }}
+                            {{ $t('02f663a0-3c65-495e-a485-71a942f06c3a') }}
                         </p>
 
                         <template #right>
@@ -214,13 +214,13 @@
                             <IconContainer v-else icon="send" class="primary" />
                         </template>
                         <h3 v-if="email.status !== EmailStatus.Draft" class="style-title-list">
-                            {{ $t('Wijzig inhoud') }}
+                            {{ $t('0089568d-e3cf-4dc7-b96a-2ec7fe233227') }}
                         </h3>
                         <h3 v-else class="style-title-list">
-                            {{ $t('Wijzig inhoud en versturen') }}
+                            {{ $t('f547c5e3-f179-44b0-b15f-19a5813be244') }}
                         </h3>
                         <p v-if="email.status !== EmailStatus.Draft" class="style-description-small">
-                            {{ $t('Je kan de inhoud van een bericht wijzigen, maar dit heeft enkel invloed op het zichtbare bericht in het ledenportaal.') }}
+                            {{ $t('890739a4-277c-4757-b6e6-c9f535d138a3') }}
                         </p>
 
                         <template #right>
@@ -233,10 +233,10 @@
                             <IconContainer icon="eye-off" class="primary" />
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Wijzig zichtbaarheid') }}
+                            {{ $t('31894c35-aca4-441e-bdfb-f45ed7e125d7') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Stel in of het bericht zichtbaar is in het ledenportaal of niet.') }}
+                            {{ $t('8e074663-072b-4331-b6e9-e472969437a2') }}
                         </p>
 
                         <template #right>
@@ -253,10 +253,10 @@
                             </IconContainer>
                         </template>
                         <h3 class="style-title-list">
-                            {{ $t('Verwijderen') }}
+                            {{ $t('d67c7c61-5387-48a5-b63b-a78682a54fd8') }}
                         </h3>
                         <p class="style-description-small">
-                            {{ $t('Dit bericht zal niet langer zichtbaar zijn en heeft uiteraard geen effect op reeds verzonden e-mails. Je kan dit niet ongedaan maken.') }}
+                            {{ $t('cde18ff3-28ea-40ad-b385-37129f4091c4') }}
                         </p>
 
                         <template #right>
@@ -322,7 +322,7 @@ defineRoutes([
                         },
                     },
                 },
-                customTitle: $t('Leden'),
+                customTitle: $t('19da8d23-acea-43c2-bfdd-742447ca57f1'),
                 customEstimatedRows: props.email.membersCount || 0,
             };
         },
@@ -417,9 +417,9 @@ async function retrySending() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('Deze e-mail opnieuw proberen te versturen?'),
-        $t('Ja, opnieuw proberen'),
-        $t('Een e-mail wordt nooit meerdere keren naar dezelfde persoon verstuurd'),
+        $t('9e0c8c63-6022-4742-918e-2716247d4c2f'),
+        $t('3dc84002-909a-45e2-a033-317be0a09c4e'),
+        $t('c284a7c8-69bb-4ceb-bf01-5f952c453aa9'),
     )) {
         return;
     }
@@ -443,8 +443,8 @@ async function doDelete() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('Dit bericht verwijderen?'),
-        $t('Ja, verwijderen'),
+        $t('c3a06b52-d25c-4ec4-afe7-208773e1332e'),
+        $t('eee720f3-5e00-429c-a847-cb3d4e237e4d'),
     )) {
         return;
     }

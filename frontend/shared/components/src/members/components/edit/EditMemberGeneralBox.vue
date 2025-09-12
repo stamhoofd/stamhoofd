@@ -70,7 +70,7 @@
                 </div>
 
                 <div v-if="!member.isNew && (nationalRegisterNumber || isPropertyEnabled('nationalRegisterNumber') )">
-                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`439176a5-dd35-476b-8c65-3216560cac2f`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('optioneel')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
+                    <NRNInput v-model="nationalRegisterNumber" :title="$t(`439176a5-dd35-476b-8c65-3216560cac2f`) + lidSuffix + (!isPropertyRequired('nationalRegisterNumber') ? ' ('+$t('3e128951-fbcd-4b44-88a3-6c5340ce1dfc')+')' : '')" :required="isPropertyRequired('nationalRegisterNumber')" :nullable="true" :validator="validator" :birth-day="birthDay">
                         <template v-if="!isPropertyEnabled('nationalRegisterNumber')" #right>
                             <button class="button icon trash small gray" type="button" @click="nationalRegisterNumber = null" />
                         </template>

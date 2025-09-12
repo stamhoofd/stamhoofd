@@ -3,8 +3,8 @@
         <div v-if="!loadingDuplicates" class="st-view">
             <STNavigationBar :title="title">
                 <template #right>
-                    <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('Vorige ontvanger')" @click="goBack" />
-                    <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('Volgende ontvanger')" @click="goForward" />
+                    <button v-if="hasPrevious || hasNext" type="button" class="button icon arrow-up" :disabled="!hasPrevious" :v-tooltip="$t('b72bff25-f6ff-4b0e-8338-32b551a5465a')" @click="goBack" />
+                    <button v-if="hasNext || hasPrevious" type="button" class="button icon arrow-down" :disabled="!hasNext" :v-tooltip="$t('af69b2c9-849e-41a6-957e-adfdfb465959')" @click="goForward" />
                 </template>
             </STNavigationBar>
 
@@ -14,7 +14,7 @@
                 </h1>
 
                 <p v-if="recipient.spamComplaintError" class="error-box">
-                    <I18nComponent :t="$t('Deze ontvanger heeft deze e-mail als spam gemarkeerd. Deze persoon werd daardoor automatisch geblokkeerd en zal geen e-mails meer ontvangen. <button>Meer info</button>')">
+                    <I18nComponent :t="$t('5d83c1fc-37e5-4d57-8581-7a1f629c19b0')">
                         <template #button="{content}">
                             <a class="inline-link" :href="$domains.getDocs('spam-complaints')" target="_blank">
                                 {{ content }}
@@ -24,7 +24,7 @@
                 </p>
 
                 <p v-if="recipient.hardBounceError" class="error-box">
-                    <I18nComponent :t="$t('De e-mail kwam automatisch terug omwille van een permanente reden (zie onder). Deze persoon werd daardoor automatisch geblokkeerd en zal geen e-mails meer ontvangen. <button>Meer info</button>')">
+                    <I18nComponent :t="$t('cd537ed4-bd5f-4b0c-81d9-1cf09e0b104d')">
                         <template #button="{content}">
                             <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
                                 {{ content }}
@@ -34,7 +34,7 @@
                 </p>
 
                 <p v-if="recipient.softBounceError" class="warning-box">
-                    <I18nComponent :t="$t('De e-mail kwam automatisch terug omwille van een tijdelijke reden (zie onder). <button>Meer info</button>')">
+                    <I18nComponent :t="$t('1db89db3-5838-4fd7-a7c4-d52d5478e033')">
                         <template #button="{content}">
                             <a class="inline-link" :href="$domains.getDocs('bounces')" target="_blank">
                                 {{ content }}
@@ -44,13 +44,13 @@
                 </p>
 
                 <p v-if="deduplicatedOf.length > 0" class="info-box">
-                    {{ $t('Meerdere e-mails werden automatisch samengevoegd tot deze ene e-mail omdat de inhoud gelijk was. Op die manier heeft de ontvanger de e-mail niet meerdere keren ontvangen.') }}
+                    {{ $t('5ac4d81e-fdd2-4699-8294-a5890ac34520') }}
                 </p>
 
                 <STList class="info">
                     <STListItem v-if="recipient.name || recipient.email">
                         <h3 class="style-definition-label">
-                            {{ $t('Verzonden naar') }}
+                            {{ $t('88b9fe03-3b9c-4e35-a640-d0575dca0edc') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             <span>{{ capitalizeFirstLetter(recipient.name ?? '') || recipient.email }}</span>
@@ -63,7 +63,7 @@
 
                     <STListItem v-for="(member, index) of members" :key="member.id" :selectable="true" @click="showMember(member.id)">
                         <h3 class="style-definition-label">
-                            {{ $t('Bijhorend lid') }} {{ members.length > 1 ? `(${index + 1})` : '' }}
+                            {{ $t('9603f7a2-14f0-4e9b-a191-0fddd8f6ec8a') }} {{ members.length > 1 ? `(${index + 1})` : '' }}
                         </h3>
                         <p class="style-definition-text">
                             <span>{{ capitalizeFirstLetter(member.name) }}</span>
@@ -76,7 +76,7 @@
 
                     <STListItem v-if="recipient.sentAt">
                         <h3 class="style-definition-label">
-                            {{ $t('Verzonden op') }}
+                            {{ $t('afd3a866-e08e-44da-a93b-ec2ece8cbb78') }}
                         </h3>
                         <p class="style-definition-text">
                             <span>{{ formatDateTime(recipient.sentAt) }}</span>
@@ -85,7 +85,7 @@
 
                     <STListItem v-if="recipient.failError && isSoftEmailRecipientError(recipient.failError)" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span style="color: var(--color-primary-dark);">{{ $t('Overgeslagen bij versturen') }}</span><span class="icon warning tiny" />
+                            <span style="color: var(--color-primary-dark);">{{ $t('fbdfafc8-9159-4848-abfd-123e044e7a38') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
                             {{ recipient.failError.getHuman() }}
@@ -94,7 +94,7 @@
 
                     <STListItem v-else-if="recipient.failError" class="theme-error">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('Fout bij versturen') }}</span><span class="icon error tiny" />
+                            <span>{{ $t('dc400a34-ce43-4e14-a292-6c9be0c0d131') }}</span><span class="icon error tiny" />
                         </h3>
                         <p class="style-definition-text">
                             {{ recipient.failError.getHuman() }}
@@ -103,7 +103,7 @@
 
                     <STListItem v-if="recipient.hardBounceError" class="theme-error">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('Hard bounce') }}</span><span class="icon error tiny" />
+                            <span>{{ $t('b33eff3e-008a-4859-b2c7-dc84ae77a2f8') }}</span><span class="icon error tiny" />
                         </h3>
                         <template v-if="bounceErrorToHuman(recipient.hardBounceError)">
                             <p class="style-definition-text pre-wrap" v-text="bounceErrorToHuman(recipient.hardBounceError)" />
@@ -114,7 +114,7 @@
 
                     <STListItem v-if="recipient.softBounceError" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span style="color: var(--color-primary-dark);">{{ $t('Soft bounce') }}</span><span class="icon warning yellow tiny" />
+                            <span style="color: var(--color-primary-dark);">{{ $t('c39fe846-065d-42b2-a34c-02147926d947') }}</span><span class="icon warning yellow tiny" />
                         </h3>
                         <template v-if="bounceErrorToHuman(recipient.softBounceError)">
                             <p class="style-definition-text pre-wrap" v-text="bounceErrorToHuman(recipient.softBounceError)" />
@@ -157,7 +157,7 @@ const props = withDefaults(
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('recipient', props);
 const present = usePresent();
 
-const title = $t('Ontvanger');
+const title = $t('7a814201-064e-42a5-8c2d-1e0bd25717d7');
 const memberFetcher = useMembersObjectFetcher();
 
 const deduplicatedOf: Ref<EmailRecipient[]> = ref([]);

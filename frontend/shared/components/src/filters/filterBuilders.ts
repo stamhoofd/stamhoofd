@@ -281,31 +281,31 @@ export function useAdminEmailFilterBuilders() {
                 key: 'sentAt',
             }),
             new NumberFilterBuilder({
-                name: $t('Aantal emailontvangers'),
+                name: $t('cbc2254d-58c7-4f51-bb2d-dcca1635386f'),
                 key: 'emailRecipientsCount',
             }),
             new NumberFilterBuilder({
-                name: $t('Aantal belangrijke mislukte verzendingen'),
+                name: $t('1c8d06f2-fefa-402f-951a-b89755abbcf9'),
                 key: 'failedCount',
             }),
             new NumberFilterBuilder({
-                name: $t('Aantal minder belangrijke mislukte verzendingen'),
+                name: $t('e05453f8-3355-4c30-bc6a-a81a3b028ae3'),
                 key: 'softFailedCount',
             }),
             new NumberFilterBuilder({
-                name: $t('Aantal hard bounces'),
+                name: $t('c991fbae-a87b-473c-927d-7b8b78246f8f'),
                 key: 'hardBouncesCount',
             }),
             new NumberFilterBuilder({
-                name: $t('Aantal soft bounces'),
+                name: $t('0239e522-2bcb-42b9-83f9-6b37cb8fb96f'),
                 key: 'softBouncesCount',
             }),
             new NumberFilterBuilder({
-                name: $t('Aantal spammeldingen'),
+                name: $t('31b066b6-aca9-4ebf-ab0c-bd7df2127149'),
                 key: 'spamComplaintsCount',
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`Verstuurd vanaf`),
+                name: $t(`b2ef4163-dad6-471a-90f3-edcaf6a4e1b8`),
                 options: [
                     ...(organization.value ? (organization.value.privateMeta?.emails ?? []) : (platform.value.privateConfig?.emails ?? [])).map(e => new MultipleChoiceUIFilterOption(e.name || e.email, e.id)),
                 ],
@@ -316,11 +316,11 @@ export function useAdminEmailFilterBuilders() {
                 },
             }),
             new StringFilterBuilder({
-                name: $t(`Onderwerp`),
+                name: $t(`f9ce67b8-22b4-4588-a78b-51036839488a`),
                 key: 'subject',
             }),
             new StringFilterBuilder({
-                name: $t(`Inhoud`),
+                name: $t(`cc262942-6716-4860-8dab-ac0a09245480`),
                 key: 'text',
             }),
 
@@ -638,7 +638,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions }:
     }
 
     const ageFilter = new SimpleNumberFilterBuilder({
-        name: $t(`Leeftijd`),
+        name: $t(`e62afedb-ad86-4827-ae25-3d17e384fe2c`),
         wrapper: {
             $and: [
                 {
@@ -1234,22 +1234,22 @@ export function useEmailRecipientsFilterBuilders() {
     return () => {
         const all: UIFilterBuilders = [
             new StringFilterBuilder({
-                name: $t('E-mailadres'),
+                name: $t('237d0720-13f0-4029-8bf2-4de7e0a9a358'),
                 key: 'email',
             }),
 
             new StringFilterBuilder({
-                name: $t('Naam'),
+                name: $t('45ebf52f-e5ba-4995-a3d8-e300f5a9e707'),
                 key: 'name',
             }),
 
             new MultipleChoiceFilterBuilder({
-                name: $t('Status'),
+                name: $t('c251e956-4c8e-455c-b648-ca26d37beea7'),
                 options: [
-                    new MultipleChoiceUIFilterOption($t('Foutmelding bij versturen'), 'failError'),
-                    new MultipleChoiceUIFilterOption($t('Hard bounce'), 'hardBounce'),
-                    new MultipleChoiceUIFilterOption($t('Soft bounce'), 'softBounce'),
-                    new MultipleChoiceUIFilterOption($t('Spam complaint'), 'spam'),
+                    new MultipleChoiceUIFilterOption($t('51302d94-ca1d-4fe6-b7a3-1bf571a306e0'), 'failError'),
+                    new MultipleChoiceUIFilterOption($t('b33eff3e-008a-4859-b2c7-dc84ae77a2f8'), 'hardBounce'),
+                    new MultipleChoiceUIFilterOption($t('c39fe846-065d-42b2-a34c-02147926d947'), 'softBounce'),
+                    new MultipleChoiceUIFilterOption($t('671720b3-bc3d-4f54-b79a-28d24937d52e'), 'spam'),
                 ],
                 wrapFilter: (f) => {
                     const choices = Array.isArray(f) ? f : [f];

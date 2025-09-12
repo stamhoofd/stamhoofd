@@ -216,7 +216,7 @@
                         <img src="~@stamhoofd/assets/images/illustrations/email.svg">
                     </template>
                     <h2 class="style-title-list">
-                        {{ $t('Afzenders') }}
+                        {{ $t('369772ac-070a-4d86-a5f4-9d7b24b3dbec') }}
                     </h2>
                     <p class="style-description">
                         {{ $t('bb6d79a2-f70f-4494-924e-7ebc27a4f0da') }}

@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
-        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings || !willSend ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('Versturen') + '…') : (willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Publiceren')) : $t('Opslaan'))" :replacements="replacements" :title="title" @save="send">
+        <EditorView v-if="!(creatingEmail || !email || !patchedEmail)" ref="editorView" :save-icon-mobile="hasMoreSettings || !willSend ? undefined : 'send'" :save-icon="hasMoreSettings || !willSend ? undefined : 'send'" class="mail-view" :loading="sending || (!willSend && !!savingPatch)" :save-text="hasMoreSettings ? ($t('698246ee-bca8-4a79-bf01-82b09c20489d') + '…') : (willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3')) : $t('87e450fe-1c15-4eed-9066-f78979e44810'))" :replacements="replacements" :title="title" @save="send">
             <h1 class="style-navigation-title with-icons">
                 <span>{{ title }}</span>
                 <ProgressRing :radius="7" :stroke="2" :loading="true" :opacity="showLoading ? 1 : 0" />
@@ -40,7 +40,7 @@
                         </button>
                     </div>
                     <template #right>
-                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('Er ging iets mis bij het aanmaken van de ontvangers: ') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
+                        <span v-if="patchedEmail.emailRecipientsCount === null && patchedEmail.recipientsErrors" v-tooltip="$t('69e2b2ce-e8d5-4833-9b6c-05c058743634') + ' ' + patchedEmail.recipientsErrors.getHuman()" class="icon error red" />
                         <span v-else-if="patchedEmail.emailRecipientsCount !== null" class="style-description-small">{{ formatInteger(patchedEmail.emailRecipientsCount) }}</span>
                         <span v-else class="style-placeholder-skeleton" />
                     </template>
@@ -59,7 +59,7 @@
                         <div class="input-icon-container right icon arrow-down-small gray" :class="{'no-padding': !auth.hasFullAccess()}">
                             <select v-model="senderId" class="list-input">
                                 <option :value="null" disabled>
-                                    {{ $t('Maak een keuze') }}
+                                    {{ $t('2e498401-c4e4-43cf-9f9e-fbcfc09afad3') }}
                                 </option>
                                 <option v-for="e in senders" :key="e.id" :value="e.id">
                                     {{ e.name ? (e.name+" <"+e.email+">") : e.email }}
@@ -171,7 +171,7 @@ export type RecipientMultipleChoiceOption = {
 const willSend = computed(() => {
     return (!props.editEmail || props.editEmail.status === EmailStatus.Draft);
 });
-const title = computed(() => props.editEmail ? (willSend.value ? $t('Bericht versturen') : $t('Bericht bewerken')) : $t('Nieuw bericht'));
+const title = computed(() => props.editEmail ? (willSend.value ? $t('ce6d1409-7683-406e-836b-d1a48981c060') : $t('b13d463e-fc48-402e-be6a-95240cc09d7c')) : $t('34bb46fd-8e22-4f18-a4d0-eaa9b382ceb4'));
 const creatingEmail = ref(true);
 const organization = useOrganization();
 const platform = usePlatform();
@@ -582,7 +582,7 @@ async function send() {
     }
 
     if (subject.value.trim().length === 0) {
-        Toast.error($t(`Vul een onderwerp in`)).show();
+        Toast.error($t(`466a4e32-6cad-41ca-902c-b01ba6215de3`)).show();
         return;
     }
 
@@ -612,7 +612,7 @@ async function send() {
     }
 
     if (!sendAsEmail.value && !showInMemberPortal.value) {
-        Toast.info($t(`Kies of je het bericht wilt publiceren in het ledenportaal en/of versturen via e-mail via de knoppen bovenaan`)).show();
+        Toast.info($t(`040cc66c-e27f-4822-87ad-722bca4f5038`)).show();
         return;
     }
 
@@ -620,14 +620,14 @@ async function send() {
     let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
 
     if (emailRecipientsCount) {
-        confirmText = emailRecipientsCount === 1 ? $t('Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?') : $t('Ben je zeker dat je de e-mail naar {count} ontvangers wilt versturen?', { count: emailRecipientsCount });
+        confirmText = emailRecipientsCount === 1 ? $t('62beee9f-1bbc-4d3c-9cec-58981122c5a6') : $t('3a666229-22b8-41b8-b2f8-17b70c32feb8', { count: emailRecipientsCount });
     }
 
     if (!sendAsEmail.value) {
-        confirmText = $t(`Ben je zeker dat je dit bericht in het ledenportaal wilt publiceren?`);
+        confirmText = $t(`98603c16-adf9-4aa9-9685-4a1199dd04d4`);
     }
 
-    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`) : $t('Publiceren'));
+    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`) : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3'));
 
     if (!isConfirm) return;
 
@@ -655,7 +655,7 @@ async function send() {
             Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
         }
         else {
-            Toast.success($t('Jouw bericht wordt zo gepubliceerd')).show();
+            Toast.success($t('730f955b-964e-4bb3-8caf-df6c7961c1ae')).show();
         }
 
         if (communicationFeature) {

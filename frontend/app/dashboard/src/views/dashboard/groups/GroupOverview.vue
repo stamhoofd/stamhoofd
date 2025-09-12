@@ -47,8 +47,8 @@
                     </template>
                     <h2 class="style-title-list">
                         {{ $t('a56bcf08-214d-421b-9cc0-336d2b5ab0ea') }}
-                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('Gesloten') }}</span>
-                        <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('Geopend') }}</span>
+                        <span v-if="group.waitingList.closed && !group.closed" class="style-tag error">{{ $t('f6c28298-1b38-4794-988e-f8c8eb496acf') }}</span>
+                        <span v-if="!group.waitingList.closed && group.closed" class="style-tag success">{{ $t('22703e89-376e-453d-9fc6-c449193be678') }}</span>
                     </h2>
                     <p class="style-description">
                         {{ $t('94832a03-67fb-4b99-ae40-d41d5601d690') }}

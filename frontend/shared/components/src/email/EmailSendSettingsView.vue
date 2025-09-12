@@ -5,7 +5,7 @@
         :loading="saving"
         :save-icon-mobile="willSend ? 'send' : undefined"
         :save-icon="willSend ? 'send' : undefined"
-        :save-text="willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('Publiceren')) : $t('Opslaan')"
+        :save-text="willSend ? (sendAsEmail ? $t('d1e7abf8-20ac-49e5-8e0c-cc7fab78fc6b') : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3')) : $t('87e450fe-1c15-4eed-9066-f78979e44810')"
         :prefer-large-button="willSend"
         :disabled="willSend && (!showInMemberPortal && !sendAsEmail)"
         @save="save"
@@ -23,10 +23,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Toon in het ledenportaal') }}
+                    {{ $t('6804cf8f-b057-41ce-a1b6-9b4f314dcab8') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Leden kunnen het bericht terugvinden in hun ledenportaal onder het tabblad ‘Berichten’') }}
+                    {{ $t('3cdf36a0-362b-416c-a6ed-c971fcc5cbd3') }}
                 </p>
             </STListItem>
 
@@ -36,10 +36,10 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Versturen als e-mail') }}
+                    {{ $t('13e9b4f6-f1de-4af7-be7d-7d90f8a400d0') }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Het bericht wordt ook als e-mail verzonden') }}
+                    {{ $t('d4ce8bf8-3868-4e41-8152-9a2d9bc05fac') }}
                 </p>
 
                 <template #right>
@@ -73,7 +73,7 @@ const props = withDefaults(defineProps<{
 
 const { patch, hasChanges, patched: patchedEmail, addPatch } = usePatch(props.editEmail);
 
-const title = props.willSend ? $t('Bericht versturen') : $t('Bericht instellingen');
+const title = props.willSend ? $t('ce6d1409-7683-406e-836b-d1a48981c060') : $t('1dae9aca-798f-4dde-b420-8fcd4936a3fc');
 const saving = ref(false);
 const errors = useErrors();
 const dismiss = useDismiss();
@@ -103,14 +103,14 @@ async function save() {
         let confirmText = $t(`8ea1d574-6388-4033-bb4e-f2e031d2da3b`);
 
         if (emailRecipientsCount) {
-            confirmText = emailRecipientsCount === 1 ? $t('Ben je zeker dat je de e-mail naar 1 ontvanger wilt versturen?') : $t('Ben je zeker dat je de e-mail naar {count} ontvangers wilt versturen?', { count: Formatter.integer(emailRecipientsCount) });
+            confirmText = emailRecipientsCount === 1 ? $t('62beee9f-1bbc-4d3c-9cec-58981122c5a6') : $t('3a666229-22b8-41b8-b2f8-17b70c32feb8', { count: Formatter.integer(emailRecipientsCount) });
         }
 
         if (!sendAsEmail.value) {
-            confirmText = $t(`Ben je zeker dat je dit bericht in het ledenportaal wilt publiceren?`);
+            confirmText = $t(`98603c16-adf9-4aa9-9685-4a1199dd04d4`);
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`) : $t('Publiceren'));
+        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`e0c68f8b-ccb1-4622-8570-08abc7f5705a`) : $t('c1cb8839-5e99-4b3c-bdcb-cdc43d9821b3'));
         if (!isConfirm) {
             return;
         }
@@ -141,7 +141,7 @@ async function save() {
                 Toast.success($t(`0adee17a-6cb5-4b32-a2a9-c6f44cbb3e7d`)).show();
             }
             else {
-                Toast.success($t('Jouw bericht wordt zo gepubliceerd')).show();
+                Toast.success($t('730f955b-964e-4bb3-8caf-df6c7961c1ae')).show();
             }
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
         }

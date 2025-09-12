@@ -34,7 +34,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ price.name || $t('Naamloos') }}
+                            {{ price.name || $t('945cc145-81e5-4fa9-ab09-c4c2222c8c6e') }}
                         </h2>
                     </STListItem>
                 </STList>
@@ -48,7 +48,7 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ option.name || $t('Naamloos') }}
+                            {{ option.name || $t('945cc145-81e5-4fa9-ab09-c4c2222c8c6e') }}
                         </h2>
 
                         <template #right>

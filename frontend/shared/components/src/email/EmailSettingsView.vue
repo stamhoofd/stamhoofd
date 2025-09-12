@@ -4,7 +4,7 @@
 
         <main>
             <h1>
-                {{ $t('Afzenders') }}
+                {{ $t('369772ac-070a-4d86-a5f4-9d7b24b3dbec') }}
             </h1>
 
             <p>{{ $t('ecc5560e-bd85-4f2a-bbb2-d0a26f8ead45') }} <a class="inline-link" :href="$domains.getDocs('e-mailadressen-instellen')" target="_blank">{{ $t('3280290b-f43e-4e95-a7bd-3c13a153888b') }}</a>.</p>

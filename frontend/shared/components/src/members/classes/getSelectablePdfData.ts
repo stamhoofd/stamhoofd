@@ -38,7 +38,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         // todo: only if platform?
         new SelectablePdfData<PlatformMember>({
             id: 'memberNumber',
-            name: $t('Lidnummer'),
+            name: $t('7c4ca473-3c49-45fb-bdd2-b87399a69e62'),
             getValue: ({ patchedMember: object }: PlatformMember) =>
                 object.details.memberNumber,
         }),
