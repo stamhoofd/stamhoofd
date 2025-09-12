@@ -528,7 +528,8 @@ describe('Endpoint.GetUserEmails', () => {
 
         // loginDetails should exist and be empty/generic for web display
         expect(loginDetailsReplacement).toBeDefined();
-        expect(loginDetailsReplacement!.value).toBe(''); // Should be empty for web display
+        expect(loginDetailsReplacement!.html).toBe(undefined); // Should be empty for web display
+        expect(loginDetailsReplacement!.value).toBe('');
 
         // unsubscribeUrl should exist and be safe for web display
         expect(unsubscribeUrlReplacement).toBeDefined();
