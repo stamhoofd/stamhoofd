@@ -161,9 +161,14 @@ export class AdminPermissionChecker {
             }
         }
         else {
-            // User is limited to a scope
-            if (this.user.organizationId) {
-                return false;
+            if (STAMHOOFD.userMode === 'organization') {
+                // User is limited to a scope: can't access platform resources
+                if (this.user.organizationId) {
+                    return false;
+                }
+            }
+            else {
+                // User can access platform resources (e.g. API keys)
             }
         }
 
