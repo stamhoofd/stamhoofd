@@ -8,7 +8,7 @@ import { OrganizationFactory } from './OrganizationFactory';
 class Options {
     organization?: Organization;
     email?: string;
-    password?: string;
+    password?: string | null; // default to random password
     firstName?: string;
     lastName?: string;
     /**
@@ -63,6 +63,9 @@ export class UserFactory extends Factory<Options, User> {
 
         if (this.options.verified === undefined || this.options.verified === true) {
             user.verified = true;
+        }
+        if (this.options.password === null) {
+            user.password = null;
         }
         await user.save();
         return user;

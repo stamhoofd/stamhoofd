@@ -1,10 +1,13 @@
-import { EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, LimitedFilteredRequest, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
+import { BalanceItemType, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, LimitedFilteredRequest, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
 import { Email } from './Email';
 import { EmailRecipient } from './EmailRecipient';
 import { EmailMocker } from '@stamhoofd/email';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { OrganizationFactory } from '../factories/OrganizationFactory';
 import { Platform } from './Platform';
+import { BalanceItemFactory, MemberFactory, UserFactory } from '../factories';
+import { CachedBalance } from './CachedBalance';
+import { Formatter } from '@stamhoofd/utility';
 
 async function buildEmail(data: {
     recipients: EmailRecipientStruct[];
@@ -868,5 +871,350 @@ describe('Model.Email', () => {
                 text: `${darkRed};${expectedContrastColor};${platform.config.name};${platform.config.name}`,
             });
         }, 15_000);
+
+        describe('User based replacements', () => {
+            it('The balance is added for existing users', async () => {
+                TestUtils.setEnvironment('domains', {
+                    ...STAMHOOFD.domains,
+                    defaultTransactionalEmail: {
+                        '': 'my-platform.com',
+                    },
+                    defaultBroadcastEmail: {
+                        '': 'broadcast.my-platform.com',
+                    },
+                });
+
+                const organization = await new OrganizationFactory({}).create();
+                const existingUser = await new UserFactory({
+                    organization,
+                }).create();
+
+                // Add outstanding balance items for this user
+                const balanceItem = await new BalanceItemFactory({
+                    userId: existingUser.id,
+                    organizationId: organization.id,
+                    type: BalanceItemType.Other,
+                    amount: 2,
+                    unitPrice: 12_99,
+                    description: 'Test balance item',
+                }).create();
+                await CachedBalance.updateForUsers(organization.id, [existingUser.id]);
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: [
+                        EmailRecipientStruct.create({
+                            email: existingUser.email,
+                            userId: existingUser.id,
+                        }),
+                    ],
+                    fromAddress: 'custom@customdomain.com',
+                    html: '<p>{{outstandingBalance}}</p>{{balanceTable}}',
+                    subject: '{{outstandingBalance}}',
+                    emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
+                });
+
+                await model.queueForSending(true);
+                await model.refresh();
+
+                // Check if it was sent correctly
+                expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+                expect(model.emailRecipientsCount).toBe(1);
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                // Both have succeeded
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                expect(await EmailMocker.getFailedCount()).toBe(0);
+
+                const expectedAmount = Formatter.price(balanceItem.unitPrice * balanceItem.amount);
+
+                // Check to header
+                expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
+                    subject: `${expectedAmount}`,
+                });
+
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p>' + expectedAmount + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(expectedAmount);
+
+                // Check if the table is correct
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<table');
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('2 x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude(Formatter.price(12_99)); // unit price
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<td>' + expectedAmount); // total price in table
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('Test balance item'); // description
+
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude('2 x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(Formatter.price(12_99)); // unit price
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(expectedAmount); // total price in table
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toInclude('test balance item'); // description
+            }, 15_000);
+
+            it('The balance is zero for unknown users', async () => {
+                TestUtils.setEnvironment('domains', {
+                    ...STAMHOOFD.domains,
+                    defaultTransactionalEmail: {
+                        '': 'my-platform.com',
+                    },
+                    defaultBroadcastEmail: {
+                        '': 'broadcast.my-platform.com',
+                    },
+                });
+
+                const organization = await new OrganizationFactory({}).create();
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: [
+                        EmailRecipientStruct.create({
+                            email: 'unknown-user@example.com',
+                        }),
+                    ],
+                    fromAddress: 'custom@customdomain.com',
+                    html: '<p>{{outstandingBalance}}</p>{{balanceTable}}',
+                    subject: '{{outstandingBalance}}',
+                    emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
+                });
+
+                await model.queueForSending(true);
+                await model.refresh();
+
+                // Check if it was sent correctly
+                expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+                expect(model.emailRecipientsCount).toBe(1);
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                // Both have succeeded
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                expect(await EmailMocker.getFailedCount()).toBe(0);
+
+                const expectedAmount = Formatter.price(0);
+
+                // Check to header
+                expect(EmailMocker.getSucceededEmail(0)).toMatchObject({
+                    subject: `${expectedAmount}`,
+                });
+
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p>' + expectedAmount + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(expectedAmount);
+
+                // Check if the table is correct
+                expect(EmailMocker.getSucceededEmail(0).html).not.toInclude('<table');
+                expect(EmailMocker.getSucceededEmail(0).html).not.toInclude(' x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude('<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>');
+
+                expect(EmailMocker.getSucceededEmail(0).text).not.toInclude(' x '); // amount
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toInclude($t('4c4f6571-f7b5-469d-a16f-b1547b43a610').toLowerCase());
+            }, 15_000);
+
+            it('loginDetails are added for existing users without password', async () => {
+                TestUtils.setEnvironment('domains', {
+                    ...STAMHOOFD.domains,
+                    defaultTransactionalEmail: {
+                        '': 'my-platform.com',
+                    },
+                    defaultBroadcastEmail: {
+                        '': 'broadcast.my-platform.com',
+                    },
+                });
+
+                const organization = await new OrganizationFactory({}).create();
+                const existingUser = await new UserFactory({
+                    organization,
+                    password: null,
+                }).create();
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: [
+                        EmailRecipientStruct.create({
+                            email: existingUser.email,
+                            userId: existingUser.id,
+                        }),
+                    ],
+                    fromAddress: 'custom@customdomain.com',
+                    html: '{{loginDetails}}',
+                    emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
+                });
+
+                await model.queueForSending(true);
+                await model.refresh();
+
+                // Check if it was sent correctly
+                expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+                expect(model.emailRecipientsCount).toBe(1);
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                // Both have succeeded
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                expect(await EmailMocker.getFailedCount()).toBe(0);
+
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: existingUser.email }),
+                );
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: existingUser.email }),
+                );
+            }, 15_000);
+
+            it('loginDetails are added for inexisting users', async () => {
+                TestUtils.setEnvironment('domains', {
+                    ...STAMHOOFD.domains,
+                    defaultTransactionalEmail: {
+                        '': 'my-platform.com',
+                    },
+                    defaultBroadcastEmail: {
+                        '': 'broadcast.my-platform.com',
+                    },
+                });
+
+                const organization = await new OrganizationFactory({}).create();
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: [
+                        EmailRecipientStruct.create({
+                            email: 'unknown@example.com',
+                        }),
+                    ],
+                    fromAddress: 'custom@customdomain.com',
+                    html: '{{loginDetails}}',
+                    emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
+                });
+
+                await model.queueForSending(true);
+                await model.refresh();
+
+                // Check if it was sent correctly
+                expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+                expect(model.emailRecipientsCount).toBe(1);
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                // Both have succeeded
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                expect(await EmailMocker.getFailedCount()).toBe(0);
+
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: 'unknown@example.com' }),
+                );
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                    $t('3ab6ddc1-7ddc-4671-95d2-64994a5d36cc', { email: 'unknown@example.com' }),
+                );
+            }, 15_000);
+
+            it('loginDetails are added for existing users with password', async () => {
+                TestUtils.setEnvironment('domains', {
+                    ...STAMHOOFD.domains,
+                    defaultTransactionalEmail: {
+                        '': 'my-platform.com',
+                    },
+                    defaultBroadcastEmail: {
+                        '': 'broadcast.my-platform.com',
+                    },
+                });
+
+                const organization = await new OrganizationFactory({}).create();
+                const existingUser = await new UserFactory({
+                    organization,
+                    password: 'existing',
+                }).create();
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: [
+                        EmailRecipientStruct.create({
+                            email: existingUser.email,
+                            userId: existingUser.id,
+                        }),
+                    ],
+                    fromAddress: 'custom@customdomain.com',
+                    html: '{{loginDetails}}',
+                    emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
+                });
+
+                await model.queueForSending(true);
+                await model.refresh();
+
+                // Check if it was sent correctly
+                expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+                expect(model.emailRecipientsCount).toBe(1);
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                // Both have succeeded
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                expect(await EmailMocker.getFailedCount()).toBe(0);
+
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                    $t('5403b466-98fe-48ac-beff-38acf7c9734d', { email: existingUser.email }),
+                );
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                    $t('5403b466-98fe-48ac-beff-38acf7c9734d', { email: existingUser.email }),
+                );
+            }, 15_000);
+
+            it('loginDetails include member security keys for existing users without password', async () => {
+                TestUtils.setEnvironment('userMode', 'platform');
+                TestUtils.setEnvironment('domains', {
+                    ...STAMHOOFD.domains,
+                    defaultTransactionalEmail: {
+                        '': 'my-platform.com',
+                    },
+                    defaultBroadcastEmail: {
+                        '': 'broadcast.my-platform.com',
+                    },
+                });
+
+                const organization = await new OrganizationFactory({}).create();
+                const existingUser = await new UserFactory({
+                    organization,
+                    password: null,
+                }).create();
+                const member = await new MemberFactory({
+                    organization,
+                    user: existingUser,
+                }).create();
+                member.details.securityCode = '123456790123456'; // 16 chars
+                await member.save();
+
+                // Add a linked member
+
+                const model = await buildEmail({
+                    organizationId: organization.id,
+                    recipients: [
+                        EmailRecipientStruct.create({
+                            email: existingUser.email,
+                            userId: existingUser.id,
+                        }),
+                    ],
+                    fromAddress: 'custom@customdomain.com',
+                    html: '{{loginDetails}}',
+                    emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
+                });
+
+                await model.queueForSending(true);
+                await model.refresh();
+
+                // Check if it was sent correctly
+                expect(model.recipientsStatus).toBe(EmailRecipientsStatus.Created);
+                expect(model.emailRecipientsCount).toBe(1);
+                expect(model.status).toBe(EmailStatus.Sent);
+
+                // Both have succeeded
+                expect(await EmailMocker.getSucceededCount()).toBe(1);
+                expect(await EmailMocker.getFailedCount()).toBe(0);
+
+                expect(EmailMocker.getSucceededEmail(0).html).toInclude(
+                    $t('e2519632-c495-4629-9ddb-334a4f00e272', {
+                        firstName: Formatter.escapeHtml(member.firstName),
+                        securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+                    }),
+                );
+                expect(EmailMocker.getSucceededEmail(0).text).toInclude(
+                    $t('e2519632-c495-4629-9ddb-334a4f00e272', {
+                        firstName: member.firstName,
+                        securityCode: Formatter.spaceString(member.details.securityCode ?? '', 4, '-'),
+                    }),
+                );
+            }, 15_000);
+        });
     });
 });
