@@ -23,15 +23,15 @@
         <div>
             <div class="split-inputs">
                 <div>
-                    <ImageInput v-model="organizationLogo" :placeholder="patched.config.squareLogo ?? patched.config.horizontalLogo" :validator="errors.validator" :resolutions="organizationLogoResolutions" :required="false" :title="$t(`Logo organisatie`)" />
+                    <ImageInput v-model="organizationLogo" :placeholder="patched.config.squareLogo ?? patched.config.horizontalLogo" :validator="errors.validator" :resolutions="organizationLogoResolutions" :required="false" :title="$t(`402b626e-6909-4e07-b246-04ad5a203e8e`)" />
 
                     <p class="style-description-small">
-                        {{ $t('Wordt gebruikt voor berichten die vanaf het platform worden verstuurd') }}
+                        {{ $t('37d634d9-b756-419c-87c8-d83476865518') }}
                     </p>
                 </div>
 
                 <div>
-                    <ImageInput v-model="organizationLogoDark" :placeholder="patched.config.squareLogoDark ?? patched.config.horizontalLogoDark" :validator="errors.validator" :resolutions="organizationLogoResolutions" :required="false" :dark="true" :title="$t(`Logo organisatie (dark mode)`)" />
+                    <ImageInput v-model="organizationLogoDark" :placeholder="patched.config.squareLogoDark ?? patched.config.horizontalLogoDark" :validator="errors.validator" :resolutions="organizationLogoResolutions" :required="false" :dark="true" :title="$t(`aa45394d-82c6-480b-90d1-7011a7b78f24`)" />
                 </div>
             </div>
         </div>

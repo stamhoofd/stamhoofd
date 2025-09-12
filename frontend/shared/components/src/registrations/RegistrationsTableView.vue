@@ -2,7 +2,7 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <p v-if="app === 'admin' && !group" class="style-description-block">
-                {{ $t('Een lid kan dubbel staan in de lijst als het meerdere inschrijvingen heeft.') }}
+                {{ $t('b652957b-2037-4f9e-8b77-169b3e1b9506') }}
             </p>
             <template #empty>
                 {{ $t('6b029bcd-5605-42c5-a5db-38f40ab70214') }}

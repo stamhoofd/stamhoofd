@@ -53,22 +53,22 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Andere start eind/datum dan werkjaar') }}
+                        {{ $t('d35a173c-5d80-48d6-a83b-5274f883a950') }}
                     </h3>
 
                     <template v-if="hasCustomDates">
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('Startdatum')" error-fields="settings.startDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('bf07a716-4f44-4534-81a9-a278532b7632')" error-fields="settings.startDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="startDate" :placeholder-date="patchedGroup.settings.startDate" />
                             </STInputBox>
-                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('Tijdstip')" />
+                            <TimeInput v-model="startDate" :validator="errors.validator" :title="$t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6')" />
                         </div>
 
                         <div class="split-inputs option" @click.stop.prevent>
-                            <STInputBox :title="$t('Einddatum')" error-fields="settings.endDate" :error-box="errors.errorBox">
+                            <STInputBox :title="$t('78e69db3-b94b-47b7-8398-940a204f485e')" error-fields="settings.endDate" :error-box="errors.errorBox">
                                 <DateSelection v-model="endDate" :placeholder-date="patchedGroup.settings.endDate" :min="startDate" />
                             </STInputBox>
-                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('Tijdstip')" />
+                            <TimeInput v-model="endDate" :validator="errors.validator" :title="$t('5a3e25de-683f-4a20-b02e-ebcc3aca89f6')" />
                         </div>
                     </template>
                 </STListItem>
@@ -509,7 +509,7 @@
                         </p>
                     </template>
                     <p v-else-if="trialDays && patchedGroup.settings.startDate.getTime() !== patchedPeriod.period.startDate.getTime()" class="info-box">
-                        {{ $t('De proefperiode begint pas te lopen vanaf de startdatum van de inschrijvingsgroep op {start}.', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
+                        {{ $t('5fe368ac-80c1-4ea3-a148-27ebbb825870', {start: Formatter.date(patchedGroup.settings.startDate)}) }}
                     </p>
                 </template>
             </template>

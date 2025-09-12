@@ -50,7 +50,7 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
             if (!await validateEmailRecipientFilter({ filter: q.filter, permissionLevel: PermissionLevel.Read })) {
                 throw Context.auth.error({
                     message: 'You do not have sufficient permissions to view all email recipients',
-                    human: $t(`Je hebt niet voldoende toegangsrechten om alle email ontvangers te bekijken. Filter op één specifieke e-mail.`),
+                    human: $t(`d499972f-270c-44f6-ad7e-9d5359aef609`),
                 });
             }
         }

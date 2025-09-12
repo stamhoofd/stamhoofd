@@ -653,20 +653,20 @@ export class RegisterItem implements ObjectWithRecords {
                 const requiredGroups = this.group.settings.requireGroupIds.map(id => this.organization.period.groups.find(g => g.id === id)).filter(g => !!g).map(g => g!.settings.name.toString());
 
                 if (requiredGroups.length && requiredGroups.length === this.group.settings.requireGroupIds.length) {
-                    return $t('{firstName} moet ingeschreven zijn voor {aOrB} om voor {group} te kunnen inschrijven', {
+                    return $t('1a537046-de7c-45ba-a990-da2fccd54325', {
                         firstName: this.member.patchedMember.details.firstName,
-                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('of') + ' '),
+                        aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('9a1ce222-c80d-4690-97be-0a896f2aa2ad') + ' '),
                         group: this.group.settings.name.toString(),
                     });
                 }
 
                 if (this.group.settings.requireGroupIds.length > 1) {
-                    return $t('{firstName} moet ingeschreven zijn voor bepaalde groepen om voor {group} te kunnen inschrijven', {
+                    return $t('a5754a6a-a584-448f-ae31-30262c8ab868', {
                         firstName: this.member.patchedMember.details.firstName,
                         group: this.group.settings.name.toString(),
                     });
                 }
-                return $t('{firstName} moet ingeschreven zijn voor een bepaalde groep om voor {group} te kunnen inschrijven', {
+                return $t('387311b4-eeed-48f5-950d-048ac0021666', {
                     firstName: this.member.patchedMember.details.firstName,
                     group: this.group.settings.name.toString(),
                 });
@@ -684,9 +684,9 @@ export class RegisterItem implements ObjectWithRecords {
 
             if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
                 const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => Platform.shared.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
-                return $t('{firstName} moet ingeschreven zijn voor {aOrB} om voor {group} te kunnen inschrijven', {
+                return $t('1a537046-de7c-45ba-a990-da2fccd54325', {
                     firstName: this.member.patchedMember.details.firstName,
-                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('of') + ' ') : $t('een bepaalde standaard leeftijdsgroep'),
+                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('9a1ce222-c80d-4690-97be-0a896f2aa2ad') + ' ') : $t('ab204a0e-c114-4c5a-8f86-95aafe9464b0'),
                     group: this.group.settings.name.toString(),
                 });
             }

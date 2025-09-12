@@ -119,7 +119,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_draft',
                     message: 'Email is not a draft',
-                    human: $t(`Je kan de ontvangerslijst alleen aanpassen als de e-mail nog een concept is`),
+                    human: $t(`ace4d2e8-88d6-479f-bd8b-d576cc0ed1f2`),
                     statusCode: 400,
                 });
             }
@@ -133,7 +133,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_draft',
                     message: 'Email is not a draft',
-                    human: $t(`Je kan enkel wijzigen of een bericht via e-mail verzonden wordt als het bericht nog niet werd verzonden.`),
+                    human: $t(`02b05c0d-908b-4200-8fb8-5fc01f539514`),
                     statusCode: 400,
                 });
             }

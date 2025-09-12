@@ -1,5 +1,5 @@
 <template>
-    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`Afzender`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+    <SaveView :loading="saving" :disabled="!hasChangesFull" :title="$t(`86f953db-fdce-4be5-abc2-bbedaf4ac63a`)" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 v-if="isNew">
             {{ $t('c5602934-95a8-437d-b576-eda8d9e6565e') }}
         </h1>
@@ -251,7 +251,7 @@ async function deleteMe() {
     if (saving.value) {
         return;
     }
-    if (!await CenteredMessage.confirm($t('Deze afzender verwijderen?'), $t('Ja, verwijderen'), $t('Je kan dit niet ongedaan maken.'))) {
+    if (!await CenteredMessage.confirm($t('6c837cc0-1832-4bb4-830f-838ebf9911f6'), $t('eee720f3-5e00-429c-a847-cb3d4e237e4d'), $t('2c9ef19d-3838-4e9a-bb9b-e5f9a714fe4c'))) {
         return;
     }
     saving.value = true;

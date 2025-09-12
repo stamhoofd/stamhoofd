@@ -375,23 +375,23 @@ export function isSoftEmailRecipientError(error: SimpleErrors) {
 export function bounceErrorToHuman(message: string) {
     message = message.toLowerCase();
     if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*full/)) {
-        return $t('De inbox van deze persoon zit vol');
+        return $t('048392a6-9ee6-42f8-b5ec-599a9c305d4a');
     }
 
     if (message.includes('failed to establish connection') || message.includes('connection timed out')) {
-        return $t('Mogelijks ongeldig e-mailadres');
+        return $t('f9735e0b-84b6-4f9f-a376-c171bacc9824');
     }
 
     if (message.includes('unable to lookup dns')) {
-        return $t('Mogelijks ongeldig e-mailadres (waarschijnlijk typefout in domeinnaam)');
+        return $t('7f3706ef-3d92-4e2d-ac88-84ede374ac7c');
     }
 
     if (message.includes('hop count exceeded')) {
-        return $t('Mogelijks een doorverwijzingslus of ongeldig e-mailadres');
+        return $t('4770f2c6-774f-4b5d-96fc-6226c7c57573');
     }
 
     if (message.includes('recipient address rejected: access denied') || message.includes('user does not exist') || message.includes('user unknown') || message.includes('the email account that you tried to reach does not exist')) {
-        return $t('Onbestaand e-mailadres');
+        return $t('7f8ae6ce-ac5d-48e8-aa9f-223a849aab02');
     }
 }
 

@@ -98,11 +98,11 @@
         </STInputBox>
 
         <hr>
-        <h2>{{ $t('Combineren') }}</h2>
-        <p>{{ $t('In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Stamhoofd kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.') }}</p>
+        <h2>{{ $t('64cc9c20-5d86-465b-921d-beacc26036df') }}</h2>
+        <p>{{ $t('db9f28bd-d199-4a25-aa06-b6435f092f20') }}</p>
 
         <Checkbox v-model="allowMultipleDiscountsToSameItem">
-            {{ $t('Meerdere kortingen op hetzelfde stuk toestaan') }}
+            {{ $t('877afa7e-d709-4d7b-bc4f-5384a2da8495') }}
         </Checkbox>
 
         <div v-if="!isNew" class="container">

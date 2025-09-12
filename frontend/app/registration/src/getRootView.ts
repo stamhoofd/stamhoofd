@@ -93,7 +93,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`Berichten`),
+        name: $t(`ac8f8aa5-466f-4552-b658-de017a97839f`),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(MemberCommunicationView, {}),
         }),

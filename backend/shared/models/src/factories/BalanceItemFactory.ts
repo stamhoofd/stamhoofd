@@ -21,6 +21,7 @@ class Options {
     updatedAt?: Date;
     status?: BalanceItemStatus;
     relations?: Map<BalanceItemRelationType, BalanceItemRelation>;
+    description?: string;
 }
 
 export class BalanceItemFactory extends Factory<Options, BalanceItem> {
@@ -34,6 +35,7 @@ export class BalanceItemFactory extends Factory<Options, BalanceItem> {
         balanceItem.orderId = this.options.orderId ?? null;
         balanceItem.dependingBalanceItemId = this.options.dependingBalanceItemId ?? null;
         balanceItem.relations = this.options.relations ?? new Map();
+        balanceItem.description = this.options.description ?? '';
 
         if (this.options.type) {
             balanceItem.type = this.options.type;

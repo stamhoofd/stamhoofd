@@ -28,7 +28,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'email_skipped_unsubscribed',
                 message: 'Recipient has unsubscribed',
-                human: $t('De ontvanger heeft zich afgemeld voor e-mails'),
+                human: $t('ffbebae7-eac3-44fe-863b-25942c5be7d0'),
             }),
         );
     }
@@ -38,7 +38,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'email_skipped_unsubscribed',
                 message: 'Recipient has unsubscribed from marketing',
-                human: $t('De ontvanger heeft zich afgemeld voor e-mails'),
+                human: $t('ffbebae7-eac3-44fe-863b-25942c5be7d0'),
             }),
         );
     }
@@ -48,7 +48,7 @@ function stringToError(message: string) {
             new SimpleError({
                 code: 'all_filtered',
                 message: 'All recipients are filtered due to hard bounce or spam',
-                human: $t('Deze ontvanger komt voor op de gedeelde bounce of spamlijst. De ontvanger was eerder permanent onbereikbaar of heeft eerder een e-mail als spam gemarkeerd.'),
+                human: $t('f6ca0939-f191-4aba-9c53-cd370453c0bc'),
             }),
         );
     }

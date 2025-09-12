@@ -4,7 +4,7 @@
 
         <main class="center">
             <h1>
-                {{ $t('Berichten') }}
+                {{ $t('ac8f8aa5-466f-4552-b658-de017a97839f') }}
             </h1>
 
             <div class="input-with-buttons">
@@ -38,7 +38,7 @@
                     {{ $t('7889a8f8-a31e-4291-b8e7-6169e68ed6b4') }}
                 </button>
             </p>
-            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t(`Geen berichten gevonden`)" />
+            <InfiniteObjectFetcherEnd v-else :fetcher="fetcher" :empty-message="$t(`8fec0620-6293-4573-884d-07d7ab814a77`)" />
         </main>
     </div>
 </template>

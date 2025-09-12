@@ -166,7 +166,7 @@
 
         <JumpToContainer :visible="forceShowAge || minAge !== null || maxAge !== null">
             <hr>
-            <h2>{{ $t('Leeftijdsrestricties') }}</h2>
+            <h2>{{ $t('3bd7031d-eb6b-4efc-97f7-53adfcff054a') }}</h2>
 
             <div class="split-inputs">
                 <STInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`7d708b33-f1a6-4b95-b0a7-717a8e5a9e07`)">
@@ -243,7 +243,7 @@
                 </template>
 
                 <h3 class="style-title-list">
-                    {{ $t('Leeftijdsrestrictie toevoegen') }}
+                    {{ $t('a0391aa7-d4f3-4ee7-af13-61e83124a6da') }}
                 </h3>
             </STListItem>
         </STList>

@@ -440,14 +440,14 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'This email does not exist.',
-                            human: $t('Deze e-mail bestaat niet (meer)'),
+                            human: $t('491156e4-a75d-4487-a97e-b208cd3a1d11'),
                             statusCode: 404,
                         });
                     }
                     if (!await Context.auth.canAccessEmail(email)) {
                         throw Context.auth.error({
                             message: 'No permissions to access this email.',
-                            human: $t('Je hebt niet voldoende toegangsrechten om te filteren op deze e-mail'),
+                            human: $t('be46002c-d77e-42ca-b163-23bde0bc628c'),
                         });
                     }
                 },

@@ -43,13 +43,13 @@
             </template>
 
             <h2 v-if="event.meta.minAge !== null && event.meta.maxAge !== null && event.meta.minAge === event.meta.maxAge" class="style-title-list">
-                {{ $t('{x} jaar oud (geboren in {xxxx})', {
+                {{ $t('2410f840-edc0-4c3b-8d3a-29f28e1af553', {
                     x: event.meta.minAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.minAge),
                 }) }}
             </h2>
             <h2 v-else-if="event.meta.minAge !== null && event.meta.maxAge !== null" class="style-title-list">
-                {{ $t('Tussen {x} en {y} jaar (geboren tussen {yyyy} en {xxxx})', {
+                {{ $t('4f301ef3-a260-4349-a981-af5741a46fce', {
                     x: event.meta.minAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.minAge),
                     y: event.meta.maxAge,
@@ -57,13 +57,13 @@
                 }) }}
             </h2>
             <h2 v-else-if="event.meta.minAge !== null" class="style-title-list">
-                {{ $t('Vanaf {x} jaar (geboren voor of in {xxxx})', {
+                {{ $t('b6e28985-659e-4e3a-84fb-53fe9b8ad36a', {
                     x: event.meta.minAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.minAge)
                 }) }}
             </h2>
             <h2 v-else-if="event.meta.maxAge !== null" class="style-title-list">
-                {{ $t('Tot {x} jaar (geboren na of in {xxxx})', {
+                {{ $t('4e28f60f-8462-42a1-a6bb-36c05eeb74a2', {
                     x: event.meta.maxAge,
                     xxxx: (event.startDate.getFullYear() - event.meta.maxAge)
                 }) }}

@@ -49,7 +49,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                 name: $t('6705ae0e-8239-4bc0-895d-10128cb5c6c4'),
                 options: [...$platform.value.config.defaultAgeGroups.map((group) => {
                     return new MultipleChoiceUIFilterOption(group.name, group.id);
-                }), new MultipleChoiceUIFilterOption($t('Geen'), null)],
+                }), new MultipleChoiceUIFilterOption($t('3ef9e622-426f-4913-89a0-0ce08f4542d4'), null)],
                 wrapper: {
                     group: {
                         defaultAgeGroupId: {

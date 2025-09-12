@@ -32,7 +32,7 @@ export class SimpleNumberUIFilter extends UIFilter {
                 style: '',
             },
             {
-                text: ' ' + $t('is') + ' ',
+                text: ' ' + $t('b908879d-48c9-4a2c-826c-c88a03ead40d') + ' ',
                 style: 'gray',
             }, {
                 text: this.valueToText,

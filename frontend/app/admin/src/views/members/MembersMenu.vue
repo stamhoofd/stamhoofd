@@ -6,14 +6,14 @@
             <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Members) }" @click="navigate(Routes.Members)">
                 <span class="icon group" />
                 <span>
-                    {{ $t("Leden") }}
+                    {{ $t("19da8d23-acea-43c2-bfdd-742447ca57f1") }}
                 </span>
             </button>
 
             <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Registrations) }" @click="navigate(Routes.Registrations)">
                 <span class="icon group" />
                 <span>
-                    {{ $t("Inschrijvingen") }}
+                    {{ $t("3f4c9896-7f02-4b49-ad29-2d363a8af71f") }}
                 </span>
             </button>
         </main>

@@ -54,13 +54,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'member.id',
-            name: $t('ID lid'),
+            name: $t('a512b8a2-163c-4f69-94f7-ed9c1c3ab4f7'),
             description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.memberNumber',
-            name: $t(`Lidnummer`),
+            name: $t(`7c4ca473-3c49-45fb-bdd2-b87399a69e62`),
         }),
         new SelectableColumn({
             id: 'member.firstName',
@@ -106,7 +106,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         sheets: [
             new SelectableSheet({
                 id: 'registrations',
-                name: $t(`Inschrijvingen`),
+                name: $t(`3f4c9896-7f02-4b49-ad29-2d363a8af71f`),
                 columns: columns.filter(column => column !== null),
             }),
         ],

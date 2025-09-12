@@ -27,7 +27,7 @@ function errorToSimpleErrors(e: unknown) {
             new SimpleError({
                 code: 'unknown_error',
                 message: ((typeof e === 'object' && e !== null && 'message' in e && typeof e.message === 'string') ? e.message : 'Unknown error'),
-                human: $t(`Onbekende fout`),
+                human: $t(`41db9fc8-77f4-49a7-a77b-40a4ae8c4d8f`),
             }),
         );
     }
@@ -259,7 +259,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_recipients',
                 message: 'Failed to build recipients (count)',
-                human: $t(`Er ging iets mis bij het aanmaken van de ontvangers. Probeer je selectie aan te passen. Neem contact op als het probleem zich blijft voordoen.`) + ' ' + this.recipientsErrors.getHuman(),
+                human: $t(`457ec920-2867-4d59-bbec-4466677e1b50`) + ' ' + this.recipientsErrors.getHuman(),
             });
         }
 
@@ -267,7 +267,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_state',
                 message: 'Email is deleted',
-                human: $t(`Deze e-mail is verwijderd en kan niet verzonden worden.`),
+                human: $t(`a0524f41-bdde-4fcc-9a9a-9350905377d8`),
             });
         }
 
@@ -945,7 +945,7 @@ export class Email extends QueryableModel {
                         new SimpleError({
                             code: 'no_recipients',
                             message: 'No recipients',
-                            human: $t(`Geen ontvangers gevonden`),
+                            human: $t(`9fe3de8e-090c-4949-97da-4810ce9e61c7`),
                         }),
                     );
                 }
