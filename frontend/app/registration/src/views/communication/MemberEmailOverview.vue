@@ -8,6 +8,10 @@
             </p>
             <h1>{{ title }}</h1>
 
+            <ScrollableSegmentedControl v-if="email.recipients.length > 1" v-model="selectedRecipient" :items="props.email.recipients" :labels="props.email.recipients.map(r => r.member?.firstName ?? (r.id))" />
+            <EmailPreviewBox :email="email" :recipient="selectedRecipient" :allow-clicks="true" :web-version="true" />
+
+            <hr>
             <STList>
                 <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent">
                     <template #left>
@@ -29,9 +33,6 @@
                     </h2>
                 </STListItem>
             </STList>
-
-            <ScrollableSegmentedControl v-if="email.recipients.length > 1" v-model="selectedRecipient" :items="props.email.recipients" :labels="props.email.recipients.map(r => r.member?.firstName ?? (r.id))" />
-            <EmailPreviewBox :email="email" :recipient="selectedRecipient" :allow-clicks="true" :web-version="true" />
         </main>
     </div>
 </template>

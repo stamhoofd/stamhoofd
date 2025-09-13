@@ -1,5 +1,5 @@
 <template>
-    <div v-if="replacedHtml" class="email-preview-box">
+    <div v-if="replacedHtml" class="email-preview-box" :class="{'web-version': webVersion}">
         <SafeHtmlBox :html="replacedHtml" :allow-clicks="allowClicks" :custom-css="webVersion ? '.email-only { display: none; }' : ''" />
 
         <hr v-if="email.attachments.length > 0" class="email-attachments-spacer">
@@ -59,6 +59,12 @@ const replacedHtml = computed(() => {
     margin: 0 calc(-1 * var(--st-horizontal-padding, 40px));
     overflow: hidden;
     margin-top: 20px;
+
+    &.web-version {
+        padding: 0;
+        margin: 0;
+        background-color: transparent
+    }
 
     .email-attachments-spacer {
         @extend .style-hr;
