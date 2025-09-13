@@ -102,7 +102,7 @@ export class LoginHelper {
         let tokenResponse: RequestResult<Token>;
         try {
             session.setLoadingError(null);
-            tokenResponse = await session.server.request({
+            tokenResponse = await session.identityServer.request({
                 method: 'POST',
                 path: '/oauth/token',
                 body: { grant_type: 'password', username: email, password },
@@ -214,7 +214,7 @@ export class LoginHelper {
         });
 
         // Do netwowrk request to create organization
-        const response = await session.server.request({
+        const response = await session.identityServer.request({
             method: 'POST',
             path: '/sign-up',
             body: user,

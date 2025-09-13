@@ -440,7 +440,7 @@ export class SessionContext implements RequestMiddleware {
         // const codeChallenge = await this.generateCodeChallenge(codeVerifier);
         // code_challenge_method = S256
 
-        const url = new URL((STAMHOOFD.environment === 'development' ? 'http://localhost:9091' : this.server.host) + '/openid/start');
+        const url = new URL((STAMHOOFD.environment === 'development' ? 'http://localhost:9091' : this.identityServer.host) + '/openid/start');
         url.searchParams.set('spaState', spaState);
         url.searchParams.set('provider', data.providerType);
         if (data.webshopId) {
@@ -539,6 +539,13 @@ export class SessionContext implements RequestMiddleware {
         return SessionContext.serverForOrganization(this.organization?.id);
     }
 
+    get identityServer() {
+        if (STAMHOOFD.userMode === 'platform') {
+            return SessionContext.serverForOrganization(null);
+        }
+        return SessionContext.serverForOrganization(this.organization?.id);
+    }
+
     /**
      * Doing authenticated requests
      */
@@ -547,6 +554,15 @@ export class SessionContext implements RequestMiddleware {
             throw new Error('Could not get authenticated server without token');
         }
         const server = this.server;
+        server.middlewares.push(this);
+        return server;
+    }
+
+    get authenticatedIdentityServer() {
+        if (!this.hasToken()) {
+            throw new Error('Could not get authenticated server without token');
+        }
+        const server = this.identityServer;
         server.middlewares.push(this);
         return server;
     }
@@ -812,7 +828,7 @@ export class SessionContext implements RequestMiddleware {
 
             // Delete first to prevent loops (could be already invalid so the deletion might fail)
             try {
-                await this.authenticatedServer.request({
+                await this.authenticatedIdentityServer.request({
                     method: 'DELETE',
                     path: '/oauth/token',
                     shouldRetry: false,
@@ -909,7 +925,7 @@ export class SessionContext implements RequestMiddleware {
                 // Already expired.
                 console.log(this.requestPrefix(request) + 'Request started with expired access token, refreshing before starting request...');
                 try {
-                    await this.token.refresh(this.server, () => request.shouldRetry);
+                    await this.token.refresh(this.identityServer, () => request.shouldRetry);
                 }
                 catch (e) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
@@ -976,7 +992,7 @@ export class SessionContext implements RequestMiddleware {
                 // Try to refresh
                 try {
                     console.log(this.requestPrefix(request) + 'Request failed due to expired access token, refreshing...');
-                    await this.token.refresh(this.server, () => request.shouldRetry);
+                    await this.token.refresh(this.identityServer, () => request.shouldRetry);
                     console.log(this.requestPrefix(request) + 'Retrying request...');
                 }
                 catch (e) {
