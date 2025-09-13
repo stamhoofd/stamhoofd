@@ -5744,5 +5744,7 @@
   "1a537046-de7c-45ba-a990-da2fccd54325": "{firstName} moet ingeschreven zijn voor {aOrB} om voor {group} te kunnen inschrijven",
   "a5754a6a-a584-448f-ae31-30262c8ab868": "{firstName} moet ingeschreven zijn voor bepaalde groepen om voor {group} te kunnen inschrijven",
   "387311b4-eeed-48f5-950d-048ac0021666": "{firstName} moet ingeschreven zijn voor een bepaalde groep om voor {group} te kunnen inschrijven",
-  "f3c6e2b1-2f3a-4e2f-8f7a-1e5f3d3c8e2a": "todo"
+  "f3c6e2b1-2f3a-4e2f-8f7a-1e5f3d3c8e2a": "todo",
+  "3e8dba08-a505-41ec-96c1-b2b5c1c17852": "Je moet een platformbeheerder zijn om inactieve verenigingen te bekijken",
+  "62488314-53f2-40b3-858f-6eb44110a248": "Enkel zichtbaar in e-mails"
 }

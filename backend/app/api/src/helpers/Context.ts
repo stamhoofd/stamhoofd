@@ -313,7 +313,7 @@ export class ContextInstance {
                 throw new SimpleError({
                     code: 'archived',
                     message: 'Platform access is required to view inactive organizations',
-                    human: $t('Je moet een platformbeheerder zijn om inactieve verenigingen te bekijken'),
+                    human: $t('3e8dba08-a505-41ec-96c1-b2b5c1c17852'),
                     statusCode: 401,
                 });
             }

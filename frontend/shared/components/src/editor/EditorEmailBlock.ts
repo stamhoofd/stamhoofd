@@ -66,7 +66,7 @@ export const EmailBlock = Node.create({
             label.appendChild(labelChild1);
 
             const labelChild2 = document.createElement('span');
-            labelChild2.innerText = $t('Enkel zichtbaar in e-mails');
+            labelChild2.innerText = $t('62488314-53f2-40b3-858f-6eb44110a248');
             label.appendChild(labelChild2);
 
             label.contentEditable = 'false';
