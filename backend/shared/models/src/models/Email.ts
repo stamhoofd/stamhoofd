@@ -1142,6 +1142,7 @@ export class Email extends QueryableModel {
                                 const existing = await EmailRecipient.select()
                                     .where('emailId', upToDate.id)
                                     .where('email', item.email)
+                                    .where('duplicateOfRecipientId', null)
                                     .fetch();
 
                                 for (const other of existing) {

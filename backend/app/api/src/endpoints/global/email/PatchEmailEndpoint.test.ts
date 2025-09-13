@@ -879,6 +879,168 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(await EmailMocker.getSucceededCount()).toBe(1);
     });
 
+    test('[Regression] Should merge identical emails to 3 members', async () => {
+        // When you have 3 members with the same email address
+        // test that we only send a single email to this email address as long as we don't include replacements
+        // that are different between the members (like firstNameMember)
+
+        // Create test groups
+        const testGroup = await new GroupFactory({
+            organization,
+        }).create();
+
+        // Update the user to have group permissions
+        if (!user.permissions) {
+            user.permissions = UserPermissions.create({});
+        }
+
+        // Get existing organization permissions
+        // Create new organization permissions if they don't exist
+        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
+            level: PermissionLevel.None,
+            resources: new Map([
+                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
+                    resourceName: sender.name!,
+                    level: PermissionLevel.None,
+                    accessRights: [AccessRight.SendMessages],
+                })]])],
+                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
+                    resourceName: testGroup.settings.name.toString(),
+                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                    accessRights: [],
+                })]])],
+            ]),
+        }));
+        await user.save();
+
+        const member1 = await new MemberFactory({
+            organization,
+        }).create();
+        member1.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+
+        await member1.save();
+
+        const member2 = await new MemberFactory({
+            organization,
+        }).create();
+        member2.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+        await member2.save();
+
+        const member3 = await new MemberFactory({
+            organization,
+        }).create();
+        member3.details.parents = [Parent.create({
+            firstName: 'Identical',
+            lastName: 'Email',
+            email: 'identical-email@test.com',
+        })];
+        await member3.save();
+
+        await new RegistrationFactory({
+            member: member1,
+            group: testGroup,
+        }).create();
+
+        await new RegistrationFactory({
+            member: member2,
+            group: testGroup,
+        }).create();
+
+        await new RegistrationFactory({
+            member: member3,
+            group: testGroup,
+        }).create();
+
+        const email = new Email();
+        email.subject = 'Test Email with Replacements {{firstName}}';
+        email.status = EmailStatus.Draft;
+        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.html = `<!DOCTYPE html>
+        <html>
+        <head>
+        <meta charset="utf-8" />
+        <title>Test Email</title>
+        </head>
+        <body>
+        <p>Hello {{firstName}} {{lastName}}, this is a test email.</p>
+        <p>Login details: {{loginDetails}}</p>
+        <p>Unsubscribe: <a href="{{unsubscribeUrl}}">Click here</a></p>
+        </body>
+        </html>`;
+        email.json = {};
+
+        email.userId = user.id;
+        email.organizationId = organization.id;
+        email.senderId = sender.id;
+
+        // Set up recipient filter to target our specific members
+        email.recipientFilter = EmailRecipientFilter.create({
+            filters: [
+                EmailRecipientSubfilter.create({
+                    type: EmailRecipientFilterType.MemberParents,
+                    filter: {
+                        id: { $in: [member1.id, member2.id, member3.id] },
+                    },
+                }),
+            ],
+        });
+
+        await email.save();
+
+        // First try to build recipients with proper context by calling through the endpoint
+        const body = EmailStruct.patch({
+            id: email.id,
+            status: EmailStatus.Sending,
+        });
+
+        // This should start the recipient building process in the background
+        const response = await patchEmail(body, token, organization);
+        expect(response.status).toBe(200);
+
+        // Wait for the background process to complete (or fail)
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Refresh the email to check the status
+        await email.refresh();
+
+        expect(email.status).toBe(EmailStatus.Sent);
+
+        // Check that EmailRecipient records were created correctly
+        const recipients = await EmailRecipient.select()
+            .where('emailId', email.id)
+            .fetch();
+
+        expect(recipients).toHaveLength(3);
+
+        // No recipients with null, because we only targeted parents
+        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        expect(recipientsWithoutEmail).toHaveLength(0);
+
+        const recipientsWithEmail = recipients.filter(r => r.email === 'identical-email@test.com');
+        expect(recipientsWithEmail).toHaveLength(3);
+
+        // Check sentAt, only one
+        const sentRecipients = recipients.filter(r => r.sentAt !== null);
+        expect(sentRecipients).toHaveLength(1);
+
+        // Check one with duplicateOfId set
+        const duplicateRecipients = recipientsWithEmail.filter(r => r.duplicateOfRecipientId !== null);
+        expect(duplicateRecipients).toHaveLength(2);
+        expect(duplicateRecipients[0].duplicateOfRecipientId).toBe(sentRecipients[0].id);
+        expect(duplicateRecipients[1].duplicateOfRecipientId).toBe(sentRecipients[0].id);
+
+        // Check only one email is sent
+        expect(await EmailMocker.getSucceededCount()).toBe(1);
+    });
+
     test('Should not merge emails to same email with different replacements', async () => {
         // When you have two members with the same email address
         // test that we only send a single email to this email address as long as we don't include replacements
