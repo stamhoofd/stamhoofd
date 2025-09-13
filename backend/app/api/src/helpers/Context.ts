@@ -309,11 +309,11 @@ export class ContextInstance {
 
         if (this.organization && !this.organization.active) {
             // For inactive organizations, you always need permissions to view them
-            if (!await Context.auth.hasFullAccess(this.organization.id)) {
+            if (!Context.auth.hasSomePlatformAccess() || !await Context.auth.hasFullAccess(this.organization.id)) {
                 throw new SimpleError({
                     code: 'archived',
-                    message: 'Full access is required to view inactive organizations',
-                    human: $t('31bc55e4-1cf3-495a-8b35-686a4cc25f69'),
+                    message: 'Platform access is required to view inactive organizations',
+                    human: $t('Je moet een platformbeheerder zijn om inactieve verenigingen te bekijken'),
                     statusCode: 401,
                 });
             }
