@@ -13,7 +13,7 @@ export class LoginHelper {
      * @returns stop: close the modal - the token is expired and you need to login again
      */
     static async retryEmail(session: SessionContext, token: string): Promise<boolean> {
-        const response = await session.server.request({
+        const response = await session.identityServer.request({
             method: 'POST',
             path: '/verify-email/retry',
             body: PollEmailVerificationRequest.create({
@@ -42,7 +42,7 @@ export class LoginHelper {
      * Return true when the polling should end + confirmation should stop
      */
     static async pollEmail(session: SessionContext, token: string): Promise<boolean> {
-        const response = await session.server.request({
+        const response = await session.identityServer.request({
             method: 'POST',
             path: '/verify-email/poll',
             body: PollEmailVerificationRequest.create({
@@ -62,7 +62,7 @@ export class LoginHelper {
 
     static async verifyEmail(session: SessionContext, code: string, token: string) {
         try {
-            const response = await session.server.request({
+            const response = await session.identityServer.request({
                 method: 'POST',
                 path: '/verify-email',
                 body: VerifyEmailRequest.create({
@@ -177,7 +177,7 @@ export class LoginHelper {
     static async patchUser(session: SessionContext, patch: AutoEncoderPatchType<NewUser | User>): Promise<{ verificationToken?: string }> {
         // Do netwowrk request to create organization
         try {
-            await session.authenticatedServer.request({
+            await session.authenticatedIdentityServer.request({
                 method: 'PATCH',
                 path: '/user/' + patch.id,
                 body: patch,
