@@ -109,7 +109,7 @@ import { Image as ImageExtension } from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';
 import { Editor, EditorContent } from '@tiptap/vue-3';
-
+import { Focus } from '@tiptap/extensions';
 import { useCanPop, useCanDismiss, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
 import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue';
@@ -217,6 +217,10 @@ function buildEditor(content: Content = '') {
                 },
             }),
             Typography.configure({}),
+            Focus.configure({
+                className: 'has-focus',
+                mode: 'all',
+            }),
             SmartVariableNode.configure({
                 smartVariables: smartVariables.value.filter(s => !s.html),
             }),
@@ -762,6 +766,7 @@ defineExpose({
                 background: $color-background;
                 border-top: 2px dashed $color-border;
                 border-bottom: 2px dashed $color-border;
+                transition: border-color 0.3s, background-color 0.3s;
 
                 &:last-child {
                     border-bottom-color: transparent;
@@ -786,15 +791,17 @@ defineExpose({
                     padding: 7px;
                     text-align: center;
                     opacity: 1;
-                    pointer-events: none;
 
                     display: flex;
                     color: $color-dark;
                     gap: 4px;
                     border-radius: $border-radius;
+                    transition: opacity 0.3s, background-color 0.3s;
+                    pointer-events: none;
+                    user-select: none;
                 }
 
-                &:hover, &:focus-within {
+                &.has-focus {
                     background: $color-background-shade;
                     border-bottom-color: transparent;
                     border-top-color: transparent;
