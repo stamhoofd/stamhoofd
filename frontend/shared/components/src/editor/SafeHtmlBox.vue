@@ -10,8 +10,10 @@ const props = withDefaults(
     defineProps<{
         html: string;
         allowClicks?: boolean;
+        customCss?: string;
     }>(), {
         allowClicks: false,
+        customCss: '',
     },
 );
 const iframe = useTemplateRef<HTMLIFrameElement>('iframeRef');
@@ -61,16 +63,13 @@ function cleanHtml(html: string) {
         const headCloseIndex = html.indexOf('</head>');
         if (headCloseIndex !== -1) {
             const styleTag = `
-                <style>
-                    body {
-                        padding: 0;
-                        margin: 0;
-                    }
-                    .email-only {
-                        display: none;
-                    }
-                </style>
-            `;
+<style>
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    ${props.customCss}
+</style>`;
             // Inject before </head>
             return html.slice(0, headCloseIndex) + styleTag + html.slice(headCloseIndex);
         }
@@ -88,9 +87,7 @@ function cleanHtml(html: string) {
                         padding: 0;
                         margin: 0;
                     }
-                    .email-only {
-                        display: none;
-                    }
+                    ${props.customCss}
                 </style>
             </head>
             <body>${html}</body>

@@ -1,6 +1,6 @@
 <template>
     <div v-if="replacedHtml" class="email-preview-box">
-        <SafeHtmlBox :html="replacedHtml" :allow-clicks="allowClicks" />
+        <SafeHtmlBox :html="replacedHtml" :allow-clicks="allowClicks" :custom-css="webVersion ? '.email-only { display: none; }' : ''" />
 
         <hr v-if="email.attachments.length > 0" class="email-attachments-spacer">
         <STList v-if="email.attachments.length > 0" class="attachments-container">
@@ -31,9 +31,11 @@ const props = withDefaults(defineProps<{
     email: EmailPreview | EmailWithRecipients;
     recipient?: EmailRecipient | null;
     allowClicks?: boolean;
+    webVersion?: boolean;
 }>(), {
     recipient: null,
     allowClicks: false,
+    webVersion: false,
 });
 
 const replacedHtml = computed(() => {
