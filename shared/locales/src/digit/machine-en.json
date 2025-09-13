@@ -19,6 +19,10 @@
     "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere groepen.",
     "translation": "Save a copy of your seating plan so you can share it with other groups."
   },
+  "040cc66c-e27f-4822-87ad-722bca4f5038": {
+    "original": "Kies of je het bericht wilt publiceren in ‘Mijn account’ en/of versturen via e-mail via de knoppen bovenaan",
+    "translation": "Choose whether to publish the message in ‘My account’ and/or send it by email using the buttons at the top."
+  },
   "05479234-2977-4bfd-a44b-924b01021b6e": {
     "original": "Op aanraden van andere groep / persoon",
     "translation": "On the recommendation of another group/person"
@@ -59,6 +63,10 @@
     "original": "Niet alle gegevens van jouw groep werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Not all your group's data was filled in the Stripe dashboard. Check if everything was filled in. The following items may be missing:"
   },
+  "0cc07b8f-9eaf-413a-9c2d-17363611f2d4": {
+    "original": "Dit bericht is enkel zichtbaar in ‘Mijn account’",
+    "translation": "This message is only visible in ‘My account’."
+  },
   "0d7ce596-ad47-490d-b619-0cb1f1ae84ec": {
     "original": "Leden kunnen hun openstaand bedrag betalen door naar ‘Mijn account’ te gaan. Bovenaan zullen ze bij 'snelle acties' een knop zien waarmee ze hun openstaand bedrag kunnen betalen (je kan een e-mail sturen met een inlogknop om naar ‘Mijn account’ te gaan).",
     "translation": "Members can pay their outstanding amount by going to ‘My account’. At the top, under 'quick actions', they will see a button with which they can pay their outstanding amount (you can send an email with a login button to go to ‘My account’)."
@@ -90,6 +98,10 @@
   "15b6f0c8-6287-4b4d-bf34-4da2f4a0e575": {
     "original": "*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in ‘Mijn account’ vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
     "translation": "*You can postpone an outstanding amount - e.g. for staggered payments or a trial period. It only appears as a quick action in 'My account' from one week before this date (together with any automatic email) and must be paid by the entered date. It is possible to pay it earlier, but certainly not obligatory."
+  },
+  "18a411e7-8fec-4d99-bde1-0cbc9c3f5cf8": {
+    "original": "Je kan op ‘Mijn account’ een nieuw account aanmaken op het e-mailadres {email}.",
+    "translation": "You can create a new account in ‘My account’ with the email address {email}."
   },
   "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
     "original": "Beperk tot bepaalde lokale groepen (tags)",
@@ -235,6 +247,10 @@
     "original": "Je kan zelf ook leden inschrijven voor deze activiteit. Jouw groep betaalt dan meteen de kostprijs aan de organisator, waarna Ravot automatisch één of meerdere openstaande bedragen aanmaakt van de ingeschreven leden aan jouw groep (te betalen via ‘Mijn account’ of manueel betaling te registreren).",
     "translation": "You can also register members for this activity yourself. Your group then immediately pays the price to the organiser, after which Ravot automatically creates one or more outstanding amounts for the registered members to your group (payable via 'My account' or manually register payment)."
   },
+  "3ab6ddc1-7ddc-4671-95d2-64994a5d36cc": {
+    "original": "Je kan op ‘Mijn account’ een nieuw account aanmaken op het e-mailadres {email}",
+    "translation": "You can create a new account in ‘My account’ using the email address {email}."
+  },
   "3c584bf6-7e0a-4348-a5e9-2bc0bcb00bde": {
     "original": "Schulden van groepen",
     "translation": "Debts of groups"
@@ -242,6 +258,10 @@
   "3c710008-5f1f-477b-9ba3-b355d47bf858": {
     "original": "Je kan op ‘Mijn account’ een nieuw account aanmaken met het e-mailadres",
     "translation": "You can create a new account on ‘My account’ with the email address"
+  },
+  "3e8dba08-a505-41ec-96c1-b2b5c1c17852": {
+    "original": "Je moet een platformbeheerder zijn om inactieve groepen te bekijken",
+    "translation": "You need to be a platform administrator to view inactive groups."
   },
   "3e94193d-873b-4770-ba03-5f7528debf2c": {
     "original": "Leden kunnen zelfstandig inschrijven via ‘Mijn account’. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Ravot en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.",
@@ -359,6 +379,10 @@
     "original": "Aanrekening via KSA Nationaal",
     "translation": "Invoicing via KSA National"
   },
+  "5403b466-98fe-48ac-beff-38acf7c9734d": {
+    "original": "Je kan op ‘Mijn account’ inloggen op {email}.",
+    "translation": "You can log in to ‘My account’ at {email}."
+  },
   "54685a94-1ae2-46f9-aa4b-03f0b3939fd3": {
     "original": "Naamloos",
     "translation": "Unnamed"
@@ -470,6 +494,10 @@
   "6793e0dc-66f0-4a70-b8ac-fb41e2063871": {
     "original": "Naam van deze groep (kort)",
     "translation": "Name of this group (short)"
+  },
+  "6804cf8f-b057-41ce-a1b6-9b4f314dcab8": {
+    "original": "Toon in ‘Mijn account’",
+    "translation": "Show in ‘My account’"
   },
   "68914509-aa54-40c7-9f53-7b8a02149198": {
     "original": "Ravot",
@@ -627,6 +655,10 @@
     "original": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
     "translation": "Charge an amount to the {count} selected groups."
   },
+  "890739a4-277c-4757-b6e6-c9f535d138a3": {
+    "original": "Je kan de inhoud van een bericht wijzigen, maar dit heeft enkel invloed op het zichtbare bericht in ‘Mijn account’.",
+    "translation": "You can edit the content of a message, but this will only affect the visible message in ‘My account’."
+  },
   "89a760d7-8995-458c-9635-da104971e95c": {
     "original": "Via proefperiodes kan je nieuwe leden de kans geven om in te schrijven zonder te (laten) betalen. Na een ingestelde periode krijgen ze vervolgens een betaalverzoek (vroeger betalen is steeds mogelijk) en kunnen ze betalen via ‘Mijn account’. Eenmaal de proefverzekering verlopen is, komen deze leden op de eerstvolgende aanrekening door KSA Nationaal. Als je leden voor het einde van de proefperiode terug uitschrijft, wordt het openstaande bedrag ook verwijderd.",
     "translation": "Trial periods allow you to give new members the chance to register without (immediate) payment. After a set period, they will receive a payment request (they can always pay earlier if they want) and can pay via ‘My account’. Once the trial insurance has expired, these members will be included in the next invoice from KSA Nationaal. If you unregister members before the end of the trial period, the open amount will be removed as well."
@@ -650,6 +682,10 @@
   "8cba151c-54df-4786-8d37-bf2af2005753": {
     "original": "Ticketverkoop via Ravot",
     "translation": "Ticket sales via Ravot"
+  },
+  "8e074663-072b-4331-b6e9-e472969437a2": {
+    "original": "Stel in of het bericht zichtbaar is in ‘Mijn account’ of niet.",
+    "translation": "Set whether the message is visible in ‘My account’."
   },
   "8e77d1c1-87dc-4fdb-ad6e-13145bc96f78": {
     "original": "Breng Ravot in orde",
@@ -711,6 +747,10 @@
     "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Ravot afkomstig is.",
     "translation": "Something went wrong when importing the seating plan. Check whether the file you have chosen does originate from Ravot."
   },
+  "98603c16-adf9-4aa9-9685-4a1199dd04d4": {
+    "original": "Ben je zeker dat je dit bericht in ‘Mijn account’ wilt publiceren?",
+    "translation": "Are you sure you want to publish this message in ‘My account’?"
+  },
   "98d05123-a351-4fb7-a0d7-87f46bcd127d": {
     "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via ‘Mijn account’.",
     "translation": "You will receive an additional confirmation via email. If data changes in the future, you can now manage it via ‘My account’."
@@ -724,8 +764,8 @@
     "translation": "All age groups will be closed (unless the group already switched to this work year earlier)"
   },
   "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
-    "original": "Een hoofdbeheerder van jouw groep moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
-    "translation": "A main administrator of your group must first set email addresses before you can send an email."
+    "original": "Een hoofdbeheerder van jouw groep moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
+    "translation": "A main administrator from your group needs to add a sender before you can send a message."
   },
   "9f1a0032-32dd-48fd-9d04-0b20bd86aefb": {
     "original": "Terug naar Ravot",
@@ -1042,6 +1082,10 @@
   "db492b1b-51de-48f1-b620-8bdc6dc5c3db": {
     "original": "Stop inschrijvingen van leden via ‘Mijn account’. Na het sluiten van de inschrijvingen kan je de groep ook eventueel archiveren.",
     "translation": "Stop member registrations via 'My account'. After closing the registrations, you can also archive the group if necessary."
+  },
+  "db9f28bd-d199-4a25-aa06-b6435f092f20": {
+    "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Ravot kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
+    "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Ravot can apply the discount to the same item if that would be more advantageous."
   },
   "de1d5cdf-6aa6-4912-828a-82cb53f8abf6": {
     "original": "Dit is geen geldig zaalplan uit Ravot",

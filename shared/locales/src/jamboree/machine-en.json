@@ -295,6 +295,10 @@
     "original": "Schulden van eenheden",
     "translation": "Debts of units"
   },
+  "3e8dba08-a505-41ec-96c1-b2b5c1c17852": {
+    "original": "Je moet een platformbeheerder zijn om inactieve eenheden te bekijken",
+    "translation": "You need to be a platform administrator to view inactive units."
+  },
   "3e94193d-873b-4770-ba03-5f7528debf2c": {
     "original": "Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Jamboree en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.",
     "translation": "Members can register independently via the member portal. This is a link that you can place on your website or send via email. You can also invite members to register by first adding them to Jamboree and then sending an email with the 'magic button' at the bottom."
@@ -884,8 +888,8 @@
     "translation": "Delete scout year"
   },
   "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
-    "original": "Een hoofdbeheerder van jouw eenheid moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
-    "translation": "A head administrator of your unit must first set up email addresses before you can send an email."
+    "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
+    "translation": "A main administrator of your unit must first add a sender that you can use before you can send a message."
   },
   "9f1a0032-32dd-48fd-9d04-0b20bd86aefb": {
     "original": "Terug naar Jamboree",
@@ -930,6 +934,10 @@
   "a7585599-1c67-4de7-b552-f5b78c7385db": {
     "original": "Schakel dit in om leden en eenheden automatisch te verwittigen als hun openstaand bedrag stijgt.",
     "translation": "Enable this to automatically notify members and units when their outstanding amount increases."
+  },
+  "a8c4cecd-b9da-4373-a50a-7158dd770c82": {
+    "original": "Alle wachtlijsten worden gedupliceerd in het nieuwe scoutsjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige scoutsjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.",
+    "translation": "All waiting lists are duplicated in the new scouts year. If you want to continue a waiting list, you can go back to the previous scouts year and add all members from there to the new waiting list."
   },
   "a9605085-cd44-454d-9386-3dd30206f3bf": {
     "original": "Opgelet, deze beheerders zijn ook niet aangesloten bij GSB, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
@@ -1179,6 +1187,10 @@
     "original": "Je moet elke betaling zelf controleren en markeren als betaald in Jamboree",
     "translation": "You must check each payment yourself and mark it as paid in Jamboree"
   },
+  "d35a173c-5d80-48d6-a83b-5274f883a950": {
+    "original": "Andere start eind/datum dan scoutsjaar",
+    "translation": "Other start/end date than scouts year"
+  },
   "d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840": {
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar",
     "translation": "You can only assign a role to members who are registered in the current scout year"
@@ -1238,6 +1250,10 @@
   "daf8a992-77cd-4c20-8bca-5c692fd1e431": {
     "original": "bv. https://www.eenheid.be/privacy",
     "translation": "e.g. https://www.unit.co.uk/privacy"
+  },
+  "db9f28bd-d199-4a25-aa06-b6435f092f20": {
+    "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Jamboree kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
+    "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Jamboree can apply the discount on the same item if that would be more advantageous."
   },
   "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
     "original": "De datum van inschrijving ligt buiten het geselecteerde scoutsjaar.",

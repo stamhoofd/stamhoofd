@@ -295,6 +295,10 @@
     "original": "Schulden van eenheden",
     "translation": "Dettes des unités"
   },
+  "3e8dba08-a505-41ec-96c1-b2b5c1c17852": {
+    "original": "Je moet een platformbeheerder zijn om inactieve eenheden te bekijken",
+    "translation": "Vous devez être gestionnaire de la plateforme pour voir les unités inactives"
+  },
   "3e94193d-873b-4770-ba03-5f7528debf2c": {
     "original": "Leden kunnen zelfstandig inschrijven via het ledenportaal. Dit is een link die je op jouw website kan plaatsen of kan versturen via e-mail. Daarnaast kan je leden ook uitnodigen om in te schrijven, dat doe je door ze eerst toe te voegen in Jamboree en daarna een e-mail te sturen waarbij je de 'magische knop' onderaan toevoegt.",
     "translation": "Les membres peuvent s'inscrire indépendamment via le portail des membres. Il s'agit d'un lien que vous pouvez placer sur votre site web ou envoyer par e-mail. Vous pouvez également inviter les membres à s'inscrire, en les ajoutant d'abord dans Jamboree, puis en envoyant un e-mail avec le bouton 'magique' en bas."
@@ -892,8 +896,8 @@
     "translation": "Supprimer l'année scoute"
   },
   "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
-    "original": "Een hoofdbeheerder van jouw eenheid moet eerst e-mailadressen instellen voor je een e-mail kan versturen.",
-    "translation": "Un administrateur principal de votre unité doit d'abord configurer les adresses e-mail pour que vous puissiez envoyer un e-mail."
+    "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
+    "translation": "Un administrateur principal de votre unité doit d'abord ajouter un expéditeur que vous pourrez utiliser pour envoyer un message."
   },
   "9f1a0032-32dd-48fd-9d04-0b20bd86aefb": {
     "original": "Terug naar Jamboree",
@@ -938,6 +942,10 @@
   "a7585599-1c67-4de7-b552-f5b78c7385db": {
     "original": "Schakel dit in om leden en eenheden automatisch te verwittigen als hun openstaand bedrag stijgt.",
     "translation": "Activez cette option pour avertir automatiquement les membres et les unités si leur montant dû augmente."
+  },
+  "a8c4cecd-b9da-4373-a50a-7158dd770c82": {
+    "original": "Alle wachtlijsten worden gedupliceerd in het nieuwe scoutsjaar. Als je de wachtlijst wilt verderzetten kan je terugkeren naar het vorige scoutsjaar en alle leden van daaruit toevoegen aan de nieuwe wachtlijst.",
+    "translation": "Toutes les listes d'attente sont dupliquées pour la nouvelle année scoute. Si vous souhaitez poursuivre une liste d'attente, vous pouvez revenir à l'année scoute précédente et ajouter tous les membres à la nouvelle liste d'attente."
   },
   "a9605085-cd44-454d-9386-3dd30206f3bf": {
     "original": "Opgelet, deze beheerders zijn ook niet aangesloten bij GSB, en zijn dus ook niet verzekerd. Gebruik met mate, bv. om externen toegang te geven voor evenementen.",
@@ -1191,6 +1199,10 @@
     "original": "Je moet elke betaling zelf controleren en markeren als betaald in Jamboree",
     "translation": "Vous devez vérifier chaque paiement et le marquer comme payé dans Jamboree"
   },
+  "d35a173c-5d80-48d6-a83b-5274f883a950": {
+    "original": "Andere start eind/datum dan scoutsjaar",
+    "translation": "Autre date de début/fin que l'année scoute"
+  },
   "d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840": {
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar",
     "translation": "Vous ne pouvez attribuer une fonction qu'aux membres inscrits à l'année scoute actuelle"
@@ -1250,6 +1262,10 @@
   "daf8a992-77cd-4c20-8bca-5c692fd1e431": {
     "original": "bv. https://www.eenheid.be/privacy",
     "translation": "par ex. https://www.unite.be/privacy"
+  },
+  "db9f28bd-d199-4a25-aa06-b6435f092f20": {
+    "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Jamboree kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
+    "translation": "Dans certains cas (par exemple avec des conditions d'article), il est possible que plusieurs réductions produit soient actives dans un panier. Jamboree peut alors appliquer la réduction la plus avantageuse sur le même article."
   },
   "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
     "original": "De datum van inschrijving ligt buiten het geselecteerde scoutsjaar.",
