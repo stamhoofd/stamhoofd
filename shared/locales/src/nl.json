@@ -5746,5 +5746,9 @@
   "387311b4-eeed-48f5-950d-048ac0021666": "{firstName} moet ingeschreven zijn voor een bepaalde groep om voor {group} te kunnen inschrijven",
   "f3c6e2b1-2f3a-4e2f-8f7a-1e5f3d3c8e2a": "todo",
   "3e8dba08-a505-41ec-96c1-b2b5c1c17852": "Je moet een platformbeheerder zijn om inactieve verenigingen te bekijken",
-  "62488314-53f2-40b3-858f-6eb44110a248": "Enkel zichtbaar in e-mails"
+  "62488314-53f2-40b3-858f-6eb44110a248": "Enkel zichtbaar in e-mails",
+  "7bd45367-4d32-408d-80f8-83bcc120d1de": "Alle berichten die werden verzonden aan {firstName}.",
+  "82a881a0-5666-4649-961a-c8f6c48177d0": "Toon berichten",
+  "e8207525-275b-48c4-9282-199f17085175": "Bericht sturen",
+  "b2dffb50-f8b1-4211-83d2-49a7b4008508": "Je kan niet meerdere leden van verschillende verenigingen tegelijk uitschrijven."
 }

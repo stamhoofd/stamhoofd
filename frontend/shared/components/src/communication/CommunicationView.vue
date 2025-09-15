@@ -7,7 +7,7 @@
                 {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
             </h1>
             <p v-if="props.members && props.members.length > 0">
-                {{ $t('Alle berichten die werden verzonden aan {firstName}.', { firstName: props.members.map(m => m.patchedMember.firstName).join(', ') }) }}
+                {{ $t('7bd45367-4d32-408d-80f8-83bcc120d1de', { firstName: props.members.map(m => m.patchedMember.firstName).join(', ') }) }}
             </p>
             <p v-else>
                 {{ $t(`feae4831-c229-4b2a-8dc1-c65184cbdfec`) }}

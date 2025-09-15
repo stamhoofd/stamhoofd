@@ -337,7 +337,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`Toon berichten`),
+                name: $t(`82a881a0-5666-4649-961a-c8f6c48177d0`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -460,7 +460,7 @@ export class MemberActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`Bericht sturen`),
+                name: $t(`e8207525-275b-48c4-9282-199f17085175`),
                 icon: 'email',
                 priority: 12,
                 groupIndex: 3,

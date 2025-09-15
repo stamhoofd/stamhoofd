@@ -287,7 +287,7 @@ export class RegistrationActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`Toon berichten`),
+                name: $t(`82a881a0-5666-4649-961a-c8f6c48177d0`),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -685,7 +685,7 @@ export class RegistrationActionBuilder {
         }
 
         if (filteredOrganizations.length > 1) {
-            Toast.error($t(`Je kan niet meerdere leden van verschillende verenigingen tegelijk uitschrijven.`)).show();
+            Toast.error($t(`b2dffb50-f8b1-4211-83d2-49a7b4008508`)).show();
             return;
         }
 
