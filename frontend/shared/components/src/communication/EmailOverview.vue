@@ -1,13 +1,13 @@
 <template>
     <div class="st-view">
         <STNavigationBar :title="title">
-            <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued" #right>
+            <template v-if="auth.canAccessEmail(email, PermissionLevel.Write) && email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued" #right>
                 <LoadingButton v-if="email.status === EmailStatus.Failed" :loading="isRetryingEmail">
                     <button v-tooltip="$t('314810ef-ff16-4b22-b8a5-399d5d820a4a')" type="button" class="button icon retry" @click="retrySending" />
                 </LoadingButton>
                 <button v-if="email.status === EmailStatus.Draft" v-tooltip="$t('2b799708-dc8a-4ab5-ad15-11c89bfa23da')" type="button" class="button icon send" @click="editEmail" />
                 <button v-else v-tooltip="$t('a7c3d104-58c1-41ac-8a33-febe6f474215')" type="button" class="button icon edit" @click="editEmail" />
-                <LoadingButton :loading="isDeletingEmail">
+                <LoadingButton v-if="email.status === EmailStatus.Draft && auth.canAccessEmail(email, PermissionLevel.Full)" :loading="isDeletingEmail">
                     <button v-tooltip="$t('d67c7c61-5387-48a5-b63b-a78682a54fd8')" type="button" class="button icon trash" @click="doDelete" />
                 </LoadingButton>
             </template>
@@ -178,7 +178,7 @@
 
             <EmailPreviewBox :email="email" />
 
-            <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued">
+            <template v-if="email.deletedAt === null && email.status !== EmailStatus.Sending && email.status !== EmailStatus.Queued && auth.canAccessEmail(email, PermissionLevel.Write)">
                 <hr>
                 <h2>{{ $t('7c093146-6de1-413b-bbda-2ada3fd63dea') }}</h2>
 
@@ -244,7 +244,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" element-name="button" @click="doDelete">
+                    <STListItem v-if="auth.canAccessEmail(email, PermissionLevel.Full)" :selectable="true" element-name="button" @click="doDelete">
                         <template #left>
                             <IconContainer icon="email" class="error">
                                 <template #aside>
@@ -272,8 +272,8 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useInterval, useOrganization, useUser } from '@stamhoofd/components';
-import { EmailPreview, EmailRecipientsStatus, EmailStatus } from '@stamhoofd/structures';
+import { CenteredMessage, EmailView, IconContainer, ProgressRing, Spinner, Toast, useAuth, useInterval, useOrganization, useUser } from '@stamhoofd/components';
+import { EmailPreview, EmailRecipientsStatus, EmailStatus, PermissionLevel } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import MembersTableView from '../members/MembersTableView.vue';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
@@ -290,6 +290,7 @@ const props = defineProps<{
 const title = computed(() => {
     return props.email.replacedSubject || $t('0f763bbf-f9fd-4213-a675-42396d1065e8');
 });
+const auth = useAuth();
 const getEmailStatus = useEmailStatus();
 const status = computed(() => {
     return getEmailStatus(props.email);

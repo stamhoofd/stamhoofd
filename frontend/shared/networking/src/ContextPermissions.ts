@@ -1,4 +1,4 @@
-import { AccessRight, Event, EventPermissionChecker, Group, GroupCategory, GroupType, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
+import { AccessRight, EmailPreview, Event, EventPermissionChecker, Group, GroupCategory, GroupType, LoadedPermissions, Organization, OrganizationForPermissionCalculation, OrganizationTag, PaymentGeneral, PermissionLevel, Permissions, PermissionsResourceType, Platform, PlatformMember, Registration, UserWithMembers } from '@stamhoofd/structures';
 import { Ref, toRaw, unref } from 'vue';
 
 export class ContextPermissions {
@@ -204,6 +204,22 @@ export class ContextPermissions {
             return true;
         }
         return false;
+    }
+
+    canAccessEmail(email: EmailPreview, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+        if (this.hasFullAccess()) {
+            return true;
+        }
+
+        if (this.user && email.user?.id === this.user?.id) {
+            return true;
+        }
+
+        if (!email.senderId || !this.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, permissionLevel)) {
+            return false;
+        }
+
+        return true;
     }
 
     canAccessPlatformMember(member: PlatformMember, permissionLevel: PermissionLevel = PermissionLevel.Read) {
