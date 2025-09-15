@@ -25,7 +25,7 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useGlobalEventListener, useOrganization } from '@stamhoofd/components';
-import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PermissionsResourceType, PlatformMember } from '@stamhoofd/structures';
 import { computed, markRaw, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';

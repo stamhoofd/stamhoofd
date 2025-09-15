@@ -6,7 +6,12 @@
             <h1>
                 {{ $t('a6304a41-8c83-419b-8e7e-c26f4a047c19') }}
             </h1>
-            <p>{{ $t(`feae4831-c229-4b2a-8dc1-c65184cbdfec`) }}</p>
+            <p v-if="props.members && props.members.length > 0">
+                {{ $t('Alle berichten die werden verzonden aan {firstName}.', { firstName: props.members.map(m => m.patchedMember.firstName).join(', ') }) }}
+            </p>
+            <p v-else>
+                {{ $t(`feae4831-c229-4b2a-8dc1-c65184cbdfec`) }}
+            </p>
 
             <div class="input-with-buttons">
                 <div>
@@ -48,7 +53,7 @@
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAdminEmailFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
 import { useEmailsObjectFetcher } from '@stamhoofd/components/src/fetchers/useEmailsObjectFetcher';
-import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, PlatformMember, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
@@ -56,6 +61,12 @@ import EmailOverview from './EmailOverview.vue';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 type ObjectType = EmailPreview;
+
+const props = withDefaults(defineProps<{
+    members?: (PlatformMember[]) | null;
+}>(), {
+    members: null,
+});
 
 const searchQuery = ref('');
 const $navigate = useNavigate();
@@ -195,6 +206,17 @@ async function editFilter(event: MouseEvent) {
 }
 
 function getRequiredFilter(): StamhoofdFilter | null {
+    if (props.members && props.members.length > 0) {
+        return {
+            recipients: {
+                $elemMatch: {
+                    memberId: {
+                        $in: props.members.map(m => m.id),
+                    },
+                },
+            },
+        };
+    }
     return null;
 }
 

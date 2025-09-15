@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { OrganizationManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
@@ -22,6 +22,7 @@ import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFami
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import CommunicationView from '../../communication/CommunicationView.vue';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);
@@ -329,6 +330,39 @@ export class MemberActionBuilder {
         ];
     }
 
+    getMessagesAction(): TableAction<PlatformMember>[] {
+        if (!this.context.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read)) {
+            return [];
+        }
+
+        return [
+            new InMemoryTableAction({
+                name: $t(`Toon berichten`),
+                priority: 1,
+                groupIndex: 6,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (members: PlatformMember[]) => {
+                    if (members.length > 100) {
+                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        return;
+                    }
+                    await this.present({
+                        components: [
+                            new ComponentWithProperties(NavigationController, {
+                                root:  new ComponentWithProperties(CommunicationView, {
+                                    members,
+                                }),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
+                icon: 'history',
+            }),
+        ];
+    }
+
     getEditAction(): TableAction<PlatformMember>[] {
         if (this.organizations.length !== 1 || this.groups.length === 0) {
             return [];
@@ -450,6 +484,7 @@ export class MemberActionBuilder {
             ...(options.includeDelete ? this.getDeleteAction() : []),
             ...this.getUnsubscribeAction(),
             ...this.getAuditLogAction(),
+            ...this.getMessagesAction(),
         ];
 
         return actions;
