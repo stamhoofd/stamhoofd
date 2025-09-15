@@ -14091,6 +14091,10 @@
     "original": "Wijzig de instellingen rond toestemming voor gegevensverzameling",
     "translation": "Modifiez les paramètres relatifs à l'autorisation de collecte de données"
   },
+  "a13326af-afab-4159-a730-d41f9bcbaff3": {
+    "original": "Enkel in e-mails",
+    "translation": "Uniquement dans les e-mails"
+  },
   "a148463b-5ae7-44d8-9cac-20538fc95431": {
     "original": "Tweede ouder",
     "translation": "Deuxième parent"
@@ -20078,6 +20082,10 @@
   "e3c3f519-562e-4ef4-b670-599ce4cb74ac": {
     "original": "Alle ontvangers zijn gefilterd wegens een hard bounce of spam",
     "translation": "Tous les destinataires ont été filtrés en raison d'un rejet définitif ou de spam"
+  },
+  "e3cca88f-3001-49fa-af16-2a7144b07216": {
+    "original": "Inhoud die enkel zichtbaar is in e-mails, niet in het ledenportaal",
+    "translation": "Contenu visible uniquement dans les e-mails, pas dans le portail des membres"
   },
   "e3d3b76b-e18c-4351-b5af-87186ebabe86": {
     "original": "Enkel van lid zelf",
