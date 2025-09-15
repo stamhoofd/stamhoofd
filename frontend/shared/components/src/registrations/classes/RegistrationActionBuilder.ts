@@ -462,7 +462,7 @@ export class RegistrationActionBuilder {
 
     private getEmailAction() {
         return new AsyncTableAction({
-            name: $t(`f92ad3ab-8743-4d37-8b3f-c9d5ca756b16`),
+            name: $t(`Bericht sturen`),
             icon: 'email',
             priority: 12,
             groupIndex: 3,
