@@ -89,7 +89,18 @@ export class PlatformFamily {
     }
 
     getOrganization(id: string) {
-        return this.organizations.find(o => o.id === id);
+        const b = this.organizations.find(o => o.id === id);
+        if (b) {
+            return b;
+        }
+        // Check in checkout cart
+        if (this.checkout.singleOrganization?.id === id) {
+            return this.checkout.singleOrganization;
+        }
+        const q = this.pendingRegisterItems.find(i => i.organization.id === id);
+        if (q) {
+            return q.organization;
+        }
     }
 
     static create(blob: MembersBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformFamily {
@@ -407,7 +418,7 @@ export class PlatformFamily {
                 }
                 organizationIds.add(group.organizationId);
 
-                const organization = this.organizations.find(o => o.id === group.organizationId);
+                const organization = this.getOrganization(group.organizationId);
                 if (organization) {
                     for (const tag of organization.meta.tags) {
                         organizationTags.add(tag);
@@ -911,7 +922,7 @@ export class PlatformMember implements ObjectWithRecords {
             }
 
             if (filters.currentPeriod !== undefined) {
-                const organization = this.organizations.find(o => o.id === r.organizationId);
+                const organization = this.family.getOrganization(r.organizationId);
                 const isCurrentPeriod = !!organization && r.group.periodId === organization.period.period.id;
 
                 if (isCurrentPeriod !== filters.currentPeriod) {
@@ -1043,7 +1054,7 @@ export class PlatformMember implements ObjectWithRecords {
                 continue;
             }
 
-            const organization = this.organizations.find(o => o.id === registration.organizationId);
+            const organization = this.family.getOrganization(registration.organizationId);
             if (organization) {
                 base.push(organization);
             }
@@ -1087,11 +1098,15 @@ export class PlatformMember implements ObjectWithRecords {
                     continue;
                 }
 
+                if (!responsibility.organizationId) {
+                    continue;
+                }
+
                 if (base.find(g => g.id === responsibility.organizationId)) {
                     continue;
                 }
 
-                const organization = this.organizations.find(o => o.id === responsibility.organizationId);
+                const organization = this.family.getOrganization(responsibility.organizationId);
                 if (organization) {
                     base.push(organization);
                 }
