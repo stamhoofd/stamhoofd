@@ -9,9 +9,26 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         emailId: FilterWrapperMarker,
     };
 
-    const unwrapped = unwrapFilter(filter, requiredFilter);
+    let unwrapped = unwrapFilter(filter, requiredFilter);
     if (!unwrapped.match) {
-        return false;
+        if (typeof filter === 'object'
+            && filter !== null
+            && filter['$and']
+            && Array.isArray(filter['$and'])
+            && Object.keys(filter).length === 1
+            && filter['$and'].length > 0
+        ) {
+            for (const subFilter of filter['$and']) {
+                unwrapped = unwrapFilter(subFilter as StamhoofdFilter, requiredFilter);
+                if (unwrapped.match) {
+                    // Found!
+                    break;
+                }
+            }
+        }
+        if (!unwrapped.match) {
+            return false;
+        }
     }
 
     const emailIds = typeof unwrapped.markerValue === 'string'
