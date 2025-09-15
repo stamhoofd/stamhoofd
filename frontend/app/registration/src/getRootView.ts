@@ -109,7 +109,6 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                     await $memberManager.loadDocuments();
 
                     const enableEvents = platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', session);
-                    const enableCommunication = manualFeatureFlag('communication', session);
 
                     return new ComponentWithProperties(TabBarController, {
                         tabs: [
@@ -120,7 +119,7 @@ export async function getRootView(session: SessionContext, ownDomain = false) {
                                 component: startView,
                             }),
                             ...(enableEvents ? [calendarTab] : []),
-                            ...(enableCommunication ? [communicationTab] : []),
+                            communicationTab,
                             new TabBarItem({
                                 id: 'cart',
                                 icon: 'basket',

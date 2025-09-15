@@ -550,7 +550,6 @@ async function getHTML() {
     };
 }
 
-const communicationFeature = useFeatureFlag()('communication');
 const hasMoreSettings = computed(() => {
     return willSend.value && !!patchedEmail.value?.recipientFilter.canShowInMemberPortal;
 });
@@ -658,9 +657,7 @@ async function send() {
             Toast.success($t('730f955b-964e-4bb3-8caf-df6c7961c1ae')).show();
         }
 
-        if (communicationFeature) {
-            await GlobalEventBus.sendEvent('selectTabById', 'communication');
-        }
+        await GlobalEventBus.sendEvent('selectTabById', 'communication');
         await pop({ force: true });
     }
     catch (e) {

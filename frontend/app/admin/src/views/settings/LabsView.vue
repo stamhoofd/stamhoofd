@@ -8,7 +8,6 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-
         <hr><h2>
             {{ $t('8f9e2384-e2d3-46b7-a83e-3baed2b40936') }}
         </h2>
@@ -54,10 +53,6 @@
 
             <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
                 {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
-            </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('communication')" @update:model-value="setFeatureFlag('communication', !!$event)">
-                Communicatiemodule (onvolledig)
             </Checkbox>
         </template>
 

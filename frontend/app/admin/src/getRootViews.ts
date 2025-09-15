@@ -153,19 +153,13 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
 
                         if (reactiveSession.auth.hasFullAccess()) {
                             moreTab.items.push(settingsTab);
-
-                            if (manualFeatureFlag('communication', reactiveSession)) {
-                                moreTab.items.push(communicationTab);
-                            }
-
+                            moreTab.items.push(communicationTab);
                             moreTab.items.push(financesTab);
                             moreTab.items.push(auditLogsTab);
                         }
                         else {
                             if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)) {
-                                if (manualFeatureFlag('communication', reactiveSession)) {
-                                    moreTab.items.push(communicationTab);
-                                }
+                                moreTab.items.push(communicationTab);
                             }
                         }
 

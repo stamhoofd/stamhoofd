@@ -473,11 +473,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             moreTab.items.unshift(auditLogsTab);
                             moreTab.items.unshift(documentsTab);
                             moreTab.items.unshift(financesTab);
-
-                            if (manualFeatureFlag('communication', reactiveSession)) {
-                                moreTab.items.unshift(communicationTab);
-                            }
-
+                            moreTab.items.unshift(communicationTab);
                             moreTab.items.unshift(settingsTab);
                         }
                         else {
@@ -486,9 +482,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             }
 
                             if (reactiveSession.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders)) {
-                                if (manualFeatureFlag('communication', reactiveSession)) {
-                                    moreTab.items.unshift(communicationTab);
-                                }
+                                moreTab.items.unshift(communicationTab);
                             }
                         }
 
