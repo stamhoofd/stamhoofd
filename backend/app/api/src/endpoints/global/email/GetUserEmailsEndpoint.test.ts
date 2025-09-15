@@ -40,6 +40,11 @@ describe('Endpoint.GetUserEmails', () => {
         userToken = await Token.createToken(user);
     });
 
+    afterEach(async () => {
+        // Delete all emails
+        await Email.delete();
+    });
+
     const getUserEmails = async (query: LimitedFilteredRequest = new LimitedFilteredRequest({ limit: 10 }), token: Token = userToken, testOrganization: Organization = organization) => {
         const request = Request.get({
             path: baseUrl,
@@ -379,8 +384,7 @@ describe('Endpoint.GetUserEmails', () => {
 
         // Should prefer the exact match recipient
         expect(emailResult.recipients).toHaveLength(1);
-        expect(emailResult.recipients[0].firstName).toBe('Exact');
-        expect(emailResult.recipients[0].lastName).toBe('Match');
+        expect(emailResult.recipients[0].id).toBe(exactMatchRecipient.id);
     });
 
     test('Should return generic data when recipient has no matching user id or email', async () => {
@@ -420,12 +424,7 @@ describe('Endpoint.GetUserEmails', () => {
 
         // Should return the generic recipient data
         expect(emailResult.recipients).toHaveLength(1);
-        expect(emailResult.recipients[0].firstName).toBe('Generic');
-        expect(emailResult.recipients[0].lastName).toBe('Member');
-        // The original recipient struct keeps its original userId and email
-        expect(emailResult.recipients[0].userId).toBe(null); // Original was null
-        expect(emailResult.recipients[0].email).toBe(null); // Original was null
-        // But replacements should be generated for the current user (tested below)
+        expect(emailResult.recipients[0].id).toBe(genericRecipient.id);
         expect(emailResult.recipients[0].replacements).toBeDefined();
     });
 
@@ -440,7 +439,7 @@ describe('Endpoint.GetUserEmails', () => {
         email.subject = 'Sensitive Data Email';
         email.status = EmailStatus.Sent;
         email.text = 'Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}';
-        email.html = '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>';
+        email.html = '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>{{balanceTable}}';
         email.json = {};
         email.organizationId = organization.id;
         email.showInMemberPortal = true;
@@ -498,9 +497,9 @@ describe('Endpoint.GetUserEmails', () => {
         expect(emailResult.recipients).toHaveLength(1);
         const recipient = emailResult.recipients[0];
 
-        // The original recipient struct keeps its original userId and email from the sensitive user
-        expect(recipient.userId).toBe(sensitiveUser.id); // Original userId
-        expect(recipient.email).toBe(sensitiveUser.email); // Original email
+        // The original recipient struct keeps its original userId and email from the sensitive user, but returns different data:
+        expect(recipient.userId).toBe(user.id); // new userId
+        expect(recipient.email).toBe(user.email); // new email
 
         // Verify that sensitive data has been properly processed
         expect(recipient.replacements).toBeDefined();
@@ -550,6 +549,139 @@ describe('Endpoint.GetUserEmails', () => {
         const balanceTableReplacement = recipient.replacements.find(r => r.token === 'balanceTable');
         expect(balanceTableReplacement).toBeDefined();
         expect(balanceTableReplacement!.html).toBe('<p class="description">' + $t('4c4f6571-f7b5-469d-a16f-b1547b43a610') + '</p>');
+    });
+
+    test('Should return one recipient for each member the user is associated with, if the email is different for each member', async () => {
+        // Create another member associated with the same user
+        const secondMember = await new MemberFactory({
+            organization,
+            user,
+        }).create();
+
+        // Create an email
+        const email = new Email();
+        email.subject = 'Email for Multiple Members';
+        email.status = EmailStatus.Sent;
+        email.text = 'Member name: {{memberFirstName}}';
+        email.html = '<p>Member name: {{memberFirstName}}</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.showInMemberPortal = true;
+        email.sentAt = new Date();
+        await email.save();
+
+        // Create an email recipient linked to the FIRST member
+        const recipient1 = new EmailRecipient();
+        recipient1.emailId = email.id;
+        recipient1.memberId = member.id; // First member
+        recipient1.userId = user.id;
+        recipient1.email = user.email;
+        recipient1.firstName = member.details.firstName;
+        recipient1.lastName = member.details.lastName;
+        recipient1.replacements = [
+            Replacement.create({
+                token: 'memberFirstName',
+                value: member.details.firstName,
+            }),
+        ];
+        recipient1.sentAt = new Date();
+        await recipient1.save();
+
+        // Create an email recipient linked to the SECOND member
+        const recipient2 = new EmailRecipient();
+        recipient2.emailId = email.id;
+        recipient2.memberId = secondMember.id; // Second member
+        recipient2.userId = user.id;
+        recipient2.email = user.email;
+        recipient2.firstName = secondMember.details.firstName;
+        recipient2.lastName = secondMember.details.lastName;
+        recipient2.sentAt = new Date();
+        recipient2.replacements = [
+            Replacement.create({
+                token: 'memberFirstName',
+                value: secondMember.details.firstName,
+            }),
+        ];
+        await recipient2.save();
+
+        const response = await getUserEmails(
+            new LimitedFilteredRequest({ limit: 10, search: 'Email for Multiple Members' }),
+        );
+
+        expect(response.body.results).toHaveLength(1);
+        const emailResult = response.body.results[0];
+
+        // Should include both members as separate recipients
+        expect(emailResult.recipients).toHaveLength(2);
+        const firstNames = emailResult.recipients.map(r => r.member?.firstName);
+        expect(firstNames).toContain(member.details.firstName);
+        expect(firstNames).toContain(secondMember.details.firstName);
+    });
+
+    test('Should return a merged recipient for each member the user is associated with, if the email is the same for each member', async () => {
+        // Create another member associated with the same user
+        const secondMember = await new MemberFactory({
+            organization,
+            user,
+        }).create();
+
+        // Create an email
+        const email = new Email();
+        email.subject = 'Email for Multiple Members';
+        email.status = EmailStatus.Sent;
+        email.text = 'Same content';
+        email.html = '<p>Same content</p>';
+        email.json = {};
+        email.organizationId = organization.id;
+        email.showInMemberPortal = true;
+        email.sentAt = new Date();
+        await email.save();
+
+        // Create an email recipient linked to the FIRST member
+        const recipient1 = new EmailRecipient();
+        recipient1.emailId = email.id;
+        recipient1.memberId = member.id; // First member
+        recipient1.userId = user.id;
+        recipient1.email = user.email;
+        recipient1.firstName = member.details.firstName;
+        recipient1.lastName = member.details.lastName;
+        recipient1.replacements = [
+            // will get automatically removed because it is not used
+            Replacement.create({
+                token: 'memberFirstName',
+                value: member.details.firstName,
+            }),
+        ];
+        recipient1.sentAt = new Date();
+        await recipient1.save();
+
+        // Create an email recipient linked to the SECOND member
+        const recipient2 = new EmailRecipient();
+        recipient2.emailId = email.id;
+        recipient2.memberId = secondMember.id; // Second member
+        recipient2.userId = user.id;
+        recipient2.email = user.email;
+        recipient2.firstName = secondMember.details.firstName;
+        recipient2.lastName = secondMember.details.lastName;
+        recipient2.sentAt = new Date();
+        recipient2.replacements = [
+            // will get automatically removed because it is not used
+            Replacement.create({
+                token: 'memberFirstName',
+                value: secondMember.details.firstName,
+            }),
+        ];
+        await recipient2.save();
+
+        const response = await getUserEmails(
+            new LimitedFilteredRequest({ limit: 10, search: 'Email for Multiple Members' }),
+        );
+
+        expect(response.body.results).toHaveLength(1);
+        const emailResult = response.body.results[0];
+
+        // Should include both members as separate recipients
+        expect(emailResult.recipients).toHaveLength(1);
     });
 
     test('Should not return emails from other members the user does not have access to', async () => {

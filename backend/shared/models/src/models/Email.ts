@@ -1365,37 +1365,53 @@ export class Email extends QueryableModel {
         const cleanedRecipients: EmailRecipient[] = [...recipientsMap.values()];
         const structures = await EmailRecipient.getStructures(cleanedRecipients);
 
-        const virtualRecipients = structures.map((struct) => {
-            const recipient = struct.getRecipient();
-
-            return {
-                struct,
-                recipient,
-            };
-        });
-        for (const { struct, recipient } of virtualRecipients) {
+        for (const struct of structures) {
             if (!(struct.userId === user.id || struct.email === user.email) && !((struct.userId === null && struct.email === null))) {
-                stripSensitiveRecipientReplacements(recipient, {
+                stripSensitiveRecipientReplacements(struct, {
                     organization,
                     willFill: true,
                 });
             }
 
-            recipient.email = user.email;
-            recipient.userId = user.id;
+            struct.firstName = user.firstName;
+            struct.lastName = user.lastName;
+            struct.email = user.email;
+            struct.userId = user.id;
 
             // We always refresh the data when we display it on the web (so everything is up to date)
-            await fillRecipientReplacements(recipient, {
+            await fillRecipientReplacements(struct, {
                 organization,
                 from: this.getFromAddress(),
                 replyTo: null,
                 forPreview: false,
                 forceRefresh: true,
             });
-            stripRecipientReplacementsForWebDisplay(recipient, {
+            stripRecipientReplacementsForWebDisplay(struct, {
                 organization,
             });
-            struct.replacements = recipient.replacements;
+            if (this.html) {
+                struct.replacements = removeUnusedReplacements(this.html, struct.replacements);
+            }
+        }
+
+        // Loop structures and remove if they have exactly the same content
+        // We do this here, because it is possible the user didn't receive any emails, so
+        // the merging at time of sending the emails didn't happen (uniqueness happened on email)
+        const uniqueStructures: EmailRecipientStruct[] = [];
+        for (const struct of structures) {
+            let found = false;
+            for (const unique of uniqueStructures) {
+                const merged = mergeReplacementsIfEqual(unique.replacements, struct.replacements);
+                if (merged !== false) {
+                    unique.replacements = merged;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                uniqueStructures.push(struct);
+            }
         }
 
         let organizationStruct: BaseOrganization | null = null;
@@ -1406,7 +1422,7 @@ export class Email extends QueryableModel {
         return EmailWithRecipients.create({
             ...this,
             organization: organizationStruct,
-            recipients: structures,
+            recipients: uniqueStructures,
 
             // Remove private-like data
             softBouncesCount: 0,
