@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-env",
-    "version": "2.97.2",
+    "version": "2.97.3",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "license": "UNLICENCED",
