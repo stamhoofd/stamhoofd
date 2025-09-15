@@ -875,6 +875,10 @@
     "original": "Type groep",
     "translation": "Group type"
   },
+  "b2dffb50-f8b1-4211-83d2-49a7b4008508": {
+    "original": "Je kan niet meerdere leden van verschillende groepen tegelijk uitschrijven.",
+    "translation": "You can't unsubscribe multiple members from different groups at the same time."
+  },
   "b2fbd227-40a3-495d-9826-0e199000cda9": {
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw groep. Stel deze eerst in voor je verder gaat.",
     "translation": "You have not yet added billing data to your group. Set this up before continuing."

@@ -2919,6 +2919,10 @@
     "original": "Voeg tag toe",
     "translation": "Ajouter une balise"
   },
+  "208ae3f1-1720-4d79-96fd-5c05d97c9de0": {
+    "original": "Bericht sturen",
+    "translation": "Envoyer un message"
+  },
   "208e986f-e479-4846-bf51-e557a5d38994": {
     "original": "Nationale activiteiten",
     "translation": "Activités nationales"
@@ -10903,6 +10907,10 @@
     "original": "Allergieën",
     "translation": "Allergies"
   },
+  "7bd45367-4d32-408d-80f8-83bcc120d1de": {
+    "original": "Alle berichten die werden verzonden aan {firstName}.",
+    "translation": "Tous les messages envoyés à {firstName}."
+  },
   "7bf36754-abf8-40f0-a7f0-70439bbbecac": {
     "original": "Ja, ook voor gezinsleden",
     "translation": "Oui, également pour les membres de la famille"
@@ -11390,6 +11398,10 @@
   "8273e002-e243-4d43-9085-c0a1e7c2c301": {
     "original": "Proefperiodes",
     "translation": "Périodes d'essai"
+  },
+  "82a881a0-5666-4649-961a-c8f6c48177d0": {
+    "original": "Toon berichten",
+    "translation": "Afficher les messages"
   },
   "82af2364-c711-4e44-a871-9346c2cab66a": {
     "original": "Je kan geen aansluitingen aanpassen in een ongeldig werkjaar",
@@ -15566,6 +15578,10 @@
   "b2add4d5-65c6-4a91-9e10-f74cadf24001": {
     "original": "Ongeldig rekeningnummer:",
     "translation": "Numéro de compte invalide :"
+  },
+  "b2dffb50-f8b1-4211-83d2-49a7b4008508": {
+    "original": "Je kan niet meerdere leden van verschillende verenigingen tegelijk uitschrijven.",
+    "translation": "Vous ne pouvez pas désinscrire plusieurs membres de différentes associations en même temps."
   },
   "b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1": {
     "original": "Dit werkjaar is niet actief",
@@ -20446,6 +20462,10 @@
   "e81e0ffa-8ed9-4382-bc07-479728006648": {
     "original": "aangevinkt",
     "translation": "coché"
+  },
+  "e8207525-275b-48c4-9282-199f17085175": {
+    "original": "Bericht sturen",
+    "translation": "Envoyer un message"
   },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen werkjaar liggen",

@@ -1003,6 +1003,10 @@
     "original": "Type eenheid",
     "translation": "Unit type"
   },
+  "b2dffb50-f8b1-4211-83d2-49a7b4008508": {
+    "original": "Je kan niet meerdere leden van verschillende eenheden tegelijk uitschrijven.",
+    "translation": "You cannot unregister members from different units at the same time."
+  },
   "b2e0df73-bf2c-421c-8feb-7bec5fe7d8c1": {
     "original": "Dit scoutsjaar is niet actief",
     "translation": "This scouting year is not active"

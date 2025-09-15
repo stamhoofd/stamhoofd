@@ -1043,6 +1043,10 @@
     "original": "Type groep",
     "translation": "Type de groupe"
   },
+  "b2dffb50-f8b1-4211-83d2-49a7b4008508": {
+    "original": "Je kan niet meerdere leden van verschillende groepen tegelijk uitschrijven.",
+    "translation": "Vous ne pouvez pas désinscrire plusieurs membres de groupes différents en même temps."
+  },
   "b2fbd227-40a3-495d-9826-0e199000cda9": {
     "original": "Je hebt nog geen facturatiegegevens toegevoegd aan jouw groep. Stel deze eerst in voor je verder gaat.",
     "translation": "Vous n'avez pas encore ajouté de données de facturation à votre groupe. Veuillez d'abord les configurer avant de continuer."
