@@ -230,6 +230,9 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
 }
 
 function createDefaultUIFilter(): UIFilter | null {
+    if (props.members && props.members.length > 0) {
+        return null;
+    }
     const filter = getDefaultStamhoofdFilter();
     return filterBuilders[0].fromFilter(filter);
 }
