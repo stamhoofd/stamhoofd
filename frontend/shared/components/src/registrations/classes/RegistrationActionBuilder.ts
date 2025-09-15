@@ -1,7 +1,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
@@ -10,6 +10,9 @@ import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCa
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
+import { AuditLogsView } from '../../audit-logs';
+import { Toast } from '../../overlays/Toast';
+import { CommunicationView } from '../../communication';
 
 export function useDirectRegistrationActions(options?: { groups?: Group[];
     organizations?: Organization[];
@@ -94,6 +97,8 @@ export class RegistrationActionBuilder {
             (options.includeEdit ? this.getEditAction() : null),
             (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
             this.getUnsubscribeAction(),
+            ...this.getAuditLogAction(),
+            ...this.getMessagesAction(),
         ].filter(a => a !== null);
 
         return actions;
@@ -225,10 +230,6 @@ export class RegistrationActionBuilder {
     }
 
     private getUnsubscribeAction(): InMemoryTableAction<PlatformRegistration> | null {
-        if (this.groups.length !== 1) {
-            return null;
-        }
-
         return new InMemoryTableAction({
             name: $t(`69aaebd1-f031-4237-8150-56e377310cf5`),
             destructive: true,
@@ -241,6 +242,76 @@ export class RegistrationActionBuilder {
                 await this.deleteRegistrations(registrations);
             },
         });
+    }
+
+    getAuditLogAction(): TableAction<PlatformRegistration>[] {
+        if ((this.organizations.length !== 1 || this.organizations[0].id !== this.context.organization?.id) && !this.context.auth.hasPlatformFullAccess()) {
+            return [];
+        }
+
+        if (this.organizations.length === 1 && this.organizations[0].id === this.context.organization?.id && !this.context.auth.hasFullAccess()) {
+            return [];
+        }
+
+        return [
+            new InMemoryTableAction({
+                name: $t(`a5cf8db3-5fb8-4a4c-9940-31d758433f23`),
+                priority: 1,
+                groupIndex: 6,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (registations: PlatformRegistration[]) => {
+                    const members = getUniqueMembersFromRegistrations(registations);
+                    if (members.length > 100) {
+                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        return;
+                    }
+                    await this.present({
+                        components: [
+                            new ComponentWithProperties(AuditLogsView, {
+                                objectIds: members.map(m => m.id),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
+                icon: 'history',
+            }),
+        ];
+    }
+
+    getMessagesAction(): TableAction<PlatformRegistration>[] {
+        if (!this.context.auth.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read)) {
+            return [];
+        }
+
+        return [
+            new InMemoryTableAction({
+                name: $t(`Toon berichten`),
+                priority: 1,
+                groupIndex: 6,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (registations: PlatformRegistration[]) => {
+                    const members = getUniqueMembersFromRegistrations(registations);
+                    if (members.length > 100) {
+                        Toast.error($t(`dc5db5f5-4027-42fa-a998-1535e2c3a82a`)).show();
+                        return;
+                    }
+                    await this.present({
+                        components: [
+                            new ComponentWithProperties(NavigationController, {
+                                root: new ComponentWithProperties(CommunicationView, {
+                                    members,
+                                }),
+                            }),
+                        ],
+                        modalDisplayStyle: 'popup',
+                    });
+                },
+                icon: 'history',
+            }),
+        ];
     }
 
     private getDeleteMemberAction() {
@@ -608,9 +679,20 @@ export class RegistrationActionBuilder {
             member: registration.member,
         }));
 
+        const filteredOrganizations = getUniqueOrganizationsFromRegistrations(registrations);
+        if (filteredOrganizations.length === 0) {
+            return;
+        }
+
+        if (filteredOrganizations.length > 1) {
+            Toast.error($t(`Je kan niet meerdere leden van verschillende verenigingen tegelijk uitschrijven.`)).show();
+            return;
+        }
+
         return await chooseOrganizationMembersForGroup({
             members: getUniqueMembersFromRegistrations(registrations),
             group: this.groups[0],
+            organization: filteredOrganizations[0],
             context: this.context,
             owner: this.owner,
             deleteRegistrations,
@@ -655,4 +737,9 @@ function getUniqueMembersFromRegistrations(registrations: PlatformRegistration[]
     const allMembers = registrations.map(r => r.member);
     const uniqueMemberIds = new Set(allMembers.map(m => m.id));
     return [...uniqueMemberIds].map(id => allMembers.find(m => m.id === id)!);
+}
+
+function getUniqueOrganizationsFromRegistrations(registrations: PlatformRegistration[]): Organization[] {
+    const allOrganinizationIds = Formatter.uniqueArray(registrations.map(r => r.organizationId));
+    return allOrganinizationIds.map(id => registrations.find(r => r.organizationId === id)!.member.organizations.find(o => o.id === id)!).filter(o => !!o);
 }
