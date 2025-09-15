@@ -431,10 +431,10 @@ export class PlatformConfig extends AutoEncoder {
      * This is not the logo of the platform, but of the corresponding organization (e.g. KSA)
      * Optional. When not set, it will use the squareLogo
      */
-    @field({ decoder: Image, nullable: true, ...NextVersion })
+    @field({ decoder: Image, nullable: true, version: 384 })
     organizationLogo: Image | null = null;
 
-    @field({ decoder: Image, nullable: true, ...NextVersion })
+    @field({ decoder: Image, nullable: true, version: 384 })
     organizationLogoDark: Image | null = null;
 
     @field({ decoder: Image, nullable: true, version: 348 })

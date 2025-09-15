@@ -180,10 +180,10 @@ export class Email extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 382 })
     deletedAt: Date | null = null;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 384 })
     sendAsEmail = true;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 384 })
     showInMemberPortal = false;
 
     getTemplateType() {
