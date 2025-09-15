@@ -558,8 +558,8 @@ async function showSmartVariableMenu(event: MouseEvent) {
             ? [
                     [new ContextMenuItem({
                         icon: 'email',
-                        name: 'Emailonly',
-                        description: 'Inhoud die enkel zichtbaar is in e-mails, niet op het ledenportaal',
+                        name: $t('Enkel in e-mails'),
+                        description: $t('Inhoud die enkel zichtbaar is in e-mails, niet in het ledenportaal'),
                         action: () => {
                             editor.value.chain().focus().toggleEmailBlock().run();
 
