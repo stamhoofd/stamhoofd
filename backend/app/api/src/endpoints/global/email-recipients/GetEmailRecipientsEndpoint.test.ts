@@ -186,6 +186,173 @@ describe('Endpoint.GetEmailRecipients', () => {
         });
     });
 
+    test('It can request all email recipients of a single email in combination with other filters', async () => {
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Draft;
+        email.text = 'test email';
+        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender2.id;
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.email = 'jan.janssens@geenemail.com';
+        emailRecipient.firstName = 'Jan';
+        emailRecipient.lastName = 'Janssens';
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        await emailRecipient.save();
+
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                filter: {
+                    emailId: email.id,
+                    email: {
+                        $contains: 'jan',
+                    },
+                },
+                limit: 10,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token2.accessToken,
+            },
+        });
+        const result = await testServer.test(endpoint, request);
+        expect(result.body.results).toHaveLength(1);
+        expect(result.body.results[0]).toMatchObject({
+            id: emailRecipient.id,
+        });
+    });
+
+    test('[Regression] It can request all email recipients of a single email in combination with $and filters', async () => {
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Draft;
+        email.text = 'test email';
+        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender2.id;
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.email = 'jan.janssens@geenemail.com';
+        emailRecipient.firstName = 'Jan';
+        emailRecipient.lastName = 'Janssens';
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        await emailRecipient.save();
+
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                filter: {
+                    $and: [
+                        { emailId: email.id },
+                        { email: { $contains: 'jan' } },
+                    ],
+                },
+                limit: 10,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token2.accessToken,
+            },
+        });
+        const result = await testServer.test(endpoint, request);
+        expect(result.body.results).toHaveLength(1);
+        expect(result.body.results[0]).toMatchObject({
+            id: emailRecipient.id,
+        });
+    });
+
+    test('[Regression] It can request all email recipients of a single email in combination with multiple $and filters', async () => {
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Draft;
+        email.text = 'test email';
+        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender2.id;
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.email = 'jan.janssens@geenemail.com';
+        emailRecipient.firstName = 'Jan';
+        emailRecipient.lastName = 'Janssens';
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        await emailRecipient.save();
+
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                filter: {
+                    $and: [
+                        { emailId: email.id },
+                        { email: { $contains: 'jan' } },
+                    ],
+                    email: { $contains: 'ssens' },
+                },
+                limit: 10,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token2.accessToken,
+            },
+        });
+        const result = await testServer.test(endpoint, request);
+        expect(result.body.results).toHaveLength(1);
+        expect(result.body.results[0]).toMatchObject({
+            id: emailRecipient.id,
+        });
+    });
+
+    test('It cannot request all email recipients of a single email in combination with $or filters', async () => {
+        const email = new Email();
+        email.subject = 'test subject';
+        email.status = EmailStatus.Draft;
+        email.text = 'test email';
+        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.json = {};
+        email.organizationId = organization.id;
+        email.senderId = sender2.id;
+        await email.save();
+
+        const emailRecipient = new EmailRecipient();
+        emailRecipient.email = 'jan.janssens@geenemail.com';
+        emailRecipient.firstName = 'Jan';
+        emailRecipient.lastName = 'Janssens';
+        emailRecipient.emailId = email.id;
+        emailRecipient.organizationId = organization.id;
+        await emailRecipient.save();
+
+        const request = Request.get({
+            path: baseUrl,
+            host: organization.getApiHost(),
+            query: new LimitedFilteredRequest({
+                filter: {
+                    $or: [
+                        { emailId: email.id },
+                        { email: { $contains: 'jan' } },
+                    ],
+                },
+                limit: 10,
+            }),
+            headers: {
+                authorization: 'Bearer ' + token2.accessToken,
+            },
+        });
+        await expect(testServer.test(endpoint, request))
+            .rejects
+            .toThrow(STExpect.errorWithCode('permission_denied'));
+    });
+
     test('It cannot request all email recipients of a single email if read permission for another sender', async () => {
         const email = new Email();
         email.subject = 'test subject';

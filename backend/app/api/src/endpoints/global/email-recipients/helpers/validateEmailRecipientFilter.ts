@@ -15,7 +15,7 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
             && filter !== null
             && filter['$and']
             && Array.isArray(filter['$and'])
-            && Object.keys(filter).length === 1
+            && Object.keys(filter).length >= 1 // does not matter if more than 1, because root is always $and together
             && filter['$and'].length > 0
         ) {
             for (const subFilter of filter['$and']) {
