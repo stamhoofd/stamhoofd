@@ -102,7 +102,7 @@ const getFilterBuilders = useEmailRecipientsFilterBuilders();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const configurationId = computed(() => {
-    return 'event-notifications';
+    return 'email-recipients';
 });
 const filterBuilders = computed(() => getFilterBuilders());
 
