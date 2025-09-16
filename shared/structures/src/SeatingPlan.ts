@@ -500,6 +500,18 @@ function isNumeric(str: string) {
     return /^\d+$/.test(str);
 }
 
+function isAlphaNumeric(str: string) {
+    return /^\D+$/.test(str);
+}
+
+function hasDigit(str: string) {
+  return /\d+/.test(str);
+}
+
+function hasNonDigit(str: string) {
+  return /\D+/.test(str);
+}
+
 export class ReservedSeat extends AutoEncoder {
     /**
      * Id of the section
@@ -593,16 +605,38 @@ export class ReservedSeat extends AutoEncoder {
     }
 
     getShortName(product: Product) {
-        if (!product.seatingPlanId) {
-            return ''
+      if (!product.seatingPlanId) {
+        return "";
+      }
+
+        if (
+          // both only digit
+          isNumeric(this.row) &&
+          isNumeric(this.seat)
+        ) {
+          return "R" + this.row + "Z" + this.seat;
         }
 
-        if (isNumeric(this.row) !== isNumeric(this.seat)) {
-            // Clean string
-            return this.row + this.seat
+        if (
+          // both only alphanumeric
+          isAlphaNumeric(this.row) &&
+          isAlphaNumeric(this.seat)
+        ) {
+          return this.row + "-" + this.seat;
         }
 
-        return 'R'+this.row+'Z'+this.seat
+        if (
+          (hasDigit(this.row) && hasNonDigit(this.row)) ||
+          (hasDigit(this.seat) && hasNonDigit(this.seat))
+        ) {
+          if (this.row.includes("-") || this.seat.includes("-")) {
+            return this.row + "/" + this.seat;
+          }
+          return this.row + "-" + this.seat;
+        }
+
+        // Clean string
+        return this.row + this.seat;
     }
 
     equals(reservedSeat: ReservedSeat) {
