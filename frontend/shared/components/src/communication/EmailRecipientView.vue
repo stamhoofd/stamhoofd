@@ -384,7 +384,7 @@ async function unblockEmailAddress() {
         emailAddresSettings.value.markedAsSpam = false;
         emailAddresSettings.value.hardBounce = false;
         Toast.success(
-            $t('4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11', { email: props.recipient.email }),
+            $t('4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11', { email: props.recipient.email || '' }),
         ).setIcon('unlock green').show();
     }
     catch (e) {
