@@ -687,8 +687,14 @@ export class Email extends QueryableModel {
 
             try {
                 if (error === null) {
-                // Mark saved
+                    // Mark saved
                     recipient.sentAt = new Date();
+                    recipient.failErrorMessage = null;
+
+                    if (recipient.failError) {
+                        recipient.previousFailError = recipient.failError;
+                    }
+                    recipient.failError = null;
 
                     // Update repacements that have been generated
                     recipient.replacements = virtualRecipient.replacements;
@@ -697,6 +703,9 @@ export class Email extends QueryableModel {
                 else {
                     recipient.failCount += 1;
                     recipient.failErrorMessage = error.message;
+                    if (recipient.failError) {
+                        recipient.previousFailError = recipient.failError;
+                    }
                     recipient.failError = errorToSimpleErrors(error);
                     recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
                     recipient.lastFailedAt = new Date();
@@ -733,36 +742,49 @@ export class Email extends QueryableModel {
         return await promise;
     }
 
-    async resumeSending(): Promise<Email | null> {
+    async resumeSending(singleRecipientId: string | null = null): Promise<Email | null> {
         const id = this.id;
         return await QueueHandler.schedule('send-email', async ({ abort }) => {
             return await this.lock(async function (upToDate: Email) {
                 if (upToDate.status === EmailStatus.Sent) {
                     // Already done
                     // In other cases -> queue has stopped and we can retry
-                    return upToDate;
+                    if (!singleRecipientId) {
+                        console.log('Email already sent, skipping...', upToDate.id);
+                        return upToDate;
+                    }
+                }
+                else {
+                    if (singleRecipientId) {
+                        // Not possible
+                        throw new SimpleError({
+                            code: 'invalid_state',
+                            message: 'Cannot retry single recipient for email that is not yet sent',
+                        });
+                    }
+
+                    if (upToDate.status === EmailStatus.Sending) {
+                    // This is an automatic retry.
+                        if (upToDate.emailType) {
+                        // Not eligible for retry
+                            upToDate.status = EmailStatus.Failed;
+                            await upToDate.save();
+                            return upToDate;
+                        }
+                        if (upToDate.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
+                        // Too long
+                            console.error('Email has been sending for too long. Marking as failed...', upToDate.id);
+                            upToDate.status = EmailStatus.Failed;
+                            await upToDate.save();
+                            return upToDate;
+                        }
+                    }
+                    else if (upToDate.status !== EmailStatus.Queued) {
+                        console.error('Email is not queued or sending, cannot send', upToDate.id, upToDate.status);
+                        return upToDate;
+                    }
                 }
 
-                if (upToDate.status === EmailStatus.Sending) {
-                    // This is an automatic retry.
-                    if (upToDate.emailType) {
-                        // Not eligible for retry
-                        upToDate.status = EmailStatus.Failed;
-                        await upToDate.save();
-                        return upToDate;
-                    }
-                    if (upToDate.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
-                        // Too long
-                        console.error('Email has been sending for too long. Marking as failed...', upToDate.id);
-                        upToDate.status = EmailStatus.Failed;
-                        await upToDate.save();
-                        return upToDate;
-                    }
-                }
-                else if (upToDate.status !== EmailStatus.Queued) {
-                    console.error('Email is not queued or sending, cannot send', upToDate.id, upToDate.status);
-                    return upToDate;
-                }
                 const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
                 let from = upToDate.getDefaultFromAddress(organization);
                 let replyTo: EmailInterfaceRecipient | null = upToDate.getFromAddress();
@@ -789,7 +811,10 @@ export class Email extends QueryableModel {
                     }
 
                     abort.throwIfAborted();
-                    upToDate.status = EmailStatus.Sending;
+
+                    if (!singleRecipientId) {
+                        upToDate.status = EmailStatus.Sending;
+                    }
                     upToDate.sentAt = upToDate.sentAt ?? new Date();
                     await upToDate.save();
 
@@ -827,6 +852,11 @@ export class Email extends QueryableModel {
                         let lastStatusSave = new Date();
 
                         async function saveStatus() {
+                            if (singleRecipientId) {
+                                // Don't save during looping
+                                return;
+                            }
+
                             if (!upToDate) {
                                 return;
                             }
@@ -895,6 +925,21 @@ export class Email extends QueryableModel {
                                     continue;
                                 }
 
+                                if (singleRecipientId) {
+                                    if (recipient.id !== singleRecipientId) {
+                                        // Failed or soft-failed
+                                        if (recipient.failError && isSoftEmailRecipientError(recipient.failError)) {
+                                            softFailedCount += 1;
+                                        }
+                                        else {
+                                            failedCount += 1;
+                                        }
+                                        skipped++;
+                                        await saveStatus();
+                                        continue;
+                                    }
+                                }
+
                                 const promise = upToDate.sendSingleRecipient(recipient, organization ?? null, {
                                     from,
                                     replyTo,
@@ -932,45 +977,49 @@ export class Email extends QueryableModel {
                         throw e;
                     }
 
-                    upToDate.succeededCount = succeededCount;
-                    upToDate.softFailedCount = softFailedCount;
-                    upToDate.failedCount = failedCount;
+                    if (!singleRecipientId) {
+                        upToDate.succeededCount = succeededCount;
+                        upToDate.softFailedCount = softFailedCount;
+                        upToDate.failedCount = failedCount;
 
-                    if (isAbortedError(e) || ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))) {
-                        // Keep sending status: we'll resume after the reboot
+                        if (isAbortedError(e) || ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))) {
+                            // Keep sending status: we'll resume after the reboot
+                            await upToDate.save();
+                            throw e;
+                        }
+
+                        upToDate.emailErrors = errorToSimpleErrors(e);
+                        upToDate.status = EmailStatus.Failed;
                         await upToDate.save();
-                        throw e;
                     }
-
-                    upToDate.emailErrors = errorToSimpleErrors(e);
-                    upToDate.status = EmailStatus.Failed;
-                    await upToDate.save();
                     throw e;
                 }
 
-                if (upToDate.sendAsEmail && upToDate.emailRecipientsCount === 0 && upToDate.userId === null) {
-                    // We only delete automated emails (email type) if they have no recipients
-                    console.log('No recipients found for email ', upToDate.id, ' deleting...');
-                    await upToDate.delete();
-                    return null;
-                }
+                if (!singleRecipientId) {
+                    if (upToDate.sendAsEmail && upToDate.emailRecipientsCount === 0 && upToDate.userId === null) {
+                        // We only delete automated emails (email type) if they have no recipients
+                        console.log('No recipients found for email ', upToDate.id, ' deleting...');
+                        await upToDate.delete();
+                        return null;
+                    }
 
-                console.log('Finished sending email', upToDate.id);
-                // Mark email as sent
+                    console.log('Finished sending email', upToDate.id);
+                    // Mark email as sent
 
-                if (upToDate.sendAsEmail && !upToDate.showInMemberPortal && (succeededCount + failedCount + softFailedCount) === 0) {
-                    upToDate.status = EmailStatus.Failed;
-                    upToDate.emailErrors = new SimpleErrors(
-                        new SimpleError({
-                            code: 'no_recipients',
-                            message: 'No recipients',
-                            human: $t(`9fe3de8e-090c-4949-97da-4810ce9e61c7`),
-                        }),
-                    );
-                }
-                else {
-                    upToDate.status = EmailStatus.Sent;
-                    upToDate.emailErrors = null;
+                    if (upToDate.sendAsEmail && !upToDate.showInMemberPortal && (succeededCount + failedCount + softFailedCount) === 0) {
+                        upToDate.status = EmailStatus.Failed;
+                        upToDate.emailErrors = new SimpleErrors(
+                            new SimpleError({
+                                code: 'no_recipients',
+                                message: 'No recipients',
+                                human: $t(`9fe3de8e-090c-4949-97da-4810ce9e61c7`),
+                            }),
+                        );
+                    }
+                    else {
+                        upToDate.status = EmailStatus.Sent;
+                        upToDate.emailErrors = null;
+                    }
                 }
 
                 upToDate.succeededCount = succeededCount;

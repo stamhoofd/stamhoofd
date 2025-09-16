@@ -12,6 +12,12 @@ export class EmailAddressSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
     unsubscribedAll: boolean;
 
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    hardBounce = false;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    markedAsSpam = false;
+
     @field({ decoder: OrganizationSimple, nullable: true })
     organization: OrganizationSimple | null = null;
 }

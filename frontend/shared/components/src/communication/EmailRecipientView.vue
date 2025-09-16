@@ -13,6 +13,14 @@
                     {{ title }}
                 </h1>
 
+                <p v-if="recipient.previousFailError && !recipient.failError" class="info-box">
+                    {{ $t('Het versturen van deze e-mail was initieel mislukt (bv. geblokkeerd e-mailadres), maar het versturen werd daarna opnieuw geprobeerd en is nu wel gelukt.') }}
+                </p>
+
+                <p v-if="recipient.sentAt && emailAddresSettings && (emailAddresSettings.unsubscribedAll || emailAddresSettings.unsubscribedMarketing)" class="info-box">
+                    <I18nComponent :t="$t('Deze ontvanger heeft zich na het ontvangen van deze e-mail uitgeschreven voor (een deel van) de e-mails die je verstuurt.')" />
+                </p>
+
                 <p v-if="recipient.spamComplaintError" class="error-box">
                     <I18nComponent :t="$t('5d83c1fc-37e5-4d57-8581-7a1f629c19b0')">
                         <template #button="{content}">
@@ -125,14 +133,79 @@
                 </STList>
 
                 <EmailPreviewBox v-if="email && recipient.sentAt" :email="email" :recipient="recipient" />
+
+                <template v-if="email && email.status === EmailStatus.Sent && (!recipient.sentAt || (emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce))) && auth.hasPlatformFullAccess()">
+                    <hr>
+                    <h2>{{ $t('7c093146-6de1-413b-bbda-2ada3fd63dea') }}</h2>
+
+                    <STList>
+                        <STListItem v-if="emailAddresSettings && (emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce)" :selectable="true" element-name="button" @click="unblockEmailAddress">
+                            <template #left>
+                                <IconContainer icon="email" class="error">
+                                    <template #aside>
+                                        <span class="icon unlock small stroke" />
+                                    </template>
+                                </IconContainer>
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t('Blokkering opheffen') }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Dit e-mailadres is momenteel geblokkeerd') }}
+                            </p>
+
+                            <template #right>
+                                <Spinner v-if="isUnblockingEmailAddress" />
+                                <span v-else class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+
+                        <STListItem v-if="emailAddresSettings && !(emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce)">
+                            <template #left>
+                                <IconContainer icon="email" class="theme-success">
+                                    <template #aside>
+                                        <span class="icon success small stroke" />
+                                    </template>
+                                </IconContainer>
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t('Niet (meer) geblokkeerd') }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Dit e-mailadres is momenteel niet (meer) geblokkeerd') }}
+                            </p>
+                        </STListItem>
+
+                        <STListItem v-if="!recipient.sentAt && email && email.status === EmailStatus.Sent && (!emailAddresSettings || !(emailAddresSettings.markedAsSpam || emailAddresSettings.hardBounce))" :selectable="true" element-name="button" @click="retrySending">
+                            <template #left>
+                                <IconContainer icon="email" class="theme-secundary">
+                                    <template #aside>
+                                        <span class="icon retry small stroke" />
+                                    </template>
+                                </IconContainer>
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t('Opnieuw proberen versturen') }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Probeer de e-mail opnieuw te versturen naar deze ontvanger') }}
+                            </p>
+
+                            <template #right>
+                                <Spinner v-if="isRetrying" />
+                                <span v-else class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
+                </template>
             </main>
         </div>
     </LoadingViewTransition>
 </template>
 
 <script setup lang="ts">
-import { bounceErrorToHuman, EmailPreview, EmailRecipient, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
-import { useBackForward, useContext } from '../hooks';
+import { bounceErrorToHuman, EmailAddressSettings, EmailPreview, EmailRecipient, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { useAuth, useBackForward, useContext } from '../hooks';
 import EmailPreviewBox from './components/EmailPreviewBox.vue';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
@@ -141,6 +214,10 @@ import { MemberSegmentedView } from '../members';
 import { Toast } from '../overlays/Toast';
 import { useEmailRecipientsObjectFetcher, useMembersObjectFetcher } from '../fetchers';
 import { computed, onMounted, Ref, ref } from 'vue';
+import { Decoder } from '@simonbackx/simple-encoding';
+import { useRequestOwner } from '@stamhoofd/networking';
+import IconContainer from '../icons/IconContainer.vue';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 
 const props = withDefaults(
     defineProps<{
@@ -163,6 +240,55 @@ const memberFetcher = useMembersObjectFetcher();
 const deduplicatedOf: Ref<EmailRecipient[]> = ref([]);
 const fetcher = useEmailRecipientsObjectFetcher();
 const loadingDuplicates = ref(false);
+const emailAddresSettings = ref<EmailAddressSettings | null>(null);
+const loadingEmailAddresSettings = ref(false);
+const context = useContext();
+const auth = useAuth();
+const owner = useRequestOwner();
+const isRetrying = ref(false);
+
+async function retrySending() {
+    if (isRetrying.value) {
+        return;
+    }
+    if (!await CenteredMessage.confirm(
+        $t('Weet je zeker dat je deze e-mail opnieuw wilt proberen te versturen?'),
+        $t('Ja, opnieuw proberen'),
+        $t('De e-mail zal opnieuw in de wachtrij worden geplaatst om verstuurd te worden. Dit kan enkele minuten duren.'),
+    )) {
+        return;
+    }
+    isRetrying.value = true;
+    let toast = new Toast($t('Dit kan enkele minuten duren...'), 'spinner');
+    toast.setHide(null);
+    toast.show();
+    try {
+        const response = await context.value.getAuthenticatedServerForOrganization(props.email?.organizationId ?? context.value.organization?.id ?? null).request({
+            method: 'POST',
+            path: '/email-recipients/' + props.recipient.id + '/retry',
+            owner,
+            shouldRetry: false,
+            timeout: 60 * 15 * 1000, // 15 minutes,
+            decoder: EmailRecipient as Decoder<EmailRecipient>,
+        });
+        toast.hide();
+        if (response.data.sentAt) {
+            Toast.success($t('De e-mail is opnieuw verzonden')).show();
+        }
+        else {
+            Toast.warning($t('Het is niet gelukt om het bericht opnieuw te versturen')).show();
+        }
+
+        props.recipient.deepSet(response.data);
+    }
+    catch (e) {
+        toast.hide();
+        Toast.fromError(e).show();
+    }
+    finally {
+        isRetrying.value = false;
+    }
+}
 
 const members = computed(() => {
     return [props.recipient, ...deduplicatedOf.value].map(r => r.member).filter(m => !!m);
@@ -192,6 +318,81 @@ async function loadDuplicates() {
     }
     finally {
         loadingDuplicates.value = false;
+    }
+}
+
+onMounted(() => {
+    if (auth.hasPlatformFullAccess()) {
+        loadEmailAddresSettings().catch(console.error);
+    }
+});
+
+async function loadEmailAddresSettings() {
+    if (loadingEmailAddresSettings.value || emailAddresSettings.value) {
+        return;
+    }
+    loadingEmailAddresSettings.value = true;
+    try {
+        const response = await context.value.authenticatedIdentityServer.request({
+            method: 'GET',
+            path: '/email/manage',
+            query: {
+                email: props.recipient.email,
+            },
+            owner,
+            shouldRetry: true,
+            decoder: EmailAddressSettings as Decoder<EmailAddressSettings>,
+        });
+        emailAddresSettings.value = response.data;
+    }
+    catch (e) {
+        console.error('Failed to load email address settings', e);
+        emailAddresSettings.value = null;
+    }
+    finally {
+        loadingEmailAddresSettings.value = false;
+    }
+}
+
+const isUnblockingEmailAddress = ref(false);
+
+async function unblockEmailAddress() {
+    if (isUnblockingEmailAddress.value || !emailAddresSettings.value) {
+        return;
+    }
+    if (!await CenteredMessage.confirm(
+        $t('Weet je zeker dat je dit emailadres wilt deblokkeren?'),
+        $t('Ja, deblokkeren'),
+        $t('Zorg ervoor dat je enkel een e-mailadres deblokkeert als je zeker bent dat het probleem is opgelost en de persoon hierna geen spam meer zal melden.'),
+    )) {
+        return;
+    }
+
+    isUnblockingEmailAddress.value = true;
+    try {
+        await context.value.authenticatedIdentityServer.request({
+            method: 'POST',
+            path: '/email/manage',
+            body: {
+                email: props.recipient.email,
+                markedAsSpam: false,
+                hardBounce: false,
+            },
+            owner,
+            shouldRetry: false,
+        });
+        emailAddresSettings.value.markedAsSpam = false;
+        emailAddresSettings.value.hardBounce = false;
+        Toast.success(
+            $t('{email} werd succesvol gedeblokkeerd', { email: props.recipient.email }),
+        ).setIcon('unlock green').show();
+    }
+    catch (e) {
+        console.error('Failed to unblock email address', e);
+        Toast.fromError(e).show();
+    }
+    finally {
+        isUnblockingEmailAddress.value = false;
     }
 }
 

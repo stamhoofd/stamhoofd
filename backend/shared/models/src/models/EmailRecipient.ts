@@ -57,6 +57,9 @@ export class EmailRecipient extends QueryableModel {
     @column({ type: 'json', nullable: true, decoder: SimpleErrors })
     failError: SimpleErrors | null = null;
 
+    @column({ type: 'json', nullable: true, decoder: SimpleErrors })
+    previousFailError: SimpleErrors | null = null;
+
     @column({ type: 'string', nullable: true })
     organizationId: string | null = null;
 
