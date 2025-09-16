@@ -37,7 +37,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email recipient not found',
-                human: $t(`Deze ontvanger bestaat niet`),
+                human: $t(`2e79bf4a-878b-43b0-902b-9d080c8b7fdf`),
                 statusCode: 404,
             });
         }
@@ -68,7 +68,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'already_sent',
                 message: 'Cant retry email recipient that is already sent',
-                human: $t(`Deze ontvanger heeft het bericht al ontvangen. Herlaad indien nodig de pagina om de nieuwe status te bekijken.`),
+                human: $t(`f3f837eb-d6f7-4c6e-9477-d566a03e09b1`),
                 statusCode: 400,
             });
         }

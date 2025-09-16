@@ -382,15 +382,15 @@
 
                     <STListItem class="hoverable" :selectable="true" element-name="a" :href="`https://www.qrcode.stamhoofd.be?link=https://${webshopUrl}`" target="_blank">
                         <h2 class="style-title-list">
-                            {{ $t('QR-code maken') }}
+                            {{ $t('8ee5ee3f-abb7-4120-a817-a81ff4935a73') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Maak een QR-code voor je webshop.') }}
+                            {{ $t('a45d87bc-1abd-461d-bd9a-01eed92c3073') }}
                         </p>
                         <template #right>
                             <button type="button" class="button secundary hide-smartphone">
                                 <span class="icon qr-code" />
-                                <span>{{ $t('Maak code') }}</span>
+                                <span>{{ $t('2875962d-b4fb-4542-af69-4f26472459f2') }}</span>
                             </button>
                         </template>
                     </STListItem>

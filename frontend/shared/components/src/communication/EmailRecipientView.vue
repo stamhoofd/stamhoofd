@@ -14,11 +14,11 @@
                 </h1>
 
                 <p v-if="recipient.previousFailError && !recipient.failError" class="info-box">
-                    {{ $t('Het versturen van deze e-mail was initieel mislukt (bv. geblokkeerd e-mailadres), maar het versturen werd daarna opnieuw geprobeerd en is nu wel gelukt.') }}
+                    {{ $t('84446271-fbd6-4d12-b4d0-f154ea860ee4') }}
                 </p>
 
                 <p v-if="recipient.sentAt && emailAddresSettings && (emailAddresSettings.unsubscribedAll || emailAddresSettings.unsubscribedMarketing)" class="info-box">
-                    <I18nComponent :t="$t('Deze ontvanger heeft zich na het ontvangen van deze e-mail uitgeschreven voor (een deel van) de e-mails die je verstuurt.')" />
+                    <I18nComponent :t="$t('8d94109e-6f86-45fe-8a73-f8bcf44fdbd3')" />
                 </p>
 
                 <p v-if="recipient.spamComplaintError" class="error-box">
@@ -148,10 +148,10 @@
                                 </IconContainer>
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('Blokkering opheffen') }}
+                                {{ $t('93fb5220-c5dc-4fdf-b014-52238288207c') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Dit e-mailadres is momenteel geblokkeerd') }}
+                                {{ $t('c5706725-504c-44e7-bb39-b29df279a345') }}
                             </p>
 
                             <template #right>
@@ -169,10 +169,10 @@
                                 </IconContainer>
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('Niet (meer) geblokkeerd') }}
+                                {{ $t('d04e6513-d40e-4888-8ea7-1b18c8721829') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Dit e-mailadres is momenteel niet (meer) geblokkeerd') }}
+                                {{ $t('15f327f6-3f58-446f-8e23-2470883133ce') }}
                             </p>
                         </STListItem>
 
@@ -185,10 +185,10 @@
                                 </IconContainer>
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t('Opnieuw proberen versturen') }}
+                                {{ $t('9d9b843c-a417-401a-b7df-d93124a77628') }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Probeer de e-mail opnieuw te versturen naar deze ontvanger') }}
+                                {{ $t('dba438de-1978-4205-bdd3-9b7d953d2f0b') }}
                             </p>
 
                             <template #right>
@@ -252,14 +252,14 @@ async function retrySending() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('Weet je zeker dat je deze e-mail opnieuw wilt proberen te versturen?'),
-        $t('Ja, opnieuw proberen'),
-        $t('De e-mail zal opnieuw in de wachtrij worden geplaatst om verstuurd te worden. Dit kan enkele minuten duren.'),
+        $t('ea396cc2-98a0-4147-bd60-7ed9e2f7c0ad'),
+        $t('ed127618-9fac-448d-ae8c-04d6c582156e'),
+        $t('89e57caf-d083-4efc-8a21-8e31aa86ea14'),
     )) {
         return;
     }
     isRetrying.value = true;
-    let toast = new Toast($t('Dit kan enkele minuten duren...'), 'spinner');
+    let toast = new Toast($t('4726631f-67a0-4404-95bd-d963cf83ad70'), 'spinner');
     toast.setHide(null);
     toast.show();
     try {
@@ -273,10 +273,10 @@ async function retrySending() {
         });
         toast.hide();
         if (response.data.sentAt) {
-            Toast.success($t('De e-mail is opnieuw verzonden')).show();
+            Toast.success($t('f6edb2e7-47c7-455f-a4c5-c9602bac4ae9')).show();
         }
         else {
-            Toast.warning($t('Het is niet gelukt om het bericht opnieuw te versturen')).show();
+            Toast.warning($t('481709c6-71f0-499d-8d3d-c8843f37c71f')).show();
         }
 
         props.recipient.deepSet(response.data);
@@ -361,9 +361,9 @@ async function unblockEmailAddress() {
         return;
     }
     if (!await CenteredMessage.confirm(
-        $t('Weet je zeker dat je dit emailadres wilt deblokkeren?'),
-        $t('Ja, deblokkeren'),
-        $t('Zorg ervoor dat je enkel een e-mailadres deblokkeert als je zeker bent dat het probleem is opgelost en de persoon hierna geen spam meer zal melden.'),
+        $t('24c3fee7-0709-4e61-91ec-a77010e6cee5'),
+        $t('6f7e2f7f-c8ad-4ce4-8838-0d7ab855d72e'),
+        $t('ea52e93e-6e9d-41d7-8b4c-9a5bc41440e7'),
     )) {
         return;
     }
@@ -384,7 +384,7 @@ async function unblockEmailAddress() {
         emailAddresSettings.value.markedAsSpam = false;
         emailAddresSettings.value.hardBounce = false;
         Toast.success(
-            $t('{email} werd succesvol gedeblokkeerd', { email: props.recipient.email }),
+            $t('4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11', { email: props.recipient.email }),
         ).setIcon('unlock green').show();
     }
     catch (e) {
