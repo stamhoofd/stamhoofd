@@ -670,6 +670,69 @@ export class Email extends QueryableModel {
         return attachments;
     }
 
+    private async sendSingleRecipient(recipient: EmailRecipient, organization: Organization | null, data: { from: EmailInterfaceRecipient; replyTo: EmailInterfaceRecipient | null; attachments: Attachment[] }) {
+        let promiseResolve: (value: void | PromiseLike<void>) => void;
+        const promise = new Promise<void>((resolve) => {
+            promiseResolve = resolve;
+        });
+
+        const virtualRecipient = recipient.getRecipient();
+
+        let resolved = false;
+        const callback = async (error: Error | null) => {
+            if (resolved) {
+                return;
+            }
+            resolved = true;
+
+            try {
+                if (error === null) {
+                // Mark saved
+                    recipient.sentAt = new Date();
+
+                    // Update repacements that have been generated
+                    recipient.replacements = virtualRecipient.replacements;
+                    await recipient.save();
+                }
+                else {
+                    recipient.failCount += 1;
+                    recipient.failErrorMessage = error.message;
+                    recipient.failError = errorToSimpleErrors(error);
+                    recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
+                    recipient.lastFailedAt = new Date();
+                    await recipient.save();
+                }
+            }
+            catch (e) {
+                console.error(e);
+            }
+            promiseResolve();
+        };
+
+        // Do send the email
+        // Create e-mail builder
+        const builder = await getEmailBuilder(organization ?? null, {
+            recipients: [
+                virtualRecipient,
+            ],
+            from: data.from,
+            replyTo: data.replyTo,
+            subject: this.subject!,
+            html: this.html!,
+            type: this.emailType ? 'transactional' : 'broadcast',
+            attachments: data.attachments,
+            callback(error: Error | null) {
+                callback(error).catch(console.error);
+            },
+            headers: {
+                'X-Email-Id': this.id,
+                'X-Email-Recipient-Id': recipient.id,
+            },
+        });
+        EmailClass.schedule(builder);
+        return await promise;
+    }
+
     async resumeSending(): Promise<Email | null> {
         const id = this.id;
         return await QueueHandler.schedule('send-email', async ({ abort }) => {
@@ -832,78 +895,27 @@ export class Email extends QueryableModel {
                                     continue;
                                 }
 
-                                let promiseResolve: (value: void | PromiseLike<void>) => void;
-                                const promise = new Promise<void>((resolve) => {
-                                    promiseResolve = resolve;
-                                });
-
-                                const virtualRecipient = recipient.getRecipient();
-
-                                let resolved = false;
-                                const callback = async (error: Error | null) => {
-                                    if (resolved) {
-                                        return;
-                                    }
-                                    resolved = true;
-
-                                    try {
-                                        if (error === null) {
-                                        // Mark saved
-                                            recipient.sentAt = new Date();
-
-                                            // Update repacements that have been generated
-                                            recipient.replacements = virtualRecipient.replacements;
-
-                                            succeededCount += 1;
-                                            await recipient.save();
-                                            await saveStatus();
-                                        }
-                                        else {
-                                            recipient.failCount += 1;
-                                            recipient.failErrorMessage = error.message;
-                                            recipient.failError = errorToSimpleErrors(error);
-                                            recipient.firstFailedAt = recipient.firstFailedAt ?? new Date();
-                                            recipient.lastFailedAt = new Date();
-
-                                            if (isSoftEmailRecipientError(recipient.failError)) {
-                                                softFailedCount += 1;
-                                            }
-                                            else {
-                                                failedCount += 1;
-                                            }
-                                            await recipient.save();
-                                            await saveStatus();
-                                        }
-                                    }
-                                    catch (e) {
-                                        console.error(e);
-                                    }
-                                    promiseResolve();
-                                };
-
-                                // Do send the email
-                                // Create e-mail builder
-                                const builder = await getEmailBuilder(organization ?? null, {
-                                    recipients: [
-                                        virtualRecipient,
-                                    ],
+                                const promise = upToDate.sendSingleRecipient(recipient, organization ?? null, {
                                     from,
                                     replyTo,
-                                    subject: upToDate.subject!,
-                                    html: upToDate.html!,
-                                    type: upToDate.emailType ? 'transactional' : 'broadcast',
                                     attachments,
-                                    callback(error: Error | null) {
-                                        callback(error).catch(console.error);
-                                    },
-                                    headers: {
-                                        'X-Email-Id': upToDate.id,
-                                        'X-Email-Recipient-Id': recipient.id,
-                                    },
                                 });
-                                abort.throwIfAborted(); // do not schedule if aborted
-                                EmailClass.schedule(builder);
-                                sendingPromises.push(promise);
+                                sendingPromises.push(promise.then(async () => {
+                                    if (recipient.sentAt) {
+                                        succeededCount += 1;
+                                        await saveStatus();
+                                    }
+                                    else {
+                                        // Failed or soft-failed
+                                        if (recipient.failError && isSoftEmailRecipientError(recipient.failError)) {
+                                            softFailedCount += 1;
+                                        }
+                                        else {
+                                            failedCount += 1;
+                                        }
+                                        await saveStatus();
+                                    }
+                                }));
                             }
 
                             if (sendingPromises.length > 0 || skipped > 0) {

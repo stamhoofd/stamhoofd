@@ -284,7 +284,7 @@ describe('Model.Email', () => {
                 sentAt: null,
                 failCount: 1,
                 failError: STExpect.simpleErrors([{
-                    message: /This is a simulated network error (3|6)/,
+                    message: /This is a simulated network error (3|4|5|6)/,
                 }]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),
@@ -294,7 +294,7 @@ describe('Model.Email', () => {
                 sentAt: null,
                 failCount: 1,
                 failError: STExpect.simpleErrors([{
-                    message: /This is a simulated network error (3|6)/,
+                    message: /This is a simulated network error (3|4|5|6)/,
                 }]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),
