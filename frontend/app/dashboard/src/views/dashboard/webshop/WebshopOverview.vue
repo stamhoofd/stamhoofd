@@ -13,7 +13,7 @@
 
             <BillingWarningBox filter-types="webshops" class="data-table-prefix" />
 
-            <STList class="illustration-list">    
+            <STList class="illustration-list">
                 <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openOrders(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/cart.svg">
                     <h2 class="style-title-list">
@@ -25,7 +25,10 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center" @click="openSeating(true)">
+                <STListItem
+                    v-if="hasSeating && hasReadPermissions" :selectable="true" class="left-center"
+                    @click="openSeating(true)"
+                >
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/seating-plan.svg">
                     <h2 class="style-title-list">
                         Zaaloverzicht
@@ -36,7 +39,10 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center" @click="openTickets(true)">
+                <STListItem
+                    v-if="hasTickets && hasScanPermissions" :selectable="true" class="left-center"
+                    @click="openTickets(true)"
+                >
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/scanner.svg">
                     <h2 class="style-title-list">
                         Scan tickets
@@ -47,7 +53,10 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem v-if="hasReadPermissions" :selectable="true" class="left-center" @click="openStatistics(true)">
+                <STListItem
+                    v-if="hasReadPermissions" :selectable="true" class="left-center"
+                    @click="openStatistics(true)"
+                >
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/diagram.svg">
                     <h2 class="style-title-list">
                         Statistieken
@@ -58,7 +67,10 @@
                     <span slot="right" class="icon arrow-right-small gray" />
                 </STListItem>
 
-                <STListItem :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl" target="_blank">
+                <STListItem
+                    :selectable="true" class="left-center" element-name="a" :href="'https://'+webshopUrl"
+                    target="_blank"
+                >
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/earth.svg">
                     <h2 class="style-title-list">
                         Bekijk jouw webshop
@@ -86,7 +98,10 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editProducts(true)">
+                    <STListItem
+                        v-if="!isTicketsOnly" :selectable="true" class="left-center"
+                        @click="editProducts(true)"
+                    >
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-package.svg">
                         <h2 class="style-title-list">
                             Productaanbod
@@ -108,7 +123,10 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem v-if="!isTicketsOnly" :selectable="true" class="left-center" @click="editCheckoutMethods(true)">
+                    <STListItem
+                        v-if="!isTicketsOnly" :selectable="true" class="left-center"
+                        @click="editCheckoutMethods(true)"
+                    >
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/bike.svg">
                         <h2 class="style-title-list">
                             Afhalen, leveren, ter plaatse eten
@@ -141,7 +159,10 @@
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
-                    <STListItem v-if="preview.meta.customFields.length" :selectable="true" class="left-center" @click="editInputFields(true)">
+                    <STListItem
+                        v-if="preview.meta.customFields.length" :selectable="true" class="left-center"
+                        @click="editInputFields(true)"
+                    >
                         <img slot="left" src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         <h2 class="style-title-list">
                             Vrije invoervelden
@@ -150,7 +171,11 @@
                             Verzamel extra informatie van bestellers bij het afrekenen.
                         </p>
 
-                        <span slot="right" v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'" class="icon error " />
+                        <span
+                            slot="right"
+                            v-tooltip="'Deze functie is verouderd. Als je alle vrije invoervelden wist, kan je gebruik maken van uitgebreidere vragenlijsten.'"
+                            class="icon error "
+                        />
                         <span slot="right" class="icon arrow-right-small gray" />
                     </STListItem>
 
@@ -263,7 +288,8 @@
                             Webshop archiveren
                         </h2>
                         <p class="style-description">
-                            Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet meer zo prominent zichtbaar in het menu.
+                            Verplaats de webshop naar het archief, maar behoud alle gegevens. De webshop is dan niet
+                            meer zo prominent zichtbaar in het menu.
                         </p>
                         <button slot="right" type="button" class="button secundary hide-smartphone">
                             <span class="icon archive" />
@@ -300,12 +326,31 @@
                         <button slot="right" type="button" class="button icon copy only-smartphone" />
                     </STListItem>
 
+                    <STListItem
+                        class="hoverable" :selectable="true" element-name="a"
+                        :href="`https://www.qrcode.stamhoofd.be?link=https://${webshopUrl}`" target="_blank"
+                    >
+                        <h2 class="style-title-list">
+                            QR-code maken
+                        </h2>
+                        <p class="style-description">
+                            Maak een QR-code voor je webshop.
+                        </p>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon qr-code" />
+                                <span>Maak code</span>
+                            </button>
+                        </template>
+                    </STListItem>
+
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
                             Webshop definitief verwijderen
                         </h2>
                         <p class="style-description">
-                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.
+                            Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal
+                            niet nodig.
                         </p>
                         <button slot="right" type="button" class="button secundary danger hide-smartphone">
                             <span class="icon trash" />
@@ -326,7 +371,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { BackButton, CenteredMessage, LoadComponent, PromiseView, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { EmailTemplate, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter, sleep } from '@stamhoofd/utility';
+import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from "../../../classes/OrganizationManager";
