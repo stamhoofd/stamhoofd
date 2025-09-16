@@ -15,6 +15,8 @@ import { Organization } from './Organization';
 import { User } from './User';
 import { Platform } from './Platform';
 
+type Attachment = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string };
+
 function errorToSimpleErrors(e: unknown) {
     if (isSimpleErrors(e)) {
         return e;
@@ -601,6 +603,73 @@ export class Email extends QueryableModel {
         return this;
     }
 
+    private async loadAttachments(): Promise<Attachment[]> {
+        const attachments: Attachment[] = [];
+        for (const attachment of this.attachments) {
+            if (!attachment.content && !attachment.file) {
+                console.warn('Attachment without content found, skipping', attachment);
+                continue;
+            }
+
+            let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
+
+            if (attachment.contentType === 'application/pdf') {
+                // tmp solution for pdf only
+                filename += '.pdf';
+            }
+
+            if (attachment.file?.name) {
+                filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+            }
+
+            // Correct file name if needed
+            if (attachment.filename) {
+                filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+            }
+
+            if (attachment.content) {
+                attachments.push({
+                    filename: filename,
+                    content: attachment.content,
+                    contentType: attachment.contentType ?? undefined,
+                    encoding: 'base64',
+                });
+            }
+            else {
+                // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
+                const withSigned = await attachment.file!.withSignedUrl();
+                if (!withSigned || !withSigned.signedUrl) {
+                    throw new SimpleError({
+                        code: 'attachment_not_found',
+                        message: 'Attachment not found',
+                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                    });
+                }
+
+                const filePath = withSigned.signedUrl;
+                let fileBuffer: Buffer | null = null;
+                try {
+                    const response = await fetch(filePath);
+                    fileBuffer = Buffer.from(await response.arrayBuffer());
+                }
+                catch (e) {
+                    throw new SimpleError({
+                        code: 'attachment_not_found',
+                        message: 'Attachment not found',
+                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
+                    });
+                }
+
+                attachments.push({
+                    filename: filename,
+                    contentType: attachment.contentType ?? undefined,
+                    content: fileBuffer,
+                });
+            }
+        }
+        return attachments;
+    }
+
     async resumeSending(): Promise<Email | null> {
         const id = this.id;
         return await QueueHandler.schedule('send-email', async ({ abort }) => {
@@ -634,7 +703,6 @@ export class Email extends QueryableModel {
                 const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
                 let from = upToDate.getDefaultFromAddress(organization);
                 let replyTo: EmailInterfaceRecipient | null = upToDate.getFromAddress();
-                const attachments: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string }[] = [];
                 let succeededCount = 0;
                 let softFailedCount = 0;
                 let failedCount = 0;
@@ -687,68 +755,7 @@ export class Email extends QueryableModel {
 
                     // Create a buffer of all attachments
                     if (upToDate.sendAsEmail === true) {
-                        for (const attachment of upToDate.attachments) {
-                            if (!attachment.content && !attachment.file) {
-                                console.warn('Attachment without content found, skipping', attachment);
-                                continue;
-                            }
-
-                            let filename = $t('b1291584-d2ad-4ebd-88ed-cbda4f3755b4');
-
-                            if (attachment.contentType === 'application/pdf') {
-                            // tmp solution for pdf only
-                                filename += '.pdf';
-                            }
-
-                            if (attachment.file?.name) {
-                                filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-                            }
-
-                            // Correct file name if needed
-                            if (attachment.filename) {
-                                filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-                            }
-
-                            if (attachment.content) {
-                                attachments.push({
-                                    filename: filename,
-                                    content: attachment.content,
-                                    contentType: attachment.contentType ?? undefined,
-                                    encoding: 'base64',
-                                });
-                            }
-                            else {
-                            // Note: because we send lots of emails, we better download the file here so we can reuse it in every email instead of downloading it every time
-                                const withSigned = await attachment.file!.withSignedUrl();
-                                if (!withSigned || !withSigned.signedUrl) {
-                                    throw new SimpleError({
-                                        code: 'attachment_not_found',
-                                        message: 'Attachment not found',
-                                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
-                                    });
-                                }
-
-                                const filePath = withSigned.signedUrl;
-                                let fileBuffer: Buffer | null = null;
-                                try {
-                                    const response = await fetch(filePath);
-                                    fileBuffer = Buffer.from(await response.arrayBuffer());
-                                }
-                                catch (e) {
-                                    throw new SimpleError({
-                                        code: 'attachment_not_found',
-                                        message: 'Attachment not found',
-                                        human: $t(`ce6ddaf0-8347-42c5-b4b7-fbe860c7b7f2`),
-                                    });
-                                }
-
-                                attachments.push({
-                                    filename: filename,
-                                    contentType: attachment.contentType ?? undefined,
-                                    content: fileBuffer,
-                                });
-                            }
-                        }
+                        const attachments = await upToDate.loadAttachments();
 
                         // Start actually sending in batches of recipients that are not yet sent
                         let idPointer = '';
