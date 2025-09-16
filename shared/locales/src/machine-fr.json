@@ -2043,6 +2043,10 @@
     "original": "Persoonsgegevens van leden",
     "translation": "Données personnelles des membres"
   },
+  "15f327f6-3f58-446f-8e23-2470883133ce": {
+    "original": "Dit e-mailadres is momenteel niet (meer) geblokkeerd",
+    "translation": "Cette adresse e-mail n'est plus bloquée actuellement"
+  },
   "1602ef29-3f5c-4ec6-a57a-d80361d89013": {
     "original": "Betaling van {price} gestart, maar nog in verwerking.",
     "translation": "Paiement de {price} lancé, mais toujours en cours de traitement."
@@ -3295,6 +3299,10 @@
     "original": "Toon/verberg tekst opties",
     "translation": "Afficher/masquer les options de texte"
   },
+  "24c3fee7-0709-4e61-91ec-a77010e6cee5": {
+    "original": "Weet je zeker dat je dit emailadres wilt deblokkeren?",
+    "translation": "Êtes-vous sûr de vouloir débloquer cette adresse e-mail ?"
+  },
   "24cdd0db-df35-4ef2-8230-7cade040fcfc": {
     "original": "Ben je zeker dat je deze soort activiteit wilt verwijderen?",
     "translation": "Êtes-vous sûr de vouloir supprimer ce type d'activité ?"
@@ -3654,6 +3662,10 @@
   "285990a8-0565-4d38-a97f-a9c935096159": {
     "original": "Uitbetalingsbedrag",
     "translation": "Montant du paiement"
+  },
+  "2875962d-b4fb-4542-af69-4f26472459f2": {
+    "original": "Maak code",
+    "translation": "Générer le code"
   },
   "288fd815-8771-4524-9e4d-6e90bd2eec11": {
     "original": "Ideaal voor de meeste API-keys.",
@@ -4186,6 +4198,10 @@
   "2e615670-813a-414f-b06c-f76136891bf8": {
     "original": "Je kan geen aansluitingen meer verwijderen in {period} (vergrendeld)",
     "translation": "Vous ne pouvez plus supprimer d'affiliations en {period} (verrouillé)"
+  },
+  "2e79bf4a-878b-43b0-902b-9d080c8b7fdf": {
+    "original": "Deze ontvanger bestaat niet",
+    "translation": "Ce destinataire n'existe pas"
   },
   "2e8a79b3-6393-4ce7-87bf-f293ec1b1f83": {
     "original": "eerste",
@@ -6247,6 +6263,10 @@
     "original": "Keuze onthouden voor toekomstige inschrijvingen bij deze groep",
     "translation": "Mémoriser ce choix pour les prochaines inscriptions de ce groupe"
   },
+  "4726631f-67a0-4404-95bd-d963cf83ad70": {
+    "original": "Dit kan enkele minuten duren...",
+    "translation": "Cela peut prendre quelques minutes..."
+  },
   "472a987d-498d-46b0-b925-3963f729492b": {
     "original": "Bundelkorting",
     "translation": "Réduction pour plusieurs inscriptions"
@@ -6326,6 +6346,10 @@
   "48148df3-81a8-439e-a368-64355aa7da6e": {
     "original": "Lid betaald rechtstreeks aan Stamhoofd",
     "translation": "Membre paie directement à Stamhoofd"
+  },
+  "481709c6-71f0-499d-8d3d-c8843f37c71f": {
+    "original": "Het is niet gelukt om het bericht opnieuw te versturen",
+    "translation": "L’envoi du message n’a pas pu être réessayé"
   },
   "481efc5e-0efc-4d3f-97e3-ccaa503172df": {
     "original": "Wanneer een online betaling bij een webshop mislukt na een lange tijd wachten - zou zelden mogen voorkomen",
@@ -6530,6 +6554,10 @@
   "49e90fda-d262-4fe7-a2e2-d6b48abc8e2b": {
     "original": "Onbekend",
     "translation": "Inconnu"
+  },
+  "4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11": {
+    "original": "{email} werd succesvol gedeblokkeerd",
+    "translation": "{email} a été débloquée avec succès"
   },
   "4a1ad6f2-d061-4fe0-8206-8540442ad038": {
     "original": "Ja, ik ben 100% zeker",
@@ -9863,6 +9891,10 @@
     "original": "Demovereniging op Stamhoofd",
     "translation": "Association de démonstration sur Stamhoofd"
   },
+  "6f7e2f7f-c8ad-4ce4-8838-0d7ab855d72e": {
+    "original": "Ja, deblokkeren",
+    "translation": "Oui, débloquer"
+  },
   "6f8446d7-f625-4134-bf05-553ba577619f": {
     "original": "Activiteit niet meer gevonden",
     "translation": "Activité non trouvée"
@@ -11559,6 +11591,10 @@
     "original": "Beheerders",
     "translation": "Administrateurs"
   },
+  "84446271-fbd6-4d12-b4d0-f154ea860ee4": {
+    "original": "Het versturen van deze e-mail was initieel mislukt (bv. geblokkeerd e-mailadres), maar het versturen werd daarna opnieuw geprobeerd en is nu wel gelukt.",
+    "translation": "L'envoi de cet e-mail avait initialement échoué (par exemple, adresse e-mail bloquée), mais il a ensuite été réessayé avec succès."
+  },
   "8455850d-829f-412f-bf1f-eedb2caa9f57": {
     "original": "bewerken",
     "translation": "modifier"
@@ -12091,6 +12127,10 @@
     "original": "Je kan een logo voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen.",
     "translation": "Vous pouvez définir un logo pour tous vos webshops via les paramètres généraux > personnalisation.  Vous n'aurez alors pas besoin de le faire pour chaque webshop séparément."
   },
+  "89e57caf-d083-4efc-8a21-8e31aa86ea14": {
+    "original": "De e-mail zal opnieuw in de wachtrij worden geplaatst om verstuurd te worden. Dit kan enkele minuten duren.",
+    "translation": "L'e-mail sera de nouveau placé dans la file d'attente pour l'envoi. Cela peut prendre quelques minutes."
+  },
   "89eafa94-6447-4608-a71e-84752eab10c8": {
     "original": "Nummer",
     "translation": "Numéro"
@@ -12415,6 +12455,10 @@
     "original": "Geen allergieën",
     "translation": "Pas d'allergies"
   },
+  "8d94109e-6f86-45fe-8a73-f8bcf44fdbd3": {
+    "original": "Deze ontvanger heeft zich na het ontvangen van deze e-mail uitgeschreven voor (een deel van) de e-mails die je verstuurt.",
+    "translation": "Après avoir reçu cet e-mail, ce destinataire s'est désinscrit de tout ou partie des e-mails que vous envoyez."
+  },
   "8d9b6fea-7005-408f-ae89-53a3eff3fb62": {
     "original": "Toepassen",
     "translation": "Appliquer"
@@ -12582,6 +12626,10 @@
   "8edda6d9-057a-4740-89f3-a226b8fd4950": {
     "original": "Naam van deze rol",
     "translation": "Nom de ce rôle"
+  },
+  "8ee5ee3f-abb7-4120-a817-a81ff4935a73": {
+    "original": "QR-code maken",
+    "translation": "Créer un code QR"
   },
   "8ef5c1e5-f960-433c-ae46-07e08fe4c309": {
     "original": "Betaling (herhaling)",
@@ -12978,6 +13026,10 @@
   "93faf169-b78d-4ad2-b13b-3b974267a632": {
     "original": "Kies minstens één leeftijdsgroep",
     "translation": "Choisissez au moins un groupe d'âge"
+  },
+  "93fb5220-c5dc-4fdf-b014-52238288207c": {
+    "original": "Blokkering opheffen",
+    "translation": "Débloquer"
   },
   "940c3987-3048-441e-9933-3fa51c6d421d": {
     "original": "naam",
@@ -13751,6 +13803,10 @@
     "original": "De beschrijving is een interne referentie, en is niet zichtbaar voor bestellers.",
     "translation": "La description est une référence interne, et n'est pas visible pour les clients."
   },
+  "9d9b843c-a417-401a-b7df-d93124a77628": {
+    "original": "Opnieuw proberen versturen",
+    "translation": "Réessayer l'envoi"
+  },
   "9db0c34d-8632-4b5c-8dc5-88cc6772baf8": {
     "original": "Activiteiten die vallen binnen dit bereik moeten voldoen aan de deadline.",
     "translation": "Les activités qui entrent dans cette fourchette doivent respecter la date limite."
@@ -14326,6 +14382,10 @@
   "a45744c8-fa0e-4300-bd1a-502321266aca": {
     "original": "Leden die door prioriteit bij {group} zullen worden ingeschreven",
     "translation": "Membres inscrits dans {group} en fonction de la priorité"
+  },
+  "a45d87bc-1abd-461d-bd9a-01eed92c3073": {
+    "original": "Maak een QR-code voor je webshop.",
+    "translation": "Générez un code QR pour votre boutique en ligne."
   },
   "a4626cf2-9306-4505-ba49-4398f6cbf4ba": {
     "original": "Deze inschrijvingsgroepen werden gearchiveerd. Je kan ze altijd nog bekijken en hun gegevens blijven behouden tot je ze manueel verwijdert. Hier kan je dus afgelopen activiteiten in bewaren.",
@@ -17303,6 +17363,10 @@
     "original": "Banner",
     "translation": "Bannière"
   },
+  "c5706725-504c-44e7-bb39-b29df279a345": {
+    "original": "Dit e-mailadres is momenteel geblokkeerd",
+    "translation": "Cette adresse e-mail est actuellement bloquée"
+  },
   "c59769e0-b0fa-42f3-b713-82a2d7237a9c": {
     "original": "Terug te betalen",
     "translation": "À rembourser"
@@ -18278,6 +18342,10 @@
   "d049c682-f167-4dec-b909-4e1d4c443a94": {
     "original": "afzenders",
     "translation": "expéditeurs"
+  },
+  "d04e6513-d40e-4888-8ea7-1b18c8721829": {
+    "original": "Niet (meer) geblokkeerd",
+    "translation": "Plus bloqué"
   },
   "d05b1cb9-e9cf-46e4-8b27-620b5562d30d": {
     "original": "Rijksregisternummer schuldenaar ontbreekt. Je vult dit best aan bij één van de ouders van dit lid.",
@@ -19330,6 +19398,10 @@
   "dba1b316-9058-48af-be8e-e9e9d6615bde": {
     "original": "Het is niet mogelijk om een inschrijving te verwijderen samen met een inschrijving voor een andere organisatie, dit moet apart gebeuren.",
     "translation": "Il n'est pas possible de supprimer une inscription avec une inscription pour une autre organisation, cela doit se faire séparément."
+  },
+  "dba438de-1978-4205-bdd3-9b7d953d2f0b": {
+    "original": "Probeer de e-mail opnieuw te versturen naar deze ontvanger",
+    "translation": "Essayez de renvoyer l'e-mail à ce destinataire"
   },
   "dba51db1-ce45-4e09-9a2f-fcea4a7fa46e": {
     "original": "Meisje",
@@ -20671,6 +20743,10 @@
     "original": "Bedrijfsnaam",
     "translation": "Nom de l'entreprise"
   },
+  "ea396cc2-98a0-4147-bd60-7ed9e2f7c0ad": {
+    "original": "Weet je zeker dat je deze e-mail opnieuw wilt proberen te versturen?",
+    "translation": "Voulez-vous vraiment réessayer d'envoyer cet e-mail ?"
+  },
   "ea422e20-5ab6-45dd-9886-abe5a207260d": {
     "original": "Leveringskost",
     "translation": "Frais de livraison"
@@ -20682,6 +20758,10 @@
   "ea51eb19-b496-4663-9404-bb1a14385bbd": {
     "original": "Je kan momenteel ook inloggen met een wachtwoord op je account. Als je wilt kan je jouw wachtwoord verwijderen zodat je enkel via je andere ingestelde loginmethode kan inloggen.",
     "translation": "Vous pouvez actuellement également vous connecter avec un mot de passe sur votre compte. Si vous le souhaitez, vous pouvez supprimer votre mot de passe afin de ne pouvoir vous connecter que via votre autre méthode de connexion configurée."
+  },
+  "ea52e93e-6e9d-41d7-8b4c-9a5bc41440e7": {
+    "original": "Zorg ervoor dat je enkel een e-mailadres deblokkeert als je zeker bent dat het probleem is opgelost en de persoon hierna geen spam meer zal melden.",
+    "translation": "Ne débloquez une adresse e-mail que si vous êtes certain que le problème est résolu et que la personne ne signalera plus de spams."
   },
   "ea7a24eb-79de-40ca-8ebf-1ca4a600587e": {
     "original": "Kijk jouw verbinding na en probeer opnieuw",
@@ -20918,6 +20998,10 @@
   "ecfdb06e-e649-47d7-8047-4e340e6f6988": {
     "original": "Minimum bedrag",
     "translation": "Montant minimum"
+  },
+  "ed127618-9fac-448d-ae8c-04d6c582156e": {
+    "original": "Ja, opnieuw proberen",
+    "translation": "Oui, réessayer"
   },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze vereniging",
@@ -21511,6 +21595,10 @@
     "original": "Maak een saldoverrekening aan met een totaalprijs van 0 euro die negatieve en positieve items combineert om de openstaande rekening te vereenvoudigen.",
     "translation": "Créez une compensation de solde avec un prix total de 0 euro qui combine des éléments positifs et négatifs pour simplifier le compte en suspens."
   },
+  "f3f837eb-d6f7-4c6e-9477-d566a03e09b1": {
+    "original": "Deze ontvanger heeft het bericht al ontvangen. Herlaad indien nodig de pagina om de nieuwe status te bekijken.",
+    "translation": "Ce destinataire a déjà reçu le message. Rechargez la page si nécessaire pour voir le statut mis à jour."
+  },
   "f3fc4e4d-76ee-4ca0-b712-9d2c7e5395fc": {
     "original": "Het maximum geldt per vereniging",
     "translation": "Le maximum s'applique par association"
@@ -21818,6 +21906,10 @@
   "f6e9cb12-9107-49d1-922a-fef46dc6e25e": {
     "original": "Wachtlijst plaatsen voor {group}",
     "translation": "Placer sur la liste d'attente pour {group}"
+  },
+  "f6edb2e7-47c7-455f-a4c5-c9602bac4ae9": {
+    "original": "De e-mail is opnieuw verzonden",
+    "translation": "L’e-mail a été renvoyé"
   },
   "f6f77de7-7691-4512-bf95-e07d12e9a43c": {
     "original": "Tijdstip",
