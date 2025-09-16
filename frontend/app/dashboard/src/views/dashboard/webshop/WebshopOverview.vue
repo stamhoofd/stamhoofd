@@ -380,7 +380,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem class="hoverable" :selectable="true" element-name="a" :href="`https://www.qrcode.stamhoofd.be?link=https://${webshopUrl}`" target="_blank">
+                    <STListItem class="hoverable" :selectable="true" element-name="a" :href="webshopQrCodeUrl" target="_blank">
                         <h2 class="style-title-list">
                             {{ $t('8ee5ee3f-abb7-4120-a817-a81ff4935a73') }}
                         </h2>
@@ -477,6 +477,11 @@ const isOpen = computed(() => !webshopManager.value.preview.isClosed());
 const isArchive = computed(() => webshopManager.value.preview.meta.status === WebshopStatus.Archived);
 const title = computed(() => props.preview.meta.name);
 const webshopUrl = computed(() => props.preview.getUrl(organization.value!));
+const webshopQrCodeUrl = computed(() => {
+    const link = `https://${webshopUrl.value}`;
+    return `https://www.qrcode.stamhoofd.be?link=${encodeURIComponent(link)}`;
+});
+
 const hasFullPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Full));
 const hasReadPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Read, false));
 
