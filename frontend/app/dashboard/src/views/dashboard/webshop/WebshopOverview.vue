@@ -380,6 +380,22 @@
                         </template>
                     </STListItem>
 
+                    <STListItem :selectable="true" @click="openQRCode()">
+                        <h2 class="style-title-list">
+                            {{ $t('QR-code maken') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Maak een QR-code voor je webshop.') }}
+                        </p>
+                        <template #right>
+                            <button type="button" class="button secundary hide-smartphone">
+                                <span class="icon qr-code" />
+                                <span>{{ $t('Maak code') }}</span>
+                            </button>
+                            <button type="button" class="button icon qr-code only-smartphone" />
+                        </template>
+                    </STListItem>
+
                     <STListItem v-if="isArchive" :selectable="true" @click="deleteWebshop()">
                         <h2 class="style-title-list">
                             {{ $t('ebd0428a-b614-4eaa-a939-69a1e1392054') }}
@@ -827,6 +843,10 @@ async function deleteWebshop() {
     catch (e) {
         Toast.fromError(e).show();
     }
+}
+
+function openQRCode() {
+    window.open(`https://www.qrcode.stamhoofd.be?link=${webshopUrl.value}`, '_blank');
 }
 
 onBeforeUnmount(() => {
