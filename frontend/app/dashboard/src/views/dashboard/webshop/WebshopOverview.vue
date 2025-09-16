@@ -380,7 +380,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem class="hoverable" :selectable="true" element-name="a" :href="`https://www.qrcode.stamhoofd.be?link=${webshopUrl}`" target="_blank">
+                    <STListItem class="hoverable" :selectable="true" element-name="a" :href="`https://www.qrcode.stamhoofd.be?link=https://${webshopUrl}`" target="_blank">
                         <h2 class="style-title-list">
                             {{ $t('QR-code maken') }}
                         </h2>
