@@ -1527,7 +1527,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
     }
 
     .add-seat-button {
-        position: absolute;
+        position: absolute !important;
         top: calc(var(--ry) + var(--rh) / 2 - 12px);
         width: 24px;
         height: 24px;
