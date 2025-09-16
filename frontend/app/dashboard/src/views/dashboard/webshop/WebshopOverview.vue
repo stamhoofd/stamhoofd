@@ -380,7 +380,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" @click="openQRCode()">
+                    <STListItem class="hoverable" :selectable="true" element-name="a" :href="`https://www.qrcode.stamhoofd.be?link=${webshopUrl}`" target="_blank">
                         <h2 class="style-title-list">
                             {{ $t('QR-code maken') }}
                         </h2>
@@ -392,7 +392,6 @@
                                 <span class="icon qr-code" />
                                 <span>{{ $t('Maak code') }}</span>
                             </button>
-                            <button type="button" class="button icon qr-code only-smartphone" />
                         </template>
                     </STListItem>
 
@@ -843,10 +842,6 @@ async function deleteWebshop() {
     catch (e) {
         Toast.fromError(e).show();
     }
-}
-
-function openQRCode() {
-    window.open(`https://www.qrcode.stamhoofd.be?link=${webshopUrl.value}`, '_blank');
 }
 
 onBeforeUnmount(() => {
