@@ -773,7 +773,7 @@ async function onClickRow(row: VisibleRow<Value>, event: MouseEvent) {
     }
 
     // Shift has lower priority over ctrl/meta
-    if (event.shiftKey && row.currentIndex) {
+    if (event.shiftKey && row.currentIndex !== null) {
         // Select all between current selection and end selection
         if (lastRowIndex === null) {
             toggleRow(row);
