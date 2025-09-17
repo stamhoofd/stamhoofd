@@ -479,7 +479,7 @@ const title = computed(() => props.preview.meta.name);
 const webshopUrl = computed(() => props.preview.getUrl(organization.value!));
 const webshopQrCodeUrl = computed(() => {
     const link = `https://${webshopUrl.value}`;
-    return `https://www.qrcode.stamhoofd.be?link=${encodeURIComponent(link)}`;
+    return `https://qrcode.stamhoofd.be?link=${encodeURIComponent(link)}`;
 });
 
 const hasFullPermissions = computed(() => auth.canAccessWebshop(props.preview, PermissionLevel.Full));
