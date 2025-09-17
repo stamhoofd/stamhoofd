@@ -15,7 +15,7 @@
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
-                    {{ priceString }}
+                    <span class="price-value">{{ priceString }}</span>
 
                     <span v-if="product.enableInFuture" class="style-tag">Vanaf {{ product.enableAfter | dateTime }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">Onbeschikbaar</span>
@@ -381,6 +381,11 @@ export default class ProductBox extends Mixins(NavigationMixin){
 
                 .style-tag {
                     margin-left: auto;
+                }
+
+                .price-value {
+                    white-space: nowrap;
+                    margin-right: 1ch;
                 }
             }
         }
