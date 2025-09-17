@@ -304,7 +304,7 @@ export class EmailRecipient extends AutoEncoder {
     @field({ decoder: SimpleErrors, nullable: true, version: 380 })
     failError: SimpleErrors | null = null;
 
-    @field({ decoder: SimpleErrors, nullable: true, ...NextVersion })
+    @field({ decoder: SimpleErrors, nullable: true, version: 385 })
     previousFailError: SimpleErrors | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 380 })
