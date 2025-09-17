@@ -402,9 +402,11 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder, ObjectData, PatchableArray, PatchableArrayAutoEncoder, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, NavigationActions, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, useRequiredOrganization, usePatch, Dropdown } from '@stamhoofd/components';
-import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, Version, WebshopField, WebshopTicketType, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper } from '@stamhoofd/structures';
+import { CenteredMessage, DateSelection, Dropdown, NavigationActions, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, usePatch, useRequiredOrganization } from '@stamhoofd/components';
+import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
+import { useGoToUitpasConfiguration } from '@stamhoofd/components/src/context/hooks/useGoToUitpasConfiguration';
+import { useSetUitpasEvent } from '@stamhoofd/components/src/context/hooks/useSetUitpasEvent';
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';
@@ -416,8 +418,6 @@ import ProductPriceBox from './ProductPriceBox.vue';
 import ProductPriceRow from './ProductPriceRow.vue';
 import ProductSelectDateRangeInput from './ProductSelectDateRangeInput.vue';
 import ProductSelectLocationInput from './ProductSelectLocationInput.vue';
-import { useGoToUitpasConfiguration } from '@stamhoofd/components/src/context/hooks/useGoToUitpasConfiguration';
-import { useSetUitpasEvent } from '@stamhoofd/components/src/context/hooks/useSetUitpasEvent';
 
 const organization = useRequiredOrganization();
 
