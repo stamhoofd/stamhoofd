@@ -63,7 +63,7 @@
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
                     <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
-                            <Checkbox v-model="isAllSelected" />
+                            <Checkbox v-model="isAllSelected" :indeterminate="hasSelection && !isAllSelected" />
                         </div>
 
                         <div class="columns">
@@ -160,6 +160,7 @@ import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSele
 import ColumnSelectorContextMenu from './ColumnSelectorContextMenu.vue';
 import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
 import TableActionsContextMenu from './TableActionsContextMenu.vue';
+import { useShallowMap } from './hooks/useShallowMap';
 
 export interface TableListable {
     id: string;
@@ -357,7 +358,7 @@ function blurFocus() {
 
 // If the user selects a row, we'll add it in the selectedRows. But if the user selects all rows,
 // we don't want to add them all, that would be a performance hit. So'ill invert it and only save the unselected values here.
-const markedRows = shallowRef(new Map<string, Value>());
+const markedRows = useShallowMap<string, Value>();
 const isRightClicking = ref(false);
 const customFocusedRows = ref(null) as Ref<null | Set<string>>;
 
@@ -378,7 +379,7 @@ const isAllSelected = computed({
     },
     set: (selected: boolean) => {
         markedRowsAreSelected.value = !selected;
-        markedRows.value.clear();
+        markedRows.clear();
 
         for (const visibleRow of visibleRows.value) {
             visibleRow.cachedSelectionValue = selected;
@@ -386,7 +387,14 @@ const isAllSelected = computed({
     },
 });
 const hasSelection = computed(() => {
-    return markedRowsAreSelected.value ? markedRows.value.size > 0 : (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0);
+    if (markedRowsAreSelected.value) {
+        if (markedRows.value.size > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    return (((props.tableObjectFetcher.totalFilteredCount ?? values.value.length) - markedRows.value.size) > 0);
 });
 
 function setShowSelection(s: boolean) {
@@ -1652,18 +1660,18 @@ function setSelectionValue(row: VisibleRow<Value>, selected: boolean) {
 function setInvisibleSelectionValue(value: Value, selected: boolean) {
     if (selected) {
         if (markedRowsAreSelected.value) {
-            markedRows.value.set(value.id, value);
+            markedRows.set(value.id, value);
         }
         else {
-            markedRows.value.delete(value.id);
+            markedRows.delete(value.id);
         }
     }
     else {
         if (!markedRowsAreSelected.value) {
-            markedRows.value.set(value.id, value);
+            markedRows.set(value.id, value);
         }
         else {
-            markedRows.value.delete(value.id);
+            markedRows.delete(value.id);
         }
     }
 }
