@@ -328,7 +328,7 @@
 
                     <STListItem
                         class="hoverable" :selectable="true" element-name="a"
-                        :href="`https://www.qrcode.stamhoofd.be?link=https://${webshopUrl}`" target="_blank"
+                        :href="`https://qrcode.stamhoofd.be?link=${encodeURIComponent('https://' + webshopUrl)}`" target="_blank"
                     >
                         <h2 class="style-title-list">
                             QR-code maken
