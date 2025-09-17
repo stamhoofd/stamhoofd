@@ -15,7 +15,7 @@
                 <p v-else-if="product.description" class="description" v-text="product.description" />
 
                 <p class="price">
-                    {{ priceString }}
+                    <span class="price-value">{{ priceString }}</span>
 
                     <span v-if="product.enableInFuture" class="style-tag">{{ $t('56954008-cc3d-4460-afaa-f986d1f35d24', {date: product.enableAfter ? formatDateTime(product.enableAfter) : '?'}) }}</span>
                     <span v-else-if="!product.isEnabled && !admin" class="style-tag error">{{ $t('11b3bb72-0edb-401e-9c60-47fbb2d132fc') }}</span>
@@ -142,7 +142,7 @@ const stockText = computed(() => {
     }
 
     return {
-        text: $t(`3ba66a09-31bc-4bef-9bba-ca44d5480c42`, {count: props.product.getRemainingStockText(remaining)}),
+        text: $t(`3ba66a09-31bc-4bef-9bba-ca44d5480c42`, { count: props.product.getRemainingStockText(remaining) }),
         style: 'warn',
     };
 });
@@ -334,6 +334,11 @@ function formatDateRange(dateRange: ProductDateRange) {
 
                 .style-tag {
                     margin-left: auto;
+                }
+
+                .price-value {
+                    white-space: nowrap;
+                    margin-right: 1ch;
                 }
             }
         }
