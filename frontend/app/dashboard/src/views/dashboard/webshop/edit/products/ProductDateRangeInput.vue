@@ -41,7 +41,7 @@ if (props.validator) {
 const startDate = computed({
     get: () => model.value?.startDate ?? new Date(),
     set: (startDate: Date) => {
-        if (model.value) {
+        if (model.value && startDate.getTime() !== model.value.startDate.getTime()) {
             model.value = model.value.patch({ startDate });
         }
     },
@@ -50,7 +50,7 @@ const startDate = computed({
 const endDate = computed({
     get: () => model.value?.endDate ?? new Date(),
     set: (endDate: Date) => {
-        if (model.value) {
+        if (model.value && endDate.getTime() !== model.value.endDate.getTime()) {
             model.value = model.value.patch({ endDate });
         }
     },
