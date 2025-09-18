@@ -484,12 +484,19 @@ function setTime(dateTime: DateTime) {
 }
 
 function emitDateTime(dateTime: DateTime | null): void {
+    function emit(date: Date | null) {
+        // only update if changed
+        if (date?.getTime() !== model.value?.getTime()) {
+            model.value = date;
+        }
+    }
+
     if (!dateTime) {
         if (props.required) {
-            model.value = selectedDay.value;
+            emit(selectedDay.value);
             return;
         }
-        model.value = null;
+        emit(null);
         return;
     }
 
@@ -498,7 +505,7 @@ function emitDateTime(dateTime: DateTime | null): void {
         // If the date is not valid, we don't set the model
         return;
     }
-    model.value = dateTime.toJSDate();
+    emit(dateTime.toJSDate());
 }
 
 function limitDateTime(dateTime: DateTime): DateTime | null {

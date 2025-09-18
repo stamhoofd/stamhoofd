@@ -24,7 +24,6 @@ import { computed } from 'vue';
 const props = withDefaults(defineProps<{ validator?: Validator | null }>(), {
     // Assign a validator if you want to offload the validation to components
     validator: null,
-    value: null,
 });
 
 const errors = useErrors({
@@ -41,7 +40,7 @@ if (props.validator) {
 const startDate = computed({
     get: () => model.value?.startDate ?? new Date(),
     set: (startDate: Date) => {
-        if (model.value && startDate.getTime() !== model.value.startDate.getTime()) {
+        if (model.value) {
             model.value = model.value.patch({ startDate });
         }
     },
@@ -50,7 +49,7 @@ const startDate = computed({
 const endDate = computed({
     get: () => model.value?.endDate ?? new Date(),
     set: (endDate: Date) => {
-        if (model.value && endDate.getTime() !== model.value.endDate.getTime()) {
+        if (model.value) {
             model.value = model.value.patch({ endDate });
         }
     },
