@@ -53,8 +53,8 @@
             <template v-if="member.patchedMember.details.address">
                 <dt>{{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}</dt>
                 <dd v-copyable>
-                    {{ member.patchedMember.details.address.street }} {{ member.patchedMember.details.address.number }}<br>{{ member.patchedMember.details.address.postalCode }}
-                    {{ member.patchedMember.details.address.city }}
+                    {{ member.patchedMember.details.address.street }} {{ member.patchedMember.details.address.number }}<br>
+                    {{ member.patchedMember.details.address.postalCode }} {{ member.patchedMember.details.address.city }}
                     <template v-if="member.patchedMember.details.address.country !== currentCountry">
                         <br>{{ formatCountry(member.patchedMember.details.address.country) }}
                     </template>

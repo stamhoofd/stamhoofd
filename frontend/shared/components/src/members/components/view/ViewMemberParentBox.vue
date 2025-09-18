@@ -34,8 +34,10 @@
             <template v-if="parent.address">
                 <dt>{{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}</dt>
                 <dd v-copyable>
-                    {{ parent.address.street }} {{ parent.address.number }}<br><template v-if="parent.address.country !== currentCountry">
-                        <br>
+                    {{ parent.address.street }} {{ parent.address.number }}<br>
+                    {{ parent.address.postalCode }} {{ parent.address.city }}
+                    <template v-if="parent.address.country !== currentCountry">
+                        <br>{{ formatCountry(parent.address.country) }}
                     </template>
                 </dd>
             </template>
