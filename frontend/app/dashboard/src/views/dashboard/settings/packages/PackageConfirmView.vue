@@ -103,7 +103,7 @@
                 <h2>Kies je betaalmethode</h2>
 
                 <p class="info-box">
-                    Betaal met de bankrekening van jouw vereniging en niet met een persoonlijke rekening. Deze bankrekening zal gebruikt worden voor toekomstige afrekeningen.
+                    Betaal met de bankrekening van jouw vereniging en niet met een persoonlijke rekening. Deze bankrekening zal gebruikt worden voor toekomstige afrekeningen via domiciliëring.
                 </p>
 
                 <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
