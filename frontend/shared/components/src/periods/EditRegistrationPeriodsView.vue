@@ -3,12 +3,17 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+        <p v-if="!isPlatform">
+            {{ $t('Hier kan je je inschrijvingen opdelen in verschillende werkjaren. Wisselen tussen werkjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) werkjaar instellen. ') }}
+        </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="sortedPeriods.length && patchedPlatform.period.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
+        <template v-if="isPlatform && sortedPeriods.length && currentPeriod.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
             <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</h2>
-            <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
+            <p>
+                {{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}
+            </p>
 
             <ul class="style-list">
                 <li>{{ $t('9c916015-e69c-44b3-a568-d0af15854787') }}</li>
@@ -29,7 +34,7 @@
         </template>
 
         <STList>
-            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :platform="patchedPlatform" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
+            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :current-period-id="currentPeriod.id" @click="editPeriod(period)" @contextmenu.prevent="isPlatform ? showContextMenu($event, period) : undefined" />
         </STList>
 
         <p>
@@ -44,21 +49,24 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { RegistrationPeriod } from '@stamhoofd/structures';
+import { CenteredMessage, ContextMenu, ContextMenuItem, ErrorBox, StartNewRegistrationPeriodView, Toast, useContext, useErrors, usePatch, usePatchArray, usePlatform, useRequiredOrganization } from '@stamhoofd/components';
+import { useOrganizationManager, usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
+import { Organization, RegistrationPeriod } from '@stamhoofd/structures';
 import { Ref, computed, ref } from 'vue';
 import EditRegistrationPeriodView from './EditRegistrationPeriodView.vue';
-import RegistrationPeriodRow from './components/RegistrationPeriodRow.vue';
+import RegistrationPeriodRow from './RegistrationPeriodRow.vue';
 
 const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
 
+const isPlatform = STAMHOOFD.userMode === 'platform';
+
 const context = useContext();
 const platform = usePlatform();
 const platformManager = usePlatformManager();
+const organization = isPlatform ? ref(Organization.create({})) as unknown as Ref<Organization> : useRequiredOrganization();
+const organizationManager = useOrganizationManager();
 
 const originalPeriods = ref([]) as Ref<RegistrationPeriod[]>;
 const loading = ref(true);
@@ -68,7 +76,11 @@ loadData().catch(console.error);
 
 const { patched, patch, addArrayPatch, hasChanges: hasChangesPeriods } = usePatchArray(originalPeriods);
 const { patched: patchedPlatform, patch: platformPatch, addPatch: addPlatformPatch, hasChanges: hasChangesPlatform } = usePatch(platform);
-const hasChanges = computed(() => hasChangesPeriods.value || hasChangesPlatform.value);
+const { patched: patchedOrganization, patch: organizationPatch, addPatch: addOrganizationPatch, hasChanges: hasChangesOrganization } = usePatch(organization);
+
+const hasChanges = computed(() => {
+    return hasChangesPeriods.value || (isPlatform && hasChangesPlatform.value) || (!isPlatform && hasChangesOrganization.value);
+});
 
 const saving = ref(false);
 
@@ -76,11 +88,13 @@ const sortedPeriods = computed(() => {
     return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
 });
 
+const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : patchedOrganization.value.period.period);
+
 const title = computed(() => $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb'));
 
 async function addPeriod() {
     const arr: PatchableArrayAutoEncoder<RegistrationPeriod> = new PatchableArray();
-    const period = platform.value.period.clone();
+    const period = currentPeriod.value.clone();
     period.id = RegistrationPeriod.create({}).id;
 
     period.startDate.setFullYear(period.startDate.getFullYear() + 1);
@@ -131,9 +145,9 @@ async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
         [
             new ContextMenuItem({
                 name: $t(`5119aacc-24c1-43e6-b025-0efa7ea60ea3`),
-                disabled: patchedPlatform.value.period.id === period.id,
-                action: () => {
-                    setCurrent(period);
+                disabled: currentPeriod.value.id === period.id,
+                action: async () => {
+                    await setCurrent(period);
                     return true;
                 },
             }),
@@ -166,16 +180,26 @@ async function save() {
             });
         }
 
-        const changedPeriod = hasChangesPlatform.value;
+        if (isPlatform) {
+            const changedPeriod = hasChangesPlatform.value;
 
-        if (changedPeriod) {
-            await platformManager.value.patch(platformPatch.value, false);
+            if (changedPeriod) {
+                await platformManager.value.patch(platformPatch.value, false);
+            }
+
+            new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
+
+            if (changedPeriod) {
+                new Toast($t('671147bd-cf0e-42fc-b456-18ce7d75b867'), 'info').setHide(20 * 1000).show();
+            }
         }
+        else {
+            const changedPeriod = hasChangesOrganization.value;
+            if (changedPeriod) {
+                await organizationManager.value.patch(organizationPatch.value, { owner, shouldRetry: false });
+            }
 
-        new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
-
-        if (changedPeriod) {
-            new Toast($t('671147bd-cf0e-42fc-b456-18ce7d75b867'), 'info').setHide(20 * 1000).show();
+            new Toast($t(`17017abf-c2e0-4479-86af-300ad37347aa`), 'success green').show();
         }
 
         await pop({ force: true });
@@ -187,8 +211,10 @@ async function save() {
     saving.value = false;
 }
 
-function setCurrent(period: RegistrationPeriod) {
-    addPlatformPatch({ period });
+async function setCurrent(period: RegistrationPeriod) {
+    if (isPlatform) {
+        addPlatformPatch({ period });
+    }
 }
 
 async function loadData() {

@@ -447,7 +447,7 @@ export async function getScopedDashboardRoot(reactiveSession: SessionContext, op
                             startTab,
                         ];
 
-                        if (organization?.meta.packages.useMembers) {
+                        if (organization?.meta.packages.useMembers || STAMHOOFD.environment === 'development') {
                             tabs.push(membersTab);
                         }
 

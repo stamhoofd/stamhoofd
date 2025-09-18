@@ -8,7 +8,7 @@
         </p>
 
         <template #right>
-            <span v-if="isCurrent" class="style-tag">{{ $t('1c5ba032-2132-4bda-8aae-7f622f6f3a2a') }}</span>
+            <span v-if="isCurrent" class="style-tag">{{ $t('Actief') }}</span>
             <span v-if="period.locked" class="icon lock gray" />
             <span class="icon arrow-right-small gray" />
         </template>
@@ -16,15 +16,15 @@
 </template>
 
 <script lang="ts" setup>
-import { Platform, RegistrationPeriod } from '@stamhoofd/structures';
+import { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
 const props = defineProps<{
     period: RegistrationPeriod;
-    platform: Platform;
+    currentPeriodId: string;
 }>();
 
 const isCurrent = computed(() => {
-    return props.period.id === props.platform.period.id;
+    return props.period.id === props.currentPeriodId;
 });
 </script>
