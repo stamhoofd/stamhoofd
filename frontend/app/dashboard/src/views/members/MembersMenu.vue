@@ -120,6 +120,9 @@ const newestPeriod = computed(() => {
 });
 
 const canUpgradePeriod = computed(() => {
+    if (STAMHOOFD.userMode === 'organization') {
+        return false;
+    }
     return $organization.value?.period.period.id !== platform.value.period.id && $organization.value!.period.period.startDate < platform.value.period.startDate && !platform.value.period.locked;
 });
 

@@ -3,12 +3,17 @@
         <h1 class="style-navigation-title">
             {{ title }}
         </h1>
+        <p v-if="!isPlatform">
+            {{ $t('Hier kan je je inschrijvingen opdelen in verschillende werkjaren. Wisselen tussen werkjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) werkjaar instellen. ') }}
+        </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="sortedPeriods.length && currentPeriod.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
+        <template v-if="isPlatform && sortedPeriods.length && currentPeriod.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
             <hr><h2>{{ $t('3b3be211-9a70-4345-abd6-760b39cef51d') }} {{ sortedPeriods[0].nameShort }}</h2>
-            <p>{{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}</p>
+            <p>
+                {{ $t("31e91d3b-16e5-4608-9390-75e61d4d090d") }}
+            </p>
 
             <ul class="style-list">
                 <li>{{ $t('9c916015-e69c-44b3-a568-d0af15854787') }}</li>
@@ -29,7 +34,7 @@
         </template>
 
         <STList>
-            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :current-period-id="currentPeriod.id" @click="editPeriod(period)" @contextmenu.prevent="showContextMenu($event, period)" />
+            <RegistrationPeriodRow v-for="period of sortedPeriods" :key="period.id" :period="period" :current-period-id="currentPeriod.id" @click="editPeriod(period)" @contextmenu.prevent="isPlatform ? showContextMenu($event, period) : undefined" />
         </STList>
 
         <p>
@@ -83,7 +88,7 @@ const sortedPeriods = computed(() => {
     return patched.value.slice().sort((b, a) => a.startDate.getTime() - b.startDate.getTime());
 });
 
-const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : patchedOrganization.value.period.period);
+const currentPeriod = computed(() => isPlatform ? patchedPlatform.value.period : (patched.value.find(pp => pp.id === patchedOrganization.value.periodId) ?? patchedOrganization.value.period.period));
 
 const title = computed(() => $t('c28ace1d-50ff-4f1a-b403-bd5ab55d9dcb'));
 
@@ -209,32 +214,6 @@ async function save() {
 async function setCurrent(period: RegistrationPeriod) {
     if (isPlatform) {
         addPlatformPatch({ period });
-    }
-    else {
-        const list = await organizationManager.value.loadPeriods(false, false, owner);
-        const organizationPeriod = list.organizationPeriods.find(o => o.period.id === period.id);
-        if (organizationPeriod) {
-            addOrganizationPatch({ period: organizationPeriod });
-            errors.errorBox = null;
-        }
-        else {
-            await present({
-                components: [
-                    new ComponentWithProperties(StartNewRegistrationPeriodView, {
-                        period,
-                        callback: async () => {
-                            const newList = await organizationManager.value.loadPeriods(false, false, owner);
-                            const organizationPeriod = newList.organizationPeriods.find(o => o.period.id === period.id);
-
-                            if (organizationPeriod) {
-                                addOrganizationPatch({ period: organizationPeriod });
-                            }
-                        },
-                    }),
-                ],
-                modalDisplayStyle: 'popup',
-            });
-        }
     }
 }
 
