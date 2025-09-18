@@ -123,6 +123,13 @@ export class STPendingInvoice extends Model {
         // Get the pending invoice if it exists
         const pendingInvoice = await STPendingInvoice.getForOrganization(organization.id)
 
+        if (pendingInvoice?.invoiceId) {
+            // Don't add automatic items because:
+            // - there mighe be a payment pending that pays for e.g. 100 members, while those members aren't in the pending invoice
+            // - if we would continue, that would add 100 members to the pending invoice, and when the payment would succeed, those 100 members would remain in the pending invoice and be charged twice later!
+            return pendingInvoice
+        }
+
         // Generate temporary pending invoice items for the current state without adding them IRL
         const notYetCreatedItems = await STPendingInvoice.createItems(organization.id, pendingInvoice)
         return await this.addItemsTo(pendingInvoice, organization, notYetCreatedItems)
