@@ -20,9 +20,9 @@
                 <InheritComponent name="tabbar-right" />
             </div>
         </header>
-        <main ref="mainElement" :class="{showTopBar, showBottomBar, shouldHideBottomBar: showBottomBar && shouldHideBottomBar}">
+        <div ref="mainElement" :class="{main: true, showTopBar, showBottomBar, shouldHideBottomBar: showBottomBar && shouldHideBottomBar}">
             <FramedComponent v-if="root" :key="root.key" :root="root" />
-        </main>
+        </div>
 
         <footer v-if="showBottomBar" :class="{hidden: shouldHideBottomBar}">
             <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
@@ -342,7 +342,8 @@ const selectTabById = async (id: string) => {
     const item = flatTabs.value.find(tab => tab.id === id);
     if (item) {
         await selectItem(item);
-    } else {
+    }
+    else {
         console.error('No tab item found with id:', id);
     }
 };
@@ -411,7 +412,7 @@ defineExpose({
     returnToHistoryIndex,
     show,
     shouldNavigateAway,
-    selectTabById
+    selectTabById,
 });
 
 </script>
@@ -475,7 +476,7 @@ defineExpose({
         }
     }
 
-    > main {
+    > .main {
         // Pass an update to the --vh because we removed some
         background: var(--color-current-background);
 
