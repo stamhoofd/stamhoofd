@@ -47,7 +47,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, SaveView, useErrors, usePatch, usePlatform, useValidation } from '@stamhoofd/components';
 import { RegistrationPeriod } from '@stamhoofd/structures';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -71,16 +71,11 @@ useValidation(errors.validator, validate);
 
 function validate() {
     if (patched.value.endDate.getTime() < patched.value.startDate.getTime()) {
-        const message = $t('De einddatum moet na de startdatum liggen.');
-
-        // prevent the error from flickering
-        if (errors.errorBox?.errors.message !== message) {
-            errors.errorBox = new ErrorBox(new SimpleError({
-                code: 'invalid_field',
-                field: 'endDate',
-                message,
-            }));
-        }
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'invalid_field',
+            field: 'endDate',
+            message: $t('De einddatum moet na de startdatum liggen.'),
+        }));
 
         return false;
     }
@@ -154,8 +149,6 @@ const endDate = computed({
     get: () => patched.value.endDate,
     set: endDate => addPatch({ endDate }),
 });
-
-watch([startDate, endDate], validate);
 
 const isValidCustomName = computed(() => {
     if (!customName.value) {

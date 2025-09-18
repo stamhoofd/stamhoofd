@@ -140,7 +140,7 @@ async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
         [
             new ContextMenuItem({
                 name: $t(`5119aacc-24c1-43e6-b025-0efa7ea60ea3`),
-                disabled: patchedPlatform.value.period.id === period.id,
+                disabled: currentPeriod.value.id === period.id,
                 action: async () => {
                     await setCurrent(period);
                     return true;
