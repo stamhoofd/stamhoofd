@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, useAuth, useEmitPatch, usePatchMoveUpDownIds } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, useAuth, usePatchMoveUpDownIds } from '@stamhoofd/components';
 import { GroupCategory, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import EditCategoryGroupsView from './EditCategoryGroupsView.vue';
@@ -26,19 +26,34 @@ import EditCategoryGroupsView from './EditCategoryGroupsView.vue';
 const props = defineProps<{
     category: GroupCategory;
     organization: Organization;
-    period: OrganizationRegistrationPeriod;
+    periodId: string;
+    periods: OrganizationRegistrationPeriod[];
 }>();
+
+const period = computed(() => props.periods.find(p => p.id === props.periodId)!);
 
 const auth = useAuth();
 const isPlatformAdmin = auth.hasFullPlatformAccess();
 const present = usePresent();
-const emit = defineEmits(['patch:period']);
-const { addPatch } = useEmitPatch(props, emit, 'period');
-const parentCategory = computed(() => props.category.getParentCategories(props.period.settings.categories)[0]);
-const grandParentCategory = computed(() => parentCategory.value?.getParentCategories(props.period.settings.categories)[0]);
-const subCategories = computed(() => parentCategory.value.categoryIds.map(id => props.period.settings.categories.find(c => c.id === id)!).filter(c => c && c.id !== props.category.id));
-const childCategories = computed(() => props.category.categoryIds.map(id => props.period.settings.categories.find(c => c.id === id)!).filter(c => c));
-const childGroups = computed(() => props.category.groupIds.map(id => props.period.groups.find(g => g.id === id)!).filter(g => g));
+const emit = defineEmits<{
+    (e: 'patch:periods', value: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>): void;
+}>();
+
+function addPatch(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>;
+    arr.addPatch(OrganizationRegistrationPeriod.patch({
+        ...patch,
+        id: props.periodId,
+    }));
+
+    emit('patch:periods', arr);
+}
+
+const parentCategory = computed(() => props.category.getParentCategories(period.value.settings.categories)[0]);
+const grandParentCategory = computed(() => parentCategory.value?.getParentCategories(period.value.settings.categories)[0]);
+const subCategories = computed(() => parentCategory.value.categoryIds.map(id => period.value.settings.categories.find(c => c.id === id)!).filter(c => c && c.id !== props.category.id));
+const childCategories = computed(() => props.category.categoryIds.map(id => period.value.settings.categories.find(c => c.id === id)!).filter(c => c));
+const childGroups = computed(() => props.category.groupIds.map(id => period.value.groups.find(g => g.id === id)!).filter(g => g));
 const { up, down } = usePatchMoveUpDownIds(props.category.id, computed(() => parentCategory.value.categoryIds), (categoryIds) => {
     const patchCategory = GroupCategory.patch({ id: parentCategory.value.id, categoryIds });
     const arr = new PatchableArray() as PatchableArrayAutoEncoder<GroupCategory>;
@@ -83,10 +98,11 @@ async function editCategory() {
             new ComponentWithProperties(EditCategoryGroupsView, {
                 category: props.category,
                 organization: props.organization,
-                period: props.period,
+                periodId: props.periodId,
+                periods: props.periods,
                 isNew: false,
-                saveHandler: (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    addPatch(patch);
+                saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                    emit('patch:periods', patch);
                 },
             }),
         ],
