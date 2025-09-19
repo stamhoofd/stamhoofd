@@ -88,29 +88,29 @@ const moveToOtherPeriod = (period: OrganizationRegistrationPeriod, category: Gro
     const groupPatch = Group.patch({ id: props.group.id, periodId: period.period.id });
 
     const settings = OrganizationRegistrationPeriodSettings.patch({});
-    const pp = GroupCategory.patch({ id: parentCategory.value.id });
-    pp.groupIds.addDelete(props.group.id);
-    settings.categories.addPatch(pp);
+    const categoryPatch1 = GroupCategory.patch({ id: parentCategory.value.id });
+    categoryPatch1.groupIds.addDelete(props.group.id);
+    settings.categories.addPatch(categoryPatch1);
 
     const periodPatch = OrganizationRegistrationPeriod.patch({
         settings,
     });
 
-    const p = GroupCategory.patch({ id: category.id });
-    p.groupIds.addPut(props.group.id);
+    const categoryPatch2 = GroupCategory.patch({ id: category.id });
+    categoryPatch2.groupIds.addPut(props.group.id);
 
     const otherSettings = OrganizationRegistrationPeriodSettings.patch({});
-    otherSettings.categories.addPatch(p);
+    otherSettings.categories.addPatch(categoryPatch2);
 
     const otherPeriodPatch = OrganizationRegistrationPeriod.patch({
         id: period.id,
         settings: otherSettings,
     });
 
-    periodPatch.groups.addPatch(groupPatch);
+    otherPeriodPatch.groups.addPatch(groupPatch);
 
-    emit('patch:period', periodPatch);
     emit('patch:otherPeriod', otherPeriodPatch);
+    emit('patch:period', periodPatch);
 };
 
 const duplicate = () => {
