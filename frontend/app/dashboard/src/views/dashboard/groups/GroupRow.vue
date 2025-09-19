@@ -66,7 +66,7 @@ const parentCategory = computed(() => props.group.getParentCategories(props.peri
 const subGroups = computed(() => parentCategory.value.groupIds.map(id => props.period.groups.find(g => g.id === id)!).filter(g => !!g));
 const allCategories = computed(() => props.period.availableCategories.filter(c => c.categories.length === 0 && c.id !== parentCategory.value?.id));
 
-const moveTo = (category: GroupCategory) => {
+function moveTo(category: GroupCategory) {
     const p = GroupCategory.patch({ id: category.id });
     p.groupIds.addPut(props.group.id);
 
@@ -84,7 +84,7 @@ const moveTo = (category: GroupCategory) => {
     emit('patch:period', q);
 };
 
-const moveToOtherPeriod = (period: OrganizationRegistrationPeriod, category: GroupCategory) => {
+function moveToOtherPeriod(period: OrganizationRegistrationPeriod, category: GroupCategory) {
     const groupPatch = Group.patch({ id: props.group.id, periodId: period.period.id });
 
     const settings = OrganizationRegistrationPeriodSettings.patch({});
@@ -113,7 +113,7 @@ const moveToOtherPeriod = (period: OrganizationRegistrationPeriod, category: Gro
     emit('patch:period', periodPatch);
 };
 
-const duplicate = () => {
+function duplicate() {
     const duplicated = props.group.clone();
     duplicated.id = uuidv4();
 
@@ -155,7 +155,6 @@ function showContextMenu(event: MouseEvent) {
         [
             new ContextMenuItem({
                 name: 'Verplaats naar',
-                disabled: allCategories.value.length === 0,
                 childMenu: new ContextMenu([
 
                     allCategories.value.map(cat =>
@@ -172,19 +171,24 @@ function showContextMenu(event: MouseEvent) {
                         new ContextMenuItem({
                             name: $t('Ander werkjaar'),
                             childMenu: new ContextMenu([
-                                otherPeriods.value.map(p => new ContextMenuItem({
-                                    name: p.period.name,
-                                    childMenu: new ContextMenu([
-                                        p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
-                                            name: c.settings.name,
-                                            rightText: c.groupIds.length + '',
-                                            action: () => {
-                                                moveToOtherPeriod(p, c);
-                                                return true;
-                                            },
-                                        })),
-                                    ]),
-                                })),
+                                otherPeriods.value.map((p) => {
+                                    const menuItems = p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
+                                        name: c.settings.name,
+                                        rightText: c.groupIds.length + '',
+                                        action: () => {
+                                            moveToOtherPeriod(p, c);
+                                            return true;
+                                        },
+                                    }));
+
+                                    return new ContextMenuItem({
+                                        name: p.period.name,
+                                        disabled: menuItems.length === 0,
+                                        childMenu: new ContextMenu([
+                                            menuItems,
+                                        ]),
+                                    });
+                                }),
 
                             ]),
                             disabled: otherPeriods.value.length === 0,

@@ -266,7 +266,7 @@ async function save() {
 async function createGroup() {
     const group = Group.create({
         organizationId: props.organization.id,
-        periodId: props.organization.period.period.id,
+        periodId: props.periodId,
         settings: GroupSettings.create({
             genderType: props.organization.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
         }),
