@@ -416,6 +416,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             shouldUpdatePeriodIds = period.id !== model.periodId;
 
+            if (shouldUpdatePeriodIds && period.organizationId !== model.organizationId) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    field: 'periodId',
+                    message: 'Cannot move a group to a period of another organization',
+                });
+            }
+
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
 
