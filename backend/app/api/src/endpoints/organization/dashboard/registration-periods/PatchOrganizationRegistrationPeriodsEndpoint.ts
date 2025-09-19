@@ -485,7 +485,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 patch.waitingList.id = model.waitingListId;
                 patch.waitingList.type = GroupType.WaitingList;
                 await throwIfUpdateWaitingListPeriodWithMultipleGroups(patch.waitingList.id);
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period, true);
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period, shouldUpdatePeriodIds);
             }
             else {
                 if (model.waitingListId) {
@@ -537,7 +537,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         else if (shouldUpdatePeriodIds && model.waitingListId) {
             // update waiting list period
             await throwIfUpdateWaitingListPeriodWithMultipleGroups(model.waitingListId);
-            await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: model.waitingListId }), period, true);
+            await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: model.waitingListId }), period, shouldUpdatePeriodIds);
         }
 
         if (shouldUpdatePeriodIds) {
