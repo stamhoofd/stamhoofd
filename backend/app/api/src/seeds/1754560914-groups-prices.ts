@@ -29,7 +29,7 @@ async function migratePrices() {
 
             // if archived
             if (group.status === GroupStatus.Archived || group.deletedAt !== null) {
-                group.settings.oldPrices = [];
+                    group.settings.oldPrices = [];
                 group.settings.prices = [
                     GroupPrice.create({
                         name: new TranslatedString('Standaard tarief'),
@@ -46,7 +46,16 @@ async function migratePrices() {
                 continue;
             }
 
-            const oldPrices = group.settings.oldPrices;
+            // sorted old prices
+            const oldPrices = group.settings.oldPrices.slice().sort((a, b) => {
+                if (a.startDate === null) {
+                    return -1;
+                }
+                if (b.startDate === null) {
+                    return 1;
+                }
+                return a.startDate.getTime() - b.startDate.getTime();
+            });
 
             if (oldPrices.length === 0) {
                 group.settings.prices = [
