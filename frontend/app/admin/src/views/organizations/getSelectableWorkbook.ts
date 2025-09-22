@@ -1,7 +1,10 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
-import { Platform } from '@stamhoofd/structures';
+import { Platform, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(_platform: Platform) {
+    const categories = _platform.config.organizationLevelRecordsConfiguration.recordCategories;
+    const flattenedCategories = RecordCategory.flattenCategoriesWith(categories, r => r.excelColumns.length > 0);
+
     return new SelectableWorkbook({
         sheets: [
             new SelectableSheet({
@@ -35,6 +38,16 @@ export function getSelectableWorkbook(_platform: Platform) {
                     new SelectableColumn({
                         id: 'address',
                         name: $t(`f7e792ed-2265-41e9-845f-e3ce0bc5da7c`),
+                    }),
+                    ...flattenedCategories.flatMap((category) => {
+                        return category.getAllRecords().flatMap((record) => {
+                            return new SelectableColumn({
+                                id: `recordAnswers.${record.id}`,
+                                name: record.name.toString(),
+                                category: category.name.toString(),
+                                description: record.description.toString(),
+                            });
+                        });
                     }),
                 ],
             }),

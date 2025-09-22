@@ -1,12 +1,12 @@
+import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 import { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
-import { Platform as PlatformStruct, ExcelExportType, LimitedFilteredRequest, Organization as OrganizationStruct, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, PaginatedResponse, MemberWithRegistrationsBlob, Premise } from '@stamhoofd/structures';
+import { Group, Member, MemberResponsibilityRecord } from '@stamhoofd/models';
+import { ExcelExportType, LimitedFilteredRequest, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse, Platform as PlatformStruct, Premise } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
-import { Group, Member, MemberResponsibilityRecord } from '@stamhoofd/models';
-import { Formatter, Sorter } from '@stamhoofd/utility';
-import { ArrayDecoder, field } from '@simonbackx/simple-encoding';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
 
 class MemberResponsibilityRecordWithMember extends MemberResponsibilityRecordStruct {
     @field({ decoder: MemberWithRegistrationsBlob })
@@ -69,6 +69,18 @@ const sheet: XlsxTransformerSheet<Object, Object> = {
         XlsxTransformerColumnHelper.createAddressColumns<OrganizationStruct>({
             matchId: 'address',
             getAddress: object => object.address,
+        }),
+        // Dynamic records
+        XlsxTransformerColumnHelper.createRecordAnswersColumns({
+            matchId: 'recordAnswers',
+            getRecordAnswers: (object: Object) => object.getRecordAnswers(),
+            getRecordCategories: () => {
+                const platform = PlatformStruct.shared;
+
+                return [
+                    ...platform.config.organizationLevelRecordsConfiguration.recordCategories,
+                ];
+            },
         }),
     ],
 };
