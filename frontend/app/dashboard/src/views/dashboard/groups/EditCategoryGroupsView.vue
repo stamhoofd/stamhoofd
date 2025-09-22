@@ -89,10 +89,10 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, useAuth, useDraggableArrayIds, useErrors } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, EditGroupView, ErrorBox, SaveView, STErrorsDefault, STInputBox, STList, useAuth, useDraggableArrayIds, useErrors, usePatchArray } from '@stamhoofd/components';
 import { Group, GroupCategory, GroupCategorySettings, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, Organization, OrganizationGenderType, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 
-import { computed, getCurrentInstance, Ref, ref } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import GroupCategoryRow from './GroupCategoryRow.vue';
 import GroupRow from './GroupRow.vue';
 import GroupTrashView from './GroupTrashView.vue';
@@ -118,20 +118,9 @@ const present = usePresent();
 const auth = useAuth();
 const isPlatformAdmin = auth.hasPlatformFullAccess();
 
-const periodsPatch = ref(new PatchableArray()) as unknown as Ref<PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>>;
+const { patch: periodsPatch, patched: patchedPeriods, addArrayPatch: addPeriodsArrayPatch, addPatch: addPeriodsPatch, hasChanges } = usePatchArray(props.periods);
 
-const patchedPeriods = computed(() => periodsPatch.value.applyTo(props.periods) as OrganizationRegistrationPeriod[]);
 const patchedPeriod = computed(() => patchedPeriods.value.find(p => p.id === props.periodId)!);
-
-const hasChanges = computed(() => periodsPatch.value.changes.length > 0);
-
-function addPeriodsPatch(newPatch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
-    periodsPatch.value.addPatch(newPatch);
-}
-
-function addPeriodsArrayPatch(newPatch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) {
-    periodsPatch.value = periodsPatch.value.patch(newPatch);
-}
 
 const patchedCategory = computed(() => {
     const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id);
