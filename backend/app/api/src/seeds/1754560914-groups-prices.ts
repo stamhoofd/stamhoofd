@@ -29,7 +29,10 @@ async function migratePrices() {
 
             // if archived
             if (group.status === GroupStatus.Archived || group.deletedAt !== null) {
+                if (group.deletedAt !== null) {
                     group.settings.oldPrices = [];
+                }
+
                 group.settings.prices = [
                     GroupPrice.create({
                         name: new TranslatedString('Standaard tarief'),
