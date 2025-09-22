@@ -151,6 +151,32 @@ function duplicate() {
 };
 
 function showContextMenu(event: MouseEvent) {
+    const moveToPeriodOptions = otherPeriods.value.map((p) => {
+        if (p.period.locked) {
+            return new ContextMenuItem({
+                name: p.period.name,
+                disabled: true,
+            });
+        }
+        const menuItems = p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
+            name: c.settings.name,
+            rightText: c.groupIds.length + '',
+
+            action: () => {
+                moveToOtherPeriod(p, c);
+                return true;
+            },
+        }));
+
+        return new ContextMenuItem({
+            name: p.period.name,
+            disabled: menuItems.length === 0,
+            childMenu: new ContextMenu([
+                menuItems,
+            ]),
+        });
+    });
+
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
@@ -171,27 +197,10 @@ function showContextMenu(event: MouseEvent) {
                         new ContextMenuItem({
                             name: $t('Ander werkjaar'),
                             childMenu: new ContextMenu([
-                                otherPeriods.value.map((p) => {
-                                    const menuItems = p.availableCategories.filter(c => c.categories.length === 0).map(c => new ContextMenuItem({
-                                        name: c.settings.name,
-                                        rightText: c.groupIds.length + '',
-                                        action: () => {
-                                            moveToOtherPeriod(p, c);
-                                            return true;
-                                        },
-                                    }));
-
-                                    return new ContextMenuItem({
-                                        name: p.period.name,
-                                        disabled: menuItems.length === 0,
-                                        childMenu: new ContextMenu([
-                                            menuItems,
-                                        ]),
-                                    });
-                                }),
+                                moveToPeriodOptions,
 
                             ]),
-                            disabled: otherPeriods.value.length === 0,
+                            disabled: moveToPeriodOptions.filter(p => !p.disabled).length === 0,
                         }),
                     ],
                 ]),
