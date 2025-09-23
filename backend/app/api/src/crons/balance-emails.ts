@@ -21,7 +21,7 @@ async function balanceEmails() {
         return;
     }
 
-    if ((new Date().getHours() > 18 || new Date().getHours() < 6) && STAMHOOFD.environment !== 'development') {
+    if ((new Date().getHours() > 10 || new Date().getHours() < 6) && STAMHOOFD.environment !== 'development') {
         return;
     }
 
