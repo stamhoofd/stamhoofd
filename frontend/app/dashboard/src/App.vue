@@ -31,7 +31,7 @@ const root = new ComponentWithProperties(PromiseView, {
         }
 
         try {
-            if (navigator.platform.indexOf('Win32') != -1 || navigator.platform.indexOf('Win64') != -1) {
+            if (AppManager.shared.getOS() === 'windows') {
                 // Load Windows stylesheet
                 try {
                     await import('@stamhoofd/scss/layout/windows-scrollbars.scss');
