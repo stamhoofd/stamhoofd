@@ -60,8 +60,15 @@ async function silentRegister({ checkout, context, admin, members }: { checkout:
     }
 
     // Force https protocol (the app can use capacitor:// instead of https, so we need to swap)
-    idCheckout.redirectUrl.protocol = 'https:';
-    idCheckout.cancelUrl.protocol = 'https:';
+    if (idCheckout.redirectUrl.protocol !== 'https:') {
+        // NOTE: setting protocol doesn't work in all situations (weird!)
+        idCheckout.redirectUrl = new URL(idCheckout.redirectUrl.toString().replace(idCheckout.redirectUrl.protocol, 'https:'));
+    }
+
+    if (idCheckout.cancelUrl.protocol !== 'https:') {
+        // NOTE: setting protocol doesn't work in all situations (weird!)
+        idCheckout.cancelUrl = new URL(idCheckout.cancelUrl.toString().replace(idCheckout.cancelUrl.protocol, 'https:'));
+    }
 
     const response = await server.request({
         method: 'POST',
@@ -111,8 +118,15 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
     }
 
     // Force https protocol (the app can use capacitor:// instead of https, so we need to swap)
-    idCheckout.redirectUrl.protocol = 'https:';
-    idCheckout.cancelUrl.protocol = 'https:';
+    if (idCheckout.redirectUrl.protocol !== 'https:') {
+        // NOTE: setting protocol doesn't work in all situations (weird!)
+        idCheckout.redirectUrl = new URL(idCheckout.redirectUrl.toString().replace(idCheckout.redirectUrl.protocol, 'https:'));
+    }
+
+    if (idCheckout.cancelUrl.protocol !== 'https:') {
+        // NOTE: setting protocol doesn't work in all situations (weird!)
+        idCheckout.cancelUrl = new URL(idCheckout.cancelUrl.toString().replace(idCheckout.cancelUrl.protocol, 'https:'));
+    }
 
     const response = await server.request({
         method: 'POST',
