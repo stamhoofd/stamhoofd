@@ -91,8 +91,10 @@ export async function migratePrices() {
 
                         const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
 
-                        if (!categoryDiscountForFamily && countWholeFamily) {
-                            categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        if (countWholeFamily) {
+                            if (!categoryDiscountForFamily) {
+                                categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                            }
                         }
                         else if (!categoryDiscountForMember) {
                             categoryDiscountForMember = createBundleDiscount(oldPrices, category, allBundleDiscounts);
@@ -151,25 +153,65 @@ export async function migratePrices() {
                         }),
                     });
 
+                    const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
+
                     const discounts = createDiscounts(oldPrices);
 
                     if (categoryDiscountForFamily) {
+                        // discount should be zero if category discount is not for family (but should be linked however)
+                        const isZeroDiscount = !countWholeFamily;
+
+                        // set custom discounts if discounts are different
+                        let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
+
+                        if (isZeroDiscount) {
+                            customDiscounts = categoryDiscountForFamily.discounts.map(() => GroupPriceDiscount.create({
+                                type: GroupPriceDiscountType.Fixed,
+                                value: ReduceablePrice.create({
+                                    price: 0,
+                                    reducedPrice: null,
+                                }),
+                            }));
+                        }
+                        // todo: test what if discounts lenght less then category discounts
+                        else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
+                            customDiscounts = undefined;
+                        }
+
                         // add discount
                         groupPrice.bundleDiscounts.set(
                             categoryDiscountForFamily.id, BundleDiscountGroupPriceSettings.create({
                                 name: categoryDiscountForFamily.name,
-                                // set custom discounts if discounts are different
-                                customDiscounts: areDiscountsEqual(categoryDiscountForFamily.discounts, discounts) ? undefined : discounts,
+                                customDiscounts,
                             }));
                     }
 
                     if (categoryDiscountForMember) {
+                        // discount should be zero if category discount is for family (but should be linked however)
+                        const isZeroDiscount = countWholeFamily;
+
+                        // set custom discounts if discounts are different
+                        let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
+
+                        if (isZeroDiscount) {
+                            customDiscounts = categoryDiscountForMember.discounts.map(() => GroupPriceDiscount.create({
+                                type: GroupPriceDiscountType.Fixed,
+                                value: ReduceablePrice.create({
+                                    price: 0,
+                                    reducedPrice: null,
+                                }),
+                            }));
+                        }
+                        // todo: test what if discounts lenght less then category discounts
+                        else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
+                            customDiscounts = undefined;
+                        }
+
                         // add discount
                         groupPrice.bundleDiscounts.set(
                             categoryDiscountForMember.id, BundleDiscountGroupPriceSettings.create({
                                 name: categoryDiscountForMember.name,
-                                // set custom discounts if discounts are different
-                                customDiscounts: areDiscountsEqual(categoryDiscountForMember.discounts, discounts) ? undefined : discounts,
+                                customDiscounts,
                             }));
                     }
 
