@@ -156,6 +156,12 @@ body.modern.web-iOS {
             overflow-x: clip;
         }
 
+        body.web-windows & {
+            // On Windows Webkit based browsers let the scrollbar overlay the content instead of creating extra space
+            // Set Firefox scrollbar width
+            scrollbar-width: thin;
+        }
+
         /**
             @deprecated
         */

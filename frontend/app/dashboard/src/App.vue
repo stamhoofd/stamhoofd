@@ -31,17 +31,6 @@ const root = new ComponentWithProperties(PromiseView, {
         }
 
         try {
-            if (AppManager.shared.getOS() === 'windows') {
-                // Load Windows stylesheet
-                try {
-                    await import('@stamhoofd/scss/layout/windows-scrollbars.scss');
-                }
-                catch (e) {
-                    console.error('Failed to load Windows scrollbars');
-                    console.error(e);
-                }
-            }
-
             let app: 'dashboard' | 'admin' | 'registration' | 'auto' = 'auto';
 
             const parts = UrlHelper.shared.getParts();
