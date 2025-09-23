@@ -1,116 +1,9 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupCategory, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-function getParentCategory(group: Group, period: OrganizationRegistrationPeriod) {
-    const parent = group.getParentCategories(period.settings.categories)[0];
-    if (!parent) {
-        return null;
-    }
-    return parent;
-}
-
-async function migratePrices() {
-    for await (const period of OrganizationRegistrationPeriod.select().all()) {
-        // key = group category id
-        const bundleMap = new Map<string, BundleDiscount[]>();
-        const allBundleDiscounts: BundleDiscount[] = [];
-
-        for await (const group of Group.select().where('periodId', period.periodId).andWhere('organizationId', period.organizationId).all()) {
-            // if already migrated
-            if (group.settings.prices.length > 0) {
-                if (group.settings.oldPrices.length > 0) {
-                    group.settings.oldPrices = [];
-                    await group.save();
-                }
-                continue;
-            }
-
-            // if archived
-            if (group.status === GroupStatus.Archived || group.deletedAt !== null) {
-                if (group.deletedAt !== null) {
-                    group.settings.oldPrices = [];
-                }
-
-                group.settings.prices = [
-                    GroupPrice.create({
-                        name: new TranslatedString('Standaard tarief'),
-                        startDate: null,
-                        endDate: null,
-                        price: ReduceablePrice.create({
-                            price: 0,
-                            reducedPrice: null,
-                        }),
-                    }),
-                ];
-
-                await group.save();
-                continue;
-            }
-
-            // sorted old prices
-            const oldPrices = group.settings.oldPrices.slice().sort((a, b) => {
-                if (a.startDate === null) {
-                    return -1;
-                }
-                if (b.startDate === null) {
-                    return 1;
-                }
-                return a.startDate.getTime() - b.startDate.getTime();
-            });
-
-            if (oldPrices.length === 0) {
-                group.settings.prices = [
-                    GroupPrice.create({
-                        name: new TranslatedString('Standaard tarief'),
-                        startDate: null,
-                        endDate: null,
-                        price: ReduceablePrice.create({
-                            price: 0,
-                            reducedPrice: null,
-                        }),
-                    }),
-                ];
-
-                await group.save();
-                continue;
-            }
-
-            const prices: GroupPrice[] = [];
-
-            const parentCategory = getParentCategory(group, period);
-            const parentCategoryId = parentCategory?.id ?? '';
-            // todo: rename
-            const parentCategoryName = parentCategory?.settings.name ?? 'andere';
-
-            for (let i = 0; i < oldPrices.length; i++) {
-                const current: OldGroupPrices = oldPrices[i];
-                const next: OldGroupPrices | undefined = oldPrices[i + 1];
-                const { groupPrice, bundleDiscount } = convertOldGroupPricesHelper(group, parentCategoryId, parentCategoryName, bundleMap, current, next);
-                prices.push(groupPrice);
-                if (bundleDiscount) {
-                    allBundleDiscounts.push(bundleDiscount);
-                }
-            }
-
-            if (prices.length === 0) {
-                throw new Error('prices empty');
-            }
-
-            group.settings.prices = prices;
-
-            group.settings.oldPrices = [];
-
-            await group.save();
-        }
-
-        if (allBundleDiscounts.length) {
-            period.settings.bundleDiscounts = [...allBundleDiscounts];
-            await period.save();
-        }
-    }
-}
+const UNNASSIGNED_KEY = 'unassigned';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment === 'test') {
@@ -126,49 +19,230 @@ export default new Migration(async () => {
     await migratePrices();
 });
 
-// copied from v1 code
-function formatDate(date: Date) {
-    const time = Formatter.time(date);
-    if (time === '0:00') {
-        return Formatter.date(date);
+export async function migratePrices() {
+    for await (const period of OrganizationRegistrationPeriod.select().all()) {
+        // groups
+        const allGroups = await Group.select()
+            .where('periodId', period.periodId)
+            .andWhere('organizationId', period.organizationId)
+            .fetch();
+
+        const filteredGroups: Group[] = [];
+
+        // filter relevant groups, cleanup other groups
+        for (const group of allGroups) {
+            if (group.type !== GroupType.Membership || group.status === GroupStatus.Archived || group.deletedAt !== null) {
+                if (group.deletedAt !== null) {
+                    group.settings.oldPrices = [];
+                }
+
+                group.settings.prices = [
+                    GroupPrice.create({
+                        name: new TranslatedString('Standaard tarief'),
+                        startDate: null,
+                        endDate: null,
+                        price: ReduceablePrice.create({
+                            price: 0,
+                            reducedPrice: null,
+                        }),
+                    }),
+                ];
+            }
+            else {
+                filteredGroups.push(group);
+            }
+        }
+
+        // group by category
+        const categoryMap = createCategoryMap(filteredGroups, period.settings.categories);
+        const allBundleDiscounts: BundleDiscount[] = [];
+
+        // loop categories
+        for (const [categoryId, groups] of categoryMap.entries()) {
+            const category = period.settings.categories.find(c => c.id === categoryId)!;
+            const isUnassigned = categoryId === UNNASSIGNED_KEY;
+            let categoryDiscountForFamily: BundleDiscount | null = null;
+            let categoryDiscountForMember: BundleDiscount | null = null;
+
+            // first find category discounts
+            if (!isUnassigned) {
+                for (const group of groups) {
+                    // todo
+                    // if already migrated
+                    if (group.settings.prices.length > 0) {
+                        throw new Error('Already migrated');
+                    }
+
+                    // sorted old prices
+                    const oldPricesArray = group.settings.oldPrices.slice().sort((a, b) => {
+                        if (a.startDate === null) {
+                            return -1;
+                        }
+                        if (b.startDate === null) {
+                            return 1;
+                        }
+                        return a.startDate.getTime() - b.startDate.getTime();
+                    });
+
+                    for (const oldPrices of oldPricesArray) {
+                        if (oldPrices.prices.length < 2) {
+                            continue;
+                        }
+
+                        const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
+
+                        if (!categoryDiscountForFamily && countWholeFamily) {
+                            categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        }
+                        else if (!categoryDiscountForMember) {
+                            categoryDiscountForMember = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        }
+                    }
+
+                    if (categoryDiscountForFamily && categoryDiscountForMember) {
+                        break;
+                    }
+                }
+            }
+
+            // migrate prices for group
+            for (const group of groups) {
+                // sorted old prices
+                const oldPricesArray = group.settings.oldPrices.slice().sort((a, b) => {
+                    if (a.startDate === null) {
+                        return -1;
+                    }
+                    if (b.startDate === null) {
+                        return 1;
+                    }
+                    return a.startDate.getTime() - b.startDate.getTime();
+                });
+
+                if (oldPricesArray.length === 0) {
+                    oldPricesArray.push(OldGroupPrices.create({
+                        startDate: null,
+                        prices: [],
+                        sameMemberOnlyDiscount: false,
+                        onlySameGroup: false,
+                    }));
+                }
+
+                const prices: GroupPrice[] = [];
+
+                // loop different tarriffs (with different start dates)
+                for (let i = 0; i < oldPricesArray.length; i++) {
+                    const oldPrices: OldGroupPrices = oldPricesArray[i];
+                    const next: OldGroupPrices | undefined = oldPricesArray[i + 1];
+
+                    const firstPrice = oldPrices.prices[0] ?? OldGroupPrice.create({
+                        price: 0,
+                        reducedPrice: null,
+                    });
+
+                    const groupPrice = GroupPrice.create({
+                        name: new TranslatedString(oldPrices.startDate === null
+                            ? 'Standaard tarief'
+                            : `Vanaf ${formatDate(oldPrices.startDate)}`),
+                        startDate: oldPrices.startDate ? new Date(oldPrices.startDate) : null,
+                        endDate: next?.startDate ? new Date(next.startDate.getTime() - 1) : null,
+                        price: ReduceablePrice.create({
+                            price: firstPrice.price,
+                            reducedPrice: firstPrice.reducedPrice,
+                        }),
+                    });
+
+                    const discounts = createDiscounts(oldPrices);
+
+                    if (categoryDiscountForFamily) {
+                        // add discount
+                        groupPrice.bundleDiscounts.set(
+                            categoryDiscountForFamily.id, BundleDiscountGroupPriceSettings.create({
+                                name: categoryDiscountForFamily.name,
+                                // set custom discounts if discounts are different
+                                customDiscounts: areDiscountsEqual(categoryDiscountForFamily.discounts, discounts) ? undefined : discounts,
+                            }));
+                    }
+
+                    if (categoryDiscountForMember) {
+                        // add discount
+                        groupPrice.bundleDiscounts.set(
+                            categoryDiscountForMember.id, BundleDiscountGroupPriceSettings.create({
+                                name: categoryDiscountForMember.name,
+                                // set custom discounts if discounts are different
+                                customDiscounts: areDiscountsEqual(categoryDiscountForMember.discounts, discounts) ? undefined : discounts,
+                            }));
+                    }
+
+                    // in other cases the bundle discount will have been added already (as a category discount)
+                    if (oldPrices.onlySameGroup) {
+                        const bundleDiscount = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
+                            name: bundleDiscount.name,
+                        }));
+                    }
+
+                    prices.push(groupPrice);
+                }
+
+                group.settings.prices = prices;
+                group.settings.oldPrices = [];
+            }
+        }
+
+        // set bundle discounts on period and save
+        if (allBundleDiscounts.length) {
+            period.settings.bundleDiscounts = [...allBundleDiscounts];
+            await period.save();
+        }
+
+        // save groups
+        for (const group of allGroups) {
+            await group.save();
+        }
     }
-    return Formatter.dateTime(date);
 }
 
-function convertOldGroupPricesHelper(group: Group, parentCategoryId: string, parentCategoryName: string, bundleMap: Map<string, BundleDiscount[]>, oldPrices: OldGroupPrices, next?: OldGroupPrices):
-{ groupPrice: GroupPrice; bundleDiscount: BundleDiscount | null } {
-    const firstPrice = oldPrices.prices[0];
+function createCategoryMap(groups: Group[], categories: GroupCategory[]) {
+    // sort groups per category
+    const categoryMap = new Map<string, Group[]>();
+    const foundGroups = new Set<string>();
 
-    const groupPrice = GroupPrice.create({
-        name: new TranslatedString(oldPrices.startDate === null
-            ? 'Standaard tarief'
-            : `Vanaf ${formatDate(oldPrices.startDate)}`),
-        startDate: oldPrices.startDate ? new Date(oldPrices.startDate) : null,
-        endDate: next?.startDate ? new Date(next.startDate.getTime() - 1) : null,
-        price: ReduceablePrice.create({
-            price: firstPrice.price,
-            reducedPrice: firstPrice.reducedPrice,
-        }),
-    });
-
-    const oldGroupPrices = oldPrices.prices;
-
-    if (oldGroupPrices.length === 1) {
-        return { groupPrice, bundleDiscount: null };
+    for (const category of categories) {
+        for (const groupId of category.groupIds) {
+            const group = groups.find(g => g.id === groupId);
+            if (group) {
+                foundGroups.add(group.id);
+                const otherGroups = categoryMap.get(category.id);
+                if (otherGroups) {
+                    otherGroups.push(group);
+                }
+                else {
+                    categoryMap.set(category.id, [group]);
+                }
+            }
+        }
     }
 
-    const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
-    const countPerGroup = oldPrices.onlySameGroup;
+    const unassignedGroups = groups.filter(g => !foundGroups.has(g.id));
+    if (unassignedGroups.length) {
+        categoryMap.set(UNNASSIGNED_KEY, unassignedGroups);
+    }
 
-    const bundleDiscountsFromCategory = bundleMap.get(parentCategoryId) ?? [];
+    return categoryMap;
+}
 
-    const baseReducedPrice = firstPrice.reducedPrice === null ? firstPrice.price : firstPrice.reducedPrice;
+function createDiscounts(oldPrices: OldGroupPrices): GroupPriceDiscount[] {
+    if (oldPrices.prices.length < 2) {
+        return [];
+    }
 
     const discounts: GroupPriceDiscount[] = [];
+    const firstPrice = oldPrices.prices[0];
+    const baseReducedPrice = firstPrice.reducedPrice === null ? firstPrice.price : firstPrice.reducedPrice;
 
     // skip first one
-    for (let i = 1; i < oldGroupPrices.length; i++) {
-        const oldGroupPrice = oldGroupPrices[i];
+    for (let i = 1; i < oldPrices.prices.length; i++) {
+        const oldGroupPrice = oldPrices.prices[i];
 
         const reducedPrice: number = oldGroupPrice.reducedPrice === null ? oldGroupPrice.price : oldGroupPrice.reducedPrice;
 
@@ -182,8 +256,21 @@ function convertOldGroupPricesHelper(group: Group, parentCategoryId: string, par
         discounts.push(discount);
     }
 
+    return discounts;
+}
+
+function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory, allBundleDiscounts: BundleDiscount[]): BundleDiscount {
+    if (oldPrices.prices.length < 2) {
+        throw new Error('Not enough prices');
+    }
+
+    const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
+    const countPerGroup = oldPrices.onlySameGroup;
+
+    const discounts = createDiscounts(oldPrices);
+
     const baseNameText = countWholeFamily ? 'Korting voor extra gezinslid' : 'Korting voor meerdere inschrijvingen';
-    const nameText = oldPrices.onlySameGroup ? baseNameText : `${parentCategoryName} - ${baseNameText}`;
+    const nameText = oldPrices.onlySameGroup ? baseNameText : `${category.settings.name} - ${baseNameText}`;
 
     const bundleDiscount = BundleDiscount.create({
         name: new TranslatedString(nameText),
@@ -192,68 +279,18 @@ function convertOldGroupPricesHelper(group: Group, parentCategoryId: string, par
         countPerGroup,
     });
 
-    const categoryDiscount = findCategoryDiscount(bundleDiscount, bundleDiscountsFromCategory);
+    allBundleDiscounts.push(bundleDiscount);
 
-    if (categoryDiscount) {
-        groupPrice.bundleDiscounts = new Map([
-            [
-                categoryDiscount.id,
-                BundleDiscountGroupPriceSettings.create({
-                    name: categoryDiscount.name,
-                    // set custom discounts if discounts are different
-                    customDiscounts: areDiscountsEqual(categoryDiscount.discounts, discounts) ? undefined : discounts,
-                }),
-            ],
-        ]);
-
-        bundleDiscountsFromCategory.forEach((d) => {
-            if (groupPrice.bundleDiscounts.has(d.id)) {
-                return;
-            }
-
-            groupPrice.bundleDiscounts.set(d.id, BundleDiscountGroupPriceSettings.create({
-                name: d.name,
-            }));
-        });
-
-        // bundle discounts exists already
-        return { groupPrice, bundleDiscount: null };
-    }
-
-    const key = oldPrices.onlySameGroup ? parentCategoryId : '';
-
-    if (bundleMap.has(key)) {
-        const existing = bundleMap.get(key)!;
-        existing.push(bundleDiscount);
-    }
-    else {
-        bundleMap.set(key, [bundleDiscount]);
-    }
-
-    groupPrice.bundleDiscounts = new Map([
-        [
-            bundleDiscount.id,
-            BundleDiscountGroupPriceSettings.create({
-                name: bundleDiscount.name,
-            }),
-        ],
-    ]);
-
-    bundleDiscountsFromCategory.forEach((d) => {
-        if (groupPrice.bundleDiscounts.has(d.id)) {
-            return;
-        }
-
-        groupPrice.bundleDiscounts.set(d.id, BundleDiscountGroupPriceSettings.create({
-            name: d.name,
-        }));
-    });
-
-    return { groupPrice, bundleDiscount };
+    return bundleDiscount;
 }
 
-function findCategoryDiscount(discount: BundleDiscount, bundleDiscounts: BundleDiscount[]): BundleDiscount | null {
-    return bundleDiscounts.find(d => d.countPerGroup === discount.countPerGroup && d.countWholeFamily === discount.countWholeFamily) ?? null;
+// copied from v1 code
+function formatDate(date: Date) {
+    const time = Formatter.time(date);
+    if (time === '0:00') {
+        return Formatter.date(date);
+    }
+    return Formatter.dateTime(date);
 }
 
 function areDiscountsEqual(a: GroupPriceDiscount[], b: GroupPriceDiscount[]) {
