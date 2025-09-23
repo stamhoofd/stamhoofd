@@ -89,7 +89,11 @@ export async function migratePrices() {
                             continue;
                         }
 
-                        const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
+                        if (oldPrices.onlySameGroup) {
+                            continue;
+                        }
+
+                        const countWholeFamily = !oldPrices.sameMemberOnlyDiscount;
 
                         if (countWholeFamily) {
                             if (!categoryDiscountForFamily) {
@@ -125,7 +129,7 @@ export async function migratePrices() {
                         startDate: null,
                         prices: [],
                         sameMemberOnlyDiscount: false,
-                        onlySameGroup: false,
+                        onlySameGroup: true,
                     }));
                 }
 
@@ -153,7 +157,7 @@ export async function migratePrices() {
                         }),
                     });
 
-                    const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
+                    const countWholeFamily = !oldPrices.sameMemberOnlyDiscount;
 
                     const discounts = createDiscounts(oldPrices);
 
@@ -302,11 +306,11 @@ function createDiscounts(oldPrices: OldGroupPrices): GroupPriceDiscount[] {
 }
 
 function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory, allBundleDiscounts: BundleDiscount[]): BundleDiscount {
-    if (oldPrices.prices.length < 2) {
+    if (!oldPrices.onlySameGroup && oldPrices.prices.length < 2) {
         throw new Error('Not enough prices');
     }
 
-    const countWholeFamily = oldPrices.sameMemberOnlyDiscount;
+    const countWholeFamily = !oldPrices.sameMemberOnlyDiscount;
     const countPerGroup = oldPrices.onlySameGroup;
 
     const discounts = createDiscounts(oldPrices);

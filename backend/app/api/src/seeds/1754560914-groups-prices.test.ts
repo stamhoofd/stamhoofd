@@ -1,5 +1,5 @@
 import { Group, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { GroupCategory, GroupPriceDiscountType, OldGroupPrice, OldGroupPrices, TranslatedString } from '@stamhoofd/structures';
+import { GroupCategory, GroupCategorySettings, GroupPriceDiscountType, OldGroupPrice, OldGroupPrices, TranslatedString } from '@stamhoofd/structures';
 import { migratePrices } from './1754560914-groups-prices';
 
 describe('migration.migratePrices', () => {
@@ -80,9 +80,11 @@ describe('migration.migratePrices', () => {
 
             organizationPeriod.settings.categories = [
                 GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
                     groupIds: [group1.id, group2.id],
                 }),
                 GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category2' }),
                     groupIds: [group3.id],
                 }),
             ];
@@ -108,7 +110,7 @@ describe('migration.migratePrices', () => {
         test('organization period', async () => {
             // check organization registration period
             const orgPeriod = await OrganizationRegistrationPeriod.getByID(organizationPeriod.id);
-            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(1);
+            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(3);
         });
 
         test('group 1', async () => {
@@ -138,7 +140,7 @@ describe('migration.migratePrices', () => {
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
 
             // check bundle discounts
-            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1); // category discount from group 1
+            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(2); // category discount from group 1
         });
 
         test('group 3', async () => {
@@ -152,7 +154,7 @@ describe('migration.migratePrices', () => {
             expect(g3!.settings.prices[0].price.reducedPrice).toBeNull();
 
             // check bundle discounts
-            expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(0); // no category discount from group 1
+            expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(1); // no category discount from group 1
         });
     });
 
@@ -233,9 +235,11 @@ describe('migration.migratePrices', () => {
 
             organizationPeriod.settings.categories = [
                 GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
                     groupIds: [group1.id, group2.id],
                 }),
                 GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category2' }),
                     groupIds: [group3.id],
                 }),
             ];
@@ -261,7 +265,7 @@ describe('migration.migratePrices', () => {
         test('organization period', async () => {
             // check organization registration period
             const orgPeriod = await OrganizationRegistrationPeriod.getByID(organizationPeriod.id);
-            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(1);
+            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(3);
         });
 
         test('group 1', async () => {
@@ -291,7 +295,7 @@ describe('migration.migratePrices', () => {
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
 
             // check bundle discounts
-            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1); // category discount from group 1
+            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(2); // category discount from group 1
         });
 
         test('group 3', async () => {
@@ -305,7 +309,7 @@ describe('migration.migratePrices', () => {
             expect(g3!.settings.prices[0].price.reducedPrice).toBeNull();
 
             // check bundle discounts
-            expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(0); // no category discount from group 1
+            expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(1); // no category discount from group 1
         });
     });
 
@@ -330,7 +334,7 @@ describe('migration.migratePrices', () => {
             group1.settings.prices = [];
             group1.settings.name = new TranslatedString('group1');
 
-            // family members in category
+            // same members in category
             const oldPrices1 = OldGroupPrices.create({
                 startDate: null,
                 sameMemberOnlyDiscount: true,
@@ -351,7 +355,7 @@ describe('migration.migratePrices', () => {
                 ],
             });
 
-            // same members in category and other price
+            // family members in category and other price
             const oldPrices2 = OldGroupPrices.create({
                 startDate: new Date(2025, 2, 1),
                 sameMemberOnlyDiscount: false,
@@ -386,9 +390,11 @@ describe('migration.migratePrices', () => {
 
             organizationPeriod.settings.categories = [
                 GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
                     groupIds: [group1.id, group2.id],
                 }),
                 GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category2' }),
                     groupIds: [group3.id],
                 }),
             ];
@@ -414,7 +420,7 @@ describe('migration.migratePrices', () => {
         test('organization period', async () => {
             // check organization registration period
             const orgPeriod = await OrganizationRegistrationPeriod.getByID(organizationPeriod.id);
-            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(2);
+            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(4);
         });
 
         test('group 1', async () => {
@@ -476,7 +482,7 @@ describe('migration.migratePrices', () => {
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
 
             // check bundle discounts
-            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(2); // category discount from group 1
+            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(3); // category discount from group 1
             expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
                 expect.arrayContaining([
                     // is connected to family discount, but zero discount
@@ -514,7 +520,332 @@ describe('migration.migratePrices', () => {
             expect(g3!.settings.prices[0].price.reducedPrice).toBeNull();
 
             // check bundle discounts
+            expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(1); // no category discount from group 1
+        });
+    });
+
+    describe('Case 4 - combination of different discounts and multiple group categories', () => {
+        let period: RegistrationPeriod;
+        let organization: Organization;
+        let organizationPeriod: OrganizationRegistrationPeriod;
+        let group1: Group;
+        let group2: Group;
+        let group3: Group;
+        let group4: Group;
+
+        beforeAll(async () => {
+            const startDate = new Date(2025, 0, 1);
+            const endDate = new Date(2025, 11, 31);
+            period = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+            organization = await new OrganizationFactory({ period }).create();
+            period.organizationId = organization.id;
+            await period.save();
+            organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+            group1 = await new GroupFactory({ organization, period }).create();
+            group1.settings.prices = [];
+            group1.settings.name = new TranslatedString('group1');
+
+            // same members in category
+            const oldPrices1 = OldGroupPrices.create({
+                startDate: null,
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 30,
+                        reducedPrice: 20,
+                    }),
+                    OldGroupPrice.create({
+                        price: 25,
+                        reducedPrice: 15,
+                    }),
+                    OldGroupPrice.create({
+                        price: 20,
+                        reducedPrice: 10,
+                    }),
+                ],
+            });
+
+            // family members in category and other price
+            const oldPrices2 = OldGroupPrices.create({
+                startDate: new Date(2025, 2, 1),
+                sameMemberOnlyDiscount: false,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 300,
+                        reducedPrice: 200,
+                    }),
+                    OldGroupPrice.create({
+                        price: 200,
+                        reducedPrice: 100,
+                    }),
+                ],
+            });
+
+            // same members in category
+            const oldPrices3 = OldGroupPrices.create({
+                startDate: new Date(2025, 6, 5),
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: true,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 31,
+                        reducedPrice: 21,
+                    }),
+                    OldGroupPrice.create({
+                        price: 26,
+                        reducedPrice: 16,
+                    }),
+                    OldGroupPrice.create({
+                        price: 21,
+                        reducedPrice: 11,
+                    }),
+                ],
+            });
+
+            group1.settings.oldPrices = [oldPrices2, oldPrices1, oldPrices3];
+
+            await group1.save();
+
+            group2 = await new GroupFactory({ organization, period }).create();
+            group2.settings.prices = [];
+
+            const oldPrices_g2_1 = OldGroupPrices.create({
+                startDate: null,
+                sameMemberOnlyDiscount: false,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 32,
+                        reducedPrice: 22,
+                    }),
+                    OldGroupPrice.create({
+                        price: 27,
+                        reducedPrice: 17,
+                    }),
+                    OldGroupPrice.create({
+                        price: 22,
+                        reducedPrice: 12,
+                    }),
+                ],
+            });
+
+            const oldPrices_g2_2 = OldGroupPrices.create({
+                startDate: new Date(2025, 7, 2),
+                sameMemberOnlyDiscount: false,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 33,
+                        reducedPrice: 23,
+                    }),
+                    OldGroupPrice.create({
+                        price: 23,
+                        reducedPrice: 13,
+                    }),
+                ],
+            });
+            group2.settings.oldPrices = [oldPrices_g2_1, oldPrices_g2_2];
+            group2.settings.name = new TranslatedString('group2');
+            await group2.save();
+
+            group3 = await new GroupFactory({ organization, period }).create();
+            group3.settings.prices = [];
+            const oldPrices_g3_1 = OldGroupPrices.create({
+                startDate: null,
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 29,
+                        reducedPrice: 19,
+                    }),
+                    OldGroupPrice.create({
+                        price: 28,
+                        reducedPrice: 18,
+                    }),
+                ],
+            });
+            group3.settings.oldPrices = [oldPrices_g3_1];
+            group3.settings.name = new TranslatedString('group3');
+            await group3.save();
+
+            group4 = await new GroupFactory({ organization, period }).create();
+            group4.settings.prices = [];
+            group4.settings.oldPrices = [];
+            group4.settings.name = new TranslatedString('group4');
+            await group4.save();
+
+            organizationPeriod.settings.categories = [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
+                    groupIds: [group1.id, group2.id],
+                }),
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category2' }),
+                    groupIds: [group3.id, group4.id],
+                }),
+            ];
+
+            await organizationPeriod.save();
+
+            await migratePrices();
+        });
+
+        afterAll(async () => {
+            await group1.delete();
+            await group2.delete();
+            await group3.delete();
+            await group4.delete();
+
+            await organizationPeriod.delete();
+            period.organizationId = null;
+            await period.save();
+
+            await organization.delete();
+            await period.delete();
+        });
+
+        test('organization period', async () => {
+            // check organization registration period
+            const orgPeriod = await OrganizationRegistrationPeriod.getByID(organizationPeriod.id);
+            expect(orgPeriod!.settings.bundleDiscounts).toHaveLength(5);
+            expect([...orgPeriod!.settings.bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    // todo: check discounts
+                    expect.objectContaining({ countWholeFamily: false, countPerGroup: false }),
+                    expect.objectContaining({ countWholeFamily: true, countPerGroup: false }),
+                    expect.objectContaining({ countWholeFamily: true, countPerGroup: false }),
+                    expect.objectContaining({ countWholeFamily: true, countPerGroup: true }),
+                    expect.objectContaining({ countWholeFamily: false, countPerGroup: true }),
+                    // is connected to family discount, but zero discount
+                    // expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                    //     expect.objectContaining({
+                    //         type: GroupPriceDiscountType.Fixed,
+                    //         value: expect.objectContaining({
+                    //             price: 0,
+                    //             reducedPrice: null,
+                    //         }),
+                    //     }),
+                    // ]) }),
+                ]),
+            );
+        });
+
+        test.skip('group 1', async () => {
+            const g1 = await Group.getByID(group1.id);
+
+            // check prices
+            expect(g1!.settings.oldPrices).toHaveLength(0);
+            expect(g1!.settings.prices).toHaveLength(2);
+            expect(g1!.settings.prices[0].price.price).toBe(30);
+            expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
+            expect(g1!.settings.prices[1].price.price).toBe(300);
+            expect(g1!.settings.prices[1].price.reducedPrice).toBe(200);
+
+            // check bundle discounts
+            expect(g1!.settings.prices[0].bundleDiscounts.size).toBe(2);
+            expect([...g1!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    // is default discount for category
+                    expect.objectContaining({ customDiscounts: null }),
+                    // is connected to family discount, but zero discount
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                ]),
+            );
+            expect(g1!.settings.prices[1].bundleDiscounts.size).toBe(2);
+            expect([...g1!.settings.prices[1].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    // is default discount for category
+                    expect.objectContaining({ customDiscounts: null }),
+                    // is connected to member only discount, but zero discount
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                ]),
+            );
+        });
+
+        test.skip('group 2', async () => {
+            // group 2
+            const g2 = await Group.getByID(group2.id);
+
+            // check prices
+            expect(g2!.settings.oldPrices).toHaveLength(0);
+            expect(g2!.settings.prices).toHaveLength(1);
+            expect(g2!.settings.prices[0].price.price).toBe(0);
+            expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
+
+            // check bundle discounts
+            expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(2); // category discount from group 1
+            expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    // is connected to family discount, but zero discount
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                    // is connected to member only discount, but zero discount
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                ]),
+            );
+        });
+
+        test.skip('group 3', async () => {
+            // group 3
+            const g3 = await Group.getByID(group3.id);
+
+            // check prices
+            expect(g3!.settings.oldPrices).toHaveLength(0);
+            expect(g3!.settings.prices).toHaveLength(1);
+            expect(g3!.settings.prices[0].price.price).toBe(0);
+            expect(g3!.settings.prices[0].price.reducedPrice).toBeNull();
+
+            // check bundle discounts
             expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(0); // no category discount from group 1
+        });
+
+        test.skip('group 4', async () => {
+            // group 3
+            const g4 = await Group.getByID(group4.id);
+
+            // check prices
+            expect(g4!.settings.oldPrices).toHaveLength(0);
+            expect(g4!.settings.prices).toHaveLength(1);
+            expect(g4!.settings.prices[0].price.price).toBe(0);
+            expect(g4!.settings.prices[0].price.reducedPrice).toBeNull();
+
+            // check bundle discounts
+            expect(g4!.settings.prices[0].bundleDiscounts.size).toBe(0); // no category discount from group 1
         });
     });
 });
