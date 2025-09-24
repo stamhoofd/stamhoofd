@@ -1296,17 +1296,11 @@ describe('Endpoint.PatchOrganization', () => {
             const token = await Token.createToken(user);
 
             const newPeriod = await new RegistrationPeriodFactory({}).create();
+
             const newOrganizationPeriod = new OrganizationRegistrationPeriod();
             newOrganizationPeriod.organizationId = organization.id;
             newOrganizationPeriod.periodId = newPeriod.id;
             await newOrganizationPeriod.save();
-
-            const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
-                id: organization.id,
-                period: newOrganizationPeriod,
-            });
-
-            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
@@ -1334,13 +1328,6 @@ describe('Endpoint.PatchOrganization', () => {
             newOrganizationPeriod.organizationId = otherOrganization.id;
             newOrganizationPeriod.periodId = newPeriod.id;
             await newOrganizationPeriod.save();
-
-            const r = Request.buildJson('PATCH', '/v2/organization', organization.getApiHost(), {
-                id: organization.id,
-                period: newOrganizationPeriod,
-            });
-
-            r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const patch = OrganizationStruct.patch({
                 id: organization.id,
