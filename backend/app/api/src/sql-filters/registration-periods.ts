@@ -10,7 +10,7 @@ export const registrationPeriodFilterCompilers: SQLFilterDefinitions = {
     organizationId: createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
-        nullable: false,
+        nullable: true,
     }),
     startDate: createColumnFilter({
         expression: SQL.column('startDate'),
