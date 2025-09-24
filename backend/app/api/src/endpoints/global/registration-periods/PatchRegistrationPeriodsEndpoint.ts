@@ -36,7 +36,14 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
     static async isCurrentRegistrationPeriod(organizationId: string | null, periodId: string) {
         if (organizationId === null) {
             const platform = await Platform.getSharedStruct();
-            return platform.periodIdIfPlatform === periodId;
+            if (STAMHOOFD.userMode === 'platform') {
+                return platform.period.id === periodId;
+            }
+            throw new SimpleError({
+                code: 'only_platform',
+                message: 'Period id should only be used if userMode is platform',
+                human: $t(`8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8`),
+            });
         }
 
         const organization = await Organization.getByID(organizationId);

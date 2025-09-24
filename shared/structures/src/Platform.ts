@@ -1,7 +1,6 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { DefaultAgeGroup } from './DefaultAgeGroup.js';
 import { Replacement } from './endpoints/EmailRequest.js';
@@ -541,23 +540,6 @@ export class Platform extends AutoEncoder {
      */
     getRoles() {
         return this.privateConfig?.roles ?? [];
-    }
-
-    /**
-     * Throws an error if userMode is not platform.
-     * The period id of the platform should almost never be used if the userMode is not platform.
-     * By throwing an error, we prevent accidental usage of the period id.
-     */
-    get periodIdIfPlatform() {
-        if (STAMHOOFD.userMode === 'platform') {
-            return this.period.id;
-        }
-
-        throw new SimpleError({
-            code: 'only_platform',
-            message: 'Period id should only be used if userMode is platform',
-            human: $t(`8a50ee7d-f37e-46cc-9ce7-30c7b37cefe8`),
-        });
     }
 
     static get shared(): Platform {
