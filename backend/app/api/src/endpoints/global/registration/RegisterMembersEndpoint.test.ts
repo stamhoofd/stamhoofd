@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -59,8 +59,8 @@ describe('Endpoint.RegisterMembers', () => {
             organization,
             permissions: permissionLevel !== PermissionLevel.None
                 ? Permissions.create({
-                    level: permissionLevel,
-                })
+                        level: permissionLevel,
+                    })
                 : null,
         })
             .create();
@@ -105,6 +105,7 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Should fail if demo limit reached', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
+
             const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
 
             organization.meta.packages = OrganizationPackages.create({

@@ -1,7 +1,6 @@
 import { Factory } from '@simonbackx/simple-database';
 import { EventNotificationStatus, RecordAnswer } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification, User } from '../models';
 import { Event } from '../models/Event';
 import { Organization } from '../models/Organization';
@@ -34,14 +33,6 @@ export class EventNotificationFactory extends Factory<Options, EventNotification
 
         eventNotification.startDate = events[0].startDate;
         eventNotification.endDate = events[0].endDate;
-
-        if (STAMHOOFD.userMode === 'organization' && this.options.periodId !== this.options.organization.periodId) {
-            throw new SimpleError({
-                code: 'invalid_period',
-                message: 'Period has different organization id then the organization',
-                statusCode: 400,
-            });
-        }
 
         eventNotification.periodId = this.options.periodId ?? this.options.organization.periodId;
 
