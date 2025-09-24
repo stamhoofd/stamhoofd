@@ -1,7 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { Organization, OrganizationFactory } from '@stamhoofd/models';
+import { OrganizationFactory } from '@stamhoofd/models';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Database } from '@simonbackx/simple-database';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { SearchOrganizationEndpoint } from './SearchOrganizationEndpoint';
 
@@ -10,7 +11,9 @@ describe('Endpoint.SearchOrganization', () => {
     const endpoint = new SearchOrganizationEndpoint();
 
     afterEach(async () => {
-        await Organization.delete();
+        await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
+        await Database.delete('DELETE FROM `organizations`');
+        await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
     });
 
     test('Search for a given organization using exact search', async () => {
