@@ -53,7 +53,7 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
             throw new Error(`Current period with id ${organization.periodId} not found for organization ${organization.id}`);
         }
 
-        const previousPeriods = periods.filter((p) => {
+        const previousPeriods: RegistrationPeriod[] = periods.filter((p) => {
             if (p.id === organization.periodId) {
                 return false;
             }
@@ -74,10 +74,14 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
             // sort by period startDate
             const p1 = previousPeriods.find(p => p.id === g1.periodId)!;
             const p2 = previousPeriods.find(p => p.id === g2.periodId)!;
-            const result = Sorter.byDateValue(p1.startDate, p2.startDate);
+            const p1StartDate: Date = p1.startDate;
+            const p2StartDate: Date = p2.startDate;
+            const result = Sorter.byDateValue(p1StartDate, p2StartDate);
             if (result === 0) {
                 // sort by start date of group
-                const result2 = Sorter.byDateValue(g1.settings.startDate, g2.settings.startDate);
+                const g1StartDate: Date = g1.settings.startDate;
+                const g2StartDate: Date = g2.settings.startDate;
+                const result2 = Sorter.byDateValue(g1StartDate, g2StartDate);
                 if (result2 !== 0) {
                     return result2;
                 }
@@ -99,7 +103,8 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
         });
 
         for (const group of groups) {
-            const requireGroupIds = new Set(group.settings.requireGroupIds);
+            const ids: string[] = group.settings.requireGroupIds;
+            const requireGroupIds = new Set(ids);
 
             // there are no future periods after the migration, so if the period is different this means it is a period in the past
             // requirePreviousGroupIds should not be migrated for past periods
@@ -153,12 +158,16 @@ export async function startRequirePreviousGroupIdsMigration(dryRun: boolean) {
                     // should add other equal groups if they have the same period, status and start date
                     if (samePeriodAndStatus.length > 1) {
                         console.log(`Multiple previous groups for ${groupIdToGetPreviousGroupOf}, adding all`);
-                        samePeriodAndStatus.forEach(g => requireGroupIds.add(g.id));
+                        samePeriodAndStatus.forEach((g) => {
+                            const id: string = g.id;
+                            return requireGroupIds.add(id);
+                        });
                         continue;
                     }
                 }
 
-                requireGroupIds.add(firstPreviousGroup.id);
+                const firstPreviousGroupId: string = firstPreviousGroup.id;
+                requireGroupIds.add(firstPreviousGroupId);
             }
 
             group.settings.requireGroupIds = Array.from(requireGroupIds);
