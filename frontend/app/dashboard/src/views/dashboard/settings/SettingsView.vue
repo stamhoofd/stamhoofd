@@ -498,7 +498,7 @@ defineRoutes([
         url: Routes.RegistrationGroups,
         present: 'popup',
         handler: async (options) => {
-            const component = buildEditGroupsView();
+            const component = await buildEditGroupsView();
 
             await present({
                 ...(options as any),

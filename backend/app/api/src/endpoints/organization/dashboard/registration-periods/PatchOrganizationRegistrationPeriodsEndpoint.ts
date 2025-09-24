@@ -3,7 +3,8 @@ import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegi
 
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { Context } from '../../../../helpers/Context';
 import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
@@ -358,7 +359,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
     }
 
-    static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null) {
+    static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null, allowPatchWaitingListPeriod = false) {
         const model = await Group.getByID(struct.id);
 
         if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
@@ -402,7 +403,27 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             period = await RegistrationPeriod.getByID(model.periodId);
         }
 
+        let shouldUpdatePeriodIds = false;
+
         if (period) {
+            if (struct.periodId !== undefined && struct.periodId !== period.id) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    field: 'periodId',
+                    message: 'Cannot patch periodId to a different period then the one being patched',
+                });
+            }
+
+            shouldUpdatePeriodIds = period.id !== model.periodId;
+
+            if (shouldUpdatePeriodIds && period.organizationId !== model.organizationId) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    field: 'periodId',
+                    message: 'Cannot move a group to a period of another organization',
+                });
+            }
+
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
 
@@ -421,6 +442,27 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
             }
         }
+
+        /**
+         * A group should only be able to be moved to another period if the waiting list is not shared with other groups in the current period.
+         */
+        const throwIfUpdateWaitingListPeriodWithMultipleGroups = async (waitingListId: string) => {
+            if (shouldUpdatePeriodIds) {
+                const groupCount = await Group.select()
+                    .where('waitingListId', waitingListId)
+                    .whereNot('id', model.id)
+                    .whereNot('periodId', model.periodId).limit(1).count();
+
+                if (groupCount > 0) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'periodId',
+                        message: 'Group has waiting list with other groups in the current period',
+                        human: $t('Je kan deze groep niet naar een andere periode verplaatsen omdat de wachtlijst van deze groep gedeeld is met andere groepen.'),
+                    });
+                }
+            }
+        };
 
         const patch = struct;
         if (patch.waitingList !== undefined) {
@@ -442,7 +484,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
                 patch.waitingList.id = model.waitingListId;
                 patch.waitingList.type = GroupType.WaitingList;
-                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period);
+                await throwIfUpdateWaitingListPeriodWithMultipleGroups(patch.waitingList.id);
+                await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.waitingList, period, shouldUpdatePeriodIds);
             }
             else {
                 if (model.waitingListId) {
@@ -490,6 +533,25 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.waitingListId = group.id;
                 }
             }
+        }
+        else if (shouldUpdatePeriodIds && model.waitingListId) {
+            // update waiting list period
+            await throwIfUpdateWaitingListPeriodWithMultipleGroups(model.waitingListId);
+            await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: model.waitingListId }), period, shouldUpdatePeriodIds);
+        }
+
+        if (shouldUpdatePeriodIds) {
+            if (model.type === GroupType.EventRegistration || (model.type === GroupType.WaitingList && !allowPatchWaitingListPeriod)) {
+                throw new SimpleError({
+                    code: 'not_supported',
+                    message: `Moving group with type ${model.type} to a different period is not supported`,
+                    statusCode: 400,
+                });
+            }
+
+            // change the period ids of the registrations in the group
+            const { changedRows } = await SQL.update(Registration.table).set('periodId', model.periodId).where('groupId', model.id).update();
+            console.log(`Moved ${changedRows} registrations to period ${model.periodId}`);
         }
 
         model.settings.throwIfInvalidPrices();

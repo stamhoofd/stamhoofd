@@ -72,10 +72,10 @@
 </template>
 
 <script setup lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
-import { GroupAvatar, MembersTableView, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
+import { GroupAvatar, MembersTableView, PromiseComponent, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useGetPeriods, useOrganizationManager, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
@@ -92,7 +92,8 @@ const organizationManager = useOrganizationManager();
 const present = usePresent();
 const auth = useAuth();
 const splitViewController = useSplitViewController();
-const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const patchOrganizationPeriods = usePatchOrganizationPeriods();
+const getPeriods = useGetPeriods();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({
@@ -281,16 +282,17 @@ async function upgradePeriod() {
 
 async function editMe() {
     if (!$rootCategory.value) return;
-    await present(new ComponentWithProperties(NavigationController, {
+
+    await present(PromiseComponent(async () => new ComponentWithProperties(NavigationController, {
         root: new ComponentWithProperties(EditCategoryGroupsView, {
             category: $rootCategory.value,
-            period: period.value,
+            periodId: period.value.id,
+            periods: await getPeriods(),
             organization: $organization.value,
-            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                patch.id = period.value.id;
-                await patchOrganizationPeriod(patch);
+            saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                await patchOrganizationPeriods(patch);
             },
         }),
-    }).setDisplayStyle('popup'));
+    })).setDisplayStyle('popup'));
 }
 </script>
