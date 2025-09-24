@@ -224,7 +224,7 @@ export class Document extends QueryableModel {
 
     static async updateForGroup(groupId: string, organizationId: string) {
         try {
-            // console.log('Updating documents for group', groupId);
+            console.log('Updating documents for group', groupId);
 
             const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
             const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
