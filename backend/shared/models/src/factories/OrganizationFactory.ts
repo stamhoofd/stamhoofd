@@ -54,9 +54,6 @@ export class OrganizationFactory extends Factory<Options, Organization> {
         }
         else {
             period = await new RegistrationPeriodFactory({}).create();
-            if (STAMHOOFD.userMode === 'organization') {
-                period.organizationId = organization.id;
-            }
         }
 
         organization.periodId = period.id;
@@ -73,6 +70,7 @@ export class OrganizationFactory extends Factory<Options, Organization> {
 
         if (!this.options.period && STAMHOOFD.userMode === 'organization') {
             // should be saved after creation of organization
+            period.organizationId = organization.id;
             await period.save();
         }
 
