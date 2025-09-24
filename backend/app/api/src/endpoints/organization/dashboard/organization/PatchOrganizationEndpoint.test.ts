@@ -1,14 +1,19 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, Organization, OrganizationFactory, Token, User, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
-import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
+import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer';
 import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
 
 describe('Endpoint.PatchOrganization', () => {
     // Test endpoint
     const endpoint = new PatchOrganizationEndpoint();
+
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
+    });
 
     const patchOrganization = async ({ patch, organization, token }: { patch: AutoEncoderPatchType<OrganizationStruct> | OrganizationStruct; organization: Organization; token: Token }) => {
         const request = Request.buildJson('PATCH', `/v${Version}/organization`, organization.getApiHost(), patch);
@@ -1272,6 +1277,66 @@ describe('Endpoint.PatchOrganization', () => {
                     token,
                 })).rejects.toThrow('You do not have permissions to edit inherited responsibility roles');
             });
+        });
+    });
+
+    describe('userMode organization', () => {
+        beforeEach(async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+        });
+
+        test("Can't set period that belongs to no organization", async () => {
+            const initialPeriod = await new RegistrationPeriodFactory({}).create();
+            const organization = await new OrganizationFactory({ }).create();
+
+            organization.periodId = initialPeriod.id;
+            await organization.save();
+
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const newPeriod = await new RegistrationPeriodFactory({}).create();
+
+            const newOrganizationPeriod = new OrganizationRegistrationPeriod();
+            newOrganizationPeriod.organizationId = organization.id;
+            newOrganizationPeriod.periodId = newPeriod.id;
+            await newOrganizationPeriod.save();
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                period: OrganizationRegistrationPeriodStruct.patch({ id: newOrganizationPeriod.id }),
+            });
+
+            await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'period' }),
+            );
+        });
+
+        test("Can't set period that belongs to other organization", async () => {
+            const initialPeriod = await new RegistrationPeriodFactory({}).create();
+            const organization = await new OrganizationFactory({ }).create();
+
+            organization.periodId = initialPeriod.id;
+            await organization.save();
+
+            const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await Token.createToken(user);
+
+            const otherOrganization = await new OrganizationFactory({ }).create();
+            const newPeriod = await new RegistrationPeriodFactory({ organization: otherOrganization }).create();
+            const newOrganizationPeriod = new OrganizationRegistrationPeriod();
+            newOrganizationPeriod.organizationId = otherOrganization.id;
+            newOrganizationPeriod.periodId = newPeriod.id;
+            await newOrganizationPeriod.save();
+
+            const patch = OrganizationStruct.patch({
+                id: organization.id,
+                period: OrganizationRegistrationPeriodStruct.patch({ id: newOrganizationPeriod.id }),
+            });
+
+            await expect(patchOrganization({ patch, organization, token })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'period' }),
+            );
         });
     });
 });

@@ -39,7 +39,15 @@ export class OrganizationFactory extends Factory<Options, Organization> {
             country: Country.Belgium,
         });
 
-        const period = this.options.period ?? await new RegistrationPeriodFactory({}).create();
+        let period: RegistrationPeriod;
+
+        if (this.options.period) {
+            period = this.options.period;
+        }
+        else {
+            period = await new RegistrationPeriodFactory({}).create();
+        }
+
         organization.periodId = period.id;
 
         if (this.options.roles) {
@@ -51,6 +59,13 @@ export class OrganizationFactory extends Factory<Options, Organization> {
         }
 
         await organization.save();
+
+        if (!this.options.period && STAMHOOFD.userMode === 'organization') {
+            // should be saved after creation of organization
+            period.organizationId = organization.id;
+            await period.save();
+        }
+
         return organization;
     }
 }

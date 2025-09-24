@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Event, EventNotification, RegistrationPeriod, Platform } from '@stamhoofd/models';
+import { Event, EventNotification, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
@@ -81,7 +81,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 if (index === 0) {
                     notification.startDate = model.startDate;
                     notification.endDate = model.endDate;
-                    const period = await RegistrationPeriod.getByDate(model.startDate);
+                    const period = await RegistrationPeriod.getByDate(model.startDate, organization?.id ?? null);
 
                     if (!period) {
                         throw new SimpleError({

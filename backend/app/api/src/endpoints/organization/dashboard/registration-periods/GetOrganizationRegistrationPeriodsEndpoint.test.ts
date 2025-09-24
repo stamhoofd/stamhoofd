@@ -114,10 +114,26 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
 
         test('Should not contain groups of other organizations or periods', async () => {
             // arrange
-            const organization = await initOrganization(registrationPeriod1);
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date(2022, 0, 1),
+                endDate: new Date(2022, 11, 31),
+            }).create();
+
+            const period = await new RegistrationPeriodFactory({
+                startDate: new Date(2023, 0, 1),
+                endDate: new Date(2023, 11, 31),
+                previousPeriodId: period2.id,
+            }).create();
+
+            const organization = await initOrganization(period);
+            period.organizationId = organization.id;
+            await period.save();
+            period2.organizationId = organization.id;
+            await period2.save();
+
             const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
                 organization,
-                period: registrationPeriod1,
+                period,
             }).create();
 
             const user = await new UserFactory({
@@ -132,12 +148,12 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
 
             const group1 = await new GroupFactory({
                 organization,
-                period: registrationPeriod1,
+                period,
             }).create();
 
             const group2 = await new GroupFactory({
                 organization,
-                period: registrationPeriod1,
+                period,
             }).create();
 
             // Make sure the groups are in a category of the organization period
@@ -147,15 +163,23 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
             await organizationPeriod.save();
 
             // group list of other organization
-            const otherOrganization = await initOrganization(registrationPeriod1);
+            const otherPeriod = await new RegistrationPeriodFactory({
+                startDate: new Date(2023, 0, 1),
+                endDate: new Date(2023, 11, 31),
+            }).create();
+
+            const otherOrganization = await initOrganization(otherPeriod);
+            otherPeriod.organizationId = otherOrganization.id;
+            await otherPeriod.save();
+
             const otherOrganizationPeriod = await new OrganizationRegistrationPeriodFactory({
                 organization: otherOrganization,
-                period: registrationPeriod1,
+                period: otherPeriod,
             }).create();
 
             const otherGroup1 = await new GroupFactory({
                 organization: otherOrganization,
-                period: registrationPeriod1,
+                period: otherPeriod,
             }).create();
 
             // Add the group to the other organization's period
@@ -165,7 +189,7 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
             // group of other period
             await new GroupFactory({
                 organization,
-                period: registrationPeriod2,
+                period: period2,
             }).create();
 
             // act

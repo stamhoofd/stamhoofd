@@ -33,6 +33,7 @@ export class EventNotificationFactory extends Factory<Options, EventNotification
 
         eventNotification.startDate = events[0].startDate;
         eventNotification.endDate = events[0].endDate;
+
         eventNotification.periodId = this.options.periodId ?? this.options.organization.periodId;
 
         // Set record answers

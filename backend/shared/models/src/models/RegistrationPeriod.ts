@@ -1,4 +1,5 @@
 import { column } from '@simonbackx/simple-database';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
@@ -67,11 +68,24 @@ export class RegistrationPeriod extends QueryableModel {
         return RegistrationPeriodStruct.create(this);
     }
 
-    static async getByDate(date: Date): Promise<RegistrationPeriod | null> {
-        const result = await SQL.select().from(SQL.table(this.table))
+    static async getByDate(date: Date, organizationId: string | null): Promise<RegistrationPeriod | null> {
+        if (STAMHOOFD.userMode === 'organization' && organizationId === null) {
+            throw new SimpleError({
+                code: 'invalid_argument',
+                message: 'Organization id is required when user mode is organization',
+                statusCode: 400,
+            });
+        }
+
+        const query = SQL.select().from(SQL.table(this.table))
             .where(SQL.column('startDate'), SQLWhereSign.LessEqual, date)
-            .where(SQL.column('endDate'), SQLWhereSign.GreaterEqual, date)
-            .first(false);
+            .where(SQL.column('endDate'), SQLWhereSign.GreaterEqual, date);
+
+        if (organizationId) {
+            query.where(SQL.column('organizationId'), organizationId);
+        }
+
+        const result = await query.first(false);
 
         if (result === null || !result[this.table]) {
             return null;

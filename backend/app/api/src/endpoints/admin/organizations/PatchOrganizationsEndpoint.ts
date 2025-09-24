@@ -126,7 +126,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             organization.meta = put.meta;
             organization.address = put.address;
 
-            const periodId = (await Platform.getShared()).periodId;
+            const periodId = (await Platform.getShared()).periodIdIfPlatform;
             organization.periodId = periodId;
 
             if (put.privateMeta) {

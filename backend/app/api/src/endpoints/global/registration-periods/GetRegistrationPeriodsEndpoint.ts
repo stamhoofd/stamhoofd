@@ -116,6 +116,8 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.setUserOrganizationScope();
+
         if (request.request.getVersion() < 371) {
             throw new SimpleError({
                 code: 'client_update_required',
@@ -142,8 +144,6 @@ export class GetRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body
                 message: 'Limit can not be less than 1',
             });
         }
-
-        await Context.setUserOrganizationScope();
 
         return new Response(
             await GetRegistrationPeriodsEndpoint.buildData(request.query),

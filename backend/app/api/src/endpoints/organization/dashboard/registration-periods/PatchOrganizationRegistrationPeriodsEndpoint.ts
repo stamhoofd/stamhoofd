@@ -54,6 +54,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         for (const patch of request.body.getPatches()) {
             const organizationPeriod = await OrganizationRegistrationPeriod.getByID(patch.id);
+
             if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -65,7 +66,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
 
-            if (!period) {
+            if (!period || (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id)) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
@@ -287,6 +288,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             });
         }
 
+        if (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id) {
+            throw new SimpleError({
+                code: 'invalid_period',
+                message: 'Period has different organization id',
+                statusCode: 400,
+            });
+        }
+
         if (period?.locked) {
             throw new SimpleError({
                 code: 'locked_period',
@@ -403,6 +412,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         if (period) {
+            if (STAMHOOFD.userMode === 'organization' && period.organizationId !== model.organizationId) {
+                throw new SimpleError({
+                    code: 'invalid_period',
+                    message: 'Period has different organization id',
+                    statusCode: 400,
+                });
+            }
+
             model.periodId = period.id;
             model.settings.period = period.getBaseStructure();
 
@@ -479,6 +496,15 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     if (!requiredPeriod) {
                         throw new Error('Unexpected missing period when creating waiting list');
                     }
+
+                    if (STAMHOOFD.userMode === 'organization' && requiredPeriod.organizationId !== model.organizationId) {
+                        throw new SimpleError({
+                            code: 'invalid_period',
+                            message: 'Period has different organization id',
+                            statusCode: 400,
+                        });
+                    }
+
                     const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                         patch.waitingList,
                         model.organizationId,
@@ -521,6 +547,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 code: 'invalid_period',
                 message: 'Period is locked',
                 human: Context.i18n.$t('f544b972-416c-471d-8836-d7f3b16f947d'),
+            });
+        }
+
+        if (STAMHOOFD.userMode === 'organization' && (period.organizationId !== organizationId)) {
+            throw new SimpleError({
+                code: 'invalid_period',
+                message: 'Period has different organization id',
+                statusCode: 400,
             });
         }
 

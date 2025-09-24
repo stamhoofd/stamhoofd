@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, RecordFileAnswer, RecordImageAnswer, Version } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, Platform, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

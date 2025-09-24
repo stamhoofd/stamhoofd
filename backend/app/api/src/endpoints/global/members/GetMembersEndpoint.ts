@@ -62,7 +62,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                         $in: tags,
                                     },
                                 },
-                                periodId: platform.periodId,
+                                periodId: platform.periodIdIfPlatform,
                             },
                         },
                     };
