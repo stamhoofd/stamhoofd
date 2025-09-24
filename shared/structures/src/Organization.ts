@@ -84,7 +84,7 @@ export class Organization extends AutoEncoder {
         const groups = this.getCategoryTree({admin}).getAllGroups()
         
         for (const group of groups) {
-            if (group.closed) {
+            if (group.closed && !group.notYetOpen) {
                 continue;
             }
             if (group.settings.requireGroupIds.length > 0 && group.settings.requireGroupIds.find(id => !!allGroups.find(g => g.id === id))) {
