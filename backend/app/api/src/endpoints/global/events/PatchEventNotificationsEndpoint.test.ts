@@ -84,12 +84,18 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
     });
 
     test('A normal user can create new event notifications for an event', async () => {
+        const startDate = new Date(2024, 8, 1, 0, 0, 0, 0);
+        const endDate = new Date(2025, 7, 31, 0, 0, 0, 0);
+        const registrationPeriod = await new RegistrationPeriodFactory({ startDate, endDate }).create();
         const organization = await new OrganizationFactory({}).create();
+        registrationPeriod.organizationId = organization.id;
+        await registrationPeriod.save();
+
         const user = await new UserFactory({
             organization,
             permissions: minimumUserPermissions,
         }).create();
-        const event = await new EventFactory({ organization }).create();
+        const event = await new EventFactory({ organization, startDate, endDate }).create();
         const recordCategories = await new RecordCategoryFactory({
             records: [
                 {
