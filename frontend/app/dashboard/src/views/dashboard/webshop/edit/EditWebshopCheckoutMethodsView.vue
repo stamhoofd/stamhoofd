@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
-        <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Dit is optioneel, maar we raden het wel sterk aan, want zo is de juiste informatie zichtbaar in de bestelbevestiging.</p>
+        <p>Stel hier in waar en wanneer de bestelde producten kunnen worden afgehaald, geleverd of ter plaatse geconsumeerd. Zodra je dit inschakelt, krijgt de besteller de keuze tijdens het afrekenen. Als je maar één optie toevoegt (bv. één afhaallocatie met maar één tijdstip), wordt die automatisch geselecteerd maar wel gecommuniceerd in de bestelbevestiging (bv. tijdstip van afhalen).</p>
 
         <STErrorsDefault :error-box="errorBox" />
 

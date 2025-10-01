@@ -10,7 +10,7 @@
         </STNavigationBar>
         <img src="@stamhoofd/assets/images/illustrations/email.svg" class="email-illustration">
 
-        <main>
+        <main class="center">
             <h1 v-if="!login">
                 Vul de code in uit de e-mail die we hebben gestuurd
             </h1>
@@ -18,7 +18,11 @@
                 Verifieer jouw e-mailadres
             </h1>
 
-            <p>Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in of klik op de link in de e-mail en wacht enkele seconden. E-mail niet ontvangen? Kijk in jouw spambox!</p>
+            <p>
+                Er werd een e-mail verstuurd naar '{{ email }}'. Vul de code uit de e-mail in. E-mail niet ontvangen? Kijk ook in jouw spambox of <button class="inline-link" type="button" @click="retry">
+                    verstuur de code opnieuw
+                </button>.
+            </p>
 
             <div><CodeInput v-model="code" @complete="submit" /></div>
 
@@ -197,6 +201,12 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin){
             display: block;
             margin: 0 auto;
             margin-bottom: 20px;
+
+            @media (max-height: 900px) {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 15px;
+            }
         }
     }
 </style>

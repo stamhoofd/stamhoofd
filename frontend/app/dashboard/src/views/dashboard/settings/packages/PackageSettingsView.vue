@@ -386,7 +386,7 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
     loadingModule: STPackageType | null = null
 
     setupMemberAdministration() {
-        if (this.organization.groups.length === 0 && this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+        if (this.organization.groups.length === 0 && this.organization.meta.type === OrganizationType.Youth && (!this.organization.meta.umbrellaOrganization || [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization))){
             // We have an automated flow for these organizations
             this.show({
                 components: [

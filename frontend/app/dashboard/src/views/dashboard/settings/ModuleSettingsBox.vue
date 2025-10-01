@@ -105,7 +105,7 @@ export default class ModuleSettingsView extends Mixins(NavigationMixin) {
         }*/
 
         if (enable && !this.enableMembersTrial) {
-            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization && [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization)) {
+            if (this.organization.meta.type === OrganizationType.Youth && (!this.organization.meta.umbrellaOrganization || [UmbrellaOrganization.ChiroNationaal, UmbrellaOrganization.ScoutsEnGidsenVlaanderen].includes(this.organization.meta.umbrellaOrganization))) {
                 // We have an automated flow for these organizations
                 this.present(new ComponentWithProperties(NavigationController, {
                     root: new ComponentWithProperties(MembersStructureSetupView, {})

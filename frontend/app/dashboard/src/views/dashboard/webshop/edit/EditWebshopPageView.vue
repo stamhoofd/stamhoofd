@@ -7,7 +7,7 @@
                 v-model="title"
                 class="input"
                 type="text"
-                placeholder="bv. Bestel je wafels"
+                :placeholder="webshop.meta.name"
                 autocomplete=""
             >
         </STInputBox>
@@ -66,22 +66,6 @@
         <EditPolicyBox v-for="policy in policies" :key="policy.id" :policy="policy" :validator="validator" :error-box="errorBox" @patch="patchPolicy(policy, $event)" @delete="deletePolicy(policy)" />
 
         <hr>
-        <h2 class="style-with-button">
-            <div>Externe links</div>
-            <div>
-                <button type="button" class="button icon add" @click="addPolicy" />
-            </div>
-        </h2>
-        <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
-
-        <p v-if="policies.length == 0" class="info-box">
-            Je hebt momenteel geen externe links toegevoegd.
-        </p>
-        <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
-            De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
-        </p>
-
-        <hr>
         <h2>Kleuren</h2>
         <p>
             Je kan de hoofdkleur voor al je webshops instellen via de algemene instellingen → Personaliseren. Dan hoef je het niet voor elke webshop apart in te stellen. Het kleur hier invullen heeft enkel nut als je het bewust anders wilt instellen.
@@ -127,6 +111,22 @@
                 </button>
             </p>
         </template>
+
+        <hr>
+        <h2 class="style-with-button">
+            <div>Externe links</div>
+            <div>
+                <button type="button" class="button icon add" @click="addPolicy" />
+            </div>
+        </h2>
+        <p>Soms wil je ook jouw algemene voorwaarden, retourbeleid, contactformulier en privacyvoorwaarden op jouw webshop vermelden. Als je online betaalmethodes wilt gebruiken, kan dit noodzakelijk zijn. Deze links worden dan onderaan jouw webshop toegevoegd.</p>
+
+        <p v-if="policies.length == 0" class="info-box">
+            Je hebt momenteel geen externe links toegevoegd.
+        </p>
+        <p v-if="policies.length > 0 && (organization.meta.privacyPolicyFile || organization.meta.privacyPolicyUrl)" class="warning-box">
+            De privacyvoorwaarden die je bij de algemene instellingen hebt ingesteld, worden niet weergegeven in deze webshop. Voeg deze ook toe als externe link als je dezelfde privacy voorwaarden op deze webshop wilt vermelden.
+        </p>
 
         <hr>
         <h2>Stamhoofd</h2>

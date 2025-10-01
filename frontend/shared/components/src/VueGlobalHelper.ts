@@ -25,8 +25,8 @@ function focusNextElement () {
     if (activeElement && activeElement.form) {
         const focussable = Array.prototype.filter.call(activeElement.form.querySelectorAll(focussableElements),
             function (element) {
-            //check for visibility while always include the current activeElement 
-                return element.offsetWidth > 0 || element.offsetHeight > 0 || element === activeElement
+                //check for visibility while always include the current activeElement 
+                return (element.offsetWidth > 0 || element.offsetHeight > 0 || element === activeElement) && !element.closest("[data-skip-enter-focus]");
             });
         const index = focussable.indexOf(activeElement);
         if(index > -1) {

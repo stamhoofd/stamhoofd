@@ -19,16 +19,14 @@
                 </button>
                 <input v-model="password" name="password" class="input" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
-        </main>
 
-        <STFloatingFooter>
-            <LoadingButton :loading="loading">
+            <LoadingButton :loading="loading" class="block bottom">
                 <button class="button primary full" type="submit">
                     <span class="icon lock" />
                     <span>Inloggen</span>
                 </button>
             </LoadingButton>
-        </STFloatingFooter>
+        </main>
     </form>
 </template>
 

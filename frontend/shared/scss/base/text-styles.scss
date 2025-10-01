@@ -263,6 +263,19 @@
         padding-top: 3px;
     }
 
+    &.smaller {
+        font-size: 15px;
+        line-height: 1.4;
+
+        +p {
+            padding-top: 3px;
+        }
+
+        @media (max-width: 400px) {
+            font-size: 13px;
+        }
+    }
+
     &.larger {
         font-size: 20px;
 
@@ -559,6 +572,18 @@
 
     >.style-tag:only-child {
         margin: 4px 0;
+    }
+}
+
+.style-description-smaller {
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: $font-weight-default;
+    color: $color-gray-text;
+    font-variation-settings: 'opsz' 19;
+
+    @media (max-width: 400px) {
+        font-size: 12px;
     }
 }
 
@@ -1603,4 +1628,85 @@ ul.style-list {
 
 .style-dark {
     color: $color-dark;
+}
+
+.style-onboarding-checklist {
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: $color-background-shade;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    --color-current-background: #{$color-background-shade};
+    --color-current-background-shade: #{$color-background-shade-darker};
+
+    --st-horizontal-padding: 0px;
+    padding: 0;
+    margin: 0 -20px;
+    margin-bottom: 25px;
+
+    --st-list-padding-top: 10px;
+    --st-list-padding-bottom: 10px;
+
+    @media (max-width: 450px) {
+        padding: 0;
+        margin: 0 -10px;
+        margin-bottom: 15px;
+        padding-bottom: 0px;
+    }
+
+    > h2 {
+        @extend .style-title-2;
+
+        padding: 20px 15px;
+        padding-bottom: 5px;
+
+        @media (max-width: 450px) {
+            padding: 15px 15px;
+            padding-bottom: 2px;
+        }
+
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        &:active {
+            opacity: 0.6;
+        }
+    }
+
+    &.closed {
+        >h2 {
+            padding: 20px 15px;
+            
+            @media (max-width: 450px) {
+                padding: 15px 15px;
+            }
+        }
+    }
+
+    > div {
+        padding-left: 44px;
+        padding-right: 10px;
+        --st-horizontal-padding: 10px;
+
+        @media (max-width: 450px) {
+            padding-left: 44px;
+        }
+    }
+
+    > div > p {
+        padding-bottom: 15px;
+    }
+
+    .style-image-with-icon {
+        transform: scale(0.7);
+        transform-origin: top left;
+        margin-right: -8px;
+    }
+
+    @media (max-width: 450px) {
+        .style-image-with-icon {
+            transform: scale(0.5);
+            margin-right: -20px;
+        }
+    }
 }

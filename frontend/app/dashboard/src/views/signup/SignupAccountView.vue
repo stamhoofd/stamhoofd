@@ -1,10 +1,13 @@
 <template>
     <form id="signup-account-view" class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Maak jouw account" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Jouw account" :dismiss="false" :pop="canPop || canDismiss" />
 
-        <main>
+        <main class="center small">
+            <aside class="style-title-prefix">
+                STAP 2 / 2
+            </aside>
             <h1>
-                Maak jouw account
+                Jouw account
             </h1>
             <p>
                 Je kan later nog andere beheerders toevoegen, dus kies een persoonlijk e-mailadres en wachtwoord dat niet gedeeld wordt.
@@ -12,40 +15,20 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
-            <div class="split-inputs">
-                <div>
-                    <EmailInput v-model="email" title="Persoonlijk e-mailadres" name="username" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
-                </div>
 
-                <div>
-                    <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox">
-                        <div class="input-group">
-                            <div>
-                                <input v-model="firstName" name="given-name" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
-                            </div>
-                            <div>
-                                <input v-model="lastName" name="family-name" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
-                            </div>
-                        </div>
-                    </STInputBox>
+            <STInputBox title="Jouw naam" error-fields="firstName,lastName" :error-box="errorBox" class="max">
+                <div class="input-group">
+                    <div>
+                        <input v-model="firstName" enterkeyhint="next" name="given-name" class="input" type="text" placeholder="Voornaam" autocomplete="given-name">
+                    </div>
+                    <div>
+                        <input v-model="lastName" enterkeyhint="next" name="family-name" class="input" type="text" placeholder="Achternaam" autocomplete="family-name">
+                    </div>
                 </div>
-            </div>
-
-            <div class="split-inputs">
-                <div>
-                    <STInputBox title="Kies een persoonlijk wachtwoord" error-fields="password" :error-box="errorBox">
-                        <input v-model="password" name="new-password" class="input" placeholder="Kies een wachtwoord" autocomplete="new-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
-                    </STInputBox>
-                    <STInputBox title="Herhaal wachtwoord" error-fields="passwordRepeat" :error-box="errorBox">
-                        <input v-model="passwordRepeat" name="repeat-new-password" class="input" placeholder="Herhaal nieuw wachtwoord" autocomplete="new-password" type="password" @input="passwordRepeat = $event.target.value" @change="passwordRepeat = $event.target.value">
-                    </STInputBox>
-                </div>
-
-                <div>
-                    <PasswordStrength v-model="password" />
-                </div>
-            </div>
-
+            </STInputBox>
+            <EmailInput v-model="email" enterkeyhint="next" class="max" title="E-mailadres" name="username" :validator="validator" placeholder="Vul jouw e-mailadres hier in" autocomplete="username" />
+                
+            <PasswordInput v-model="password" enterkeyhint="next" class="max" title="Wachtwoord" name="new-password" :validator="validator" placeholder="Kies een wachtwoord" autocomplete="new-password" />
 
             <div class="checkbox-box">
                 <Checkbox v-model="acceptPrivacy" class="long-text">
@@ -60,25 +43,27 @@
                     Ik heb <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/terms/verwerkersovereenkomst'" target="_blank">de verwerkersovereenkomst</a> gelezen en ga hiermee akkoord in naam van mijn vereniging.
                 </Checkbox>
             </div>
-        </main>
 
-        <STToolbar>
-            <template #right>
-                <LoadingButton :loading="loading">
+            <hr>
+
+            <div class="style-button-bar">
+                <LoadingButton slot="right" :loading="loading" class="max">
                     <button class="button primary" type="button" @click.prevent="goNext">
-                        Account aanmaken
+                        <span>Voltooien</span>
+                        <span class="icon arrow-right" />
                     </button>
                 </LoadingButton>
-            </template>
-        </STToolbar>
+            </div>
+        </main>
     </form>
 </template>
 
 <script lang="ts">
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties,NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { BackButton, CenteredMessage,Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
-import { LoginHelper, Session, Storage } from "@stamhoofd/networking"
+import { PasswordInput } from '@stamhoofd/components';
+import { BackButton, Checkbox,ConfirmEmailView,EmailInput, ErrorBox, LoadingButton, PasswordStrength, STErrorsDefault, STInputBox, STNavigationBar, STToolbar, Validator } from "@stamhoofd/components"
+import { LoginHelper, Session, SessionManager, Storage } from "@stamhoofd/networking"
 import { Organization } from '@stamhoofd/structures';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -92,7 +77,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         BackButton,
         EmailInput,
         Checkbox,
-        PasswordStrength
+        PasswordStrength,
+        PasswordInput
     }
 })
 export default class SignupAccountView extends Mixins(NavigationMixin) {
@@ -106,7 +92,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
     validator = new Validator()
 
     password = ""
-    passwordRepeat = ""
     email = ""
     firstName = ""
     lastName = ""
@@ -146,15 +131,6 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 }))
             }
             errors.throwIfNotEmpty()
-
-            if (this.password != this.passwordRepeat) {
-                plausible('passwordsNotMatching'); // track how many people try to create a sorter one (to reevaluate this restriction)
-                throw new SimpleError({
-                    code: "password_do_not_match",
-                    message: "De ingevoerde wachtwoorden komen niet overeen",
-                    field: "passwordRepeat"
-                })
-            }
 
             if (this.password.length < 8) {
                 plausible('passwordTooShort'); // track how many people try to create a sorter one (to reevaluate this restriction)
@@ -204,6 +180,12 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
             }
 
             this.loading = false;
+
+            try {
+                await SessionManager.addOrganizationToStorage(this.organization)
+            } catch (e) {
+                console.error("Failed to add organization to storage", e)
+            }
 
             const session = new Session(this.organization.id)
             this.show(new ComponentWithProperties(ConfirmEmailView, { token, session, email: this.email }))

@@ -18,7 +18,7 @@ import Spinner from "../Spinner.vue";
 })
 export default class LoadingButton extends Vue {
     @Prop({ default: false, type: Boolean })
-    loading!: boolean;
+        loading!: boolean;
 
     // Remove the spinner animation from the dom to save some resources of the browser
     delayLoading = false
@@ -48,6 +48,11 @@ export default class LoadingButton extends Vue {
 
     &.block {
         display: block;
+    }
+
+    &.max {
+        display: block;
+        width: 100%;
     }
 
     &.bottom {

@@ -9,44 +9,57 @@
         
         <STErrorsDefault :error-box="errorBox" />
 
-        <div class="split-inputs">
-            <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
-                <input
-                    ref="firstInput"
-                    v-model="name"
-                    class="input"
-                    type="text"
-                    :placeholder="'Naam '+typeName"
-                    autocomplete=""
-                    enterkeyhint="next"
-                >
-            </STInputBox>
-            <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errorBox">
-                <Dropdown
-                    v-model="type"
-                >
-                    <option value="Ticket">
-                        Ticket
-                    </option>
-                    <option value="Voucher">
-                        Voucher
-                    </option>
-                </Dropdown>
-            </STInputBox>
+        <p v-if="!nameWarning && seatingWarning" class="error-box">
+            {{ seatingWarning }}
+        </p>
 
-            <STInputBox v-else title="Type" error-fields="type" :error-box="errorBox">
-                <Dropdown
-                    v-model="type"
-                >
-                    <option value="Product">
-                        Stuks
-                    </option>
-                    <option value="Person">
-                        Personen
-                    </option>
-                </Dropdown>
-            </STInputBox>
+        <div class="split-inputs">
+            <div>
+                <STInputBox title="Naam" error-fields="name" :error-box="errorBox">
+                    <input
+                        ref="firstInput"
+                        v-model="name"
+                        class="input"
+                        type="text"
+                        :placeholder="'Naam '+typeName"
+                        autocomplete=""
+                        enterkeyhint="next"
+                    >
+                </STInputBox>
+
+                <p v-if="nameWarning" class="warning-box">
+                    {{ nameWarning }}
+                </p>
+            </div>
+            <div>
+                <STInputBox v-if="isTicket" title="Type" error-fields="type" :error-box="errorBox">
+                    <Dropdown
+                        v-model="type"
+                    >
+                        <option value="Ticket">
+                            Ticket
+                        </option>
+                        <option value="Voucher">
+                            Voucher
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+
+                <STInputBox v-else title="Type" error-fields="type" :error-box="errorBox">
+                    <Dropdown
+                        v-model="type"
+                    >
+                        <option value="Product">
+                            Stuks
+                        </option>
+                        <option value="Person">
+                            Personen
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+            </div>
         </div>
+
 
         <STInputBox title="Beschrijving" error-fields="description" :error-box="errorBox" class="max">
             <textarea
@@ -405,6 +418,36 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     beforeDestroy() {
         document.body.removeEventListener("paste", this.onPaste);
+    }
+
+    get nameWarning() {
+        if (!this.name) {
+            return null
+        }
+        const lowerName = this.name.toLowerCase().trim()
+        for (const p of this.patchedWebshop.products) {
+            if (p.id !== this.product.id && p.name && p.name.toLowerCase().trim() === lowerName) {
+                return "Er bestaat al een artikel met dezelfde naam in deze webshop, je gebruikt best unieke namen."
+            }
+        }
+        return null
+    }
+
+    get seatingWarning() {
+        if (!this.patchedProduct.seatingPlanId) {
+            return null;
+        }
+        if (!this.patchedProduct.dateRange) {
+            return null;
+        }
+
+        for (const p of this.patchedWebshop.products) {
+            if (p.id !== this.product.id && p.seatingPlanId === this.patchedProduct.seatingPlanId && p.dateRange && p.dateRange.toString() === this.patchedProduct.dateRange.toString()) {
+                return "Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie."
+            }
+        }
+        
+        return null
     }
 
     async onPaste(event) {

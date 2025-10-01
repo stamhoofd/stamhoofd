@@ -30,10 +30,10 @@
                         Beheer jouw vereniging
                     </h1>
                     <p v-if="!isNative" class="style-description-block style-description-large">
-                        Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging als is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
+                        Welkom op het dashboard voor beheerders van verenigingen op Stamhoofd. Als jouw vereniging is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
                     </p>
                     <p v-else class="style-description-block style-description-large">
-                        Welkom in de Stamhoofd app voor beheerders. Als jouw vereniging al is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
+                        Welkom in de Stamhoofd app voor beheerders. Als jouw vereniging is aangesloten bij Stamhoofd, kan je die hieronder zoeken.
                     </p>
 
                     <form class="input-icon-container icon search gray" @submit.prevent>
@@ -172,7 +172,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
         this.present(
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import(/* webpackChunkName: "SignupGeneralView" */ '../signup/SignupGeneralView.vue'), {})
-            }).setDisplayStyle("popup")
+            })
         )
         plausible('openSignup');
     }
@@ -197,7 +197,7 @@ export default class OrganizationSelectionView extends Mixins(NavigationMixin){
                                 } : null,
                                 visitViaUrl: true
                             })
-                        }).setDisplayStyle("popup").setAnimated(false)
+                        }).setAnimated(false)
                     ]
                 })
                 

@@ -3,9 +3,9 @@
         <STNavigationBar title="Ledenadministratie is actief" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
-            <h1>Hoera! 🥳 De ledenadministratie is actief</h1>
+            <h1>Stel de ledenadministratie in</h1>
 
-            <p>Tijd om alles correct in te stellen. Daarna kan je leden vragen om in te schrijven via jullie ledenportaal, of kan je ze uitnodigen (<a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-schrijven-leden-in/'" class="inline-link" target="_blank">meer info</a>). Je kan gerust zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
+            <p>Via het ledenadministratie-pakket kan je leden vragen om online in te schrijven via jullie eigen ledenportaal, of kan je ze uitnodigen (<a :href="'https://'+ $t('shared.domains.marketing') +'/docs/hoe-schrijven-leden-in/'" class="inline-link" target="_blank">meer info</a>). Je kan gerust zelf eerst even proberen in te schrijven. Je kan testleden daarna terug verwijderen (gebruik wel een geldig e-mailadres).</p>
 
             <hr>
             <h2>1. Stel je lidstructuur in</h2>
@@ -57,7 +57,7 @@
             </p>
 
             <hr>
-            <h2>4. Stel meer in via 'Instellingen' in het menu</h2>
+            <h2>4. Stel meer in via het tabblad 'Instellingen'</h2>
             <p>Je kan alle bovenstaande zaken en nog meer (zoals financiële ondersteuning, vrije bijdrages, betaalmethodes, leden importeren) op elk moment wijzigen, via het tabblad 'Instellingen' in het menu van Stamhoofd.</p>
 
             <hr>

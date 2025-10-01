@@ -1,139 +1,184 @@
 <template>
-    <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
+    <SaveView :title="viewTitle" :save-text="isNew ? 'Aanmaken' : 'Opslaan'" :loading="saving" :disabled="!hasChanges" @save="save">
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errorBox" />
         
-        <STInputBox title="Naam (kort)" error-fields="meta.name" :error-box="errorBox">
+        <STInputBox title="Naam" error-fields="meta.name" :error-box="errorBox">
             <input
                 v-model="name"
                 class="input"
                 type="text"
-                placeholder="bv. Wafelverkoop"
+                :placeholder="namePlaceholder"
                 autocomplete=""
             >
-
-            <p v-if="name.length > 30" class="style-description-small">
-                Lange naam? Je kan de zichtbare titel op de webshop apart wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
-            </p>
         </STInputBox>
 
-        <hr>
-        <h2>Type</h2>
-
-        <STList>
-            <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.None" />
-                <h3 class="style-title-list">
-                    Geen tickets
-                </h3>
-                <p class="style-description">
-                    Webshop zonder scanners. Er worden geen tickets aangemaakt.
-                </p>
-            </STListItem>
-            <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.SingleTicket" />
-                <h3 class="style-title-list">
-                    Ticketverkoop voor groepen
-                </h3>
-                <p class="style-description">
-                    Eén ticket per bestelling. Ideaal voor een eetfestijn
-                </p>
-            </STListItem>
-            <STListItem :selectable="true" element-name="label" class="left-center">
-                <Radio slot="left" v-model="ticketType" :value="WebshopTicketType.Tickets" />
-                <h3 class="style-title-list">
-                    Ticketverkoop voor personen
-                </h3>
-                <p class="style-description">
-                    Eén ticket per artikel. Ideaal voor een fuif
-                </p>
-            </STListItem>
-        </STList>
-
-        <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
-            Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket.
+        <p v-if="name.length > 30 && isNew" class="style-description-small">
+            Lange naam? Je kan de zichtbare titel straks wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
         </p>
-        <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
-            Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Ideaal voor een fuif of evenement waar toegang betalend is per persoon. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+        <p v-else-if="name.length > 30" class="style-description-small">
+            Lange naam? Je kan de zichtbare titel op de webshop apart wijzigen bij de instellingen 'Personaliseren'. Hier houd je het beter kort.
         </p>
 
-        <hr>
-        <h2>Beschikbaarheid</h2>
+        <template v-if="forceType === null || type !== forceType">
+            <STInputBox title="Type" error-fields="type" :error-box="errorBox" class="max">
+                <div class="illustration-radio-container">
+                    <label class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="type" :value="WebshopType.Performance" />
+                        </div>
+                        <figure>
+                            <img src="~@stamhoofd/assets/images/illustrations/stage.svg">
+                        </figure>
+                        <h3>Zaalvoorstelling</h3>
+                        <p>Met tickets en vaste plaatsen</p>
+                    </label>
 
-        <Checkbox v-model="hasStatusClosed">
-            Manueel gesloten
-        </Checkbox>
+                    <label class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="type" :value="WebshopType.Event" />
+                        </div>
+                        <figure>
+                            <img src="~@stamhoofd/assets/images/illustrations/tickets.svg">
+                        </figure>
+                        <h3>Evenement met tickets</h3>
+                        <p>Fuif, festival, ...</p>
+                    </label>
 
-        <template v-if="!hasStatusClosed">
-            <Checkbox v-model="useAvailableUntil">
-                Sluit webshop na een bepaalde datum
-            </Checkbox>
-            <div v-if="useAvailableUntil" class="split-inputs">
-                <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
-                    <DateSelection v-model="availableUntil" />
-                </STInputBox>
-                <TimeInput v-model="availableUntil" title="Om" :validator="validator" />
-            </div>
-            <Checkbox v-model="useOpenAt">
-                Open webshop pas na een bepaalde datum
-            </Checkbox>
-            <div v-if="useOpenAt" class="split-inputs">
-                <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
-                    <DateSelection v-model="openAt" />
-                </STInputBox>
-                <TimeInput v-model="openAt" title="Om" :validator="validator" />
-            </div>
+                    <label class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="type" :value="WebshopType.Registrations" />
+                        </div>
+                        <figure>
+                            <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
+                        </figure>
+                        <h3>Inschrijvingen</h3>
+                        <p>Quiz, wandeltocht, eetfestijn, workshop...</p>
+                    </label>
+
+                    <label class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="type" :value="WebshopType.TakeawayAndDelivery" />
+                        </div>
+                        <figure>
+                            <img src="~@stamhoofd/assets/images/illustrations/truck.svg">
+                        </figure>
+                        <h3>Take-away of levering</h3>
+                    </label>
+
+                    <label class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="type" :value="WebshopType.Donations" />
+                        </div>
+                        <figure>
+                            <img src="~@stamhoofd/assets/images/illustrations/charity.svg">
+                        </figure>
+                        <h3>Donaties of inzameling</h3>
+                    </label>
+
+                    <label class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="type" :value="WebshopType.Webshop" />
+                        </div>
+                        <figure>
+                            <img src="~@stamhoofd/assets/images/illustrations/cart.svg">
+                        </figure>
+                        <h3>Webshop / andere</h3>
+                    </label>
+                </div>
+            </STInputBox>
+            <p v-if="isNew" class="style-description-small">
+                Via het type van je webshop helpen we later makkelijk op weg.
+            </p>
         </template>
 
-        <div class="container">
-            <hr>
-            <h2>Nummering</h2>
+        <template v-if="accessControlList.length > 1">
+            <STInputBox :title="accessControlLabel" error-fields="type" :error-box="errorBox" class="max">
+                <div class="illustration-radio-container">
+                    <label v-for="option in accessControlList" :key="option.value" class="illustration-radio-box">
+                        <div>
+                            <Radio v-model="ticketType" :value="option.value" />
+                        </div>
+                        <figure>
+                            <img :src="option.src">
+                        </figure>
+                        <h3>{{ option.label }}</h3>
+                        <p v-if="option.tag"><span class="style-tag">{{ option.tag }}</span></p>
+                        <p v-if="option.description">{{ option.description }}</p>
 
-            <STList>
-                <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" />
-                    <h3 class="style-title-list">
-                        Gebruik opeenvolgende bestelnummers
-                    </h3>
-                    <p class="style-description">
-                        1, 2, 3, ...
-                    </p>
-                </STListItem>
-                <STListItem :selectable="true" element-name="label" class="left-center">
-                    <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" />
-                    <h3 class="style-title-list">
-                        Gebruik willekeurige bestelnummers
-                    </h3>
-                    <p class="style-description">
-                        964824335, 116455337, 228149715, ...
-                    </p>
-                </STListItem>
-            </STList>
-
-            <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errorBox">
-                <NumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
+                    </label>
+                </div>
             </STInputBox>
-            <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
-                Je kan dit enkel wijzigen als je alle bestellingen verwijdert.
+            <p v-if="ticketType === WebshopTicketType.SingleTicket" class="info-box">
+                Per bestelling wordt er maar één ticket met QR-code aangemaakt. Dus als er 5 spaghetti's en één beenham besteld worden, dan krijgt de besteller één scanbaar ticket. Ideaal als je bv. aan de inkom een enveloppe uitdeelt aan elke groep met daarin alle bonnetjes.
             </p>
-        </div>
+            <p v-if="ticketType === WebshopTicketType.Tickets" class="info-box">
+                Op de webshop staan tickets en vouchers te koop die elk hun eigen QR-code krijgen en apart gescand moeten worden. Minder ideaal voor grote groepen omdat je dan elk ticket afzonderlijk moet scannen (dus best niet voor een eetfestijn gebruiken).
+            </p>
+        </template>
 
-        <template v-if="isNew">
+        <template v-if="!isNew">
             <hr>
-            <h2>Betaalmethodes</h2>
-            <p>Zoek je informatie over alle betaalmethodes, neem dan een kijkje op <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/betaalmethodes-voor-webshops-instellen/'" target="_blank">deze pagina</a>.</p>
+            <h2>Beschikbaarheid</h2>
 
-            <EditPaymentMethodsBox
-                type="webshop"
-                :webshop="webshop"
-                :organization="organization" 
-                :config="config"
-                :private-config="privateConfig" 
-                :validator="validator" 
-                :show-administration-fee="false" 
-                @patch:config="patchConfig($event)"
-                @patch:privateConfig="patchPrivateConfig($event)"
-            />
+            <Checkbox v-model="hasStatusClosed">
+                Manueel gesloten
+            </Checkbox>
+
+            <template v-if="!hasStatusClosed">
+                <Checkbox v-model="useAvailableUntil">
+                    Sluit webshop na een bepaalde datum
+                </Checkbox>
+                <div v-if="useAvailableUntil" class="split-inputs">
+                    <STInputBox title="Stop bestellingen op" error-fields="settings.availableUntil" :error-box="errorBox">
+                        <DateSelection v-model="availableUntil" />
+                    </STInputBox>
+                    <TimeInput v-model="availableUntil" title="Om" :validator="validator" />
+                </div>
+                <Checkbox v-model="useOpenAt">
+                    Open webshop pas na een bepaalde datum
+                </Checkbox>
+                <div v-if="useOpenAt" class="split-inputs">
+                    <STInputBox title="Open op" error-fields="settings.openAt" :error-box="errorBox">
+                        <DateSelection v-model="openAt" />
+                    </STInputBox>
+                    <TimeInput v-model="openAt" title="Om" :validator="validator" />
+                </div>
+            </template>
+
+            <div class="container">
+                <hr>
+                <h2>Nummering</h2>
+
+                <STList>
+                    <STListItem :selectable="true" element-name="label" class="left-center">
+                        <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Continuous" />
+                        <h3 class="style-title-list">
+                            Gebruik opeenvolgende bestelnummers
+                        </h3>
+                        <p class="style-description">
+                            1, 2, 3, ...
+                        </p>
+                    </STListItem>
+                    <STListItem :selectable="true" element-name="label" class="left-center">
+                        <Radio slot="left" v-model="numberingType" :value="WebshopNumberingType.Random" />
+                        <h3 class="style-title-list">
+                            Gebruik willekeurige bestelnummers
+                        </h3>
+                        <p class="style-description">
+                            964824335, 116455337, 228149715, ...
+                        </p>
+                    </STListItem>
+                </STList>
+
+                <STInputBox v-if="numberingType === WebshopNumberingType.Continuous" title="Eerste bestelnummer" error-fields="settings.openAt" :error-box="errorBox">
+                    <NumberInput v-model="startNumber" :min="1" :max="100000000 - 100000" />
+                </STInputBox>
+                <p v-if="!isNew && numberingType === WebshopNumberingType.Continuous" class="style-description-small">
+                    Je kan dit enkel wijzigen als je alle bestellingen verwijdert.
+                </p>
+            </div>
+            </hr>
         </template>
 
         <template v-if="isNew && roles.length > 0">
@@ -150,6 +195,21 @@
                 <WebshopPermissionRow v-for="role in roles" :key="role.id" type="role" :role="role" :organization="organization" :webshop="webshop" @patch="addPatch" />
             </STList>
         </template>
+
+        <div v-if="stripeAccountObject || hasPayconiq || hasMollieOrBuckaroo" class="container">
+            <hr>
+            <h2>Betaalmethodes</h2>
+            <EditPaymentMethodsBox 
+                type="webshop"
+                :organization="organization" 
+                :webshop="webshop"
+                :config="config"
+                :private-config="privateConfig" 
+                :validator="validator" 
+                @patch:config="patchConfig($event)"
+                @patch:privateConfig="patchPrivateConfig($event)" 
+            />
+        </div>
 
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
             <hr>
@@ -183,13 +243,18 @@
 </template>
 
 <script lang="ts">
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
+import listIllustrationSrc from '@stamhoofd/assets/images/illustrations/list.svg'
+import scannerIllustrationSrc from '@stamhoofd/assets/images/illustrations/scanner.svg'
+import teamIllustrationSrc from '@stamhoofd/assets/images/illustrations/team.svg';
+import userIllustrationSrc from '@stamhoofd/assets/images/illustrations/user.svg'
 import { Checkbox, DateSelection, NumberInput, Radio, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast } from "@stamhoofd/components";
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { SessionManager, UrlHelper } from '@stamhoofd/networking';
-import { PaymentConfiguration, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { Component, Mixins } from "vue-property-decorator";
+import { Country, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PermissionRole, PermissionsByRole, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductType, StripeAccount, WebshopAuthType, WebshopMetaData, WebshopNumberingType, WebshopPrivateMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 import { OrganizationManager } from '../../../../classes/OrganizationManager';
 import EditPaymentMethodsBox from '../../../../components/EditPaymentMethodsBox.vue';
@@ -213,6 +278,13 @@ import EditWebshopMixin from './EditWebshopMixin';
     },
 })
 export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {    
+    @Prop({ default: null })
+        forceType: WebshopType | null
+
+    created() {
+        this.loadStripeAccounts().catch(console.error)
+    }
+    
     mounted() {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/general")
         
@@ -239,6 +311,189 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
                 }))
             }
         }
+
+        if (this.forceType) {
+            this.type = this.forceType
+        }
+    }
+    loadingStripeAccounts = false
+    stripeAccounts: StripeAccount[] = []
+
+    get stripeAccountObject() {
+        return this.stripeAccounts.find(a => a.id == this.stripeAccountId) ?? null
+    }
+
+    get stripeAccountId() {
+        return this.privateConfig.stripeAccountId
+    }
+
+    set stripeAccountId(value: string | null) {
+        this.patchPrivateConfig(PrivatePaymentConfiguration.patch({
+            stripeAccountId: value
+        }));
+    }
+
+    get hasMollieOrBuckaroo() {
+        return this.organization.privateMeta?.buckarooSettings !== null || !!this.organization.privateMeta?.mollieOnboarding?.canReceivePayments
+    }
+
+    get hasPayconiq() {
+        return (this.organization.privateMeta?.payconiqAccounts.length ?? 0) > 0
+    }
+
+    async loadStripeAccounts() {
+        try {
+            this.loadingStripeAccounts = true
+            const response = await SessionManager.currentSession!.authenticatedServer.request({
+                method: "GET",
+                path: "/stripe/accounts",
+                decoder: new ArrayDecoder(StripeAccount as Decoder<StripeAccount>),
+                shouldRetry: true,
+                owner: this
+            })
+            this.stripeAccounts = response.data
+
+            if (this.isNew || (!this.hasMollieOrBuckaroo && !this.stripeAccountObject)) {
+                this.stripeAccountId = this.stripeAccounts[0]?.id ?? null
+            }
+
+            this.$nextTick(() => {
+                this.setDefaultSelection()
+            })
+        } catch (e) {
+            console.error(e)
+        }
+        this.loadingStripeAccounts = false
+    }
+
+    get country() {
+        return I18nController.shared.country
+    }
+
+    getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
+        if (paymentMethod === PaymentMethod.Unknown || paymentMethod === PaymentMethod.Transfer || paymentMethod === PaymentMethod.PointOfSale) {
+            return
+        }
+
+        if (this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta))  {
+            return;
+        }
+
+        if (this.organization.privateMeta?.buckarooSettings?.paymentMethods.includes(paymentMethod)) {
+            return
+        }
+
+        switch (paymentMethod) {
+            case PaymentMethod.Payconiq: {
+                if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
+                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
+                }
+                break
+            }
+
+            case PaymentMethod.iDEAL:
+            case PaymentMethod.CreditCard:
+            case PaymentMethod.Bancontact: {
+                if (this.stripeAccountObject) {
+                    return PaymentMethodHelper.getName(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
+                }
+                break
+            }
+        }
+
+        return "Je kan "+PaymentMethodHelper.getName(paymentMethod)+" niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts."
+    }
+
+    getPaymentMethod(method: PaymentMethod) {
+        return this.config.paymentMethods.includes(method)
+    }
+
+    setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false) {
+        if (enabled === this.getPaymentMethod(method)) {
+            return
+        }
+        
+        const arr = new PatchableArray<PaymentMethod, PaymentMethod, PaymentMethod>()
+        if (enabled) {
+            const errorMessage = this.getEnableErrorMessage(method)
+            if (!force && errorMessage) {
+                new Toast(errorMessage, "error red").setHide(15*1000).show()
+                return
+            }
+            arr.addPut(method)
+        } else {
+            if (!force && this.config.paymentMethods.length == 1) {
+                new Toast("Je moet minimaal één betaalmethode accepteren", "error red").show();
+                return
+            }
+
+            arr.addDelete(method)
+        }
+
+        this.patchConfig(PaymentConfiguration.patch({
+            paymentMethods: arr
+        }))
+    }
+
+    canEnablePaymentMethod(method: PaymentMethod) {
+        const errorMessage = this.getEnableErrorMessage(method)
+        return !errorMessage
+    }
+
+    get sortedPaymentMethods() {
+        const r: PaymentMethod[] = []
+
+        // Force a given ordering
+        if (this.country == Country.Netherlands) {
+            r.push(PaymentMethod.iDEAL)
+        }
+
+        // Force a given ordering
+        if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
+            r.push(PaymentMethod.Payconiq)
+        }
+
+        // Force a given ordering
+        r.push(PaymentMethod.Bancontact)
+
+        // Force a given ordering
+        if (this.country != Country.Netherlands) {
+            r.push(PaymentMethod.iDEAL)
+        }
+
+        r.push(PaymentMethod.CreditCard)
+        
+        r.push(PaymentMethod.Transfer)
+        r.push(PaymentMethod.PointOfSale)
+
+        // Sort so all disabled are at the end:
+        r.sort((a, b) => Sorter.byBooleanValue(this.canEnablePaymentMethod(a), this.canEnablePaymentMethod(b)))
+        return r
+    }
+
+    setDefaultSelection() {
+        if (this.config.paymentMethods.length == 0) {
+            const ignore = [
+                PaymentMethod.Unknown,
+                PaymentMethod.Transfer,
+                PaymentMethod.PointOfSale
+            ]
+
+            let found = false;
+
+            // Check if online payments are enabled
+            for (const p of this.sortedPaymentMethods) {
+                if (!ignore.includes(p) && this.canEnablePaymentMethod(p)) {
+                    this.setPaymentMethod(p, true)
+                    found = true
+                }
+            }
+
+            if (!found) {
+                // Enable point of sale
+                this.setPaymentMethod(PaymentMethod.PointOfSale, true)
+            }
+        } 
     }
 
     get canChangeType() {
@@ -246,14 +501,52 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     }
     
     get viewTitle() {
+        if (this.forceType) {
+            switch (this.forceType) {
+                case WebshopType.Performance:
+                    return "Nieuwe zaalvoorstelling"
+                case WebshopType.Event:
+                    return "Nieuw evenement met tickets"
+                case WebshopType.Registrations:
+                    return "Nieuwe inschrijvingen"
+                case WebshopType.TakeawayAndDelivery:
+                    return "Nieuwe take-away of levering"
+                case WebshopType.Donations:
+                    return "Nieuwe inzameling"
+                default:
+                    return "Nieuwe webshop"
+            }
+        }
+
         if (this.isNew) {
             return "Nieuwe webshop, ticketverkoop of evenement";
         }
         return "Algemene instellingen"
     }
 
+    get namePlaceholder() {
+        switch (this.type) {
+            case WebshopType.Performance:
+                return "Bv. 'Schaduwen van morgen'"
+            case WebshopType.Event:
+                return "Bv. Ruimtefestival"
+            case WebshopType.Registrations:
+                return "Bv. Eetfestijn"
+            case WebshopType.TakeawayAndDelivery:
+                return "bv. Wijnverkoop"
+            case WebshopType.Donations:
+                return "bv. Inzameling nieuw materiaal"
+            default:
+                return "Bv. T-shirts"
+        }
+    }
+
     get WebshopTicketType() {
         return WebshopTicketType
+    }
+
+    get WebshopType() {
+        return WebshopType
     }
 
     get WebshopNumberingType() {
@@ -266,6 +559,79 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
 
     get name() {
         return this.webshop.meta.name
+    }
+
+    get accessControlLabel() {
+        if (this.webshop.meta.type === WebshopType.Webshop || this.webshop.meta.type === WebshopType.TakeawayAndDelivery) {
+            return 'Controle bij afhalen/leveren'
+        }
+        return 'Toegangscontrole'
+    }
+
+    get accessControlList() {
+        if (this.webshop.meta.type === WebshopType.Webshop 
+            || this.webshop.meta.type === WebshopType.TakeawayAndDelivery
+        ) {
+            return [
+                {
+                    label: 'Zonder scanners',
+                    value: WebshopTicketType.None,
+                    src: listIllustrationSrc,
+                    tag: 'Meest gekozen'
+                },
+                {
+                    label: 'Bestelling scannen',
+                    value: WebshopTicketType.SingleTicket,
+                    src: scannerIllustrationSrc
+                }
+            ]
+        }
+        
+        if (this.webshop.meta.type === WebshopType.Donations) {
+            return [
+                {
+                    label: 'Zonder scannen',
+                    value: WebshopTicketType.None,
+                    src: listIllustrationSrc
+                }
+            ]
+        }
+
+        if (this.webshop.meta.type === WebshopType.Performance) {
+            return [
+                {
+                    label: 'Ticket per persoon',
+                    value: WebshopTicketType.Tickets,
+                    src: teamIllustrationSrc
+                }
+            ]
+        }
+
+        const list: { label: string; value: WebshopTicketType; src: string; tag?: string; description?: string }[] = [];
+
+        if (this.webshop.meta.type !== WebshopType.Event) {
+            list.push({
+                label: 'Zonder scanners',
+                value: WebshopTicketType.None,
+                src: listIllustrationSrc,
+                tag: 'Meest gekozen'
+            })
+        }
+
+        return [
+            ...list,
+            {
+                label: 'Ticket per persoon',
+                value: WebshopTicketType.Tickets,
+                src: userIllustrationSrc,
+                tag: list.length === 0 ? 'Meest gekozen' : undefined
+            },
+            {
+                label: 'Ticket per bestelling',
+                value: WebshopTicketType.SingleTicket,
+                src: teamIllustrationSrc
+            }
+        ]
     }
 
     set name(name: string) {
@@ -358,6 +724,42 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
     set numberingType(numberingType: WebshopNumberingType) {
         const patch = WebshopPrivateMetaData.patch({ numberingType })
         this.addPatch(PrivateWebshop.patch({ privateMeta: patch}) )
+    }
+
+    get type() {
+        return this.webshop.meta.type
+    }
+
+    set type(type: WebshopType) {
+        if (type === this.type) {
+            return;
+        }
+        const patch = WebshopMetaData.patch({ type })
+        this.addPatch(PrivateWebshop.patch({ meta: patch}) )
+
+        // If changed to original type again
+        if (type === this.originalWebshop.meta.type) {
+            // Change back to original ticket type
+            this.ticketType = this.originalWebshop.meta.ticketType;
+            return;
+        } 
+
+        this.$nextTick(() => {
+            const list = this.accessControlList;
+            if (list.length > 0) {
+                const initialType = this.originalWebshop.meta.ticketType;
+                const found2 = list.find(i => i.value === initialType);
+                if (found2 && !this.isNew) {
+                    this.ticketType = initialType;
+                    return;
+                }
+
+                const found = list.find(i => i.value === this.ticketType);
+                if (!found) {
+                    this.ticketType = list[0].value
+                }
+            }
+        })
     }
 
     get startNumber() {
@@ -482,7 +884,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         return this.webshop.privateMeta.paymentConfiguration
     }
 
-    patchPrivateConfig(patch: PrivatePaymentConfiguration) {
+    patchPrivateConfig(patch: PrivatePaymentConfiguration | AutoEncoderPatchType<PrivatePaymentConfiguration>) {
         this.addPatch(
             PrivateWebshop.patch({
                 privateMeta: WebshopPrivateMetaData.patch({

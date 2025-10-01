@@ -17,6 +17,7 @@ import { Component, Prop,Vue } from "vue-property-decorator";
 
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsInput from '../errors/STErrorsInput.vue';
+import { ViewportHelper } from "../ViewportHelper";
 
 @Component({
     components: {
@@ -32,6 +33,51 @@ export default class STInputBox extends Vue {
 
     @Prop({ default: ""})
         title!: string
+
+    mounted() {
+        if ((this as any).$isMobile) {
+            this.$nextTick(() => {
+                const inputElements = this.$el.querySelectorAll('input, textarea, select')
+                inputElements.forEach((element) => {
+                    element.addEventListener('focus', () => {
+                        setTimeout(() => {
+                            this.scrollIntoView(element as HTMLElement)
+                        }, 300) // wait for possible keyboard animation
+                    })
+                })
+            })
+        }
+    }
+
+    scrollIntoView(element: HTMLElement) {
+        // default scrollIntoView is broken on Safari and sometimes causes the scrollview to scroll too far and get stuck
+        const scrollElement = ViewportHelper.getScrollElement(element)
+        const elRect = element.getBoundingClientRect()
+        const scrollRect = scrollElement.getBoundingClientRect()
+
+        let scrollPosition = scrollElement.scrollTop + (elRect.top - scrollRect.top) - scrollElement.clientHeight / 4;
+        // TODO: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
+        console.log("innitial scrolling to", scrollPosition, "from", scrollElement.scrollTop, "diff", Math.abs(element.scrollTop - scrollPosition))
+
+        let topPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'))
+        if (isNaN(topPadding)) {
+            topPadding = 25
+        }
+        let elTopPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-top'))
+        if (isNaN(elTopPadding)) {
+            elTopPadding = 0
+        }
+        scrollPosition -= Math.max(0, topPadding - elTopPadding)
+        scrollPosition = Math.max(0, Math.min(scrollPosition, scrollElement.scrollHeight - scrollElement.clientHeight))
+
+        const exponential = function(x: number): number {
+            return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
+        }
+
+        console.log("Scrolling to", scrollPosition, "from", scrollElement.scrollTop, "diff", Math.abs(element.scrollTop - scrollPosition))
+
+        ViewportHelper.scrollTo(scrollElement, scrollPosition, Math.min(600, Math.max(350, Math.abs(element.scrollTop - scrollPosition) / 2)), exponential)
+    }
 }
 </script>
 

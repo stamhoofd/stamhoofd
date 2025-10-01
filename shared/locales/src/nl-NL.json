@@ -1,6 +1,6 @@
 {
   "shared": {
-    "Gemeente": "Woonplaats",
+    "Gemeente": "Plaats",
     "login": "Inloggen",
     "transferTypes": {
       "structured": "Betalingskenmerk"

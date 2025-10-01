@@ -31,7 +31,7 @@
             </button>
         </p>
 
-        <p v-if="!shouldFilter('webshops') && isWebshopsTrial" class="warning-box selectable with-button" @click="checkout(STPackageBundle.Webshops)">
+        <p v-if="!hideTrial && !shouldFilter('webshops') && isWebshopsTrial" class="warning-box selectable with-button" @click="checkout(STPackageBundle.Webshops)">
             Je test momenteel de webshops functie. Je webshops staan nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.
 
             <button class="button text" type="button">
@@ -87,6 +87,9 @@ import PackageSettingsView from "./PackageSettingsView.vue";
 export default class BillingWarningBox extends Mixins(NavigationMixin) {
     @Prop({ default: null })
         filterTypes: "members" | "webshops" | null
+
+    @Prop({ default: false })
+        hideTrial: boolean;
 
     OrganizationManager = OrganizationManager
     STPackageBundle = STPackageBundle

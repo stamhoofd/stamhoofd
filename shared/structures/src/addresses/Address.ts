@@ -21,6 +21,12 @@ export class Address extends AutoEncoder {
     country: Country;
 
     toString(): string {
+        if (!this.street && !this.number) {
+            if (this.postalCode && this.city) {
+                return this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
+            }
+            return this.city + ", " + CountryHelper.getName(this.country)
+        }
         return this.street + " " + this.number + ", " + this.postalCode + " " + this.city + ", " + CountryHelper.getName(this.country)
     }
 

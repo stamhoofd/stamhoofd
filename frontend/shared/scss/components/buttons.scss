@@ -491,7 +491,7 @@
                 height: 34px;
                 top: 50% !important;
                 bottom: auto !important;
-                background-color: $color-background-shade;
+                background-color: var(--color-current-background-shade, #{$color-background-shade});
                 border-radius: $border-radius;
                 transform: translate(-50%, -50%);
                 z-index: 0;
@@ -554,7 +554,7 @@
                     height: 34px;
                     top: 50% !important;
                     bottom: auto !important;
-                    background-color: $color-background-shade;
+                    background-color: var(--color-current-background-shade, #{$color-background-shade});
                     border-radius: $border-radius;
                     transform: translate(-50%, -50%);
                     z-index: 0;

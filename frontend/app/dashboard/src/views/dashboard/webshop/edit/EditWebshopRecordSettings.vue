@@ -3,7 +3,16 @@
         <h1>
             Vragenlijsten en gegevens
         </h1>
-        <p>Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen.</p>
+        <p>Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen. Dit wordt maar één keer per bestelling gevraagd.</p>
+
+        <p v-if="webshop.meta.isTicketBased" class="info-box">
+            Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk. 
+            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.
+        </p>
+        <p v-else-if="webshop.meta.isRegistrations" class="info-box">
+            Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.
+            Als je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.
+        </p>
             
         <STErrorsDefault :error-box="errorBox" />
 
@@ -13,6 +22,25 @@
         <p>Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.</p>
 
         <STList>
+            <STListItem element-name="label" :selectable="false">
+                <Checkbox slot="left" :checked="true" :disabled="true" />
+                <p class="style-title-list">
+                    Naam
+                </p>
+                <p class="style-description-small">
+                    Deze is altijd verplicht per bestelling.
+                </p>
+            </STListItem>
+            <STListItem element-name="label" :selectable="false">
+                <Checkbox slot="left" :checked="true" :disabled="true" />
+                <p class="style-title-list">
+                    E-mailadres
+                </p>
+                <p class="style-description-small">
+                    Hierop ontvangen bestellers hun bestelbevestiging. Deze is altijd verplicht per bestelling.
+                </p>
+            </STListItem>
+
             <STListItem element-name="label" :selectable="true">
                 <Checkbox slot="left" v-model="phoneEnabled" />
                 <p class="style-title-list">
@@ -46,7 +74,7 @@ import { PatchableArrayAutoEncoder } from "@simonbackx/simple-encoding";
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { Checkbox, SaveView, STErrorsDefault, STList, STListItem } from "@stamhoofd/components";
 import { UrlHelper } from "@stamhoofd/networking";
-import { Checkout } from "@stamhoofd/structures";
+import { Checkout, WebshopType } from "@stamhoofd/structures";
 import { RecordEditorSettings } from "@stamhoofd/structures";
 import { PrivateWebshop, RecordCategory, WebshopMetaData } from "@stamhoofd/structures";
 import { Formatter } from "@stamhoofd/utility";
@@ -71,6 +99,10 @@ import EditWebshopMixin from './EditWebshopMixin';
 export default class EditWebshopRecordSettings extends Mixins(EditWebshopMixin) {
     mounted() {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/records")
+    }
+
+    get WebshopType() {
+        return WebshopType;
     }
 
     get categories() {

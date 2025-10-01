@@ -326,6 +326,21 @@ export class AnyCheckoutMethodDecoder {
     }
 }
 
+export enum WebshopType {
+    /**
+     * Simple webshop
+     */
+    "Webshop" = "Webshop",
+    "Donations" = "Donations",
+    "TakeawayAndDelivery" = "TakeawayAndDelivery",
+
+    "Performance" = "Performance",
+    "Event" = "Event",
+    "Registrations" = "Registrations",
+
+}
+
+
 export enum WebshopTicketType {
     "None" = "None",
 
@@ -375,6 +390,26 @@ export class WebshopMetaData extends AutoEncoder {
     downgradePatch: (data) => data.text,
   })
   description = RichText.create({});
+
+  /**
+   * Newly added. Serves as a hint in the UI for better suggestions and UX.
+   */
+  @field({ 
+    decoder: new EnumDecoder(WebshopType), 
+    optional: true,
+    version: 5,
+    upgrade: function (this: WebshopMetaData) {
+        if (this.ticketType === WebshopTicketType.Tickets && this.seatingPlans.length > 0) {
+            return WebshopType.Performance;
+        }
+        
+        if (this.ticketType === WebshopTicketType.Tickets) {
+            return WebshopType.Event;
+        }
+        return WebshopType.Webshop;
+    }
+  })
+  type = WebshopType.Webshop;
 
   @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
   ticketType = WebshopTicketType.None;
@@ -549,6 +584,20 @@ export class WebshopMetaData extends AutoEncoder {
   @field({ decoder: StringDecoder, nullable: true, optional: true })
   customCode: string | null = null;
 
+  /**
+   * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not
+   */
+  get isTicketBased() {
+    return this.type === WebshopType.Event || this.type === WebshopType.Performance || this.ticketType === WebshopTicketType.Tickets;
+  }
+
+  get isRegistrations() {
+    return this.type === WebshopType.Registrations
+  }
+
+  /**
+   * Returns whether QR-codes are generated /scanners are used
+   */
   get hasTickets() {
     return (
       this.ticketType === WebshopTicketType.SingleTicket ||

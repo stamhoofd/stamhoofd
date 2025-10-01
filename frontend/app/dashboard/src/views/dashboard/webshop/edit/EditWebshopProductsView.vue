@@ -3,6 +3,7 @@
         <h1 class="style-navigation-title">
             {{ viewTitle }}
         </h1>
+        <p>{{ description }}</p>
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="webshop.categories.length > 0">
@@ -37,7 +38,7 @@
             <hr>
             <h2>Winkelmandje</h2>
             <p>
-                Met een winkelmandje kunnen bezoekers meerdere artikel combinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.
+                Met een winkelmandje kunnen bezoekers meerdere artikelcombinaties in één keer bestellen. Zet je het uit, dan kunnen bezoekers meteen afrekenen na het selecteren van een artikel. Voor formulieren waar je maar één ingevuld formulier (= artikel) verwacht, is het vaak nuttig om het uit te zetten.
             </p>
 
             <STList>
@@ -81,6 +82,10 @@ import ProductRow from './products/ProductRow.vue';
 export default class EditWebshopProductsView extends Mixins(EditWebshopMixin) {
     mounted() {
         UrlHelper.setUrl("/webshops/" + Formatter.slug(this.webshop.meta.name) + "/settings/" + (this.isTickets ? "tickets" : "products"))
+    }
+
+    get description() {
+        return this.webshop.meta.ticketType === WebshopTicketType.Tickets ? "Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe." : "Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe."
     }
     
     get viewTitle() {

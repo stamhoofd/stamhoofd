@@ -24,12 +24,16 @@ export class NetworkManagerStatic implements RequestMiddleware {
      * Normal, non authenticated requests
      */
     get server() {
-        const server = new Server("https://"+STAMHOOFD.domains.api)
+        const server = new Server(this.https + "://"+STAMHOOFD.domains.api)
         server.middlewares.push(this)
 
         // Set the version in which we decode the responses
         server.setVersionHeaders(['X-Version'])
         return server
+    }
+
+    get https() {
+        return window.location.protocol === "https:" || STAMHOOFD.environment !== 'development' ? 'https' : 'http'
     }
 
     /**

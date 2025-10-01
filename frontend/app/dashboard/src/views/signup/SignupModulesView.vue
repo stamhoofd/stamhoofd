@@ -1,15 +1,11 @@
 <template>
     <form class="st-view" @submit.prevent="goNext">
-        <STNavigationBar title="Functies uitproberen" :dismiss="canDismiss" :pop="canPop" />
+        <STNavigationBar title="Waarmee wil je beginnen?" :dismiss="canDismiss" :pop="canPop" />
 
         <main>
             <h1>
                 Waarmee wil je beginnen?
             </h1>
-            <p>
-                Je kan later andere functies uitproberen via het instellingen menu.
-            </p>
-
             <SmoothModuleSettingsBox />
         </main>
     </form>
@@ -21,6 +17,7 @@ import { BackButton, Checkbox,EmailInput, LoadingButton, STErrorsDefault, STInpu
 import { Component, Mixins } from "vue-property-decorator";
 
 import SmoothModuleSettingsBox from "../dashboard/settings/SmoothModuleSettingsBox.vue"
+import { usePostHog } from './usePostHog';
 
 @Component({
     components: {
@@ -36,9 +33,12 @@ import SmoothModuleSettingsBox from "../dashboard/settings/SmoothModuleSettingsB
     }
 })
 export default class SignupModulesView extends Mixins(NavigationMixin) {
-  
     goNext() {
         this.dismiss({ force: true })
+    }
+
+    mounted() {
+        usePostHog();
     }
 }
 </script>

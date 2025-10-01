@@ -35,3 +35,12 @@ export default class Dropdown extends Mixins(NavigationMixin) {
     }
 }
 </script>
+
+<style lang="scss" scoped>
+.input-icon-container {
+    flex-shrink: 0;
+}
+select {
+    padding-right: 40px;
+}
+</style>

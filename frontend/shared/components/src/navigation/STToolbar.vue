@@ -28,6 +28,36 @@ export default class STToolbar extends Vue {
 @use "~@stamhoofd/scss/base/variables.scss" as *;
 @use '~@stamhoofd/scss/base/text-styles.scss';
 
+@mixin center {
+    > div:first-child {
+        display: none;
+    }
+
+    > div .button, > div .loading-button {
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 10px;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    > div:last-child {
+        justify-self: center;
+        flex-basis: 100%;
+        flex-direction: column;
+        max-width: 400px;
+        margin: 0 auto;
+
+        &> .button {
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: center;
+        }
+    }
+}
+
 .st-toolbar {
     margin: 0;
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
@@ -35,6 +65,7 @@ export default class STToolbar extends Vue {
     padding-top: var(--st-vertical-padding, 20px);
     bottom: 0;
     overflow: hidden;
+    z-index: 100;
     //pointer-events: none; // fix browser bug not able to click through
 
     // If embedded inside of a box: add negative margins around
@@ -44,8 +75,14 @@ export default class STToolbar extends Vue {
     }
 
     &.sticky {
-        position: sticky;
-        z-index: 10;
+        //position: sticky;
+        z-index: 100;
+    }
+
+    &.center {
+        > div {
+            @include center;
+        }
     }
 
     > div {
@@ -78,30 +115,7 @@ export default class STToolbar extends Vue {
         }
 
         @media (max-width: 500px) {
-            > div:first-child {
-                display: none;
-            }
-
-            > div .button, > div .loading-button {
-                margin-left: 0;
-                margin-right: 0;
-                margin-top: 10px;
-
-                &:first-child {
-                    margin-top: 0;
-                }
-            }
-
-            > div:last-child {
-                flex-basis: 100%;
-                flex-direction: column;
-
-                &> .button {
-                    width: 100%;
-                    box-sizing: border-box;
-                    justify-content: center;
-                }
-            }
+            @include center;
         }
     }
 }

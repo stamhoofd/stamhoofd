@@ -107,7 +107,7 @@ export class ViewportHelper {
                 });
             }, { passive: true });
 
-            if (AppManager.shared.getOS() === "iOS") {
+            if (AppManager.shared.getOS() === "iOS" || AppManager.shared.getOS() === "android") {
                 let clickedElement: HTMLElement | null = null;
                 
                 document.body.addEventListener("touchstart", (event) => {
@@ -200,7 +200,7 @@ export class ViewportHelper {
         // Calculate bottom padding
         // In modern mode, the body is set to 100dvh / 100vh, and we need to calculate the difference between 100vh and the viewport height
         // This can be used to calculate the keyboard height
-        if (AppManager.shared.getOS() === "iOS") {
+        if (AppManager.shared.getOS() === "iOS" || AppManager.shared.getOS() === "android") {
             if (window.visualViewport && this.modern) {
                 const bodyHeight = (window.innerHeight ?? document.body.clientHeight) + window.scrollY;
                 const bottomPadding = bodyHeight - window.visualViewport.height
@@ -262,6 +262,17 @@ export class ViewportHelper {
             const elapsed = timestamp - start;
 
             if (element.scrollTop !== previousPosition && start !== timestamp){
+                // The user has scrolled the page: stop animation
+                element.style.overflow = ""
+                element.style.willChange = "";
+                (element.style as any).webkitOverflowScrolling = ""
+                return
+            }
+
+            // Correct scroll position
+            const correctedScrollPosition = Math.max(0, Math.min(endPosition, element.scrollHeight - element.clientHeight))
+            if (endPosition !== correctedScrollPosition) {
+                console.log('abort scroll, viewport changed', endPosition, correctedScrollPosition)
                 // The user has scrolled the page: stop animation
                 element.style.overflow = ""
                 element.style.willChange = "";

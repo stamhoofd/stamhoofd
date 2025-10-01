@@ -273,8 +273,8 @@ export default class EditPaymentMethodsBox extends Vue {
             }
 
             if (!found) {
-                // Enable transfer
-                this.setPaymentMethod(PaymentMethod.Transfer, true)
+                // Enable point of sale
+                this.setPaymentMethod(PaymentMethod.PointOfSale, true)
             }
         } else {
             this.clean()

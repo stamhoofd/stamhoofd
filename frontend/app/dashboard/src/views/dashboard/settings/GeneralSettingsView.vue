@@ -20,7 +20,7 @@
                     >
                 </STInputBox>
 
-                <AddressInput v-model="address" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
+                <AddressInput v-model="address" :optional-except-city="true" title="Adres van je vereniging" :validator="validator" :link-country-to-locale="true" />
             </div>
 
             <div>

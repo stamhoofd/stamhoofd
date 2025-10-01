@@ -1,7 +1,7 @@
 <template>
     <TableView ref="table" :prefix-column="prefixColumn" default-sort-direction="DESC" :organization="organization" :title="title" :column-configuration-id="'orders-'+preview.id" :actions="actions" :all-values="isLoadingOrders ? [] : orders" :estimated-rows="estimatedRows" :all-columns="allColumns" :filter-definitions="filterDefinitions" @refresh="refresh(false)" @click="openOrder">
         <template #empty>
-            Er zijn nog geen bestellingen.
+            Hier komt een lijst met alle bestellingen. Plaats zelf een test-bestelling om het eens uit te proberen.
         </template>
     </TableView>
 </template>

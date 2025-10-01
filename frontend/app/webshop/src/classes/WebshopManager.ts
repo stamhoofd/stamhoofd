@@ -24,7 +24,7 @@ export class WebshopManagerStatic {
      */
     get server() {
         const server = NetworkManager.server
-        server.host = "https://" + this.organization.id + "." + STAMHOOFD.domains.api;
+        server.host = NetworkManager.https + "://" + this.organization.id + "." + STAMHOOFD.domains.api;
         return server
     }
 
