@@ -314,42 +314,48 @@ export class I18nController {
             }
         }
 
-        // 3. Get country by TLD
-        if (!country && !defaultCountry) {
-            // try to get country from domain name
-            const splitted = window.location.hostname.split('.');
-            const tld = splitted[splitted.length - 1].toLowerCase();
+        // 3. Get country by referrer TLD
+        if (!country && document.referrer && typeof document.referrer === 'string' && document.referrer.length > 0) {
+            try {
+                const referrerUrl = new URL(document.referrer);
+                const splitted = referrerUrl.hostname.split('.');
+                const tld = splitted[splitted.length - 1].toLowerCase();
 
-            switch (tld) {
-                case 'be': {
-                    country = Country.Belgium;
-                    break;
+                switch (tld) {
+                    case 'be': {
+                        country = Country.Belgium;
+                        break;
+                    }
+                    case 'nl': {
+                        country = Country.Netherlands;
+                        break;
+                    }
+                    case 'de': {
+                        country = Country.Germany;
+                        break;
+                    }
+                    case 'lu': {
+                        country = Country.Luxembourg;
+                        break;
+                    }
+                    case 'fr': {
+                        country = Country.France;
+                        break;
+                    }
+                    // We used .shop before, but were only active in Belgium
+                    case 'shop': {
+                        country = Country.Belgium;
+                        break;
+                    }
                 }
-                case 'nl': {
-                    country = Country.Netherlands;
-                    break;
-                }
-                case 'de': {
-                    country = Country.Germany;
-                    break;
-                }
-                case 'lu': {
-                    country = Country.Luxembourg;
-                    break;
-                }
-                case 'fr': {
-                    country = Country.France;
-                    break;
-                }
-                // We used .shop before, but were only active in Belgium
-                case 'shop': {
-                    country = Country.Belgium;
-                    break;
+
+                if (country) {
+                    console.info('Using country from referrer TLD', '.' + tld, country);
                 }
             }
-
-            if (country) {
-                console.info('Using country from TLD', '.' + tld, country);
+            catch (e) {
+                // Invalid referrer URL
+                console.error('Failed to get country from referrer', e);
             }
         }
 
@@ -366,7 +372,8 @@ export class I18nController {
                 }
             }
 
-            if (!country && navigator.language && navigator.language.length === 5) {
+            if (!country && !defaultCountry && navigator.language && navigator.language.length === 5) {
+                // This is not trustworthy at all
                 const c = navigator.language.substr(3, 2).toUpperCase();
                 if (this.isValidCountry(c)) {
                     console.info('[I18n] Using browser country', c);
