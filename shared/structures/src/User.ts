@@ -54,7 +54,7 @@ export class User extends AutoEncoder {
     @field({
         decoder: UserPermissions,
         nullable: true,
-        version: 247,
+        version: 248,
         upgrade: function (this: User, oldValue: Permissions | null): UserPermissions | null {
             if (!oldValue || !this.organizationId) {
                 return null;
@@ -124,7 +124,7 @@ export class ApiUser extends AutoEncoder {
     @field({
         decoder: UserPermissions,
         nullable: true,
-        version: 247,
+        version: 248,
         upgrade: function (this: User, oldValue: Permissions | null): UserPermissions | null {
             if (!oldValue || !this.organizationId) {
                 return null;
