@@ -8,6 +8,7 @@
             <h1 v-else>
                 Inloggen
             </h1>
+            <p>Enkel voor beheerders van {{ session.organization.name }}.</p>
 
             <STErrorsDefault :error-box="errorBox" />
 
@@ -24,22 +25,26 @@
                 <input v-model="password" enterkeyhint="go" class="input" name="current-password" placeholder="Vul jouw wachtwoord hier in" autocomplete="current-password" type="password" @input="password = $event.target.value" @change="password = $event.target.value">
             </STInputBox>
 
+            
+            <div class="style-form-buttons">
+                <LoadingButton :loading="loading" class="block bottom">
+                    <button class="button primary full" type="submit">
+                        <span class="lock icon" />
+                        <span>Inloggen</span>
+                    </button>
+                </LoadingButton>
+
+                <a v-if="session.organization && session.organization.meta.packages.useMembers" class="button text" tabindex="-1" :href="session.organization.registerUrl">
+                    <span>Of registreer hier als lid</span>
+                    <span class="icon arrow-right-small" />
+                </a>
+            </div>
+
+            <hr>
+
             <button class="button text" type="button" tabindex="-1" @click="help">
                 <span class="help icon" />
                 <span>Ik heb geen account</span>
-            </button>
-
-            <LoadingButton :loading="loading" class="block bottom">
-                <button class="button primary full" type="submit">
-                    <span class="lock icon" />
-                    <span>Inloggen</span>
-                </button>
-            </LoadingButton>
-
-
-            <button class="button text" type="button" tabindex="-1" @click="help">
-                <span class="icon arrow-right" />
-                <span>Ik ben een lid</span>
             </button>
         </main>
     </form>
