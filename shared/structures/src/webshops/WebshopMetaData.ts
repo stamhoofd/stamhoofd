@@ -392,12 +392,12 @@ export class WebshopMetaData extends AutoEncoder {
   description = RichText.create({});
 
   /**
-   * Newly added. Serves as a hint in the UI for better suggestions and UX.
+   * Serves as a hint in the UI for better suggestions and UX.
    */
   @field({ 
     decoder: new EnumDecoder(WebshopType), 
     optional: true,
-    version: 5,
+    version: 247,
     upgrade: function (this: WebshopMetaData) {
         if (this.ticketType === WebshopTicketType.Tickets && this.seatingPlans.length > 0) {
             return WebshopType.Performance;
