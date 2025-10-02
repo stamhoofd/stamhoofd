@@ -54,6 +54,8 @@ async function start(dryRun: boolean) {
 
 async function cleanupGroup(group: Group, dryRun: boolean) {
     group.settings.cycleSettings = new Map();
+    group.settings.preventPreviousGroupIds = [];
+    group.settings.requirePreviousGroupIds = [];
     group.cycle = cycleIfMigrated;
     if (group.status === GroupStatus.Archived) {
         group.status = GroupStatus.Closed;
@@ -155,6 +157,39 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
                 }
             }
         }
+    }
+
+    // migrate require and prevent group ids
+    for (const originalGroup of groups) {
+        // migrate requirePreviousGroupIds
+        const requirePreviousGroupIds = originalGroup.settings.requirePreviousGroupIds;
+        const requireIdSet = new Set<string>();
+
+        for (const groupIdToGetPreviousGroupOf of requirePreviousGroupIds) {
+            const previousGroups = groupMap.get(groupIdToGetPreviousGroupOf);
+            if (previousGroups && previousGroups.length > 0) {
+                // previous groups are already ordered
+                const firstPreviousGroup = previousGroups[0];
+                requireIdSet.add(firstPreviousGroup.id);
+            }
+        }
+
+        originalGroup.settings.requireGroupIds = [...requireIdSet];
+
+        // migrate preventPreviousGroupIds
+        const preventPreviousGroupIds = originalGroup.settings.preventPreviousGroupIds;
+        const preventIdSet = new Set<string>();
+
+        for (const groupIdToGetPreviousGroupOf of preventPreviousGroupIds) {
+            const previousGroups = groupMap.get(groupIdToGetPreviousGroupOf);
+            if (previousGroups && previousGroups.length > 0) {
+                // previous groups are already ordered
+                const firstPreviousGroup = previousGroups[0];
+                preventIdSet.add(firstPreviousGroup.id);
+            }
+        }
+
+        originalGroup.settings.preventGroupIds = [...preventIdSet];
     }
 
     // #region create categories for current period
