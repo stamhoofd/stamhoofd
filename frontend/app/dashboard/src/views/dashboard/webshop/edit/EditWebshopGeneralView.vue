@@ -53,7 +53,7 @@
                             <img src="~@stamhoofd/assets/images/illustrations/edit-data.svg">
                         </figure>
                         <h3>Inschrijvingen</h3>
-                        <p>Quiz, wandeltocht, eetfestijn, workshop...</p>
+                        <p>Quiz, wandeltocht, eetfestijn, lessen, workshop...</p>
                     </label>
 
                     <label class="illustration-radio-box">
