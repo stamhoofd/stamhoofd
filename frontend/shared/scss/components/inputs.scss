@@ -384,7 +384,7 @@ select.input {
             grid-template-columns: 1fr;
         }
 
-        @container st-view (min-width: 295px) {
+        @container st-view (min-width: 350px) {
             grid-template-columns: repeat(2, 1fr);
         }
 
@@ -435,7 +435,7 @@ select.input {
         padding: 0 7px;
     }
 
-    @container st-view (max-width: 440px) {
+    @container st-view (max-width: 570px) {
         img {
             width: 38px;
             height: 38px;
