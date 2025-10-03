@@ -56,6 +56,8 @@ body.modern.web-iOS {
     height: calc(var(--vh, 1vh) * 100);
     max-height: 100vh;
     max-height: 100dvh;
+    container-type: inline-size;
+    container-name: st-view;
 
     overflow: hidden;
     overflow: clip; // More modern + disables scrolling
@@ -81,9 +83,6 @@ body.modern.web-iOS {
     > main {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
-
-        container-type: inline-size;
-        container-name: st-view;
 
         &.center {
             &:not(.small) {

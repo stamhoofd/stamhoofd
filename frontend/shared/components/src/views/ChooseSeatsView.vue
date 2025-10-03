@@ -237,5 +237,6 @@ export default class ChooseSeatsView extends Mixins(NavigationMixin){
     width: max-content !important;
     min-width: min(100vw, var(--st-sheet-width, 400px));
     max-width: 100vw;
+    container-type: normal;
 }
 </style>
