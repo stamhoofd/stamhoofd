@@ -24,12 +24,18 @@
 
 
         <STList>
-            <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :disabled="!canEnablePaymentMethod(method)">
-                <Checkbox slot="left" :checked="getPaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
+            <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(showPrices && getPaymentMethod(method) && getDescription(method))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
+                <Checkbox slot="left" :checked="getPaymentMethod(method)" :disabled="!canEnablePaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
                 <h3 class="style-title-list">
                     {{ getName(method) }}
                 </h3>
                 <p v-if="showPrices && getPaymentMethod(method) && getDescription(method)" class="style-description-small pre-wrap" v-text="getDescription(method)" />
+                <template v-if="!canEnablePaymentMethod(method)" #right>
+                    <button class="button text selected" type="button" @click.stop="openPaymentSettings">
+                        <span>Activeren</span>
+                        <span class="icon arrow-right-small" />
+                    </button>
+                </template>
             </STListItem>
         </STList>
 
@@ -118,12 +124,15 @@
 <script lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray } from "@simonbackx/simple-encoding";
 import { SimpleError } from "@simonbackx/simple-errors";
-import { Checkbox, Dropdown, ErrorBox, IBANInput,LoadingView,PermyriadInput,PriceInput,Radio, Spinner, STErrorsDefault, STInputBox, STList, STListItem, Toast, Validator } from "@stamhoofd/components";
+import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
+import { Checkbox, Dropdown, ErrorBox, IBANInput,LoadingView,PermyriadInput,PriceInput,Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { SessionManager } from "@stamhoofd/networking";
-import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, RecordCategory, StripeAccount, TransferDescriptionType, TransferSettings, Webshop } from "@stamhoofd/structures";
+import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings, Webshop } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import PaymentSettingsView from "../views/dashboard/settings/PaymentSettingsView.vue";
 
 @Component({
     components: {
@@ -143,7 +152,7 @@ import { Component, Prop, Vue } from "vue-property-decorator";
         price: Formatter.price.bind(Formatter)
     }
 })
-export default class EditPaymentMethodsBox extends Vue {
+export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
     @Prop({ required: true })
         type: 'registration'|'webshop'
 
@@ -325,20 +334,20 @@ export default class EditPaymentMethodsBox extends Vue {
         }
 
         // Force a given ordering
+        r.push(PaymentMethod.Bancontact)
+
+        // Force a given ordering
         if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
             r.push(PaymentMethod.Payconiq)
         }
 
-        // Force a given ordering
-        r.push(PaymentMethod.Bancontact)
+        r.push(PaymentMethod.CreditCard)
 
         // Force a given ordering
         if (this.country != Country.Netherlands) {
             r.push(PaymentMethod.iDEAL)
         }
 
-        r.push(PaymentMethod.CreditCard)
-        
         r.push(PaymentMethod.Transfer)
         r.push(PaymentMethod.PointOfSale)
 
@@ -363,7 +372,7 @@ export default class EditPaymentMethodsBox extends Vue {
         const provider = this.organization.privateMeta?.getPaymentProviderFor(paymentMethod, this.stripeAccountObject?.meta) ?? PaymentProvider.Stripe
 
         switch (paymentMethod) {
-            case PaymentMethod.Transfer: return "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd"
+            case PaymentMethod.Transfer: return "Je controleert en markeert manueel elke betaling als betaald in Stamhoofd"
             case PaymentMethod.Payconiq: 
                 return this.providerText(provider, {
                     [PaymentProvider.Payconiq]: "",
@@ -398,6 +407,17 @@ export default class EditPaymentMethodsBox extends Vue {
         return this.config.paymentMethods.includes(method)
     }
 
+    openPaymentSettings() {
+        this.present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: new ComponentWithProperties(PaymentSettingsView, {})
+                })
+            ],
+            modalDisplayStyle: "popup"
+        })
+    }
+
     setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false) {
         if (enabled === this.getPaymentMethod(method)) {
             return
@@ -407,7 +427,13 @@ export default class EditPaymentMethodsBox extends Vue {
         if (enabled) {
             const errorMessage = this.getEnableErrorMessage(method)
             if (!force && this.choices === null && errorMessage) {
-                new Toast(errorMessage, "error red").setHide(15*1000).show()
+                const toast = new Toast(errorMessage, "error red");
+
+                toast.setButton(new ToastButton('Open instellingen', () => {
+                    this.openPaymentSettings()
+                }, "settings"));
+                
+                toast.setHide(15*1000).show()
                 return
             }
             arr.addPut(method)
@@ -457,7 +483,7 @@ export default class EditPaymentMethodsBox extends Vue {
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
                 if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
-                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
+                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts)."
                 }
                 break
             }
@@ -466,13 +492,13 @@ export default class EditPaymentMethodsBox extends Vue {
             case PaymentMethod.CreditCard:
             case PaymentMethod.Bancontact: {
                 if (this.stripeAccountObject) {
-                    return PaymentMethodHelper.getName(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
+                    return PaymentMethodHelper.getNameCapitalized(paymentMethod)+" is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld."
                 }
                 break
             }
         }
 
-        return "Je kan "+PaymentMethodHelper.getName(paymentMethod)+" niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Stamhoofd instellingen > Betaalaccounts."
+        return "Sluit eerst aan bij Stripe via de Stamhoofd instellingen > Betaalaccounts, daarna kan je "+PaymentMethodHelper.getName(paymentMethod)+" activeren."
     }
 
     // Administration cost

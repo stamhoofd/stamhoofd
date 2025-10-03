@@ -386,7 +386,7 @@ export default class EditWebshopGeneralView extends Mixins(EditWebshopMixin) {
         switch (paymentMethod) {
             case PaymentMethod.Payconiq: {
                 if ((this.organization.privateMeta?.payconiqApiKey ?? "").length == 0) {
-                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalmethodes). Daar vind je ook meer informatie."
+                    return "Je moet eerst Payconiq activeren via de betaalinstellingen (Instellingen > Betaalaccounts)."
                 }
                 break
             }

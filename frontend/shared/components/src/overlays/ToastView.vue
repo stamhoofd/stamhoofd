@@ -7,7 +7,8 @@
             <div>
                 <div>{{ message }}</div>
                 <button v-if="toast.button" class="button text" type="button" @click.stop="clickedButton">
-                    {{ toast.button.text }}
+                    <span v-if="toast.button.icon" :class="'icon ' + toast.button.icon" />
+                    <span>{{ toast.button.text }}</span>
                 </button>
             </div>
             <span v-if="toast.action" class="icon arrow-right" />
@@ -32,7 +33,7 @@ import { Toast } from './Toast';
 })
 export default class ToastView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    toast: Toast
+        toast: Toast
 
     get message() {
         return this.toast.message
@@ -41,7 +42,7 @@ export default class ToastView extends Mixins(NavigationMixin) {
     isClosing = false
 
     @Prop({default: null})
-    onClose: (() => void) | null
+        onClose: (() => void) | null
 
     mounted() {
         if (this.toast.autohideAfter) {

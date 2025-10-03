@@ -13,7 +13,7 @@
                 <h1>
                     {{ centeredMessage.title }}
                 </h1>
-                <p>{{ centeredMessage.description }}</p>
+                <p class="pre-wrap" v-text="centeredMessage.description" />
 
                 <STErrorsDefault :error-box="errorBox" />
 
@@ -53,7 +53,7 @@ import { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
 })
 export default class CenteredMessageView extends Mixins(NavigationMixin) {
     @Prop({ required: true})
-    centeredMessage: CenteredMessage
+        centeredMessage: CenteredMessage
 
     isClosing = false
     errorBox: ErrorBox | null = null

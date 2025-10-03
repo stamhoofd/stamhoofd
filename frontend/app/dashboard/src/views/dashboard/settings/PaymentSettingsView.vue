@@ -156,16 +156,16 @@
             </p>
 
             <div class="style-button-bar">
-                <a class="button primary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
-                    <span>Lees de gids</span>
-                    <span class="icon arrow-right" />
-                </a>
-
                 <LoadingButton :loading="creatingStripeAccount">
-                    <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
-                        <span>Nieuw betaalaccount</span>
+                    <button type="button" class="button primary" :disabled="creatingStripeAccount" @click="createStripeAccount">
+                        <span>Aansluiten bij Stripe</span>
                     </button>
                 </LoadingButton>
+
+                <a class="button secundary" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">
+                    <span class="icon book" />
+                    <span>Lees gids</span>
+                </a>
             </div>
         </div>
         
@@ -794,7 +794,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     async createStripeAccount() {
-        if (this.isBelgium && (!await CenteredMessage.confirm('Waarschuwing!', 'Ja, gelezen', 'Selecteer de juiste bedrijfsvorm in Stripe. Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen, en spaart dus veel problemen uit. Lees ook zeker de documentatie.'))) {
+        if (this.isBelgium && (!await CenteredMessage.confirm('Let op met wat je invult', 'Ja, gelezen', '- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.'))) {
             return;
         }
 
