@@ -133,11 +133,24 @@
                 * Een extra Stripe account naast je eerste Stripe account kost éénmalig 5 euro. Hiermee kan je betalingen per webshop op een andere rekening laten storten door een andere bankrekening te koppelen met je nieuwe account. 
             </p>
         </template>
-        <template v-if="stripeAccounts.length === 0 || creatingStripeAccount">
+        <div v-if="stripeAccounts.length === 0 || creatingStripeAccount" class="container">
             <hr>
-            <h2>
-                Online betalingen via Stripe
+            <aside class="style-title-prefix">
+                Stripe
+            </aside>
+            <h2 v-if="isBelgium">
+                Bancontact, kredietkaart en iDEAL  <span class="style-tag">Snelst + Meest gebruikt</span>
             </h2>
+            <h2 v-else>
+                iDEAL en kredietkaart
+            </h2>
+            <p v-if="isBelgium">
+                Via Stripe kan je snel en eenvoudig online betalingen accepteren via Bancontact, kredietkaart, iDEAL en meer. <a href="https://www.stamhoofd.be/docs/stripe/" target="_blank" class="inline-link">Meer info</a>. Als je alles zorgvuldig invult en eerst de documentatie naleest, kan je dit in minder dan een half uur activeren.
+            </p>
+            <p v-else>
+                Via Stripe kan je snel en eenvoudig online betalingen accepteren via iDEAL of kredietkaart. <a href="https://www.stamhoofd.be/docs/stripe/" target="_blank" class="inline-link">Meer info</a>. Als je alles zorgvuldig invult en eerst de documentatie naleest, kan je dit in minder dan een half uur activeren.
+            </p>
+
             <p class="info-box">
                 Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
             </p>
@@ -150,18 +163,21 @@
 
                 <LoadingButton :loading="creatingStripeAccount">
                     <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
-                        <span>Aansluiten bij Stripe</span>
+                        <span>Nieuw betaalaccount</span>
                     </button>
                 </LoadingButton>
             </div>
-        </template>
+        </div>
         
 
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
+            <aside class="style-title-prefix">
+                Payconiq
+            </aside>
             <h2>Online betalingen via Payconiq</h2>
             <p class="style-description">
-                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>
+                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>. Heb je geen API-key en wil je snel aan de slag, stel dan Stripe (Bancontact) hierboven in. Een Payconiq API-key aanvragen duurt enkele weken.
             </p>
 
             <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
@@ -179,6 +195,9 @@
 
         <template v-if="!enableBuckaroo && (organization.privateMeta.mollieOnboarding || forceMollie)">
             <hr>
+            <aside class="style-title-prefix">
+                Mollie
+            </aside>
             <h2>
                 Online betalingen via Mollie
             </h2>
