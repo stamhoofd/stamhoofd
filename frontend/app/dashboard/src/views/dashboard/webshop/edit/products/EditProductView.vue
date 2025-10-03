@@ -443,7 +443,7 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
         for (const p of this.patchedWebshop.products) {
             if (p.id !== this.product.id && p.seatingPlanId === this.patchedProduct.seatingPlanId && p.dateRange && p.dateRange.toString() === this.patchedProduct.dateRange.toString()) {
-                return "Er bestaat al een ander ticket met hetzelfde zaalplan maar een andere datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie."
+                return "Er bestaat al een ander ticket met hetzelfde zaalplan én datum. Dit zal niet werken omdat de gereserveerde plaatsen tussen beide tickets niet gedeeld zijn. Gebruik in plaats daarvan keuzemenu's in hetzelfde ticket (bv. volwassenen, kinderen, vrijwilligers). Lees de documentatie rond zetelselectie goed door voor meer informatie."
             }
         }
         
