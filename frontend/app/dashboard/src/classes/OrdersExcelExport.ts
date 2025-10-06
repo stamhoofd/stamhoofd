@@ -1,6 +1,6 @@
 import { Toast } from '@stamhoofd/components';
 import { AppManager } from '@stamhoofd/networking';
-import { CartItem, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
+import { CartItem, CartItemOption, CheckoutMethodType, OrderStatusHelper, PaymentMethodHelper, PrivateOrder, ProductType, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import XLSX from "xlsx";
 
@@ -366,14 +366,48 @@ export class OrdersExcelExport {
         }
 
         const itemColumns = new Map<string, number>()
-        const itemNames: RowValue[] = []
+        const itemNames: (RowValue & {value: string})[] = []
+
+        // First add all products that have maximum 1 option menu and product prices
+        for (const product of webshop.productsInOrder) {
+            if (product.optionMenus.length > 1) {
+                continue;
+            }
+
+            if (product.optionMenus[0] && product.optionMenus[0].multipleChoice) {
+                continue;
+            }
+
+            for (const productPrice of product.prices) {
+                for (const option of product.optionMenus[0]?.options ?? [null]) {
+                    const group = cartItemGroupingString(CartItem.create({
+                        product,
+                        productPrice,
+                        options: option ? [CartItemOption.create({
+                            option,
+                            optionMenu: product.optionMenus[0]
+                        })] : []
+                    }))
+                    const groupName = Formatter.slug(group)
+
+                    if (!itemColumns.has(groupName)) {
+                        itemColumns.set(groupName, itemColumns.size)
+                        itemNames.push({
+                            value: group,
+                            width: group.length
+                        })
+                    }
+                }
+            }
+        }
 
         // Columns for products
         for (const order of orders) {
             for (const item of order.data.cart.items) {
                 const group = cartItemGroupingString(item)
-                if (!itemColumns.has(group)) {
-                    itemColumns.set(group, itemColumns.size)
+                const groupName = Formatter.slug(group)
+                if (!itemColumns.has(groupName)) {
+                    itemColumns.set(groupName, itemColumns.size)
                     itemNames.push({
                         value: group,
                         width: group.length
@@ -381,7 +415,7 @@ export class OrdersExcelExport {
                 }
             }
         }
-        
+
         // Columns
         const wsData: RowValue[][] = [
             [
@@ -443,8 +477,9 @@ export class OrdersExcelExport {
             const itemAmounts: number[] = itemNames.map(a => 0)
 
             for (const item of order.data.cart.items) {
-                const group = cartItemGroupingString(item)
-                const index = itemColumns.get(group)
+                const group = cartItemGroupingString(item);
+                const groupName = Formatter.slug(group);
+                const index = itemColumns.get(groupName);
                 if (index !== undefined) {
                     itemAmounts[index] = (itemAmounts[index] ?? 0) + item.amount
                 }
@@ -498,7 +533,8 @@ export class OrdersExcelExport {
         }
 
         return ExcelHelper.buildWorksheet(wsData, {
-            defaultColumnWidth: 13
+            defaultColumnWidth: 13,
+            keepLastColumns: itemNames.length
         })
     }
 
