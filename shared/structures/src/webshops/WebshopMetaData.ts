@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, AutoEncoderPatchType, BooleanDecoder, Data, DateDecoder, Decoder, EnumDecoder, field, IntegerDecoder, PartialWithoutMethods, PatchableDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -331,6 +331,20 @@ export class AnyCheckoutMethodDecoder {
     }
 }
 
+export enum WebshopType {
+    /**
+     * Simple webshop
+     */
+    Webshop = 'Webshop',
+    Donations = 'Donations',
+    TakeawayAndDelivery = 'TakeawayAndDelivery',
+
+    Performance = 'Performance',
+    Event = 'Event',
+    Registrations = 'Registrations',
+
+}
+
 export enum WebshopTicketType {
     None = 'None',
 
@@ -373,6 +387,43 @@ export class WebshopMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder })
     @field({ decoder: RichText, version: 181, upgrade: data => RichText.create({ text: data }), downgrade: data => data.text, upgradePatch: data => RichText.patch({ text: data }), downgradePatch: data => data.text })
     description = RichText.create({});
+
+    /**
+     * Serves as a hint in the UI for better suggestions and UX.
+     */
+    /* @field({
+        decoder: new EnumDecoder(WebshopType),
+        optional: true,
+        version: 247,
+        upgrade: function (this: WebshopMetaData) {
+            if (this.ticketType === WebshopTicketType.Tickets && this.seatingPlans.length > 0) {
+                return WebshopType.Performance;
+            }
+
+            if (this.ticketType === WebshopTicketType.Tickets) {
+                return WebshopType.Event;
+            }
+            return WebshopType.Webshop;
+        },
+    })
+    @field({
+        decoder: new EnumDecoder(WebshopType),
+        ...NextVersion,
+        upgrade: function (this: WebshopMetaData) {
+            if (this.type) {
+                return this.type;
+            }
+            if (this.ticketType === WebshopTicketType.Tickets && this.seatingPlans.length > 0) {
+                return WebshopType.Performance;
+            }
+
+            if (this.ticketType === WebshopTicketType.Tickets) {
+                return WebshopType.Event;
+            }
+            return WebshopType.Webshop;
+        },
+    })
+    type: WebshopType; */ // do not set a default here, the upgrade will break otherwise. Set one in the create method
 
     @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
     ticketType = WebshopTicketType.None;
@@ -568,6 +619,16 @@ export class WebshopMetaData extends AutoEncoder {
                 value: this.color ? Colors.getContrastColor(this.color) : '#fff',
             }),
         ];
+    }
+
+    static override create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<WebshopMetaData>): WebshopMetaData {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const o = super.create({
+            type: WebshopType.Webshop,
+            ...object,
+        } as any) as WebshopMetaData;
+
+        return o;
     }
 }
 
