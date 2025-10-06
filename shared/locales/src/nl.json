@@ -5776,5 +5776,13 @@
   "24c3fee7-0709-4e61-91ec-a77010e6cee5": "Weet je zeker dat je dit emailadres wilt deblokkeren?",
   "6f7e2f7f-c8ad-4ce4-8838-0d7ab855d72e": "Ja, deblokkeren",
   "ea52e93e-6e9d-41d7-8b4c-9a5bc41440e7": "Zorg ervoor dat je enkel een e-mailadres deblokkeert als je zeker bent dat het probleem is opgelost en de persoon hierna geen spam meer zal melden.",
-  "4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11": "{email} werd succesvol gedeblokkeerd"
+  "4a1a3ddf-3ae9-41a8-933f-bf0ca4726c11": "{email} werd succesvol gedeblokkeerd",
+  "186723cd-2cd4-45fd-aa9c-020c9d92b225": "De einddatum moet na de startdatum liggen.",
+  "d004e93c-e67f-48ab-bf3d-7b4ad86c7a38": "Deze periode is niet verbonden aan een organisatie",
+  "7ee15d1f-e8bd-4100-900b-1ff69dc7c857": "Verhinder inschrijven als ingeschreven bij",
+  "5d0d0da2-3c50-4ee5-9a44-68f4a65f76b3": "Naam",
+  "0838734b-4388-49e9-b96b-ad15883a219b": "Voeg bij voorkeur een jaartal toe aan de naam.",
+  "a4dbfbda-407b-4519-8c91-4a4b1eb70fd5": "Hier kan je je inschrijvingen opdelen in verschillende werkjaren. Wisselen tussen werkjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) werkjaar instellen. ",
+  "079afc7a-6ccb-4c7f-b739-24198b0cfec2": "Actief",
+  "a7f3e9ef-7d56-4648-91c8-280d6170617c": "{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verhinder inschrijving bij leeftijdsgroep)."
 }

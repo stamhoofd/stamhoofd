@@ -382,7 +382,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period has no organization id',
-                            human: $t('Deze periode is niet verbonden aan een organisatie'),
+                            human: $t('d004e93c-e67f-48ab-bf3d-7b4ad86c7a38'),
                             field: 'period',
                         });
                     }

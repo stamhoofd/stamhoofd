@@ -1202,7 +1202,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: preventGroupIds',
-                    human: $t('{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verhinder inschrijving bij leeftijdsgroep).', {
+                    human: $t('a7f3e9ef-7d56-4648-91c8-280d6170617c', {
                         member: this.member.patchedMember.name,
                     }),
                 });

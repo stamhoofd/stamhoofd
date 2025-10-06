@@ -80,7 +80,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             if (put.endDate < put.startDate) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t('De einddatum moet na de startdatum liggen.'),
+                    message: $t('186723cd-2cd4-45fd-aa9c-020c9d92b225'),
                     field: 'endDate',
                 });
             }
@@ -148,7 +148,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             if ((patch.startDate || patch.endDate) && model.endDate < model.startDate) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t('De einddatum moet na de startdatum liggen.'),
+                    message: $t('186723cd-2cd4-45fd-aa9c-020c9d92b225'),
                     field: 'endDate',
                 });
             }

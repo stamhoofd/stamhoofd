@@ -4,7 +4,7 @@
             {{ title }}
         </h1>
         <p v-if="!isPlatform">
-            {{ $t('Hier kan je je inschrijvingen opdelen in verschillende werkjaren. Wisselen tussen werkjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) werkjaar instellen. ') }}
+            {{ $t('a4dbfbda-407b-4519-8c91-4a4b1eb70fd5') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />

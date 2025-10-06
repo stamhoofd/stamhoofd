@@ -6,12 +6,12 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox :title="$t('Naam')" error-fields="notes" :error-box="errors.errorBox" class="max">
+        <STInputBox :title="$t('5d0d0da2-3c50-4ee5-9a44-68f4a65f76b3')" error-fields="notes" :error-box="errors.errorBox" class="max">
             <input v-model="customName" class="input" type="text" autocomplete="off" enterkeyhint="next" :maxlength="200" :placeholder="patched.name">
         </STInputBox>
 
         <p v-if="!isValidCustomName" class="warning-box">
-            {{ $t('Voeg bij voorkeur een jaartal toe aan de naam.') }}
+            {{ $t('0838734b-4388-49e9-b96b-ad15883a219b') }}
         </p>
 
         <div class="split-inputs">
@@ -74,7 +74,7 @@ function validate() {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
             field: 'endDate',
-            message: $t('De einddatum moet na de startdatum liggen.'),
+            message: $t('186723cd-2cd4-45fd-aa9c-020c9d92b225'),
         }));
 
         return false;
