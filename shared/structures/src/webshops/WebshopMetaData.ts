@@ -408,7 +408,7 @@ export class WebshopMetaData extends AutoEncoder {
     })
     @field({
         decoder: new EnumDecoder(WebshopType),
-        version: 386,
+        <--todo version!!-->
         upgrade: function (this: WebshopMetaData) {
             if (this.type) {
                 return this.type;
