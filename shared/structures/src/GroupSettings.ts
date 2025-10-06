@@ -550,7 +550,7 @@ export class GroupSettings extends AutoEncoder {
     /**
      * Prevent members from these groups from registering for this group.
      */
-    @field({ decoder: new ArrayDecoder(StringDecoder), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(StringDecoder), version: 386 })
     preventGroupIds: string[] = [];
 
     /**
