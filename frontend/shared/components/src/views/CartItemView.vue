@@ -240,6 +240,9 @@ function onChangeItem() {
     if (props.oldItem) {
         clonedCheckout.cart.removeItem(props.oldItem);
     }
+    if (!cartEnabled.value) {
+        clonedCheckout.cart.clear();
+    }
     const pricedItemClone = props.cartItem.clone();
     clonedCheckout.cart.addItem(pricedItemClone, false); // No merging (otherwise prices are not updated)
 
