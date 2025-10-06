@@ -425,6 +425,18 @@ export class WebshopMetaData extends AutoEncoder {
     })
     type: WebshopType; */ // do not set a default here, the upgrade will break otherwise. Set one in the create method
 
+    /*
+    static override create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<WebshopMetaData>): WebshopMetaData {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        const o = super.create({
+            type: WebshopType.Webshop,
+            ...object,
+        } as any) as WebshopMetaData;
+
+        return o;
+    }
+    */
+
     @field({ decoder: new EnumDecoder(WebshopTicketType), version: 105 })
     ticketType = WebshopTicketType.None;
 
@@ -619,16 +631,6 @@ export class WebshopMetaData extends AutoEncoder {
                 value: this.color ? Colors.getContrastColor(this.color) : '#fff',
             }),
         ];
-    }
-
-    static override create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<WebshopMetaData>): WebshopMetaData {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        const o = super.create({
-            type: WebshopType.Webshop,
-            ...object,
-        } as any) as WebshopMetaData;
-
-        return o;
     }
 }
 
