@@ -727,6 +727,10 @@
     "original": "Dit mag niet leeg zijn",
     "translation": "Ceci ne peut pas être vide"
   },
+  "079afc7a-6ccb-4c7f-b739-24198b0cfec2": {
+    "original": "Actief",
+    "translation": "Actif"
+  },
   "079d3877-b607-4f3b-8139-7f5f4463bd19": {
     "original": "categorie",
     "translation": "catégorie"
@@ -786,6 +790,10 @@
   "082fff79-1ecd-450b-a2ed-a5cef7769f0f": {
     "original": "Unieke leden",
     "translation": "Membres uniques"
+  },
+  "0838734b-4388-49e9-b96b-ad15883a219b": {
+    "original": "Voeg bij voorkeur een jaartal toe aan de naam.",
+    "translation": "Il est préférable d'ajouter une année à ce nom."
   },
   "083a34cb-26f4-4467-978e-3dc19897befb": {
     "original": "Lidnummer wijzigen naar {memberNumber}",
@@ -1588,8 +1596,8 @@
     "translation": "Modifier les données de facturation"
   },
   "11ad3320-726c-434b-938a-923f20c9c59c": {
-    "original": "De structuur van jouw leeftijdsgroepen blijft behouden, maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.",
-    "translation": "La structure de vos groupes d'âge est conservée, mais vous devez vous-même définir correctement le prix et les dates. N'oubliez pas."
+    "original": "De structuur van jouw leeftijdsgroepen blijft behouden (er wordt een éénmalige kopie gemaakt), maar je moet zelf nog de prijs en datums goed zetten. Vergeet dit niet.",
+    "translation": "La structure de vos groupes d'âge est conservée (une copie unique est créée), mais vous devrez encore adapter le prix et les dates vous-même. N'oubliez pas de le faire."
   },
   "11ad8aa2-5aea-400b-8fe1-90e8495c1395": {
     "original": "Bevestig dat je leeftijdsgroepen in orde zijn",
@@ -2258,6 +2266,10 @@
   "1866a2ab-1798-45df-a619-0929258d6cd8": {
     "original": "Webshop archief",
     "translation": "Archives de la boutique en ligne"
+  },
+  "186723cd-2cd4-45fd-aa9c-020c9d92b225": {
+    "original": "De einddatum moet na de startdatum liggen.",
+    "translation": "La date de fin doit être postérieure à la date de début."
   },
   "187657c7-d1ad-4047-a693-ab0e215d41fc": {
     "original": "Ga naar de volgende",
@@ -8223,6 +8235,10 @@
     "original": "Soorten lokalen",
     "translation": "Types de salles"
   },
+  "5d0d0da2-3c50-4ee5-9a44-68f4a65f76b3": {
+    "original": "Naam",
+    "translation": "Nom"
+  },
   "5d0d84fe-2ddb-4962-b104-337abbeeaa1f": {
     "original": "Koptekst",
     "translation": "En-tête"
@@ -11158,6 +11174,10 @@
   "7edb3d38-4eaf-4314-867e-9621b5fb826e": {
     "original": "lid past",
     "translation": "le membre correspond"
+  },
+  "7ee15d1f-e8bd-4100-900b-1ff69dc7c857": {
+    "original": "Verhinder inschrijven als ingeschreven bij",
+    "translation": "Empêcher l'inscription si déjà inscrit dans"
   },
   "7eec15d0-4d60-423f-b860-4f3824271578": {
     "original": "Locatie",
@@ -14423,6 +14443,10 @@
     "original": "Klad",
     "translation": "Ébauche"
   },
+  "a4dbfbda-407b-4519-8c91-4a4b1eb70fd5": {
+    "original": "Hier kan je je inschrijvingen opdelen in verschillende werkjaren. Wisselen tussen werkjaren kan je doen in het tabblad ‘Leden’, daar kan je ook het huidige (actieve) werkjaar instellen. ",
+    "translation": "Ici, vous pouvez répartir vos inscriptions selon différentes années associatives. Pour changer d'année associative, rendez-vous dans l’onglet « Membres », où vous pouvez également définir l'année associative active."
+  },
   "a4dde8e6-d0f7-4ad6-b880-cf5467771770": {
     "original": "Payconiq by Bancontact",
     "translation": "Payconiq par Bancontact"
@@ -14770,6 +14794,10 @@
   "a7f32979-1ee8-47fe-a409-7b17ce9f9d39": {
     "original": "Account ID",
     "translation": "ID du compte"
+  },
+  "a7f3e9ef-7d56-4648-91c8-280d6170617c": {
+    "original": "{member} voldoet niet aan de voorwaarden om in te schrijven voor deze groep (verhinder inschrijving bij leeftijdsgroep).",
+    "translation": "{member} ne remplit pas les conditions pour s'inscrire dans ce groupe (inscription empêchée dans le groupe d'âge)."
   },
   "a821c56c-e5de-4505-83ca-25d8a74d3c19": {
     "original": "Voeg openstaande bedragen toe of verwijder ze, en pas de betaalstatus van een lid aan.",
@@ -18314,6 +18342,10 @@
   "cffa7f10-50e3-4da2-946c-5c60fc3fa2cf": {
     "original": "Via overschrijving",
     "translation": "Par virement"
+  },
+  "d004e93c-e67f-48ab-bf3d-7b4ad86c7a38": {
+    "original": "Deze periode is niet verbonden aan een organisatie",
+    "translation": "Cette période n'est pas liée à une association."
   },
   "d0099dec-d92f-41dc-9e42-7409de459d71": {
     "original": "Bij betalingen via overschrijving of domiciliëring kan het even duren voor we een betaling ontvangen en bevestigen. Je kan hier de status opvolgen.",
