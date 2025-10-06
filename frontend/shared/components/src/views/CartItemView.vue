@@ -223,6 +223,9 @@ export default class CartItemView extends Mixins(NavigationMixin){
         if (this.oldItem) {
             clonedCheckout.cart.removeItem(this.oldItem)
         }
+        if (!this.cartEnabled) {
+            clonedCheckout.cart.clear();
+        }
         const pricedItem = this.cartItem.clone()
         clonedCheckout.cart.addItem(pricedItem, false) // No merging (otherwise prices are not updated)
 
