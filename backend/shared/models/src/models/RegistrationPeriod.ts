@@ -81,7 +81,7 @@ export class RegistrationPeriod extends QueryableModel {
             .where(SQL.column('startDate'), SQLWhereSign.LessEqual, date)
             .where(SQL.column('endDate'), SQLWhereSign.GreaterEqual, date);
 
-        if (organizationId) {
+        if (organizationId && STAMHOOFD.userMode === 'organization') {
             query.where(SQL.column('organizationId'), organizationId);
         }
 
