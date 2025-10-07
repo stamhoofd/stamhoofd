@@ -97,6 +97,16 @@ function buildCaddyConfig(domains: StamhoofdDomains) {
                         },
                     },
                 },
+                {
+                    handler: 'headers',
+                    response: {
+                        set: {
+                            'Cache-Control': [
+                                'no-store',
+                            ],
+                        },
+                    },
+                },
             ],
         },
         {
