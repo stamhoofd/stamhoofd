@@ -275,7 +275,7 @@
                     </STList>
                 </STInputBox>
 
-                <STInputBox error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`)">
+                <STInputBox v-if="requirePlatformMembershipOnRegistrationDate || (!defaultAgeGroupId)" error-fields="requirePlatformMembershipOnRegistrationDate" :error-box="errors.errorBox" class="max" :title="$t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`)">
                     <STList>
                         <STListItem :selectable="true" element-name="label">
                             <template #left>
