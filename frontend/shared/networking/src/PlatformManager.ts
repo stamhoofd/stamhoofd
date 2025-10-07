@@ -3,6 +3,7 @@ import { ColorHelper, GlobalEventBus } from '@stamhoofd/components';
 import { SessionContext, Storage } from '@stamhoofd/networking';
 import { AppType, LimitedFilteredRequest, OrganizationAdmins, PaginatedResponseDecoder, Platform, RegistrationPeriod, SortItemDirection, UserWithMembers, Version } from '@stamhoofd/structures';
 import { inject, reactive, Ref, toRef } from 'vue';
+import { QueueHandler } from './QueueHandler';
 
 export function usePlatformManager(): Ref<PlatformManager> {
     return toRef(inject<PlatformManager>('$platformManager', null as unknown as PlatformManager)) as any as Ref<PlatformManager>;
@@ -36,12 +37,13 @@ export class PlatformManager {
     }
 
     static _lastFetch: Date | null = null;
+    static _lastFetchedPlatform: Platform | null = null;
 
     /**
      * Create one from cache, otherwise load it using the network
      */
     static async createFromCache($context: SessionContext, app: AppType | 'auto', backgroundFetch = true, requirePrivateConfig = false): Promise<PlatformManager> {
-        const fromStorage = await PlatformManager.loadPlatform();
+        const fromStorage = this._lastFetchedPlatform ?? (await PlatformManager.loadPlatform());
 
         // Users with global permissions need the private data to reliably calculate permissions, even for specific organizations when not using the admin panel
         requirePrivateConfig = requirePrivateConfig || $context.user?.permissions?.globalPermissions?.isEmpty === false;
@@ -52,15 +54,14 @@ export class PlatformManager {
         if (fromStorage && (fromStorage.privateConfig || !requirePrivateConfig)) {
             const manager = new PlatformManager($context, reactive(fromStorage as any) as Platform, app);
 
-            if (backgroundFetch && (this._lastFetch === null || (Date.now() - this._lastFetch.getTime()) > 1000 * 60)) {
-                this._lastFetch = new Date();
-                manager.forceUpdate().catch(console.error);
+            if (backgroundFetch && (this._lastFetch === null || (Date.now() - this._lastFetch.getTime()) > 1000 * 5 * 60)) {
+                manager.forceUpdate(requirePrivateConfig).catch(console.error);
             }
 
             return manager;
         }
 
-        const platform = reactive(await PlatformManager.fetchPlatform($context)) as any as Platform;
+        const platform = reactive(await PlatformManager.fetchPlatform($context, requirePrivateConfig)) as any as Platform;
         const platformManager = new PlatformManager($context, platform, app);
         await platformManager.savePlatform();
         await GlobalEventBus.sendEvent('platform-updated', platformManager.$platform);
@@ -89,18 +90,31 @@ export class PlatformManager {
         document.head.appendChild(link);
     }
 
-    static async fetchPlatform($context: SessionContext) {
-        const pResponse = await $context.optionalAuthenticatedServer.request({
-            method: 'GET',
-            path: '/platform',
-            decoder: Platform as Decoder<Platform>,
+    static async fetchPlatform($context: SessionContext, requirePrivateConfig = false) {
+        // Run in a queue to prevent race conditions. So we always return the last fetched platform when creating new platform managers
+        const started = this._lastFetch;
+        return await QueueHandler.schedule('fetch-platform', async () => {
+            if (started !== this._lastFetch && this._lastFetchedPlatform) {
+                if (!requirePrivateConfig || this._lastFetchedPlatform.privateConfig) {
+                    // Has been resolved when we started this request in the queue
+                    console.log('Returning cached platform');
+                    return this._lastFetchedPlatform;
+                }
+            }
+
+            const pResponse = await $context.optionalAuthenticatedServer.request({
+                method: 'GET',
+                path: '/platform',
+                decoder: Platform as Decoder<Platform>,
+            });
+            this._lastFetch = new Date();
+            this._lastFetchedPlatform = pResponse.data;
+            return pResponse.data;
         });
-        this._lastFetch = new Date();
-        return pResponse.data;
     }
 
-    async forceUpdate() {
-        this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context));
+    async forceUpdate(requirePrivateConfig = false) {
+        this.$platform.deepSet(await PlatformManager.fetchPlatform(this.$context, requirePrivateConfig));
         this.updateStyles();
         await this.savePlatform();
         await GlobalEventBus.sendEvent('platform-updated', this.$platform);
@@ -209,11 +223,13 @@ export class PlatformManager {
     static async loadPlatform() {
         try {
             const value = await Storage.keyValue.getItem('platform');
+
             if (!value) {
                 return null;
             }
             const decoder = new VersionBoxDecoder(Platform as Decoder<Platform>);
             const result = decoder.decode(new ObjectData(JSON.parse(value), { version: 0 }));
+
             return result.data;
         }
         catch (e) {
