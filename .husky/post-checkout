@@ -1,4 +1,0 @@
-echo "Clearing builds...";
-yarn;
-yarn clear;
-yarn clear-vite-cache;
