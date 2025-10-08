@@ -278,7 +278,25 @@
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errorBox">
-                                <NumberInput v-model="stock" />
+                                <NumberInput v-model="stock" suffix="stuks" suffix-singular="stuk" />
+                            </STInputBox>
+                        </div>
+                    </STListItem>
+
+                    <STListItem v-if="hasAnyStock" :selectable="true" element-name="label">
+                        <Checkbox slot="left" v-model="useShowStockBelow" />
+
+                        <h3 class="style-title-list">
+                            Verberg het beschikbare aantal stuks als voorraad groter is dan...
+                        </h3>
+
+                        <p v-if="useShowStockBelow" class="style-description-small">
+                            Stamhoofd zal de de beschikbare voorraad verbergen als er nog meer dan {{ showStockBelow }} stuks beschikbaar zijn.
+                        </p>
+
+                        <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
+                                <NumberInput v-model="showStockBelow" suffix="stuks" suffix-singular="stuk" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -728,6 +746,26 @@ export default class EditProductView extends Mixins(NavigationMixin) {
 
     set stock(stock: number) {
         this.patchProduct = this.patchProduct.patch({ stock })
+    }
+
+    get useShowStockBelow() {
+        return this.patchedProduct.showStockBelow !== null
+    }
+
+    set useShowStockBelow(useShowStockBelow: boolean) {
+        this.patchProduct = this.patchProduct.patch({ showStockBelow: useShowStockBelow ? (this.patchedProduct.showStockBelow ?? this.product.showStockBelow ?? 50) : null })
+    }
+
+    get showStockBelow() {
+        return this.patchedProduct.showStockBelow
+    }
+
+    set showStockBelow(showStockBelow: number | null) {
+        this.patchProduct = this.patchProduct.patch({ showStockBelow })
+    }
+
+    get hasAnyStock() {
+        return this.patchedProduct.hasAnyStock;
     }
 
     get useMaxPerOrder() {

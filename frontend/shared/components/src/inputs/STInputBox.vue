@@ -118,6 +118,7 @@ export default class STInputBox extends Vue {
     }
 
     & + .style-description-small, & + .style-description, + div:not([class]) > .style-description-small:first-child {
+        margin-top: -5px;
         padding-bottom: 15px;
     }
 

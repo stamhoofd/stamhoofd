@@ -147,7 +147,8 @@ export default class EditCategoryView extends Mixins(NavigationMixin) {
 
     addProduct() {
         const product = Product.create({
-            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product
+            type: this.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
+            showStockBelow: null
         })
         const p = PrivateWebshop.patch({})
         p.products.addPut(product)

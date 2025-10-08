@@ -142,15 +142,23 @@ export default class ProductBox extends Mixins(NavigationMixin){
         }
 
         if (this.editExisting) {
-            if (remainingWithoutCart === null || remainingWithoutCart > 25) {
+            if (remainingWithoutCart === null) {
                 return null
             }
 
-            const maxOrder = CartStockHelper.getOrderMaximum({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin});
+            const showStockBelow = this.product.showStockBelow;
+
+            if (showStockBelow !== null) {
+                if (remainingWithoutCart > showStockBelow) {
+                    return null
+                }
+            }
+
+            /*const maxOrder = CartStockHelper.getOrderMaximum({ cart: new Cart(), product: this.product, webshop: this.webshop, admin: this.admin});
             if (maxOrder && maxOrder.remaining !== null && maxOrder.remaining < remainingWithoutCart) {
                 // No point in showing stock: you can only order x items in one order
                 return null;
-            }
+            }*/
 
             return {
                 text:  'Nog ' + this.product.getRemainingStockText(remainingWithoutCart),
@@ -174,11 +182,14 @@ export default class ProductBox extends Mixins(NavigationMixin){
             return null
         }
 
-        if (remaining > 25 || (maxOrder && maxOrder.remaining !== null && remaining > maxOrder.remaining)) {
-            // No point in showing stock: you can only order x items in one order
-            return null
+        const showStockBelow = this.product.showStockBelow;
+
+        if (showStockBelow !== null) {
+            if (remaining > showStockBelow) {
+                return null
+            }
         }
-    
+        
         if (remaining === 0 ) {
             return {
                 text: "Maximum bereikt",

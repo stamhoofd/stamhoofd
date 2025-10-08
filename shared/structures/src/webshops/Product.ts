@@ -258,6 +258,12 @@ export class Product extends AutoEncoder {
     maxPerOrder: number | null = null
 
     /**
+     * Only show available stock if going below this amount - or null to always show the stock.
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, optional: true })
+    showStockBelow: number | null = 25;
+
+    /**
      * Total stock, excluding already sold items into account
      */
     @field({ decoder: IntegerDecoder, nullable: true })
@@ -358,6 +364,29 @@ export class Product extends AutoEncoder {
         return Math.min(...stocks)
     }
 
+    get hasAnyStock(): boolean {
+        if (this.remainingStock !== null) {
+            return true;
+        }
+
+        for (const price of this.prices) {
+            if (price.remainingStock !== null) {
+                return true;
+            }
+        }
+
+        for (const menu of this.optionMenus) {
+            // Required to pick one
+            // We need to pick the maximum of the option stock
+            for (const option of menu.options) {
+                if (option.remainingStock !== null) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     getRemainingSeats(webshop: Webshop, isAdmin: boolean): number | null {
         if (this.seatingPlanId === null) {

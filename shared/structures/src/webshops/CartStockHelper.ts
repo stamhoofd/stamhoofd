@@ -59,10 +59,11 @@ export class CartStockHelper {
             more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
         }
         const text: string|null = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} beschikbaar${more}`
+        const showStockBelow = product.showStockBelow ?? Infinity;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(product.name)} is uitverkocht`: (remaining < 25 || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(product.name)} is uitverkocht`: (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
         }
     }
 
@@ -102,11 +103,13 @@ export class CartStockHelper {
             more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
         }
         const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} van ${productPrice.name} beschikbaar${more}`
+
+        const showStockBelow = product.showStockBelow ?? Infinity;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(productPrice.name)} is uitverkocht`: (remaining < 25 || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null))
+            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(productPrice.name)} is uitverkocht`: (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < showStockBelow ? `Nog ${product.getRemainingStockText(remaining)}` : null))
         }
     }
 
@@ -151,11 +154,12 @@ export class CartStockHelper {
         }
         const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${product.getRemainingStockText(remainingStock)} van ${option.name} beschikbaar${more}`
 
+        const showStockBelow = product.showStockBelow ?? Infinity;
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht`: (remaining < 25 || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < 25 ? `Nog ${product.getRemainingStockText(remaining)}` : null))
+            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht`: (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            shortText: remainingStock === 0 ? 'Uitverkocht' : (remaining === 0 ? 'Maximum bereikt' : (remaining < showStockBelow ? `Nog ${product.getRemainingStockText(remaining)}` : null))
         }
     }
 
@@ -189,11 +193,12 @@ export class CartStockHelper {
             more = `, waarvan er al ${inCart} in jouw winkelmandje ${inCart == 1 ? 'zit' : 'zitten'}`;
         }
         const text = `Er ${remainingStock == 1 ? 'is' : 'zijn'} nog maar ${Formatter.pluralText(remainingStock, 'plaats', 'plaatsen')} beschikbaar${more}`
+        const showStockBelow = product.showStockBelow ?? Infinity;
 
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? 'Er zijn geen plaatsen meer beschikbaar': (remaining < 25 || (amount && remaining <= amount) ? text : null)
+            text: remainingStock === 0 ? 'Er zijn geen plaatsen meer beschikbaar': (remaining < showStockBelow || (amount && remaining <= amount) ? text : null)
         }
     }
 

@@ -225,6 +225,11 @@ export default class NumberInput extends Vue {
         min-width: 0;
         flex-shrink: 0;
     }
+
+    & + .style-description-small, & + .style-description, + div:not([class]) > .style-description-small:first-child {
+        padding-top: 5px;
+        padding-bottom: 15px;
+    }
 }
 .number-input {
     position: relative;
