@@ -325,7 +325,7 @@
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <NumberInput v-model="stock" :suffix="$t('stuks')" :suffix-singular="$t('stuk')" />
+                                <NumberInput v-model="stock" :suffix="$t('5cdeae87-7fc9-4b46-b384-f8dabb022a32')" :suffix-singular="$t('7447ec38-44b1-448e-8745-c5aebbdf846b')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -336,16 +336,16 @@
                         </template>
 
                         <h3 class="style-title-list">
-                            {{ $t('Verberg het beschikbare aantal stuks als voorraad groter is dan...') }}
+                            {{ $t('75b1afbb-3595-40da-a97f-fef5172fe58e') }}
                         </h3>
 
                         <p v-if="useShowStockBelow" class="style-description-small">
-                            {{ $t('Stamhoofd zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.', { showStockBelow: showStockBelow! }) }}
+                            {{ $t('c6dc2ed9-f90a-425d-970b-dde1ab00d564', { showStockBelow: showStockBelow! }) }}
                         </p>
 
                         <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
-                                <NumberInput v-model="showStockBelow" :suffix="$t('stuks')" :suffix-singular="$t('stuk')" />
+                                <NumberInput v-model="showStockBelow" :suffix="$t('5cdeae87-7fc9-4b46-b384-f8dabb022a32')" :suffix-singular="$t('7447ec38-44b1-448e-8745-c5aebbdf846b')" />
                             </STInputBox>
                         </div>
                     </STListItem>
