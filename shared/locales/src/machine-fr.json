@@ -247,6 +247,10 @@
     "original": "Korting geldt ook als gezinsleden zich inschrijven.",
     "translation": "La réduction s'applique également si les membres de la famille s'inscrivent."
   },
+  "02af3451-0f6a-4001-bc1d-8b35db5c09a9": {
+    "original": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen",
+    "translation": "Vous pouvez commander au maximum {5-items-or-persons-or-tickets}"
+  },
   "02b0533d-31b1-44ce-a22b-47d7f90adea8": {
     "original": "This category should be invisible. Check if the record categories are filtered using .filter(c => c.isEnabled(value))",
     "translation": "Cette catégorie doit être invisible. Vérifiez si les catégories d'enregistrement sont filtrées à l'aide de .filter(c => c.isEnabled(value))"
@@ -3552,8 +3556,8 @@
     "translation": "Mois"
   },
   "272cfcc9-e917-4e74-8952-076b8f2e8b23": {
-    "original": "Een lid moet een aansluiting hebben op de dag van de inschrijving.",
-    "translation": "Un membre doit avoir une affiliation le jour de l'inscription."
+    "original": "Leden moeten een andere aansluiting hebben (manueel aangemaakt of automatisch via een andere inschrijving bij een standaard inschrijvingsgroep) op het moment ze inschrijven, anders kunnen ze niet inschrijven.",
+    "translation": "Les membres doivent avoir une autre affiliation (créée manuellement ou générée automatiquement via une autre inscription dans un groupe d'inscription standard) au moment de s'inscrire, sinon l'inscription n'est pas possible."
   },
   "272f5dee-9f15-4afc-a07f-c6ff32b5d106": {
     "original": "België",
@@ -5291,6 +5295,10 @@
     "original": "Je hebt al voor elk werkjaar instellingen toegevoegd",
     "translation": "Vous avez déjà ajouté des paramètres pour chaque année associative"
   },
+  "3b26c975-10ca-4b38-a86a-0ea27c0cd584": {
+    "original": "Er zijn nog maar {x} plaatsen beschikbaar",
+    "translation": "Il ne reste que {x} places"
+  },
   "3b3be211-9a70-4345-abd6-760b39cef51d": {
     "original": "Overschakelen naar",
     "translation": "Passer à"
@@ -5882,6 +5890,10 @@
   "42bbd5c0-8789-4ca1-b667-1c9ecf4d0190": {
     "original": "De opgegeven client credentials zijn niet geldig.",
     "translation": "Les identifiants client fournis ne sont pas valides."
+  },
+  "42be9a70-2480-4510-93bf-94d6dfdc0628": {
+    "original": "Er zijn nog maar {x} plaatsen beschikbaar, waarvan er al één in jouw winkelmandje zit",
+    "translation": "Il ne reste que {x} places, dont une déjà dans votre panier"
   },
   "42dccb0d-88b1-4a18-9250-04aa969b1299": {
     "original": ". Verwijder of pas daar de link eerst aan als je die wilt hergebruiken.",
@@ -8139,6 +8151,10 @@
     "original": "Uploaden",
     "translation": "Télécharger"
   },
+  "5bef85b2-cefb-4c43-8986-7f745807ba38": {
+    "original": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen, waarvan er al {4} in jouw winkelmandje zitten",
+    "translation": "Vous pouvez commander au maximum {5-items-or-persons-or-tickets}, dont {4} déjà dans votre panier"
+  },
   "5c031764-a911-4861-b09e-621058dcf6d4": {
     "original": "Exporteer zaalplan",
     "translation": "Exporter le plan de salle"
@@ -8223,6 +8239,10 @@
     "original": "Demo webshops",
     "translation": "Démo boutiques en ligne"
   },
+  "5cdeae87-7fc9-4b46-b384-f8dabb022a32": {
+    "original": "stuks",
+    "translation": "pièces"
+  },
   "5cfae96d-516c-4b37-9ddf-afd21cab6574": {
     "original": "Nog niet verstuurd",
     "translation": "Pas encore envoyé"
@@ -8270,6 +8290,10 @@
   "5d614fe0-ec0d-47af-92bc-8c50f09717e2": {
     "original": "Wijzigingen opgeslagen",
     "translation": "Modifications enregistrées"
+  },
+  "5d697eff-bb5e-426a-9ccc-ce18d58891e8": {
+    "original": "Er is nog maar één plaats beschikbaar, en die zit al in jouw winkelmandje",
+    "translation": "Il ne reste qu'une seule place, et elle est déjà dans votre panier"
   },
   "5d75775a-a4b5-426a-aea9-b1e75ee5f055": {
     "original": "bv. https://www.vereniging.be",
@@ -9583,6 +9607,10 @@
     "original": "bestellers",
     "translation": "les clients"
   },
+  "6c2f78d7-0b5d-4264-8a55-9164ed4f2ddd": {
+    "original": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen, waarvan er al één in jouw winkelmandje zit",
+    "translation": "Vous pouvez commander au maximum {5-items-or-persons-or-tickets}, dont une déjà dans votre panier"
+  },
   "6c42ae73-6653-43e6-9d99-cfee321d23f4": {
     "original": "{address} kon niet als een adres worden herkend. Controleer of het formaat \"Straatnaam huisnummer, postcode stad\" werd gevolgd.",
     "translation": "{address} n’a pas pu être reconnu comme une adresse. Vérifie que le format \"Nom de rue numéro, code postal ville\" est respecté."
@@ -10331,6 +10359,10 @@
     "original": "Wissen",
     "translation": "Effacer"
   },
+  "7447ec38-44b1-448e-8745-c5aebbdf846b": {
+    "original": "stuk",
+    "translation": "pièce"
+  },
   "7453643b-fdb2-4aa1-9964-ddd71762c983": {
     "original": "Eenheidsprijs",
     "translation": "Prix unitaire"
@@ -10442,6 +10474,10 @@
   "759abb2c-48d9-4eb6-bf3a-bd8284b28ffa": {
     "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.",
     "translation": "Ce membre n'est pas inscrit dans un groupe d'âge standard pour l'année associative en cours. Supprimez la fonction ou inscrivez le membre pour l'année associative actuelle."
+  },
+  "75b1afbb-3595-40da-a97f-fef5172fe58e": {
+    "original": "Verberg het beschikbare aantal stuks als voorraad groter is dan...",
+    "translation": "Masquer le nombre disponible de pièces si le stock est supérieur à..."
   },
   "75b6fd85-2721-46fd-9ac0-8c96a782484c": {
     "original": "Jouw webshop blijft ook bereikbaar via",
@@ -15500,8 +15536,8 @@
     "translation": "Fonctions"
   },
   "b0d2d30a-f641-473a-91c7-4ab2297f25b1": {
-    "original": "Aansluiting is verplicht",
-    "translation": "L'affiliation est obligatoire"
+    "original": "Verplicht actieve aansluiting bij Stamhoofd vóór leden kunnen inschrijven",
+    "translation": "Affiliation active obligatoire auprès de Stamhoofd avant que les membres puissent s'inscrire"
   },
   "b0d861f2-1bad-4feb-aec7-116a9a954260": {
     "original": "Mollie koppelen",
@@ -15574,6 +15610,10 @@
   "b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35": {
     "original": "Je hebt nog geen instellingen toegevoegd.",
     "translation": "Vous n'avez pas encore ajouté de paramètres."
+  },
+  "b1af9723-7908-472c-94d4-00021a92a803": {
+    "original": "Er is nog maar één plaats beschikbaar",
+    "translation": "Il ne reste qu'une seule place disponible"
   },
   "b1bb4138-62b1-4b25-a495-1a892bcfa8d6": {
     "original": "onderaan deze pagina.",
@@ -16487,6 +16527,10 @@
     "original": "Hier kan je eventeel afhaalinstructies kwijt (optioneel)",
     "translation": "Vous pouvez y indiquer des instructions de retrait éventuelles (facultatif)"
   },
+  "bba032fe-170c-452e-96f2-4a53c30aa1c7": {
+    "original": "Je kan maximaal {1-item-or-person-or-ticket} bestellen",
+    "translation": "Vous pouvez commander au maximum {1-item-or-person-or-ticket}"
+  },
   "bba50e14-c3a1-4b18-9102-14f323453ca0": {
     "original": "Adres (van lid zelf)",
     "translation": "Adresse (du membre lui-même)"
@@ -16658,6 +16702,10 @@
   "bd5418b3-5d06-43da-a0e6-4ced20644825": {
     "original": "Je zal e-mails kunnen versturen vanaf @{mailDomain} nadat je het instellen hebt voltooid.",
     "translation": "Vous pourrez envoyer des e-mails à partir de @{mailDomain} une fois la configuration terminée."
+  },
+  "bd543e10-ee7c-4207-b6e6-e3a74ea69cee": {
+    "original": "Nog {x-items}",
+    "translation": "Encore {x-items}"
   },
   "bd54c45e-d3df-444e-b5d9-9722a6e08999": {
     "original": "Naam leden",
@@ -17510,6 +17558,10 @@
   "c6d477b8-8ca5-4d7e-b164-21630e5057b0": {
     "original": "Filter niet opslaan?",
     "translation": "Ne pas enregistrer le filtre ?"
+  },
+  "c6dc2ed9-f90a-425d-970b-dde1ab00d564": {
+    "original": "Stamhoofd zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
+    "translation": "Stamhoofd masquera le stock disponible s'il reste plus de {showStockBelow } pièces."
   },
   "c6e6c4b8-b3ad-4163-aa08-bbf22cc337aa": {
     "original": "De redirect URI behoud je best op de voorgestelde waarde.",
@@ -21319,6 +21371,10 @@
     "original": "De afzender van deze email bestaat niet meer. Probeer een andere afzender te kiezen.",
     "translation": "L’expéditeur de cet email n’existe plus. Merci d’en choisir un autre."
   },
+  "f0966b9d-6eb5-4e89-a45e-fa3ced8f17fe": {
+    "original": "Je kan maximaal {1-item-or-person-or-ticket} bestellen, en die zit al in jouw winkelmandje",
+    "translation": "Vous pouvez commander au maximum {1-item-or-person-or-ticket}, et il est déjà dans votre panier"
+  },
   "f0a3b61f-a736-47f7-b893-1c8c61555b50": {
     "original": "Er zijn meerdere TXT-records ingesteld voor",
     "translation": "Plusieurs enregistrements TXT ont été définis pour"
@@ -22238,6 +22294,10 @@
   "f9ea9a60-9957-49ba-8d25-76b3e1d539a2": {
     "original": "(enkel verplicht invullen als:",
     "translation": "(uniquement remplissage obligatoire si :"
+  },
+  "f9ecdf70-de9f-4349-a301-7139fee95029": {
+    "original": "Er zijn nog maar {x} plaatsen beschikbaar, waarvan er al {4} in jouw winkelmandje zitten",
+    "translation": "Il ne reste que {x} places, dont {4} déjà dans votre panier"
   },
   "f9ed62e7-b956-41d0-b256-66cbe5b44ee9": {
     "original": "Is gelijk aan...",

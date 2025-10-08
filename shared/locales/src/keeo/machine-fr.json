@@ -999,6 +999,10 @@
     "original": "Bij een andere eenheid inschrijven",
     "translation": "Inscription auprès d’une autre unité"
   },
+  "b0d2d30a-f641-473a-91c7-4ab2297f25b1": {
+    "original": "Verplicht actieve aansluiting bij FOS Open Scouting vóór leden kunnen inschrijven",
+    "translation": "Affiliation active obligatoire auprès de FOS Open Scouting avant que les membres puissent s'inscrire"
+  },
   "b1491db8-95be-4d67-ad4a-5edb124b23a5": {
     "original": "Beroepseenheid",
     "translation": "Unité professionnelle"
@@ -1126,6 +1130,10 @@
   "c5d21881-b70a-489e-bce9-5bb3d24b6f76": {
     "original": "Alle leden moeten opnieuw inschrijven voor het nieuwe scoutsjaar, of schrijf je zelf opnieuw in",
     "translation": "Tous les membres doivent s'inscrire à nouveau pour la nouvelle année scoute, ou inscrivez-vous vous-même à nouveau"
+  },
+  "c6dc2ed9-f90a-425d-970b-dde1ab00d564": {
+    "original": "Keeo zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
+    "translation": "Keeo masquera le stock disponible s'il reste plus de {showStockBelow } pièces."
   },
   "c6f24e63-4735-43c4-a93a-405755ba70c2": {
     "original": "Scoutsjaar maken",

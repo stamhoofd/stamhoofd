@@ -863,6 +863,10 @@
     "original": "Bij een andere groep inschrijven",
     "translation": "Register with another group"
   },
+  "b0d2d30a-f641-473a-91c7-4ab2297f25b1": {
+    "original": "Verplicht actieve aansluiting bij KSA Nationaal vóór leden kunnen inschrijven",
+    "translation": "An active affiliation with KSA Nationaal is required before members can register."
+  },
   "b1491db8-95be-4d67-ad4a-5edb124b23a5": {
     "original": "Beroepsgroep",
     "translation": "Professional group"
@@ -966,6 +970,10 @@
   "c4d225ea-8e41-4829-bf0c-bc04755492de": {
     "original": "De naam van de groep is te lang. Probeer de naam wat te verkorten en probeer opnieuw.",
     "translation": "The group name is too long. Try shortening the name and try again."
+  },
+  "c6dc2ed9-f90a-425d-970b-dde1ab00d564": {
+    "original": "Ravot zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.",
+    "translation": "Ravot will hide the available stock if there are more than {showStockBelow } pieces left."
   },
   "c78c4a14-8796-4ddc-a449-33a38ef3a6ac": {
     "original": "Je kan deze link ook personaliseren met jouw eigen domeinnaam via Instellingen > Personaliseren. bv. inschrijven.mijngroep.be",
