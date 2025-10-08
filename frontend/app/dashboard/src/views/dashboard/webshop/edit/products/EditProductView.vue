@@ -325,7 +325,27 @@
 
                         <div v-if="useStock" class="split-inputs option" @click.stop.prevent>
                             <STInputBox title="" error-fields="stock" :error-box="errors.errorBox">
-                                <NumberInput v-model="stock" />
+                                <NumberInput v-model="stock" :suffix="$t('stuks')" :suffix-singular="$t('stuk')" />
+                            </STInputBox>
+                        </div>
+                    </STListItem>
+
+                    <STListItem v-if="hasAnyStock" :selectable="true" element-name="label">
+                        <template #left>
+                            <Checkbox v-model="useShowStockBelow" />
+                        </template>
+
+                        <h3 class="style-title-list">
+                            {{ $t('Verberg het beschikbare aantal stuks als voorraad groter is dan...') }}
+                        </h3>
+
+                        <p v-if="useShowStockBelow" class="style-description-small">
+                            {{ $t('Stamhoofd zal de de beschikbare voorraad verbergen als er nog meer dan {showStockBelow } stuks beschikbaar zijn.', { showStockBelow: showStockBelow! }) }}
+                        </p>
+
+                        <div v-if="useShowStockBelow" class="split-inputs option" @click.stop.prevent>
+                            <STInputBox title="" error-fields="showStockBelow" :error-box="showStockBelow">
+                                <NumberInput v-model="showStockBelow" :suffix="$t('stuks')" :suffix-singular="$t('stuk')" />
                             </STInputBox>
                         </div>
                     </STListItem>
@@ -702,6 +722,24 @@ const stock = computed({
     set: (stock: number) => {
         addProductPatch({ stock });
     },
+});
+
+const useShowStockBelow = computed({
+    get: () => patchedProduct.value.showStockBelow !== null,
+    set: (useShowStockBelow: boolean) => {
+        addProductPatch({ showStockBelow: useShowStockBelow ? (patchedProduct.value.showStockBelow ?? props.product.showStockBelow ?? 50) : null });
+    },
+});
+
+const showStockBelow = computed({
+    get: () => patchedProduct.value.showStockBelow,
+    set: (showStockBelow: number | null) => {
+        addProductPatch({ showStockBelow });
+    },
+});
+
+const hasAnyStock = computed(() => {
+    return patchedProduct.value.hasAnyStock;
 });
 
 const useMaxPerOrder = computed({

@@ -5233,7 +5233,7 @@
   },
   "3ba66a09-31bc-4bef-9bba-ca44d5480c42": {
     "original": "Nog {count}",
-    "translation": "Still {count}"
+    "translation": "{count} left"
   },
   "3bb4e938-ca4e-4318-a86d-002ba6035fd0": {
     "original": "Heeft geen rol",
@@ -19281,7 +19281,7 @@
   },
   "dceceb1c-6d55-4a93-bf8f-85ba041786f4": {
     "original": "Nog {stock} beschikbaar",
-    "translation": "Still {stock} available"
+    "translation": "Only {stock} left"
   },
   "dced31f7-3554-425d-bae9-85416e3742d6": {
     "original": "Wijzigingen zijn opgeslagen",

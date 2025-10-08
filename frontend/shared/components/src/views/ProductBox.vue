@@ -96,15 +96,10 @@ const stockText = computed(() => {
             style: 'error',
         };
     }
+    const showStockBelow = props.product.showStockBelow ?? Infinity;
 
     if (editExisting.value) {
-        if (remainingWithoutCart === null || remainingWithoutCart > 25) {
-            return null;
-        }
-
-        const maxOrder = CartStockHelper.getOrderMaximum({ cart: new Cart(), product: props.product, webshop: props.webshop, admin: props.admin });
-        if (maxOrder && maxOrder.remaining !== null && maxOrder.remaining < remainingWithoutCart) {
-            // No point in showing stock: you can only order x items in one order
+        if (remainingWithoutCart === null || remainingWithoutCart > showStockBelow) {
             return null;
         }
 
@@ -129,8 +124,7 @@ const stockText = computed(() => {
         return null;
     }
 
-    if (remaining > 25 || (maxOrder && maxOrder.remaining !== null && remaining > maxOrder.remaining)) {
-        // No point in showing stock: you can only order x items in one order
+    if (remaining > showStockBelow) {
         return null;
     }
 

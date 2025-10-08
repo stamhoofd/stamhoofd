@@ -108,6 +108,7 @@ const description = computed({
 function addProduct() {
     const product = Product.create({
         type: props.webshop.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
+        showStockBelow: null
     });
     const p = PrivateWebshop.patch({});
     p.products.addPut(product);
