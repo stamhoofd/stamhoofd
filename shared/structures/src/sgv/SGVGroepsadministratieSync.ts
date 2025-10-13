@@ -284,7 +284,10 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
             }
         }
 
-        newContacts.push(createOrUpdateParent(parent, lid.contacten, addressMap))
+        const p = createOrUpdateParent(parent, lid.contacten, addressMap);
+        if (!newContacts.find(c => c.id === p.id)) {
+            newContacts.push(p)
+        }
     }
 
     // Create an address mapping
