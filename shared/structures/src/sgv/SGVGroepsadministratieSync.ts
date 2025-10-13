@@ -265,17 +265,21 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         if (!parent.address) {
             throw new Error("Er ontbreekt een adres bij één van de ouders")
         }
-        if (parent.address && !addressMap.has(parent.address.toString())) {
+        if (parent.address && !addressMap.has(parent.address.toString().toLowerCase())) {
             const a = createOrUpdateAddress(parent.address, lid.adressen, index + 1, lid.contacten ?? [])
-            newAddresses.push(a)
-            addressMap.set(parent.address.toString(), a.id)
+            addressMap.set(parent.address.toString().toLowerCase(), a.id)
 
-            if (hasPostAdres) {
-                // Disable postadres
-                a.postadres = false;
-            } else {
-                if (a.postadres) {
-                    hasPostAdres = true;
+            // Check duplicate address
+            if (!newAddresses.find(na => na.id === a.id)) {
+                newAddresses.push(a)
+
+                if (hasPostAdres) {
+                    // Disable postadres
+                    a.postadres = false;
+                } else {
+                    if (a.postadres) {
+                        hasPostAdres = true;
+                    }
                 }
             }
         }
@@ -284,15 +288,18 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
     }
 
     // Create an address mapping
-    if (details.address && !addressMap.has(details.address.toString())) {
+    if (details.address && !addressMap.has(details.address.toString().toLowerCase())) {
         const a = createOrUpdateAddress(details.address, lid.adressen, 0, lid.contacten ?? [])
-        newAddresses.push(a)
-        addressMap.set(details.address.toString(), a.id)
+        addressMap.set(details.address.toString().toLowerCase(), a.id)
 
-        if (!hasPostAdres) {
-            // Users own address is always postadres
-            a.postadres = true;
-            hasPostAdres = true;
+        if (!newAddresses.find(na => na.id === a.id)) {
+            newAddresses.push(a)
+
+            if (!hasPostAdres) {
+                // Users own address is always postadres
+                a.postadres = true;
+                hasPostAdres = true;
+            }
         }
     }
 
@@ -790,7 +797,7 @@ function parentToSGV(parent: Parent, adressen: Map<string, string>): any {
     return {
         voornaam: parent.firstName,
         achternaam: parent.lastName,
-        adres: adressen.get(parent.address!.toString()),
+        adres: adressen.get(parent.address!.toString().toLowerCase()),
         gsm: parent.phone ?? "",
         email: parent.email ?? "",
         rol: parent.type == ParentType.Father ? "vader" : (parent.type == ParentType.Mother ? "moeder" : "voogd"),
