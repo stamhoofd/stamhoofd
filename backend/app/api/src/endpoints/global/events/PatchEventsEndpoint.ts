@@ -59,6 +59,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 putGroup,
                 putGroup.organizationId,
                 period,
+                { allowedIds: [putGroup.id] },
             );
         }
         else {

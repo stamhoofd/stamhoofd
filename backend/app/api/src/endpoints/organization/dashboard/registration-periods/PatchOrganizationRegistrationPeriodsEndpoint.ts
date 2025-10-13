@@ -37,7 +37,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error();
         }
 
@@ -214,6 +214,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             for (const groupPut of patch.groups.getPuts()) {
                 shouldUpdateSetupSteps = true;
                 groupPut.put.settings.throwIfInvalidPrices();
+                if (groupPut.put.type === GroupType.EventRegistration) {
+                    throw new SimpleError({
+                        code: 'invalid_group_type',
+                        message: 'Cannot create groups for events via this endpoint',
+                        human: $t(`Oeps, er ging iets mis bij het aanmaken van de inschrijvingsgroep. Je kan via deze weg geen inschrijvingen voor activiteiten aanmaken.`),
+                    });
+                }
+
                 const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
                 deleteUnreachable = true;
                 forceGroupIds.push(group.id);
@@ -528,14 +536,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
         const allowedIds = options?.allowedIds ?? [];
 
-        if (struct.type === GroupType.Membership || struct.type === GroupType.WaitingList) {
+        if (struct.type !== GroupType.EventRegistration && !allowedIds.includes(struct.id) {
             if (!await Context.auth.hasFullAccess(organizationId)) {
-                if (allowedIds.includes(struct.id)) {
-                    // Ok
-                }
-                else {
-                    throw Context.auth.error($t(`153a7443-e2d9-4126-8e10-089b54964fb8`));
-                }
+                throw Context.auth.error($t(`153a7443-e2d9-4126-8e10-089b54964fb8`));
             }
         }
         else {
@@ -587,7 +590,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.settings.registeredMembers = 0;
         model.settings.reservedMembers = 0;
 
-        if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+        if (struct.type !== GroupType.EventRegistration && !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
             // Create a temporary permission role for this user
             const organizationPermissions = user.permissions?.organizationPermissions?.get(organizationId);
             if (!organizationPermissions) {
