@@ -761,6 +761,8 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return response.data;
     }
 
+    private unknownErrorMessage = 'De groepsadministratie van Scouts en Gidsen Vlaanderen gaf een foutmelding. Kijk ook even na of er geen rare of foutieve gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, ...). Pas de gegevens aan in Stamhoofd en probeer opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.'
+
     async tryRequest<T>(request: RequestInitializer<T>): Promise<RequestResult<T>> {
         try {
             return await this.authenticatedServer.request({
@@ -779,7 +781,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
                 throw new SimpleError({
                     code: "sgv_timeout",
-                    message: "De groepsadministratie reageerde niet binnen 30 seconden. Mogelijks is de groepsadministratie even gedeeltelijk onbereikbaar of heb je een onstabiele internetverbinding. Probeer het later opnieuw."
+                    message: "De groepsadministratie van Scouts en Gidsen Vlaanderen reageerde niet binnen 30 seconden. Mogelijks is Scouts en Gidsen Vlaanderen even onbereikbaar of heb je een onstabiele internetverbinding. Probeer het later opnieuw."
                 })
             }
 
@@ -798,7 +800,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
 
                 throw new SimpleError({
                     code: "sgv_internal_error",
-                    message: "De groepsadministratie gaf een interne foutmelding. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie (bv. dubbele adressen, dubbele ouders, onbestaande adressen). Probeer later opnieuw."
+                    message: this.unknownErrorMessage
                 })
             }
 
@@ -833,12 +835,12 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         }
 
         if (Request.isNetworkError(error)) {
-            return "De groepsadministratie reageerde niet. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie. Probeer later opnieuw."
+            return "De groepsadministratie reageerde niet. Kijk ook even na of er geen rare of foute gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, lege velden...). Pas de gegevens aan en probeer daarna opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be."
         }
         if (!isSimpleError(error) && !isSimpleErrors(error)) {
             if ('message' in error && typeof error.message === 'string') {
                 if (error.message.startsWith('<!DOCTYPE') || error.message.startsWith('<html') || error.message.length > 1000) {
-                    return "De groepsadministratie gaf een interne foutmelding. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie. Probeer later opnieuw."
+                    return this.unknownErrorMessage;
                 }
 
                 return error.message
@@ -870,7 +872,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
             if (patch.adressen && patch.adressen.length == 0) {
                 throw new SimpleError({
                     code: "",
-                    message: "Je moet minstens één adres toevoegen in Stamhoofd voor we dat lid kunnen toevoegen in de groepsadministratie"
+                    message: "Je moet minstens één adres toevoegen bij dit lid. Voeg een adres toe in Stamhoofd en probeer daarna opnieuw te synchroniseren."
                 })
             }
 
@@ -928,7 +930,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         if (!post.adressen || post.adressen.length == 0) {
             throw new SimpleError({
                 code: "",
-                message: "Je moet minstens één adres hebben voor een lid in de groepsadministratie"
+                message: "Je moet minstens één adres toevoegen bij dit lid. Voeg een adres toe in Stamhoofd en probeer daarna opnieuw te synchroniseren."
             })
         }
 
