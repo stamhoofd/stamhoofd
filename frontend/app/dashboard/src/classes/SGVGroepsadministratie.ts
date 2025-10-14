@@ -793,12 +793,12 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
                 }));
             }
 
-            if (e instanceof SyntaxError && /Unexpected token/.test(e.message)) {
+            if (e instanceof SyntaxError && (/Unexpected token/.test(e.message) || /Unrecognized token/.test(e.message))) {
                 console.log("This error came from JSON.parse due to invalid syntax.");
 
                 throw new SimpleError({
                     code: "sgv_internal_error",
-                    message: "De groepsadministratie gaf een interne foutmelding. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie. Probeer later opnieuw."
+                    message: "De groepsadministratie gaf een interne foutmelding. Mogelijks zit er een fout in de groepsadministratie als gevolg van een recente update. Kijk ook even na of er geen gekke gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie (bv. dubbele adressen, dubbele ouders, onbestaande adressen). Probeer later opnieuw."
                 })
             }
 

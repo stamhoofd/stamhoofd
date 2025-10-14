@@ -370,6 +370,7 @@ export function getPatch(member: MemberWithRegistrations, lid: any, groepNummer:
         // SGV bug: throws error if you send links when creating or deleting
         delete (lidFunctie as any).links;
         delete (lidFunctie as any).omschrijving;
+        delete (lidFunctie as any).code;
 
         // End this function
         newFunctions.push({
