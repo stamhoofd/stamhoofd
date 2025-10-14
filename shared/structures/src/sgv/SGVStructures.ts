@@ -69,7 +69,7 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
                 return new SimpleErrors(new SimpleError({
                     code: "SGVError",
                     message: JSON.stringify(data.data),
-                    human: "Onbekende foutmelding van de groepsadministratie (kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, en probeer opnieuw) "+JSON.stringify(data.data)
+                    human: "Onbekende foutmelding van de groepsadministratie (kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutive postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, ... en probeer opnieuw) "+JSON.stringify(data.data)
                 }))
             } catch (e) {
                 return new SimpleErrors(new SimpleError({
