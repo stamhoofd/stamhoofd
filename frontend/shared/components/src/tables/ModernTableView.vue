@@ -447,18 +447,35 @@ function getSortingContextMenu() {
     });
 }
 
+/**
+ * Small security check when doing optimizations. If you are selecting individual rows,
+ * then search (limit rows in memory), then we should not optimize based on the values in memory
+ */
+function areAllMarkedRowsInCurrentFilter() {
+    if (props.tableObjectFetcher.totalFilteredCount === props.tableObjectFetcher.objects.length) {
+        const map = new Set(props.tableObjectFetcher.objects.map(i => i.id));
+        for (const id of markedRows.value.keys()) {
+            if (!map.has(id)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelected?: boolean): TableActionSelection<Value> {
     if (customMarkedRows === undefined) {
         if (showSelection.value && hasSelection.value) {
             customMarkedRows = [...markedRows.value.values()] as Value[];
             customMarkedRowsSelected = markedRowsAreSelected.value;
 
-            // Try to invert if we already have everything in memory (optimization)
-            if (!customMarkedRowsSelected) {
-                if (props.tableObjectFetcher.totalFilteredCount === props.tableObjectFetcher.objects.length) {
-                    customMarkedRows = props.tableObjectFetcher.objects.filter(i => !markedRows.value.has(i.id));
-                    customMarkedRowsSelected = true;
-                }
+            if (props.tableObjectFetcher.totalFilteredCount === props.tableObjectFetcher.objects.length) {
+                const map = new Set(props.tableObjectFetcher.objects.map(i => i.id));
+                // Little optimization where we remove all marked rows that are not in the current rows - as this won't make sense
+                customMarkedRows = customMarkedRows.filter(r => map.has(r.id));
+
+                console.log('Optimized marked rows to only those in current filter', customMarkedRows);
             }
         }
     }
@@ -492,6 +509,7 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
                 filter,
                 sort: props.tableObjectFetcher.objectFetcher.extendSort ? props.tableObjectFetcher.objectFetcher.extendSort([...props.tableObjectFetcher.sort]) : props.tableObjectFetcher.sort,
                 limit: props.tableObjectFetcher.maxLimit,
+                search: props.tableObjectFetcher.searchQuery,
             }),
             fetcher: props.tableObjectFetcher.objectFetcher,
             markedRows: new Map(customMarkedRows.map(i => [i.id, i])),
@@ -1672,6 +1690,29 @@ function setInvisibleSelectionValue(value: Value, selected: boolean) {
         }
         else {
             markedRows.delete(value.id);
+        }
+    }
+
+    // Optimize marked rows
+    optimizeMarkedRows();
+}
+
+function optimizeMarkedRows() {
+    if (markedRows.value.size < 10) {
+        return;
+    }
+
+    // Invert if that are less marked rows
+    if (areAllMarkedRowsInCurrentFilter()) {
+        const qqq = props.tableObjectFetcher.objects.filter(i => !markedRows.value.has(i.id));
+        if (qqq.length < markedRows.size) {
+            const m = new Map<string, Value>();
+            for (const v of qqq) {
+                m.set(v.id, v);
+            }
+            markedRows.value = m;
+            console.log('Optimized marked rows by inverting the selection');
+            markedRowsAreSelected.value = !markedRowsAreSelected.value;
         }
     }
 }

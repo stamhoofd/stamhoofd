@@ -29,6 +29,10 @@ export function useShallowMap<K, V>(initialEntries = []) {
         get value() {
             return mapRef.value;
         },
+        set value(v: Map<K, V>) {
+            mapRef.value = v;
+            triggerRef(mapRef);
+        },
         get size() {
             return mapRef.value.size;
         },
