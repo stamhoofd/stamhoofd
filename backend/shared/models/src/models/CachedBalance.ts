@@ -4,6 +4,7 @@ import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceT
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem';
 import { MemberUser } from './MemberUser';
+import { Formatter } from '@stamhoofd/utility';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -437,7 +438,7 @@ export class CachedBalance extends QueryableModel {
         const memberCachedBalances = await this.getForObjects(memberUsers.map(mu => mu.membersId), organizationId);
 
         for (const memberCachedBalance of memberCachedBalances) {
-            const userIds = memberUsers.filter(mu => mu.membersId === memberCachedBalance.objectId).map(mu => mu.usersId);
+            const userIds = Formatter.uniqueArray(memberUsers.filter(mu => mu.membersId === memberCachedBalance.objectId).map(mu => mu.usersId));
 
             for (const userId of userIds) {
                 // if already in results: append
@@ -487,7 +488,7 @@ export class CachedBalance extends QueryableModel {
         }
 
         const memberUsers = await MemberUser.select().where('usersId', userIds).fetch();
-        const memberIds = memberUsers.map(mu => mu.membersId);
+        const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
         const memberCachedBalances = await this.balanceForMembers(organizationId, memberIds);
         return base.concat(memberCachedBalances);
     }
