@@ -222,10 +222,6 @@ function getTextInputDate() {
 }
 
 watch(model, (value: Date | null) => {
-    if (value === null) {
-        return;
-    }
-
     onModelChangeDay(value);
     onModelChangeMonth(value);
     onModelChangeYear(value);
