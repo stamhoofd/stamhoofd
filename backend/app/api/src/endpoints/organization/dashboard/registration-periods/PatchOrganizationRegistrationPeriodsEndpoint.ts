@@ -536,7 +536,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
         const allowedIds = options?.allowedIds ?? [];
 
-        if (struct.type !== GroupType.EventRegistration && !allowedIds.includes(struct.id) {
+        if (struct.type !== GroupType.EventRegistration && !allowedIds.includes(struct.id)) {
             if (!await Context.auth.hasFullAccess(organizationId)) {
                 throw Context.auth.error($t(`153a7443-e2d9-4126-8e10-089b54964fb8`));
             }
