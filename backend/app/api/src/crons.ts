@@ -124,7 +124,7 @@ async function checkWebshopDNS() {
 // Keep checking pending paymetns for 3 days
 async function checkPayments() {
     if (STAMHOOFD.environment === 'development') {
-        return;
+        // return;
     }
 
     const timeout = 60 * 1000 * 31;

@@ -1,7 +1,7 @@
 import { CachedBalance, Member, MemberResponsibilityRecord, MemberWithUsers, Organization, Platform, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
-import { AuditLogSource, MemberDetails, PermissionRole, Permissions, UserPermissions } from '@stamhoofd/structures';
+import { AuditLogSource, MemberDetails, PermissionRole, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';
@@ -416,7 +416,7 @@ export class MemberUserSyncerStatic {
      */
     async updateUserBalance(userId: string, memberId: string) {
         // Update balance of this user, as it could have changed
-        const memberBalances = await CachedBalance.getForObjects([memberId]);
+        const memberBalances = await CachedBalance.getForObjects([memberId], null, ReceivableBalanceType.member);
         if (memberBalances.length > 0) {
             const organizationIds = Formatter.uniqueArray(memberBalances.map(b => b.organizationId));
             for (const organizationId of organizationIds) {

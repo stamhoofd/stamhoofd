@@ -1,5 +1,5 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import { BalanceItemRelationType, BalanceItemWithPayments, DetailedReceivableBalance, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getReceivableBalanceTypeNameNotTranslated, PaginatedResponse, ReceivableBalance } from '@stamhoofd/structures';
+import { BalanceItemRelationType, BalanceItemWithPayments, DetailedReceivableBalance, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getReceivableBalanceTypeName, PaginatedResponse, ReceivableBalance } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
@@ -287,7 +287,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
             name: $t(`a0dfe596-0670-48bc-a5f3-2c9308c70a17`),
             width: 10,
             getValue: (object: ReceivableBalance) => ({
-                value: getReceivableBalanceTypeNameNotTranslated(object.objectType),
+                value: getReceivableBalanceTypeName(object.objectType),
             }),
         },
     ];

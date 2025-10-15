@@ -9,30 +9,19 @@ export enum ReceivableBalanceType {
     member = 'member',
     user = 'user',
     registration = 'registration',
+    userWithoutMembers = 'userWithoutMembers',
 }
 
-export function getReceivableBalanceTypeName(type: ReceivableBalanceType, $t: TranslateMethod): string {
+export function getReceivableBalanceTypeName(type: ReceivableBalanceType): string {
     switch (type) {
         case ReceivableBalanceType.organization: return $t('b66501e0-f6de-4259-95ef-13590b24182b');
         case ReceivableBalanceType.member: return $t('146d0874-2f4d-4374-8808-61a4bd953354');
         case ReceivableBalanceType.user: return $t('fbb0dee5-c500-4bb4-81d6-945666ae4784');
         case ReceivableBalanceType.registration: return $t('b4a0f9cb-ecd0-4f9b-bd28-9e4a6c8b1518');
+        case ReceivableBalanceType.userWithoutMembers: return $t('fbb0dee5-c500-4bb4-81d6-945666ae4784');
     }
 }
 
-/**
- * @deprecated
- * @param type
- * @returns
- */
-export function getReceivableBalanceTypeNameNotTranslated(type: ReceivableBalanceType): string {
-    switch (type) {
-        case ReceivableBalanceType.organization: return $t(`e5f00b6a-9424-46b7-ada2-9474160189c4`);
-        case ReceivableBalanceType.member: return $t(`5173cc6a-ed5a-4c13-9b17-e2499ebffbd5`);
-        case ReceivableBalanceType.user: return $t(`269872df-ab70-4eae-b671-ab9246162d4e`);
-        case ReceivableBalanceType.registration: return $t(`b8af36e8-ea5a-4e8a-a7ae-c3e4b5497567`);
-    }
-}
 export class ReceivableBalanceObjectContact extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     firstName: string | null = null;

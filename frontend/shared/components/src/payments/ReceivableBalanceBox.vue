@@ -95,17 +95,6 @@
                 </STListItem>
             </STList>
 
-            <template v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
-                <hr><h2>{{ $t('683a45ce-773c-4867-b656-1344beb5bd55') }}</h2>
-                <p>{{ $t("0d7ce596-ad47-490d-b619-0cb1f1ae84ec") }}</p>
-                <p v-if="detailedItem.amountPending !== 0" class="style-description-block">
-                    {{ $t('60b43285-c778-483c-bdeb-8c90b732f3e7') }}
-                </p>
-                <p v-if="detailedItem.amountOpen !== 0" class="style-description-block">
-                    {{ $t("2c4beec1-1431-4082-8f8c-157109f60d46") }}
-                </p>
-            </template>
-
             <template v-if="pendingPayments.length > 0">
                 <hr><h2>{{ $t('ac279f6b-0c7c-4ef1-9178-1fd030fe7cc8') }}</h2>
                 <p>{{ $t('f06c6769-1e42-4a15-b44d-f74a32980d26') }}</p>
@@ -247,10 +236,10 @@ async function createPayment() {
         paidAt: new Date(),
         customer: detailedItem.value.object.contacts.length > 0
             ? PaymentCustomer.create({
-                firstName: detailedItem.value.object.contacts[0].firstName,
-                lastName: detailedItem.value.object.contacts[0].lastName,
-                email: detailedItem.value.object.contacts[0].emails[0] ?? null,
-            })
+                    firstName: detailedItem.value.object.contacts[0].firstName,
+                    lastName: detailedItem.value.object.contacts[0].lastName,
+                    email: detailedItem.value.object.contacts[0].emails[0] ?? null,
+                })
             : null,
     });
 

@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { CachedBalance, Organization } from '@stamhoofd/models';
-import { PayableBalance, PayableBalanceCollection } from '@stamhoofd/structures';
+import { PayableBalance, PayableBalanceCollection, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -31,12 +31,12 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setUserOrganizationScope();
         const { user } = await Context.authenticate();
 
-        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([user.id], organization));
+        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([user.id], organization, ReceivableBalanceType.user));
     }
 
-    static async getBillingStatusForObjects(objectIds: string[], organization?: Organization | null) {
+    static async getBillingStatusForObjects(objectIds: string[], organization: Organization | null, objectType: ReceivableBalanceType) {
         // Load cached balances
-        const receivableBalances = await CachedBalance.getForObjects(objectIds, organization?.id);
+        const receivableBalances = await CachedBalance.getForObjects(objectIds, organization?.id, objectType);
 
         const organizationIds = Formatter.uniqueArray(receivableBalances.map(b => b.organizationId));
 

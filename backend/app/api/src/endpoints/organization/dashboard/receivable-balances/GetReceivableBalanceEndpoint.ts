@@ -1,11 +1,12 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { DetailedReceivableBalance, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 
-import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, MemberUser, Payment } from '@stamhoofd/models';
 import { Context } from '../../../../helpers/Context';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
 import { SQL } from '@stamhoofd/sql';
 import { BalanceItemService } from '../../../../services/BalanceItemService';
+import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string; type: ReceivableBalanceType };
 type Query = undefined;
@@ -38,14 +39,13 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             throw Context.auth.error();
         }
 
-        // Flush caches (this makes sure that we do a reload in the frontend after a registration or change, we get the newest balances)
-        await BalanceItemService.flushCaches(organization.id);
-
-        const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type, true);
         let paymentModels: Payment[] = [];
 
         switch (request.params.type) {
             case ReceivableBalanceType.organization: {
+                // Force cache updates, because sometimes the cache could be out of date
+                BalanceItemService.scheduleOrganizationUpdate(organization.id, request.params.id);
+
                 paymentModels = await Payment.select()
                     .where('organizationId', organization.id)
                     .andWhere(
@@ -66,6 +66,9 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             }
 
             case ReceivableBalanceType.member: {
+                // Force cache updates, because sometimes the cache could be out of date
+                BalanceItemService.scheduleMemberUpdate(organization.id, request.params.id);
+
                 paymentModels = await Payment.select()
                     .where('organizationId', organization.id)
                     .join(
@@ -86,7 +89,51 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             }
 
             case ReceivableBalanceType.user: {
-                paymentModels = await Payment.select()
+                const memberUsers = await MemberUser.select().where('usersId', request.params.id).fetch();
+                const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
+
+                // Force cache updates, because sometimes the cache could be out of date
+                BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
+
+                for (const memberId of memberIds) {
+                    BalanceItemService.scheduleMemberUpdate(organization.id, memberId);
+                }
+
+                const q = Payment.select()
+                    .where('organizationId', organization.id)
+                    .join(
+                        SQL.join(BalanceItemPayment.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
+                    )
+                    .join(
+                        SQL.join(BalanceItem.table)
+                            .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+                    );
+
+                if (memberIds.length === 0) {
+                    q.where(SQL.column(BalanceItem.table, 'userId'), request.params.id);
+                }
+                else {
+                    q.where(
+                        SQL.where(SQL.column(BalanceItem.table, 'userId'), request.params.id)
+                            .or(SQL.column(BalanceItem.table, 'memberId'), memberIds),
+                    );
+                }
+
+                paymentModels = await q
+                    .andWhere(
+                        SQL.whereNot('status', PaymentStatus.Failed),
+                    )
+                    .groupBy(SQL.column(Payment.table, 'id'))
+                    .fetch();
+                break;
+            }
+
+            case ReceivableBalanceType.userWithoutMembers: {
+                // Force cache updates, because sometimes the cache could be out of date
+                BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
+
+                const q = Payment.select()
                     .where('organizationId', organization.id)
                     .join(
                         SQL.join(BalanceItemPayment.table)
@@ -96,7 +143,9 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
                         SQL.join(BalanceItem.table)
                             .where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
                     )
-                    .where(SQL.column(BalanceItem.table, 'userId'), request.params.id)
+                    .where(SQL.column(BalanceItem.table, 'userId'), request.params.id);
+
+                paymentModels = await q
                     .andWhere(
                         SQL.whereNot('status', PaymentStatus.Failed),
                     )
@@ -126,10 +175,13 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
             }
         }
 
+        // Flush caches (this makes sure that we do a reload in the frontend after a registration or change, we get the newest balances)
+        await BalanceItemService.flushCaches(organization.id);
+        const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
         const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);
 
-        const balances = await CachedBalance.getForObjects([request.params.id], organization.id);
+        const balances = await CachedBalance.getForObjects([request.params.id], organization.id, request.params.type);
 
         const created = new CachedBalance();
         created.amountOpen = 0;

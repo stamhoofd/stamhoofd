@@ -97,7 +97,8 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectId'),
             ).where(
                 SQL.column('cached_outstanding_balances', 'objectType'),
-                'user'),
+                ['user', 'userWithoutMembers'],
+            ),
         {
             ...baseSQLFilterCompilers,
             name: createColumnFilter({
@@ -106,6 +107,11 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                     new SQLScalar(' '),
                     SQL.column('lastName'),
                 ),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+            email: createColumnFilter({
+                expression: SQL.column('email'),
                 type: SQLValueType.String,
                 nullable: false,
             }),

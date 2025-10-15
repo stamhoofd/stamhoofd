@@ -11,33 +11,35 @@
             <h1 class="style-navigation-title">
                 {{ title }}
             </h1>
+            <p v-if="item.objectType === ReceivableBalanceType.member || item.objectType === ReceivableBalanceType.user">
+                {{ $t("0d7ce596-ad47-490d-b619-0cb1f1ae84ec") }}
+            </p>
+
+            <p v-if="item.objectType === ReceivableBalanceType.userWithoutMembers" class="info-box">
+                {{ $t("Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid.") }}
+            </p>
 
             <STList class="info">
-                <STListItem>
+                <STListItem :selectable="canClick" @click="onClick">
                     <h3 class="style-definition-label">
-                        {{ $t('4a07f8e5-c16e-4706-9387-9d3ded9e2b3c') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text">
-                        {{ capitalizeFirstLetter(getReceivableBalanceTypeName(item.objectType, $t)) }}
-                    </p>
-                </STListItem>
-
-                <STListItem>
-                    <h3 class="style-definition-label">
-                        {{ $t('f7300ff2-638b-47c2-97b5-e8774aa0b6f5') }}
+                        {{ capitalizeFirstLetter(getReceivableBalanceTypeName(item.objectType)) }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ item.object.name }}
                     </p>
-                </STListItem>
 
-                <STListItem v-if="item.object.uri">
-                    <h3 class="style-definition-label">
-                        {{ $t('cd798189-d5c8-4b79-98f7-a68786ab288c') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
+                    <p v-if="(item.objectType === ReceivableBalanceType.userWithoutMembers || item.objectType === ReceivableBalanceType.user) && item.object.contacts.length === 1 && item.object.contacts[0].emails.length === 1" v-copyable class="style-description-small style-copyable">
+                        {{ item.object.contacts[0].emails[0] }}
+                    </p>
+
+                    <p v-if="item.object.uri" v-copyable class="style-description-small style-copyable">
                         {{ item.object.uri }}
                     </p>
+
+                    <template v-if="canClick" #right>
+                        <span class="icon user gray" />
+                        <span class="icon arrow-right-small gray" />
+                    </template>
                 </STListItem>
 
                 <STListItem v-if="item.amountOpen >= 0">
@@ -69,7 +71,7 @@
                     </p>
                 </STListItem>
 
-                <STListItem v-if="item.amountOpen > 0">
+                <STListItem v-if="item.amountOpen > 0 && (item.objectType === ReceivableBalanceType.organization || item.objectType === ReceivableBalanceType.user)">
                     <h3 class="style-definition-label">
                         {{ $t('a8bf2d7d-3208-4c18-bac3-2cc97b629ad1') }}
                     </h3>
@@ -88,15 +90,15 @@
                 </STListItem>
             </STList>
 
-            <hr><ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="false" />
+            <hr><ReceivableBalanceBox :item="item" :member="member" :hide-segmented-control="item.objectType !== ReceivableBalanceType.organization" />
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { useBackForward } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
-import { getReceivableBalanceTypeName, PlatformMember, ReceivableBalance } from '@stamhoofd/structures';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { MemberSegmentedView, PromiseView, Toast, useBackForward, useMembersObjectFetcher } from '@stamhoofd/components';
+import { getReceivableBalanceTypeName, LimitedFilteredRequest, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import ReceivableBalanceBox from './ReceivableBalanceBox.vue';
 
@@ -112,8 +114,47 @@ const props = withDefaults(
     });
 
 const { goBack, goForward, hasNext, hasPrevious } = useBackForward('item', props);
+const present = usePresent();
+const memberFetcher = useMembersObjectFetcher();
 const title = computed(() => {
     return $t('28c2bc66-231f-44f3-9249-c1981b871a1f');
 });
+
+const canClick = computed(() => {
+    return props.item.objectType === ReceivableBalanceType.member;
+});
+
+async function onClick() {
+    if (props.item.objectType === ReceivableBalanceType.member) {
+        await showMember(props.item.object.id);
+    }
+}
+
+async function showMember(memberId: string) {
+    const component = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                const members = await memberFetcher.fetch(new LimitedFilteredRequest({
+                    filter: {
+                        id: memberId,
+                    },
+                    limit: 1,
+                }));
+                if (members.results.length === 0) {
+                    Toast.error($t(`22541ecc-ba4f-4a91-b8d3-8213bfaaea0b`)).show();
+                    throw new Error('Member not found');
+                }
+                return new ComponentWithProperties(MemberSegmentedView, {
+                    member: members.results[0],
+                });
+            },
+        }),
+    });
+
+    await present({
+        components: [component],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 </script>

@@ -21,6 +21,8 @@ export default new Migration(async () => {
         }
     });
 
+    await BalanceItemService.flushAll();
+
     console.log('Updated outstanding balance for ' + c + ' items');
 
     // Do something here

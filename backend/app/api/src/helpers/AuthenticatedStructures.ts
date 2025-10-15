@@ -399,10 +399,10 @@ export class AuthenticatedStructures {
         if (Context.organization) {
             await BalanceItemService.flushCaches(Context.organization.id);
         }
-        const balances = await CachedBalance.getForObjects(registrationIds, null);
+        const balances = await CachedBalance.getForObjects(registrationIds, null, ReceivableBalanceType.registration);
         const memberIds = members.map(m => m.id);
         const allMemberBalances = Context.organization
-            ? (await CachedBalance.getForObjects(memberIds, Context.organization.id))
+            ? (await CachedBalance.getForObjects(memberIds, Context.organization.id, ReceivableBalanceType.member))
             : [];
 
         if (includeUser) {
@@ -619,7 +619,7 @@ export class AuthenticatedStructures {
                 const balancesPermission = member ? (await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id)) : false;
                 r = registration.getStructure();
                 r.balances = balancesPermission
-                    ? ((await CachedBalance.getForObjects([registration.id], null)).map((b) => {
+                    ? ((await CachedBalance.getForObjects([registration.id], null, ReceivableBalanceType.registration)).map((b) => {
                             return GenericBalance.create(b);
                         }))
                     : [];
@@ -863,7 +863,7 @@ export class AuthenticatedStructures {
         const members = memberIds.length > 0 ? await Member.getByIDs(...memberIds) : [];
 
         const userIds = Formatter.uniqueArray([
-            ...balances.filter(b => b.objectType === ReceivableBalanceType.user).map(b => b.objectId),
+            ...balances.filter(b => b.objectType === ReceivableBalanceType.user || b.objectType === ReceivableBalanceType.userWithoutMembers).map(b => b.objectId),
         ]);
         const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
 
@@ -988,7 +988,7 @@ export class AuthenticatedStructures {
                     });
                 }
             }
-            else if (balance.objectType === ReceivableBalanceType.user) {
+            else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
                 const user = users.find(m => m.id === balance.objectId) ?? null;
                 if (user) {
                     const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
@@ -1024,7 +1024,7 @@ export class AuthenticatedStructures {
         const results: DetailedReceivableBalance[] = [];
 
         for (const { balance, object } of items) {
-            const balanceItems = await CachedBalance.balanceForObjects(organizationId, [balance.objectId], balance.objectType, true);
+            const balanceItems = await CachedBalance.balanceForObjects(organizationId, [balance.objectId], balance.objectType);
             const balanceItemsWithPayments = await BalanceItem.getStructureWithPayments(balanceItems);
 
             const result = DetailedReceivableBalance.create({

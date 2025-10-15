@@ -15,7 +15,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@simo
 import { AsyncTableAction, Column, ComponentExposed, EmailView, getCachedOutstandingBalanceUIFilterBuilders, GlobalEventBus, ModernTableView, ReceivableBalanceView, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, useFeatureFlag, useOrganization, usePlatform, useReceivableBalancesObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, getReceivableBalanceTypeName, mergeFilters, ReceivableBalance, ReceivableBalanceType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
@@ -50,7 +50,7 @@ function getRequiredFilter(): StamhoofdFilter | null {
     if (!props.objectType) {
         return {
             objectType: {
-                $in: $feature('organization-receivable-balances') ? [ReceivableBalanceType.user, ReceivableBalanceType.organization] : [ReceivableBalanceType.user],
+                $in: $feature('organization-receivable-balances') ? [ReceivableBalanceType.member, ReceivableBalanceType.userWithoutMembers, ReceivableBalanceType.organization] : [ReceivableBalanceType.member, ReceivableBalanceType.userWithoutMembers],
             },
             $or: {
                 amountOpen: { $neq: 0 },
@@ -92,9 +92,24 @@ const allColumns: Column<ObjectType, any>[] = [
             ]
         : []),
 
+    ...($feature('organization-receivable-balances')
+        ? [
+                new Column<ObjectType, string | null>({
+                    id: 'type',
+                    name: $t('Type'),
+                    getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType)),
+                    format: value => value || 'Geen',
+                    getStyle: value => !value ? 'gray' : '',
+                    minimumWidth: 70,
+                    recommendedWidth: 120,
+                    allowSorting: false,
+                }),
+            ]
+        : []),
+
     new Column<ObjectType, string>({
         id: 'name',
-        name: 'Schuldenaar',
+        name: $feature('organization-receivable-balances') ? 'Schuldenaar' : 'Lid',
         getValue: object => object.object.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -163,16 +178,18 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: $t('b05b58d8-09b6-4e4a-9786-a4777f8e1ac4'),
+        name: $t('Leden'),
         options: [
             {
                 id: 'accounts',
-                name: 'Alle accounts',
+                name: $t('Alle leden'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.ReceivableBalances,
                         filter: mergeFilters([filter, {
-                            objectType: ReceivableBalanceType.user,
+                            objectType: {
+                                $neq: ReceivableBalanceType.organization,
+                            },
                         }]),
                         search,
                     }),
@@ -183,7 +200,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const organizationOption: RecipientMultipleChoiceOption = {
         type: 'MultipleChoice',
-        name: $t('3c584bf6-7e0a-4348-a5e9-2bc0bcb00bde'),
+        name: $t('Eenheden'),
         options: [],
         defaultSelection: organization.value?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
         build: (selectedIds: string[]) => {

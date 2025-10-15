@@ -5,7 +5,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -315,7 +315,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 );
 
                 // Never reuse a registration that has a balance - that means they had a cancellation fee and not all balance items were canceled (we don't want to merge in that state)
-                const balances = await CachedBalance.getForObjects(possibleReuseRegistrations.map(r => r.id), null);
+                const balances = await CachedBalance.getForObjects(possibleReuseRegistrations.map(r => r.id), null, ReceivableBalanceType.registration);
 
                 reuseRegistration = possibleReuseRegistrations.find((r) => {
                     const balance = balances.filter(b => b.objectId === r.id).reduce((a, b) => a + b.amountOpen + b.amountPaid + b.amountPending, 0);

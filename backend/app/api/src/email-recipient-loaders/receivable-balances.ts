@@ -14,7 +14,7 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
 
     const recipients: EmailRecipient[] = [];
     for (const balance of result.results) {
-        const balanceItemModels = await CachedBalance.balanceForObjects(balance.organizationId, [balance.object.id], balance.objectType, true);
+        const balanceItemModels = balance.objectType === ReceivableBalanceType.organization ? (await CachedBalance.balanceForObjects(balance.organizationId, [balance.object.id], balance.objectType)) : [];
         const balanceItems = balanceItemModels.map(i => i.getStructure());
 
         const filteredContacts = balance.object.contacts.filter(c => compiledFilter(c));
@@ -22,7 +22,7 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
             for (const email of contact.emails) {
                 const recipient = EmailRecipient.create({
                     objectId: balance.id, // Note: not set member, user or organization id here - should be the queryable balance id
-                    userId: balance.objectType === ReceivableBalanceType.user ? balance.object.id : null,
+                    userId: balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers ? balance.object.id : null,
                     memberId: balance.objectType === ReceivableBalanceType.member ? balance.object.id : null,
                     firstName: contact.firstName,
                     lastName: contact.lastName,
@@ -32,15 +32,22 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
                             token: 'objectName',
                             value: balance.object.name,
                         }),
-                        Replacement.create({
-                            token: 'outstandingBalance',
-                            value: Formatter.price(balance.amountOpen),
-                        }),
-                        Replacement.create({
-                            token: 'balanceTable',
-                            value: '',
-                            html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
-                        }),
+                        ...(
+                            balance.objectType === ReceivableBalanceType.organization
+                                ? [
+                                        Replacement.create({
+                                            token: 'outstandingBalance',
+                                            value: Formatter.price(balance.amountOpen),
+                                        }),
+                                        Replacement.create({
+                                            token: 'balanceTable',
+                                            value: '',
+                                            html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
+                                        }),
+                                    ]
+                                : []
+                        ),
+
                         ...(contact.meta && contact.meta.url && typeof contact.meta.url === 'string'
                             ? [Replacement.create({
                                     token: 'paymentUrl',

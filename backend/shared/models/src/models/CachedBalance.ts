@@ -83,7 +83,7 @@ export class CachedBalance extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async getForObjects(objectIds: string[], limitOrganizationId?: string | null): Promise<CachedBalance[]> {
+    static async getForObjects(objectIds: string[], limitOrganizationId?: string | null, objectType?: ReceivableBalanceType): Promise<CachedBalance[]> {
         if (objectIds.length === 0) {
             return [];
         }
@@ -93,6 +93,10 @@ export class CachedBalance extends QueryableModel {
 
         if (limitOrganizationId) {
             query.where('organizationId', limitOrganizationId);
+        }
+
+        if (objectType !== undefined) {
+            query.where('objectType', objectType);
         }
 
         return await query.fetch();
@@ -111,6 +115,7 @@ export class CachedBalance extends QueryableModel {
                 await this.updateForMembers(organizationId, objectIds);
                 break;
             case ReceivableBalanceType.user:
+            case ReceivableBalanceType.userWithoutMembers:
                 await this.updateForUsers(organizationId, objectIds);
                 break;
             case ReceivableBalanceType.registration:
@@ -119,7 +124,7 @@ export class CachedBalance extends QueryableModel {
         }
     }
 
-    static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType, includeUserMembers = false) {
+    static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
         if (objectIds.length === 0) {
             return [];
         }
@@ -130,7 +135,9 @@ export class CachedBalance extends QueryableModel {
             case ReceivableBalanceType.member:
                 return await this.balanceForMembers(organizationId, objectIds);
             case ReceivableBalanceType.user:
-                return await this.balanceForUsers(organizationId, objectIds, includeUserMembers);
+                return await this.balanceForUsers(organizationId, objectIds, true);
+            case ReceivableBalanceType.userWithoutMembers:
+                return await this.balanceForUsers(organizationId, objectIds, false);
             case ReceivableBalanceType.registration:
                 return await this.balanceForRegistrations(organizationId, objectIds);
         }
@@ -430,12 +437,13 @@ export class CachedBalance extends QueryableModel {
             SQL.where('memberId', null),
         );
 
-        // We also need to include the balance of the related members for each user
+        // Fetch cached balance of these members and merge the results
+        await this.setForResults(organizationId, results, ReceivableBalanceType.userWithoutMembers);
 
         // Fetch members of these users
         const memberUsers = await MemberUser.select().where('usersId', userIds).fetch();
-
-        const memberCachedBalances = await this.getForObjects(memberUsers.map(mu => mu.membersId), organizationId);
+        const memberIds = memberUsers.map(mu => mu.membersId);
+        const memberCachedBalances = await this.getForObjects(memberIds, organizationId);
 
         for (const memberCachedBalance of memberCachedBalances) {
             const userIds = Formatter.uniqueArray(memberUsers.filter(mu => mu.membersId === memberCachedBalance.objectId).map(mu => mu.usersId));

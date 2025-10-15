@@ -163,6 +163,18 @@ export const BalanceItemService = {
         }
     },
 
+    scheduleUserUpdate(organizationId: string, userId: string) {
+        userUpdateQueue.addItem(organizationId, userId);
+    },
+
+    scheduleMemberUpdate(organizationId: string, memberId: string) {
+        memberUpdateQueue.addItem(organizationId, memberId);
+    },
+
+    scheduleOrganizationUpdate(organizationId: string, payingOrganizationId: string) {
+        organizationUpdateQueue.addItem(organizationId, payingOrganizationId);
+    },
+
     async markDue(balanceItem: BalanceItem) {
         if (balanceItem.status === BalanceItemStatus.Hidden) {
             balanceItem.status = BalanceItemStatus.Due;

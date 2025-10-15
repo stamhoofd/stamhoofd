@@ -300,7 +300,7 @@
             <template v-if="payment.balanceItemPayments.length">
                 <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
                 <STList>
-                    <STListItem v-for="item in sortedItems" :key="item.id">
+                    <STListItem v-for="item in sortedItems" :key="item.id" :selectable="canWrite" @click="editBalanceItem(item.balanceItem)">
                         <template #left>
                             <BalanceItemIcon :item="item.balanceItem" :is-payable="false" />
                         </template>
@@ -320,9 +320,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
-import { Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { EditBalanceItemView, GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemWithPayments, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Sorter } from '@stamhoofd/utility';
@@ -330,6 +330,7 @@ import { computed, ref } from 'vue';
 import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 
 const props = withDefaults(
     defineProps<{
@@ -354,6 +355,7 @@ const context = useContext();
 const owner = useRequestOwner();
 const markingPaid = ref(false);
 const platform = usePlatform();
+const present = usePresent();
 
 const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {
@@ -422,5 +424,36 @@ async function mark(status: PaymentStatus) {
         Toast.fromError(e).show();
     }
     markingPaid.value = false;
+}
+
+async function editBalanceItem(balanceItem: BalanceItem) {
+    if (!canWrite.value) {
+        return;
+    }
+    const component = new ComponentWithProperties(EditBalanceItemView, {
+        balanceItem,
+        isNew: false,
+        saveHandler: async (patch: AutoEncoderPatchType<BalanceItemWithPayments>) => {
+            const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
+            patch.id = balanceItem.id;
+            arr.addPatch(patch);
+            await context.value.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/organization/balance',
+                body: arr,
+                decoder: new ArrayDecoder(BalanceItemWithPayments),
+                shouldRetry: false,
+            });
+            GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
+        },
+    });
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: component,
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 </script>

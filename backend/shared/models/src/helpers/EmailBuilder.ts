@@ -402,6 +402,16 @@ export function mergeReplacement(replacementA: Replacement, replacementB: Replac
         return replacementA;
     }
 
+    if (replacementA.token === 'objectName') {
+        // Add comma if values are not the same
+        const aa = replacementA.value.split(', ');
+
+        return Replacement.create({
+            token: 'objectName',
+            value: Formatter.uniqueArray([...aa, ...replacementB.value.split(', ')]).join(', '),
+        });
+    }
+
     return false;
 }
 
@@ -668,7 +678,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
     // todo: only if detected it is used
     if (!recipient.replacements.find(r => r.token === 'balanceTable')) {
         if (organization && recipientUser) {
-            const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user, true);
+            const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user);
             const balanceItems = balanceItemModels.map(i => i.getStructure());
 
             // Get members
