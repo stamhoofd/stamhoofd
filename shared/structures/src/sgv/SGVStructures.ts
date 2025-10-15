@@ -69,13 +69,13 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
                 return new SimpleErrors(new SimpleError({
                     code: "SGVError",
                     message: JSON.stringify(data.data),
-                    human: "Onbekende foutmelding van de groepsadministratie (kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutive postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, ... en probeer opnieuw) "+JSON.stringify(data.data)
+                    human: "Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutive postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw. Foutmelding groepsadministratie: "+JSON.stringify(data.data)
                 }))
             } catch (e) {
                 return new SimpleErrors(new SimpleError({
                     code: "SGVError",
                     message: data.data+"",
-                    human: "Onbekende foutmelding van de groepsadministratie. Kijk even na of er niet ergens foutieve gegevens bij dit lid ingevuld staan (bv. geen huisnummer bij een adres), dat de groepsadministratie online is en dat je zelf wel deze leden kan bewerken in de groepsadministratie."
+                    human: "Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutive postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw."
                 }))
             }
             

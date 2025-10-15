@@ -761,7 +761,7 @@ class SGVGroepsadministratieStatic implements RequestMiddleware {
         return response.data;
     }
 
-    private unknownErrorMessage = 'De groepsadministratie van Scouts en Gidsen Vlaanderen gaf een foutmelding. Kijk ook even na of er geen rare of foutieve gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, ...). Pas de gegevens aan in Stamhoofd en probeer opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.'
+    private unknownErrorMessage = 'De groepsadministratie van Scouts en Gidsen Vlaanderen gaf een foutmelding. Kijk ook even na of er geen rare of foutieve gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, fout geschreven straatnaam, ontbrekende spatie in straat, ...). Zoek het adres van het lid (en ouders) op in Google Maps en corrigeer indien nodig. Pas de gegevens aan in Stamhoofd en probeer opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.'
 
     async tryRequest<T>(request: RequestInitializer<T>): Promise<RequestResult<T>> {
         try {
