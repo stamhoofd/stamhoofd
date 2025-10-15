@@ -16,11 +16,11 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             });
         }
 
-        if (filter.length > 200) {
+        if (filter.length > 1000) {
             throw new SimpleError({
                 code: 'invalid_filter',
-                message: 'Too many values in $in filter, maximum is 200',
-                human: $t('616cf7ee-8a23-4fd0-b4f6-ec3d9d493bd7', { count: filter.length }),
+                message: 'Too many values in $in filter, maximum is 1000',
+                human: $t('Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.', { count: filter.length }),
             });
         }
 
