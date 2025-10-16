@@ -450,7 +450,7 @@ export class SQLTableExpression implements SQLNamedExpression {
     }
 }
 
-export type SQLJSONTableColumnType = 'VARCHAR' | 'INT' | 'TEXT';
+export type SQLJSONTableColumnType = 'VARCHAR' | 'INT' | 'TEXT' | 'JSON';
 export class SQLJSONTableColumn implements SQLExpression {
     name: string;
     type: SQLJSONTableColumnType;

@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar, createExistsFilter } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -106,4 +106,63 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
+
+    items: createExistsFilter(
+        /**
+         * There is a bug in MySQL 8 that is fixed in 9.3
+         * where EXISTS (select * from json_table(...)) does not work
+         * To fix this, we do a double select with join inside the select
+         * It is a bit slower, but it works for now.
+         */
+        SQL.select()
+            .from('webshop_orders', 'innerOrders')
+            .join(
+                SQL.join(
+                    SQL.jsonTable(
+                        SQL.jsonValue(SQL.column('innerOrders', 'data'), '$.value.cart.items'),
+                        'items',
+                    )
+                        .addColumn(
+                            'amount',
+                            'INT',
+                            '$.amount',
+                        )
+                        .addColumn(
+                            'productId',
+                            'TEXT',
+                            '$.product.id',
+                        )
+                        .addColumn(
+                            'productPriceId',
+                            'TEXT',
+                            '$.productPrice.id',
+                        ),
+                ),
+            )
+            .where(SQL.column('innerOrders', 'id'), SQL.column('webshop_orders', 'id')),
+        {
+            ...baseSQLFilterCompilers,
+            amount: createColumnFilter({
+                expression: SQL.column('items', 'amount'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            product: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.column('items', 'productId'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            },
+            productPrice: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.column('items', 'productPriceId'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            },
+        },
+    ),
 };
