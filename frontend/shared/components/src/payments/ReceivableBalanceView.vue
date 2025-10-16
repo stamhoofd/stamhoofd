@@ -16,7 +16,7 @@
             </p>
 
             <p v-if="item.objectType === ReceivableBalanceType.userWithoutMembers" class="info-box">
-                {{ $t("Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid.") }}
+                {{ $t("5d5aa495-fe78-45f5-93b2-4c78acdc1e9f") }}
             </p>
 
             <STList class="info">

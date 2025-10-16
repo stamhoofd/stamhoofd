@@ -96,7 +96,7 @@ const allColumns: Column<ObjectType, any>[] = [
         ? [
                 new Column<ObjectType, string | null>({
                     id: 'type',
-                    name: $t('Type'),
+                    name: $t('70bf2b13-2ff0-4d64-bcfe-524e89bc4b96'),
                     getValue: object => Formatter.capitalizeFirstLetter(getReceivableBalanceTypeName(object.objectType)),
                     format: value => value || 'Geen',
                     getStyle: value => !value ? 'gray' : '',
@@ -178,11 +178,11 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const memberOptions: RecipientChooseOneOption = {
         type: 'ChooseOne',
-        name: $t('Leden'),
+        name: $t('672a6035-da6d-403b-a31e-242cdd92cc5b'),
         options: [
             {
                 id: 'accounts',
-                name: $t('Alle leden'),
+                name: $t('bc8a585c-6670-418c-ba88-228157009d44'),
                 value: [
                     EmailRecipientSubfilter.create({
                         type: EmailRecipientFilterType.ReceivableBalances,
@@ -200,7 +200,7 @@ async function openMail(selection: TableActionSelection<ObjectType>) {
 
     const organizationOption: RecipientMultipleChoiceOption = {
         type: 'MultipleChoice',
-        name: $t('Eenheden'),
+        name: $t('da4e80d0-e482-4cef-80a6-c49e445b0f4e'),
         options: [],
         defaultSelection: organization.value?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
         build: (selectedIds: string[]) => {

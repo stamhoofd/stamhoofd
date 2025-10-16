@@ -5799,5 +5799,19 @@
   "f0966b9d-6eb5-4e89-a45e-fa3ced8f17fe": "Je kan maximaal {1-item-or-person-or-ticket} bestellen, en die zit al in jouw winkelmandje",
   "02af3451-0f6a-4001-bc1d-8b35db5c09a9": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen",
   "6c2f78d7-0b5d-4264-8a55-9164ed4f2ddd": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen, waarvan er al één in jouw winkelmandje zit",
-  "5bef85b2-cefb-4c43-8986-7f745807ba38": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen, waarvan er al {4} in jouw winkelmandje zitten"
+  "5bef85b2-cefb-4c43-8986-7f745807ba38": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen, waarvan er al {4} in jouw winkelmandje zitten",
+  "40dde58e-47fb-4adb-971a-537b16c479d5": "Oeps, er ging iets mis bij het aanmaken van de inschrijvingsgroep. Je kan via deze weg geen inschrijvingen voor activiteiten aanmaken.",
+  "d0ef2e12-dfa2-4d2a-9ee7-793e52e6b94f": "Ongeldige filter",
+  "2f4b0c22-044e-486b-8a75-80a5b51beaf3": "Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.",
+  "70bf2b13-2ff0-4d64-bcfe-524e89bc4b96": "Type",
+  "672a6035-da6d-403b-a31e-242cdd92cc5b": "Leden",
+  "bc8a585c-6670-418c-ba88-228157009d44": "Alle leden",
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": "Eenheden",
+  "f968eadd-511c-4bb7-ba95-26062633abc0": "Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.",
+  "fb540a87-1191-4e51-b53a-5f63f1b28d5c": "Beheerders kunnen leden waarvoor ze bewerkrechten hebben, inschrijven (uitschrijven is niet mogelijk).",
+  "ddb211ab-2e6b-4a8c-9f05-5c18d16c911c": "Laat beheerders van #groepen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken",
+  "a641a313-6916-4747-ba44-43d4df6d477f": "Laat andere beheerders toe om inschrijvingen van ‘hun’ leden te bekijken",
+  "025ccb96-96ec-441f-9992-13668e1758ec": "Laat andere beheerders toe ‘hun’ leden in te schrijven",
+  "b91c82a6-67c0-451f-867c-8a3468d6381c": "Je ziet maar een deel van de inschrijvingen.",
+  "5d5aa495-fe78-45f5-93b2-4c78acdc1e9f": "Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid."
 }

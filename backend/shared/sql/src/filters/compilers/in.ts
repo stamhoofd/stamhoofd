@@ -20,7 +20,7 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             throw new SimpleError({
                 code: 'invalid_filter',
                 message: 'Too many values in $in filter, maximum is 1000',
-                human: $t('Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.', { count: filter.length }),
+                human: $t('2f4b0c22-044e-486b-8a75-80a5b51beaf3', { count: filter.length }),
             });
         }
 

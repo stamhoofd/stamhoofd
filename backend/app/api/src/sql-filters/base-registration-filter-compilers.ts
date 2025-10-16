@@ -16,7 +16,7 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
             code: 'invalid_field',
             field: 'filter',
             message: 'You must filter on a group of the organization you are trying to access',
-            human: $t(`Ongeldige filter`),
+            human: $t(`d0ef2e12-dfa2-4d2a-9ee7-793e52e6b94f`),
         });
     }
 

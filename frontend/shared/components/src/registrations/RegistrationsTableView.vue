@@ -2,7 +2,7 @@
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
             <p v-if="isLimitedGroup" class="style-description-block">
-                {{ $t('Je ziet maar een deel van de inschrijvingen.') }}
+                {{ $t('b91c82a6-67c0-451f-867c-8a3468d6381c') }}
             </p>
             <p v-if="app === 'admin' && !group" class="style-description-block">
                 {{ $t('b652957b-2037-4f9e-8b77-169b3e1b9506') }}

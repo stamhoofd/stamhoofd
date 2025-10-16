@@ -218,7 +218,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     throw new SimpleError({
                         code: 'invalid_group_type',
                         message: 'Cannot create groups for events via this endpoint',
-                        human: $t(`Oeps, er ging iets mis bij het aanmaken van de inschrijvingsgroep. Je kan via deze weg geen inschrijvingen voor activiteiten aanmaken.`),
+                        human: $t(`40dde58e-47fb-4adb-971a-537b16c479d5`),
                     });
                 }
 

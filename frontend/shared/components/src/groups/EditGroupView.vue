@@ -324,10 +324,10 @@
                                 <Checkbox v-model="allowViewRegistrations" :disabled="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t(`Laat beheerders van #groepen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken`) }}
+                                {{ $t(`ddb211ab-2e6b-4a8c-9f05-5c18d16c911c`) }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.') }}
+                                {{ $t('f968eadd-511c-4bb7-ba95-26062633abc0') }}
                             </p>
                         </STListItem>
 
@@ -349,10 +349,10 @@
                                 <Checkbox v-model="allowViewRegistrations" :disabled="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t(`Laat andere beheerders toe om inschrijvingen van ‘hun’ leden te bekijken`) }}
+                                {{ $t(`a641a313-6916-4747-ba44-43d4df6d477f`) }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.') }}
+                                {{ $t('f968eadd-511c-4bb7-ba95-26062633abc0') }}
                             </p>
                         </STListItem>
 
@@ -361,10 +361,10 @@
                                 <Checkbox v-model="allowRegistrationsByOrganization" />
                             </template>
                             <h3 class="style-title-list">
-                                {{ $t(`Laat andere beheerders toe ‘hun’ leden in te schrijven`) }}
+                                {{ $t(`025ccb96-96ec-441f-9992-13668e1758ec`) }}
                             </h3>
                             <p class="style-description-small">
-                                {{ $t('Beheerders kunnen leden waarvoor ze bewerkrechten hebben, inschrijven (uitschrijven is niet mogelijk).') }}
+                                {{ $t('fb540a87-1191-4e51-b53a-5f63f1b28d5c') }}
                             </p>
                         </STListItem>
                     </template>
