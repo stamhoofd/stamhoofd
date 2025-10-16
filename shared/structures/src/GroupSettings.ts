@@ -593,7 +593,7 @@ export class GroupSettings extends AutoEncoder {
      * Allow other admins to see registrations of this group - but only for the members they have access to.
      * Note: when allowRegistrationsByOrganization is enabled, this is implied
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 387 })
     allowViewRegistrations = false;
 
     /**
