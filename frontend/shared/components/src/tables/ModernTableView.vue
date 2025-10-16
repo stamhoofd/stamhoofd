@@ -465,8 +465,10 @@ function areAllMarkedRowsInCurrentFilter() {
 }
 
 function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelected?: boolean): TableActionSelection<Value> {
+    let forceFilter = true;
     if (customMarkedRows === undefined) {
         if (showSelection.value && hasSelection.value) {
+            optimizeMarkedRows(true);
             customMarkedRows = [...markedRows.value.values()] as Value[];
             customMarkedRowsSelected = markedRowsAreSelected.value;
 
@@ -474,7 +476,7 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
                 const map = new Set(props.tableObjectFetcher.objects.map(i => i.id));
                 // Little optimization where we remove all marked rows that are not in the current rows - as this won't make sense
                 customMarkedRows = customMarkedRows.filter(r => map.has(r.id));
-
+                forceFilter = false;
                 console.log('Optimized marked rows to only those in current filter', customMarkedRows);
             }
         }
@@ -485,11 +487,22 @@ function buildSelectionObject(customMarkedRows?: Value[], customMarkedRowsSelect
             customMarkedRowsSelected = true;
         }
 
-        const idFilter = {
+        let idFilter: StamhoofdFilter = {
             id: {
                 $in: customMarkedRows.map(i => i.id),
             },
         };
+
+        if (forceFilter) {
+            idFilter = mergeFilters([
+                {
+                    id: {
+                        $in: customMarkedRows.map(i => i.id),
+                    },
+                },
+                props.tableObjectFetcher.filter,
+            ]);
+        }
 
         const filter = customMarkedRowsSelected
             ? idFilter
@@ -1697,8 +1710,14 @@ function setInvisibleSelectionValue(value: Value, selected: boolean) {
     optimizeMarkedRows();
 }
 
-function optimizeMarkedRows() {
-    if (markedRows.value.size < 10) {
+function optimizeMarkedRows(force = false) {
+    if (markedRows.size < 10) {
+        // Leave for later
+        return;
+    }
+
+    if (markedRows.size < 500 && !force) {
+        // Leave for later
         return;
     }
 
