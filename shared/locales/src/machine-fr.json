@@ -219,6 +219,10 @@
     "original": "Vul de gegevens hieronder aan voor je de kampmelding indient.",
     "translation": "Veuillez compléter les informations ci-dessous avant de soumettre la notification de camp."
   },
+  "025ccb96-96ec-441f-9992-13668e1758ec": {
+    "original": "Laat andere beheerders toe ‘hun’ leden in te schrijven",
+    "translation": "Permettre aux autres administrateurs d'inscrire « leurs » membres"
+  },
   "025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f": {
     "original": "Link verwijderen",
     "translation": "Supprimer le lien"
@@ -4279,6 +4283,10 @@
     "original": "Geen niet-geverifieerde adressen",
     "translation": "Aucune adresse non vérifiée"
   },
+  "2f4b0c22-044e-486b-8a75-80a5b51beaf3": {
+    "original": "Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.",
+    "translation": "Trop de valeurs sélectionnées individuellement dans votre filtre (le maximum est 1000). Essayez de tout sélectionner d'un coup, puis d'exclure éventuellement certaines lignes, ou bien utilisez un filtre et sélectionnez tout en une fois."
+  },
   "2f4b9572-4b9c-42e0-91f1-b0984624d225": {
     "original": "Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.",
     "translation": "Le tarif préférentiel pour cette UiTPAS est {correctPrice} au lieu de {orderPrice}."
@@ -5762,6 +5770,10 @@
   "40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f": {
     "original": "Openstaand bedrag",
     "translation": "Montant dû"
+  },
+  "40dde58e-47fb-4adb-971a-537b16c479d5": {
+    "original": "Oeps, er ging iets mis bij het aanmaken van de inschrijvingsgroep. Je kan via deze weg geen inschrijvingen voor activiteiten aanmaken.",
+    "translation": "Oups, une erreur s'est produite lors de la création du groupe d'inscription. Il n'est pas possible de créer des inscriptions pour des activités via ce chemin."
   },
   "40eced71-abce-42f2-a157-5c7a6686bc63": {
     "original": "Van",
@@ -8283,6 +8295,10 @@
     "original": "Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.",
     "translation": "Si vous activez cette option, une seule unité peut être commandée par combinaison unique d'options et de questions ouvertes."
   },
+  "5d5aa495-fe78-45f5-93b2-4c78acdc1e9f": {
+    "original": "Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid.",
+    "translation": "Attention, ce solde ouvert n'est plus lié à un membre en particulier. Il est désormais rattaché à un compte (= adresse e-mail). Nous vous conseillons de corriger cela afin que chaque élément soit associé à un membre."
+  },
   "5d5cb596-1b5b-4ec3-98dd-2c0f012d9093": {
     "original": "Boekhouding",
     "translation": "Comptabilité"
@@ -9207,6 +9223,10 @@
     "original": "Algemene gegevens",
     "translation": "Informations générales"
   },
+  "672a6035-da6d-403b-a31e-242cdd92cc5b": {
+    "original": "Leden",
+    "translation": "Membres"
+  },
   "672ceeaf-53d2-4281-8e0d-05eaea6a614a": {
     "original": "Naast elkaar",
     "translation": "Côte à côte"
@@ -10042,6 +10062,10 @@
   "70b46ba6-abe4-42a1-a0ab-a1b5bfd68210": {
     "original": "Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.",
     "translation": "Vous avez supprimé un groupe d'inscriptions par erreur ? Vous pouvez restaurer le groupe d'inscriptions et les membres qui y sont associés."
+  },
+  "70bf2b13-2ff0-4d64-bcfe-524e89bc4b96": {
+    "original": "Type",
+    "translation": "Type"
   },
   "70c5edd2-3550-447e-8a36-b43d7833fe1c": {
     "original": "Toegangsbeheer",
@@ -14635,6 +14659,10 @@
     "original": "Stel eerst een startdatum in voor de inschrijvingen om deze optie te kunnen gebruiken.",
     "translation": "Définissez d'abord une date de début pour les inscriptions afin de pouvoir utiliser cette option."
   },
+  "a641a313-6916-4747-ba44-43d4df6d477f": {
+    "original": "Laat andere beheerders toe om inschrijvingen van ‘hun’ leden te bekijken",
+    "translation": "Permettre aux autres administrateurs de consulter les inscriptions de « leurs » membres"
+  },
   "a64ad874-4655-4a39-87f5-698c9fd47c8a": {
     "original": "kan zelf inloggen of registreren op",
     "translation": "peut se connecter ou s’inscrire sur"
@@ -16311,6 +16339,10 @@
     "original": "inloggen als hoofdbeheerder",
     "translation": "se connecter en tant qu'administrateur principal"
   },
+  "b91c82a6-67c0-451f-867c-8a3468d6381c": {
+    "original": "Je ziet maar een deel van de inschrijvingen.",
+    "translation": "Vous ne voyez qu'une partie des inscriptions."
+  },
   "b91fa8bc-9922-49c5-b773-5190b5103c25": {
     "original": "Schakel over naar",
     "translation": "Passer à"
@@ -16614,6 +16646,10 @@
   "bc898c83-c02e-4ea2-a19f-80d2037c47b8": {
     "original": "Groepnaam",
     "translation": "Nom du groupe"
+  },
+  "bc8a585c-6670-418c-ba88-228157009d44": {
+    "original": "Alle leden",
+    "translation": "Tous les membres"
   },
   "bc90ce0a-2273-4942-9ce9-45fead8f928c": {
     "original": "betaling",
@@ -18483,6 +18519,10 @@
     "original": "Functies",
     "translation": "Fonctions"
   },
+  "d0ef2e12-dfa2-4d2a-9ee7-793e52e6b94f": {
+    "original": "Ongeldige filter",
+    "translation": "Filtre invalide"
+  },
   "d0f49d2a-6b83-4e03-9480-4d0995bbb0a1": {
     "original": "Vragenlijsten en gegevens",
     "translation": "Formulaires personnalisés et données"
@@ -19335,6 +19375,10 @@
     "original": "Lidgeld bewerken",
     "translation": "Modifier la cotisation"
   },
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
+    "original": "Eenheden",
+    "translation": "Unités"
+  },
   "da5f0578-ebf9-40e1-8caf-baa3a7970b28": {
     "original": "Vragenlijsten en gegevens",
     "translation": "Formulaires personnalisés et données"
@@ -19726,6 +19770,10 @@
   "ddb1b9de-cc00-4960-ba36-fa70429cbac1": {
     "original": "Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.",
     "translation": "Oups! Pour éviter le spam, nous limitons le nombre de codes de sécurité que vous pouvez essayer. Veuillez réessayer demain."
+  },
+  "ddb211ab-2e6b-4a8c-9f05-5c18d16c911c": {
+    "original": "Laat beheerders van verenigingen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken",
+    "translation": "Permettre aux administrateurs des associations (même s'ils ne sont pas principaux) de voir les inscriptions de « leurs » membres"
   },
   "ddc9d375-901c-4b2d-a257-0449083a9bfd": {
     "original": "Ontvangers",
@@ -22243,6 +22291,10 @@
     "original": "Op naam van",
     "translation": "Au nom de"
   },
+  "f968eadd-511c-4bb7-ba95-26062633abc0": {
+    "original": "Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.",
+    "translation": "Les administrateurs ne peuvent voir que les inscriptions des membres auxquels ils avaient déjà accès par un autre moyen."
+  },
   "f972abd4-de1e-484b-b7da-ad4c75d37808": {
     "original": "Man",
     "translation": "Homme"
@@ -22462,6 +22514,10 @@
   "fb5241ef-b085-4c4d-9d8a-5ac799ea9891": {
     "original": "Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd",
     "translation": "Lorsqu'un client choisit le virement bancaire - veuillez inclure les instructions de paiement si le paiement n'a pas encore été effectué"
+  },
+  "fb540a87-1191-4e51-b53a-5f63f1b28d5c": {
+    "original": "Beheerders kunnen leden waarvoor ze bewerkrechten hebben, inschrijven (uitschrijven is niet mogelijk).",
+    "translation": "Les administrateurs peuvent inscrire les membres pour lesquels ils ont des droits de modification (désinscrire n'est pas possible)."
   },
   "fb583c62-4ebf-4a54-acbf-5be7c07e09dd": {
     "original": "Inschrijvingen zijn momenteel gesloten via het ledenportaal.",

@@ -1287,6 +1287,10 @@
     "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",
     "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute n’est pas active."
   },
+  "ddb211ab-2e6b-4a8c-9f05-5c18d16c911c": {
+    "original": "Laat beheerders van eenheden (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken",
+    "translation": "Permettre aux administrateurs des unités (même s'ils ne sont pas principaux) de voir les inscriptions de « leurs » membres"
+  },
   "de1d5cdf-6aa6-4912-828a-82cb53f8abf6": {
     "original": "Dit is geen geldig zaalplan uit Keeo",
     "translation": "Ceci n'est pas un plan de salle Keeo valide."

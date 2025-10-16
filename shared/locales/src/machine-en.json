@@ -211,6 +211,10 @@
     "original": "Vul de gegevens hieronder aan voor je de kampmelding indient.",
     "translation": "Fill in the information below before submitting the camp notification."
   },
+  "025ccb96-96ec-441f-9992-13668e1758ec": {
+    "original": "Laat andere beheerders toe ‘hun’ leden in te schrijven",
+    "translation": "Let other administrators register their members."
+  },
   "025d14dd-57d4-4ec4-aa85-ddf9ddf98b6f": {
     "original": "Link verwijderen",
     "translation": "Remove link"
@@ -4215,6 +4219,10 @@
     "original": "Geen niet-geverifieerde adressen",
     "translation": "No unverified addresses"
   },
+  "2f4b0c22-044e-486b-8a75-80a5b51beaf3": {
+    "original": "Te veel individueel geselecteerde waarden in jouw filter (het maximum is 1000). Probeer om alles in één keer te selecteren en daarna eventueel sommige rijen uit te sluiten, of gebruik een filter en selecteer alles.",
+    "translation": "Too many individually selected values in your filter (the maximum is 1000). Try selecting everything at once and then excluding certain rows if needed, or use a filter to select all."
+  },
   "2f4b9572-4b9c-42e0-91f1-b0984624d225": {
     "original": "Het kansentarief voor deze UiTPAS is {correctPrice} in plaats van {orderPrice}.",
     "translation": "The reduced rate for this UiTPAS is {correctPrice} instead of {orderPrice}."
@@ -5662,6 +5670,10 @@
   "40d7ac9f-f62d-4a9d-8b2f-5fcfb938c12f": {
     "original": "Openstaand bedrag",
     "translation": "Outstanding amount"
+  },
+  "40dde58e-47fb-4adb-971a-537b16c479d5": {
+    "original": "Oeps, er ging iets mis bij het aanmaken van de inschrijvingsgroep. Je kan via deze weg geen inschrijvingen voor activiteiten aanmaken.",
+    "translation": "Oops, something went wrong while creating the registration group. It's not possible to create registrations for activities through this route."
   },
   "40eced71-abce-42f2-a157-5c7a6686bc63": {
     "original": "Van",
@@ -8163,6 +8175,10 @@
     "original": "Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.",
     "translation": "If you enable this, only one unit can be ordered per unique combination of choices and open questions."
   },
+  "5d5aa495-fe78-45f5-93b2-4c78acdc1e9f": {
+    "original": "Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid.",
+    "translation": "Please note: this open amount is no longer linked to a specific member but is instead linked to an account (email address). We recommend changing this so each individual item is linked to a member."
+  },
   "5d5cb596-1b5b-4ec3-98dd-2c0f012d9093": {
     "original": "Boekhouding",
     "translation": "Accounting"
@@ -9079,6 +9095,10 @@
     "original": "Algemene gegevens",
     "translation": "General information"
   },
+  "672a6035-da6d-403b-a31e-242cdd92cc5b": {
+    "original": "Leden",
+    "translation": "Members"
+  },
   "672ceeaf-53d2-4281-8e0d-05eaea6a614a": {
     "original": "Naast elkaar",
     "translation": "Next to each other"
@@ -9902,6 +9922,10 @@
   "70b46ba6-abe4-42a1-a0ab-a1b5bfd68210": {
     "original": "Per ongeluk een inschrijvingsgroep verwijderd? Hier haal je de inschrijvingsgroep en daarbij horende leden terug.",
     "translation": "Accidentally deleted a registration group? Here you retrieve the registration group and the associated members."
+  },
+  "70bf2b13-2ff0-4d64-bcfe-524e89bc4b96": {
+    "original": "Type",
+    "translation": "Type"
   },
   "70c5edd2-3550-447e-8a36-b43d7833fe1c": {
     "original": "Toegangsbeheer",
@@ -14431,6 +14455,10 @@
     "original": "Stel eerst een startdatum in voor de inschrijvingen om deze optie te kunnen gebruiken.",
     "translation": "First set a start date for registrations to use this option."
   },
+  "a641a313-6916-4747-ba44-43d4df6d477f": {
+    "original": "Laat andere beheerders toe om inschrijvingen van ‘hun’ leden te bekijken",
+    "translation": "Let other administrators view registrations for their members."
+  },
   "a64ad874-4655-4a39-87f5-698c9fd47c8a": {
     "original": "kan zelf inloggen of registreren op",
     "translation": "can log in or register on"
@@ -16083,6 +16111,10 @@
     "original": "inloggen als hoofdbeheerder",
     "translation": "log in as main administrator"
   },
+  "b91c82a6-67c0-451f-867c-8a3468d6381c": {
+    "original": "Je ziet maar een deel van de inschrijvingen.",
+    "translation": "You are only seeing part of the registrations."
+  },
   "b91fa8bc-9922-49c5-b773-5190b5103c25": {
     "original": "Schakel over naar",
     "translation": "Switch to"
@@ -16386,6 +16418,10 @@
   "bc898c83-c02e-4ea2-a19f-80d2037c47b8": {
     "original": "Groepnaam",
     "translation": "Group name"
+  },
+  "bc8a585c-6670-418c-ba88-228157009d44": {
+    "original": "Alle leden",
+    "translation": "All members"
   },
   "bc90ce0a-2273-4942-9ce9-45fead8f928c": {
     "original": "betaling",
@@ -18231,6 +18267,10 @@
     "original": "Functies",
     "translation": "Roles"
   },
+  "d0ef2e12-dfa2-4d2a-9ee7-793e52e6b94f": {
+    "original": "Ongeldige filter",
+    "translation": "Invalid filter"
+  },
   "d0f49d2a-6b83-4e03-9480-4d0995bbb0a1": {
     "original": "Vragenlijsten en gegevens",
     "translation": "Forms and data"
@@ -19059,6 +19099,10 @@
     "original": "Lidgeld bewerken",
     "translation": "Edit membership fee"
   },
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
+    "original": "Eenheden",
+    "translation": "Units"
+  },
   "da5f0578-ebf9-40e1-8caf-baa3a7970b28": {
     "original": "Vragenlijsten en gegevens",
     "translation": "Forms and data"
@@ -19442,6 +19486,10 @@
   "ddb1b9de-cc00-4960-ba36-fa70429cbac1": {
     "original": "Oeps! Om spam te voorkomen limiteren we het aantal beveiligingscodes die je kan proberen. Probeer morgen opnieuw.",
     "translation": "Oops! To prevent spam, we limit the number of security codes you can try. Please try again tomorrow."
+  },
+  "ddb211ab-2e6b-4a8c-9f05-5c18d16c911c": {
+    "original": "Laat beheerders van verenigingen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken",
+    "translation": "Allow administrators of associations (including those who aren't primary administrators) to view the registrations of their members."
   },
   "ddc9d375-901c-4b2d-a257-0449083a9bfd": {
     "original": "Ontvangers",
@@ -21923,6 +21971,10 @@
     "original": "Op naam van",
     "translation": "In the name of"
   },
+  "f968eadd-511c-4bb7-ba95-26062633abc0": {
+    "original": "Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.",
+    "translation": "Administrators can only see registrations for members they already have access to through another route."
+  },
   "f972abd4-de1e-484b-b7da-ad4c75d37808": {
     "original": "Man",
     "translation": "Male"
@@ -22142,6 +22194,10 @@
   "fb5241ef-b085-4c4d-9d8a-5ac799ea9891": {
     "original": "Wanneer een besteller kiest voor overschrijving - bevat nog eens de betaalinstructies als de betaling nog niet zou zijn gebeurd",
     "translation": "When an orderer chooses for a bank transfer - once again contains the payment instructions if the payment hasn't been made yet"
+  },
+  "fb540a87-1191-4e51-b53a-5f63f1b28d5c": {
+    "original": "Beheerders kunnen leden waarvoor ze bewerkrechten hebben, inschrijven (uitschrijven is niet mogelijk).",
+    "translation": "Administrators can register members for whom they have edit rights (unregistering is not possible)."
   },
   "fb583c62-4ebf-4a54-acbf-5be7c07e09dd": {
     "original": "Inschrijvingen zijn momenteel gesloten via het ledenportaal.",

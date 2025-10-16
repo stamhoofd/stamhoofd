@@ -1099,6 +1099,10 @@
     "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Ravot kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
     "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Ravot can apply the discount to the same item if that would be more advantageous."
   },
+  "ddb211ab-2e6b-4a8c-9f05-5c18d16c911c": {
+    "original": "Laat beheerders van groepen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken",
+    "translation": "Allow administrators of groups (including those who aren't primary administrators) to view the registrations of their members."
+  },
   "de1d5cdf-6aa6-4912-828a-82cb53f8abf6": {
     "original": "Dit is geen geldig zaalplan uit Ravot",
     "translation": "This is not a valid seating plan from Ravot"
