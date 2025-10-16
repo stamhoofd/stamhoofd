@@ -27,7 +27,7 @@ describe('$in', () => {
         });
     });
 
-    it('throws when passing more than 100 values to the filter', async () => {
+    it('throws when passing more than 1000 values to the filter', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
             age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
@@ -36,11 +36,11 @@ describe('$in', () => {
         await testError({
             filter: {
                 age: {
-                    $in: Array.from({ length: 201 }, (_, i) => i + 1),
+                    $in: Array.from({ length: 1001 }, (_, i) => i + 1),
                 },
             },
             filters,
-            error: 'Too many values in $in filter, maximum is 200',
+            error: 'Too many values in $in filter, maximum is 1000',
         });
     });
 
