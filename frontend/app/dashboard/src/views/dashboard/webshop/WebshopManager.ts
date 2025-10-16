@@ -107,7 +107,7 @@ export class WebshopManager {
         }
 
         // Clone data and keep references
-        this.context.organization!.webshops.find(w => w.id == this.preview.id)?.set(webshop);
+        this.context.organization!.webshops.find(w => w.id === this.preview.id)?.deepSet(webshop);
         this.preview.deepSet(webshop);
         new OrganizationManager(this.context).save().catch(console.error);
 
