@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar, createExistsFilter } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar, createExistsFilter, createWildcardColumnFilter, SQLJsonExtract } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -164,5 +164,42 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                 }),
             },
         },
+    ),
+
+    recordAnswers: createWildcardColumnFilter(
+        (key: string) => ({
+            expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
+            type: SQLValueType.JSONObject,
+            nullable: true,
+        }),
+        (key: string) => ({
+            ...baseSQLFilterCompilers,
+            selected: createColumnFilter({
+                expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
+                type: SQLValueType.JSONBoolean,
+                nullable: true,
+            }),
+            selectedChoice: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
+                    type: SQLValueType.JSONString,
+                    nullable: true,
+                }),
+            },
+            selectedChoices: {
+                ...baseSQLFilterCompilers,
+                id: createColumnFilter({
+                    expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
+                    type: SQLValueType.JSONArray,
+                    nullable: true,
+                }),
+            },
+            value: createColumnFilter({
+                expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
+                type: SQLValueType.JSONString,
+                nullable: true,
+            }),
+        }),
     ),
 };
