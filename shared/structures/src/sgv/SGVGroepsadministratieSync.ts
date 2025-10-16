@@ -709,21 +709,21 @@ export function splitStreetNumber(huisnummer: string): {number: string; bus: str
 }
 
 function isSameAddress(address: Address, sgv: any) {
-    if (StringCompare.typoCount(trim(address.street), trim(sgv.straat)) != 0) {
+    if (StringCompare.typoCount(trim(address.street), trim(sgv.straat ?? '')) != 0) {
         return false
     }
 
-    if (StringCompare.typoCount(trim(address.city), trim(sgv.gemeente)) != 0) {
+    if (StringCompare.typoCount(trim(address.city), trim(sgv.gemeente ?? '')) != 0) {
         return false
     }
 
-    if (StringCompare.typoCount(trim(address.postalCode), trim(sgv.postcode)) != 0) {
+    if (StringCompare.typoCount(trim(address.postalCode), trim(sgv.postcode ?? '')) != 0) {
         return false
     }
 
     const { number, bus } = splitStreetNumber(address.number)
 
-    if (StringCompare.typoCount(trim(number), trim(sgv.nummer)) != 0) {
+    if (StringCompare.typoCount(trim(number), trim(sgv.nummer ?? '')) != 0) {
         return false
     }
 
@@ -736,11 +736,11 @@ function isSameAddress(address: Address, sgv: any) {
 
 
 function isSameParent(parent: Parent, sgv: any) {
-    if (StringCompare.typoCount(parent.firstName, sgv.voornaam) > 1) {
+    if (StringCompare.typoCount(parent.firstName, sgv.voornaam ?? '') > 1) {
         return false
     }
 
-    if (StringCompare.typoCount(parent.lastName, sgv.achternaam) > 1) {
+    if (StringCompare.typoCount(parent.lastName, sgv.achternaam ?? '') > 1) {
         return false
     }
 
