@@ -116,10 +116,12 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
                     logger.error(
                         ...requestPrefix(request, 'error'),
                         "Request with error in response ",
-                        new StyledText(error).addClass('request', 'error')
+                        new StyledText(error.code).addClass('request', 'error')
                     )
-
-                    logRequestDetails(request)
+                    
+                    if (!error.hasCode('too_big_attachments')) {
+                        logRequestDetails(request)
+                    }
                 }
             } else {
                 logger.error(
