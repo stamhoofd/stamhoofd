@@ -99,14 +99,26 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     if (await Context.auth.hasFullAccess(organization.id, permissionLevel)) {
                         // Can access full history for now
                         scopeFilter = {
-                            organizationId: organization.id,
+                            member: {
+                                registrations: {
+                                    $elemMatch: {
+                                        organizationId: organization.id,
+                                    },
+                                },
+                            },
                         };
                     }
                     else {
                         // Can only access current period
                         scopeFilter = {
-                            organizationId: organization.id,
-                            periodId: organization.periodId,
+                            member: {
+                                registrations: {
+                                    $elemMatch: {
+                                        organizationId: organization.id,
+                                        periodId: organization.periodId,
+                                    },
+                                },
+                            },
                         };
                     }
                 }
@@ -130,8 +142,14 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     }
 
                     scopeFilter = {
-                        groupId: {
-                            $in: groupIds,
+                        member: {
+                            registrations: {
+                                $elemMatch: {
+                                    groupId: {
+                                        $in: groupIds,
+                                    },
+                                },
+                            },
                         },
                     };
                 }
@@ -196,8 +214,13 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         for (const registration of data) {
-            if (!await Context.auth.canAccessRegistration(registration, permissionLevel)) {
-                throw Context.auth.error();
+            if (registration.group.settings.implicitlyAllowViewRegistrations) {
+                // okay, only need to check if we can access the members (next step)
+            }
+            else {
+                if (!await Context.auth.canAccessRegistration(registration, permissionLevel)) {
+                    throw Context.auth.error();
+                }
             }
         }
 

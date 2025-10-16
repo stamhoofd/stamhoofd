@@ -1,5 +1,58 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
+import { Context } from '../helpers/Context';
 import { organizationFilterCompilers } from './organizations';
+
+async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
+    const groupIds = typeof filter === 'string'
+        ? [filter]
+        : unwrapFilter(filter as StamhoofdFilter, {
+            $in: FilterWrapperMarker,
+        })?.markerValue;
+
+    if (!Array.isArray(groupIds)) {
+        throw new SimpleError({
+            code: 'invalid_field',
+            field: 'filter',
+            message: 'You must filter on a group of the organization you are trying to access',
+            human: $t(`Ongeldige filter`),
+        });
+    }
+
+    if (groupIds.length === 0) {
+        return;
+    }
+
+    for (const groupId of groupIds) {
+        if (typeof groupId !== 'string') {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'filter',
+                message: 'Invalid group ID in filter',
+            });
+        }
+    }
+
+    const groups = await Context.auth.getGroups(groupIds as string[]);
+
+    console.log('Filtering registrations on groups', groups.map(g => g.settings.name.toString()));
+
+    for (const group of groups) {
+        if (!await Context.auth.canAccessGroup(group, permissionLevel)) {
+            if (permissionLevel === PermissionLevel.Read && group.settings.implicitlyAllowViewRegistrations) {
+                // Allowed to filter on this group, since we have view access.
+                continue;
+            }
+            throw Context.auth.error({
+                message: 'You do not have access to this group',
+                human: $t(`45eedf49-0f0a-442c-a0bd-7881c2682698`, { groupName: group.settings.name }),
+            });
+        }
+    }
+
+    return;
+}
 
 export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -38,6 +91,9 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
         expression: SQL.column('groupId'),
         type: SQLValueType.String,
         nullable: false,
+        async checkPermission(filter) {
+            await checkGroupIdFilterAccess(filter, PermissionLevel.Read);
+        },
     }),
     registeredAt: createColumnFilter({
         expression: SQL.column('registeredAt'),
@@ -60,6 +116,9 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             expression: SQL.column('groupId'),
             type: SQLValueType.String,
             nullable: false,
+            async checkPermission(filter) {
+                await checkGroupIdFilterAccess(filter, PermissionLevel.Read);
+            },
         }),
         type: createColumnFilter({
             expression: SQL.column('groups', 'type'),

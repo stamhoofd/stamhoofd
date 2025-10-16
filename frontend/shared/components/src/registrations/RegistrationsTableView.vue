@@ -1,6 +1,9 @@
 <template>
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route" :default-sort-column="defaultSortColumn" :default-sort-direction="defaultSortDirection">
+            <p v-if="isLimitedGroup" class="style-description-block">
+                {{ $t('Je ziet maar een deel van de inschrijvingen.') }}
+            </p>
             <p v-if="app === 'admin' && !group" class="style-description-block">
                 {{ $t('b652957b-2037-4f9e-8b77-169b3e1b9506') }}
             </p>
@@ -12,9 +15,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useRequiredRegistrationsFilter, useTableObjectFetcher } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, mergeFilters, Organization, PlatformRegistration, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
@@ -70,6 +72,7 @@ const estimatedRows = computed(() => {
 });
 
 const app = useAppContext();
+const organization = useOrganization();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const auth = useAuth();
@@ -159,6 +162,7 @@ const groups = (() => {
     }
     return [];
 })();
+const { getRequiredRegistrationsFilter } = useRequiredRegistrationsFilter();
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (props.customFilter) {
@@ -206,29 +210,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
         };
     }
 
-    const extra: StamhoofdFilter[] = [];
-
-    if (props.organization && props.group && props.group.organizationId !== props.organization?.id) {
-        // Only show members that are registered in the current period AND in this group
-        // (avoid showing old members that moved to other groups)
-        const periodIds = [props.group.periodId];
-        if (props.periodId) {
-            periodIds.push(props.periodId);
-        }
-        if (props.organization?.period?.period?.id) {
-            periodIds.push(props.organization.period.period.id);
-        }
-        if (platform.value.period.id) {
-            periodIds.push(platform.value.period.id);
-        }
-
-        extra.push({
-            organizationId: props.organization.id,
-            periodId: {
-                $in: Formatter.uniqueArray(periodIds),
-            },
-        });
-    }
+    const extra: StamhoofdFilter[] = getRequiredRegistrationsFilter({
+        group: props.group ?? undefined,
+        periodId: props.periodId ?? undefined,
+    }, true);
 
     return [
         props.group
@@ -288,7 +273,7 @@ const actionBuilder = useDirectRegistrationActions({
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
-if (!props.organization) {
+if (!organization.value) {
     // For now not possible via admin panel
     canAdd = false;
 }
@@ -300,6 +285,27 @@ const registrationActions = actionBuilder.getActions({
     selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
     includeMove: true,
     includeEdit: !excludeEdit,
+});
+
+const isLimitedGroup = computed(() => {
+    if (!props.group) {
+        return false;
+    }
+
+    if (props.group.settings.registeredMembers !== null && tableObjectFetcher.totalCount !== null && props.group.settings.registeredMembers === tableObjectFetcher.totalCount) {
+        return false;
+    }
+
+    if (app === 'admin') {
+        return false;
+    }
+    if (organization.value && props.group.organizationId !== organization.value.id) {
+        return true;
+    }
+    if (!auth.canAccessGroup(props.group)) {
+        return true;
+    }
+    return false;
 });
 
 const actions: TableAction<ObjectType>[] = [

@@ -1,5 +1,4 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Group } from '@stamhoofd/models';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter, WrapperFilter } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context';
 
@@ -55,17 +54,22 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
         }
     }
 
-    const groups = await Group.getByIDs(...groupIds as string[]);
-    Context.auth.cacheGroups(groups);
+    const groups = await Context.auth.getGroups(groupIds as string[]);
 
-    console.log('Fetching members for groups', groups.map(g => g.settings.name.toString()));
+    console.log('Fetching members for groups before', groups.map(g => g.settings.name.toString()));
 
     for (const group of groups) {
         if (!await Context.auth.canAccessGroup(group, permissionLevel)) {
-            throw Context.auth.error({
-                message: 'You do not have access to this group',
-                human: $t(`45eedf49-0f0a-442c-a0bd-7881c2682698`, { groupName: group.settings.name }),
-            });
+            if (permissionLevel !== PermissionLevel.Read || !group.settings.implicitlyAllowViewRegistrations) {
+                throw Context.auth.error({
+                    message: 'You do not have access to this group',
+                    human: $t(`45eedf49-0f0a-442c-a0bd-7881c2682698`, { groupName: group.settings.name }),
+                });
+            }
+            else {
+                // Return false so we add additional scope filters (only view overlap)
+                return false;
+            }
         }
     }
 

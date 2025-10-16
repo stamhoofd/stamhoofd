@@ -5,21 +5,26 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
+import { CountFilteredRequest, mergeFilters, StamhoofdFilter } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';
-import { useMembersObjectFetcher } from '../../fetchers';
+import { useRegistrationsObjectFetcher } from '../../fetchers/useRegistrationsObjectFetcher';
 
 const props = defineProps<{
     filter: StamhoofdFilter;
 }>();
 const count = ref(null as null | number);
-const fetcher = useMembersObjectFetcher();
+const fetcher = useRegistrationsObjectFetcher();
 
 watch(() => JSON.stringify(props.filter), async () => {
     Request.cancelAll(fetcher);
 
     const response = await fetcher.fetchCount(new CountFilteredRequest({
-        filter: props.filter,
+        filter: mergeFilters([
+            props.filter,
+            {
+                deactivatedAt: null
+            },
+        ]),
     }));
 
     count.value = response;

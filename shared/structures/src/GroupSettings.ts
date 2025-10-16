@@ -590,11 +590,22 @@ export class GroupSettings extends AutoEncoder {
     requireOrganizationTags: string[] = [];
 
     /**
+     * Allow other admins to see registrations of this group - but only for the members they have access to.
+     * Note: when allowRegistrationsByOrganization is enabled, this is implied
+     */
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    allowViewRegistrations = false;
+
+    /**
      * Allow other organizations to register members in this group
      * This would create a payment between the organizations instead, so that often requires invoicing
      */
     @field({ decoder: BooleanDecoder, version: 303 })
     allowRegistrationsByOrganization = false;
+
+    get implicitlyAllowViewRegistrations() {
+        return this.allowRegistrationsByOrganization || this.allowViewRegistrations;
+    }
 
     /**
      * @deprecated

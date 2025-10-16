@@ -70,6 +70,7 @@ export class AdminPermissionChecker {
             return await cache;
         }
 
+        console.log('Get group', groupId);
         const promise = Group.select()
             .where('id', groupId)
             .first(false);
@@ -78,6 +79,46 @@ export class AdminPermissionChecker {
         const group = await promise;
         this.groupsCache.set(groupId, group);
         return group;
+    }
+
+    async getGroups(groupIds: string[]): Promise<Group[]> {
+        const cached: Group[] = [];
+        const remainingIds: string[] = [];
+
+        for (const groupId of groupIds) {
+            const cache = this.groupsCache.get(groupId);
+            if (cache !== undefined) {
+                const resolved = await cache;
+                if (resolved) {
+                    cached.push(resolved);
+                }
+                else {
+                    // Not found, no need to readd
+                }
+            }
+            else {
+                remainingIds.push(groupId);
+            }
+        }
+
+        if (remainingIds.length > 0) {
+            console.log('Get groups', remainingIds);
+            const promise = Group.select()
+                .where('id', remainingIds)
+                .fetch();
+
+            for (const groupId of remainingIds) {
+                this.groupsCache.set(groupId, promise.then(list => list.find(l => l.id === groupId) ?? null));
+            }
+            const groups = await promise;
+            cached.push(...groups);
+
+            for (const groupId of remainingIds) {
+                this.groupsCache.set(groupId, groups.find(l => l.id === groupId) ?? null);
+            }
+        }
+
+        return cached;
     }
 
     cacheGroup(group: Group) {
@@ -178,7 +219,7 @@ export class AdminPermissionChecker {
     async canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         // Check permissions aren't scoped to a specific organization, and they mismatch
         if (!this.checkScope(group.organizationId)) {
-            return false;
+            // return false;
         }
         const organization = await this.getOrganization(group.organizationId);
 
@@ -246,8 +287,13 @@ export class AdminPermissionChecker {
             return true;
         }
         if (asOrganizationId) {
-            if (group.settings.allowRegistrationsByOrganization) {
-                return await this.hasFullAccess(asOrganizationId);
+            if (group.settings.allowRegistrationsByOrganization && !group.getStructure().closed) {
+                if (group.organizationId !== asOrganizationId) {
+                    return await this.hasFullAccess(asOrganizationId);
+                }
+                else {
+                    return await this.hasSomeAccess(asOrganizationId);
+                }
             }
         }
         return false;
@@ -337,7 +383,7 @@ export class AdminPermissionChecker {
         }
 
         for (const registration of member.registrations) {
-            if (await this.canAccessRegistration(registration, permissionLevel)) {
+            if (await this.canAccessRegistration(registration, permissionLevel, false)) {
                 return true;
             }
         }
@@ -378,7 +424,7 @@ export class AdminPermissionChecker {
     /**
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
-    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember = true) {
         if (registration.deactivatedAt || !registration.registeredAt) {
             // No full access: cannot access deactivated registrations
             return false;
@@ -404,13 +450,24 @@ export class AdminPermissionChecker {
             }
         }
 
-        const group = await this.getGroup(registration.groupId);
+        const group = Registration.group.isLoaded(registration) ? ((registration as any).group as Group) : await this.getGroup(registration.groupId);
         if (!group || group.deletedAt) {
             return false;
         }
 
         if (await this.canAccessGroup(group, permissionLevel)) {
             return true;
+        }
+
+        if (permissionLevel === PermissionLevel.Read && checkMember && group.settings.implicitlyAllowViewRegistrations) {
+            // We can also view this registration if we have access to the member
+            const members = await Member.getBlobByIds(registration.memberId);
+
+            if (members.length === 1) {
+                if (await this.canAccessMember(members[0], permissionLevel)) {
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -1298,6 +1355,7 @@ export class AdminPermissionChecker {
         }
 
         if (hasTemporaryMemberAccess(this.user.id, member.id, PermissionLevel.Full)) {
+            // You created this member, so temporary can read all records in order to set the member up correctly
             return {
                 canAccess: true,
                 record: record.record,

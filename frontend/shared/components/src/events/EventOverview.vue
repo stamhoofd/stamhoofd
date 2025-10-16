@@ -19,7 +19,7 @@
                     </template>
 
                     <EventInfoTable :event="event">
-                        <template v-if="event.group && (!organization || (event.group.organizationId === organization.id && auth.canAccessGroup(event.group, undefined, groupOrganization)) || auth.canRegisterMembersInGroup(event.group, groupOrganization))">
+                        <template v-if="event.group && (!organization || auth.canAccessGroup(event.group, undefined, groupOrganization) || event.group.settings.implicitlyAllowViewRegistrations)">
                             <STListItem :selectable="true" class="left-center right-stack" @click="$navigate(Routes.Registrations)">
                                 <template #left>
                                     <span class="icon group" />
@@ -32,12 +32,13 @@
                                     {{ $t('8063280c-a4d1-4acf-a54d-dff02e973909') }}
                                 </p>
                                 <template #right>
-                                    <span v-if="event.group.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
+                                    <span v-if="event.group.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.getMemberCount()!) }}</span>
+                                    <RegistrationCountSpan v-else :filter="getCountFilter(event.group)" class="style-description-small" />
                                     <span class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
 
-                            <STListItem v-if="event.group.waitingList && (!organization || (event.group.waitingList.organizationId === organization.id && auth.canAccessGroup(event.group.waitingList, undefined, groupOrganization)) || auth.canRegisterMembersInGroup(event.group.waitingList, groupOrganization))" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
+                            <STListItem v-if="event.group.waitingList && (!organization || auth.canAccessGroup(event.group.waitingList, undefined, groupOrganization) || event.group.waitingList.settings.implicitlyAllowViewRegistrations)" :selectable="true" class="left-center right-stack" @click="$navigate(Routes.WaitingList)">
                                 <template #left>
                                     <span class="icon clock" />
                                 </template>
@@ -49,7 +50,8 @@
                                     {{ $t('8e8cd172-b1c4-4b9e-ad06-e99f5e40a645') }}
                                 </p>
                                 <template #right>
-                                    <span v-if="event.group.waitingList.getMemberCount() !== null" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
+                                    <span v-if="event.group.waitingList.getMemberCount() !== null && canWriteEvent" class="style-description-small">{{ formatInteger(event.group.waitingList.getMemberCount()!) }}</span>
+                                    <RegistrationCountSpan v-else :filter="getCountFilter(event.group.waitingList)" class="style-description-small" />
                                     <span class="icon arrow-right-small gray" />
                                 </template>
                             </STListItem>
@@ -232,7 +234,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, appToUri, EmailTemplateType, Event, Group, Organization, OrganizationRegistrationPeriod, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, appToUri, EmailTemplateType, Event, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, StamhoofdFilter, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
 import { LoadComponent } from '../containers';
@@ -241,7 +243,7 @@ import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
 import { useAuth, useContext, useFeatureFlag, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import IconContainer from '../icons/IconContainer.vue';
-import { MembersTableView, useChooseOrganizationMembersForGroup } from '../members';
+import { MembersTableView, RegistrationCountSpan, useChooseOrganizationMembersForGroup } from '../members';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
@@ -251,6 +253,7 @@ import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 import EventNotificationRow from './components/EventNotificationRow.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
+import { useRequiredRegistrationsFilter } from '../registrations';
 
 const props = defineProps<{
     event: Event;
@@ -393,6 +396,16 @@ enum Routes {
 }
 
 const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
+const { getRequiredRegistrationsFilter } = useRequiredRegistrationsFilter();
+
+function getCountFilter(g: Group) {
+    return mergeFilters([
+        {
+            groupId: g.id,
+        },
+        getRequiredRegistrationsFilter({ group: g }, true),
+    ]);
+}
 
 defineRoutes([
     isRegistrationsTableEnabled

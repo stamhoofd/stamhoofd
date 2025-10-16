@@ -183,9 +183,14 @@ export class ContextPermissions {
         if (this.canAccessGroup(group, PermissionLevel.Write, organization)) {
             return true;
         }
-        if (this.organization && this.organization.id !== group.organizationId) {
+        if (this.organization) {
             if (group.settings.allowRegistrationsByOrganization && !group.closed) {
-                return this.hasFullAccess();
+                if (this.organization.id !== group.organizationId) {
+                    return this.hasFullAccess();
+                }
+                else {
+                    return this.hasSomeAccess();
+                }
             }
         }
         return false;
@@ -327,7 +332,11 @@ export class ContextPermissions {
     }
 
     hasSomePlatformAccess(): boolean {
-        return !!this.platformPermissions;
+        return !!this.platformPermissions && !this.platformPermissions.isEmpty;
+    }
+
+    hasSomeAccess(): boolean {
+        return !!this.permissions && !this.permissions.isEmpty;
     }
 
     hasPlatformFullAccess(): boolean {

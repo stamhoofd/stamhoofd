@@ -27,7 +27,7 @@
             <span v-else>{{ $t('5e56d87a-0c2b-412c-8a84-92091856e538') }}</span>
         </p>
 
-        <p v-if="event.group && app !== 'registration'" class="style-description-small">
+        <p v-if="event.group && app !== 'registration' && (event.group.organizationId === organization?.id || app === 'admin')" class="style-description-small">
             <span v-if="event.group.getMemberCount() !== null">{{ capitalizeFirstLetter(pluralText(event.group.getMemberCount() ?? 0, 'inschrijving', 'inschrijvingen')) }}</span>
         </p>
 

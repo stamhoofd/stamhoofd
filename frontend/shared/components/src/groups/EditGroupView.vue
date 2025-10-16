@@ -306,28 +306,68 @@
             <div v-if="showAllowRegistrationsByOrganization || showEnableMaxMembers" class="container">
                 <hr><h2>{{ $t('bf2af52c-de5d-4089-b46d-9be48594cdb4') }}</h2>
                 <STList>
-                    <STListItem v-if="showAllowRegistrationsByOrganization" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="allowRegistrationsByOrganization" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ $t('7aa7f71d-cd2c-4fb4-b4e6-4085738c1e60') }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ $t('9dc28ec0-750c-464e-95f1-fa55b7cf3390') }}
-                        </p>
-                    </STListItem>
-                    <STListItem v-if="showAllowRegistrationsByOrganization && allowRegistrationsByOrganization" :selectable="true" element-name="label">
-                        <template #left>
-                            <Checkbox v-model="sendConfirmationEmailForManualRegistrations" />
-                        </template>
-                        <h3 class="style-title-list">
-                            {{ $t('1383a10a-2804-4102-b583-ba13d35f3ca4') }}
-                        </h3>
-                        <p class="style-description-small">
-                            {{ $t('027bed5e-9c4b-43d2-85d4-06925be61a12') }}
-                        </p>
-                    </STListItem>
+                    <template v-if="isMultiOrganization">
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="allowRegistrationsByOrganization" />
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t('7aa7f71d-cd2c-4fb4-b4e6-4085738c1e60') }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('9dc28ec0-750c-464e-95f1-fa55b7cf3390') }}
+                            </p>
+                        </STListItem>
+
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="allowViewRegistrations" :disabled="allowRegistrationsByOrganization" />
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t(`Laat beheerders van #groepen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken`) }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.') }}
+                            </p>
+                        </STListItem>
+
+                        <STListItem v-if="allowRegistrationsByOrganization" :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="sendConfirmationEmailForManualRegistrations" />
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t('1383a10a-2804-4102-b583-ba13d35f3ca4') }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('027bed5e-9c4b-43d2-85d4-06925be61a12') }}
+                            </p>
+                        </STListItem>
+                    </template>
+                    <template v-else-if="showAllowRegistrationsByOrganization">
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="allowViewRegistrations" :disabled="allowRegistrationsByOrganization" />
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t(`Laat andere beheerders toe om inschrijvingen van ‘hun’ leden te bekijken`) }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Beheerders kunnen enkel de inschrijvingen zien van leden waar ze via een andere weg al toegang tot hadden gekregen.') }}
+                            </p>
+                        </STListItem>
+
+                        <STListItem :selectable="true" element-name="label">
+                            <template #left>
+                                <Checkbox v-model="allowRegistrationsByOrganization" />
+                            </template>
+                            <h3 class="style-title-list">
+                                {{ $t(`Laat andere beheerders toe ‘hun’ leden in te schrijven`) }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ $t('Beheerders kunnen leden waarvoor ze bewerkrechten hebben, inschrijven (uitschrijven is niet mogelijk).') }}
+                            </p>
+                        </STListItem>
+                    </template>
 
                     <STListItem v-if="showEnableMaxMembers" :selectable="true" element-name="label">
                         <template #left>
@@ -894,13 +934,22 @@ const preventGroupIds = computed({
     }),
 });
 
-const showAllowRegistrationsByOrganization = computed(() => props.isMultiOrganization || allowRegistrationsByOrganization.value);
+const showAllowRegistrationsByOrganization = computed(() => props.isMultiOrganization || patchedGroup.value.type === GroupType.EventRegistration || allowRegistrationsByOrganization.value || allowViewRegistrations.value);
 
 const allowRegistrationsByOrganization = computed({
     get: () => patchedGroup.value.settings.allowRegistrationsByOrganization,
     set: allowRegistrationsByOrganization => addGroupPatch({
         settings: GroupSettings.patch({
             allowRegistrationsByOrganization,
+        }),
+    }),
+});
+
+const allowViewRegistrations = computed({
+    get: () => patchedGroup.value.settings.implicitlyAllowViewRegistrations,
+    set: allowViewRegistrations => addGroupPatch({
+        settings: GroupSettings.patch({
+            allowViewRegistrations,
         }),
     }),
 });

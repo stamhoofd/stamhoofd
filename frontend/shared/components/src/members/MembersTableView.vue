@@ -1,6 +1,10 @@
 <template>
     <LoadingViewTransition>
         <ModernTableView v-if="!loading" ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :default-filter="defaultFilter" :actions="actions" :all-columns="allColumns" :estimated-rows="estimatedRows" :Route="Route">
+            <p v-if="isLimitedGroup" class="style-description-block">
+                {{ $t('Je ziet maar een deel van de inschrijvingen.') }}
+            </p>
+
             <template #empty>
                 {{ $t('22f14cbd-ccaf-41a7-a7ca-15272d6203b9') }}
             </template>
@@ -9,9 +13,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { ComponentExposed, InMemoryTableAction, LoadingViewTransition, ModernTableView, TableAction, useAppContext, useAuth, useChooseOrganizationMembersForGroup, useGlobalEventListener, useOrganization, usePlatform, useRequiredRegistrationsFilter, useTableObjectFetcher } from '@stamhoofd/components';
 import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useAdvancedMemberWithRegistrationsBlobUIFilterBuilders } from '../filters/filter-builders/members';
@@ -119,6 +122,7 @@ const groups = (() => {
     return [];
 })();
 
+const { getRequiredRegistrationsFilter } = useRequiredRegistrationsFilter();
 function getRequiredFilter(): StamhoofdFilter | null {
     if (props.customFilter) {
         return props.customFilter;
@@ -154,37 +158,10 @@ function getRequiredFilter(): StamhoofdFilter | null {
         return null;
     }
 
-    const extra: StamhoofdFilter[] = [];
-
-    if (organization.value && props.group && props.group.organizationId !== organization.value?.id) {
-        // Only show members that are registered in the current period AND in this group
-        // (avoid showing old members that moved to other groups)
-        const periodIds = [props.group.periodId];
-        if (props.periodId) {
-            periodIds.push(props.periodId);
-        }
-        if (organization?.value?.period?.period?.id) {
-            periodIds.push(organization.value.period.period.id);
-        }
-        if (platform.value.period.id) {
-            periodIds.push(platform.value.period.id);
-        }
-
-        extra.push({
-            registrations: {
-                $elemMatch: {
-                    organizationId: organization.value.id,
-                    periodId: {
-                        $in: Formatter.uniqueArray(periodIds),
-                    },
-                    group: {
-                        // Do not show members that are only registered for a waiting list or event
-                        type: GroupType.Membership,
-                    },
-                },
-            },
-        });
-    }
+    const extra: StamhoofdFilter[] = getRequiredRegistrationsFilter({
+        group: props.group ?? undefined,
+        periodId: props.periodId ?? undefined,
+    });
 
     return [
         {
@@ -234,6 +211,27 @@ const Route = {
 
 const actionBuilder = useDirectMemberActions({
     groups: props.group ? [props.group] : (props.category ? props.category.getAllGroups() : []),
+});
+
+const isLimitedGroup = computed(() => {
+    if (!props.group) {
+        return false;
+    }
+
+    if (props.group.settings.registeredMembers !== null && tableObjectFetcher.totalCount !== null && props.group.settings.registeredMembers === tableObjectFetcher.totalCount) {
+        return false;
+    }
+
+    if (app === 'admin') {
+        return false;
+    }
+    if (organization.value && props.group.organizationId !== organization.value.id) {
+        return true;
+    }
+    if (!auth.canAccessGroup(props.group)) {
+        return true;
+    }
+    return false;
 });
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();

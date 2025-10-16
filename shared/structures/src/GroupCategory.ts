@@ -236,7 +236,7 @@ export class GroupCategoryTree extends GroupCategory {
                 const g = groups.find(c => c.id === id);
                 if (g) {
                     // Hide groups we don't have permissions for
-                    if (permissions && (!g.hasReadAccess(permissions, categories))) {
+                    if (permissions && (!g.hasReadAccess(permissions, categories) && !g.settings.implicitlyAllowViewRegistrations)) {
                         return [];
                     }
                     return [g];
