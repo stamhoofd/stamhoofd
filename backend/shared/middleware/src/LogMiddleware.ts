@@ -160,7 +160,9 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
                         new StyledText(error).addClass('request', 'error'),
                     );
 
-                    logRequestDetails(request);
+                    if (!error.hasCode('too_big_attachments')) {
+                        logRequestDetails(request);
+                    }
                 }
             }
             else {
