@@ -1,9 +1,5 @@
 <template>
     <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="allColumns[0]" :Route="Route">
-        <p class="style-description">
-            {{ $t('e322ea15-9df9-4654-bccc-c7147f35e18f') }}
-        </p>
-
         <template #empty>
             {{ $t('0637e394-fbd7-42ea-9a1b-5acdcc86419a') }}
         </template>
