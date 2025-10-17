@@ -1416,7 +1416,7 @@ export class AdminPermissionChecker {
     /**
      * Changes data inline
      */
-    async filterMemberData(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob): Promise<MemberWithRegistrationsBlob> {
+    async filterMemberData(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean }): Promise<MemberWithRegistrationsBlob> {
         const cloned = data.clone();
 
         for (const [key, value] of cloned.details.recordAnswers.entries()) {
@@ -1444,7 +1444,7 @@ export class AdminPermissionChecker {
         }
 
         // Has financial read access?
-        if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
+        if (!options?.forAdminCartCalculation && !await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
             cloned.details.requiresFinancialSupport = null;
             cloned.details.uitpasNumber = null;
             cloned.outstandingBalance = 0;

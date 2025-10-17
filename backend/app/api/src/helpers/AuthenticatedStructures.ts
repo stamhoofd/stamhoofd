@@ -388,7 +388,7 @@ export class AuthenticatedStructures {
         return (await this.membersBlob(members, false)).members;
     }
 
-    static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User): Promise<MembersBlob> {
+    static async membersBlob(members: MemberWithRegistrations[], includeContextOrganization = false, includeUser?: User, options?: { forAdminCartCalculation?: boolean }): Promise<MembersBlob> {
         if (members.length === 0 && !includeUser) {
             return MembersBlob.create({ members: [], organizations: [] });
         }
@@ -468,16 +468,18 @@ export class AuthenticatedStructures {
                     }
                 }
                 if (organizations.get(registration.organizationId)?.active || (Context.auth.organization && Context.auth.organization.active && registration.organizationId === Context.auth.organization.id) || await Context.auth.hasFullAccess(registration.organizationId)) {
-                    /* if ( // Causes issues with bundle discount calculations
+                    // WARNING: If we ever filter registrations, make sure to not filter it when forAdminCartCalculation is set!
+                    filtered.push(registration);
+
+                    /* if ( // For now filtering like this causes issues with bundle discount calculations
                         registration.group.settings.implicitlyAllowViewRegistrations
                         || await Context.auth.canAccessRegistration(registration, PermissionLevel.Read)
                     ) { */
-                    filtered.push(registration);
                     // }
                 }
             }
             member.registrations = filtered;
-            const balancesPermission = await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id);
+            const balancesPermission = (!!options?.forAdminCartCalculation) || await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id);
 
             let memberBalances: GenericBalance[] = [];
 
@@ -512,7 +514,7 @@ export class AuthenticatedStructures {
             });
 
             memberBlobs.push(
-                await Context.auth.filterMemberData(member, blob),
+                await Context.auth.filterMemberData(member, blob, { forAdminCartCalculation: options?.forAdminCartCalculation ?? false }),
             );
         }
 

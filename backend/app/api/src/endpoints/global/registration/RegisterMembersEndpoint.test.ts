@@ -1,12 +1,15 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { BalanceItemCartItem, BalanceItemType, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice, RegisterItemOption, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { initPayconiq } from '../../../../tests/init/initPayconiq';
 import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
+import { assertBalances } from '../../../../tests/assertions/assertBalances';
+import PersistentFile from 'formidable/PersistentFile';
+import { PatchMap } from '@simonbackx/simple-encoding';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -53,7 +56,7 @@ describe('Endpoint.RegisterMembers', () => {
         return { organization, organizationRegistrationPeriod };
     };
 
-    async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel, linkMembersToUser = defaultLinkMembersToUser }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel; linkMembersToUser?: boolean } = {}) {
+    async function initData({ otherMemberAmount = 0, groupPermissionLevel = PermissionLevel.None, memberPermissionLevel = PermissionLevel.None, permissionLevel = defaultPermissionLevel, linkMembersToUser = defaultLinkMembersToUser }: { otherMemberAmount?: number; memberPermissionLevel?: PermissionLevel; groupPermissionLevel?: PermissionLevel; permissionLevel?: PermissionLevel; linkMembersToUser?: boolean } = {}) {
         const { organization, organizationRegistrationPeriod } = await initOrganization(period);
 
         const user = await new UserFactory({
@@ -78,7 +81,7 @@ describe('Endpoint.RegisterMembers', () => {
                 .create());
         }
 
-        if (!linkMembersToUser && permissionLevel !== PermissionLevel.None) {
+        if (!linkMembersToUser && (permissionLevel !== PermissionLevel.None || memberPermissionLevel !== null)) {
             // Give write permission to the member by registering them for another group
             const genericGroup = await new GroupFactory({
                 organization,
@@ -91,14 +94,49 @@ describe('Endpoint.RegisterMembers', () => {
                 group: genericGroup,
                 groupPrice: genericGroup.settings.prices[0],
             }).create();
+
+            if (memberPermissionLevel !== PermissionLevel.None) {
+                // Grant permissions to this genericGroup
+                user.permissions = user.permissions ?? UserPermissions.create({});
+                let org = user.permissions.organizationPermissions.get(organization.id) ?? Permissions.create({});
+                const p = Permissions.patch({});
+                p.resources.set(PermissionsResourceType.Groups, new PatchMap([[
+                    genericGroup.id, ResourcePermissions.patch({
+                        level: memberPermissionLevel,
+                    }),
+                ]]));
+                org = org.patch(p);
+                user.permissions.organizationPermissions.set(organization.id, org);
+
+                // Save
+                await user.save();
+            }
         }
 
         const group = await new GroupFactory({
             organization,
             price: 25_00,
+            reducedPrice: 12_50,
             stock: 500,
         })
             .create();
+
+        if (groupPermissionLevel !== PermissionLevel.None) {
+            // Grant permissions to this genericGroup
+            user.permissions = user.permissions ?? UserPermissions.create({});
+            let org = user.permissions.organizationPermissions.get(organization.id) ?? Permissions.create({});
+            const p = Permissions.patch({});
+            p.resources.set(PermissionsResourceType.Groups, new PatchMap([[
+                group.id, ResourcePermissions.patch({
+                    level: groupPermissionLevel,
+                }),
+            ]]));
+            org = org.patch(p);
+            user.permissions.organizationPermissions.set(organization.id, org);
+
+            // Save
+            await user.save();
+        }
 
         const groupPrice = group.settings.prices[0];
 
@@ -1265,8 +1303,260 @@ describe('Endpoint.RegisterMembers', () => {
                 }));
         });
 
+        /**
+         * Case: you have write permission - but no access to financial data.
+         */
         test('Registering members with financial support', async () => {
-            const { member, user, organization, token } = await initData();
+            const { member, user, groupPrice, group, organization, token } = await initData({
+                permissionLevel: PermissionLevel.Write,
+            });
+
+            // Set member financial data status
+            member.details.requiresFinancialSupport = BooleanStatus.create({ value: true });
+            await member.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00, // This is wrong, but the admin should not know that since he/she does not know the actual financial status of the member
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+
+            // No balance information leaks
+            expect(response.body.registrations[0].balances.length).toEqual(0);
+
+            // Check acual charged amount
+            const registration = (await Registration.getByID(response.body.registrations[0].id))!;
+            expect(registration).toBeDefined();
+            expect(registration.discounts).toMatchMap(new Map([]));
+
+            // Check balance has been added
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration.id,
+                    amount: 1,
+                    price: 12_50,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 12_50,
+                    pricePending: 0,
+                },
+            ]);
+
+            // Check member in response doesn't include sensitive data
+            const memberInResponse = response.body.members.members.find(m => m.id === member.id)!;
+            expect(memberInResponse).toBeDefined();
+            expect(memberInResponse.details.requiresFinancialSupport).toBe(null);
+            const returnedRegistration = memberInResponse.registrations.find(r => r.id === registration.id)!;
+            expect(returnedRegistration).toBeDefined();
+            expect(returnedRegistration.balances.length).toBe(0);
+        });
+
+        /**
+         * Negative test for previous test
+         */
+        test('Can register a member as full admin', async () => {
+            const { member, groupPrice, group, organization, token } = await initData({});
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+
+            // Check acual charged amount
+            const registration = (await Registration.getByID(response.body.registrations[0].id))!;
+            expect(registration).toBeDefined();
+            expect(registration.discounts).toMatchMap(new Map([]));
+
+            // Check balance has been added
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration.id,
+                    amount: 1,
+                    price: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 25_00,
+                    pricePending: 0,
+                },
+            ]);
+
+            // Check member in response does include financial data
+            const memberInResponse = response.body.members.members.find(m => m.id === member.id)!;
+            expect(memberInResponse).toBeDefined();
+            const returnedRegistration = memberInResponse.registrations.find(r => r.id === registration.id)!;
+            expect(returnedRegistration).toBeDefined();
+            expect(returnedRegistration.balances.length).not.toBe(0);
+        });
+
+        test('Can register a member as admin with write permission to new group only', async () => {
+            // read permission to existing member, write permission to new group you want to register the member in
+            const { member, groupPrice, group, organization, token } = await initData({
+                permissionLevel: PermissionLevel.None,
+                groupPermissionLevel: PermissionLevel.Write,
+                memberPermissionLevel: PermissionLevel.Read,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                asOrganizationId: organization.id,
+            });
+
+            const response = await post(body, organization, token);
+            expect(response.body.registrations.length).toBe(1);
+
+            // No balance information leaks
+            expect(response.body.registrations[0].balances.length).toEqual(0);
+
+            // Check acual charged amount
+            const registration = (await Registration.getByID(response.body.registrations[0].id))!;
+            expect(registration).toBeDefined();
+            expect(registration.discounts).toMatchMap(new Map([]));
+
+            // Check balance has been added
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration.id,
+                    amount: 1,
+                    price: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 25_00,
+                    pricePending: 0,
+                },
+            ]);
+        });
+
+        test('Cannot register a member with only read permissions', async () => {
+            const { member, groupPrice, group, organization, token } = await initData({
+                permissionLevel: PermissionLevel.None,
+                groupPermissionLevel: PermissionLevel.Read,
+                memberPermissionLevel: PermissionLevel.Read,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                asOrganizationId: organization.id,
+            });
+
+            // send request and check occupancy
+            await expect(async () => await post(body, organization, token)).rejects.toThrow('No permission to register in this group');
+        });
+
+        test('Cannot register a member with only read permissions even when having full permissions to the specific member', async () => {
+            const { member, groupPrice, group, organization, token } = await initData({
+                // No global organization permissions
+                permissionLevel: PermissionLevel.None,
+                groupPermissionLevel: PermissionLevel.Read, // Only read access to the new group
+                memberPermissionLevel: PermissionLevel.Full, // Full access to the member
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                asOrganizationId: organization.id,
+            });
+
+            // send request and check occupancy
+            await expect(async () => await post(body, organization, token)).rejects.toThrow('No permission to register in this group');
         });
     });
 
@@ -2138,7 +2428,9 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Cannot delete registrations as admin if no write permission to group', async () => {
             const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
-                permissionLevel: PermissionLevel.Read,
+                permissionLevel: PermissionLevel.None,
+                groupPermissionLevel: PermissionLevel.Read,
+                memberPermissionLevel: PermissionLevel.Full,
                 linkMembersToUser: false,
             });
 
@@ -2162,7 +2454,7 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to register this member/);
+            await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
         });
 
         /**

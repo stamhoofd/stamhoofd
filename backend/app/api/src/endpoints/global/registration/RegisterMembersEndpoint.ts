@@ -78,6 +78,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
+            // Fast fail
+            if (!await Context.auth.hasSomeAccess(request.body.asOrganizationId)) {
+                throw new SimpleError({
+                    code: 'forbidden',
+                    message: 'No permission to register members manually',
+                    human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
+                    statusCode: 403,
+                });
+            }
+        }
+
         // For non paid organizations, limit amount of tests
         if (!organization.meta.packages.isPaid) {
             const limiter = demoLimiter;
@@ -145,7 +157,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         for (const member of members) {
-            if (!await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+            if (!await Context.auth.canAccessMember(
+                member,
+                request.body.asOrganizationId ? PermissionLevel.Read : PermissionLevel.Write,
+            )) {
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register this member',
@@ -170,7 +185,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             for (const memberId of memberIds) {
                 const familyMembers = (await Member.getFamilyWithRegistrations(memberId));
                 members.push(...familyMembers);
-                const blob = await AuthenticatedStructures.membersBlob(familyMembers, true);
+                const blob = await AuthenticatedStructures.membersBlob(familyMembers, true, undefined, { forAdminCartCalculation: true });
                 const family = PlatformFamily.create(blob, {
                     platform: platformStruct,
                     contextOrganization,
@@ -224,13 +239,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const totalPrice = checkout.totalPrice;
 
-        if (totalPrice !== request.body.totalPrice) {
-            throw new SimpleError({
-                code: 'changed_price',
-                message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
-            });
-        }
-
         // Who is going to pay?
         let whoWillPayNow: 'member' | 'organization' | 'nobody' = 'member'; // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
 
@@ -241,6 +249,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
             // The organization will pay to the organizing organization, and it will get added to the outstanding amount of the member towards the paying organization
             whoWillPayNow = 'organization';
+        }
+
+        if (totalPrice !== request.body.totalPrice) {
+            if (whoWillPayNow === 'nobody') {
+                // Safe to ignore: we are only updating the outstanding amounts
+            }
+            else {
+                throw new SimpleError({
+                    code: 'changed_price',
+                    message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
+                });
+            }
         }
 
         const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
