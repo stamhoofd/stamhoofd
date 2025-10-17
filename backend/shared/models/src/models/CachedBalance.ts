@@ -314,7 +314,9 @@ export class CachedBalance extends QueryableModel {
 
             const result = results.find(r => r[0] === objectId);
             if (result) {
-                result[1].nextDueAt = dueAt;
+                if (amountOpen !== 0) {
+                    result[1].nextDueAt = dueAt;
+                }
 
                 if (result[1].amountOpen < 0) {
                     if (amountOpen > 0) {
@@ -327,7 +329,7 @@ export class CachedBalance extends QueryableModel {
                 result[1].amountPaid += amountPaid;
             }
             else {
-                results.push([objectId, { amountPaid, amountOpen: 0, amountPending, nextDueAt: dueAt }]);
+                results.push([objectId, { amountPaid, amountOpen: 0, amountPending, nextDueAt: amountOpen !== 0 ? dueAt : null }]);
             }
         }
 

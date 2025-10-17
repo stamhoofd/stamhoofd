@@ -324,7 +324,7 @@ export class BalanceItem extends AutoEncoder {
     }
 
     static filterBalanceItems(items: BalanceItem[]) {
-        return items.filter(i => BalanceItem.getOutstandingBalance([i]).priceOpen !== 0).sort((a, b) => Sorter.stack(
+        return items.filter(i => i.priceOpen !== 0).sort((a, b) => Sorter.stack(
             Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
             Sorter.byDateValue(b.createdAt, a.createdAt),
         ));
