@@ -15,6 +15,7 @@ describe('Endpoint.RegisterMembers', () => {
     const endpoint = new RegisterMembersEndpoint();
     let period: RegistrationPeriod;
     let defaultPermissionLevel = PermissionLevel.None;
+    let defaultLinkMembersToUser = true;
     const post = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
         const request = Request.buildJson('POST', baseUrl, organization.getApiHost(), body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -52,7 +53,7 @@ describe('Endpoint.RegisterMembers', () => {
         return { organization, organizationRegistrationPeriod };
     };
 
-    async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) {
+    async function initData({ otherMemberAmount = 0, permissionLevel = defaultPermissionLevel, linkMembersToUser = defaultLinkMembersToUser }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel; linkMembersToUser?: boolean } = {}) {
         const { organization, organizationRegistrationPeriod } = await initOrganization(period);
 
         const user = await new UserFactory({
@@ -67,14 +68,29 @@ describe('Endpoint.RegisterMembers', () => {
 
         const token = await Token.createToken(user);
 
-        const member = await new MemberFactory({ organization, user })
+        const member = await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })
             .create();
 
         const otherMembers: MemberWithRegistrations[] = [];
 
         for (let i = 0; i < otherMemberAmount; i++) {
-            otherMembers.push(await new MemberFactory({ organization, user })
+            otherMembers.push(await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })
                 .create());
+        }
+
+        if (!linkMembersToUser && permissionLevel !== PermissionLevel.None) {
+            // Give write permission to the member by registering them for another group
+            const genericGroup = await new GroupFactory({
+                organization,
+                price: 0,
+            })
+                .create();
+
+            await new RegistrationFactory({
+                member,
+                group: genericGroup,
+                groupPrice: genericGroup.settings.prices[0],
+            }).create();
         }
 
         const group = await new GroupFactory({
@@ -101,6 +117,7 @@ describe('Endpoint.RegisterMembers', () => {
     describe('Register as member', () => {
         beforeEach(() => {
             defaultPermissionLevel = PermissionLevel.None;
+            defaultLinkMembersToUser = true;
         });
 
         test('Should fail if demo limit reached', async () => {
@@ -1161,6 +1178,7 @@ describe('Endpoint.RegisterMembers', () => {
     describe('Register as organization', () => {
         beforeEach(() => {
             defaultPermissionLevel = PermissionLevel.Full;
+            defaultLinkMembersToUser = false;
         });
 
         test('Should reuse recently deactivated registration', async () => {
@@ -1246,15 +1264,20 @@ describe('Endpoint.RegisterMembers', () => {
                     code: 'cannot_pay_balance_items',
                 }));
         });
+
+        test('Registering members with financial support', async () => {
+            const { member, user, organization, token } = await initData();
+        });
     });
 
     describe('Register by other organization', () => {
         beforeEach(() => {
             defaultPermissionLevel = PermissionLevel.Full;
+            defaultLinkMembersToUser = false;
         });
 
         async function initDualData(options?: Parameters<typeof initData>[0]) {
-            const base = await initData(options);
+            const base = await initData({ ...options, permissionLevel: PermissionLevel.None });
 
             base.group.settings.allowRegistrationsByOrganization = true;
             await base.group.save();
@@ -1269,6 +1292,18 @@ describe('Endpoint.RegisterMembers', () => {
                 ]),
             });
             await base.user.save();
+
+            // Give the user permission to the original member
+            const genericGroup = await new GroupFactory({
+                organization: organization2,
+                price: 0,
+            }).create();
+
+            await new RegistrationFactory({
+                member: base.member,
+                group: genericGroup,
+                groupPrice: genericGroup.settings.prices[0],
+            }).create();
 
             return {
                 ...base,
@@ -1760,9 +1795,11 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
         });
 
-        test('Move registration should fail if admin of same organization', async () => {
-            // #region arrange
-            const { organization, group: group1, groupPrice: groupPrice1, token, member } = await initData();
+        test('Move registration should fail via member portal (no asOrganizationId set)', async () => {
+            const { organization, group: group1, groupPrice: groupPrice1, token, member } = await initData({
+                permissionLevel: defaultPermissionLevel,
+                linkMembersToUser: true,
+            });
 
             const registration = await new RegistrationFactory({
                 member,
@@ -1801,14 +1838,9 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 5,
                 customer: null,
             });
-            // #endregion
-
-            // #region act and assert
 
             // send request and check occupancy
             await expect(async () => await post(body, organization, token)).rejects.toThrow('Not allowed to move registrations');
-
-            // #endregion
         });
     });
 
@@ -1885,8 +1917,10 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should throw error if deleting registrations as normal member', async () => {
-            // #region arrange
-            const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData();
+            const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData({
+                permissionLevel: PermissionLevel.Full,
+                linkMembersToUser: true,
+            });
             await initPayconiq({ organization: organization1 });
 
             const registration = await new RegistrationFactory({
@@ -1933,7 +1967,6 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should deactivate registration', async () => {
-            // #region arrange
             const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
 
             const registration = await new RegistrationFactory({
@@ -1973,15 +2006,12 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await post(body, organization, token);
 
             const updatedRegistration = await Registration.getByID(registration.id);
             expect(updatedRegistration).toBeDefined();
             expect(updatedRegistration!.deactivatedAt).not.toBe(null);
-            // #endregion
         });
 
         test('Should fail if invalid cancelation fee', async () => {
@@ -2059,9 +2089,10 @@ describe('Endpoint.RegisterMembers', () => {
             }
         });
 
-        test('Delete by member should fail if no permission to delete registration', async () => {
-            // #region arrange
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+        test('Cannot delete registrations via the member portal', async () => {
+            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
+                linkMembersToUser: true,
+            });
 
             const registration = await new RegistrationFactory({
                 member,
@@ -2099,18 +2130,17 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 5,
                 customer: null,
             });
-            // #endregion
 
-            // #region act and assert
             await expect(async () => await post(body, organization, token))
                 .rejects
                 .toThrow(new RegExp('Permission denied: you are not allowed to delete registrations'));
-            // #endregion
         });
 
-        test('Delete by organization should fail if no permission to delete registration', async () => {
-            // #region arrange
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({ permissionLevel: PermissionLevel.Read });
+        test('Cannot delete registrations as admin if no write permission to group', async () => {
+            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
+                permissionLevel: PermissionLevel.Read,
+                linkMembersToUser: false,
+            });
 
             const registration = await new RegistrationFactory({
                 member,
@@ -2131,11 +2161,40 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
                 asOrganizationId: organization.id,
             });
-            // #endregion
 
-            // #region act and assert
+            await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to register this member/);
+        });
+
+        /**
+         * userManager does not allow unregistering your own members, even when you have some admin permissions and set asOrganizationId
+         */
+        test('Cannot delete registrations as admin if no write permission to group but does have userManager permissions', async () => {
+            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
+                permissionLevel: PermissionLevel.Read,
+                linkMembersToUser: true,
+            });
+
+            const registration = await new RegistrationFactory({
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [],
+                    deleteRegistrationIds: [registration.id],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 0,
+                customer: null,
+                asOrganizationId: organization.id,
+            });
+
             await expect(async () => await post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
-            // #endregion
         });
 
         test('Should fail if registration does not exist anymore', async () => {
