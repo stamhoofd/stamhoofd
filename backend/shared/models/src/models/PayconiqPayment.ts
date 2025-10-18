@@ -1,6 +1,7 @@
 import { column, Model } from "@simonbackx/simple-database";
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PayconiqAccount, PaymentStatus, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { IncomingMessage } from 'http';
 import https from "https";
 import { v4 as uuidv4 } from "uuid";
