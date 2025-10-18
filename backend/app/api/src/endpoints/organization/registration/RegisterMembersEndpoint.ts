@@ -443,6 +443,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         let paymentUrl: string | null = null
+        let paymentQRCode: string | null = null;
         const description = 'Inschrijving '+organization.name
         if (payment.status != PaymentStatus.Succeeded) {
             const redirectUrl = "https://"+organization.getHost()+'/payment?id='+encodeURIComponent(payment.id)
@@ -513,7 +514,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 dbPayment.mollieId = molliePayment.id
                 await dbPayment.save();
             } else if (payment.provider === PaymentProvider.Payconiq) {
-                paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl)
+                ({paymentUrl, paymentQRCode} = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl));
             } else if (payment.provider == PaymentProvider.Buckaroo) {
                 // Increase request timeout because buckaroo is super slow (in development)
                 request.request.request?.setTimeout(60 * 1000)
@@ -536,7 +537,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             payment: PaymentStruct.create(payment),
             members: (await Member.getMembersWithRegistrationForUser(user)).map(m => m.getStructureWithRegistrations()),
             registrations: registrations.map(r => Member.getRegistrationWithMemberStructure(r)),
-            paymentUrl
+            paymentUrl,
+            paymentQRCode
         }));
     }
 }

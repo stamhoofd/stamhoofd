@@ -11,6 +11,12 @@ export class RegisterResponse extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 28 })
     paymentUrl: string | null = null
 
+    /**
+     * Data to put in a QR-code
+     */
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    paymentQRCode: string | null = null
+
     @field({ decoder: new ArrayDecoder(EncryptedMemberWithRegistrations) })
     members: EncryptedMemberWithRegistrations[] = []
 

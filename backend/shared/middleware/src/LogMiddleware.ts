@@ -115,8 +115,8 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
                 if (!error.hasCode("expired_access_token") && !error.hasCode('unknown_domain') && !error.hasCode('unknown_webshop')) {
                     logger.error(
                         ...requestPrefix(request, 'error'),
-                        "Request with error in response ",
-                        new StyledText(error.code).addClass('request', 'error')
+                        "Request with error in response: \n",
+                        new StyledText(error).addClass('request', 'error')
                     )
                     
                     if (!error.hasCode('too_big_attachments')) {

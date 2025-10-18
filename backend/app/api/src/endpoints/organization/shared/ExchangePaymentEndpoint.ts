@@ -333,6 +333,8 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                             console.error('Manually cancelling Payconiq payment', payment.id)
                             if (await payconiqPayment.cancel(organization)) {
                                 status = PaymentStatus.Failed
+                            } else {
+                                console.error('Failed to manually cancel payment')
                             }
                         }
 

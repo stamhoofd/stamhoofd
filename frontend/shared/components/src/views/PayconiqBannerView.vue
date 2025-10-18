@@ -6,7 +6,7 @@
         <div class="payconiq-logo" />
 
         <div class="qr-code" :class="{ scanned: payment.status == 'Pending'}">
-            <img v-if="payment.status == 'Pending' || payment.status == 'Created'" :src="qrCodeSrc">
+            <img v-if="payment.status == 'Pending' || payment.status == 'Created'" :src="qrCodeSrc" draggable="false">
         </div>
 
         <LoadingButton :loading="payment && payment.status == 'Pending'" class="price-loading">
@@ -15,7 +15,7 @@
             </p>
         </LoadingButton>
 
-        <p>Of scan met een ondersteunende bank app</p>
+        <p>Of scan met een bank app</p>
     </div>
 </template>
 
@@ -145,7 +145,19 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
     }
 
     get qrCodeSrc() {
-        return "https://portal.payconiq.com/qrcode?s=L&c="+encodeURIComponent(this.paymentUrl);
+        return this.paymentUrl;
+        /*let testMode = false;
+        if (this.paymentUrl.includes('preprod.bancontact') || this.paymentUrl.includes('ext.payconiq')) {
+            testMode = true;
+        }
+        const isWero = testMode || Date.now() > new Date('2025-10-19T02:00:00+02:00').getTime();
+        
+        let endpoint = !testMode ? 'https://portal.payconiq.com/qrcode' : 'https://portal.ext.payconiq.com/qrcode';
+        let updatedPaymentUrl = this.paymentUrl;
+        if (isWero) {
+            endpoint = !testMode ? 'https://qrcodegenerator.api.bancontact.net/qrcode' : 'https://qrcodegenerator.api.preprod.bancontact.net/qrcode'
+        }
+        return endpoint + "?s=L&c="+encodeURIComponent(this.paymentUrl);*/
     }
 
 }
@@ -166,7 +178,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
         .payconiq-close {
             color: $color-payconiq-dark-original;
-            position: absolute;
+            position: absolute !important;
             top: 15px;
             right: 15px;
         }
@@ -194,6 +206,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             display: flex;
             align-items: center;
             justify-content: center;
+            user-select: none;
 
             img {
                 width: 240px;

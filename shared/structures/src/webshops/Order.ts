@@ -512,6 +512,12 @@ export class OrderResponse extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     paymentUrl: string | null = null
 
+    /**
+     * Data to put in a QR-code
+     */
+    @field({ decoder: StringDecoder, nullable: true, optional: true })
+    paymentQRCode: string | null = null
+    
     @field({ decoder: Order })
     order: Order
 }

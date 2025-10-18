@@ -44,6 +44,11 @@ export class Formatter {
         return this.removeAccents(name).replace(/[^A-Za-z0-9-]+/g, " ").trim()
     }
 
+    static sepaPaymentSlug(name: string): string {
+        // https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/sepa-requirements-extended-character-set-unicode-subset-best
+        return this.removeAccents(name).replace(/[^A-Za-z0-9-.:'+]+/g, " ").trim()
+    }
+
     static removeDuplicateSpaces(name: string): string {
         return name.replace(/\s+/, " ");
     }

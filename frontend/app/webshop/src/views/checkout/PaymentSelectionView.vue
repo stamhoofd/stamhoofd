@@ -161,6 +161,7 @@ export default class PaymentSelectionView extends Mixins(NavigationMixin){
                     organization: this.organization, 
                     payment, 
                     paymentUrl: response.data.paymentUrl, 
+                    paymentQRCode: response.data.paymentQRCode, 
                     returnUrl: "https://"+this.webshop.getUrl(this.organization)+"/payment?id="+encodeURIComponent(payment.id),
                     component: this,
                     transferSettings: WebshopManager.webshop.meta.transferSettings,

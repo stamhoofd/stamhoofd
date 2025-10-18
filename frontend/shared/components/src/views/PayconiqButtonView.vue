@@ -6,8 +6,9 @@
 
         <main>
             <h1>Betaal met Payconiq by Bancontact</h1>
-            <p class="style-description">Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.</p>
-            <p class="style-description">Klik op de volgende pagina op 'Kies een andere app' als je met een andere app dan Payconiq by Bancontact wilt betalen.</p>
+            <p class="style-description">
+                Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.
+            </p>
         </main>
 
         <STToolbar>
@@ -90,7 +91,7 @@ export default class PayconiqButtonView extends PayconiqBannerView {
 
     helpMe() {
         if (this.getOS() == "iOS") {
-            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Als je op een pagina terecht komt die zegt dat je de app niet hebt: sleep die pagina naar beneden tot er een grijze balk tevoorschijn komt, klik daar op 'Open'. Probeer eventueel opnieuw op een computer of selecteer een andere betaalmethode.")
+            new CenteredMessage("Het lukt niet", "Kijk na of je één van de apps bovenaan deze pagina hebt geïnstalleerd. Zorg dat je de Safari app gebruikt, en geen andere app. Probeer eventueel opnieuw op een computer (daar kan je de QR-code scannen) of selecteer een andere betaalmethode.")
                 .addCloseButton()
                 .show()
         } else {
