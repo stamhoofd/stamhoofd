@@ -36,25 +36,6 @@ export class PayconiqPayment extends QueryableModel {
 
         const testMode = organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production');
 
-        if (testMode && false) {
-            const payment = await Payment.getByID(this.paymentId);
-            if (!payment) {
-                throw new SimpleError({
-                    code: '',
-                    message: 'Payment not found',
-                });
-            }
-
-            const age = (new Date().getTime() - new Date(payment.createdAt).getTime()) / 1000;
-
-            // 10 seconds pending
-            if (age < 10) {
-                return PaymentStatus.Pending;
-            }
-
-            return PaymentStatus.Succeeded;
-        }
-
         const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, testMode);
         if (response.status) {
             switch (response.status) {
