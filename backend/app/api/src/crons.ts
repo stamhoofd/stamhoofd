@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { Group, Organization, Payment, Registration, STPackage, Webshop } from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-
+import { SQL } from '@stamhoofd/sql';
 import { registerCron } from '@stamhoofd/crons';
 import { checkSettlements } from './helpers/CheckSettlements';
 import { PaymentService } from './services/PaymentService';
@@ -351,4 +351,4 @@ registerCron('checkPayments', checkPayments);
 registerCron('checkDrips', checkDrips);
 
 // Register other crons
-import './crons/index.js'; import { SQL } from '@stamhoofd/sql';
+import './crons/index.js';
