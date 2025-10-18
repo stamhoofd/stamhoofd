@@ -6,7 +6,7 @@
         <div class="payconiq-logo" />
 
         <div class="qr-code" :class="{ scanned: payment.status === 'Pending'}">
-            <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc">
+            <img v-if="payment.status === 'Pending' || payment.status === 'Created'" :src="qrCodeSrc" draggable="false">
         </div>
 
         <LoadingButton :loading="payment && payment.status === 'Pending'" class="price-loading">
@@ -150,7 +150,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
     }
 
     get qrCodeSrc() {
-        return 'https://portal.payconiq.com/qrcode?s=L&c=' + encodeURIComponent(this.paymentUrl);
+        return this.paymentUrl;
     }
 }
 </script>
@@ -198,6 +198,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin) {
             display: flex;
             align-items: center;
             justify-content: center;
+            user-select: none;
 
             img {
                 width: 240px;

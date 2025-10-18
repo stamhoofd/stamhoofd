@@ -130,30 +130,25 @@ async function checkPayments() {
     const timeout = 60 * 1000 * 31;
 
     // TODO: only select the ID + organizationId
-    const payments = await Payment.where({
-        status: {
-            sign: 'IN',
-            value: [PaymentStatus.Created, PaymentStatus.Pending],
-        },
-        method: {
-            sign: 'IN',
-            value: [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard],
-        },
-        // Check all payments that are 11 minutes old and are still pending
-        createdAt: {
-            sign: '<',
-            value: new Date(new Date().getTime() - timeout),
-        },
-    }, {
-        limit: 100,
-
-        // Return oldest payments first
-        // If at some point, they are still pending after 1 day, their status should change to failed
-        sort: [{
-            column: 'createdAt',
-            direction: 'ASC',
-        }],
-    });
+    const payments = await Payment.select()
+        .where(
+            SQL.where('method', [
+                PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
+            ])
+                .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
+                .and('createdAt', '<', new Date(new Date().getTime() - timeout)),
+        )
+        // For payconiq payments, we have a shorter timeout of 1 minute if they are still in the 'created' state (not scanned)
+        .orWhere(
+            SQL.where('method', [
+                PaymentMethod.Payconiq,
+            ])
+                .and('status', [PaymentStatus.Created])
+                .and('createdAt', '<', new Date(new Date().getTime() - 60 * 1000)),
+        )
+        .orderBy('createdAt', 'ASC')
+        .limit(200)
+        .fetch();
 
     console.log('[DELAYED PAYMENTS] Checking pending payments: ' + payments.length);
 
@@ -356,4 +351,4 @@ registerCron('checkPayments', checkPayments);
 registerCron('checkDrips', checkDrips);
 
 // Register other crons
-import './crons/index.js';
+import './crons/index.js'; import { SQL } from '@stamhoofd/sql';

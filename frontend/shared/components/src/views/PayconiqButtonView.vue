@@ -7,9 +7,6 @@
             <p class="style-description">
                 {{ $t('b3bdadbd-5c9c-461d-8607-6f9cd5c2640d') }}
             </p>
-            <p class="style-description">
-                {{ $t("630a85b7-2e2a-4e94-a8a2-f77bd80b78ed") }}
-            </p>
         </main>
 
         <STToolbar>

@@ -260,6 +260,9 @@ export const PaymentService = {
                                 if (await payconiqPayment.cancel(organization)) {
                                     status = PaymentStatus.Failed;
                                 }
+                                else {
+                                    console.error('Failed to manually cancel payment');
+                                }
                             }
 
                             if (this.isManualExpired(status, payment)) {

@@ -160,6 +160,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             organization: checkout.singleOrganization!,
             payment,
             paymentUrl: response.data.paymentUrl,
+            paymentQRCode: response.data.paymentQRCode, 
             navigate,
             transferSettings: checkout.singleOrganization!.meta.registrationPaymentConfiguration.transferSettings,
             type: 'registration',

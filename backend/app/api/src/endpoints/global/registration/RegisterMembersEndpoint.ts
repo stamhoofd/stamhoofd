@@ -782,6 +782,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         let paymentUrl: string | null = null;
+        let paymentQRCode: string | null = null;
         let payment: Payment | null = null;
 
         // Delay marking as valid as late as possible so any errors will prevent creating valid balance items
@@ -833,6 +834,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 if (response) {
                     paymentUrl = response.paymentUrl;
+                    paymentQRCode = response.paymentQRCode;
                     payment = response.payment;
                 }
             }
@@ -860,6 +862,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             members: await AuthenticatedStructures.membersBlob(updatedMembers),
             registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r)),
             paymentUrl,
+            paymentQRCode,
         }));
     }
 
@@ -1066,6 +1069,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const description = $t(`33a926ea-9bc7-444e-becc-c0f2f70e1f0e`) + ' ' + organization.name;
 
         let paymentUrl: string | null = null;
+        let paymentQRCode: string | null = null;
 
         try {
             // Update balance items
@@ -1163,7 +1167,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     await dbPayment.save();
                 }
                 else if (payment.provider === PaymentProvider.Payconiq) {
-                    paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl);
+                    ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl));
                 }
                 else if (payment.provider == PaymentProvider.Buckaroo) {
                     // Increase request timeout because buckaroo is super slow (in development)
@@ -1194,6 +1198,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             provider,
             stripeAccount,
             paymentUrl,
+            paymentQRCode,
         };
     }
 }

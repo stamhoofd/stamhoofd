@@ -224,7 +224,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
 
                 let paymentUrl: string | null = null;
-                const description = webshop.meta.name + ' - ' + payment.id;
+                let paymentQRCode: string | null = null;
+                const description = webshop.meta.name + ' - ' + organization.name;
 
                 if (payment.method === PaymentMethod.Transfer) {
                     await order.markValid(payment, []);
@@ -324,7 +325,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         await dbPayment.save();
                     }
                     else if (payment.provider == PaymentProvider.Payconiq) {
-                        paymentUrl = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl);
+                        ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl));
                     }
                     else if (payment.provider == PaymentProvider.Buckaroo) {
                         // Increase request timeout because buckaroo is super slow
@@ -351,6 +352,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
                 return new Response(OrderResponse.create({
                     paymentUrl: paymentUrl,
+                    paymentQRCode,
                     order: OrderStruct.create({ ...order, payment: PaymentStruct.create(payment) }),
                 }));
             }

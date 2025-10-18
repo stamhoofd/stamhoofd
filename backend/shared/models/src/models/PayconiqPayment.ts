@@ -7,6 +7,7 @@ import https from 'https';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Organization, Payment } from './';
+import { Formatter } from '@stamhoofd/utility';
 
 export class PayconiqPayment extends QueryableModel {
     static table = 'payconiq_payments';
@@ -35,7 +36,7 @@ export class PayconiqPayment extends QueryableModel {
 
         const testMode = organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production');
 
-        if (testMode) {
+        if (testMode && false) {
             const payment = await Payment.getByID(this.paymentId);
             if (!payment) {
                 throw new SimpleError({
@@ -92,7 +93,7 @@ export class PayconiqPayment extends QueryableModel {
             return true;
         }
         catch (e) {
-            console.error('Failed to cancel Payconiq payment', this.id, this.payconiqId, e);
+            console.error('Failed to cancel Payconiq payment', this.id, this.payconiqId, this.payconiqId, e);
             return false;
         }
     }
@@ -119,7 +120,7 @@ export class PayconiqPayment extends QueryableModel {
         }
     }
 
-    static async createPayment(payment: Payment, organization: Organization, description: string, returnUrl?: string, callbackUrl?: string) {
+    static async createPayment(payment: Payment, organization: Organization, description: string, returnUrl?: string, callbackUrl?: string): Promise<{ paymentUrl: string; paymentQRCode: string }> {
         const apiKey = organization.privateMeta.payconiqApiKey;
         if (!apiKey) {
             throw new SimpleError({
@@ -129,30 +130,47 @@ export class PayconiqPayment extends QueryableModel {
         }
 
         const response = await this.request('POST', '/v3/payments', {
-            reference: payment.id.replace('-', ''), // 36 chars, max length is 35...
+            reference: payment.id.replaceAll('-', ''), // 36 chars, max length is 35.... The actual id is also in the description
             amount: payment.price,
             currency: 'EUR',
             callbackUrl: callbackUrl ?? 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true',
             returnUrl,
-            description,
+            description: Formatter.sepaPaymentSlug(description).substring(0, 140), // Lmimit to 140 chars
         }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
 
         const payconiqPayment = new PayconiqPayment();
         payconiqPayment.paymentId = payment.id;
         payconiqPayment.payconiqId = response.paymentId;
 
-        // Read link (currently we use checkout!)
-        let link = response._links.checkout.href as string;
+        // Read link
+        const paymentUrl = response._links.checkout.href as string;
+        let paymentQRCode = response._links.qrcode.href as string;
 
-        if (organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production')) {
-            // For checkout only!
-            // We get the wrong link in development mode
-            link = link.replace('https://payconiq.com/', 'https://ext.payconiq.com/');
+        if (typeof paymentUrl !== 'string' || typeof paymentQRCode !== 'string') {
+            console.error('Unsupported Payconiq response', response);
+            throw new SimpleError({
+                code: '',
+                message: $t('4a3b54dc-e945-4a15-8b31-b9b4bb483b2a'),
+            });
+        }
+
+        try {
+            // Grow QR-code in size
+            const u = new URL(paymentQRCode);
+            u.searchParams.set('s', 'L');
+            paymentQRCode = u.toString();
+        }
+        catch (e) {
+            console.error('Found unreadable payment QR Code');
+            console.error(e);
         }
 
         await payconiqPayment.save();
 
-        return link;
+        return {
+            paymentUrl,
+            paymentQRCode,
+        };
     }
 
     /**
@@ -163,7 +181,7 @@ export class PayconiqPayment extends QueryableModel {
             const jsonData = JSON.stringify(data);
 
             // Payconiq switches to Wero on 2025-10-19
-            const isWero = Date.now() > new Date('2025-10-19T02:00:00+02:00').getTime();
+            const isWero = testMode || Date.now() > new Date('2025-10-19T02:00:00+02:00').getTime();
             let hostname = !testMode ? 'api.payconiq.com' : 'api.ext.payconiq.com';
             if (isWero) {
                 hostname = !testMode ? 'merchant.api.bancontact.net' : 'merchant.api.preprod.bancontact.net';

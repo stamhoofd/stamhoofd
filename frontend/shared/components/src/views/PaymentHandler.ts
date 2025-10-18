@@ -56,6 +56,7 @@ export class PaymentHandler {
             organization: Organization;
             payment: Payment;
             paymentUrl: string | null;
+            paymentQRCode: string | null;
             transferSettings: TransferSettings | null;
             navigate: NavigationActions;
             type: 'order' | 'registration';
@@ -64,7 +65,7 @@ export class PaymentHandler {
         failedHandler: (payment: Payment | null) => void | Promise<void>,
         transferHandler?: (payment: Payment | null) => void | Promise<void>,
     ) {
-        const { payment, organization, server, navigate, paymentUrl, transferSettings } = settings;
+        const { payment, organization, server, navigate, paymentUrl, paymentQRCode, transferSettings } = settings;
         GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
 
         if (payment.method == PaymentMethod.PointOfSale) {
@@ -88,7 +89,7 @@ export class PaymentHandler {
             }));
         }
         else if (payment.provider == PaymentProvider.Payconiq && paymentUrl) {
-            if (this.getOS() == 'android' || this.getOS() == 'iOS') {
+            if (!paymentQRCode || this.getOS() == 'android' || this.getOS() == 'iOS') {
                 // we need this view for polling
                 const buttonComponent = new ComponentWithProperties(PayconiqButtonView, {
                     paymentUrl,
@@ -108,15 +109,9 @@ export class PaymentHandler {
                 return;
             }
             else {
-                // We need to remove the checkout search params to make the QR-code work.
-                const u = new URL(paymentUrl);
-                u.searchParams.delete('token');
-                u.searchParams.delete('returnUrl');
-                const url = u.toString();
-
                 // only on desktop
                 const bannerComponent = new ComponentWithProperties(PayconiqBannerView, {
-                    paymentUrl: url,
+                    paymentUrl: paymentQRCode,
                     server,
                     initialPayment: payment,
                     finishedHandler: (payment: Payment | null) => {

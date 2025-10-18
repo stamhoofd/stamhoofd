@@ -133,6 +133,7 @@ async function goNext() {
                 organization: organization.value,
                 payment,
                 paymentUrl: response.data.paymentUrl,
+                paymentQRCode: response.data.paymentQRCode,
                 transferSettings: webshopManager.webshop.meta.paymentConfiguration.transferSettings,
                 type: 'order',
                 navigate: navigationActions,
