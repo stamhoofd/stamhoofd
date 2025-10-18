@@ -67,16 +67,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
-            if (!await Context.auth.canManageFinances(request.body.asOrganizationId)) {
-                throw new SimpleError({
-                    code: 'forbidden',
-                    message: 'No permission to register as this organization for a different organization',
-                    human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
-                    statusCode: 403,
-                });
-            }
-        }
+        // Who is going to pay?
+        let whoWillPayNow: 'member' | 'organization' | 'nobody' = 'member'; // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
 
         if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
             // Fast fail
@@ -88,6 +80,22 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     statusCode: 403,
                 });
             }
+
+            // We won't create a payment. The balance will get added to the outstanding amount of the member / already paying organization
+            whoWillPayNow = 'nobody';
+        }
+        else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
+            if (!await Context.auth.hasFullAccess(request.body.asOrganizationId)) {
+                throw new SimpleError({
+                    code: 'forbidden',
+                    message: 'No permission to register as this organization for a different organization',
+                    human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
+                    statusCode: 403,
+                });
+            }
+
+            // The organization will pay to the organizing organization, and it will get added to the outstanding amount of the member towards the paying organization
+            whoWillPayNow = 'organization';
         }
 
         // For non paid organizations, limit amount of tests
@@ -239,23 +247,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         const totalPrice = checkout.totalPrice;
 
-        // Who is going to pay?
-        let whoWillPayNow: 'member' | 'organization' | 'nobody' = 'member'; // if this is set to 'organization', there will also be created separate balance items so the member can pay back the paying organization
-
-        if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
-            // Will get added to the outstanding amount of the member / already paying organization
-            whoWillPayNow = 'nobody';
-        }
-        else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
-            // The organization will pay to the organizing organization, and it will get added to the outstanding amount of the member towards the paying organization
-            whoWillPayNow = 'organization';
-        }
-
         if (totalPrice !== request.body.totalPrice) {
             if (whoWillPayNow === 'nobody') {
-                // Safe to ignore: we are only updating the outstanding amounts
+                // Safe and important to ignore: we are only updating the outstanding amounts
+                // If we would throw here, that could leak personal data (e.g. that the user uses financial support)
             }
             else {
+                // when whoWillPay = organization/member, we should throw or the payment amount could be different / incorrect.
+                // This never leaks information because in this case the user already has full access to the organization (asOrganizationId) or the member
                 throw new SimpleError({
                     code: 'changed_price',
                     message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),

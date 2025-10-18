@@ -424,7 +424,7 @@ export class AdminPermissionChecker {
     /**
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
-    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember = true) {
+    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithRegistrations = true) {
         if (registration.deactivatedAt || !registration.registeredAt) {
             // No full access: cannot access deactivated registrations
             return false;
@@ -461,7 +461,7 @@ export class AdminPermissionChecker {
 
         if (permissionLevel === PermissionLevel.Read && checkMember && group.settings.implicitlyAllowViewRegistrations) {
             // We can also view this registration if we have access to the member
-            const members = await Member.getBlobByIds(registration.memberId);
+            const members = checkMember === true ? await Member.getBlobByIds(registration.memberId) : [checkMember];
 
             if (members.length === 1) {
                 if (await this.canAccessMember(members[0], permissionLevel)) {

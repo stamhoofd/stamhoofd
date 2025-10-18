@@ -3,7 +3,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessRight, AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel, getPermissionLevelNumber } from './PermissionLevel.js';
-import { PermissionsResourceType, getPermissionResourceTypeName } from './PermissionsResourceType.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class PermissionRole extends AutoEncoder {

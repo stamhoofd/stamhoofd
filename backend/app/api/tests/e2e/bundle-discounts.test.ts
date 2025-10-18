@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, ReduceablePrice } from '@stamhoofd/structures';
+import { AccessRight, AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
 import { assertBalances } from '../assertions/assertBalances';
@@ -9,6 +9,7 @@ import { initBundleDiscount } from '../init/initBundleDiscount';
 import { initStripe } from '../init/initStripe';
 import { initAdmin } from '../init/initAdmin';
 import { BalanceItemService } from '../../src/services/BalanceItemService';
+import { initPermissionRole } from '../init';
 
 const baseUrl = `/members/register`;
 
@@ -3390,7 +3391,332 @@ describe('E2E.Bundle Discounts', () => {
 
             const registration2 = response2.body.registrations[0];
             expect(registration2.registeredAt).not.toBeNull();
+            expect(registration2.discounts).toMatchMap(new Map()); // note: not super reliable, as this is permission checked
+
+            const registration2Model = (await Registration.getByID(registration2.id))!;
+            expect(registration2).toBeDefined();
+            expect(registration2Model.discounts).toMatchMap(new Map());
+
+            // Get registration 1 again, it should now have the bundle discount applied
+            await registration1.refresh();
+            expect(registration1.discounts).toMatchMap(new Map([
+                [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                    name: bundleDiscount.name,
+                    amount: 5_00,
+                })],
+            ]));
+
+            await assertBalances({ member: otherMember }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    price: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 25_00,
+                    pricePending: 0,
+                    userId: user.id,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    price: -5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: -5_00,
+                    pricePending: 0,
+                    userId: null,
+                },
+            ]);
+
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    price: 15_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 15_00,
+                    pricePending: 0,
+                    userId: null,
+                },
+            ]);
+        });
+
+        test('Discounts work across family members when admins register members, even when the admin does not have access to the family members', async () => {
+            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const bundleDiscount = await initBundleDiscount({
+                organizationRegistrationPeriod,
+                discount: {
+                    countWholeFamily: true,
+                    discounts: [
+                        {
+                            value: 20_00,
+                            type: GroupPriceDiscountType.Percentage,
+                        },
+                    ],
+                },
+            });
+
+            const groups = [
+                await new GroupFactory({
+                    organization,
+                    price: 25_00,
+                    bundleDiscount,
+                }).create(),
+                await new GroupFactory({
+                    organization,
+                    price: 15_00,
+                    bundleDiscount,
+                }).create(),
+            ];
+
+            // Create an unrelated group and registration so admin has access to the member
+            const randomGroup = await new GroupFactory({
+                organization,
+                price: 0,
+            }).create();
+
+            await new RegistrationFactory({
+                organization,
+                member: member,
+                group: randomGroup,
+            }).create();
+
+            // Make sure the user has financial access so we can check the responses
+            const role = await initPermissionRole({
+                organization,
+                accessRights: [
+                    AccessRight.MemberReadFinancialData,
+                ],
+            });
+
+            const { adminToken } = await initAdmin({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Groups, new Map([
+                            [
+                                randomGroup.id, ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ], [
+                                groups[1].id, ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ],
+                            // No permission for group 0
+                        ]),
+                    ]]),
+                    roles: [role],
+                }),
+            });
+
+            const otherMember = await new MemberFactory({
+                organization,
+                user,
+            }).create();
+
+            // First register the otherMember for group 1. No discount should be applied yet
+            const registration1 = await new RegistrationFactory({
+                organization,
+                member: otherMember,
+                group: groups[0],
+            }).create();
+
+            await new BalanceItemFactory({
+                userId: user.id,
+                memberId: otherMember.id,
+                organizationId: organization.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 25_00,
+                status: BalanceItemStatus.Due,
+                registrationId: registration1.id,
+            }).create();
+
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            groupPrice: groups[1].settings.prices[0],
+                            groupId: groups[1].id,
+                            organizationId: organization.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                totalPrice: 15_00, // Admin does not know there should be discount
+                asOrganizationId: organization.id,
+            });
+
+            const response2 = await post(checkout, organization, adminToken);
+            expect(response2.body.registrations.length).toBe(1);
+
+            const registration2 = response2.body.registrations[0];
+            expect(registration2.registeredAt).not.toBeNull();
             expect(registration2.discounts).toMatchMap(new Map());
+
+            const registration2Model = (await Registration.getByID(registration2.id))!;
+            expect(registration2).toBeDefined();
+            expect(registration2Model.discounts).toMatchMap(new Map());
+
+            // Get registration 1 again, it should now have the bundle discount applied
+            await registration1.refresh();
+            expect(registration1.discounts).toMatchMap(new Map([
+                [bundleDiscount.id, AppliedRegistrationDiscount.create({
+                    name: bundleDiscount.name,
+                    amount: 5_00,
+                })],
+            ]));
+
+            await assertBalances({ member: otherMember }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    price: 25_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 25_00,
+                    pricePending: 0,
+                    userId: user.id,
+                },
+                {
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    registrationId: registration1.id,
+                    amount: 1,
+                    price: -5_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: -5_00,
+                    pricePending: 0,
+                    userId: null,
+                },
+            ]);
+
+            await assertBalances({ member }, [
+                {
+                    type: BalanceItemType.Registration,
+                    registrationId: registration2.id,
+                    amount: 1,
+                    price: 15_00,
+                    status: BalanceItemStatus.Due,
+                    priceOpen: 15_00,
+                    pricePending: 0,
+                    userId: null,
+                },
+            ]);
+        });
+
+        test('Discounts work across family members when admins register members, even when the admin does not have access to the family members nor financial access rights', async () => {
+            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const bundleDiscount = await initBundleDiscount({
+                organizationRegistrationPeriod,
+                discount: {
+                    countWholeFamily: true,
+                    discounts: [
+                        {
+                            value: 20_00,
+                            type: GroupPriceDiscountType.Percentage,
+                        },
+                    ],
+                },
+            });
+
+            const groups = [
+                await new GroupFactory({
+                    organization,
+                    price: 25_00,
+                    bundleDiscount,
+                }).create(),
+                await new GroupFactory({
+                    organization,
+                    price: 15_00,
+                    bundleDiscount,
+                }).create(),
+            ];
+
+            // Create an unrelated group and registration so admin has access to the member
+            const randomGroup = await new GroupFactory({
+                organization,
+                price: 0,
+            }).create();
+
+            await new RegistrationFactory({
+                organization,
+                member: member,
+                group: randomGroup,
+            }).create();
+
+            const { adminToken } = await initAdmin({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Groups, new Map([
+                            [
+                                randomGroup.id, ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ], [
+                                groups[1].id, ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ],
+                            // No permission for group 0
+                        ]),
+                    ]]),
+                }),
+            });
+
+            const otherMember = await new MemberFactory({
+                organization,
+                user,
+            }).create();
+
+            // First register the otherMember for group 1. No discount should be applied yet
+            const registration1 = await new RegistrationFactory({
+                organization,
+                member: otherMember,
+                group: groups[0],
+            }).create();
+
+            await new BalanceItemFactory({
+                userId: user.id,
+                memberId: otherMember.id,
+                organizationId: organization.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 25_00,
+                status: BalanceItemStatus.Due,
+                registrationId: registration1.id,
+            }).create();
+
+            const checkout = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            groupPrice: groups[1].settings.prices[0],
+                            groupId: groups[1].id,
+                            organizationId: organization.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                }),
+                totalPrice: 15_00, // Admin does not know there should be discount
+                asOrganizationId: organization.id,
+            });
+
+            const response2 = await post(checkout, organization, adminToken);
+            expect(response2.body.registrations.length).toBe(1);
+
+            const registration2 = response2.body.registrations[0];
+            expect(registration2.registeredAt).not.toBeNull();
+            expect(registration2.discounts).toMatchMap(new Map());
+
+            const registration2Model = (await Registration.getByID(registration2.id))!;
+            expect(registration2).toBeDefined();
+            expect(registration2Model.discounts).toMatchMap(new Map());
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();

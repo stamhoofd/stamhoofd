@@ -459,6 +459,7 @@ export class AuthenticatedStructures {
             const filtered: (Registration & {
                 group: Group;
             })[] = [];
+            const userManager = Context.auth.isUserManager(member);
             for (const registration of member.registrations) {
                 if (includeContextOrganization || registration.organizationId !== Context.auth.organization?.id) {
                     const found = organizations.get(registration.id);
@@ -468,14 +469,14 @@ export class AuthenticatedStructures {
                     }
                 }
                 if (organizations.get(registration.organizationId)?.active || (Context.auth.organization && Context.auth.organization.active && registration.organizationId === Context.auth.organization.id) || await Context.auth.hasFullAccess(registration.organizationId)) {
-                    // WARNING: If we ever filter registrations, make sure to not filter it when forAdminCartCalculation is set!
-                    filtered.push(registration);
-
-                    /* if ( // For now filtering like this causes issues with bundle discount calculations
-                        registration.group.settings.implicitlyAllowViewRegistrations
-                        || await Context.auth.canAccessRegistration(registration, PermissionLevel.Read)
-                    ) { */
-                    // }
+                    if (
+                        !!options?.forAdminCartCalculation
+                        || registration.group.settings.implicitlyAllowViewRegistrations
+                        || userManager
+                        || await Context.auth.canAccessRegistration(registration, PermissionLevel.Read, member)
+                    ) {
+                        filtered.push(registration);
+                    }
                 }
             }
             member.registrations = filtered;
