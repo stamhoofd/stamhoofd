@@ -327,7 +327,7 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
                             await payconiqPayment.cancel(organization)
                         }
 
-                        let status = await payconiqPayment.getStatus(organization)
+                        let status = await payconiqPayment.getStatus(organization, payment)
 
                         if (!cancel && this.shouldTryToCancel(status, payment)) {
                             console.error('Manually cancelling Payconiq payment', payment.id)
