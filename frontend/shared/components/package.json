@@ -12,7 +12,6 @@
         "@tiptap/extension-typography": "^3.4.2",
         "@tiptap/pm": "^3.4.2",
         "@tiptap/starter-kit": "^3.4.2",
-        "@tiptap/vue-3": "^3.4.2",
-        "ibantools": "^3.1.0"
+        "@tiptap/vue-3": "^3.4.2"
     }
 }

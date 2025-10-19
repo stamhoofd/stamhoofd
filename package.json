@@ -74,7 +74,8 @@
     "tslib": "^2.8.1",
     "uuid": "11.0.3",
     "vue": "3.5.17",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
+    "ibantools": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
