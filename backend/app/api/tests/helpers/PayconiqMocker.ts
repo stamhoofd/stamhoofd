@@ -40,6 +40,10 @@ export class PayconiqMocker {
 
                 return [200, {
                     paymentId: uuidv4(),
+                    debtor: {
+                        name: 'Test User',
+                        iban: 'BE41878878996410', // random iban
+                    },
                     _links: {
                         checkout: {
                             href: 'https://payconiq.com/pay/2/5bdb1685b93d1c000bde96f2?token=530ea8a4ec8ded7d87620c8637354022cd965b143f257f8f8cb118e7f4a22d8f&returnUrl=https%3A%2F%2Fummy.webshop%2Fcheckout%2Fsuccess',
@@ -59,6 +63,10 @@ export class PayconiqMocker {
 
                 return [200, {
                     paymentId: uuidv4(),
+                    debtor: {
+                        name: 'Test User',
+                        iban: 'BE41878878996410', // random iban
+                    },
                     _links: {
                         checkout: {
                             href: 'https://payconiq.com/pay/2/5bdb1685b93d1c000bde96f2?token=530ea8a4ec8ded7d87620c8637354022cd965b143f257f8f8cb118e7f4a22d8f&returnUrl=https%3A%2F%2Fummy.webshop%2Fcheckout%2Fsuccess',

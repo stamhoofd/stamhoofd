@@ -253,7 +253,7 @@ export const PaymentService = {
                                 await payconiqPayment.cancel(organization);
                             }
 
-                            let status = await payconiqPayment.getStatus(organization);
+                            let status = await payconiqPayment.getStatus(organization, payment);
 
                             if (!cancel && this.shouldTryToCancel(status, payment)) {
                                 console.error('Manually cancelling Payconiq payment', payment.id);

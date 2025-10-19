@@ -25,18 +25,7 @@ export class PayconiqPayment extends QueryableModel {
     @column({ type: 'string' })
     payconiqId: string;
 
-    async getStatus(organization: Organization): Promise<PaymentStatus> {
-        const apiKey = organization.privateMeta.payconiqApiKey;
-        if (!apiKey) {
-            throw new SimpleError({
-                code: '',
-                message: 'Payconiq API key missing to check the status of the payment',
-            });
-        }
-
-        const testMode = organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production');
-
-        const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, testMode);
+    getResponseStatus(response: any) {
         if (response.status) {
             switch (response.status) {
                 case 'AUTHORIZED': return PaymentStatus.Pending;
@@ -53,10 +42,66 @@ export class PayconiqPayment extends QueryableModel {
             }
             return PaymentStatus.Pending; // default to pending
         }
+
         throw new SimpleError({
             code: '',
             message: 'Status missing in response',
         });
+    }
+
+    async getStatus(organization: Organization, payment: Payment): Promise<PaymentStatus> {
+        const apiKey = organization.privateMeta.payconiqApiKey;
+        if (!apiKey) {
+            throw new SimpleError({
+                code: '',
+                message: 'Payconiq API key missing to check the status of the payment',
+            });
+        }
+
+        const testMode = organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production');
+        const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, testMode);
+
+        if (typeof response !== 'object' || response === null) {
+            throw new SimpleError({
+                code: '',
+                message: 'Invalid Payconiq response',
+            });
+        }
+        const status = this.getResponseStatus(response);
+
+        // Check debtor
+        if ('debtor' in response && typeof response.debtor === 'object' && response.debtor !== null) {
+            try {
+                const name = response.debtor.name;
+                const iban = response.debtor.iban;
+
+                if (typeof iban === 'string') {
+                    payment.iban = Formatter.iban(iban);
+                }
+
+                if (typeof name === 'string') {
+                    payment.ibanName = name.substring(0, 128);
+                }
+                await payment.save();
+            }
+            catch (e) {
+                console.error('Failed to save iban in Payconiq payment');
+                console.error(e);
+            }
+        }
+
+        // Check and save amount
+        if (typeof response.amount === 'number' && status === PaymentStatus.Succeeded) {
+            const amount = response.amount;
+            if (amount < payment.price) {
+                // We do NOT allow lower prices
+                console.error('Manual price change detected by Payconiq user. Failing the payment');
+                console.error('Expected: ' + payment.price + '; Received: ' + amount);
+                return PaymentStatus.Failed;
+            }
+        }
+
+        return status;
     }
 
     async cancel(organization: Organization): Promise<boolean> {
