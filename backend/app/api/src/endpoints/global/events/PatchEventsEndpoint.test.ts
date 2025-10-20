@@ -1,7 +1,7 @@
 import { PatchableArray } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventFactory, Organization, OrganizationFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
-import { AccessRight, Event, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { EventFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
+import { AccessRight, Event, Group, GroupSettings, GroupType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint';
@@ -55,6 +55,10 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 ]),
             }),
         }).create();
+    });
+
+    beforeEach(async () => {
+        TestUtils.setEnvironment('userMode', 'platform');
     });
 
     test('A normal user with write access can create an event', async () => {
@@ -166,6 +170,264 @@ describe('Endpoint.PatchEventsEndpoint', () => {
     describe('userMode organization', () => {
         beforeEach(async () => {
             TestUtils.setEnvironment('userMode', 'organization');
+        });
+
+        test('Cannot create group for event in non-default period as non-full admin', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const period1 = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period1,
+                organization,
+            }).create();
+
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date('2001-01-01'),
+                endDate: new Date('2002-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period2,
+                organization,
+            }).create();
+
+            organization.periodId = period2.id;
+            await organization.save();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2000-02-10'),
+                endDate: new Date('2000-02-12'),
+            }).create();
+
+            const body: Body = new PatchableArray();
+            const newEvent = Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        description: TranslatedString.create('Inschrijvingsgroep'),
+                    }),
+                }),
+            });
+            body.addPatch(newEvent);
+
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(STExpect.simpleError({
+                code: 'permission_denied',
+            }));
+        });
+
+        test('Can create group for event in non-default period as full admin', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const period1 = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period1,
+                organization,
+            }).create();
+
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date('2001-01-01'),
+                endDate: new Date('2002-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period2,
+                organization,
+            }).create();
+
+            organization.periodId = period2.id;
+            await organization.save();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2000-02-10'),
+                endDate: new Date('2000-02-12'),
+            }).create();
+
+            const body: Body = new PatchableArray();
+            const newEvent = Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        description: TranslatedString.create('Inschrijvingsgroep'),
+                    }),
+                }),
+            });
+            body.addPatch(newEvent);
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            expect(result.body).toHaveLength(1);
+            expect(result.body[0].group).toBeDefined();
+            expect(result.body[0].group!.settings.name).toEqual(TranslatedString.create('test event'));
+            expect(result.body[0].group!.settings.description).toEqual(TranslatedString.create('Inschrijvingsgroep'));
+            expect(result.body[0].group!.periodId).toEqual(period1.id);
+            expect(result.body[0].group!.organizationId).toEqual(organization.id);
+            expect(result.body[0].group!.type).toEqual(GroupType.EventRegistration);
+        });
+
+        test('Can create group for event in default period as non-full admin', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const period1 = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period1,
+                organization,
+            }).create();
+
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date('2001-01-01'),
+                endDate: new Date('2002-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period2,
+                organization,
+            }).create();
+
+            organization.periodId = period2.id;
+            await organization.save();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2001-02-10'),
+                endDate: new Date('2001-02-12'),
+            }).create();
+
+            const body: Body = new PatchableArray();
+            const newEvent = Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        description: TranslatedString.create('Inschrijvingsgroep'),
+                    }),
+                }),
+            });
+            body.addPatch(newEvent);
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            expect(result.body).toHaveLength(1);
+            expect(result.body[0].group).toBeDefined();
+            expect(result.body[0].group!.settings.name).toEqual(TranslatedString.create('test event'));
+            expect(result.body[0].group!.settings.description).toEqual(TranslatedString.create('Inschrijvingsgroep'));
+            expect(result.body[0].group!.periodId).toEqual(period2.id);
+            expect(result.body[0].group!.organizationId).toEqual(organization.id);
+            expect(result.body[0].group!.type).toEqual(GroupType.EventRegistration);
+        });
+
+        test('Changing an event startDate will move the registration period of the corresponding group', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }), // full permissions are required, otherwise you'll get a permission error
+            }).create();
+
+            const period1 = await new RegistrationPeriodFactory({
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period1,
+                organization,
+            }).create();
+
+            const period2 = await new RegistrationPeriodFactory({
+                startDate: new Date('2001-01-01'),
+                endDate: new Date('2002-01-01'),
+                organization,
+            }).create();
+
+            await new OrganizationRegistrationPeriodFactory({
+                period: period2,
+                organization,
+            }).create();
+
+            const event = await new EventFactory({
+                organization,
+                name: 'test event',
+                startDate: new Date('2000-02-10'),
+                endDate: new Date('2000-02-12'),
+            }).create();
+
+            async function part1() {
+                const body: Body = new PatchableArray();
+                const newEvent = Event.patch({
+                    id: event.id,
+                    group: Group.create({
+                        settings: GroupSettings.create({
+                            description: TranslatedString.create('Inschrijvingsgroep'),
+                        }),
+                    }),
+                });
+                body.addPatch(newEvent);
+
+                const result = await TestRequest.patch({ body, user, organization });
+                expect(result.status).toBe(200);
+                expect(result.body).toHaveLength(1);
+                expect(result.body[0].group).toBeDefined();
+                expect(result.body[0].group!.settings.name).toEqual(TranslatedString.create('test event'));
+                expect(result.body[0].group!.settings.description).toEqual(TranslatedString.create('Inschrijvingsgroep'));
+                expect(result.body[0].group!.periodId).toEqual(period1.id);
+                expect(result.body[0].group!.organizationId).toEqual(organization.id);
+                expect(result.body[0].group!.type).toEqual(GroupType.EventRegistration);
+            }
+            await part1();
+
+            // Now alter start date
+            async function part2() {
+                const body: Body = new PatchableArray();
+                const newEvent = Event.patch({
+                    id: event.id,
+                    startDate: new Date('2001-02-10'),
+                    endDate: new Date('2001-02-12'),
+                });
+                body.addPatch(newEvent);
+
+                const result = await TestRequest.patch({ body, user, organization });
+                expect(result.status).toBe(200);
+                expect(result.body).toHaveLength(1);
+                expect(result.body[0].group).toBeDefined();
+                expect(result.body[0].group!.periodId).toEqual(period2.id);
+            }
+            await part2();
         });
 
         test('A normal user with write access can create an event where the type has a maximum', async () => {

@@ -1,17 +1,18 @@
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from '@stamhoofd/structures';
 
-import { useOrganization } from '@stamhoofd/components';
+import { PromiseComponent, useOrganization } from '@stamhoofd/components';
+import { useGetPeriods, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
-import { usePatchOrganizationPeriod } from '@stamhoofd/networking';
 
 // You can declare mixins as the same style as components.
 export function useEditGroupsView() {
     const o = useOrganization();
-    const patchOrganizationPeriod = usePatchOrganizationPeriod();
+    const patchOrganizationPeriods = usePatchOrganizationPeriods();
+    const getPeriods = useGetPeriods();
 
-    return function () {
+    return async function () {
         const organization = o.value;
         if (!organization) {
             throw new Error('Organization is not defined');
@@ -32,16 +33,21 @@ export function useEditGroupsView() {
                 settings,
             });
 
-            return new ComponentWithProperties(EditCategoryGroupsView, {
-                period: period.patch(p),
+            return PromiseComponent(async () => new ComponentWithProperties(EditCategoryGroupsView, {
+                periodId: period.id,
+                periods: (await getPeriods()).map((x) => {
+                    if (x.id === period.id) {
+                        return x.patch(p);
+                    }
+                    return x;
+                }),
                 category: category,
                 organization,
                 isNew: false,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    patch.id = period.id;
-                    await patchOrganizationPeriod(patch);
+                saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                    await patchOrganizationPeriods(patch);
                 },
-            });
+            }));
         }
 
         let cat = period.settings.rootCategory;
@@ -80,15 +86,20 @@ export function useEditGroupsView() {
                 cat = full.categories[0];
             }
         }
-        return new ComponentWithProperties(EditCategoryGroupsView, {
-            period: period.patch(p),
+        return PromiseComponent(async () => new ComponentWithProperties(EditCategoryGroupsView, {
+            periodId: period.id,
+            periods: (await getPeriods()).map((x) => {
+                if (x.id === period.id) {
+                    return x.patch(p);
+                }
+                return x;
+            }),
             category: cat,
             organization,
             isNew: false,
-            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                patch.id = period.id;
-                await patchOrganizationPeriod(patch);
+            saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                await patchOrganizationPeriods(patch);
             },
-        });
+        }));
     };
 }
