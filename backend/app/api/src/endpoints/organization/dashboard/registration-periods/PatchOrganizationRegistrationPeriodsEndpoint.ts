@@ -435,6 +435,14 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (period) {
             shouldUpdatePeriodIds = period.id !== model.periodId;
 
+            if (shouldUpdatePeriodIds && period.locked) {
+                throw new SimpleError({
+                    code: 'invalid_period',
+                    message: 'Period is locked',
+                    human: Context.i18n.$t('f544b972-416c-471d-8836-d7f3b16f947d'),
+                });
+            }
+
             if (!isPatchingEvent) {
                 if (shouldUpdatePeriodIds && struct.periodId === undefined) {
                     throw new SimpleError({
