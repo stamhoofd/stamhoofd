@@ -446,6 +446,22 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             if (shouldUpdatePeriodIds) {
+                if (!isPatchingEvent && struct.periodId === undefined) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        field: 'periodId',
+                        message: 'Setting periodId is required when moving a group to a new period',
+                    });
+                }
+
+                if (STAMHOOFD.userMode === 'organization' && period.organizationId !== model.organizationId) {
+                    throw new SimpleError({
+                        code: 'invalid_period',
+                        message: 'Period has different organization id',
+                        statusCode: 400,
+                    });
+                }
+
                 // Check current period is locked
                 const currentPeriod = await RegistrationPeriod.getByID(model.periodId);
 
@@ -466,39 +482,24 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         });
                     }
                 }
+
+                if ((!isPatchingEvent && model.type === GroupType.EventRegistration) || (model.type === GroupType.WaitingList && !allowPatchWaitingListPeriod)) {
+                    throw new SimpleError({
+                        code: 'not_supported',
+                        message: `Moving group with type ${model.type} to a different period is not supported`,
+                        statusCode: 400,
+                    });
+                }
             }
 
             if (!isPatchingEvent) {
-                if (shouldUpdatePeriodIds && struct.periodId === undefined) {
-                    throw new SimpleError({
-                        code: 'invalid_field',
-                        field: 'periodId',
-                        message: 'Setting periodId is required when moving a group to a new period',
-                    });
-                }
-                if (struct.periodId !== period.id) {
+                if (struct.periodId !== undefined && struct.periodId !== period.id) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'periodId',
                         message: 'Cannot patch periodId to a different period then the one being patched',
                     });
                 }
-            }
-
-            if (shouldUpdatePeriodIds && STAMHOOFD.userMode === 'organization' && period.organizationId !== model.organizationId) {
-                throw new SimpleError({
-                    code: 'invalid_period',
-                    message: 'Period has different organization id',
-                    statusCode: 400,
-                });
-            }
-
-            if ((!isPatchingEvent && model.type === GroupType.EventRegistration) || (model.type === GroupType.WaitingList && !allowPatchWaitingListPeriod)) {
-                throw new SimpleError({
-                    code: 'not_supported',
-                    message: `Moving group with type ${model.type} to a different period is not supported`,
-                    statusCode: 400,
-                });
             }
 
             model.periodId = period.id;
