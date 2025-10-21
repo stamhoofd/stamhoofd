@@ -76,7 +76,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 });
             }
 
-            if (period.locked) {
+            if ((!period.organizationId && period.locked) || (period.locked && period.organizationId && !await Context.auth.hasFullAccess(period.organizationId))) {
                 throw new SimpleError({
                     code: 'locked_period',
                     message: 'This period is locked',
@@ -436,11 +436,36 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             shouldUpdatePeriodIds = period.id !== model.periodId;
 
             if (shouldUpdatePeriodIds && period.locked) {
-                throw new SimpleError({
-                    code: 'invalid_period',
-                    message: 'Period is locked',
-                    human: Context.i18n.$t('f544b972-416c-471d-8836-d7f3b16f947d'),
-                });
+                if (period.organizationId === null || !await Context.auth.hasFullAccess(period.organizationId)) {
+                    throw new SimpleError({
+                        code: 'locked_period',
+                        message: 'This period is locked',
+                        human: Context.i18n.$t('f544b972-416c-471d-8836-d7f3b16f947d'),
+                    });
+                }
+            }
+
+            if (shouldUpdatePeriodIds) {
+                // Check current period is locked
+                const currentPeriod = await RegistrationPeriod.getByID(model.periodId);
+
+                if (!currentPeriod) {
+                    throw new SimpleError({
+                        code: 'missing_required_relation',
+                        message: 'Relation periodId is missing on group ' + model.id,
+                        statusCode: 500,
+                    });
+                }
+
+                if (currentPeriod.locked) {
+                    if (currentPeriod.organizationId === null || !await Context.auth.hasFullAccess(currentPeriod.organizationId)) {
+                        throw new SimpleError({
+                            code: 'locked_period',
+                            message: 'This period is locked',
+                            human: $t('Dit werkjaar is vergrendeld, je kan er geen inschrijvingsgroepen meer verplaatsen'),
+                        });
+                    }
+                }
             }
 
             if (!isPatchingEvent) {
