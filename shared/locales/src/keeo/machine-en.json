@@ -63,6 +63,10 @@
     "original": "Niet alle gegevens van jouw eenheid werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Not all data of your unit has been filled in in the Stripe dashboard. Check if everything has been filled in. The following things might be missing:"
   },
+  "0d47541d-abf2-45b5-a06c-3a85b7fa3994": {
+    "original": "Je hebt geen toegangsrechten om inschrijvingen op te zetten voor activiteiten in deze periode (geen toegang tot scoutsjaar)",
+    "translation": "You do not have access rights to set up registrations for activities in this period (no access to the scouts year)"
+  },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
     "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Keeo). Zorg dat deze overeenkomt met de namen in Keeo.",
     "translation": "‘{group}’ is not a valid registration group (it does not exist in Keeo). Please make sure it matches the names in Keeo."
@@ -98,6 +102,10 @@
   "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
     "original": "FOS De Goudvis",
     "translation": "FOS The Goldfish"
+  },
+  "18530ea6-4c97-4fd8-af49-54ed7b812a59": {
+    "original": "Ander scoutsjaar",
+    "translation": "Other scouts year"
   },
   "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
     "original": "Beperk tot bepaalde eenheden (tags)",
@@ -1310,6 +1318,10 @@
   "e0fff936-3f3c-46b8-adcf-c723c33907a2": {
     "original": "Het scoutsjaar dat je wilt instellen is nog niet gestart",
     "translation": "The scouting year you want to configure has not started yet."
+  },
+  "e115a9d1-11a6-42b9-a781-c6ab9d8a4b9c": {
+    "original": "Dit scoutsjaar is vergrendeld, je kan er geen inschrijvingsgroepen meer verplaatsen",
+    "translation": "This scouts year is locked, you can no longer move registration groups in it"
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
     "original": "Is jouw eenheid een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",

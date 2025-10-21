@@ -1255,6 +1255,10 @@
     "original": "Groot tekstveld",
     "translation": "Grand champ de texte"
   },
+  "0d47541d-abf2-45b5-a06c-3a85b7fa3994": {
+    "original": "Je hebt geen toegangsrechten om inschrijvingen op te zetten voor activiteiten in deze periode (geen toegang tot werkjaar)",
+    "translation": "Vous n'avez pas les droits nécessaires pour gérer les inscriptions aux activités durant cette période (accès à l'année associative manquant)"
+  },
   "0d4b25fe-6a3d-480b-86e8-e21c664a15ee": {
     "original": "bv. Bpost",
     "translation": "par ex. Bpost"
@@ -2266,6 +2270,10 @@
   "18444ea0-bbae-4acb-bf53-71df2badf2fb": {
     "original": "Indien er voldoende plaats is. Meerdere artikels worden in lijstweergave getoond.",
     "translation": "S'il y a suffisamment d'espace. Plusieurs articles sont affichés en liste."
+  },
+  "18530ea6-4c97-4fd8-af49-54ed7b812a59": {
+    "original": "Ander werkjaar",
+    "translation": "Autre année associative"
   },
   "18650de1-4791-4334-ac74-2ab6848f9a28": {
     "original": "Voeg alle inschrijvingen toe aan het mandje en reken in één keer af.",
@@ -10462,6 +10470,10 @@
   "752a87bb-4994-4a86-b03c-f8d91670bafd": {
     "original": "Demo ledenadministratie",
     "translation": "Démo administration des membres"
+  },
+  "753684e1-94aa-4663-a81c-9656a51283ae": {
+    "original": "Je kan deze groep niet naar een andere periode verplaatsen omdat de wachtlijst van deze groep gedeeld is met andere groepen.",
+    "translation": "Vous ne pouvez pas déplacer ce groupe vers une autre période car la liste d'attente de ce groupe est partagée avec d'autres groupes."
   },
   "75398f88-8d64-47e9-8d8f-627af69052db": {
     "original": "Toestemming verzamelen gevoelige gegevens",
@@ -20079,6 +20091,10 @@
     "original": "Het werkjaar dat je wilt instellen is nog niet gestart",
     "translation": "L'année associative que vous souhaitez définir n'a pas encore commencé"
   },
+  "e115a9d1-11a6-42b9-a781-c6ab9d8a4b9c": {
+    "original": "Dit werkjaar is vergrendeld, je kan er geen inschrijvingsgroepen meer verplaatsen",
+    "translation": "Cette année associative est verrouillée, il n'est plus possible de déplacer des groupes d'inscription"
+  },
   "e11ad49e-d853-464c-a951-d45b9549ec30": {
     "original": "Deze categorie is niet zichtbaar voor gewone leden",
     "translation": "Cette catégorie n'est pas visible pour les membres ordinaires"
@@ -21350,6 +21366,10 @@
   "efeed776-7b4a-4f06-b755-04b1c615ff2d": {
     "original": "Leeftijdsgroepen",
     "translation": "Groupes d'âge"
+  },
+  "eff21f4c-2d50-4553-9eb9-8a9e399f4124": {
+    "original": "Je hebt niet voldoende toegangsrechten",
+    "translation": "Vous ne disposez pas des droits d'accès suffisants"
   },
   "effd2b1f-01f6-46e0-a5af-488bcbd93f1d": {
     "original": "E-mailadres",

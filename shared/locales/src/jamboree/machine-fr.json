@@ -63,6 +63,10 @@
     "original": "Niet alle gegevens van jouw eenheid werden in het Stripe dashboard ingevuld. Kijk na of alles werd ingevuld. Volgende zaken zouden ontbreken:",
     "translation": "Toutes les données de votre unité n'ont pas été saisies dans le tableau de bord Stripe. Vérifiez si tout a été rempli. Les éléments suivants pourraient manquer :"
   },
+  "0d47541d-abf2-45b5-a06c-3a85b7fa3994": {
+    "original": "Je hebt geen toegangsrechten om inschrijvingen op te zetten voor activiteiten in deze periode (geen toegang tot scoutsjaar)",
+    "translation": "Vous n'avez pas les droits nécessaires pour gérer les inscriptions aux activités durant cette période (accès à l'année scoute manquant)"
+  },
   "0ef6349f-0540-4c34-bc51-9919d38dc3ff": {
     "original": "‘{group}’ is geen geldige inschrijvingsgroep (deze bestaat niet in Jamboree). Zorg dat deze overeenkomt met de namen in Jamboree.",
     "translation": "‘{group}’ n'est pas un groupe d'inscription valide (ce groupe n'existe pas dans Jamboree). Veillez à ce qu'il corresponde exactement aux noms utilisés dans Jamboree."
@@ -98,6 +102,10 @@
   "16ba3d97-5943-451d-92b5-0bf21555f7ae": {
     "original": "Scoutsgroep De Goudvis",
     "translation": "Scoutsgroupe Le Poisson rouge"
+  },
+  "18530ea6-4c97-4fd8-af49-54ed7b812a59": {
+    "original": "Ander scoutsjaar",
+    "translation": "Autre année scoute"
   },
   "18a41eda-92fd-46a6-acc1-fc35536b86b4": {
     "original": "Beperk tot bepaalde eenheden (tags)",
@@ -1326,6 +1334,10 @@
   "e0fff936-3f3c-46b8-adcf-c723c33907a2": {
     "original": "Het scoutsjaar dat je wilt instellen is nog niet gestart",
     "translation": "L'année scoute que vous souhaitez définir n'a pas encore commencé."
+  },
+  "e115a9d1-11a6-42b9-a781-c6ab9d8a4b9c": {
+    "original": "Dit scoutsjaar is vergrendeld, je kan er geen inschrijvingsgroepen meer verplaatsen",
+    "translation": "Cette année scoute est verrouillée, il n'est plus possible de déplacer des groupes d'inscription"
   },
   "e13d9fec-ff5a-43e0-8cf4-4edc6e576d17": {
     "original": "Is jouw eenheid een feitelijke vereniging zonder VZW, dan moet je hier het refertenummer invullen dat je bij Belcotax had aangevraagd.",
