@@ -85,11 +85,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             whoWillPayNow = 'nobody';
         }
         else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
-            if (!await Context.auth.hasFullAccess(request.body.asOrganizationId)) {
+            // Paying balance to a different organization requires finance permissions
+            // we'll check later if you are also registering members, which requires full permissions
+            if (!await Context.auth.canManageFinances(request.body.asOrganizationId)) {
                 throw new SimpleError({
                     code: 'forbidden',
-                    message: 'No permission to register as this organization for a different organization',
-                    human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
+                    message: 'No permission to checkout as this organization for a different organization',
+                    human: $t(`Je hebt niet voldoende toegangsrechten`),
                     statusCode: 403,
                 });
             }
@@ -206,6 +208,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     });
                 }
                 platformMembers.push(platformMember);
+            }
+
+            if (memberIds.length > 0 && request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
+                // For registering members at a different organization, you need full permissions
+                if (!await Context.auth.hasFullAccess(request.body.asOrganizationId)) {
+                    throw new SimpleError({
+                        code: 'forbidden',
+                        message: 'No permission to register as this organization for a different organization',
+                        human: $t(`62fe6e39-f6b0-4836-b0f7-dc84d22a81e3`),
+                        statusCode: 403,
+                    });
+                }
             }
         }
         else {

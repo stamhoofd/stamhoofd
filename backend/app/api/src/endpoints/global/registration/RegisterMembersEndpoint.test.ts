@@ -1,7 +1,7 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer';
@@ -10,6 +10,8 @@ import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
 import { assertBalances } from '../../../../tests/assertions/assertBalances';
 import PersistentFile from 'formidable/PersistentFile';
 import { PatchMap } from '@simonbackx/simple-encoding';
+import { initAdmin, initPermissionRole } from '../../../../tests/init';
+import { BalanceItemService } from '../../../services/BalanceItemService';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -1219,6 +1221,132 @@ describe('Endpoint.RegisterMembers', () => {
             defaultLinkMembersToUser = false;
         });
 
+        test('[Regression] Pay balance between organizations requires only finance access rights', async () => {
+            const { member, organization, token, user } = await initData();
+            const role = await initPermissionRole({
+                organization,
+                accessRights: [AccessRight.OrganizationFinanceDirector],
+            });
+            const { admin, adminToken } = await initAdmin({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [role],
+                }),
+            });
+
+            const company = Company.create({});
+            organization.meta.companies.push(company);
+            await organization.save();
+
+            const otherOrganization = await new OrganizationFactory({ }).create();
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: otherOrganization.id,
+                memberId: null,
+                userId: null,
+                payingOrganizationId: organization.id,
+                type: BalanceItemType.PlatformMembership,
+                amount: 10,
+                unitPrice: 2,
+            }).create();
+
+            const cartItem = BalanceItemCartItem.create({
+                item: balanceItem1.getStructure(),
+                price: 20,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        cartItem,
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 20,
+                asOrganizationId: organization.id,
+                customer: PaymentCustomer.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    company,
+                }),
+            });
+
+            const response = await post(body, otherOrganization, adminToken);
+            expect(response.body.registrations.length).toBe(0);
+
+            await BalanceItemService.flushAll();
+            await balanceItem1.refresh();
+
+            expect(balanceItem1).toMatchObject({
+                amount: 10,
+                unitPrice: 2,
+                priceOpen: 0,
+                pricePending: 20,
+                pricePaid: 0,
+            });
+        });
+
+        test('Pay balance between organizations not possible without finance access rights', async () => {
+            const { member, user, organization, token } = await initData({
+                permissionLevel: PermissionLevel.Write,
+            });
+
+            const otherOrganization = await new OrganizationFactory({ }).create();
+
+            const company = Company.create({});
+            organization.meta.companies.push(company);
+            await organization.save();
+
+            const balanceItem1 = await new BalanceItemFactory({
+                organizationId: otherOrganization.id,
+                memberId: null,
+                userId: null,
+                payingOrganizationId: organization.id,
+                type: BalanceItemType.PlatformMembership,
+                amount: 10,
+                unitPrice: 2,
+            }).create();
+
+            const cartItem = BalanceItemCartItem.create({
+                item: balanceItem1.getStructure(),
+                price: 20,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        cartItem,
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 20,
+                asOrganizationId: organization.id,
+                customer: PaymentCustomer.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    company,
+                }),
+            });
+
+            await expect(post(body, otherOrganization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({
+                    code: 'forbidden',
+                    message: 'No permission to checkout as this organization for a different organization',
+                }));
+        });
+
         test('Should reuse recently deactivated registration', async () => {
             const { organization, group, groupPrice, token, member } = await initData();
             group.settings.allowRegistrationsByOrganization = true;
@@ -1262,7 +1390,7 @@ describe('Endpoint.RegisterMembers', () => {
             expect(response.body.registrations[0].id).toEqual(firstRegistration.id);
         });
 
-        test('Cannot pay balances as organization', async () => {
+        test('Cannot pay member balances as organization', async () => {
             const { member, user, organization, token } = await initData();
 
             const balanceItem1 = await new BalanceItemFactory({

@@ -1,7 +1,13 @@
 import { BalanceItem } from '@stamhoofd/models';
 import { BalanceItemService } from '../../src/services/BalanceItemService';
 
-export async function assertBalances(selector: { user: { id: string | null } } | { member: { id: string | null } }, balances: Partial<BalanceItem>[]) {
+export async function assertBalances(
+    selector:
+        { user: { id: string | null } }
+        | { member: { id: string | null } }
+        | { organization: { id: string | null } }
+        | { payingOrganization: { id: string | null } },
+    balances: Partial<BalanceItem>[]) {
     await BalanceItemService.flushAll();
 
     // Fetch all user balances
@@ -11,6 +17,12 @@ export async function assertBalances(selector: { user: { id: string | null } } |
     }
     else if ('member' in selector && selector.member.id) {
         q.where('memberId', selector.member.id);
+    }
+    else if ('organization' in selector && selector.organization.id) {
+        q.where('organizationId', selector.organization.id);
+    }
+    else if ('payingOrganization' in selector && selector.payingOrganization.id) {
+        q.where('payingOrganizationId', selector.payingOrganization.id);
     }
     else {
         throw new Error('Selector must contain either user or member with an id');
