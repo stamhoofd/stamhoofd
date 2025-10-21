@@ -385,6 +385,10 @@ export class Product extends AutoEncoder {
             }
         }
 
+        if (this.seatingPlanId !== null) {
+            return true
+        }
+
         return false;
     }
 
