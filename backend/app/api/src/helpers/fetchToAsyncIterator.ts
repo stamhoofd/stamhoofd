@@ -1,9 +1,13 @@
 import { IPaginatedResponse, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { FileSignService } from '../services/FileSignService';
 
 export function fetchToAsyncIterator<T>(
     initialFilter: LimitedFilteredRequest,
     loader: {
         fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T, LimitedFilteredRequest>>;
+    },
+    options?: {
+        signFiles?: boolean;
     },
 ): AsyncIterable<T> {
     return {
@@ -20,6 +24,9 @@ export function fetchToAsyncIterator<T>(
                     }
 
                     const response = await loader.fetch(request);
+                    if (options?.signFiles) {
+                        await FileSignService.fillSignedUrlsForStruct(response.results);
+                    }
                     request = response.next ?? null;
 
                     return {

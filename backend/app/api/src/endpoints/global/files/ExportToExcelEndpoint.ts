@@ -154,7 +154,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 await exportToExcel({
                     definitions: loader.sheets,
                     writer,
-                    dataGenerator: fetchToAsyncIterator(request.filter, loader),
+                    dataGenerator: fetchToAsyncIterator(request.filter, loader, { signFiles: true }),
                     filter: request.workbookFilter,
                 });
 
