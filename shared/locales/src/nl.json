@@ -5812,5 +5812,10 @@
   "a641a313-6916-4747-ba44-43d4df6d477f": "Laat andere beheerders toe om inschrijvingen van ‘hun’ leden te bekijken",
   "025ccb96-96ec-441f-9992-13668e1758ec": "Laat andere beheerders toe ‘hun’ leden in te schrijven",
   "b91c82a6-67c0-451f-867c-8a3468d6381c": "Je ziet maar een deel van de inschrijvingen.",
-  "5d5aa495-fe78-45f5-93b2-4c78acdc1e9f": "Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid."
+  "5d5aa495-fe78-45f5-93b2-4c78acdc1e9f": "Opgelet, dit openstaand bedrag is op één of andere manier niet langer gekoppeld aan een specifiek lid. In de plaats daarvan is het gekoppeld aan een account (= emailadres). We raden je aan om dit aan te passen zodat elk individueel item gekoppeld is aan een lid.",
+  "0d47541d-abf2-45b5-a06c-3a85b7fa3994": "Je hebt geen toegangsrechten om inschrijvingen op te zetten voor activiteiten in deze periode (geen toegang tot werkjaar)",
+  "eff21f4c-2d50-4553-9eb9-8a9e399f4124": "Je hebt niet voldoende toegangsrechten",
+  "e115a9d1-11a6-42b9-a781-c6ab9d8a4b9c": "Dit werkjaar is vergrendeld, je kan er geen inschrijvingsgroepen meer verplaatsen",
+  "753684e1-94aa-4663-a81c-9656a51283ae": "Je kan deze groep niet naar een andere periode verplaatsen omdat de wachtlijst van deze groep gedeeld is met andere groepen.",
+  "18530ea6-4c97-4fd8-af49-54ed7b812a59": "Ander werkjaar"
 }

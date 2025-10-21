@@ -478,7 +478,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         throw new SimpleError({
                             code: 'locked_period',
                             message: 'This period is locked',
-                            human: $t('Dit werkjaar is vergrendeld, je kan er geen inschrijvingsgroepen meer verplaatsen'),
+                            human: $t('e115a9d1-11a6-42b9-a781-c6ab9d8a4b9c'),
                         });
                     }
                 }
@@ -536,7 +536,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         code: 'invalid_field',
                         field: 'periodId',
                         message: 'Group has waiting list with other groups in the current period',
-                        human: $t('Je kan deze groep niet naar een andere periode verplaatsen omdat de wachtlijst van deze groep gedeeld is met andere groepen.'),
+                        human: $t('753684e1-94aa-4663-a81c-9656a51283ae'),
                     });
                 }
             }

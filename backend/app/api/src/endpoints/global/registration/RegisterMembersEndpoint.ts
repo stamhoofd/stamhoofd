@@ -91,7 +91,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to checkout as this organization for a different organization',
-                    human: $t(`Je hebt niet voldoende toegangsrechten`),
+                    human: $t(`eff21f4c-2d50-4553-9eb9-8a9e399f4124`),
                     statusCode: 403,
                 });
             }

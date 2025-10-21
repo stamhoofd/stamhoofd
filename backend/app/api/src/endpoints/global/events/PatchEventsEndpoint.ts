@@ -53,7 +53,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (!await Context.auth.canAccessGroupsInPeriod(period.id, putGroup.organizationId)) {
-            throw Context.auth.error($t(`Je hebt geen toegangsrechten om inschrijvingen op te zetten voor activiteiten in deze periode (geen toegang tot werkjaar)`));
+            throw Context.auth.error($t(`0d47541d-abf2-45b5-a06c-3a85b7fa3994`));
         }
 
         if (!group) {

@@ -195,7 +195,7 @@ function showContextMenu(event: MouseEvent) {
                     ),
                     [
                         new ContextMenuItem({
-                            name: $t('Ander werkjaar'),
+                            name: $t('18530ea6-4c97-4fd8-af49-54ed7b812a59'),
                             childMenu: new ContextMenu([
                                 moveToPeriodOptions,
 
