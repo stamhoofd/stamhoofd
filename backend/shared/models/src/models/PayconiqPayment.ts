@@ -150,8 +150,9 @@ export class PayconiqPayment extends Model {
             })
         }
 
+        let response: any;
         try {
-            const response = await this.request("POST", "/v3/payments", {
+             response = await this.request("POST", "/v3/payments", {
                 reference: payment.id.replaceAll("-", ""), // 36 chars, max length is 35.... The actual id is also in the description
                 amount: payment.price,
                 currency: "EUR",
