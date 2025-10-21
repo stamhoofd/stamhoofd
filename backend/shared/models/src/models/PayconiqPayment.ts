@@ -150,14 +150,23 @@ export class PayconiqPayment extends Model {
             })
         }
 
-        const response = await this.request("POST", "/v3/payments", {
-            reference: payment.id.replaceAll("-", ""), // 36 chars, max length is 35.... The actual id is also in the description
-            amount: payment.price,
-            currency: "EUR",
-            callbackUrl: callbackUrl ?? 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
-            returnUrl,
-            description: Formatter.sepaPaymentSlug(description).substring(0, 140) // Lmimit to 140 chars
-        }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+        try {
+            const response = await this.request("POST", "/v3/payments", {
+                reference: payment.id.replaceAll("-", ""), // 36 chars, max length is 35.... The actual id is also in the description
+                amount: payment.price,
+                currency: "EUR",
+                callbackUrl: callbackUrl ?? 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                returnUrl,
+                description: Formatter.sepaPaymentSlug(description).substring(0, 140) // Lmimit to 140 chars
+            }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+        } catch (e) {
+            console.error('Payconiq responded with an error')
+            console.error(e);
+            throw new SimpleError({
+                code: "payconiq_error",
+                message: "Betaling via Payconiq is tijdelijk onbeschikbaar door een probleem bij Payconiq of met het account van de handelaar.",
+            })
+        }
 
         const payconiqPayment = new PayconiqPayment()
         payconiqPayment.paymentId = payment.id
