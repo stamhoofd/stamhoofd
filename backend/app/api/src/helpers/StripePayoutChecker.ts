@@ -44,7 +44,13 @@ export class StripePayoutChecker {
                 },
             })) {
                 // Get all payments for this payout
-                await this.fetchBalanceItems(payout);
+                try {
+                    await this.fetchBalanceItems(payout);
+                }
+                catch (e) {
+                    console.error('Error for payout ' + payout.id);
+                    console.error(e);
+                }
             }
         }
         catch (e) {
