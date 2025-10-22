@@ -27,10 +27,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
     });
 
     describe('Duplicate members', () => {
-        test('The security code should be a requirement', async () => {
+        test('The security code should be a requirement in organization scope', async () => {
             const organization = await new OrganizationFactory({ }).create();
             const user = await new UserFactory({
-                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
             }).create();
 
@@ -54,6 +54,50 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             arr.addPut(put);
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await expect(testServer.test(endpoint, request))
+                .rejects
+                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+        });
+
+        test('The security code should be a requirement in platform scope', async () => {
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Read }),
+            }).create();
+
+            const existingMember = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: true,
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    securityCode: 'ABC-123',
+                    email: 'original@example.com',
+                    parents: [
+                        Parent.create({
+                            firstName: 'Jane',
+                            lastName: 'Doe',
+                            email: 'jane.doe@example.com',
+                        }),
+                    ],
+                }),
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const put = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                }),
+            });
+            arr.addPut(put);
+
+            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
             await expect(testServer.test(endpoint, request))
                 .rejects
@@ -178,6 +222,45 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             // Check parent is still there
             expect(member.details.parents.length).toBe(1);
             expect(member.details.parents[0]).toEqual(existingMember.details.parents[0]);
+        });
+
+        describe('Usermode platform', () => {
+            // remark: in usermode organization the organization id of the member will be set to the organization id
+            test('A user with full permissions for an organization should be able to create a duplicate member (without merging) without security code when normally a security code is required', async () => {
+                const organization = await new OrganizationFactory({ }).create();
+                const user = await new UserFactory({
+                    permissions: Permissions.create({ level: PermissionLevel.Full }),
+                    organization, // since we are in platform mode, this will only set the permissions for this organization
+                }).create();
+
+                const existingMember = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: true,
+                }).create();
+
+                const token = await Token.createToken(user);
+
+                const arr: Body = new PatchableArray();
+                const put = MemberWithRegistrationsBlob.create({
+                    details: MemberDetails.create({
+                        firstName,
+                        lastName,
+                        birthDay: new Date(existingMember.details.birthDay!.getTime() + 1),
+                    }),
+                });
+                arr.addPut(put);
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
+
+                expect(response.status).toBe(200);
+                // Check id of the returned member does not match the existing member
+                expect(response.body.members.length).toBe(1);
+                expect(response.body.members[0].id).not.toBe(existingMember.id);
+            });
         });
     });
 
