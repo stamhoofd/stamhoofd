@@ -93,10 +93,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             struct.details.cleanData();
             member.details = struct.details;
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
-            if (duplicate) {
+            try {
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
+                if (duplicate) {
                 // Merge data
-                member = duplicate;
+                    member = duplicate;
+                }
+            }
+            catch (error: any) {
+                if (!organization
+                    || !(error instanceof SimpleError && error.code === 'known_member_missing_rights')
+                    // a user with full permissions for an organization should be able to create a duplicate member (without merging)
+                    || !await PatchOrganizationMembersEndpoint.canCreateDuplicateMember(organization.id)
+                ) {
+                    throw error;
+                }
             }
 
             // We risk creating a new member without being able to access it manually afterwards
@@ -956,6 +967,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (type === 'patch') {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
+
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
@@ -977,6 +989,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         const age = put.details.age;
         // do not check if member is duplicate for historical members
         return age !== null && age < 81;
+    }
+
+    static async canCreateDuplicateMember(organizationId: string): Promise<boolean> {
+        if (STAMHOOFD.userMode === 'platform') {
+            return await Context.auth.hasFullAccess(organizationId);
+        }
+
+        return false;
     }
 
     static async checkDuplicate(member: Member, securityCode: string | null | undefined, type: 'put' | 'patch') {
