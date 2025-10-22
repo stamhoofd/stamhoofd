@@ -180,6 +180,14 @@
                 Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>. Heb je geen API-key en wil je snel aan de slag, stel dan Stripe (Bancontact) hierboven in. Een Payconiq API-key aanvragen duurt enkele weken.
             </p>
 
+            <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="'https://'+ $t('shared.domains.marketing') +'/docs/oude-payconiq-accounts/'" target="_blank">
+                Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.
+
+                <span class="button text">
+                    Meer lezen
+                </span>
+            </a>
+
             <STInputBox title="API-key" error-fields="payconiqApiKey" :error-box="errorBox" class="max">
                 <input
                     v-model="payconiqApiKey"

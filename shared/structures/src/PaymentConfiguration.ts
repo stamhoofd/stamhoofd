@@ -28,6 +28,12 @@ export class PayconiqAccount extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true })
     callbackUrl: string|null = null
+
+    /**
+     * Temorary stored whether this payconiq API key is probably still on the old system
+     */
+    @field({ decoder: BooleanDecoder, optional: true })
+    legacyApi: boolean = false
 }
 
 /**

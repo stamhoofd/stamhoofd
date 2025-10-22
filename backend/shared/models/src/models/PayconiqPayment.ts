@@ -57,7 +57,13 @@ export class PayconiqPayment extends Model {
             })
         }
 
-        const response = await PayconiqPayment.request("GET", "/v3/payments/"+this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+        const response = await PayconiqPayment.request(
+            "GET", 
+            "/v3/payments/"+this.payconiqId, 
+            {}, 
+            apiKey, {
+                testMode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production'
+            })
         if (typeof response !== 'object' || response === null) {
             throw new SimpleError({
                 code: "",
@@ -111,7 +117,13 @@ export class PayconiqPayment extends Model {
 
         // Throws on failure
         try {
-            await PayconiqPayment.request("DELETE", "/v3/payments/"+this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+            await PayconiqPayment.request(
+                "DELETE", 
+                "/v3/payments/"+this.payconiqId, 
+                {}, 
+                apiKey, {
+                    testMode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production'
+                })
             return true;
         } catch (e) {
             console.error('Failed to cancel Payconiq payment', this.id, this.payconiqId, this.paymentId, e)
@@ -126,17 +138,79 @@ export class PayconiqPayment extends Model {
         }
 
         try {
-            const response = await this.request("POST", "/v3/payments", {
-                reference: "test-"+(new Date().getTime()), // 36 chars, max length is 35...
-                amount: 1,
-                currency: "EUR",
-                callbackUrl: 'https://'+organization.getApiHost(),
-                description: "Key validation test",
-
-            }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+            const response = await this.request(
+                "POST", 
+                "/v3/payments", 
+                {
+                    reference: "test-"+(new Date().getTime()), // 36 chars, max length is 35...
+                    amount: 1,
+                    currency: "EUR",
+                    callbackUrl: 'https://'+organization.getApiHost(),
+                    description: "Key validation test",
+                }, 
+                apiKey, 
+                {
+                    testMode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production'
+                }
+            )
             return response;
         } catch (e) {
+            console.error(e);
             return;
+        }
+    }
+
+    static legacyApiCache: Map<string, {
+        value: Promise<boolean> | boolean,
+        checked: Date
+    }> = new Map();
+
+    static forceLegacyRecheck(organization: Organization, payconiqAccount: PayconiqAccount) {
+        const apiKey = payconiqAccount.apiKey
+        if (!apiKey) {
+            return;
+        }
+        this.legacyApiCache.delete(apiKey);
+    }
+
+    static async checkLegacyApi(apiKey: string): Promise<boolean> {
+        const v = this.legacyApiCache.get(apiKey);
+        if (v !== undefined && v.checked < new Date(Date.now() - 1000 * 60 * 60 * 24)) {
+            return await v.value;
+        }
+        const promise = this.isLegacyApi(apiKey);
+        this.legacyApiCache.set(apiKey, {
+            value: promise,
+            checked: new Date()
+        });
+        const updated = await promise;
+        this.legacyApiCache.set(apiKey, {
+            value: updated,
+            checked: new Date()
+        });
+        return updated
+    }
+
+    static async isLegacyApi(apiKey: string): Promise<boolean> {
+        try {
+            await this.request(
+                "POST", 
+                "/v3/payments", 
+                {
+                    reference: "test-"+(new Date().getTime()), // 36 chars, max length is 35...
+                    amount: 1,
+                    currency: "EUR",
+                    description: "Key validation test",
+                }, 
+                apiKey, 
+                {
+                    testMode: false,
+                    legacyApi: true
+                }
+            )
+            return true;
+        } catch (e) {
+            return false;
         }
     }
 
@@ -152,14 +226,22 @@ export class PayconiqPayment extends Model {
 
         let response: any;
         try {
-             response = await this.request("POST", "/v3/payments", {
-                reference: payment.id.replaceAll("-", ""), // 36 chars, max length is 35.... The actual id is also in the description
-                amount: payment.price,
-                currency: "EUR",
-                callbackUrl: callbackUrl ?? 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
-                returnUrl,
-                description: Formatter.sepaPaymentSlug(description).substring(0, 140) // Lmimit to 140 chars
-            }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production')
+             response = await this.request(
+                "POST", 
+                "/v3/payments", 
+                {
+                    reference: payment.id.replaceAll("-", ""), // 36 chars, max length is 35.... The actual id is also in the description
+                    amount: payment.price,
+                    currency: "EUR",
+                    callbackUrl: callbackUrl ?? 'https://'+organization.getApiHost()+"/v"+Version+"/payments/"+encodeURIComponent(payment.id)+"?exchange=true",
+                    returnUrl,
+                    description: Formatter.sepaPaymentSlug(description).substring(0, 140) // Lmimit to 140 chars
+                }, 
+                apiKey, 
+                {
+                    testMode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production'
+                }
+            )
         } catch (e) {
             console.error('Payconiq responded with an error')
             console.error(e);
@@ -205,13 +287,15 @@ export class PayconiqPayment extends Model {
     /**
      * Do a post request on the API.
      */
-    private static request(method: string, path: string, data = {}, auth: string | null = null, testMode: boolean): Promise<any> {
+    private static async request(method: string, path: string, data = {}, auth: string, {testMode, legacyApi = null}: {
+        testMode: boolean,
+        legacyApi?: boolean | null
+    }): Promise<any> {
+        legacyApi = legacyApi ?? (testMode ? false : await this.checkLegacyApi(auth))
         return new Promise((resolve, reject) => {
             const jsonData = JSON.stringify(data);
-            // Payconiq switches to Wero on 2025-10-19
-            const isWero = testMode || Date.now() > new Date('2025-10-19T02:00:00+02:00').getTime();
             let hostname = !testMode ? 'api.payconiq.com' : 'api.ext.payconiq.com';
-            if (isWero) {
+            if (!legacyApi) {
                 hostname = !testMode ? 'merchant.api.bancontact.net' : 'merchant.api.preprod.bancontact.net';
             }
             const base = "https://"+hostname

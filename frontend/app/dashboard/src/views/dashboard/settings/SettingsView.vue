@@ -17,6 +17,14 @@
                 </a>
             </p>
 
+            <a v-if="organization.privateMeta && organization.privateMeta.payconiqAccounts.length > 0 && organization.privateMeta.payconiqAccounts[0].legacyApi" :selectable="true" class="warning-box" :href="'https://'+ $t('shared.domains.marketing') +'/docs/oude-payconiq-accounts/'" target="_blank">
+                Jouw API-key van Payconiq vereist jouw aandacht. Jouw Payconiq acccount is niet overgezet naar het nieuwe handelaarportaal. Je hebt mogelijks enkel een contract met Payconiq voor de sticker oplossing, niet voor de online oplossing. Lees de gids (klik hier) door om dit te verhelpen. We kunnen niet garanderen dat je huidige Payconiq koppeling blijft werken in de toekomst.
+
+                <span class="button text">
+                    Meer lezen
+                </span>
+            </a>
+
             <STList class="illustration-list">    
                 <STListItem :selectable="true" class="left-center" @click="openGeneral(true)">
                     <img slot="left" src="~@stamhoofd/assets/images/illustrations/flag.svg">

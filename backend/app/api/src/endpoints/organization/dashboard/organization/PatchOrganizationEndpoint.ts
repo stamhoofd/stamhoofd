@@ -122,6 +122,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                     for (const account of organization.privateMeta.payconiqAccounts) {
                         if (account.merchantId === null) {
+                            await PayconiqPayment.forceLegacyRecheck(organization, account);
                             const payment = await PayconiqPayment.createTest(organization, account)
                             
                             if (!payment) {
@@ -146,6 +147,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             account.profileId = decoded.profileId
                             account.name = decoded.name
                             account.iban = decoded.iban
+                            account.legacyApi = (organization.privateMeta.useTestPayments ?? STAMHOOFD.environment != 'production') ? false : (await PayconiqPayment.checkLegacyApi(account.apiKey));
                         }
                     }
                 }
