@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useAuth, useContext, useIsMobile } from '@stamhoofd/components';
+import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useAuth, useIsMobile } from '@stamhoofd/components';
 import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
@@ -51,7 +51,6 @@ const props = defineProps<{
 
 const present = usePresent();
 const show = useShow();
-const context = useContext();
 const isMobile = useIsMobile();
 const preview = computed(() => props.webshopManager.preview);
 const webshop = computed(() => props.webshopManager.webshop);
@@ -59,6 +58,8 @@ const loading = ref(false);
 const orders = ref([]) as Ref<PrivateOrderWithTickets[]>;
 const selectedProductId = ref<string | null>(null);
 const requestOwner = useRequestOwner();
+const isLoadingOrders = ref(true);
+const isRefreshingOrders = ref(false);
 
 const selectedProduct = computed({
     get: (): Product | null => webshop.value?.products?.find(p => p.id === selectedProductId.value) ?? null,
@@ -264,9 +265,6 @@ function putOrder(order: PrivateOrder) {
     }
     orders.value.push(PrivateOrderWithTickets.create(order));
 }
-
-const isLoadingOrders = ref(true);
-const isRefreshingOrders = ref(false);
 
 async function loadOrders() {
     console.log('Loading orders...');
