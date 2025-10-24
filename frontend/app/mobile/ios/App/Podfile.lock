@@ -1,30 +1,30 @@
 PODS:
-  - Alamofire (5.4.1)
-  - Capacitor (5.7.5):
+  - Alamofire (5.10.2)
+  - Capacitor (6.2.1):
     - CapacitorCordova
-  - CapacitorApp (5.0.7):
+  - CapacitorApp (6.0.2):
     - Capacitor
-  - CapacitorAppLauncher (5.0.7):
+  - CapacitorAppLauncher (6.0.3):
     - Capacitor
-  - CapacitorCordova (5.7.5)
-  - CapacitorFilesystem (5.1.4):
+  - CapacitorCordova (6.2.1)
+  - CapacitorFilesystem (6.0.3):
     - Capacitor
-  - CapacitorHaptics (5.0.7):
+  - CapacitorHaptics (6.0.2):
     - Capacitor
-  - CapacitorKeyboard (5.0.7):
+  - CapacitorKeyboard (6.0.3):
     - Capacitor
-  - CapacitorPreferences (5.0.7):
+  - CapacitorPreferences (6.0.3):
     - Capacitor
   - CapacitorRateApp (4.0.3):
     - Capacitor
-  - CapacitorShare (5.0.7):
+  - CapacitorShare (6.0.3):
     - Capacitor
-  - CapacitorStatusBar (5.0.7):
+  - CapacitorStatusBar (6.0.2):
     - Capacitor
-  - CapgoCapacitorUpdater (5.3.57):
+  - CapgoCapacitorUpdater (6.14.0):
     - Alamofire
     - Capacitor
-    - SSZipArchive
+    - SSZipArchive (= 2.4.3)
     - Version
   - SSZipArchive (2.4.3)
   - Version (0.8.0)
@@ -76,19 +76,19 @@ EXTERNAL SOURCES:
     :path: "../../../../../node_modules/@capgo/capacitor-updater"
 
 SPEC CHECKSUMS:
-  Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
-  Capacitor: 7a18af881e4be18578381ae43aa860b20a5905d6
-  CapacitorApp: b23ce4279972fa24721b9ad7aefdf05e36c29db7
-  CapacitorAppLauncher: 3c24de236f37bf7ab79e90ecf5576f962cc7d99e
-  CapacitorCordova: c946a6052b547e1e185fc46862003f7b9130ead1
-  CapacitorFilesystem: e75468db4353d254b2fbae481d26a3d40c10d0f5
-  CapacitorHaptics: 85a1ecd1d3026089642518d789f0fb81fe93cf80
-  CapacitorKeyboard: 7998987a2d8719967f0fec2508ea13244b7630b7
-  CapacitorPreferences: cbf7f033bd08dd33b07090fe9ff54344dc02d6e2
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  Capacitor: c95400d761e376be9da6be5a05f226c0e865cebf
+  CapacitorApp: e1e6b7d05e444d593ca16fd6d76f2b7c48b5aea7
+  CapacitorAppLauncher: 7c8dfa7797c7817e770d14a526fae62901e5f347
+  CapacitorCordova: 8d93e14982f440181be7304aa9559ca631d77fff
+  CapacitorFilesystem: 59270a63c60836248812671aa3b15df673fbaf74
+  CapacitorHaptics: 4fc15afe22b123d093e6ace24d95e8e3b1f261b9
+  CapacitorKeyboard: e89189ad398b815b6ff7e52271f0fb4f911a0a0a
+  CapacitorPreferences: f3eadae2369ac3ab8e21743a2959145b0d1286a3
   CapacitorRateApp: 20928fa996851647e912bbf119af59a48a171712
-  CapacitorShare: 3cdbe767398f9d73a556e5b71fc1106d7686dfb7
-  CapacitorStatusBar: 37ca5200a1791340c519239521ec2519d384eacb
-  CapgoCapacitorUpdater: 0c08d989a490f2a1badadbe842f67338151b40fc
+  CapacitorShare: d2a742baec21c8f3b92b361a2fbd2401cdd8288e
+  CapacitorStatusBar: b16799a26320ffa52f6c8b01737d5a95bbb8f3eb
+  CapgoCapacitorUpdater: e02ba85723479e91d40068f9c11ec42b05fdf020
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   Version: de5907f2c5d0f3cf21708db7801d1d5401139486
 

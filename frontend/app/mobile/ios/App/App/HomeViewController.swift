@@ -50,4 +50,8 @@ class HomeViewController: CAPBridgeViewController {
         self.webView!.configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         self.webView!.configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
     }
+
+    override open func capacitorDidLoad() {
+        bridge?.registerPluginInstance(QRScannerPlugin())
+    }
 }
