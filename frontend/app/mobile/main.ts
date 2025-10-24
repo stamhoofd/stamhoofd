@@ -12,7 +12,7 @@ import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager, SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
-import { RateApp } from 'capacitor-rate-app';
+import { InAppReview } from '@capacitor-community/in-app-review';
 import { createApp } from 'vue';
 
 import App from '../dashboard/src/App.vue';
@@ -207,7 +207,7 @@ async function markReviewMoment($context: SessionContext) {
             // When the counter reaches 4, we'll ask for a review and reset the counter
             if (counter >= 4) {
                 // Ask for a review
-                RateApp.requestReview().catch(console.error);
+                InAppReview.requestReview().catch(console.error);
                 counter = 0;
             }
 

@@ -15,27 +15,27 @@
   },
   "dependencies": {
     "@capacitor-community/http": "1.4.1",
-    "@capacitor/android": "6.1.2",
-    "@capacitor/app": "6.0.1",
-    "@capacitor/app-launcher": "6.0.2",
+    "@capacitor-community/in-app-review": "^7.1.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/app-launcher": "^7.0.0",
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/core": "6.1.2",
-    "@capacitor/filesystem": "6.0.1",
-    "@capacitor/haptics": "6.0.1",
-    "@capacitor/ios": "6.1.2",
-    "@capacitor/keyboard": "6.0.2",
-    "@capacitor/preferences": "6.0.2",
-    "@capacitor/share": "6.0.2",
-    "@capacitor/status-bar": "6.0.1",
-    "@capgo/capacitor-updater": "6.14.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
+    "@capgo/capacitor-updater": "7.22.0",
     "@stamhoofd/assets": "1.0.0",
     "@stamhoofd/components": "1.0.0",
     "@stamhoofd/scss": "1.0.0",
-    "@stamhoofd/structures": "*",
-    "capacitor-rate-app": "4.0.3"
+    "@stamhoofd/structures": "*"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0",
+    "@capacitor/cli": "^7.0.0",
     "@trapezedev/configure": "^7.0.10"
   }
 }
