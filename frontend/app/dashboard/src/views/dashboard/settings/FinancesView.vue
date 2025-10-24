@@ -36,7 +36,7 @@
                 </STListItem>
             </STList>
 
-            <template v-if="hasFinanceAccess">
+            <template v-if="hasFinanceAccess && !areSalesDisabled">
                 <hr>
                 <h2>Betalingen aan Stamhoofd</h2>
                 <BillingWarningBox v-if="hasFinanceAccess" @billing="openPendingInvoice(true)" />
@@ -117,7 +117,7 @@
 <script lang="ts">
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { BackButton, LoadComponent, LoadingView,STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
-import { SessionManager, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { STBillingStatus, STCredit } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins } from "vue-property-decorator";
@@ -188,6 +188,10 @@ export default class FinancesView extends Mixins(NavigationMixin) {
 
     get organization() {
         return OrganizationManager.organization
+    }
+
+    get areSalesDisabled() {
+        return AppManager.shared.isNative && this.organization.id === "34541097-44dd-4c68-885e-de4f42abae4c"
     }
 
     get hasFinanceAccess() {
