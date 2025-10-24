@@ -23,6 +23,7 @@
 		"androidScheme": "https"
 	},
 	"packageClassList": [
+		"InAppReviewPlugin",
 		"AppPlugin",
 		"AppLauncherPlugin",
 		"FilesystemPlugin",
@@ -31,7 +32,6 @@
 		"PreferencesPlugin",
 		"SharePlugin",
 		"StatusBarPlugin",
-		"CapacitorUpdaterPlugin",
-		"CapacitorRateAppPlugin"
+		"CapacitorUpdaterPlugin"
 	]
 }

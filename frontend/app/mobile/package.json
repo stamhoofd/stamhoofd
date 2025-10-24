@@ -12,25 +12,24 @@
     "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production webpack --performance-hints warning"
   },
   "dependencies": {
-    "@capacitor/android": "^6.0.0",
-    "@capacitor/app": "^6.0.0",
-    "@capacitor/app-launcher": "^6.0.0",
-    "@capacitor/cli": "^6.0.0",
-    "@capacitor/core": "^6.0.0",
-    "@capacitor/filesystem": "^6.0.0",
-    "@capacitor/haptics": "^6.0.0",
-    "@capacitor/ios": "^6.0.0",
-    "@capacitor/keyboard": "^6.0.0",
-    "@capacitor/preferences": "^6.0.0",
-    "@capacitor/share": "^6.0.0",
-    "@capacitor/status-bar": "^6.0.0",
-    "@capgo/capacitor-updater": "6.14.0",
+    "@capacitor-community/in-app-review": "^7.1.0",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/app-launcher": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
+    "@capgo/capacitor-updater": "7.22.0",
     "@stamhoofd/assets": "1.0.0",
     "@stamhoofd/components": "1.0.0",
-    "@stamhoofd/scss": "1.0.0",
-    "capacitor-rate-app": "4.0.3"
+    "@stamhoofd/scss": "1.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0"
+    "@capacitor/cli": "^7.0.0"
   }
 }

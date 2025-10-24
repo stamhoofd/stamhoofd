@@ -1,5 +1,9 @@
 [
 	{
+		"pkg": "@capacitor-community/in-app-review",
+		"classpath": "com.getcapacitor.community.inappreview.InAppReviewPlugin"
+	},
+	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},
@@ -34,9 +38,5 @@
 	{
 		"pkg": "@capgo/capacitor-updater",
 		"classpath": "ee.forgr.capacitor_updater.CapacitorUpdaterPlugin"
-	},
-	{
-		"pkg": "capacitor-rate-app",
-		"classpath": "com.capacitor.rateApp.CapacitorRateAppPlugin"
 	}
 ]

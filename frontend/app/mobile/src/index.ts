@@ -7,12 +7,12 @@ import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Haptics, NotificationType } from '@capacitor/haptics';
 import { Keyboard } from '@capacitor/keyboard';
 import { Share } from '@capacitor/share';
+import { InAppReview } from '@capacitor-community/in-app-review';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { HistoryManager } from '@simonbackx/vue-app-navigation';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager, SessionManager, Storage, UrlHelper } from '@stamhoofd/networking';
-import { RateApp } from 'capacitor-rate-app';
 import Vue from "vue";
 import VueMeta from 'vue-meta';
 
@@ -195,7 +195,7 @@ async function markReviewMoment() {
             // When the counter reaches 4, we'll ask for a review and reset the counter
             if (counter >= 4) {
                 // Ask for a review
-                RateApp.requestReview().catch(console.error);
+                InAppReview.requestReview().catch(console.error);
                 counter = 0
             }
         
