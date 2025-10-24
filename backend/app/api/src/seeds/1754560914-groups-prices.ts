@@ -177,7 +177,7 @@ export async function migratePrices() {
                                 }),
                             }));
                         }
-                        // todo: test what if discounts lenght less then category discounts
+                        // todo: test what if discounts length less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
                             customDiscounts = undefined;
                         }
@@ -220,7 +220,7 @@ export async function migratePrices() {
                     }
 
                     // in other cases the bundle discount will have been added already (as a category discount)
-                    if (oldPrices.onlySameGroup) {
+                    if (oldPrices.prices.length > 1 && oldPrices.onlySameGroup) {
                         const bundleDiscount = createBundleDiscount(oldPrices, category, allBundleDiscounts);
                         groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
                             name: bundleDiscount.name,
