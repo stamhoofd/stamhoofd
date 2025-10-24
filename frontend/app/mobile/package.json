@@ -12,7 +12,6 @@
     "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production webpack --performance-hints warning"
   },
   "dependencies": {
-    "@capacitor-community/http": "1.4.1",
     "@capacitor/android": "5.7.0",
     "@capacitor/app": "5.0.7",
     "@capacitor/app-launcher": "5.0.7",

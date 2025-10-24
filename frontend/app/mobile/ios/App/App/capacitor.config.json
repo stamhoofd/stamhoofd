@@ -21,5 +21,17 @@
 	"server": {
 		"hostname": "stamhoofd.app",
 		"androidScheme": "https"
-	}
+	},
+	"packageClassList": [
+		"AppPlugin",
+		"AppLauncherPlugin",
+		"FilesystemPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"PreferencesPlugin",
+		"SharePlugin",
+		"StatusBarPlugin",
+		"CapacitorUpdaterPlugin",
+		"CapacitorRateAppPlugin"
+	]
 }
