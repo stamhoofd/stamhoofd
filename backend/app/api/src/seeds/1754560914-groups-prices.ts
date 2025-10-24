@@ -169,13 +169,17 @@ export async function migratePrices() {
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
 
                         if (isZeroDiscount) {
-                            customDiscounts = categoryDiscountForFamily.discounts.map(() => GroupPriceDiscount.create({
-                                type: GroupPriceDiscountType.Fixed,
-                                value: ReduceablePrice.create({
-                                    price: 0,
-                                    reducedPrice: null,
-                                }),
-                            }));
+                            customDiscounts = categoryDiscountForFamily.discounts
+                                // todo: test this case
+                                // the custom discounts cannot exceed the length of the original discounts
+                                .filter((_, index) => index < discounts.length)
+                                .map(() => GroupPriceDiscount.create({
+                                    type: GroupPriceDiscountType.Fixed,
+                                    value: ReduceablePrice.create({
+                                        price: 0,
+                                        reducedPrice: null,
+                                    }),
+                                }));
                         }
                         // todo: test what if discounts length less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
@@ -198,13 +202,17 @@ export async function migratePrices() {
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
 
                         if (isZeroDiscount) {
-                            customDiscounts = categoryDiscountForMember.discounts.map(() => GroupPriceDiscount.create({
-                                type: GroupPriceDiscountType.Fixed,
-                                value: ReduceablePrice.create({
-                                    price: 0,
-                                    reducedPrice: null,
-                                }),
-                            }));
+                            customDiscounts = categoryDiscountForMember.discounts
+                                // todo: test this case
+                                // the custom discounts cannot exceed the length of the original discounts
+                                .filter((_, index) => index < discounts.length)
+                                .map(() => GroupPriceDiscount.create({
+                                    type: GroupPriceDiscountType.Fixed,
+                                    value: ReduceablePrice.create({
+                                        price: 0,
+                                        reducedPrice: null,
+                                    }),
+                                }));
                         }
                         // todo: test what if discounts lenght less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
