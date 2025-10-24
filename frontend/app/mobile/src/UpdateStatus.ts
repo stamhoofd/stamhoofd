@@ -132,7 +132,7 @@ export class UpdateStatus {
         // Set the version on next reload
         await CapacitorUpdater.next(version);
 
-        new Toast($t('b4cb2ff2-bb82-417d-bf01-6af09e996357'), $t(`44a86a23-a189-421b-b53a-8f922c17ab78`)).setButton(new ToastButton($t(`1529d78d-800f-415a-8e56-b756a8bc6449`), () => {
+        new Toast($t('b4cb2ff2-bb82-417d-bf01-6af09e996357'), 'download').setButton(new ToastButton($t(`1529d78d-800f-415a-8e56-b756a8bc6449`), () => {
             CapacitorUpdater.set(version).catch((e) => {
                 Toast.fromError(e as Error).show();
             });
