@@ -94,14 +94,17 @@ export async function migratePrices() {
                         }
 
                         const countWholeFamily = !oldPrices.sameMemberOnlyDiscount;
+                        const isCategoryDiscount = !oldPrices.onlySameGroup;
 
-                        if (countWholeFamily) {
-                            if (!categoryDiscountForFamily) {
-                                categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        if (isCategoryDiscount) {
+                            if (countWholeFamily) {
+                                if (!categoryDiscountForFamily) {
+                                    categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                                }
                             }
-                        }
-                        else if (!categoryDiscountForMember) {
-                            categoryDiscountForMember = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                            else if (!categoryDiscountForMember) {
+                                categoryDiscountForMember = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                            }
                         }
                     }
 
@@ -138,6 +141,7 @@ export async function migratePrices() {
                 // loop different tarriffs (with different start dates)
                 for (let i = 0; i < oldPricesArray.length; i++) {
                     const oldPrices: OldGroupPrices = oldPricesArray[i];
+                    const isCategoryDiscount = !oldPrices.onlySameGroup;
                     const next: OldGroupPrices | undefined = oldPricesArray[i + 1];
 
                     const firstPrice = oldPrices.prices[0] ?? OldGroupPrice.create({
@@ -162,8 +166,8 @@ export async function migratePrices() {
                     const discounts = createDiscounts(oldPrices);
 
                     if (categoryDiscountForFamily) {
-                        // discount should be zero if category discount is not for family (but should be linked however)
-                        const isZeroDiscount = !countWholeFamily;
+                        // discount should be zero if discount is not a category discount (group discount) or if the discount is not for family members (but should be linked however)
+                        const isZeroDiscount = !isCategoryDiscount || !countWholeFamily;
 
                         // set custom discounts if discounts are different
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
@@ -195,8 +199,8 @@ export async function migratePrices() {
                     }
 
                     if (categoryDiscountForMember) {
-                        // discount should be zero if category discount is for family (but should be linked however)
-                        const isZeroDiscount = countWholeFamily;
+                        // discount should be zero if discount is not a category discount (group discount) or if the discount is for family members (but should be linked however)
+                        const isZeroDiscount = !isCategoryDiscount || countWholeFamily;
 
                         // set custom discounts if discounts are different
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
