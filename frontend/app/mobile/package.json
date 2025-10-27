@@ -14,7 +14,6 @@
     "android": "cap open android"
   },
   "dependencies": {
-    "@capacitor-community/http": "1.4.1",
     "@capacitor-community/in-app-review": "^7.1.0",
     "@capacitor/android": "^7.0.0",
     "@capacitor/app": "^7.0.0",

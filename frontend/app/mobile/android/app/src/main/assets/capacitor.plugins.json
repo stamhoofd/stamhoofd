@@ -1,9 +1,5 @@
 [
 	{
-		"pkg": "@capacitor-community/http",
-		"classpath": "com.getcapacitor.plugin.http.Http"
-	},
-	{
 		"pkg": "@capacitor-community/in-app-review",
 		"classpath": "com.getcapacitor.community.inappreview.InAppReviewPlugin"
 	},

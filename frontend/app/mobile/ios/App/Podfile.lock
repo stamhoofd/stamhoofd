@@ -7,8 +7,6 @@ PODS:
     - Capacitor
   - CapacitorAppLauncher (7.0.2):
     - Capacitor
-  - CapacitorCommunityHttp (1.4.1):
-    - Capacitor
   - CapacitorCommunityInAppReview (7.1.0):
     - Capacitor
   - CapacitorCordova (7.4.4)
@@ -39,7 +37,6 @@ DEPENDENCIES:
   - "Capacitor (from `../../../../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../../../../node_modules/@capacitor/app`)"
   - "CapacitorAppLauncher (from `../../../../../node_modules/@capacitor/app-launcher`)"
-  - "CapacitorCommunityHttp (from `../../../../../node_modules/@capacitor-community/http`)"
   - "CapacitorCommunityInAppReview (from `../../../../../node_modules/@capacitor-community/in-app-review`)"
   - "CapacitorCordova (from `../../../../../node_modules/@capacitor/ios`)"
   - "CapacitorFilesystem (from `../../../../../node_modules/@capacitor/filesystem`)"
@@ -65,8 +62,6 @@ EXTERNAL SOURCES:
     :path: "../../../../../node_modules/@capacitor/app"
   CapacitorAppLauncher:
     :path: "../../../../../node_modules/@capacitor/app-launcher"
-  CapacitorCommunityHttp:
-    :path: "../../../../../node_modules/@capacitor-community/http"
   CapacitorCommunityInAppReview:
     :path: "../../../../../node_modules/@capacitor-community/in-app-review"
   CapacitorCordova:
@@ -92,7 +87,6 @@ SPEC CHECKSUMS:
   Capacitor: 358dd1c3fdd71d969547b17e159fd8a7736cb45f
   CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
   CapacitorAppLauncher: b70f649f609bab6412eccdd413bd7f0dd42df4a9
-  CapacitorCommunityHttp: 7eba71da94e070e37a26a60483350285a33e3903
   CapacitorCommunityInAppReview: 3756d05524c5cf2eccbc8ed460f77f8f8db6c141
   CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
   CapacitorFilesystem: f9bd850c41e048180e5dc0cbb90f2033ede9d2cc
@@ -106,6 +100,6 @@ SPEC CHECKSUMS:
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   Version: de5907f2c5d0f3cf21708db7801d1d5401139486
 
-PODFILE CHECKSUM: 35c6e62f73376ee6217cd9298d834fdd46b4749c
+PODFILE CHECKSUM: f453d6c4a3c4f7bbbadd82b5e843dce21f764335
 
 COCOAPODS: 1.16.2

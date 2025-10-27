@@ -23,7 +23,6 @@
 		"androidScheme": "https"
 	},
 	"packageClassList": [
-		"HttpPlugin",
 		"InAppReviewPlugin",
 		"AppPlugin",
 		"AppLauncherPlugin",

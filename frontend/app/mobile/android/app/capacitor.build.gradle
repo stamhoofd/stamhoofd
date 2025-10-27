@@ -9,7 +9,6 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
-    implementation project(':capacitor-community-http')
     implementation project(':capacitor-community-in-app-review')
     implementation project(':capacitor-app')
     implementation project(':capacitor-app-launcher')
