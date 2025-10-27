@@ -201,10 +201,18 @@ describe('migration.migratePrices', () => {
             // check bundle discounts (each price should have 1 bundle discount for family members in same category)
             expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1);
 
-            // The custom discounts should be empty because there were no prices for the group. It should only be linked to the bundle discount because the discount for group 1 should be applied if a member inscribes for group 2.
+            // The custom discounts should be 0 because there were no prices for the group. It should only be linked to the bundle discount because the discount for group 1 should be applied if a member inscribes for group 2.
             expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
                 expect.arrayContaining([
-                    expect.objectContaining({ customDiscounts: expect.toBeArrayOfSize(0) }),
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
                 ]),
             );
         });
@@ -418,10 +426,18 @@ describe('migration.migratePrices', () => {
             // check bundle discounts (each price should have 1 bundle discount for same members in same category)
             expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1);
 
-            // The custom discounts should be empty because there were no prices for the group. It should only be linked to the bundle discount because the discount for group 1 should be applied if a member inscribes for group 2.
+            // The custom discounts should be 0 because there were no prices for the group. It should only be linked to the bundle discount because the discount for group 1 should be applied if a member inscribes for group 2.
             expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
                 expect.arrayContaining([
-                    expect.objectContaining({ customDiscounts: expect.toBeArrayOfSize(0) }),
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
                 ]),
             );
         });
@@ -659,11 +675,27 @@ describe('migration.migratePrices', () => {
             // check bundle discounts (each price should have 2 bundle discounts for same members in same category and for family members in same category)
             expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(2);
 
-            // The custom discounts should be empty because there were no prices for the group. It should only be linked to the 2 bundle discounts because the discount for group 1 should be applied if a member inscribes for group 2.
+            // The custom discounts should be 0 because there were no prices for the group. It should only be linked to the 2 bundle discounts because the discount for group 1 should be applied if a member inscribes for group 2.
             expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
                 expect.arrayContaining([
-                    expect.objectContaining({ customDiscounts: expect.toBeArrayOfSize(0) }),
-                    expect.objectContaining({ customDiscounts: expect.toBeArrayOfSize(0) }),
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
                 ]),
             );
         });
@@ -1098,11 +1130,19 @@ describe('migration.migratePrices', () => {
             expect(g4!.settings.prices[0].price.price).toBe(0);
             expect(g4!.settings.prices[0].price.reducedPrice).toBeNull();
 
-            // Should have 1 bundle discount because group 4 is in the same category as group 3 and group 3 has a discount for family members in the same category. The custom discounts should be empty because there is no discount for this group, it is only linked.
+            // Should have 1 bundle discount because group 4 is in the same category as group 3 and group 3 has a discount for family members in the same category. The custom discounts should be 0 because there is no discount for this group, it is only linked.
             expect(g4!.settings.prices[0].bundleDiscounts.size).toBe(1);
             expect([...g4!.settings.prices[0].bundleDiscounts.values()]).toEqual(
                 expect.arrayContaining([
-                    expect.objectContaining({ customDiscounts: expect.toBeArrayOfSize(0) }),
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
                 ]),
             );
         });
@@ -1327,10 +1367,18 @@ describe('migration.migratePrices', () => {
             // check bundle discounts (each price should have 1 bundle discount for family members in same category)
             expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1);
 
-            // The custom discounts should be empty because there were no prices for the group. It should only be linked to the bundle discount because the discount for group 1 should be applied if a member inscribes for group 2.
+            // The custom discounts should be 0 because there were no prices for the group. It should only be linked to the bundle discount because the discount for group 1 should be applied if a member inscribes for group 2.
             expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
                 expect.arrayContaining([
-                    expect.objectContaining({ customDiscounts: expect.toBeArrayOfSize(0) }),
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
                 ]),
             );
         });
@@ -1349,4 +1397,335 @@ describe('migration.migratePrices', () => {
             expect(g3!.settings.prices[0].bundleDiscounts.size).toBe(0);
         });
     });
+
+    describe('Old group price with single price should not result in an empty custom discount but in a custom discount of 0', () => {
+        // The main purpose of this test is to check that the custom discount is not an array without items because the calculation of the bundle discount would fail.
+
+        let period: RegistrationPeriod;
+        let organization: Organization;
+        let organizationPeriod: OrganizationRegistrationPeriod;
+        let group1: Group;
+
+        afterEach(async () => {
+            if (group1) {
+                await group1.delete();
+            }
+
+            if (organizationPeriod) {
+                await organizationPeriod.delete();
+            }
+
+            if (period) {
+                period.organizationId = null;
+                await period.save();
+            }
+
+            if (organization) {
+                await organization.delete();
+            }
+
+            if (period) {
+                await period.delete();
+            }
+        });
+
+        // case where the discount is for family members in the same category
+        test('family member discount for category', async () => {
+        // arrange
+            const startDate = new Date(2025, 0, 1);
+            const endDate = new Date(2025, 11, 31);
+            period = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+            organization = await new OrganizationFactory({ period }).create();
+            period.organizationId = organization.id;
+            await period.save();
+            organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+            group1 = await new GroupFactory({ organization, period }).create();
+            group1.settings.prices = [];
+            group1.settings.name = new TranslatedString('group1');
+
+            // initial price with discount if family members in same category
+            const oldPrices1 = OldGroupPrices.create({
+                startDate: null,
+                sameMemberOnlyDiscount: false,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 30,
+                        reducedPrice: 20,
+                    }),
+                    OldGroupPrice.create({
+                        price: 25,
+                        reducedPrice: 15,
+                    }),
+                    OldGroupPrice.create({
+                        price: 20,
+                        reducedPrice: 10,
+                    }),
+                ],
+            });
+
+            // price with discount after startDate 2025-03-01 if family members in same category
+            const oldPrices2 = OldGroupPrices.create({
+                startDate: new Date(2025, 2, 1),
+                sameMemberOnlyDiscount: false,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 300,
+                        reducedPrice: 200,
+                    }),
+                ],
+            });
+
+            // add both prices with discounts to group 1
+            group1.settings.oldPrices = [oldPrices2, oldPrices1];
+
+            await group1.save();
+
+            // add group 1 and to 2 to same category, add group 3 to different category
+            organizationPeriod.settings.categories = [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
+                    groupIds: [group1.id],
+                }),
+            ];
+
+            await organizationPeriod.save();
+
+            // act
+            await migratePrices();
+            const g1 = await Group.getByID(group1.id);
+
+            // check prices (should be equal to old prices)
+            expect(g1!.settings.oldPrices).toHaveLength(0);
+            expect(g1!.settings.prices).toHaveLength(2);
+            expect(g1!.settings.prices[0].price.price).toBe(30);
+            expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
+            expect(g1!.settings.prices[1].price.price).toBe(300);
+            expect(g1!.settings.prices[1].price.reducedPrice).toBe(200);
+
+            // check bundle discounts (each price should have 1 bundle discount for family members in same category)
+            expect(g1!.settings.prices[0].bundleDiscounts.size).toBe(1);
+            expect(g1!.settings.prices[1].bundleDiscounts.size).toBe(1);
+
+            // custom discount for bundle discount of the first price should be null because the discounts are not different than the discounts for the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1)
+            expect([...g1!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ customDiscounts: null }),
+                ]),
+            );
+
+            // custom discount for bundle discount of second price should not be null because the discounts are different than the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1), it should contain the discount for oldPrices2 which is 0 because there is only one price
+            expect([...g1!.settings.prices[1].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                ]),
+            );
+        });
+
+        // case where the discount is for same members in the same category
+        test('same member discount for category', async () => {
+            // arrange
+            const startDate = new Date(2025, 0, 1);
+            const endDate = new Date(2025, 11, 31);
+            period = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+            organization = await new OrganizationFactory({ period }).create();
+            period.organizationId = organization.id;
+            await period.save();
+            organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+            group1 = await new GroupFactory({ organization, period }).create();
+            group1.settings.prices = [];
+            group1.settings.name = new TranslatedString('group1');
+
+            // initial price with discount if same members in same category
+            const oldPrices1 = OldGroupPrices.create({
+                startDate: null,
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 30,
+                        reducedPrice: 20,
+                    }),
+                    OldGroupPrice.create({
+                        price: 25,
+                        reducedPrice: 15,
+                    }),
+                    OldGroupPrice.create({
+                        price: 20,
+                        reducedPrice: 10,
+                    }),
+                ],
+            });
+
+            // price with discount after startDate 2025-03-01 if same members in same category
+            const oldPrices2 = OldGroupPrices.create({
+                startDate: new Date(2025, 2, 1),
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: false,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 300,
+                        reducedPrice: 200,
+                    }),
+                ],
+            });
+
+            // add both prices with discounts to group 1
+            group1.settings.oldPrices = [oldPrices2, oldPrices1];
+
+            await group1.save();
+
+            // add group 1 and to 2 to same category, add group 3 to different category
+            organizationPeriod.settings.categories = [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
+                    groupIds: [group1.id],
+                }),
+            ];
+
+            await organizationPeriod.save();
+
+            // act
+            await migratePrices();
+            const g1 = await Group.getByID(group1.id);
+
+            // check prices (should be equal to old prices)
+            expect(g1!.settings.oldPrices).toHaveLength(0);
+            expect(g1!.settings.prices).toHaveLength(2);
+            expect(g1!.settings.prices[0].price.price).toBe(30);
+            expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
+            expect(g1!.settings.prices[1].price.price).toBe(300);
+            expect(g1!.settings.prices[1].price.reducedPrice).toBe(200);
+
+            // check bundle discounts (each price should have 1 bundle discount for family members in same category)
+            expect(g1!.settings.prices[0].bundleDiscounts.size).toBe(1);
+            expect(g1!.settings.prices[1].bundleDiscounts.size).toBe(1);
+
+            // custom discount for bundle discount of the first price should be null because the discounts are not different than the discounts for the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1)
+            expect([...g1!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ customDiscounts: null }),
+                ]),
+            );
+
+            // custom discount for bundle discount of second price should not be null because the discounts are different than the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1), it should contain the discount for oldPrices2 which is 0 because there is only one price
+            expect([...g1!.settings.prices[1].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ customDiscounts: expect.arrayContaining([
+                        expect.objectContaining({
+                            type: GroupPriceDiscountType.Fixed,
+                            value: expect.objectContaining({
+                                price: 0,
+                                reducedPrice: null,
+                            }),
+                        }),
+                    ]) }),
+                ]),
+            );
+        });
+
+        // case where the discount is for family members in the same group
+        test('family member discount for group', async () => {
+            // arrange
+            const startDate = new Date(2025, 0, 1);
+            const endDate = new Date(2025, 11, 31);
+            period = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+            organization = await new OrganizationFactory({ period }).create();
+            period.organizationId = organization.id;
+            await period.save();
+            organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+            group1 = await new GroupFactory({ organization, period }).create();
+            group1.settings.prices = [];
+            group1.settings.name = new TranslatedString('group1');
+
+            // initial price with discount if same members in same category
+            const oldPrices1 = OldGroupPrices.create({
+                startDate: null,
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: true,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 30,
+                        reducedPrice: 20,
+                    }),
+                    OldGroupPrice.create({
+                        price: 25,
+                        reducedPrice: 15,
+                    }),
+                    OldGroupPrice.create({
+                        price: 20,
+                        reducedPrice: 10,
+                    }),
+                ],
+            });
+
+            // price with discount after startDate 2025-03-01 if same members in same category
+            const oldPrices2 = OldGroupPrices.create({
+                startDate: new Date(2025, 2, 1),
+                sameMemberOnlyDiscount: true,
+                onlySameGroup: true,
+                prices: [
+                    OldGroupPrice.create({
+                        price: 300,
+                        reducedPrice: 200,
+                    }),
+                ],
+            });
+
+            // add both prices with discounts to group 1
+            group1.settings.oldPrices = [oldPrices2, oldPrices1];
+
+            await group1.save();
+
+            // add group 1 and to 2 to same category, add group 3 to different category
+            organizationPeriod.settings.categories = [
+                GroupCategory.create({
+                    settings: GroupCategorySettings.create({ name: 'category1' }),
+                    groupIds: [group1.id],
+                }),
+            ];
+
+            await organizationPeriod.save();
+
+            // act
+            await migratePrices();
+            const g1 = await Group.getByID(group1.id);
+
+            // check prices (should be equal to old prices)
+            expect(g1!.settings.oldPrices).toHaveLength(0);
+            expect(g1!.settings.prices).toHaveLength(2);
+            expect(g1!.settings.prices[0].price.price).toBe(30);
+            expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
+            expect(g1!.settings.prices[1].price.price).toBe(300);
+            expect(g1!.settings.prices[1].price.reducedPrice).toBe(200);
+
+            // check bundle discounts
+            // first price should have 1 bundle discount for same members in same group
+            expect(g1!.settings.prices[0].bundleDiscounts.size).toBe(1);
+            // second price should not have bundle discount because the group price has only one price
+            expect(g1!.settings.prices[1].bundleDiscounts.size).toBe(0);
+
+            // custom discount for bundle discount of the first price should be null because the discounts are not different than the discounts for the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1)
+            expect([...g1!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({ customDiscounts: null }),
+                ]),
+            );
+        });
+    });
+
+    // todo: test areDiscountsEqual
+    // todo: fix change request
 });

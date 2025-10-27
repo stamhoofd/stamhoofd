@@ -173,17 +173,12 @@ export async function migratePrices() {
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
 
                         if (isZeroDiscount) {
-                            customDiscounts = categoryDiscountForFamily.discounts
-                                // todo: test this case
-                                // the custom discounts cannot exceed the length of the original discounts
-                                .filter((_, index) => index < discounts.length)
-                                .map(() => GroupPriceDiscount.create({
-                                    type: GroupPriceDiscountType.Fixed,
-                                    value: ReduceablePrice.create({
-                                        price: 0,
-                                        reducedPrice: null,
-                                    }),
-                                }));
+                            customDiscounts = [GroupPriceDiscount.create({
+                                type: GroupPriceDiscountType.Fixed,
+                                value: ReduceablePrice.create({
+                                    price: 0,
+                                    reducedPrice: null,
+                                }) })];
                         }
                         // todo: test what if discounts length less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
@@ -206,17 +201,12 @@ export async function migratePrices() {
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
 
                         if (isZeroDiscount) {
-                            customDiscounts = categoryDiscountForMember.discounts
-                                // todo: test this case
-                                // the custom discounts cannot exceed the length of the original discounts
-                                .filter((_, index) => index < discounts.length)
-                                .map(() => GroupPriceDiscount.create({
-                                    type: GroupPriceDiscountType.Fixed,
-                                    value: ReduceablePrice.create({
-                                        price: 0,
-                                        reducedPrice: null,
-                                    }),
-                                }));
+                            customDiscounts = [GroupPriceDiscount.create({
+                                type: GroupPriceDiscountType.Fixed,
+                                value: ReduceablePrice.create({
+                                    price: 0,
+                                    reducedPrice: null,
+                                }) })];
                         }
                         // todo: test what if discounts lenght less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
@@ -291,7 +281,12 @@ function createCategoryMap(groups: Group[], categories: GroupCategory[]) {
 
 function createDiscounts(oldPrices: OldGroupPrices): GroupPriceDiscount[] {
     if (oldPrices.prices.length < 2) {
-        return [];
+        return [GroupPriceDiscount.create({
+            type: GroupPriceDiscountType.Fixed,
+            value: ReduceablePrice.create({
+                price: 0,
+                reducedPrice: null,
+            }) })];
     }
 
     const discounts: GroupPriceDiscount[] = [];
