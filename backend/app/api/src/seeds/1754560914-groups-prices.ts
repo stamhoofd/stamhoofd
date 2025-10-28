@@ -28,14 +28,11 @@ export async function migratePrices() {
             .fetch();
 
         const filteredGroups: Group[] = [];
+        const archivedGroups: Group[] = [];
 
         // filter relevant groups, cleanup other groups
         for (const group of allGroups) {
-            if (group.type !== GroupType.Membership || group.status === GroupStatus.Archived || group.deletedAt !== null) {
-                if (group.deletedAt !== null) {
-                    group.settings.oldPrices = [];
-                }
-
+            if (group.type !== GroupType.Membership || group.deletedAt !== null) {
                 group.settings.prices = [
                     GroupPrice.create({
                         name: new TranslatedString('Standaard tarief'),
@@ -48,18 +45,21 @@ export async function migratePrices() {
                     }),
                 ];
             }
+            else if (group.status === GroupStatus.Archived) {
+                archivedGroups.push(group);
+            }
             else {
                 filteredGroups.push(group);
             }
         }
 
         // group by category
-        const categoryMap = createCategoryMap(filteredGroups, period.settings.categories);
+        const categoryMap = createCategoryMap(filteredGroups, archivedGroups, period.settings.categories);
         const allBundleDiscounts: BundleDiscount[] = [];
 
         // loop categories
         for (const [categoryId, groups] of categoryMap.entries()) {
-            const category = period.settings.categories.find(c => c.id === categoryId)!;
+            const category: GroupCategory | undefined = period.settings.categories.find(c => c.id === categoryId)!;
             const isUnassigned = categoryId === UNNASSIGNED_KEY;
             let categoryDiscountForFamily: BundleDiscount | null = null;
             let categoryDiscountForMember: BundleDiscount | null = null;
@@ -180,7 +180,6 @@ export async function migratePrices() {
                                     reducedPrice: null,
                                 }) })];
                         }
-                        // todo: test what if discounts length less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
                             customDiscounts = undefined;
                         }
@@ -208,7 +207,6 @@ export async function migratePrices() {
                                     reducedPrice: null,
                                 }) })];
                         }
-                        // todo: test what if discounts lenght less then category discounts
                         else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
                             customDiscounts = undefined;
                         }
@@ -222,7 +220,7 @@ export async function migratePrices() {
                     }
 
                     // in other cases the bundle discount will have been added already (as a category discount)
-                    if (oldPrices.prices.length > 1 && oldPrices.onlySameGroup) {
+                    if (oldPrices.prices.length > 1 && (oldPrices.onlySameGroup || isUnassigned)) {
                         const bundleDiscount = createBundleDiscount(oldPrices, category, allBundleDiscounts);
                         groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
                             name: bundleDiscount.name,
@@ -233,7 +231,6 @@ export async function migratePrices() {
                 }
 
                 group.settings.prices = prices;
-                group.settings.oldPrices = [];
             }
         }
 
@@ -250,7 +247,7 @@ export async function migratePrices() {
     }
 }
 
-function createCategoryMap(groups: Group[], categories: GroupCategory[]) {
+function createCategoryMap(groups: Group[], archivedGroups: Group[], categories: GroupCategory[]) {
     // sort groups per category
     const categoryMap = new Map<string, Group[]>();
     const foundGroups = new Set<string>();
@@ -272,6 +269,9 @@ function createCategoryMap(groups: Group[], categories: GroupCategory[]) {
     }
 
     const unassignedGroups = groups.filter(g => !foundGroups.has(g.id));
+    // add archived groups to unassigned groups
+    unassignedGroups.push(...archivedGroups);
+
     if (unassignedGroups.length) {
         categoryMap.set(UNNASSIGNED_KEY, unassignedGroups);
     }
@@ -312,7 +312,7 @@ function createDiscounts(oldPrices: OldGroupPrices): GroupPriceDiscount[] {
     return discounts;
 }
 
-function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory, allBundleDiscounts: BundleDiscount[]): BundleDiscount {
+function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory | undefined, allBundleDiscounts: BundleDiscount[]): BundleDiscount {
     if (!oldPrices.onlySameGroup && oldPrices.prices.length < 2) {
         throw new Error('Not enough prices');
     }
@@ -323,7 +323,7 @@ function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory
     const discounts = createDiscounts(oldPrices);
 
     const baseNameText = countWholeFamily ? 'Korting voor extra gezinslid' : 'Korting voor meerdere inschrijvingen';
-    const nameText = oldPrices.onlySameGroup ? baseNameText : `${category.settings.name} - ${baseNameText}`;
+    const nameText = oldPrices.onlySameGroup || !category ? baseNameText : `${category.settings.name} - ${baseNameText}`;
 
     const bundleDiscount = BundleDiscount.create({
         name: new TranslatedString(nameText),

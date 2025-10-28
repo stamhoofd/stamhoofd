@@ -1,5 +1,5 @@
 import { Group, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { GroupCategory, GroupCategorySettings, GroupPriceDiscountType, OldGroupPrice, OldGroupPrices, TranslatedString } from '@stamhoofd/structures';
+import { GroupCategory, GroupCategorySettings, GroupPriceDiscountType, GroupStatus, OldGroupPrice, OldGroupPrices, TranslatedString } from '@stamhoofd/structures';
 import { migratePrices } from './1754560914-groups-prices';
 
 describe('migration.migratePrices', () => {
@@ -154,7 +154,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -193,7 +192,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (the price should be 0 because there were no old prices configured)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(0);
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
@@ -379,7 +377,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -418,7 +415,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (the price should be 0 because there were no old prices configured)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(0);
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
@@ -618,7 +614,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -667,7 +662,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (the price should be 0 because there were no old prices configured)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(0);
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
@@ -991,7 +985,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(3);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -1062,7 +1055,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (should be equal to old prices)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(2);
             expect(g2!.settings.prices[0].price.price).toBe(32);
             expect(g2!.settings.prices[0].price.reducedPrice).toBe(22);
@@ -1104,7 +1096,6 @@ describe('migration.migratePrices', () => {
             const g3 = await Group.getByID(group3.id);
 
             // check prices (should be equal to old prices)
-            expect(g3!.settings.oldPrices).toHaveLength(0);
             expect(g3!.settings.prices).toHaveLength(1);
             expect(g3!.settings.prices[0].price.price).toBe(29);
             expect(g3!.settings.prices[0].price.reducedPrice).toBe(19);
@@ -1125,7 +1116,6 @@ describe('migration.migratePrices', () => {
             const g4 = await Group.getByID(group4.id);
 
             // check prices (should be equal to old prices)
-            expect(g4!.settings.oldPrices).toHaveLength(0);
             expect(g4!.settings.prices).toHaveLength(1);
             expect(g4!.settings.prices[0].price.price).toBe(0);
             expect(g4!.settings.prices[0].price.reducedPrice).toBeNull();
@@ -1313,7 +1303,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -1359,7 +1348,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (the price should be 0 because there were no old prices configured)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(0);
             expect(g2!.settings.prices[0].price.reducedPrice).toBeNull();
@@ -1388,7 +1376,6 @@ describe('migration.migratePrices', () => {
             const g3 = await Group.getByID(group3.id);
 
             // check prices (the price should be 0 because there were no old prices configured)
-            expect(g3!.settings.oldPrices).toHaveLength(0);
             expect(g3!.settings.prices).toHaveLength(1);
             expect(g3!.settings.prices[0].price.price).toBe(0);
             expect(g3!.settings.prices[0].price.reducedPrice).toBeNull();
@@ -1498,7 +1485,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -1601,7 +1587,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -1704,7 +1689,6 @@ describe('migration.migratePrices', () => {
             const g1 = await Group.getByID(group1.id);
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(2);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -1845,7 +1829,6 @@ describe('migration.migratePrices', () => {
             // test group 1
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(1);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -1864,7 +1847,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (should be equal to old prices)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(30);
             expect(g2!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2000,7 +1982,6 @@ describe('migration.migratePrices', () => {
             // test group 1
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(1);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2019,7 +2000,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (should be equal to old prices)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(30);
             expect(g2!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2139,7 +2119,6 @@ describe('migration.migratePrices', () => {
             // test group 1
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(1);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2158,7 +2137,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (should be equal to old prices)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(30);
             expect(g2!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2277,7 +2255,6 @@ describe('migration.migratePrices', () => {
             // test group 1
 
             // check prices (should be equal to old prices)
-            expect(g1!.settings.oldPrices).toHaveLength(0);
             expect(g1!.settings.prices).toHaveLength(1);
             expect(g1!.settings.prices[0].price.price).toBe(30);
             expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2296,7 +2273,6 @@ describe('migration.migratePrices', () => {
             const g2 = await Group.getByID(group2.id);
 
             // check prices (should be equal to old prices)
-            expect(g2!.settings.oldPrices).toHaveLength(0);
             expect(g2!.settings.prices).toHaveLength(1);
             expect(g2!.settings.prices[0].price.price).toBe(30);
             expect(g2!.settings.prices[0].price.reducedPrice).toBe(20);
@@ -2321,5 +2297,263 @@ describe('migration.migratePrices', () => {
         });
     });
 
+    test('Groups that are in no category should not have bundle discounts from other groups that also do not have a category', async () => {
+        // arrange
+        const startDate = new Date(2025, 0, 1);
+        const endDate = new Date(2025, 11, 31);
+        const period = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+        const organization = await new OrganizationFactory({ period }).create();
+        period.organizationId = organization.id;
+        await period.save();
+        const organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+        const group1 = await new GroupFactory({ organization, period }).create();
+        group1.settings.prices = [];
+        group1.settings.name = new TranslatedString('group1');
+
+        // initial price with discount if family members in same category
+        const oldPrices1 = OldGroupPrices.create({
+            startDate: null,
+            sameMemberOnlyDiscount: false,
+            onlySameGroup: false,
+            prices: [
+                OldGroupPrice.create({
+                    price: 30,
+                    reducedPrice: 20,
+                }),
+                OldGroupPrice.create({
+                    price: 25,
+                    reducedPrice: 15,
+                }),
+                OldGroupPrice.create({
+                    price: 20,
+                    reducedPrice: 10,
+                }),
+            ],
+        });
+
+        group1.settings.oldPrices = [oldPrices1];
+
+        await group1.save();
+
+        const group2 = await new GroupFactory({ organization, period }).create();
+        group2.settings.prices = [];
+        group2.settings.name = new TranslatedString('group2');
+
+        // initial price with discount if same members in same category
+        const oldPrices2 = OldGroupPrices.create({
+            startDate: null,
+            sameMemberOnlyDiscount: true,
+            onlySameGroup: false,
+            prices: [
+                OldGroupPrice.create({
+                    price: 30,
+                    reducedPrice: 20,
+                }),
+                OldGroupPrice.create({
+                    price: 25,
+                    reducedPrice: 15,
+                }),
+                OldGroupPrice.create({
+                    price: 20,
+                    reducedPrice: 10,
+                }),
+            ],
+        });
+        group2.settings.oldPrices = [oldPrices2];
+
+        await group2.save();
+
+        // add group 1 and to 2 to same category
+        organizationPeriod.settings.categories = [
+            GroupCategory.create({
+                settings: GroupCategorySettings.create({ name: 'category1' }),
+                // the groups are not in a category
+                groupIds: [],
+            }),
+        ];
+
+        await organizationPeriod.save();
+
+        // act
+        await migratePrices();
+        const g1 = await Group.getByID(group1.id);
+
+        // test group 1
+
+        // check prices (should be equal to old prices)
+        expect(g1!.settings.prices).toHaveLength(1);
+        expect(g1!.settings.prices[0].price.price).toBe(30);
+        expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
+
+        // check bundle discounts (each price should have 1 bundle discount for family members in same category)
+        expect(g1!.settings.prices[0].bundleDiscounts.size).toBe(1);
+
+        // custom discount for bundle discount of the first price should be null because the discounts are not different than the discounts for the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1)
+        expect([...g1!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ customDiscounts: null }),
+            ]),
+        );
+
+        // test group 2
+        const g2 = await Group.getByID(group2.id);
+
+        // check prices (should be equal to old prices)
+        expect(g2!.settings.prices).toHaveLength(1);
+        expect(g2!.settings.prices[0].price.price).toBe(30);
+        expect(g2!.settings.prices[0].price.reducedPrice).toBe(20);
+
+        // check bundle discounts (each price should have 1 bundle discount for family members in same category)
+        expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1);
+
+        // custom discount for bundle discount of the second price should be null because the group is not in a category and thus should not be linked to the bundle discount of the other group
+        expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ customDiscounts: null }),
+            ]),
+        );
+
+        // cleanup
+        await group1.delete();
+        await group2.delete();
+        await organizationPeriod.delete();
+        period.organizationId = null;
+        await period.save();
+        await organization.delete();
+        await period.delete();
+    });
+
+    test('Groups that are archived should not have bundle discounts from other groups that also do not have a category', async () => {
+        // arrange
+        const startDate = new Date(2025, 0, 1);
+        const endDate = new Date(2025, 11, 31);
+        const period = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+        const organization = await new OrganizationFactory({ period }).create();
+        period.organizationId = organization.id;
+        await period.save();
+        const organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+
+        const group1 = await new GroupFactory({ organization, period }).create();
+        // archived group
+        group1.status = GroupStatus.Archived;
+        group1.settings.prices = [];
+        group1.settings.name = new TranslatedString('group1');
+
+        // initial price with discount if family members in same category
+        const oldPrices1 = OldGroupPrices.create({
+            startDate: null,
+            sameMemberOnlyDiscount: false,
+            onlySameGroup: false,
+            prices: [
+                OldGroupPrice.create({
+                    price: 30,
+                    reducedPrice: 20,
+                }),
+                OldGroupPrice.create({
+                    price: 25,
+                    reducedPrice: 15,
+                }),
+                OldGroupPrice.create({
+                    price: 20,
+                    reducedPrice: 10,
+                }),
+            ],
+        });
+
+        group1.settings.oldPrices = [oldPrices1];
+
+        await group1.save();
+
+        const group2 = await new GroupFactory({ organization, period }).create();
+        // archived group
+        group2.status = GroupStatus.Archived;
+        group2.settings.prices = [];
+        group2.settings.name = new TranslatedString('group2');
+
+        // initial price with discount if same members in same category
+        const oldPrices2 = OldGroupPrices.create({
+            startDate: null,
+            sameMemberOnlyDiscount: true,
+            onlySameGroup: false,
+            prices: [
+                OldGroupPrice.create({
+                    price: 30,
+                    reducedPrice: 20,
+                }),
+                OldGroupPrice.create({
+                    price: 25,
+                    reducedPrice: 15,
+                }),
+                OldGroupPrice.create({
+                    price: 20,
+                    reducedPrice: 10,
+                }),
+            ],
+        });
+        group2.settings.oldPrices = [oldPrices2];
+
+        await group2.save();
+
+        // add group 1 and to 2 to same category
+        organizationPeriod.settings.categories = [
+            GroupCategory.create({
+                settings: GroupCategorySettings.create({ name: 'category1' }),
+                groupIds: [group1.id, group2.id],
+            }),
+        ];
+
+        await organizationPeriod.save();
+
+        // act
+        await migratePrices();
+        const g1 = await Group.getByID(group1.id);
+
+        // test group 1
+
+        // check prices (should be equal to old prices)
+        expect(g1!.settings.prices).toHaveLength(1);
+        expect(g1!.settings.prices[0].price.price).toBe(30);
+        expect(g1!.settings.prices[0].price.reducedPrice).toBe(20);
+
+        // check bundle discounts (each price should have 1 bundle discount for family members in same category)
+        expect(g1!.settings.prices[0].bundleDiscounts.size).toBe(1);
+
+        // custom discount for bundle discount of the first price should be null because the discounts are not different than the discounts for the bundle discount that is configured in the settings of the organization (which are the discounts for oldPrices1)
+        expect([...g1!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ customDiscounts: null }),
+            ]),
+        );
+
+        // test group 2
+        const g2 = await Group.getByID(group2.id);
+
+        // check prices (should be equal to old prices)
+        expect(g2!.settings.prices).toHaveLength(1);
+        expect(g2!.settings.prices[0].price.price).toBe(30);
+        expect(g2!.settings.prices[0].price.reducedPrice).toBe(20);
+
+        // check bundle discounts (each price should have 1 bundle discount for family members in same category)
+        expect(g2!.settings.prices[0].bundleDiscounts.size).toBe(1);
+
+        // custom discount for bundle discount of the second price should be null because the group is archived and thus should not be linked to the bundle discount of the other group, even if they are in the same category still
+        expect([...g2!.settings.prices[0].bundleDiscounts.values()]).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ customDiscounts: null }),
+            ]),
+        );
+
+        // cleanup
+        await group1.delete();
+        await group2.delete();
+        await organizationPeriod.delete();
+        period.organizationId = null;
+        await period.save();
+        await organization.delete();
+        await period.delete();
+    });
+
     // todo: fix change request
+    // todo: what about move groups?
 });
