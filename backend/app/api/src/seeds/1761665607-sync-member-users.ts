@@ -10,7 +10,7 @@ export default new Migration(async () => {
     }
 
     if (STAMHOOFD.userMode !== 'platform') {
-        console.log('skipped seed update-membership because usermode not platform');
+        console.log('skipped seed because usermode not platform');
         return;
     }
 
