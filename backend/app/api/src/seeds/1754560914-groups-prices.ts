@@ -39,6 +39,9 @@ export async function migratePrices() {
         const filteredGroups: Group[] = [];
         const archivedGroups: Group[] = [];
 
+        const sameGroupDiscountForFamily: BundleDiscount | null = null;
+        const sameGroupDiscountForMember: BundleDiscount | null = null;
+
         // filter relevant groups, cleanup other groups
         for (const group of allGroups) {
             // make sure prices are empty (just in case, if previous migration failed)
@@ -232,9 +235,31 @@ export async function migratePrices() {
 
                     // in other cases the bundle discount will have been added already (as a category discount)
                     if (oldPrices.prices.length > 1 && (oldPrices.onlySameGroup || isUnassigned)) {
-                        const bundleDiscount = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        let bundleDiscount: BundleDiscount | undefined = undefined;
+                        let customDiscounts: GroupPriceDiscount[] | undefined = undefined;
+
+                        // reuse existing bundle discount if only same group
+                        if (oldPrices.onlySameGroup) {
+                            // search if equal bundle discounts exist
+                            const equalBundleDiscount = allBundleDiscounts.find(bd => bd.countPerGroup && bd.countWholeFamily === countWholeFamily);
+
+                            if (equalBundleDiscount) {
+                                bundleDiscount = equalBundleDiscount;
+
+                                // set custom discounts if discounts are different
+                                if (!areDiscountsEqual(bundleDiscount.discounts, discounts)) {
+                                    customDiscounts = discounts;
+                                }
+                            }
+                        }
+
+                        if (!bundleDiscount) {
+                            bundleDiscount = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                        }
+
                         groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
                             name: bundleDiscount.name,
+                            customDiscounts,
                         }));
                     }
 
