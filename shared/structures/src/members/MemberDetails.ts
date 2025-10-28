@@ -748,6 +748,37 @@ export class MemberDetails extends AutoEncoder {
         return this.parents.flatMap(p => p.getEmails());
     }
 
+    getNotificationEmails() {
+        const emails: string[] = [];
+
+        const m = this.getMemberEmails();
+        if (m.length) {
+            // Only the first email address of parents
+            emails.push(m[0].toLocaleLowerCase());
+        }
+        else {
+            // Add all unverified email addresses (one will be right hopefully)
+            if (this.unverifiedEmails.length) {
+                emails.push(...this.unverifiedEmails);
+            }
+        }
+
+        if (this.calculatedParentsHaveAccess) {
+            // Only the first email address of parents
+            emails.push(
+                ...this.parents.flatMap((p) => {
+                    const q = p.getEmails();
+                    if (q.length) {
+                        return [q[0].toLocaleLowerCase()];
+                    }
+                    return [];
+                }),
+            );
+        }
+
+        return emails;
+    }
+
     hasEmail(email: string) {
         const cleanedEmail = email.toLowerCase().trim();
         return this.getMemberEmails().includes(cleanedEmail) || this.getParentEmails().includes(cleanedEmail);

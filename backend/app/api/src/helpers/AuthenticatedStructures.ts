@@ -937,7 +937,7 @@ export class AuthenticatedStructures {
                                     ]
                                 : []),
 
-                            ...((member.details.defaultAge <= 18 || member.details.getMemberEmails().length === 0)
+                            ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
                                 ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
                                         firstName: p.firstName ?? '',
                                         lastName: p.lastName ?? '',
@@ -980,7 +980,7 @@ export class AuthenticatedStructures {
                                     ]
                                 : []),
 
-                            ...((member.details.defaultAge <= 18 || member.details.getMemberEmails().length === 0)
+                            ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
                                 ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
                                         firstName: p.firstName ?? '',
                                         lastName: p.lastName ?? '',

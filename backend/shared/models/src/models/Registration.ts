@@ -189,6 +189,8 @@ export class Registration extends QueryableModel {
             return [];
         }
 
+        const allowedEmails = member.details.getNotificationEmails();
+
         return member.users.map(user => Recipient.create({
             firstName: user.firstName,
             lastName: user.lastName,
@@ -212,7 +214,7 @@ export class Registration extends QueryableModel {
                     value: group.settings.name.toString(),
                 }),
             ],
-        }));
+        })).filter(r => allowedEmails.includes(r.email.toLocaleLowerCase()));
     }
 
     async sendEmailTemplate(data: {
