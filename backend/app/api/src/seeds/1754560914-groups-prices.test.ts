@@ -2553,7 +2553,4 @@ describe('migration.migratePrices', () => {
         await organization.delete();
         await period.delete();
     });
-
-    // todo: fix change request
-    // todo: what about move groups?
 });

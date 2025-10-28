@@ -27,11 +27,23 @@ export async function migratePrices() {
             .andWhere('organizationId', period.organizationId)
             .fetch();
 
+        if (allGroups.every(g => g.settings.prices.length > 0)) {
+            // already migrated
+            console.log('Skipping period (already migrated): ' + period.id);
+            continue;
+        }
+
+        // make sure bundle discounts are empty (just in case, if previous migration failed)
+        period.settings.bundleDiscounts = [];
+
         const filteredGroups: Group[] = [];
         const archivedGroups: Group[] = [];
 
         // filter relevant groups, cleanup other groups
         for (const group of allGroups) {
+            // make sure prices are empty (just in case, if previous migration failed)
+            group.settings.prices = [GroupPrice.create({})];
+
             if (group.type !== GroupType.Membership || group.deletedAt !== null) {
                 group.settings.prices = [
                     GroupPrice.create({
@@ -67,10 +79,9 @@ export async function migratePrices() {
             // first find category discounts
             if (!isUnassigned) {
                 for (const group of groups) {
-                    // todo
-                    // if already migrated
-                    if (group.settings.prices.length > 0) {
-                        throw new Error('Already migrated');
+                    if (group.settings.prices.length > 1 || (group.settings.prices.length === 1 && group.settings.prices[0].bundleDiscounts.size > 0)) {
+                        // should never happen because prices are reset
+                        throw new Error('Prices are not empty: ' + group.id);
                     }
 
                     // sorted old prices
