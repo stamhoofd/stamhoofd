@@ -1293,6 +1293,14 @@ export class AdminPermissionChecker {
             };
         }
 
+        // All member access, means also having access to record categories of non-registered members
+        if (this.canAccessAllPlatformMembers(PermissionLevel.Read)) {
+            return {
+                canAccess: true,
+                record: record.record,
+            };
+        }
+
         return {
             canAccess: false,
             record: record.record,
@@ -1362,6 +1370,14 @@ export class AdminPermissionChecker {
             };
         }
 
+        // All member access, means also having access to record categories of non-registered members
+        if (this.canAccessAllPlatformMembers(level)) { // needs to be full to also inherit record category access
+            return {
+                canAccess: true,
+                record: record.record,
+            };
+        }
+
         if (hasTemporaryMemberAccess(this.user.id, member.id, PermissionLevel.Full)) {
             // You created this member, so temporary can read all records in order to set the member up correctly
             return {
@@ -1371,13 +1387,13 @@ export class AdminPermissionChecker {
         }
 
         // It is possible that this is a platform admin (or an admin that has access to multiple organizations), and inherits automatic permissions for tags. So'll need to loop all the organizations where this member has an active registration for
-        if (!record.organizationId && !this.organization && this.hasSomePlatformAccess()) {
+        if (!record.organizationId && !this.organization) {
             const checkedOrganizations = new Map<string, boolean>();
             for (const registration of member.registrations) {
                 const permissions = checkedOrganizations.get(registration.organizationId);
 
                 // Checking the organization permissions is faster (and less data lookups required), so we do that first before doing the more expensive registration access check
-                if (permissions !== null) {
+                if (permissions !== undefined) {
                     if (permissions === true && await this.canAccessRegistration(registration, level)) {
                         return {
                             canAccess: true,
@@ -1648,8 +1664,8 @@ export class AdminPermissionChecker {
         return data;
     }
 
-    canAccessAllPlatformMembers(): boolean {
-        return !!this.platformPermissions && !!this.platformPermissions.hasAccessRight(AccessRight.PlatformLoginAs);
+    canAccessAllPlatformMembers(level: PermissionLevel): boolean {
+        return this.getPlatformAccessibleOrganizationTags(level) === 'all';
     }
 
     canAccess(accessRight: AccessRight): boolean {
@@ -1682,7 +1698,7 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (tags.length === allTags.length) {
+        if (tags.length > 0 && tags.length === allTags.length) {
             return 'all';
         }
 

@@ -6,6 +6,7 @@ import { PermissionLevel } from './PermissionLevel.js';
 export enum AccessRight {
     // Platform level permissions
     /**
+     * @deprecated
      * Allows the user to log in as a full-access admin to a specific organization
      */
     PlatformLoginAs = 'PlatformLoginAs',

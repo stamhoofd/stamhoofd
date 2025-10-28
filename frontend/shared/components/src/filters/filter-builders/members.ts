@@ -1,5 +1,5 @@
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { computed, ComputedRef, Ref, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
@@ -691,7 +691,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     }
 
     function filterRecordCategory(recordCategory: RecordCategory) {
-        return auth.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id);
+        return auth.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id) || auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Full) === 'all';
     }
 
     const recordCategoriesFilterBuilders: UIFilterBuilder<UIFilter>[] = [];

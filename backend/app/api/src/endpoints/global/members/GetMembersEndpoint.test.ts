@@ -1,9 +1,10 @@
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
+import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordTextAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetMembersEndpoint } from './GetMembersEndpoint';
 import { testServer } from '../../../../tests/helpers/TestServer';
+import { initPlatformRecordCategory } from '../../../../tests/init/initPlatformRecordCategory';
 
 const baseUrl = `/members`;
 const endpoint = new GetMembersEndpoint();
@@ -884,6 +885,395 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 STExpect.errorWithCode('permission_denied'),
             );
         });
+
+        test('Not allowed: A user cannot filter on record answer if no permission for that category', async () => {
+            // Same test, but without giving the user permissions to read the group
+            // Setup
+            const role = PermissionRoleDetailed.create({
+                name: 'Test Role',
+                accessRights: [],
+            });
+
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [role] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            const record = recordCategory.records[0];
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [
+                        role,
+                    ],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const member2 = await new MemberFactory({ }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+            await member1.save();
+
+            const group = await new GroupFactory({ organization, period }).create();
+
+            // The user can read members registered for default group, but not events for default group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            await new RegistrationFactory({ member: member1, group }).create();
+            await new RegistrationFactory({ member: member2, group }).create();
+
+            // Try to request members for this group
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                        details: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    value: {
+                                        $contains: 'has been',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
+
+        test('Allowed: A user can filter on record answer if permission for that category', async () => {
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            const record = recordCategory.records[0];
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const member2 = await new MemberFactory({ }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+            await member1.save();
+
+            const group = await new GroupFactory({ organization, period }).create();
+
+            // The user can read members registered for default group, but not events for default group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            resources.set(
+                PermissionsResourceType.RecordCategories, new Map([[
+                    recordCategory.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            await new RegistrationFactory({ member: member1, group }).create();
+            await new RegistrationFactory({ member: member2, group }).create();
+
+            // Try to request members for this group
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                        details: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    value: {
+                                        $contains: 'has been',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // Response only includes members registered in a membership group, not the event group
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+            // Check ids are matching without depending on ordering using jest extended
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+            ]);
+        });
+
+        test('Allowed: A platform admin can filter on record answer if permission for all members', async () => {
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            const record = recordCategory.records[0];
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const member2 = await new MemberFactory({ }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+            await member1.save();
+
+            const group = await new GroupFactory({ organization, period }).create();
+
+            resources.set(
+                PermissionsResourceType.OrganizationTags, new Map([[
+                    '',
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Full,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            await new RegistrationFactory({ member: member1, group }).create();
+            await new RegistrationFactory({ member: member2, group }).create();
+
+            // Try to request members for this group
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                        details: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    value: {
+                                        $contains: 'has been',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // Response only includes members registered in a membership group, not the event group
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+            // Check ids are matching without depending on ordering using jest extended
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+            ]);
+        });
+
+        test('Not allowed: A platform admin cannot filter on record answer if no permission for all members', async () => {
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            const record = recordCategory.records[0];
+            const group = await new GroupFactory({ organization, period }).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: new Map([[
+                        PermissionsResourceType.Groups, new Map([[
+                            '',
+                            ResourcePermissions.create({
+                                level: PermissionLevel.Full,
+                                accessRights: [],
+                            }),
+                        ]]),
+                    ]]),
+                }),
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const member2 = await new MemberFactory({ }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+            await member1.save();
+
+            resources.set(
+                PermissionsResourceType.OrganizationTags, new Map([[
+                    'tagtest',
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Full,
+                        accessRights: [],
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            await new RegistrationFactory({ member: member1, group }).create();
+            await new RegistrationFactory({ member: member2, group }).create();
+
+            // Try to request members for this group
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                        details: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    value: {
+                                        $contains: 'has been',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+        });
     });
 
     describe('Default filtering', () => {
@@ -1049,6 +1439,403 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect.objectContaining({ id: member3.id }),
                 expect.objectContaining({ id: member4.id }),
             ]);
+        });
+
+        test('[REGRESSION] A user with minimal access can also view platform record answers in platform scope', async () => {
+            /**
+             * When fetching members via the admin api, without organization scope, we need to calculate which records to return and which not.
+             * This test makes sure we check all registrations of the member to know whether we can return a platform record cateogry answer.
+             */
+            const role = PermissionRoleDetailed.create({
+                name: 'Stamhoofd verantwoordelijke',
+                level: PermissionLevel.None,
+                accessRights: [],
+            });
+
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [role] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            // Add a record category the admin does not have access to
+            const controlRecordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            await initPlatformRecordCategory({ recordCategory: controlRecordCategory });
+            const record = recordCategory.records[0];
+            const controlRecord = controlRecordCategory.records[0];
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [
+                        role,
+                    ],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+
+            const controlAnswer = RecordTextAnswer.create({ settings: controlRecord });
+            controlAnswer.value = 'This should be invisible';
+            member1.details.recordAnswers.set(controlRecord.id, controlAnswer);
+            await member1.save();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+
+            // Give permission to read the record category
+            resources.set(
+                PermissionsResourceType.RecordCategories, new Map([[
+                    recordCategory.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+
+            await user.save();
+
+            // Register the memebr for group
+            await new RegistrationFactory({ member: member1, group }).create();
+
+            // Try to request all members
+            const request = Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({
+                    limit: 10,
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                    },
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // Response only includes members registered in a membership group, not the event group
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+            // Check ids are matching without depending on ordering using jest extended
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+            ]);
+
+            const returnedMember = response.body.results.members[0];
+
+            // Check only one record answer returned
+            expect(returnedMember.details.recordAnswers.size).toEqual(1);
+
+            expect(returnedMember.details.recordAnswers.get(record.id)).toMatchObject({
+                value: 'This has been answered',
+                settings: expect.objectContaining({
+                    id: record.id,
+                }),
+            });
+        });
+
+        test('[REGRESSION] A user with full access to a single organization can also view platform record answers in platform scope', async () => {
+            /**
+             * When fetching members via the admin api, without organization scope, we need to calculate which records to return and which not.
+             * This test makes sure we check all registrations of the member to know whether we can return a platform record cateogry answer.
+             */
+            const role = PermissionRoleDetailed.create({
+                name: 'Stamhoofd verantwoordelijke',
+                level: PermissionLevel.Full,
+                accessRights: [],
+            });
+
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [role] })
+                .create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            // Add a record category the admin does not have access to
+            const controlRecordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            await initPlatformRecordCategory({ recordCategory: controlRecordCategory });
+            const record = recordCategory.records[0];
+            const controlRecord = controlRecordCategory.records[0];
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [
+                        role,
+                    ],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+
+            const controlAnswer = RecordTextAnswer.create({ settings: controlRecord });
+            controlAnswer.value = 'This should be invisible';
+            member1.details.recordAnswers.set(controlRecord.id, controlAnswer);
+            await member1.save();
+
+            // Register the memebr for group
+            await new RegistrationFactory({ member: member1, group }).create();
+
+            // Try to request all members
+            const request = Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({
+                    limit: 10,
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: group.id,
+                            },
+                        },
+                    },
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // Response only includes members registered in a membership group, not the event group
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+            // Check ids are matching without depending on ordering using jest extended
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+            ]);
+
+            const returnedMember = response.body.results.members[0];
+
+            // Check only one record answer returned
+            expect(returnedMember.details.recordAnswers.size).toEqual(2);
+        });
+
+        test('[REGRESSION] A user with full access to a single organization cannot view platform record answers in platform scope of member of different organization', async () => {
+            /**
+             * Case:
+             * - organization1 gives read access to the member, not the record category
+             * - organization2 gives read access to the member and record category
+             *
+             * member is registered at organization1, and at organization2 (but in a group the user does not have access to)
+             * -> cannot see answer
+             */
+            const resources = new Map();
+            const resources2 = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [] }).create();
+            const organization2 = await new OrganizationFactory({ period, roles: [] }).create();
+
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            // Add a record category the admin does not have access to
+            const controlRecordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            await initPlatformRecordCategory({ recordCategory: controlRecordCategory });
+            const record = recordCategory.records[0];
+            const controlRecord = controlRecordCategory.records[0];
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+            const member1 = await new MemberFactory({ }).create();
+            const controlMember = await new MemberFactory({ }).create();
+            const group = await new GroupFactory({ organization, period }).create();
+            const unauthorizedGroup = await new GroupFactory({ organization, period }).create();
+            const controlGroup = await new GroupFactory({ organization: organization2, period }).create();
+
+            // Make sure member1 has answered the question
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = 'This has been answered';
+            member1.details.recordAnswers.set(record.id, answer);
+
+            const controlAnswer = RecordTextAnswer.create({ settings: controlRecord });
+            controlAnswer.value = 'This should be invisible';
+            member1.details.recordAnswers.set(controlRecord.id, controlAnswer);
+            await member1.save();
+
+            // Make sure member1 has answered the question
+            const controlMemberAnswer = RecordTextAnswer.create({ settings: record });
+            controlMemberAnswer.value = 'This has been answered control';
+            controlMember.details.recordAnswers.set(record.id, controlMemberAnswer);
+
+            const controlMemberControlAnswer = RecordTextAnswer.create({ settings: controlRecord });
+            controlMemberControlAnswer.value = 'This should be invisible';
+            controlMember.details.recordAnswers.set(controlRecord.id, controlMemberControlAnswer);
+            await controlMember.save();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+
+            // Do not give permission to read the record category
+
+            // Give read permission to the control group
+            resources2.set(
+                PermissionsResourceType.Groups, new Map([[
+                    controlGroup.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+
+            // Give permission to read the record category
+            resources2.set(
+                PermissionsResourceType.RecordCategories, new Map([[
+                    recordCategory.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+
+            // Add permission for organization2
+            user.permissions!.organizationPermissions.set(organization2.id, Permissions.create({
+                level: PermissionLevel.None,
+                resources: resources2,
+            }));
+            await user.save();
+
+            // Register the memebr for group
+            await new RegistrationFactory({ member: member1, group }).create();
+            await new RegistrationFactory({ member: member1, group: unauthorizedGroup }).create();
+            await new RegistrationFactory({ member: controlMember, group: controlGroup }).create();
+
+            // Try to request all members
+            const request = Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({
+                    limit: 10,
+                    filter: {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: {
+                                    $in: [
+                                        group.id, controlGroup.id,
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            // Response only includes members registered in a membership group, not the event group
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(2);
+            // Check ids are matching without depending on ordering using jest extended
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member1.id }),
+                expect.objectContaining({ id: controlMember.id }),
+            ]);
+
+            const returnedMember = response.body.results.members.find(m => m.id === member1.id)!;
+            const returnedControlMember = response.body.results.members.find(m => m.id === controlMember.id)!;
+
+            expect(returnedMember).toBeDefined();
+            expect(returnedControlMember).toBeDefined();
+
+            // Check only one record answer returned
+            expect(returnedMember.details.recordAnswers.size).toEqual(0);
+            expect(returnedControlMember.details.recordAnswers.size).toEqual(1);
+
+            expect(returnedControlMember.details.recordAnswers.get(record.id)).toMatchObject({
+                value: 'This has been answered control',
+                settings: expect.objectContaining({
+                    id: record.id,
+                }),
+            });
         });
     });
 });
