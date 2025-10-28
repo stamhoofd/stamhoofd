@@ -497,7 +497,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                     if (!result.canAccess) {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: 'No permissions for financial support filter (organization scope).',
+                            message: 'No permissions to filter on record ' + key,
                             human: result.record ? $t(`3560487e-3f2c-4cc9-ad7f-4e9a0fc1bbb8`, { recordName: result.record.name }) : $t(`Je hebt niet voldoende toegangsrechten om te filteren op dit gegevensveld`),
                             statusCode: 400,
                         });

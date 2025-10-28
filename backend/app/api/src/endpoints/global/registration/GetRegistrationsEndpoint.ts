@@ -68,7 +68,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
-        if (!Context.auth.canAccessAllPlatformMembers() && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: null })) {
+        if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: null })) {
             if (!organization) {
                 const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
                 if (tags !== 'all' && tags.length === 0) {
