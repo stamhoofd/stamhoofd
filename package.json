@@ -24,6 +24,7 @@
     "dev:stamhoofd": "STAMHOOFD_ENV=stamhoofd yarn -s dev:watch-env",
     "dev:keeo": "STAMHOOFD_ENV=keeo yarn -s dev:watch-env",
     "dev:ravot": "STAMHOOFD_ENV=ravot yarn -s dev:watch-env",
+    "dev:jambo": "STAMHOOFD_ENV=jambo yarn -s dev:watch-env",
     "dev:init": "wait-on shared/build-development-env/dist/src/init.js && node shared/build-development-env/dist/src/init.js",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
     "test": "lerna run test -- --passWithNoTests",
