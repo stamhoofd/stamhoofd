@@ -1,11 +1,10 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address.js';
 import { File } from '../files/File.js';
 import { Payment, Settlement } from '../members/Payment.js';
-import { Organization } from '../Organization.js';
 import { OrganizationSimple } from '../OrganizationSimple.js';
 import { STPackage, STPricingType } from './STPackage.js';
 
@@ -14,14 +13,6 @@ export enum STInvoiceStatus {
     Prepared = 'Prepared',
     Completed = 'Completed',
     Canceled = 'Canceled',
-}
-
-export class STInvoiceItemDetail extends AutoEncoder {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
-    id: string;
-
-    @field({ decoder: StringDecoder })
-    name = '';
 }
 
 export class STInvoiceItem extends AutoEncoder {
@@ -34,12 +25,6 @@ export class STInvoiceItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = '';
 
-    /**
-     * Allow to add a very detailed list of included items
-     */
-    @field({ decoder: new ArrayDecoder(STInvoiceItemDetail), version: 271 })
-    details: STInvoiceItemDetail[] = [];
-
     @field({ decoder: IntegerDecoder })
     amount = 1;
 
@@ -48,6 +33,12 @@ export class STInvoiceItem extends AutoEncoder {
 
     @field({ decoder: BooleanDecoder, version: 155 })
     canUseCredits = true;
+
+    @field({ decoder: DateDecoder, nullable: true, optional: true })
+    firstFailedPayment: Date | null = null;
+
+    @field({ decoder: IntegerDecoder, optional: true })
+    paymentFailedCount = 0;
 
     get price(): number {
         return this.unitPrice * this.amount;
@@ -141,8 +132,12 @@ export class STInvoiceItem extends AutoEncoder {
         if (other.package && this.package && other.package.id !== this.package.id) {
             return false;
         }
-        if (this.name === other.name) {
-            if (this.unitPrice === other.unitPrice && this.description === other.description) {
+        if (this.name === other.name && this.description === other.description) {
+            if (this.unitPrice === other.unitPrice) {
+                return true;
+            }
+
+            if (this.amount === 1 && other.amount === 1) {
                 return true;
             }
         }
@@ -150,15 +145,21 @@ export class STInvoiceItem extends AutoEncoder {
     }
 
     merge(other: STInvoiceItem): void {
-        this.amount += other.amount;
-
-        // Other package will be more up to date
-        this.package = other.package;
-
-        // Copy details
-        for (const detail of other.details) {
-            this.details.push(detail.clone());
+        if (other.paymentFailedCount > this.paymentFailedCount) {
+            this.paymentFailedCount = other.paymentFailedCount;
         }
+        if (other.firstFailedPayment && (!this.firstFailedPayment || other.firstFailedPayment < this.firstFailedPayment)) {
+            this.firstFailedPayment = other.firstFailedPayment;
+        }
+        if (other.unitPrice !== this.unitPrice) {
+            if (other.amount === 1 && this.amount === 1) {
+                this.unitPrice += other.unitPrice;
+                this.package = other.package;
+                return;
+            }
+            throw new Error('Cannot merge items with different unit prices and amount greater than 1');
+        }
+        this.amount += other.amount;
     }
 
     /// Only compress an invoice when it is marked as paid and for a pending invoice when it doesn't has an invoice
@@ -261,7 +262,8 @@ export class STInvoiceMeta extends AutoEncoder {
     }
 
     getVATOnExcludingVATAmount(price: number) {
-        return Math.round(this.itemPrice * this.VATPercentage / 100);
+        // Make sure price result doesn't depend on the sign of the price
+        return Math.round(Math.abs(price) * this.VATPercentage / 100) * Math.sign(price);
     }
 
     get priceWithoutVAT(): number {
@@ -317,17 +319,51 @@ export class STInvoice extends AutoEncoder {
 
     @field({ decoder: DateDecoder, nullable: true })
     paidAt: Date | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true, version: 245 })
+    negativeInvoiceId: string | null = null;
 }
 
 export class STInvoicePrivate extends STInvoice {
-    @field({ decoder: Organization, optional: true })
-    organization?: Organization;
+    @field({ decoder: OrganizationSimple, optional: true })
+    organization?: OrganizationSimple;
 
     @field({ decoder: Settlement, nullable: true })
     settlement: Settlement | null = null;
 
     @field({ decoder: StringDecoder, nullable: true, version: 186 })
     reference: string | null = null;
+
+    matchQuery(query: string) {
+        if (query === this.number?.toString() || query === this.id) {
+            return true;
+        }
+
+        if (
+            StringCompare.contains(this.meta.companyName, query)
+            || StringCompare.typoCount(this.meta.companyAddress.city, query) < 2
+            || StringCompare.contains(this.meta.companyContact, query)
+            || (this.meta.companyVATNumber && StringCompare.typoCount(this.meta.companyVATNumber, query) < 2)
+            || StringCompare.typoCount(this.meta.companyAddress.street, query) < 2
+        ) {
+            return true;
+        }
+
+        if (!this.organization) {
+            return false;
+        }
+
+        if (
+            StringCompare.typoCount(this.organization.name, query) < 2
+            || StringCompare.typoCount(this.organization.address.city, query) < 2
+            || StringCompare.typoCount(this.organization.address.street, query) < 2
+            || StringCompare.typoCount(this.meta.companyName, query) < 2
+            || StringCompare.typoCount(this.meta.companyName, query) < 2
+        ) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export class STPendingInvoice extends AutoEncoder {
