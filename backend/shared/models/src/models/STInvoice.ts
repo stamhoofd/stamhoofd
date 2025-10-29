@@ -1,8 +1,9 @@
+import { createMollieClient } from '@mollie/api-client';
 import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
-import { STInvoiceMeta } from '@stamhoofd/structures';
+import { OrganizationPaymentMandate, OrganizationPaymentMandateDetails, STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-
 import { Organization, Payment } from './';
 
 export class STInvoice extends QueryableModel {
@@ -76,4 +77,50 @@ export class STInvoice extends QueryableModel {
 
     static organization = new ManyToOneRelation(Organization, 'organization');
     static payment = new ManyToOneRelation(Payment, 'payment');
+
+    static async getMollieMandates(organization: Organization) {
+        // Poll mollie status
+        // Mollie payment is required
+        const mandates: OrganizationPaymentMandate[] = [];
+
+        try {
+            const apiKey = STAMHOOFD.MOLLIE_API_KEY;
+            if (!apiKey) {
+                throw new SimpleError({
+                    code: '',
+                    message: 'Mollie niet correct gekoppeld',
+                });
+            }
+
+            const mollieClient = createMollieClient({ apiKey });
+
+            if (organization.serverMeta.mollieCustomerId) {
+                const m = await mollieClient.customerMandates.page({ customerId: organization.serverMeta.mollieCustomerId, limit: 250 });
+                for (const mandate of m) {
+                    try {
+                        const details = mandate.details;
+                        mandates.push(OrganizationPaymentMandate.create({
+                            ...mandate,
+                            isDefault: mandate.id === organization.serverMeta.mollieMandateId,
+                            createdAt: new Date(mandate.createdAt),
+                            details: OrganizationPaymentMandateDetails.create({
+                                consumerName: ('consumerName' in details ? details.consumerName : details.cardHolder) ?? undefined,
+                                consumerAccount: ('consumerAccount' in details ? details.consumerAccount : details.cardNumber) ?? undefined,
+                                consumerBic: ('consumerBic' in details ? details.consumerBic : details.cardExpiryDate) ?? undefined,
+                                cardExpiryDate: ('cardExpiryDate' in details ? details.cardExpiryDate : null),
+                                cardLabel: ('cardLabel' in details ? details.cardLabel : null),
+                            }),
+                        }));
+                    }
+                    catch (e) {
+                        console.error(e);
+                    }
+                }
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
+        return mandates;
+    }
 }

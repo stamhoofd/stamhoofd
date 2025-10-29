@@ -3,11 +3,12 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context';
 import { AuditLogService } from '../../../../services/AuditLogService';
 import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService';
+import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper';
 
 type Params = { id: string };
 type Query = undefined;
@@ -157,6 +158,12 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
 
                         // Determine the payment provider (always null because no online payments here)
                         payment.provider = null;
+                        ServiceFeeHelper.setServiceFee(
+                            payment,
+                            organization,
+                            webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
+                            order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                        );
 
                         await payment.save();
 

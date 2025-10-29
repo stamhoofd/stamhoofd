@@ -15,6 +15,7 @@ import { StripeHelper } from '../../../helpers/StripeHelper';
 import { BalanceItemService } from '../../../services/BalanceItemService';
 import { RegistrationService } from '../../../services/RegistrationService';
 import { PaymentService } from '../../../services/PaymentService';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout;
@@ -1062,6 +1063,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationPaymentConfiguration);
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
+        ServiceFeeHelper.setServiceFee(payment, organization, 'members', [...balanceItems.entries()].map(([_, p]) => p));
 
         await payment.save();
 

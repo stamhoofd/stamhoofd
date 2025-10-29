@@ -1,10 +1,10 @@
 import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { QueryableModel } from '@stamhoofd/sql';
-import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageType } from '@stamhoofd/structures';
+import { EmailTemplateType, Recipient, Replacement, STPackageMeta, STPackageStatus, STPackageStatusServiceFee, STPackageType, STPricingType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
+import { QueryableModel } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder';
 import { GroupBuilder } from '../helpers/GroupBuilder';
 import { Organization } from './';
@@ -179,11 +179,36 @@ export class STPackage extends QueryableModel {
         pack.removeAt.setMonth(pack.removeAt.getMonth() + 3);
 
         // Custom renewals for single webshop:
-        if (this.meta.type === STPackageType.SingleWebshop) {
+        /* if (this.meta.type === STPackageType.SingleWebshop) {
             // Disable functions after two months
-            pack.validUntil = new Date(pack.meta.startDate);
-            pack.validUntil.setMonth(pack.validUntil.getMonth() + 2);
-            pack.removeAt = new Date(pack.validUntil);
+            pack.validUntil = new Date(pack.meta.startDate)
+            pack.validUntil.setMonth(pack.validUntil.getMonth() + 2)
+            pack.removeAt = new Date(pack.validUntil)
+        } */
+        if (this.meta.type === STPackageType.SingleWebshop) {
+            pack.meta.type = STPackageType.Webshops;
+        }
+
+        // Change prices
+        if (pack.meta.type === STPackageType.Webshops) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 2_00;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 20;
+
+            pack.meta.unitPrice = 0;
+            pack.meta.pricingType = STPricingType.Fixed;
+            pack.validUntil = null;
+            pack.removeAt = null;
+        }
+        else if (pack.meta.type === STPackageType.Members) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 0;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 0;
+
+            pack.meta.unitPrice = 100;
+            pack.meta.pricingType = STPricingType.PerMember;
         }
 
         return pack;
@@ -197,6 +222,18 @@ export class STPackage extends QueryableModel {
             validUntil: this.validUntil,
             removeAt: this.removeAt,
             firstFailedPayment: this.meta.firstFailedPayment,
+            serviceFees: [
+                STPackageStatusServiceFee.create({
+                    fixed: this.meta.serviceFeeFixed,
+                    percentage: this.meta.serviceFeePercentage,
+                    minimum: this.meta.serviceFeeMinimum,
+                    maximum: this.meta.serviceFeeMaximum,
+                    startDate: this.meta.startDate,
+                    endDate: this.validUntil && this.removeAt
+                        ? new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+                        : (this.validUntil ?? this.removeAt),
+                },
+                )],
         });
     }
 
@@ -288,11 +325,11 @@ export class STPackage extends QueryableModel {
                     }),
                     Replacement.create({
                         token: 'validUntil',
-                        value: this.validUntil ? Formatter.dateTime(this.validUntil) : $t(`a402f8d1-b470-4b1e-948b-1524576708ea`),
+                        value: this.validUntil ? Formatter.dateTime(this.validUntil) : 'nooit',
                     }),
                     Replacement.create({
                         token: 'validUntilDate',
-                        value: this.validUntil ? Formatter.date(this.validUntil) : $t(`a402f8d1-b470-4b1e-948b-1524576708ea`),
+                        value: this.validUntil ? Formatter.date(this.validUntil) : 'nooit',
                     }),
                     Replacement.create({
                         token: 'renewUrl',

@@ -28,7 +28,7 @@ export class StripeHelper {
 
                 if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
                     const fees = charge.balance_transaction.fee;
-                    payment.transferFee = fees;
+                    payment.transferFee = fees - payment.serviceFeePayout;
                 }
             }
 
@@ -223,7 +223,7 @@ export class StripeHelper {
 
         if (totalPrice < 50) {
             throw new SimpleError({
-                code: 'minmum_amount',
+                code: 'minimum_amount',
                 message: 'The minimum amount for an online payment is € 0,50',
                 human: $t(`dae9058f-0aa7-4fcb-9f1d-fc918c65784b`),
             });
@@ -253,10 +253,13 @@ export class StripeHelper {
         }
 
         payment.transferFee = fee;
+        const serviceFee = payment.serviceFeePayout;
 
         const fullMetadata = {
             ...(metadata ?? {}),
             organizationVATNumber: organization.meta.VATNumber,
+            transactionFee: fee,
+            serviceFee: serviceFee,
         };
 
         const stripe = StripeHelper.getInstance(directCharge ? stripeAccount.accountId : null);
@@ -286,7 +289,7 @@ export class StripeHelper {
                 payment_method: paymentMethod.id,
                 payment_method_types: [payment.method.toLowerCase()],
                 statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
-                application_fee_amount: fee ? fee : undefined,
+                application_fee_amount: fee + serviceFee,
                 on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
                 confirm: true,
                 return_url: redirectUrl,
@@ -363,7 +366,7 @@ export class StripeHelper {
                 locale: i18n.language as 'nl',
                 payment_intent_data: {
                     on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
-                    application_fee_amount: fee ? fee : undefined,
+                    application_fee_amount: fee + serviceFee,
                     transfer_data: !directCharge
                         ? {
                                 destination: stripeAccount.accountId,

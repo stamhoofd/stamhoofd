@@ -5,7 +5,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
@@ -13,6 +13,7 @@ import { Context } from '../../../helpers/Context';
 import { StripeHelper } from '../../../helpers/StripeHelper';
 import { AuditLogService } from '../../../services/AuditLogService';
 import { UitpasService } from '../../../services/uitpas/UitpasService';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper';
 
 type Params = { id: string };
 type Query = undefined;
@@ -182,6 +183,12 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, webshop.privateMeta.paymentConfiguration);
                 payment.provider = provider;
                 payment.stripeAccountId = stripeAccount?.id ?? null;
+                ServiceFeeHelper.setServiceFee(
+                    payment,
+                    organization,
+                    webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
+                    order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                );
 
                 await payment.save();
 
