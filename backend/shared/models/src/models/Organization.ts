@@ -50,7 +50,7 @@ export class Organization extends QueryableModel {
      * Public meta data
      */
     @column({ type: 'json', decoder: OrganizationMetaData })
-    meta: OrganizationMetaData;
+    meta: OrganizationMetaData = OrganizationMetaData.create({});
 
     /**
      * Data only accessible by the owners / users with special permissions

@@ -33,7 +33,7 @@ export class RegistrationPeriod extends QueryableModel {
     endDate: Date;
 
     @column({ type: 'json', decoder: RegistrationPeriodSettings })
-    settings: RegistrationPeriodSettings;
+    settings = RegistrationPeriodSettings.create({});
 
     @column({ type: 'boolean' })
     locked = false;
