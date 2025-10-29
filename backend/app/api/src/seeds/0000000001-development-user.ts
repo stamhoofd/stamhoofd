@@ -9,8 +9,8 @@ export default new Migration(async () => {
     }
 
     // Check if total users is 0
-    const totalUsers = await User.select().count();
-    if (totalUsers > 0) {
+    const hasUser = await User.select().where('id', '!=', '1').first(false);
+    if (hasUser) {
         console.log('Skipped, users already exist');
         return;
     }
