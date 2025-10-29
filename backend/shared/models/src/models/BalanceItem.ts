@@ -4,9 +4,8 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { Document, MemberUser, Payment } from './';
-import { CachedBalance } from './CachedBalance';
+import { QueryableModel } from '@stamhoofd/sql';
+import { Payment } from './';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
