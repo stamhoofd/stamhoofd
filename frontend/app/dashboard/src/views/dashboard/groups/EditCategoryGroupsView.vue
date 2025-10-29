@@ -122,13 +122,7 @@ const { patch: periodsPatch, patched: patchedPeriods, addArrayPatch: addPeriodsA
 
 const patchedPeriod = computed(() => patchedPeriods.value.find(p => p.id === props.periodId)!);
 
-const patchedCategory = computed(() => {
-    const c = patchedPeriod.value.settings.categories.find(c => c.id === props.category.id);
-    if (c) {
-        return c;
-    }
-    return props.category;
-});
+const patchedCategory = computed(() => patchedPeriod.value.settings.categories.find(c => c.id === props.category.id)!);
 
 const isRoot = computed(() => props.category.id === patchedPeriod.value.settings.rootCategoryId);
 const title = computed(() => isRoot.value ? 'Inschrijvingsgroepen' : (props.isNew ? 'Nieuwe categorie' : name.value));
@@ -218,10 +212,8 @@ const draggableGroups = useDraggableArrayIds(() => {
 });
 
 function addPatch(patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) {
-    addPeriodsPatch(OrganizationRegistrationPeriod.patch({
-        ...patch,
-        id: props.periodId,
-    }));
+    patch.id = props.periodId;
+    addPeriodsPatch(patch);
 }
 
 function addCategoryPatch(patch: AutoEncoderPatchType<GroupCategory>) {
@@ -307,18 +299,23 @@ async function createCategory() {
     settings.categories.addPatch(me);
 
     const p = OrganizationRegistrationPeriod.patch({
+        id: props.periodId,
         settings,
     });
+
+    const arr: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod> = new PatchableArray();
+    arr.addPatch(p);
 
     await present({
         components: [
             new ComponentWithProperties(EditCategoryGroupsView, {
                 category: category,
                 organization: props.organization,
-                periods: props.periods,
+                periods: arr.applyTo(props.periods),
                 periodId: props.periodId,
                 isNew: true,
                 saveHandler: async (patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriod>) => {
+                    addPeriodsArrayPatch(arr);
                     addPeriodsArrayPatch(patch);
                 },
             }),
