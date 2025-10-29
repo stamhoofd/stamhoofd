@@ -3,6 +3,7 @@ import { STCredit } from './STCredit.js';
 
 import { STInvoice, STPendingInvoice } from './STInvoice.js';
 import { STPackage } from './STPackage.js';
+import { OrganizationPaymentMandate } from './OrganizationPaymentMandate.js';
 
 export class STBillingStatus extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(STInvoice) })
@@ -16,4 +17,7 @@ export class STBillingStatus extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(STCredit) })
     credits: STCredit[];
+
+    @field({ decoder: new ArrayDecoder(OrganizationPaymentMandate), optional: true })
+    mandates: OrganizationPaymentMandate[] = [];
 }
