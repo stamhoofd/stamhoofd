@@ -9,6 +9,7 @@ import { AcquisitionType } from '../OrganizationPrivateMetaData.js';
 import { OrganizationType } from '../OrganizationType.js';
 import { UmbrellaOrganization } from '../UmbrellaOrganization.js';
 import { User } from '../User.js';
+import { OrganizationPaymentMandate } from '../billing/OrganizationPaymentMandate.js';
 
 export class OrganizationStats extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -25,46 +26,6 @@ export class OrganizationStats extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     activeAdmins: number;
-}
-
-export class OrganizationPaymentMandateDetails extends AutoEncoder {
-    @field({ decoder: StringDecoder, optional: true })
-    consumerName?: string;
-
-    @field({ decoder: StringDecoder, optional: true })
-    consumerAccount?: string;
-
-    @field({ decoder: StringDecoder, optional: true })
-    consumerBic?: string;
-}
-
-export class OrganizationPaymentMandate extends AutoEncoder {
-    @field({ decoder: StringDecoder })
-    id: string;
-
-    @field({ decoder: StringDecoder })
-    method: 'directdebit' | 'creditcard' | 'paypal';
-
-    @field({ decoder: StringDecoder })
-    status: 'valid' | 'pending' | 'invalid';
-
-    @field({ decoder: OrganizationPaymentMandateDetails })
-    details: OrganizationPaymentMandateDetails;
-
-    /**
-     * The signature date of the mandate in YYYY-MM-DD format.
-     */
-    @field({ decoder: StringDecoder, nullable: true })
-    signatureDate: string | null = null;
-
-    /**
-     * The mandate’s date and time of creation, in ISO 8601 format.
-     */
-    @field({ decoder: DateDecoder })
-    createdAt: Date;
-
-    @field({ decoder: StringDecoder, nullable: true })
-    mandateReference: string | null = null;
 }
 
 export class OrganizationSummary extends Organization {

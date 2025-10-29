@@ -32,6 +32,7 @@ export * from './src/addresses/CountryDecoder.js';
 export * from './src/addresses/Premise.js';
 export * from './src/addresses/Province.js';
 export * from './src/addresses/SearchRegions.js';
+export * from './src/billing/OrganizationPaymentMandate';
 export * from './src/Company.js';
 export * from './src/DefaultAgeGroup.js';
 export * from './src/Document.js';
