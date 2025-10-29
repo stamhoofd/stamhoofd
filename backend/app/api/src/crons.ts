@@ -121,13 +121,14 @@ async function checkWebshopDNS() {
     lastWebshopDNSId = webshops[webshops.length - 1].id;
 }
 
-// Keep checking pending paymetns for 3 days
+// 11 min - 2 hours
 async function checkPayments() {
     if (STAMHOOFD.environment === 'development') {
         // return;
     }
 
-    const timeout = 60 * 1000 * 31;
+    const timeout = 60 * 1000 * 11;
+    const timeout2 = 60 * 1000 * 60 * 2;
 
     // TODO: only select the ID + organizationId
     const payments = await Payment.select()
@@ -136,7 +137,8 @@ async function checkPayments() {
                 PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
             ])
                 .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
-                .and('createdAt', '<', new Date(new Date().getTime() - timeout)),
+                .and('createdAt', '<', new Date(new Date().getTime() - timeout))
+                .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
         )
         // For payconiq payments, we have a shorter timeout of 1 minute if they are still in the 'created' state (not scanned)
         .orWhere(
@@ -144,14 +146,45 @@ async function checkPayments() {
                 PaymentMethod.Payconiq,
             ])
                 .and('status', [PaymentStatus.Created])
-                .and('createdAt', '<', new Date(new Date().getTime() - 60 * 1000)),
+                .and('createdAt', '<', new Date(new Date().getTime() - 60 * 1000))
+                .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
         )
         .orderBy('createdAt', 'ASC')
-        .limit(200)
+        .limit(500)
         .fetch();
 
     console.log('[DELAYED PAYMENTS] Checking pending payments: ' + payments.length);
+    await doCheckPayments(payments);
+}
 
+// 2 hours - 3 days
+async function checkOldPayments() {
+    if (STAMHOOFD.environment === 'development') {
+        // return;
+    }
+
+    const timeout = 60 * 1000 * 60 * 2;
+    const timeout2 = 60 * 1000 * 60 * 24 * 3;
+
+    // TODO: only select the ID + organizationId
+    const payments = await Payment.select()
+        .where(
+            SQL.where('method', [
+                PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
+            ])
+                .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
+                .and('createdAt', '<', new Date(new Date().getTime() - timeout))
+                .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
+        )
+        .orderBy('createdAt', 'ASC')
+        .limit(500)
+        .fetch();
+
+    console.log('[DELAYED PAYMENTS] Checking old pending payments: ' + payments.length);
+    await doCheckPayments(payments);
+}
+
+async function doCheckPayments(payments: Payment[]) {
     for (const payment of payments) {
         try {
             if (payment.organizationId) {
@@ -348,6 +381,7 @@ registerCron('checkReservedUntil', checkReservedUntil);
 registerCron('checkDNS', checkDNS);
 registerCron('checkWebshopDNS', checkWebshopDNS);
 registerCron('checkPayments', checkPayments);
+registerCron('checkOldPayments', checkOldPayments);
 registerCron('checkDrips', checkDrips);
 
 // Register other crons
