@@ -23,17 +23,15 @@ Documentation and code is located in the backend folder.
 
 ## Shared
 
-We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. Make sure you keep everything backwards compatible, read the documantation in [@simonbackx/simple-encoding](https://github.com/simonbackx/simple-encoding). If you need to add some new data, you'll probably need to make some changes in this package.
+We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](https://stamhoofd.notion.site/). 
 
 # Contributing
 
 Do you want to contribute? GREAT! :D You can build features that you need for your own club or you can help the project. 
 
-This is what you need to know:
-
-1. Try to keep all communication in English, even when you know everyone is speaking the same language. It makes it easier for others to find answers to some questions later on and to join a conversation. We know the software is currently in Dutch only, but that will change in the future ;) 
-2. We recommend you to create an issue before starting to build something (unless it is a bugfix or a small improvement, then you can open up a PR right away). Big features should be discussed first.
-3. Look at the issues if you want to help build something, or open an issue if you want to help but don't know where to start. Tip: you can look at our feedback system (https://stamhoofd.nolt.io to find inspiration).
+1. Drop us an email (support@stamhoofd.be) if you are interested, have an idea you want to build yourself... We can't allow all changes to the code, so it is better we can discuss this upfront. Tip: you can look at our feedback system (https://stamhoofd.nolt.io to find inspiration).
+2. Read our developer documentation and try to install Stamhoofd locally on your computer
+3. For larger features you'll need to document how you want to build something, and specifically where in the codebase. This will help save your some time and allows for feedback earlier.
 4. Create a pull request, make a draft if you feel some discussion is needed or if you want to show your WIP
 
 ## Development
