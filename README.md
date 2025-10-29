@@ -38,6 +38,10 @@ This is what you need to know:
 
 ## Development
 
+### Developer documentation
+
+You can read the documentation of the most important building blocks of Stamhoofd [here](https://stamhoofd.notion.site/). We have some internal libraries, and those are all covered in the docs. Find something missing? Feel free to let us know.
+
 ### Installation
 
 #### Git (optional, recommended)
