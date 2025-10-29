@@ -8,18 +8,22 @@
 
             <p>{{ $t('369440db-a9e0-4530-a06b-3ea05cc6a2b0') }}</p>
 
-            <p v-if="members.length === 0" class="style-button-bar">
-                <button v-if="isAcceptingNewMembers" class="button primary" type="button" @click="registerMembers">
+            <p v-if="members.length === 0 && !isAcceptingNewMembers" class="info-box icon lock">
+                {{ $t('Momenteel zijn inschrijvingen voor nieuwe leden gesloten. Als je een bestaand lid bent, kijk dan na of je met het juiste e-mailadres inlogt.') }}
+            </p>
+
+            <p v-if="members.length === 0 && isAcceptingNewMembers" class="style-button-bar">
+                <button class="button primary" type="button" @click="registerMembers">
                     <span class="icon edit" />
                     <span>{{ $t('d55c9b50-2f86-4e7a-b6a5-2f03c0fad4fa') }}</span>
                 </button>
 
-                <a :href="documentationUrl.toString()" target="_blank" class="button text selected">
+                <a v-if="documentationUrl" :href="documentationUrl.toString()" target="_blank" class="button text selected">
                     <span class="icon book" />
                     <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
                 </a>
             </p>
-            <p v-else class="style-button-bar">
+            <p v-else-if="documentationUrl" class="style-button-bar">
                 <a :href="documentationUrl.toString()" target="_blank" class="button text selected">
                     <span class="icon book" />
                     <span>{{ $t('b6994143-5a0c-424d-97b3-8b3cf96a3443') }}</span>
@@ -234,7 +238,7 @@ const members = computed(() => memberManager.family.members);
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);
 const chooseGroupForMember = useChooseGroupForMember();
 const addMember = useAddMember();
-const documentationUrl = TranslatedString.create(STAMHOOFD.memberDocumentationPage ?? LocalizedDomains.getDocs('mijn-account'));
+const documentationUrl = STAMHOOFD.userMode === 'platform' ? TranslatedString.create(STAMHOOFD.memberDocumentationPage ?? LocalizedDomains.getDocs('mijn-account')) : undefined;
 
 async function registerMembers() {
     await $navigate(Routes.RegisterMembers);
