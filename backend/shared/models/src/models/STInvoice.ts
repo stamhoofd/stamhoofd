@@ -1,10 +1,10 @@
 import { createMollieClient } from '@mollie/api-client';
-import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { column } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { OrganizationPaymentMandate, OrganizationPaymentMandateDetails, STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Organization, Payment } from './';
+import { Organization } from './';
 
 export class STInvoice extends QueryableModel {
     static table = 'stamhoofd_invoices';
@@ -20,10 +20,16 @@ export class STInvoice extends QueryableModel {
     id!: string;
 
     /**
-     * Is null for deleted organizations
+     * Organization that made the invoice. Can be null if the organization was deleted and for the migration from V1 -> V2
      */
-    @column({ foreignKey: STInvoice.organization, type: 'string', nullable: true })
+    @column({ type: 'string', nullable: true })
     organizationId: string | null;
+
+    /**
+     * Organization that is associated with this invoice (can be null if deleted or unknown)
+     */
+    @column({ type: 'string', nullable: true })
+    payingOrganizationId: string | null;
 
     /**
      * An associated STCredit, that was used to remove credits from the user's credits.
@@ -35,7 +41,7 @@ export class STInvoice extends QueryableModel {
     /**
      * Note: always create a new invoice for failed payments. We never create an actual invoice until we received the payment
      */
-    @column({ type: 'string', nullable: true, foreignKey: STInvoice.payment })
+    @column({ type: 'string', nullable: true })
     paymentId: string | null = null;
 
     @column({ type: 'json', decoder: STInvoiceMeta })
@@ -75,8 +81,8 @@ export class STInvoice extends QueryableModel {
     @column({ type: 'string', nullable: true })
     reference: string | null = null;
 
-    static organization = new ManyToOneRelation(Organization, 'organization');
-    static payment = new ManyToOneRelation(Payment, 'payment');
+    // static organization = new ManyToOneRelation(Organization, 'organization');
+    // static payment = new ManyToOneRelation(Payment, 'payment');
 
     static async getMollieMandates(organization: Organization) {
         // Poll mollie status
