@@ -4,11 +4,11 @@ import { STPackage, STPackageMeta, STPackageType, STPricingType } from './STPack
  * Package bundle are packages that you can buy
  */
 export enum STPackageBundle {
-    // Full members package
-    Members = 'Members',
-
     // Webshop package (max 10 webshops)
     Webshops = 'Webshops',
+
+    // Full members package
+    Members = 'Members',
 
     // One webshop package (max 1 webshop)
     SingleWebshop = 'SingleWebshop',
@@ -20,18 +20,16 @@ export enum STPackageBundle {
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`972bf91c-ce61-48af-b2c9-04bc52eb2838`);
-            case STPackageBundle.Webshops: return $t(`0125db4f-75ca-4ede-a4dc-8d5173d0456f`);
-            case STPackageBundle.SingleWebshop: return $t(`91399a14-70ae-40e5-b31a-9534558cf085`);
+            case STPackageBundle.Members: return $t(`Ledenadministratie`);
+            case STPackageBundle.Webshops: return $t(`Webshops, ticketverkoop en openbare inschrijvingen`);
         }
         return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`0b66eb2c-28ce-4e26-aecf-334880283bce`);
-            case STPackageBundle.Webshops: return $t(`d098733a-c6d7-4522-8a85-c4df8014506a`);
-            case STPackageBundle.SingleWebshop: return $t(`05cb225f-376c-4685-b5d3-e7858171fa23`);
+            case STPackageBundle.Members: return $t(`Beheer je leden overzichtelijk, houd gegevens netjes bij en geef hen toegang tot jullie eigen ledenportaal om hun gegevens te beheren of inschrijvingen te doen.`);
+            case STPackageBundle.Webshops: return $t(`Verkoop tickets, inschrijvingen, merchandising en meer via één of meerdere webshops.`);
         }
         return '?';
     }
@@ -40,7 +38,14 @@ export class STPackageBundleHelper {
         switch (bundle) {
             case STPackageBundle.Members: return true;
             case STPackageBundle.Webshops: return true;
-            case STPackageBundle.SingleWebshop: return true;
+        }
+        return false;
+    }
+
+    static requiresMandate(bundle: STPackageBundle): boolean {
+        switch (bundle) {
+            case STPackageBundle.Members: return true;
+            case STPackageBundle.Webshops: return true;
         }
         return false;
     }
@@ -60,6 +65,64 @@ export class STPackageBundleHelper {
             }
         }
         return true;
+    }
+
+    static isAlreadyBought(bundle: STPackageBundle, pack: STPackage): boolean {
+        switch (bundle) {
+            case STPackageBundle.Members: {
+                if (pack.meta.type === STPackageType.Members) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.Webshops: {
+                if (pack.meta.type === STPackageType.Webshops) {
+                    // Already bought
+                    return true;
+                }
+                if (pack.meta.type === STPackageType.SingleWebshop) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.SingleWebshop: {
+                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    static isInTrial(bundle: STPackageBundle, pack: STPackage): boolean {
+        switch (bundle) {
+            case STPackageBundle.Members: {
+                if (pack.meta.type === STPackageType.TrialMembers) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.Webshops: {
+                if (pack.meta.type === STPackageType.TrialWebshops) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+            case STPackageBundle.SingleWebshop: {
+                if (pack.meta.type === STPackageType.TrialWebshops) {
+                    // Already bought
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
     }
 
     static isCombineable(bundle: STPackageBundle, pack: STPackage): boolean {
@@ -123,7 +186,7 @@ export class STPackageBundleHelper {
                     meta: STPackageMeta.create({
                         type: STPackageType.Members,
                         unitPrice: 100,
-                        minimumAmount: 79,
+                        minimumAmount: 0,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
                         startDate: new Date(date),
@@ -132,50 +195,23 @@ export class STPackageBundleHelper {
             }
 
             case STPackageBundle.Webshops: {
-                // 1 year valid
-                const validUntil = new Date(date);
-                validUntil.setFullYear(validUntil.getFullYear() + 1);
-
-                // Remove (= not renewable) if not renewed after 1 month
-                const removeAt = new Date(validUntil);
-                removeAt.setMonth(removeAt.getMonth() + 1);
-
                 return STPackage.create({
-                    validUntil,
-                    removeAt,
+                    validUntil: null,
+                    removeAt: null,
                     meta: STPackageMeta.create({
                         type: STPackageType.Webshops,
-                        unitPrice: 7900,
-                        minimumAmount: 1,
-                        allowRenew: true,
-                        pricingType: STPricingType.PerYear,
-                        startDate: new Date(date),
-                    }),
-                });
-            }
-
-            case STPackageBundle.SingleWebshop: {
-                // Disable functions after two months
-                const validUntil = new Date(date);
-                validUntil.setMonth(validUntil.getMonth() + 2);
-
-                // Remove if not valid anymore
-                const removeAt = new Date(validUntil);
-
-                return STPackage.create({
-                    validUntil,
-                    removeAt,
-                    meta: STPackageMeta.create({
-                        type: STPackageType.SingleWebshop,
-                        unitPrice: 3900,
-                        minimumAmount: 1,
-                        allowRenew: true,
+                        unitPrice: 0,
+                        minimumAmount: 0,
+                        allowRenew: false,
                         pricingType: STPricingType.Fixed,
+                        serviceFeeFixed: 0,
+                        serviceFeePercentage: 2_00,
+                        serviceFeeMaximum: 20,
                         startDate: new Date(date),
+                        canDeactivate: true,
                     }),
                 });
             }
-
             case STPackageBundle.TrialMembers: {
                 // Disable functions after two weeks, manual reenable required
                 const validUntil = new Date(date);
