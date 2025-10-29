@@ -5,6 +5,7 @@ import basex from 'base-x';
 import crypto from 'crypto';
 
 import { Organization, User } from './';
+import { SimpleError } from '@simonbackx/simple-errors';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
 
@@ -95,6 +96,14 @@ export class PasswordToken extends QueryableModel {
      * Create a token without saving it
      */
     static async createToken<U extends User>(user: U, validUntil?: Date): Promise<PasswordTokenWithUser> {
+        if (user.isSystemUser) {
+            throw new SimpleError({
+                code: 'internal_error',
+                message: 'Cannot create password token for system user',
+                statusCode: 500,
+            });
+        }
+
         const token = new PasswordToken().setRelation(PasswordToken.user, user);
 
         if (validUntil) {

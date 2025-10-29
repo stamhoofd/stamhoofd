@@ -290,6 +290,10 @@ export class User extends QueryableModel {
         return !this.email.includes('@') && this.email.endsWith('.api') && this.verified;
     }
 
+    get isSystemUser() {
+        return this.id === '1';
+    }
+
     hasAccount() {
         if (this.hasPasswordBasedAccount()) {
             return true;
@@ -529,6 +533,11 @@ export class User extends QueryableModel {
     }
 
     async changePassword(password: string) {
+        if (this.isSystemUser) {
+            // Can't set password
+            this.password = null;
+            return;
+        }
         this.password = await User.hash(password);
     }
 

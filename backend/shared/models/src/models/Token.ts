@@ -5,6 +5,7 @@ import crypto from 'crypto';
 
 import { RateLimiter } from '../helpers/RateLimiter';
 import { User } from './';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 export type TokenWithUser = Token & { user: User };
 
@@ -184,6 +185,13 @@ export class Token extends QueryableModel {
      * Create a token without saving it
      */
     static async createUnsavedToken<U extends User>(user: U): Promise<(Token & { user: U })> {
+        if (user.isSystemUser) {
+            throw new SimpleError({
+                code: 'internal_error',
+                message: 'Cannot create token for system user',
+                statusCode: 500,
+            });
+        }
         // Get all the tokens of the user that are olde
 
         // First search if we already have more than 5 tokens (we only allow up to 5 devices)
