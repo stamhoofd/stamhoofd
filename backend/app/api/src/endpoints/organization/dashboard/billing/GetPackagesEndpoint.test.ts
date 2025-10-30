@@ -9,7 +9,7 @@ import { GetPackagesEndpoint } from './GetPackagesEndpoint';
 const baseUrl = `/organization/packages`;
 const endpoint = new GetPackagesEndpoint();
 
-describe('Endpoint.GetMembersEndpoint', () => {
+describe('Endpoint.GetPackagesEndpoint', () => {
     beforeEach(async () => {
         TestUtils.setEnvironment('userMode', 'organization');
     });
