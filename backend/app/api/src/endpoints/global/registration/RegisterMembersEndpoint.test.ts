@@ -1,17 +1,16 @@
+import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { initPayconiq } from '../../../../tests/init/initPayconiq';
-import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
 import { assertBalances } from '../../../../tests/assertions/assertBalances';
-import PersistentFile from 'formidable/PersistentFile';
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { testServer } from '../../../../tests/helpers/TestServer';
 import { initAdmin, initPermissionRole } from '../../../../tests/init';
+import { initPayconiq } from '../../../../tests/init/initPayconiq';
 import { BalanceItemService } from '../../../services/BalanceItemService';
+import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -19,6 +18,7 @@ describe('Endpoint.RegisterMembers', () => {
     // #region global
     const endpoint = new RegisterMembersEndpoint();
     let period: RegistrationPeriod;
+    let previousPeriod: RegistrationPeriod;
     let defaultPermissionLevel = PermissionLevel.None;
     let defaultLinkMembersToUser = true;
     const post = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
@@ -28,9 +28,10 @@ describe('Endpoint.RegisterMembers', () => {
     };
 
     beforeAll(async () => {
-        const previousPeriod = await new RegistrationPeriodFactory({
+        previousPeriod = await new RegistrationPeriodFactory({
             startDate: new Date(2022, 0, 1),
             endDate: new Date(2022, 11, 31),
+            locked: true,
         }).create();
 
         period = await new RegistrationPeriodFactory({
@@ -54,6 +55,7 @@ describe('Endpoint.RegisterMembers', () => {
             .create();
 
         const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: registrationPeriod }).create();
+        const previosOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: previousPeriod }).create();
 
         return { organization, organizationRegistrationPeriod };
     };
@@ -2059,6 +2061,51 @@ describe('Endpoint.RegisterMembers', () => {
             expect(updatedGroup1After!.settings.reservedMembers).toBe(0);
         });
 
+        test('[REGRESSION] Cannot replace registrations of locked periods', async () => {
+            const { member, group, groupPrice, organization, token } = await initData();
+
+            const group1 = await new GroupFactory({
+                organization,
+                price: 25_00,
+                reducedPrice: 12_50,
+                stock: 500,
+                period: previousPeriod,
+            })
+                .create();
+            const groupPrice1 = group1.settings.prices[0];
+
+            const registration = await new RegistrationFactory({
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [registration.id],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 30,
+                asOrganizationId: organization.id,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
+        });
+
         test('When replacing a registration, we should keep the original paying organization id', async () => {
             const { organization, group: group1, groupPrice: groupPrice1, token, member, user } = await initData();
 
@@ -2430,6 +2477,42 @@ describe('Endpoint.RegisterMembers', () => {
             const updatedRegistration = await Registration.getByID(registration.id);
             expect(updatedRegistration).toBeDefined();
             expect(updatedRegistration!.deactivatedAt).not.toBe(null);
+        });
+
+        test('[REGRESSION] Cannot deactivate registrations of locked periods', async () => {
+            const { member, organization, token } = await initData();
+
+            const group1 = await new GroupFactory({
+                organization,
+                price: 25_00,
+                reducedPrice: 12_50,
+                stock: 500,
+                period: previousPeriod,
+            })
+                .create();
+            const groupPrice1 = group1.settings.prices[0];
+
+            const registration = await new RegistrationFactory({
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [],
+                    deleteRegistrationIds: [registration.id],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 30,
+                asOrganizationId: organization.id,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
         });
 
         test('Should fail if invalid cancelation fee', async () => {
