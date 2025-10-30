@@ -333,10 +333,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('dd8f3b31-064c-4391-9352-6ec9c15bd9a8') }}
+                            {{ $t('Functionaliteiten activeren') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('d772b39b-b319-45ea-8b4b-2448b75ac54d') }}
+                            {{ $t('Activeer nieuwe functies') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -399,6 +399,7 @@ import { useEditGroupsView } from './hooks/useEditGroupsView';
 import FreeContributionSettingsView from './modules/members/FreeContributionSettingsView.vue';
 import ImportMembersView from './modules/members/ImportMembersView.vue';
 import BillingWarningBox from './packages/BillingWarningBox.vue';
+import PackageSettingsView from './packages/PackageSettingsView.vue';
 
 type ttt = FreeContributionSettingsView;
 
@@ -580,6 +581,15 @@ defineRoutes([
         present: 'popup',
         component: EditRegistrationPeriodsView as ComponentOptions,
     },
+    ...(!isPlatform
+        ? [
+                {
+                    url: Routes.Packages,
+                    present: 'popup' as const,
+                    component: PackageSettingsView as ComponentOptions,
+                },
+            ]
+        : []),
 ]);
 
 const $navigate = useNavigate();

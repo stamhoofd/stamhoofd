@@ -32,7 +32,6 @@ export * from './src/addresses/CountryDecoder.js';
 export * from './src/addresses/Premise.js';
 export * from './src/addresses/Province.js';
 export * from './src/addresses/SearchRegions.js';
-export * from './src/billing/OrganizationPaymentMandate';
 export * from './src/Company.js';
 export * from './src/DefaultAgeGroup.js';
 export * from './src/Document.js';
@@ -204,11 +203,7 @@ export * from './src/webshops/WebshopMetaData.js';
 export * from './src/webshops/UitpasNumberAndPrice.js';
 
 // billing
-export * from './src/billing/STBillingStatus.js';
-export * from './src/billing/STCredit.js';
-export * from './src/billing/STInvoice.js';
-export * from './src/billing/STPackage.js';
-export * from './src/billing/STPackageBundle.js';
+export * from './src/billing';
 
 // Admin
 export * from './src/admin/MemberSummary.js';

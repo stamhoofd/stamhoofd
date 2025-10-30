@@ -23,3 +23,4 @@ export * from './EmailTemplateFactory';
 export * from './RecordCategoryFactory';
 export * from './RecordAnswerFactory';
 export * from './DocumentTemplateFactory';
+export * from './STPackageFactory';
