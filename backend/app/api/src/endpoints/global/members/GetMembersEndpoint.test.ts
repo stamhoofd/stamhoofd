@@ -1440,7 +1440,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect.objectContaining({ id: member4.id }),
             ]);
         });
+    });
 
+    describe('Data filtering', () => {
         test('[REGRESSION] A user with minimal access can also view platform record answers in platform scope', async () => {
             /**
              * When fetching members via the admin api, without organization scope, we need to calculate which records to return and which not.
