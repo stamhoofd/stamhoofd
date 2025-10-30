@@ -20,16 +20,16 @@ export enum STPackageBundle {
 export class STPackageBundleHelper {
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`Ledenadministratie`);
-            case STPackageBundle.Webshops: return $t(`Webshops, ticketverkoop en openbare inschrijvingen`);
+            case STPackageBundle.Members: return $t(`e15286b6-ccc1-463c-95de-d5d87b6b84a4`);
+            case STPackageBundle.Webshops: return $t(`3b1c092c-fdb5-4322-a34d-b8142881b3cf`);
         }
         return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`Beheer je leden overzichtelijk, houd gegevens netjes bij en geef hen toegang tot jullie eigen ledenportaal om hun gegevens te beheren of inschrijvingen te doen.`);
-            case STPackageBundle.Webshops: return $t(`Verkoop tickets, inschrijvingen, merchandising en meer via één of meerdere webshops.`);
+            case STPackageBundle.Members: return $t(`2e76098c-b75a-4c40-ae13-03bbc1f06b3e`);
+            case STPackageBundle.Webshops: return $t(`3c731bcc-187c-437f-8d6c-f1c1b1207c86`);
         }
         return '?';
     }

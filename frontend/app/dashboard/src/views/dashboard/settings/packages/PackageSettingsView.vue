@@ -1,15 +1,15 @@
 <template>
     <LoadingViewTransition :error-box="errors.errorBox">
         <div v-if="status" class="st-view background">
-            <STNavigationBar :title="$t('Functionaliteiten activeren')" />
+            <STNavigationBar :title="$t('04fe8969-a277-417d-92e8-8bd532affc19')" />
 
             <main>
                 <h1>
-                    {{ $t('Functionaliteiten activeren') }}
+                    {{ $t('04fe8969-a277-417d-92e8-8bd532affc19') }}
                 </h1>
 
                 <p class="style-description-block">
-                    <I18nComponent :t="$t(' Kies de functies die je wilt activeren. Meer info over alle prijzen kan je terugvinden op <button>onze website</button>')">
+                    <I18nComponent :t="$t('5afbf5f5-1051-4a95-9c90-602c828094fa')">
                         <template #button="{content}">
                             <a class="inline-link" :href="'https://'+LocalizedDomains.marketing+'/prijzen'" target="_blank">
                                 {{ content }}
@@ -32,16 +32,16 @@
                         </template>
 
                         <p v-if="pack.inTrial && !pack.alreadyBought" class="style-title-prefix-list theme-secundary">
-                            <span>{{ $t('In proefperiode') }}</span>
-                            <button v-if="pack.inTrial && !pack.alreadyBought" v-tooltip="$t('Stop proefperiode')" type="button" class="button icon small disabled selected" @click.stop="stopTrial(pack)" />
+                            <span>{{ $t('6ed63ff0-296c-4151-905a-fc6fdc7832e8') }}</span>
+                            <button v-if="pack.inTrial && !pack.alreadyBought" v-tooltip="$t('01c1e6ec-a92b-455f-8721-08f4cd900b67')" type="button" class="button icon small disabled selected" @click.stop="stopTrial(pack)" />
                         </p>
 
                         <p v-if="pack.alreadyBought && pack.expiresSoon" class="style-title-prefix-list">
-                            {{ $t('Vervalt binnenkort') }}
+                            {{ $t('b69ae0b8-d957-4dde-b06d-a6f97ceea656') }}
                         </p>
 
                         <p v-else-if="pack.alreadyBought" class="style-title-prefix-list">
-                            {{ $t('Actief') }}
+                            {{ $t('493f3fc9-ea9e-4b3d-8af6-e15cd3fd2539') }}
                         </p>
 
                         <h3 class="style-title-list">
@@ -49,7 +49,7 @@
                         </h3>
 
                         <p v-if="pack.alreadyBought && pack.package.validUntil" class="style-description-small">
-                            {{ $t('Geldig tot {dateTime}', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                            {{ $t('e40ae4e1-abe1-418d-8662-16626c93acc2', {dateTime: formatDateTime(pack.package.validUntil)}) }}
                         </p>
 
                         <p class="style-description-small">

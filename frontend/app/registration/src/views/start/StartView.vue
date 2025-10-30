@@ -9,7 +9,7 @@
             <p>{{ $t('369440db-a9e0-4530-a06b-3ea05cc6a2b0') }}</p>
 
             <p v-if="members.length === 0 && !isAcceptingNewMembers" class="info-box icon lock">
-                {{ $t('Momenteel zijn inschrijvingen voor nieuwe leden gesloten. Als je een bestaand lid bent, kijk dan na of je met het juiste e-mailadres inlogt.') }}
+                {{ $t('dd5ee237-2ae7-475c-b58d-3c5a2159f4c5') }}
             </p>
 
             <p v-if="members.length === 0 && isAcceptingNewMembers" class="style-button-bar">

@@ -333,10 +333,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/stock.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Functionaliteiten activeren') }}
+                            {{ $t('04fe8969-a277-417d-92e8-8bd532affc19') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Activeer nieuwe functies') }}
+                            {{ $t('e923e4f3-42d4-4f9b-a919-2709c99780bb') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

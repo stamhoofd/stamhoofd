@@ -90,13 +90,13 @@ const warnings = computed(() => {
         if (props.member.patchedMember.details.parentsHaveAccess?.value === true) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('De ouders behouden toegang als dit lid 18 jaar wordt')),
+                    text: TranslatedString.create($t('aeeeb5ba-7576-497c-a40e-8bc48338b2a7')),
                     type: RecordWarningType.Info,
                 }));
             }
             else {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('De ouders hebben toegang tot dit meerderjarig lid')),
+                    text: TranslatedString.create($t('54bdf92a-7ff9-46ba-a944-2422f4b84f80')),
                     type: RecordWarningType.Info,
                 }));
             }
@@ -104,7 +104,7 @@ const warnings = computed(() => {
         else if (props.member.patchedMember.details.parentsHaveAccess?.value === false) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('De ouders hebben geen toegang tot dit minderjarig lid')),
+                    text: TranslatedString.create($t('9ce4a6f7-81ec-4dba-aac5-5d497d33a274')),
                     type: RecordWarningType.Info,
                 }));
             }

@@ -27,16 +27,16 @@ export class STPackageTypeHelper {
         switch (type) {
             case STPackageType.LegacyMembers: return $t(`d855727b-b760-4d38-8506-d1ba215256c9`);
             case STPackageType.Members: {
-                return $t(`Ledenadministratie`);
+                return $t(`e15286b6-ccc1-463c-95de-d5d87b6b84a4`);
             }
             case STPackageType.Webshops: {
-                return $t(`Webshops, ticketverkoop en openbare inschrijvingen`);
+                return $t(`3b1c092c-fdb5-4322-a34d-b8142881b3cf`);
             }
             case STPackageType.SingleWebshop: {
                 return $t(`fb1cc501-93bd-45e9-9ce6-26c3f4427205`);
             }
-            case STPackageType.TrialMembers: return $t(`Proefperiode ledenadministratie`);
-            case STPackageType.TrialWebshops: return $t(`Proefperiode webshops`);
+            case STPackageType.TrialMembers: return $t(`752fdb9b-b159-41b3-95d1-fc3bd83bf9b4`);
+            case STPackageType.TrialWebshops: return $t(`6aeb7f4b-9a84-4738-b3ca-db96a7c92fcd`);
         }
     }
 }

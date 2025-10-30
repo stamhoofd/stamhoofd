@@ -15,14 +15,14 @@
                     <Checkbox v-model="parentsHaveAccess" :indeterminate="!parentsHaveAccessChangeDate" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Geef ouders toegang en stuur hen automatische e-mails') }}
+                    {{ $t('2f657935-44b2-4fd6-baaa-a89b7b4da83d') }}
                 </h3>
                 <p v-if="!parentsHaveAccessChangeDate && parentsHaveAccess" class="style-description-small">
-                    {{ $t('Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt.', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('810b15cd-001e-4ab9-9d9e-054044904879', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
                 <p v-else-if="parentsHaveAccess" class="style-description-small">
-                    {{ $t('De ouders hebben toegang tot de gegevens van {firstName} en ontvangen automatische e-mails.', {firstName: member.patchedMember.details.firstName}) }}
-                    <I18nComponent v-if="member.patchedMember.details.defaultAge < 18" :t="$t('Ze behouden ook toegang nadat {firstName} 18 jaar wordt. <button>Ongedaan maken</button>', {firstName: member.patchedMember.details.firstName})">
+                    {{ $t('a9439a82-82d3-4254-a3a6-abe14952a392', {firstName: member.patchedMember.details.firstName}) }}
+                    <I18nComponent v-if="member.patchedMember.details.defaultAge < 18" :t="$t('d5ee5112-988f-4d4b-82e0-46f257c40bbb', {firstName: member.patchedMember.details.firstName})">
                         <template #button="{content}">
                             <button class="inline-link" type="button" @click="clearParentsHaveAccess">
                                 {{ content }}
@@ -31,7 +31,7 @@
                     </I18nComponent>
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('De ouders krijgen geen toegang tot de gegevens van {firstName}. Ze ontvangen ook geen automatische e-mails.', {firstName: member.patchedMember.details.firstName}) }}
+                    {{ $t('78c16cd9-a935-4382-9828-7b30d9808e0f', {firstName: member.patchedMember.details.firstName}) }}
                 </p>
             </STListItem>
 
