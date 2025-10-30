@@ -151,6 +151,10 @@
     "original": "Niet aangevinkt",
     "translation": "Unchecked"
   },
+  "01c1e6ec-a92b-455f-8721-08f4cd900b67": {
+    "original": "Stop proefperiode",
+    "translation": "End trial period"
+  },
   "01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c": {
     "original": "Inschrijving van",
     "translation": "Registration of"
@@ -490,6 +494,10 @@
   "04ee201f-076f-4a3f-b10f-56eb10ca0d87": {
     "original": "Breedte",
     "translation": "Width"
+  },
+  "04fe8969-a277-417d-92e8-8bd532affc19": {
+    "original": "Functionaliteiten activeren",
+    "translation": "Enable functionalities"
   },
   "04ff85c0-eb98-46b8-975b-8fd136ddc49a": {
     "original": "Een {name} moet minimum {days} duren",
@@ -4163,6 +4171,10 @@
     "original": "Je kan geen aansluitingen meer verwijderen in {period} (vergrendeld)",
     "translation": "You can no longer remove affiliations in {period} (locked)"
   },
+  "2e76098c-b75a-4c40-ae13-03bbc1f06b3e": {
+    "original": "Beheer je leden overzichtelijk, houd gegevens netjes bij en geef hen toegang tot jullie eigen ledenportaal om hun gegevens te beheren of inschrijvingen te doen.",
+    "translation": "Manage your members clearly, keep data organized, and give members access to your own member portal to manage their data and registrations."
+  },
   "2e79bf4a-878b-43b0-902b-9d080c8b7fdf": {
     "original": "Deze ontvanger bestaat niet",
     "translation": "This recipient does not exist"
@@ -4242,6 +4254,10 @@
   "2f645618-a9a9-4598-883d-6f1991ae379d": {
     "original": "Geen rechtspersoonlijkheid (feitelijke vereniging)",
     "translation": "No legal personality (de facto association)"
+  },
+  "2f657935-44b2-4fd6-baaa-a89b7b4da83d": {
+    "original": "Geef ouders toegang en stuur hen automatische e-mails",
+    "translation": "Give parents access and send them automatic emails"
   },
   "2f6eb4f4-cfc7-498f-9aef-e534979ea402": {
     "original": "Vergrendeld",
@@ -5223,6 +5239,10 @@
     "original": "Later te betalen",
     "translation": "To be paid later"
   },
+  "3b1c092c-fdb5-4322-a34d-b8142881b3cf": {
+    "original": "Webshops, ticketverkoop en openbare inschrijvingen",
+    "translation": "Webshops, ticket sales, and public registrations"
+  },
   "3b252c1e-73af-4ad5-af1c-df0b5bd6dcac": {
     "original": "De e-mail die een besteller nog ontvangt als je de betaling hebt gemarkeerd als ontvangen (enkel bij betaalmethode overschrijving)",
     "translation": "The email that an orderer still receives if you've marked the payment as received (only with bank transfer as payment method)"
@@ -5314,6 +5334,10 @@
   "3c712881-ef26-474f-a431-dd1c74011260": {
     "original": "Afhaal/leverdatum",
     "translation": "Collection/delivery date"
+  },
+  "3c731bcc-187c-437f-8d6c-f1c1b1207c86": {
+    "original": "Verkoop tickets, inschrijvingen, merchandising en meer via één of meerdere webshops.",
+    "translation": "Sell tickets, registrations, merchandise, and more through one or multiple webshops."
   },
   "3c90169c-9776-4d40-bda0-dba27a5bad69": {
     "original": "Einddatum",
@@ -6403,6 +6427,10 @@
     "original": "{firstName} kan inloggen of registreren op één van de ingevoerde e-mailadressen en krijgt dan automatisch toegang tot de gegevens van {firstName} en het ledenportaal.",
     "translation": "{firstName} can log in or register at one of the entered email addresses and will then automatically get access to {firstName}'s data and the member portal."
   },
+  "493f3fc9-ea9e-4b3d-8af6-e15cd3fd2539": {
+    "original": "Actief",
+    "translation": "Active"
+  },
   "4943ece9-450b-4913-a6d8-6834d011a1ee": {
     "original": "Waarschuwing",
     "translation": "Warning"
@@ -7487,6 +7515,10 @@
     "original": "Gemeente",
     "translation": "Municipality"
   },
+  "54bdf92a-7ff9-46ba-a944-2422f4b84f80": {
+    "original": "De ouders hebben toegang tot dit meerderjarig lid",
+    "translation": "Parents have access to this adult member"
+  },
   "54c43796-dab2-4458-96b2-7566541e865b": {
     "original": "De benaming van het systeem voor financiële ondersteuning. Bijvoorbeeld: \"Financiële ondersteuning\" of \"Kansentarief\"",
     "translation": "The system's name for financial support. For example: \"Financial support\" or \"Discount rate\""
@@ -7970,6 +8002,10 @@
   "5aca8049-d981-4cc5-a86c-0c194047743d": {
     "original": "Natuurvereniging",
     "translation": "Nature association"
+  },
+  "5afbf5f5-1051-4a95-9c90-602c828094fa": {
+    "original": " Kies de functies die je wilt activeren. Meer info over alle prijzen kan je terugvinden op <button>onze website</button>",
+    "translation": "Select the roles you want to activate. You can find more details about all prices on <button>our website</button>."
   },
   "5b035b31-579b-4d02-bce7-23e500e4fe9d": {
     "original": "Gebruik deze code om een account toegang te geven tot dit lid als hun e-mailadres nog niet in het systeem zit. Deze staat ook altijd onderaan alle e-mails naar leden/ouders.",
@@ -9379,6 +9415,10 @@
     "original": "Aankruisvakje met tekstvak indien aangevinkt",
     "translation": "Checkbox with text box if checked"
   },
+  "6aeb7f4b-9a84-4738-b3ca-db96a7c92fcd": {
+    "original": "Proefperiode webshops",
+    "translation": "Webshop trial period"
+  },
   "6aedccdb-08e6-42c5-ae54-cb26c181ab02": {
     "original": "Lokale groep",
     "translation": "Local group"
@@ -9742,6 +9782,10 @@
   "6ecc6d7f-35dd-4459-b8d0-ce5b780b8012": {
     "original": "Nieuw sjabloon naar leden",
     "translation": "New template to members"
+  },
+  "6ed63ff0-296c-4151-905a-fc6fdc7832e8": {
+    "original": "In proefperiode",
+    "translation": "In trial period"
   },
   "6ef5e456-73f7-4baf-845c-4321094bbc6b": {
     "original": "Er ging iets mis. Je hebt geen toegang tot deze vereniging.",
@@ -10327,6 +10371,10 @@
     "original": "Demo ledenadministratie",
     "translation": "Demo member administration"
   },
+  "752fdb9b-b159-41b3-95d1-fc3bd83bf9b4": {
+    "original": "Proefperiode ledenadministratie",
+    "translation": "Member administration trial period"
+  },
   "753684e1-94aa-4663-a81c-9656a51283ae": {
     "original": "Je kan deze groep niet naar een andere periode verplaatsen omdat de wachtlijst van deze groep gedeeld is met andere groepen.",
     "translation": "You cannot move this group to another period because its waiting list is shared with other groups."
@@ -10638,6 +10686,10 @@
   "78b9dc16-fb37-4d8b-8b30-263235e7367b": {
     "original": "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies.",
     "translation": "This button goes to the order overview, with all information of the orders and any payment instructions."
+  },
+  "78c16cd9-a935-4382-9828-7b30d9808e0f": {
+    "original": "De ouders krijgen geen toegang tot de gegevens van {firstName}. Ze ontvangen ook geen automatische e-mails.",
+    "translation": "Parents do not have access to {firstName}'s data and will not receive automatic emails."
   },
   "78c8c642-1036-48db-8f21-592ca3efc29a": {
     "original": "Kan in enkele dagen worden geraden door een computer",
@@ -11278,6 +11330,10 @@
   "81082354-9a9a-4a23-aa02-3273d4906652": {
     "original": "E-mailadres ouder",
     "translation": "Parent email address"
+  },
+  "810b15cd-001e-4ab9-9d9e-054044904879": {
+    "original": "Momenteel hebben de ouders toegang tot {firstName} 18 jaar wordt.",
+    "translation": "Parents currently have access until {firstName} turns 18."
   },
   "8113733b-00ea-42ae-8829-6056774a8be0": {
     "original": "Afhaallocatie",
@@ -13651,6 +13707,10 @@
     "original": "Ledenadministratie instellen",
     "translation": "Configure member administration"
   },
+  "9ce4a6f7-81ec-4dba-aac5-5d497d33a274": {
+    "original": "De ouders hebben geen toegang tot dit minderjarig lid",
+    "translation": "Parents do not have access to this underage member"
+  },
   "9ce60d74-86a4-420f-92ab-91fb536a79be": {
     "original": "RRN",
     "translation": "National registration number"
@@ -14739,6 +14799,10 @@
     "original": "Verschuldigd",
     "translation": "Owed"
   },
+  "a9439a82-82d3-4254-a3a6-abe14952a392": {
+    "original": "De ouders hebben toegang tot de gegevens van {firstName} en ontvangen automatische e-mails.",
+    "translation": "Parents have access to {firstName}'s data and receive automatic emails."
+  },
   "a94e08c1-bddf-4f13-af83-8349dc361a47": {
     "original": "Uitnodiging verzonden naar",
     "translation": "Invitation sent to"
@@ -15186,6 +15250,10 @@
   "aeed7048-efaa-410d-bec1-796b5fe581a6": {
     "original": "Hoeveel nu betalen?",
     "translation": "How much to pay now?"
+  },
+  "aeeeb5ba-7576-497c-a40e-8bc48338b2a7": {
+    "original": "De ouders behouden toegang als dit lid 18 jaar wordt",
+    "translation": "Parents keep access when this member turns 18"
   },
   "aef8493c-6d75-4270-ba4c-f9f09b65caf7": {
     "original": "Gele achtergrond",
@@ -15910,6 +15978,10 @@
   "b6994143-5a0c-424d-97b3-8b3cf96a3443": {
     "original": "Hulp nodig?",
     "translation": "Need help?"
+  },
+  "b69ae0b8-d957-4dde-b06d-a6f97ceea656": {
+    "original": "Vervalt binnenkort",
+    "translation": "Expires soon"
   },
   "b6a7d8fa-58ed-41dd-a2d0-ada96a4e56bb": {
     "original": "Wijzig de instellingen rond financiële ondersteuning",
@@ -18699,6 +18771,10 @@
     "original": "Er zijn geen leden die kunnen inschrijven.",
     "translation": "There are no members who can register."
   },
+  "d5ee5112-988f-4d4b-82e0-46f257c40bbb": {
+    "original": "Ze behouden ook toegang nadat {firstName} 18 jaar wordt. <button>Ongedaan maken</button>",
+    "translation": "They will also keep access after {firstName} turns 18. <button>Undo</button>"
+  },
   "d6244dd4-a0b6-4063-9f93-91c5ab91905c": {
     "original": "Facturatiegegevens",
     "translation": "Billing data"
@@ -19459,6 +19535,10 @@
     "original": "bv. Contact",
     "translation": "e.g. Contact"
   },
+  "dd5ee237-2ae7-475c-b58d-3c5a2159f4c5": {
+    "original": "Momenteel zijn inschrijvingen voor nieuwe leden gesloten. Als je een bestaand lid bent, kijk dan na of je met het juiste e-mailadres inlogt.",
+    "translation": "Registrations for new members are currently closed. If you are already a member, please check if you are logging in with the correct email address."
+  },
   "dd63dfe1-1a13-476b-b729-10b9df944e88": {
     "original": "Je hebt geen toegang om deze gebruiker te verwijderen",
     "translation": "You do not have access to delete this user"
@@ -19827,6 +19907,10 @@
     "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de blauwe kleur te behouden.",
     "translation": "Enter the HEX colour code of your main colour above. Leave blank to keep the blue colour."
   },
+  "e15286b6-ccc1-463c-95de-d5d87b6b84a4": {
+    "original": "Ledenadministratie",
+    "translation": "Member administration"
+  },
   "e1aab1a7-fded-4e5e-b994-6607684764ac": {
     "original": "Er is een fout opgetreden bij het zoeken naar UiTPAS-organisaties. Probeer het later opnieuw.",
     "translation": "An error occurred while searching for UiTPAS organizations. Please try again later."
@@ -20046,6 +20130,10 @@
   "e4017a21-58c1-4cea-824c-8cef6a7ab019": {
     "original": "Opmerkingen",
     "translation": "Comments"
+  },
+  "e40ae4e1-abe1-418d-8662-16626c93acc2": {
+    "original": "Geldig tot {dateTime}",
+    "translation": "Valid until {dateTime}"
   },
   "e412b71e-566b-41d4-8b1f-97ab7f140b29": {
     "original": "Bedrag aanrekenen",
@@ -20482,6 +20570,10 @@
   "e909e3d1-516f-4284-8923-0390c95ae290": {
     "original": "Kanaal",
     "translation": "Channel"
+  },
+  "e923e4f3-42d4-4f9b-a919-2709c99780bb": {
+    "original": "Activeer nieuwe functies",
+    "translation": "Enable new roles"
   },
   "e92b72a2-177b-4a1c-9137-f2e2c6ffe724": {
     "original": "Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app",
