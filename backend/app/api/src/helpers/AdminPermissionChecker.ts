@@ -434,8 +434,16 @@ export class AdminPermissionChecker {
      */
     async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithRegistrations = true) {
         if (registration.deactivatedAt || !registration.registeredAt) {
+            if (!checkMember) {
+                // We can't grant access to a member because of a deactivated registration
+                return false;
+            }
+
             // No full access: cannot access deactivated registrations
-            return false;
+            if (permissionLevel !== PermissionLevel.Read) {
+                // Not allowed to edit registrations that are deleted
+                return false;
+            }
         }
 
         const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);

@@ -269,6 +269,148 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             });
         });
 
+        test('A registration grants permission to a member', async () => {
+            // Member had a deactivated registration with a group that should give the admin acecss to the member, but since it is deactivated -> no access
+            const organization = await new OrganizationFactory({}).create();
+            const resources = new Map();
+
+            const group = await new GroupFactory({
+                organization,
+            }).create();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources,
+                }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
+
+            // Register this member
+            await new RegistrationFactory({
+                member,
+                group,
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    firstName: 'Changed',
+                }),
+            });
+            arr.addPatch(patch);
+
+            // Try to request all members at organization
+            const request = Request.patch({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                body: arr,
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+            const response = await testServer.test(endpoint, request);
+
+            // Check returned
+            expect(response.status).toBe(200);
+            expect(response.body.members.length).toBe(1);
+            const memberStruct = response.body.members[0];
+            expect(memberStruct.details).toMatchObject({
+                firstName: 'Changed',
+            });
+        });
+
+        test('[REGRESSION] A deactivated registration does not grant permission to a member', async () => {
+            // Member had a deactivated registration with a group that should give the admin acecss to the member, but since it is deactivated -> no access
+            const organization = await new OrganizationFactory({}).create();
+            const resources = new Map();
+
+            const group = await new GroupFactory({
+                organization,
+            }).create();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    group.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Write,
+                    }),
+                ]]),
+            );
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    resources,
+                }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
+
+            // Register this member
+            await new RegistrationFactory({
+                member,
+                group,
+                deactivatedAt: new Date(),
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const arr: Body = new PatchableArray();
+            const patch = MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    firstName: 'Changed',
+                }),
+            });
+            arr.addPatch(patch);
+
+            // Try to request all members at organization
+            const request = Request.patch({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                body: arr,
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.simpleError({
+                code: 'not_found',
+            }));
+
+            await member.refresh();
+
+            // Not changed
+            expect(member.details.firstName).toEqual(firstName);
+        });
+
         test('A full platform admin can edit members without registrations', async () => {
             const organization = await new OrganizationFactory({}).create();
 

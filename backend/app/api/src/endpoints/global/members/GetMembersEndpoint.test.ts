@@ -1442,7 +1442,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
         });
     });
 
-    describe('Data filtering', () => {
+    describe('Record answer filtering', () => {
         test('[REGRESSION] A user with minimal access can also view platform record answers in platform scope', async () => {
             /**
              * When fetching members via the admin api, without organization scope, we need to calculate which records to return and which not.
@@ -1838,6 +1838,123 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     id: record.id,
                 }),
             });
+        });
+    });
+
+    // Returned registrations in the members
+    describe('Filtering registrations', () => {
+        test('[REGRESSION] Deactivated registrations are returned when having access to that group', async () => {
+            /**
+             * Note: a deactivated registration doesn't give an admin access to a member, so we need an
+             * extra registration so the admin does have acess to the member and can fetch it.
+             * Next, we add two deactivated registrations: one for a group we have access to, one without. We should only see the one with access of course.
+             */
+
+            const role = PermissionRoleDetailed.create({
+                name: 'Stamhoofd verantwoordelijke',
+                level: PermissionLevel.None,
+                accessRights: [],
+            });
+
+            const resources = new Map();
+
+            const organization = await new OrganizationFactory({ period, roles: [role] })
+                .create();
+            const member = await new MemberFactory({ }).create();
+
+            // Group we have access for, but with an active registration
+            const accessGroup = await new GroupFactory({
+                organization,
+                period,
+            }).create();
+
+            // Deactivated, with access
+            const deactivatedGroup = await new GroupFactory({
+                organization,
+                period,
+            }).create();
+
+            // Deactivated, without access
+            const deactivatedControlGroup = await new GroupFactory({
+                organization,
+                period,
+            }).create();
+
+            // Create 3 registrations with each group
+            const accessRegistration = await new RegistrationFactory({
+                group: accessGroup,
+                member,
+            }).create();
+
+            const deactivatedRegistration = await new RegistrationFactory({
+                group: deactivatedGroup,
+                member,
+                deactivatedAt: new Date(),
+            }).create();
+
+            // deactivatedControlRegistration
+            await new RegistrationFactory({
+                group: deactivatedControlGroup,
+                member,
+                deactivatedAt: new Date(),
+            }).create();
+
+            // Give read permission to the group
+            resources.set(
+                PermissionsResourceType.Groups, new Map([[
+                    accessGroup.id,
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ], [
+                    deactivatedGroup.id, // not for the control group
+                    ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    }),
+                ]]),
+            );
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [
+                        role,
+                    ],
+                    resources,
+                }),
+            })
+                .create();
+
+            const token = await Token.createToken(user);
+
+            // Try to request all members at organization
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+            expect(response.body.results.members).toIncludeSameMembers([
+                expect.objectContaining({ id: member.id }),
+            ]);
+
+            const returnedMember = response.body.results.members[0];
+
+            // Check only one record answer returned
+            expect(returnedMember.registrations.length).toEqual(2);
+
+            expect(returnedMember.registrations).toIncludeSameMembers([
+                expect.objectContaining({ id: accessRegistration.id, deactivatedAt: null }),
+                expect.objectContaining({ id: deactivatedRegistration.id, deactivatedAt: deactivatedRegistration.deactivatedAt }),
+            ]);
         });
     });
 });
