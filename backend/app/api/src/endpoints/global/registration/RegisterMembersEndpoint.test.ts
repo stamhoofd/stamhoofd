@@ -1561,6 +1561,45 @@ describe('Endpoint.RegisterMembers', () => {
             expect(returnedRegistration.balances.length).not.toBe(0);
         });
 
+        test('[REGRESSION] Cannot register a member in a locked period', async () => {
+            const { member, organization, token } = await initData({});
+            const group = await new GroupFactory({
+                organization,
+                price: 25_00,
+                reducedPrice: 12_50,
+                stock: 500,
+                period: previousPeriod,
+            })
+                .create();
+            const groupPrice = group.settings.prices[0];
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                asOrganizationId: organization.id,
+            });
+
+            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
+        });
+
         test('Can register a member as admin with write permission to new group only', async () => {
             // read permission to existing member, write permission to new group you want to register the member in
             const { member, groupPrice, group, organization, token } = await initData({
