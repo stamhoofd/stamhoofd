@@ -55,13 +55,15 @@ describe('Endpoint.RegisterMembers', () => {
             .create();
 
         const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: registrationPeriod }).create();
-        const previosOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: previousPeriod }).create();
+        if (registrationPeriod !== previousPeriod) {
+            await new OrganizationRegistrationPeriodFactory({ organization, period: previousPeriod }).create();
+        }
 
         return { organization, organizationRegistrationPeriod };
     };
 
-    async function initData({ otherMemberAmount = 0, groupPermissionLevel = PermissionLevel.None, memberPermissionLevel = PermissionLevel.None, permissionLevel = defaultPermissionLevel, linkMembersToUser = defaultLinkMembersToUser }: { otherMemberAmount?: number; memberPermissionLevel?: PermissionLevel; groupPermissionLevel?: PermissionLevel; permissionLevel?: PermissionLevel; linkMembersToUser?: boolean } = {}) {
-        const { organization, organizationRegistrationPeriod } = await initOrganization(period);
+    async function initData({ registrationPeriod = period, otherMemberAmount = 0, groupPermissionLevel = PermissionLevel.None, memberPermissionLevel = PermissionLevel.None, permissionLevel = defaultPermissionLevel, linkMembersToUser = defaultLinkMembersToUser }: { registrationPeriod?: RegistrationPeriod; otherMemberAmount?: number; memberPermissionLevel?: PermissionLevel; groupPermissionLevel?: PermissionLevel; permissionLevel?: PermissionLevel; linkMembersToUser?: boolean } = {}) {
+        const { organization, organizationRegistrationPeriod } = await initOrganization(registrationPeriod);
 
         const user = await new UserFactory({
             organization,
@@ -794,6 +796,37 @@ describe('Endpoint.RegisterMembers', () => {
             const updatedGroup = await Group.getByID(group.id);
             expect(updatedGroup!.settings.registeredMembers).toBe(1);
             expect(updatedGroup!.settings.reservedMembers).toBe(0);
+        });
+
+        test('Cannot register in locked period', async () => {
+            const { member, group, groupPrice, organization, token } = await initData({
+                registrationPeriod: previousPeriod,
+            });
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 25_00,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
         });
 
         test('Should set reserved members when using online payments', async () => {
