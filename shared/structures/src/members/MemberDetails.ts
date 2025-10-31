@@ -163,7 +163,7 @@ export class MemberDetails extends AutoEncoder {
      * When set to false, the account of parents won't be linked to the member.
      * Also when not set, parents will have acess until the member reaches the age of 18.
      */
-    @field({ decoder: BooleanStatus, nullable: true, ...NextVersion })
+    @field({ decoder: BooleanStatus, nullable: true, version: 388 })
     parentsHaveAccess: BooleanStatus | null = null;
 
     /**
