@@ -203,7 +203,7 @@ export * from './src/webshops/WebshopMetaData.js';
 export * from './src/webshops/UitpasNumberAndPrice.js';
 
 // billing
-export * from './src/billing';
+export * from './src/billing/index.js';
 
 // Admin
 export * from './src/admin/MemberSummary.js';
