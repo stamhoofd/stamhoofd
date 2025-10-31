@@ -154,7 +154,7 @@
             <hr>
             <h2>{{ $t('df421a41-36de-4225-b22b-2401a4009f90') }}</h2>
             <p>
-                {{ $t('455200de-131e-4508-b5e7-3f94a05fb52b') }} <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
+                {{ $t('455200de-131e-4508-b5e7-3f94a05fb52b') }} <a :href="$domains.getDocs('payconiq')" target="_blank" class="inline-link">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
             </p>
 
             <STInputBox error-fields="payconiqApiKey" :error-box="errorBox" class="max" :title="$t(`da7c1f63-529d-47c6-8d2d-87e5cb98a411`)">
