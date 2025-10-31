@@ -185,12 +185,8 @@ async function markReviewMoment($context: SessionContext) {
         return;
     }
 
-    if (!$context.organization) {
-        return;
-    }
-
     // Check if at least one package active (only ask reviews to organizations who bought the app)
-    if (($context.organization.meta.packages.useMembers && !$context.organization.meta.packages.isMembersTrial) || ($context.organization.meta.packages.useWebshops && !$context.organization.meta.packages.isWebshopsTrial)) {
+    if (!$context.organization || ($context.organization.meta.packages.useMembers && !$context.organization.meta.packages.isMembersTrial) || ($context.organization.meta.packages.useWebshops && !$context.organization.meta.packages.isWebshopsTrial)) {
         // Use a counter, that can only increment once a day
         const counterRaw = await Storage.keyValue.getItem('reviewCounter');
         let counter = counterRaw ? parseInt(counterRaw) : 0;
@@ -198,16 +194,19 @@ async function markReviewMoment($context: SessionContext) {
             counter = 0;
         }
         const lastDateRaw = await Storage.keyValue.getItem('reviewLastCounterIncrease');
-        const lastDate = lastDateRaw ? new Date(parseInt(lastDateRaw)) : new Date(0);
+        const lastDate = lastDateRaw && STAMHOOFD.environment === 'production' ? new Date(parseInt(lastDateRaw)) : new Date(0);
+        const lastReviewRaw = await Storage.keyValue.getItem('lastReviewRequested');
+        const lastReview = lastReviewRaw && STAMHOOFD.environment === 'production' ? new Date(parseInt(lastReviewRaw)) : new Date(0);
 
-        // Only increase counter if last counter increase was at least 2 hours ago
-        if (lastDate < new Date(Date.now() - 2 * 60 * 60 * 1000)) {
+        // Only increase counter if last counter increase was at least 2 hours ago and only start recounting if last review was over a month ago
+        if (lastDate < new Date(Date.now() - 2 * 60 * 60 * 1000) && lastReview < new Date(Date.now() - 24 * 60 * 60 * 1000 * 31)) {
             counter++;
 
             // When the counter reaches 4, we'll ask for a review and reset the counter
             if (counter >= 4) {
                 // Ask for a review
                 InAppReview.requestReview().catch(console.error);
+                await Storage.keyValue.setItem('lastReviewRequested', Date.now().toString());
                 counter = 0;
             }
 

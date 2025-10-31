@@ -59,11 +59,12 @@ import { computed, ref } from 'vue';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
 import { useErrors } from '../errors/useErrors';
 import { GlobalEventBus } from '../EventBus';
-import { usePatch } from '../hooks';
+import { useContext, usePatch } from '../hooks';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import { Formatter } from '@stamhoofd/utility';
 import { ErrorBox } from '../errors/ErrorBox';
+import { AppManager } from '@stamhoofd/networking';
 
 const props = withDefaults(defineProps<{
     editEmail: EmailPreview;
@@ -77,6 +78,7 @@ const title = props.willSend ? $t('ce6d1409-7683-406e-836b-d1a48981c060') : $t('
 const saving = ref(false);
 const errors = useErrors();
 const dismiss = useDismiss();
+const context = useContext();
 
 const showInMemberPortal = computed({
     get: () => patchedEmail.value?.showInMemberPortal ?? true,
@@ -144,6 +146,9 @@ async function save() {
                 Toast.success($t('730f955b-964e-4bb3-8caf-df6c7961c1ae')).show();
             }
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
+
+            // Mark review moment
+            AppManager.shared.markReviewMoment(context.value);
         }
         await dismiss({ force: true });
     }

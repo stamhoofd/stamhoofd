@@ -25,7 +25,10 @@ export class OrganizationPackages extends AutoEncoder {
 
     isActive(type: STPackageType) {
         if (STAMHOOFD.userMode === 'platform') {
-            return true;
+            if (type === STPackageType.Webshops || type === STPackageType.Members) {
+                return true;
+            }
+            return false;
         }
 
         const status = this.packages.get(type);

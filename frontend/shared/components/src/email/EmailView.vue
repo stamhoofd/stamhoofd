@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, Decoder, encodeObject, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { useRequestOwner } from '@stamhoofd/networking';
+import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
@@ -659,6 +659,9 @@ async function send() {
 
         await GlobalEventBus.sendEvent('selectTabById', 'communication');
         await pop({ force: true });
+
+        // Mark review moment
+        AppManager.shared.markReviewMoment(context.value);
     }
     catch (e) {
         console.error(e);

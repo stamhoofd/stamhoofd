@@ -2,7 +2,7 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { OrganizationManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { AppManager, OrganizationManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
@@ -428,7 +428,7 @@ export class MemberActionBuilder {
     }
 
     editMember(member: PlatformMember) {
-        presentEditMember({ member, present: this.present }).catch(console.error);
+        presentEditMember({ member, present: this.present, context: this.context }).catch(console.error);
     }
 
     getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
@@ -836,15 +836,18 @@ export function getActionsForCategory<T extends { id: string }>(category: GroupC
     return r;
 }
 
-export async function presentEditMember({ member, present }: { member: PlatformMember; present: ReturnType<typeof usePresent> }) {
+export async function presentEditMember({ member, present, context }: { member: PlatformMember; present: ReturnType<typeof usePresent>; context: SessionContext }) {
     await present({
         components: [
             new ComponentWithProperties(MemberStepView, {
                 member,
-                title: member.member.firstName + ' ' + $t(`ee3bc635-c294-4134-9155-7a74f47dec4f`),
+                title: $t(`8748130b-9551-4ad4-b80e-9fd1119651a7`, { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
                     await dismiss({ force: true });
+
+                    // Mark review moment
+                    AppManager.shared.markReviewMoment(context);
                 },
             }),
         ],

@@ -116,7 +116,7 @@ export class RegistrationActionBuilder {
                 enabled: this.hasWrite,
                 handler: (registrations: PlatformRegistration[]) => {
                     if (registrations.length) {
-                        presentEditMember({ member: registrations[0].member, present: this.present }).catch(console.error);
+                        presentEditMember({ member: registrations[0].member, present: this.present, context: this.context }).catch(console.error);
                     }
                 },
             }),
