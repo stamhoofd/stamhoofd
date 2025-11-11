@@ -223,3 +223,12 @@ yalc.lock
 # Vitest screenshots
 __screenshots__
 .internal-contributor
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+/tests/playwright/playwright-report
+/tests/playwright/test-results

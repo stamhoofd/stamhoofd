@@ -1,0 +1,15 @@
+{
+  "name": "@stamhoofd/playwright",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:e2e": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test"
+  },
+   "dependencies": {
+    "@stamhoofd/backend": "2.105.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
+}
