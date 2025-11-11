@@ -5,11 +5,24 @@ export class CaddyHelper {
 
     async configure(routes: any[]) {
         const existingRoutes = await this.getRoutes();
-        const newRoutes = routes.filter(
-            (r) => !existingRoutes.some((er) => er.group === r.group),
-        );
+        const filteredRoutes: any[] = [];
+        const lastRoutes: any[] = [];
 
-        await this.postRoutes(newRoutes);
+        for(const route of existingRoutes) {
+            if(routes.some((r) => r.group === route.group)) {
+                continue;
+            }
+
+            // route without match should be last
+            if(route.match === undefined) {
+                lastRoutes.push(route);
+                continue;
+            }
+
+            filteredRoutes.push(route);
+        }
+
+        await this.patchRoutes([...filteredRoutes, ...routes, ...lastRoutes]);
 
         return {
             cleanup: async () => {
@@ -64,8 +77,24 @@ export class CaddyHelper {
     //     }
     // }
 
+    private async patchRoutes(routes: any[]) {
+        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
+
+        const res = await fetch(url, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(routes),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(
+                `Failed to patch routes: ${res.status} ${res.statusText} - ${text}`,
+            );
+        }
+    }
+
     private async postRoutes(routes: any[]) {
-        // first get routes and check if route already exists
         const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/...`;
 
         const res = await fetch(url, {
@@ -136,7 +165,7 @@ export class CaddyHelper {
     private async getRoutes() {
         const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
         const result = await fetch(url);
-        const routes: { group?: string }[] = await result.json();
+        const routes: { group?: string, match?: any[] }[] = await result.json();
         return routes;
     }
 
