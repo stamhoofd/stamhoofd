@@ -33,6 +33,7 @@ export class ApiServerHelper implements ServerHelper {
         );
 
         return {
+            domains: [domain],
             caddyRoutes: this.createRoutes({ domain, port, group }),
             wait: async () => {
                 await NetworkHelper.waitForUrl(
