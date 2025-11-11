@@ -12,15 +12,15 @@ async function globalSetup(config: FullConfig) {
     }
 
     const caddyHelper = new CaddyHelper();
-    // make sure all playwright routes are deleted
-    await caddyHelper.deleteAllPlaywrightRoutes();
+    // make sure all caddy configuration for playwrigth is deleted
+    await caddyHelper.deletePlaywrightConfig();
     console.log("Finished global setup");
 }
 
 export async function globalTeardown() {
     console.log("Start global teardown");
     const caddyHelper = new CaddyHelper();
-    await caddyHelper.deleteAllPlaywrightRoutes();
+    await caddyHelper.deletePlaywrightConfig();
     console.log("Finished global teardown");
 }
 

@@ -26,7 +26,6 @@ export const test = base.extend<
             const frontendServerHelper = new FrontendServerHelper();
 
             const workerIndex = process.env.TEST_WORKER_INDEX!;
-            console.log("Worker index:", workerIndex);
 
             // start api
             const apiProcesses = await apiServerHelper.start(workerIndex);
@@ -36,27 +35,25 @@ export const test = base.extend<
                 await frontendServerHelper.start(workerIndex);
 
             // configure caddy
-            const {cleanup: caddyCleanup} = await caddyHelper.configure([
-                ...apiProcesses.caddyRoutes,
-                ...frontendProcesses.caddyRoutes,
-            ]);
-
-            if(1 === 1) {
-                await caddyHelper.logConfig();
-                // throw new Error('todo')
-            }
+            const { cleanup: caddyCleanup } = await caddyHelper.configure(
+                [...apiProcesses.caddyRoutes, ...frontendProcesses.caddyRoutes],
+                [...apiProcesses.domains, ...frontendProcesses.domains],
+            );
 
             // wait until all services are reachable
             await apiProcesses.wait();
             await frontendProcesses.wait();
 
             // wait for tests to run
-            await use({ workerIndex, urls: {
-                api: getUrl("api", workerIndex),
-                dashboard: getUrl("dashboard", workerIndex),
-                webshop: getUrl("webshop", workerIndex),
-                registration: getUrl("registration", workerIndex),
-            } });
+            await use({
+                workerIndex,
+                urls: {
+                    api: getUrl("api", workerIndex),
+                    dashboard: getUrl("dashboard", workerIndex),
+                    webshop: getUrl("webshop", workerIndex),
+                    registration: getUrl("registration", workerIndex),
+                },
+            });
 
             // kill processes
             await apiProcesses.kill();
@@ -64,7 +61,6 @@ export const test = base.extend<
 
             // cleanup caddy config
             await caddyCleanup();
-            // await caddyHelper.deleteAllPlaywrightRoutesForWorker(workerIndex);
         },
         {
             scope: "worker",

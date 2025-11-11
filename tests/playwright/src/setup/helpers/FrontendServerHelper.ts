@@ -35,9 +35,6 @@ export class FrontendServerHelper implements ServerHelper {
             },
         ];
 
-        console.log('domains:', JSON.stringify(services.map(s => getDomain(s.name, workerIndex))));
-        console.log('ports:', JSON.stringify(services.map(s => s.port)));
-
         const childProcesses = services.map((s) => {
             console.log(`Starting ${s.name}...`);
             return ProcessHelper.spawnWithCleanup(
@@ -56,6 +53,7 @@ export class FrontendServerHelper implements ServerHelper {
         });
 
         return {
+            domains: services.map(s => getDomain(s.name, workerIndex)),
             caddyRoutes: services.map((s) => {
                 const domain = getDomain(s.name, workerIndex);
                 return this.createFrontendRoute({
