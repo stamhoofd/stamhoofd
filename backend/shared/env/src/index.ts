@@ -1,7 +1,6 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import { promises } from 'fs';
 import chalk from 'chalk';
+import crypto from 'crypto';
+import fs, { promises } from 'fs';
 
 async function fileExists(path: string): Promise<boolean> {
     try {
@@ -15,8 +14,9 @@ async function fileExists(path: string): Promise<boolean> {
 
 async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
     let env: any;
+
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
-        // Force load the cjs version of test-utils because the esm version gives issues with the json environment
+    // Force load the cjs version of test-utils because the esm version gives issues with the json environment
         const builder = await import('@stamhoofd/test-utils');
         await builder.TestUtils.loadEnvironment();
         env = STAMHOOFD;

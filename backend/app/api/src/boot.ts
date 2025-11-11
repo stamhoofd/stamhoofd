@@ -6,8 +6,10 @@ import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { resumeEmails } from './helpers/EmailResumer';
 import { GlobalHelper } from './helpers/GlobalHelper';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater';
@@ -17,10 +19,8 @@ import { BalanceItemService } from './services/BalanceItemService';
 import { DocumentService } from './services/DocumentService';
 import { FileSignService } from './services/FileSignService';
 import { PlatformMembershipService } from './services/PlatformMembershipService';
-import { UniqueUserService } from './services/UniqueUserService';
-import { QueueHandler } from '@stamhoofd/queues';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasService } from './services/uitpas/UitpasService';
+import { UniqueUserService } from './services/UniqueUserService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -59,8 +59,11 @@ function productionLog(message: string) {
     }
 }
 
-const start = async () => {
+export const boot = async (options: { killProcess: boolean }) => {
     productionLog('Running server at v' + Version);
+    productionLog('Running server at port ' + STAMHOOFD.PORT);
+    productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here
+
     loadLogger();
 
     await GlobalHelper.load();
@@ -77,6 +80,8 @@ const start = async () => {
     // Note: we should load endpoints one by once to have a reliable order of url matching
     await router.loadAllEndpoints(__dirname + '/endpoints/global/*');
     await router.loadAllEndpoints(__dirname + '/endpoints/admin/*');
+    await router.loadAllEndpoints(__dirname + '/endpoints/frontend');
+
     await router.loadAllEndpoints(__dirname + '/endpoints/auth');
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/dashboard/*');
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/registration');
@@ -204,24 +209,28 @@ const start = async () => {
         }
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
-        process.exit(0);
+        if (options.killProcess) {
+            process.exit(0);
+        }
     };
 
-    process.on('SIGTERM', () => {
-        productionLog('SIGTERM signal received.');
-        shutdown().catch((e) => {
-            console.error(e);
-            process.exit(1);
+    if (options.killProcess) {
+        process.on('SIGTERM', () => {
+            productionLog('SIGTERM signal received.');
+            shutdown().catch((e) => {
+                console.error(e);
+                process.exit(1);
+            });
         });
-    });
 
-    process.on('SIGINT', () => {
-        productionLog('SIGINT signal received.');
-        shutdown().catch((e) => {
-            console.error(e);
-            process.exit(1);
+        process.on('SIGINT', () => {
+            productionLog('SIGINT signal received.');
+            shutdown().catch((e) => {
+                console.error(e);
+                process.exit(1);
+            });
         });
-    });
+    }
 
     // Register crons
     await import('./crons');
@@ -234,9 +243,6 @@ const start = async () => {
 
     startCrons();
     seeds().catch(console.error);
-};
 
-start().catch((error) => {
-    console.error('unhandledRejection', error);
-    process.exit(1);
-});
+    return { shutdown };
+};

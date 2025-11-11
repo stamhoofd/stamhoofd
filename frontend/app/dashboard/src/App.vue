@@ -19,6 +19,7 @@ import { getScopedAutoRoot, getScopedAutoRootFromUrl, getScopedDashboardRootFrom
 
 const modalStack = ref(null) as Ref<InstanceType<typeof ModalStackComponent> | null>;
 HistoryManager.activate();
+HistoryManager.debug = STAMHOOFD.environment === 'test';
 
 const root = new ComponentWithProperties(PromiseView, {
     promise: async () => {

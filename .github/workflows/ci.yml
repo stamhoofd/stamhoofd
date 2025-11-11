@@ -344,4 +344,156 @@ jobs:
                   value: "click_me"
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
-  
+
+  job_test_playwright:
+    name: 'Playwright Tests'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    if: needs.job_setup.outputs.changed_backend == 'true' || needs.job_setup.outputs.changed_frontend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'yarn'
+        cache-dependency-path: 'yarn.lock'
+    - name: Use correct yarn version
+      run: yarn policies set-version 1.22.19
+    - name: Restore CoreDNS cache
+      id: cache-coredns
+      uses: actions/cache@v3
+      with:
+        path: .coredns
+        key: coredns-v1.13.1
+    - name: Install CoreDNS
+      if: steps.cache-coredns.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p .coredns
+        curl -L -o .coredns/coredns.tgz \
+        https://github.com/coredns/coredns/releases/download/v1.13.1/coredns_1.13.1_linux_amd64.tgz
+        tar -xzf .coredns/coredns.tgz -C .coredns
+        chmod +x .coredns/coredns
+    - name: Add CoreDNS to PATH
+      run: echo "${GITHUB_WORKSPACE}/.coredns" >> $GITHUB_PATH
+    - name: Check CoreDNS version
+      run: coredns -version
+    - name: Disable default DNS
+      run: |
+        sudo systemctl stop systemd-resolved
+        sudo systemctl disable systemd-resolved
+        sudo rm /etc/resolv.conf
+        echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
+    - name: Run coredns
+      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo -E ./.coredns/coredns -conf .development/Corefile &
+    - name: Use local DNS
+      run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
+    - name: Log coredns corefile path
+      run: ps aux | grep coredns
+    - name: Log corefile
+      run: cat .development/Corefile
+    - name: List DNS servers
+      run: sudo cat /etc/resolv.conf
+    - name: Log if DNS is running
+      run: ps aux | grep coredns
+    - name: Log if DNS is listening
+      run: sudo netstat -tulnp | grep ":53"
+    - name: Check DNS resolver
+      run: dig test.stamhoofd @127.0.0.1
+    - name: Check DNS resolution
+      run: |
+        DOMAIN="test.stamhoofd"
+        EXPECTED_IP="127.0.0.1"
+
+        ACTUAL_IP=$(dig +short A "$DOMAIN" | head -n1)
+
+        echo "Expected IP: $EXPECTED_IP"
+        echo "Actual IP:   $ACTUAL_IP"
+
+        if [[ "$ACTUAL_IP" != "$EXPECTED_IP" ]]; then
+            echo "❌ DNS check failed! $DOMAIN resolved to $ACTUAL_IP"
+            exit 1
+        fi
+
+          echo "✅ DNS check passed!"
+    # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
+    - name: Install libnss3-tools
+      run: sudo apt-get update && sudo apt-get install -y libnss3-tools
+    - name: Install dependencies
+      run: yarn install --prefer-offline --frozen-lockfile
+    - name: Install Playwright Browsers
+      run: yarn playwright install --with-deps --no-shell
+    - name: Cache Caddy
+      id: caddy-cache
+      uses: actions/cache@v4
+      with:
+        path: /usr/local/bin/caddy
+        key: caddy-${{ runner.os }}-v2.10.2
+    - name: Install Caddy if missing
+      if: steps.caddy-cache.outputs.cache-hit != 'true'
+      run: |
+        curl -fsSL https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_linux_amd64.tar.gz \
+        | sudo tar -C /usr/local/bin -xz caddy
+        sudo chmod +x /usr/local/bin/caddy
+    - name: Verify Caddy
+      run: caddy version
+    - name: Give Caddy permissions to bind to privileged ports
+      run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
+    - name: Caddy trust
+      run: caddy start && sudo caddy trust && caddy stop
+    - name: Log ca certificates
+      run: sudo ls -la /usr/local/share/ca-certificates
+
+    # Add chrome certificates to nss
+    - name: Create initial NSS database for Chromium
+      run: | 
+        mkdir -p $HOME/.pki/nssdb
+        certutil -N -d sql:$HOME/.pki/nssdb --empty-password
+    - name: Add trusted CA certificate to NSS
+      run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
+    - name: Build shared packages
+      run: yarn build:shared
+    - name: Build API
+      run: cd backend/app/api && yarn build
+    - name: Shutdown MySQL
+      run: sudo service mysql stop
+    - uses: daniellockyer/mysql-action@main
+      with:
+        authentication plugin: 'mysql_native_password'
+        mysql version: '8.0'
+        mysql database: 'stamhoofd-tests'
+        mysql root password: 'root'
+    - name: Run Playwright tests
+      run: cd tests/playwright && yarn -s test
+    - name: Upload Playwright artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-traces
+        path: |
+            tests/playwright/playwright-report
+            tests/playwright/test-results
+        retention-days: 1
+    - name: Notify Slack of failure
+      uses: slackapi/slack-github-action@v2.0.0
+      if: failure() && github.event_name != 'pull_request'
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+            text: "Playwright tests failed"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "@channel *Playwright tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
+                accessory:
+                  type: "button"
+                  text:
+                    type: "plain_text"
+                    text: "Open commit"
+                    emoji: false
+                  value: "click_me"
+                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
+                  action_id: "button-action"

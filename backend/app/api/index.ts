@@ -8,7 +8,12 @@ backendEnv.load({ service: 'api' }).catch((error) => {
         const { run } = await import('./src/migrate');
         await run();
     }
-    await import('./src/boot');
+    const { boot } = await import('./src/boot');
+
+    boot({ killProcess: true }).catch((error) => {
+        console.error('unhandledRejection', error);
+        process.exit(1);
+    });
 }).catch((error) => {
     console.error('Failed to start the API:', error);
     process.exit(1);

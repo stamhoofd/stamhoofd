@@ -222,7 +222,7 @@ export class EmailVerificationCode extends QueryableModel {
             });
         }
 
-        if (verificationCode.code === code || (code === '111111' && STAMHOOFD.environment === 'development')) {
+        if (verificationCode.code === code || (code === '111111' && (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test'))) {
             // Delete all remaining information!
             // To avoid leaving information about the existince of this user (tries)
             await verificationCode.delete();
