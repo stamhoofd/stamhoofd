@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                   // modern JS for Node 18+
+    "module": "ESNext",                    // ESM output; use "CommonJS" if you need it
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",                        // base path for relative imports
+    "paths": {
+      "@your-org/server": ["../../server/src"]  // adjust relative path to backend package
+    },
+    "outDir": "dist",                      // optional, if you compile TS
+    "types": ["node", "playwright/test"]   // include Node and Playwright types
+  },
+  "include": [
+    "src/setup/**/*.ts",
+    "src/tests/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

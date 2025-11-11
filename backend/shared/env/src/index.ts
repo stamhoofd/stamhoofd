@@ -1,7 +1,6 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import { promises } from 'fs';
 import chalk from 'chalk';
+import crypto from 'crypto';
+import fs, { promises } from 'fs';
 
 async function fileExists(path: string): Promise<boolean> {
     try {
@@ -15,13 +14,16 @@ async function fileExists(path: string): Promise<boolean> {
 
 async function load(settings?: { path?: string; service?: 'redirecter' | 'api' | 'renderer' | 'backup' }) {
     let env: any;
-    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
+
+    const isLocalPlaywrightTest = process.env.STAMHOOFD_ENV === 'playwright' && process.env.NODE_ENV === 'test';
+
+    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test' && !isLocalPlaywrightTest) {
         // Force load the cjs version of test-utils because the esm version gives issues with the json environment
         const builder = await import('@stamhoofd/test-utils');
         await builder.TestUtils.loadEnvironment();
         env = STAMHOOFD;
     }
-    else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
+    else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development' || isLocalPlaywrightTest) && process.env.STAMHOOFD_ENV) {
         const builder = await import('@stamhoofd/build-development-env');
         env = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
             backend: settings?.service ?? 'api',

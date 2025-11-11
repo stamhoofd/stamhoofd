@@ -3,10 +3,10 @@ import fs from 'fs';
 import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 
+import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import { type ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
-import postcssDiscardDulicates from 'postcss-discard-duplicates';
 
 // https://vitejs.dev/config/
 export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
@@ -16,18 +16,22 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
 
     let loadedEnv: FrontendEnvironment | undefined = undefined;
 
-    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
+    const isLocalPlaywrightTest = process.env.STAMHOOFD_ENV === 'playwright' && process.env.NODE_ENV === 'test';
+
+    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test' && !isLocalPlaywrightTest) {
         // Force load the cjs version of test-utils because the esm version gives issues with the json environment
         const builder = await import('@stamhoofd/test-utils/cjs');
         await builder.TestUtils.loadEnvironment();
         loadedEnv = STAMHOOFD;
     }
-    else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development' || isLocalPlaywrightTest) {
         console.log('Building for development...', process.env.NODE_ENV);
         const builder = await import('@stamhoofd/build-development-env');
-        loadedEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+        const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
             frontend: options.name,
         });
+
+        loadedEnv = builtEnv;
     }
     else if (process.env.LOAD_ENV) {
         // Load this in the environment
