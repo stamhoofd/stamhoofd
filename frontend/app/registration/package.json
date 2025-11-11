@@ -7,6 +7,7 @@
     "scripts": {
         "dev": "NODE_ENV=development ENV_FILE=../../.env.json vite",
         "build": "NODE_ENV=development ENV_FILE=../../.env.json vite build",
+        "build:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright vite build",
         "build:production": "NODE_OPTIONS=\"--max-old-space-size=8192\" NODE_ENV=production vite build"
     },
     "files": [

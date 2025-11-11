@@ -87,10 +87,12 @@ export class LoginHelper {
                     await session.loadFromStorage();
                     await SessionManager.prepareSessionForUsage(session, false);
                     if (session.user && session.user.verified && session.canGetCompleted()) {
+                        // All good
                         return;
                     }
                 }
             }
+            throw e;
         }
     }
 

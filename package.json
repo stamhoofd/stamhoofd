@@ -8,7 +8,8 @@
       "frontend/shared/*",
       "backend/app/*",
       "backend/shared/*",
-      "shared/*"
+      "shared/*",
+      "tests/*"
     ],
     "nohoist": [
       "@simonbackx/simple-encoding"
@@ -28,6 +29,7 @@
     "dev:init": "wait-on shared/build-development-env/dist/src/init.js && node shared/build-development-env/dist/src/init.js",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
     "test": "lerna run test -- --passWithNoTests",
+    "test:playwright": "yarn -s build:shared && cd backend/app/api && yarn build && cd ../../.. && cd tests/playwright && yarn -s test",
     "lint": "lerna run lint",
     "vitest": "NODE_ENV=test vitest",
     "clear:shared": "yarn -s clear:global:shared && yarn clear:backend:shared",
@@ -48,13 +50,13 @@
     "translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn start",
     "frontend:types": "wait-on shared/locales/esm/dist/index.d.ts && cd frontend/app/dashboard && yarn -s check-types",
     "prepare": "husky",
-    "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
+    "dns": "export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && cd .development && coredns"
   },
   "dependencies": {
     "@simonbackx/simple-encoding": "2.22.0",
     "@simonbackx/simple-errors": "^1.5.0",
     "@simonbackx/simple-networking": "1.20.0",
-    "@simonbackx/vue-app-navigation": "2.17.1",
+    "@simonbackx/vue-app-navigation": "2.17.3",
     "@zxcvbn-ts/core": "^0.3.0",
     "@zxcvbn-ts/language-common": "^0.1.2",
     "@zxcvbn-ts/language-nl-be": "^0.3.0",
@@ -62,6 +64,7 @@
     "chart.js": "^3.9.1",
     "core-js": "^3.20.1",
     "file-saver": "^2.0.5",
+    "ibantools": "^3.1.0",
     "jose": "^5.9.6",
     "jsvat-next": "3.0.2",
     "jszip": "^3.7.1",
@@ -75,8 +78,7 @@
     "tslib": "^2.8.1",
     "uuid": "11.0.3",
     "vue": "3.5.17",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz",
-    "ibantools": "^3.1.0"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
@@ -102,19 +104,19 @@
     "lerna": "^8.2.3",
     "maildev": "^2.2.1",
     "nodemon": "^3.1.0",
-    "playwright": "^1.51.0",
     "postcss-discard-duplicates": "^7.0.2",
     "sass": "^1.45.1",
     "terser": "^5.43.1",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.6.2",
+    "typescript": "5.8.3",
     "vite": "^7.0.0",
     "vite-svg-2-webfont": "^4.0.0",
     "vitest": "^3.2.4",
     "vitest-browser-vue": "^1.0.0",
     "vue-tsc": "^2.0.14",
-    "wait-on": "^8.0.3"
+    "wait-on": "^8.0.3",
+    "@playwright/test": "^1.56.1"
   },
   "resolutions": {
     "**/@mollie/api-client/axios": "^0.30.0",

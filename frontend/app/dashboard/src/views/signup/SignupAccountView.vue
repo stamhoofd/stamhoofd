@@ -14,17 +14,17 @@
 
             <div class="split-inputs">
                 <div>
-                    <EmailInput v-model="email" name="username" :validator="validator" autocomplete="username" :title="$t(`26cb7015-6d17-4c3b-8b94-f44f38576854`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
+                    <EmailInput v-model="email" data-testid="email-input" name="username" :validator="validator" autocomplete="username" :title="$t(`26cb7015-6d17-4c3b-8b94-f44f38576854`)" :placeholder="$t(`55d8cd6e-91d1-4cbe-b9b4-f367bbf37b62`)" />
                 </div>
 
                 <div>
                     <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`f50f1057-e8a0-472e-ae14-2f393f79db53`)">
                         <div class="input-group">
                             <div>
-                                <input v-model="firstName" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                                <input v-model="firstName" data-testid="first-name-input" name="given-name" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
                             </div>
                             <div>
-                                <input v-model="lastName" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                                <input v-model="lastName" data-testid="last-name-input" name="family-name" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
                             </div>
                         </div>
                     </STInputBox>
@@ -34,10 +34,10 @@
             <div class="split-inputs">
                 <div>
                     <STInputBox error-fields="password" :error-box="errorBox" :title="$t(`d220bb47-196f-4ffb-9f0a-367234ced464`)">
-                        <input v-model="password" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
+                        <input v-model="password" data-testid="password-input" name="new-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`adf7def3-6328-4261-a390-6cd006737aaf`)">
                     </STInputBox>
                     <STInputBox error-fields="passwordRepeat" :error-box="errorBox" :title="$t(`ed8aef93-717e-406c-a779-2465dcd07baa`)">
-                        <input v-model="passwordRepeat" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`79537e4c-5363-4f06-9d82-9b1b007add73`)">
+                        <input v-model="passwordRepeat" data-testid="password-repeat-input" name="confirm-password" class="input" autocomplete="new-password" type="password" :placeholder="$t(`79537e4c-5363-4f06-9d82-9b1b007add73`)">
                     </STInputBox>
                 </div>
 
@@ -47,15 +47,15 @@
             </div>
 
             <div class="checkbox-box">
-                <Checkbox v-model="acceptPrivacy" class="long-text">
+                <Checkbox v-model="acceptPrivacy" class="long-text" data-testid="accept-privacy-input">
                     {{ $t('df2f7ae1-ad07-4ec4-94c0-939dd3f6bc8d') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/privacy'" target="_blank">{{ $t('005c5e2d-8185-46e7-b1a0-4e4eaaf60d41') }}</a>.
                 </Checkbox>
 
-                <Checkbox v-model="acceptTerms" class="long-text">
+                <Checkbox v-model="acceptTerms" class="long-text" data-testid="accept-terms-input">
                     {{ $t('b22d5516-2644-4f4a-bcb5-ad93b82a0d61') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/algemene-voorwaarden'" target="_blank">{{ $t('1943d3e6-4550-4240-b2f7-5aaa74e55f5d') }}</a> {{ $t('da2d2d9e-07cc-471e-963a-7915c7698ba9') }}
                 </Checkbox>
 
-                <Checkbox v-model="acceptDataAgreement" class="long-text">
+                <Checkbox v-model="acceptDataAgreement" class="long-text" data-testid="accept-data-agreement-input">
                     {{ $t('b22d5516-2644-4f4a-bcb5-ad93b82a0d61') }} <a class="inline-link" :href="'https://'+$domains.marketing+'/terms/verwerkersovereenkomst'" target="_blank">{{ $t('2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9') }}</a> {{ $t('da2d2d9e-07cc-471e-963a-7915c7698ba9') }}
                 </Checkbox>
             </div>
@@ -64,7 +64,7 @@
         <STToolbar>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" type="button" @click.prevent="goNext">
+                    <button class="button primary" type="button" data-testid="signup-account-button" @click.prevent="goNext">
                         {{ $t('657d0ca3-739f-48bc-b4c0-b4c326b59834') }}
                     </button>
                 </LoadingButton>
@@ -118,6 +118,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
     acceptDataAgreement = false;
 
     async goNext() {
+        console.error('playwright debug - start goNext');
         if (this.loading) {
             return;
         }
@@ -197,7 +198,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 return;
             }
 
+            console.error('playwright debug - get token - start');
             const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code);
+            console.error('playwright debug - get token - done');
             plausible('signup');
 
             this.loading = false;
@@ -210,8 +213,11 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 console.error(e);
             }
 
+            console.error('playwright debug - new session');
             const session = new SessionContext(this.organization);
+            console.error('playwright debug - prepare session');
             await SessionManager.prepareSessionForUsage(session, true);
+            console.error('playwright debug - dasbboard context');
             const dashboardContext = await getScopedAutoRoot(session, {
                 initialPresents: [
                     {
@@ -222,7 +228,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     },
                 ],
             });
+            console.error('playwright debug - dismiss');
             await this.dismiss({ force: true });
+            console.error('playwright debug - send event');
             await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
 
             // Show popup to confirm e-mail

@@ -1,0 +1,13 @@
+{
+    "name": "@stamhoofd/playwright",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "test": "NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* yarn playwright test",
+        "test:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true yarn -s test:playwright",
+        "test:trace": "yarn -s test:playwright --trace on"
+    },
+    "dependencies": {
+        "@simonbackx/simple-database": "1.34.0"
+    }
+}

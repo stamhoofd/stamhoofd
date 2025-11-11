@@ -1,7 +1,7 @@
 import testEnv from './env.json';
 // import { read1PasswordCli } from '@stamhoofd/build-development-env';
 
-export async function loadEnvironment() {
+export function getGlobalObject() {
     let globalObject: any = null;
     if (typeof window === 'object') {
         globalObject = window;
@@ -15,6 +15,22 @@ export async function loadEnvironment() {
         globalObject = self;
     }
 
+    return (globalObject as any);
+}
+
+export function updateLinkedEnvs() {
+    // Database
+    process.env.DB_DATABASE = (STAMHOOFD as any).DB_DATABASE + '';
+    process.env.DB_HOST = (STAMHOOFD as any).DB_HOST + '';
+    process.env.DB_PASS = (STAMHOOFD as any).DB_PASS + '';
+    process.env.DB_USER = (STAMHOOFD as any).DB_USER + '';
+
+    // Database
+    process.env.DB_MULTIPLE_STATEMENTS = 'true';
+}
+
+export async function loadEnvironment() {
+    const globalObject = getGlobalObject();
     (globalObject as any).STAMHOOFD = JSON.parse(JSON.stringify(testEnv)); // deep clone
 
     if (!globalObject.$t) {
@@ -28,14 +44,5 @@ export async function loadEnvironment() {
     }
 
     // Database
-    process.env.DB_DATABASE = (STAMHOOFD as any).DB_DATABASE + '';
-    process.env.DB_HOST = (STAMHOOFD as any).DB_HOST + '';
-    process.env.DB_PASS = (STAMHOOFD as any).DB_PASS + '';
-    process.env.DB_USER = (STAMHOOFD as any).DB_USER + '';
-
-    // Database
-    process.env.DB_MULTIPLE_STATEMENTS = 'true';
-
-    // (STAMHOOFD as any).UITPAS_API_CLIENT_ID = await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/client ID');
-    // (STAMHOOFD as any).UITPAS_API_CLIENT_SECRET = await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/client secret');
+    updateLinkedEnvs();
 }

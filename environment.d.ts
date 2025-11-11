@@ -1,4 +1,4 @@
-import type jose from 'jose'
+import type jose from 'jose';
 
 export { };
 

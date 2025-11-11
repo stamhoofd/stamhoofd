@@ -141,6 +141,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
                 this.dismiss({ force: true });
                 return;
             }
+            console.error('playwright debug - poll email');
             const stop = await LoginHelper.pollEmail(this.$context, this.token);
             if (stop) {
                 this.dismiss({ force: true });

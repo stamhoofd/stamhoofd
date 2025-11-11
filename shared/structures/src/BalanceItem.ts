@@ -56,7 +56,7 @@ export enum BalanceItemType {
     /**
      * Small differences that occurred when creating a payment or invoice
      */
-    Rounding = 'Rounding'
+    Rounding = 'Rounding',
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {

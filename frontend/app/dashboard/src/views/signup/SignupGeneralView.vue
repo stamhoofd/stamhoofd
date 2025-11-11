@@ -32,7 +32,7 @@
                 <div class="split-inputs">
                     <div>
                         <STInputBox :title="$t('d185d3ca-e20f-43a2-a79f-f77404b8f33a')" error-fields="name" :error-box="errorBox">
-                            <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
+                            <input id="organization-name" ref="firstInput" v-model="name" data-testid="organization-name-input" class="input" type="text" :placeholder="$t('cb51b737-c4cf-4ea7-aeb5-b5736a43c333')" autocomplete="organization">
                         </STInputBox>
 
                         <AddressInput v-model="address" :title="$t('68c40b9e-30d7-4ce5-8069-f7ca93221906')" :validator="validator" :link-country-to-locale="true" />
@@ -43,7 +43,7 @@
 
                     <div>
                         <STInputBox error-fields="type" :error-box="errorBox" :title="$t(`b26772a9-019a-4555-a6ca-7eb5200cab8f`)">
-                            <Dropdown v-model="type">
+                            <Dropdown v-model="type" data-testid="organization-type-select">
                                 <option :value="null" disabled>
                                     {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
                                 </option>
@@ -60,7 +60,7 @@
                         </p>
 
                         <STInputBox v-if="type === 'Youth' && isBelgium" error-fields="umbrellaOrganization" :error-box="errorBox" :title="$t(`a5f71b13-f443-488a-81a4-62cf2498d9af`)">
-                            <Dropdown v-model="umbrellaOrganization">
+                            <Dropdown v-model="umbrellaOrganization" data-testid="organization-umbrella-select">
                                 <option :value="null" disabled>
                                     {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
                                 </option>
@@ -75,19 +75,19 @@
                 <template v-if="!validatedRegisterCode">
                     <hr><h2>{{ $t('937b407c-7681-45c1-8c29-f415cf03faaf') }}</h2>
 
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Recommended)" data-testid="acquisition-recommended-checkbox" @update:model-value="setBooleanType(AcquisitionType.Recommended, $event)">
                         {{ $t('05479234-2977-4bfd-a44b-924b01021b6e') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Seen)" data-testid="acquisition-seen-checkbox" @update:model-value="setBooleanType(AcquisitionType.Seen, $event)">
                         {{ $t('c82d1491-73f8-4f05-af15-5b7bf58f1bcb') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.SocialMedia)" data-testid="acquisition-social-media-checkbox" @update:model-value="setBooleanType(AcquisitionType.SocialMedia, $event)">
                         {{ $t('d57a2f00-6cf5-4f37-b532-31fe5fae4946') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Search)" data-testid="acquisition-search-checkbox" @update:model-value="setBooleanType(AcquisitionType.Search, $event)">
                         {{ $t('90816551-3afb-44d2-b698-bef4a73d36b3') }}
                     </Checkbox>
-                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
+                    <Checkbox :model-value="getBooleanType(AcquisitionType.Other)" data-testid="acquisition-other-checkbox" @update:model-value="setBooleanType(AcquisitionType.Other, $event)">
                         {{ $t('8f7475aa-c110-49b2-8017-1a6dd0fe72f9') }}
                     </Checkbox>
                 </template>
@@ -96,7 +96,7 @@
             <STToolbar>
                 <template #right>
                     <LoadingButton :loading="loading">
-                        <button class="button primary" type="submit" @click.prevent="goNext">
+                        <button class="button primary" type="submit" data-testid="signup-next-button" @click.prevent="goNext">
                             {{ $t('c34ab59f-979c-45e7-acd2-60ff24fc0705') }}
                         </button>
                     </LoadingButton>
@@ -115,7 +115,7 @@ import { AddressInput, BackButton, CenteredMessage, Checkbox, Dropdown, ErrorBox
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, Storage } from '@stamhoofd/networking';
 import { AcquisitionType, Address, Country, Organization, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationType, OrganizationTypeHelper, RecordConfigurationFactory, RegisterCode, UmbrellaOrganization, UmbrellaOrganizationHelper } from '@stamhoofd/structures';
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Sorter } from '@stamhoofd/utility';
 
 import SignupAccountView from './SignupAccountView.vue';
 
