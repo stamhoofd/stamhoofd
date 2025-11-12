@@ -29,6 +29,10 @@ export function build(): any {
             // },
             webshopCname: `playwright-shop-${playwrightWorkerId}.stamhoofd`,
         },
+        DB_HOST: '127.0.0.1',
+        DB_USER: 'root',
+        DB_PASS: 'root',
+        DB_DATABASE: `stamhoofd-playwright-${playwrightWorkerId}`,
     };
 
     if (process.env.PORT) {

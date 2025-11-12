@@ -1,6 +1,7 @@
 import { test as base } from "@playwright/test";
 import { ApiServerHelper } from "./helpers/ApiServerHelper";
 import { CaddyHelper } from "./helpers/CaddyHelper";
+import { DatabaseHelper } from "./helpers/DatabaseHelper";
 import { FrontendServerHelper } from "./helpers/FrontendServerHelper";
 import { getUrl } from "./helpers/getUrl";
 
@@ -37,11 +38,16 @@ export const test = base.extend<
             // configure caddy
             const { cleanup: caddyCleanup } = await caddyHelper.configure(
                 [...apiProcesses.caddyRoutes, ...frontendProcesses.caddyRoutes],
-                [...apiProcesses.domains, ...frontendProcesses.domains],
+                [...apiProcesses.domains, ...apiProcesses.domains.map(domain => '*.'+domain), ...frontendProcesses.domains],
             );
 
             // wait until all services are reachable
             await apiProcesses.wait();
+
+            // clear database
+            const databaseHelper = new DatabaseHelper();
+            await databaseHelper.clear(workerIndex);
+
             await frontendProcesses.wait();
 
             // wait for tests to run
