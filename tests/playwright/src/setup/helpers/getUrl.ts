@@ -4,5 +4,5 @@ export function getUrl(
     service: "api" | "dashboard" | "registration" | "webshop" | string,
     workerId: string,
 ) {
-    return 'http://' + getDomain(service, workerId);
+    return 'https://' + getDomain(service, workerId);
 }
