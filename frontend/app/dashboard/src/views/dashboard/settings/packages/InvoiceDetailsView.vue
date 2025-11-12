@@ -71,11 +71,19 @@
                         </template>
                     </STListItem>
 
-                    <STListItem>
-                        Te betalen
+                    <STListItem v-if="invoice.meta.payableRoundingAmount !== 0">
+                        Afrondingsverschil
 
                         <template slot="right">
-                            {{ invoice.meta.priceWithVAT | price }}
+                            {{ invoice.meta.payableRoundingAmount | price }}
+                        </template>
+                    </STListItem>
+
+                    <STListItem>
+                        Totaal
+
+                        <template slot="right">
+                            {{ invoice.meta.totalPrice | price }}
                         </template> 
                     </STListItem>
                 </STList>

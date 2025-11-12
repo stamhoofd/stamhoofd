@@ -118,7 +118,6 @@ export class InvoiceBuilder {
         const logoHeight = 13
 
         this.document.image(__dirname + '/../assets/logo.png', (logoX - 1) * MM, logoY * MM, { height: logoHeight * MM })
-
         
         this.posY = 44
 
@@ -127,7 +126,7 @@ export class InvoiceBuilder {
         this.document.fillColor(COLOR_DARK);
         this.document.font('Metropolis-SemiBold')
 
-        const price = this.invoice.meta.priceWithVAT
+        const price = this.invoice.meta.totalPrice
 
         if (this.invoice.number) {
             this.document.text(price >= 0 ? "Factuur" : "Creditnota", logoX * MM, this.posY * MM, { align: 'left' })
@@ -422,14 +421,23 @@ export class InvoiceBuilder {
             this.document.fillColor(COLOR_DARK);
         }
 
+        if (this.invoice.meta.payableRoundingAmount !== 0) {
+            y = this.document.y + 5*MM
+            this.document.font('Metropolis-SemiBold')
+            this.document.text("Afrondingsverschil*", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+            this.document.font('Metropolis-Medium')
+            // eslint-disable-next-line no-irregular-whitespace
+            this.document.text(Formatter.price(this.invoice.meta.payableRoundingAmount).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
+        }
+
         // Keep semibold
         this.document.font('Metropolis-SemiBold')
         y = this.document.y + 5*MM
         this.document.fontSize(4 * MM);
-        this.document.text("Totaal incl. btw", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+        this.document.text("Totaalbedrag", x4 - 40*MM, y, { align: 'right', width: 40*MM })
         this.document.fontSize(3.5 * MM);
         // eslint-disable-next-line no-irregular-whitespace
-        this.document.text(Formatter.price(this.invoice.meta.priceWithVAT).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
+        this.document.text(Formatter.price(this.invoice.meta.totalPrice).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
 
         y = this.document.y
         y -= 12

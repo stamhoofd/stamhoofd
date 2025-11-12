@@ -199,6 +199,12 @@ export class STInvoiceMeta extends AutoEncoder {
     pdf?: File
 
     /**
+     * Only set if the invoice is officially generated and send + company has VAT number
+     */
+    @field({ decoder: File, optional: true })
+    xml?: File
+
+    /**
      * VATPercentage should be zero in countries outside Belgium in EU
      */
     @field({ decoder: IntegerDecoder})
@@ -240,6 +246,7 @@ export class STInvoiceMeta extends AutoEncoder {
     stripeAccountId: string | null = null
 
     /**
+     * @deprecated
      * Depending on areItemsIncludingVAT, this can either be including or excluding VAT
      */
     private get itemPrice() {
@@ -265,24 +272,55 @@ export class STInvoiceMeta extends AutoEncoder {
         return Math.round(Math.abs(price) * this.VATPercentage / 100) * Math.sign(price)
     }
 
+    get useLegacyRounding() {
+        // In the past we didn't round the price without VAT if we calculated starting from a price inclusive VAT
+        // in that case, we only rounded the VAT
+        // todo: based on number!
+        return false;
+    }
+
     get priceWithoutVAT(): number {
-        const itemPrice = this.itemPrice
-        if (this.areItemsIncludingVAT) {
-            return itemPrice - this.VAT
+        if (this.useLegacyRounding) {
+            const itemPrice = this.itemPrice
+            if (this.areItemsIncludingVAT) {
+                return itemPrice - this.VAT;
+            }
+            return itemPrice;
         }
-        return itemPrice
+
+        if (this.areItemsIncludingVAT) {
+            // We round at individual item level
+            // because PEPPOL requires prices with max 2 decimals on every line level, meaning we need to round.
+            return this.items.reduce((price, item) => price + this.includingVATToExcludingVAT(item.price), 0)
+        }
+         return this.items.reduce((price, item) => price + item.price, 0)
     }
 
     get VAT(): number {
-        if (this.areItemsIncludingVAT) {
+        if (this.useLegacyRounding && this.areItemsIncludingVAT) {
             // Subtract VAT and round
+            // Need to be careful with circular calls
             return this.getVATOnIncludingVATAmount(this.itemPrice)
         }
 
-        return this.getVATOnExcludingVATAmount(this.itemPrice)
+        return this.getVATOnExcludingVATAmount(this.priceWithoutVAT)
     }
 
     get priceWithVAT(): number {
+        return this.priceWithoutVAT + this.VAT
+    }
+
+    /**
+     * How much to add or remove to priceWithVAT to get to the payable amount. We can get a rounding error of 1 cent positive or negative if we calculate from a given price inclusive VAT.
+     * 
+     * 1 cent if we need to add 1 cent
+     * -1 cent if we need to remove 1 cent from the priceWithVAT to get to the payable amount
+     */
+    get payableRoundingAmount() {
+        return this.totalPrice - this.priceWithVAT; 
+    }
+
+    get totalPrice() {
         const itemPrice = this.itemPrice
         if (this.areItemsIncludingVAT) {
             return itemPrice
@@ -321,6 +359,9 @@ export class STInvoice extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, version: 245})
     negativeInvoiceId: string | null = null
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    didSendPeppol = false
 }
 
 export class STInvoicePrivate extends STInvoice {

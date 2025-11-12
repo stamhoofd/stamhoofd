@@ -66,8 +66,8 @@ async function handleInvoiceChargeback(invoice: STInvoice, chargeback: MollieCha
         console.log("Creating negative payment for invoice "+invoice.id)
         const price = -Math.round(parseFloat(chargeback.amount.value)*100)
 
-        if (negativeInvoice.meta.priceWithVAT !== price) {
-            throw new Error("Invalid price for negative invoice "+invoice.id + ", expected " + price + ", received " + negativeInvoice.meta.priceWithVAT)
+        if (negativeInvoice.meta.totalPrice !== price) {
+            throw new Error("Invalid price for negative invoice "+invoice.id + ", expected " + price + ", received " + negativeInvoice.meta.totalPrice)
         }
 
         const payment = new Payment();

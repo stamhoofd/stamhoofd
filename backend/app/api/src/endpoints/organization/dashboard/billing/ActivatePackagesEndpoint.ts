@@ -255,7 +255,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             // Calculate price
-            if (invoice.meta.priceWithVAT > 0 || request.body.includePending) {
+            if (invoice.meta.totalPrice > 0 || request.body.includePending) {
                 
                 // Since we are about the pay something:
                 // also add the items that are in the pending queue
@@ -281,11 +281,11 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             // If we are going to link a payment method, set the minimum amount
             const minimumAmount = 2;
 
-            if (request.body.paymentMethod !== PaymentMethod.Unknown && invoice.meta.priceWithVAT < minimumAmount && !request.body.proForma) {
+            if (request.body.paymentMethod !== PaymentMethod.Unknown && invoice.meta.totalPrice < minimumAmount && !request.body.proForma) {
                 invoice.meta.items.push(
                     STInvoiceItem.create({
                         name: 'Verificatie bankkaart',
-                        unitPrice: minimumAmount - invoice.meta.priceWithVAT,
+                        unitPrice: minimumAmount - invoice.meta.totalPrice,
                         canUseCredits: false
                     })
                 )
@@ -300,7 +300,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                 })  
             }
             
-            const price = invoice.meta.priceWithVAT
+            const price = invoice.meta.totalPrice
 
             if (price < 0) {
                 throw new Error("Unexpected negative price")

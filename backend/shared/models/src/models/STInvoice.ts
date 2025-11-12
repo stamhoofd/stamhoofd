@@ -4,8 +4,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
 import { QueueHandler } from "@stamhoofd/queues";
-import { calculateVATPercentage, Country, OrganizationPaymentMandate, OrganizationPaymentMandateDetails,Payment as PaymentStruct, PaymentMethod, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
-import { Sorter } from "@stamhoofd/utility";
+import { calculateVATPercentage, Country, File,OrganizationPaymentMandate, OrganizationPaymentMandateDetails,Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentStatus,STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
+import { Formatter, Sorter } from "@stamhoofd/utility";
+import AWS from 'aws-sdk';
 import { v4 as uuidv4 } from "uuid";
 
 import { InvoiceBuilder } from "../helpers/InvoiceBuilder";
@@ -85,6 +86,9 @@ export class STInvoice extends Model {
 
     @column({ type: "string", nullable: true })
     reference: string | null = null
+
+    @column({ type: "boolean" })
+    didSendPeppol = false;
 
     static organization = new ManyToOneRelation(Organization, "organization");
     static payment = new ManyToOneRelation(Payment, "payment");
@@ -194,6 +198,80 @@ export class STInvoice extends Model {
         }
     }
 
+    async officialize() {
+        if (this.meta.priceWithoutVAT === 0) {
+            // Only assign a number if it was an non empty invoice
+            return;
+        }
+
+        if (this.number) {
+            // Already officialized
+            return;
+        }
+
+        await this.assignNextNumber()
+
+        if (this.number !== null && !this.meta.pdf) {
+            await this.generatePdf()
+            await this.generateUBL()
+        }
+
+        await this.sendPeppol();
+
+        // Send via e-mail if not sending via PEPPOL
+        if (!this.didSendPeppol) {
+            if (this.organizationId && this.meta.pdf && this.number !== null && this.meta.priceWithVAT > 0) {
+                const organization = await Organization.getByID(this.organizationId)
+                if (organization) {
+                    const invoicingTo = await organization.getInvoicingToEmails()
+
+                    if (invoicingTo) {
+                        // Send the e-mail
+                        Email.sendInternal({
+                            to: invoicingTo,
+                            subject: "Factuur " + this.number + " voor " + organization.name,
+                            text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie factuur "+ this.number +" voor jullie administratie. Deze werd al betaald, je hoeft dus geen actie meer te ondernemen. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                            attachments: [
+                                {
+                                    filename: "factuur-"+this.number+".pdf",
+                                    href: this.meta.pdf.getPublicPath(),
+                                    contentType: "application/pdf"
+                                },
+                                ...(this.meta.xml ? [{
+                                    filename: "factuur-"+this.number+".xml",
+                                    href: this.meta.xml.getPublicPath(),
+                                    contentType: "application/xml"
+                                }] : [])
+                            ]
+                        }, organization.i18n)
+                    }
+                }
+            } else if (this.meta.pdf && this.number !== null && this.meta.priceWithVAT < 0) {
+                // Send the e-mail
+                Email.sendInternal({
+                    to: 'hallo@stamhoofd.be',
+                    bcc: "simon@stamhoofd.be",
+                    subject: "Creditnota " + this.number,
+                    text: "Beste, \n\nIn bijlage creditnota "+ this.number +" voor de administratie.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                    attachments: [
+                        {
+                            filename: "creditnota-"+this.number+".pdf",
+                            href: this.meta.pdf.getPublicPath(),
+                            contentType: "application/pdf"
+                        },
+                        ...(this.meta.xml ? [{
+                            filename: "creditnota-"+this.number+".xml",
+                            href: this.meta.xml.getPublicPath(),
+                            contentType: "application/xml"
+                        }] : [])
+                    ]
+                }, new I18n("nl", Country.Belgium))
+            }
+        } else {
+            console.log('Skipped sending invoice via email: already sent via PEPPOL')
+        }
+    }
+
     /**
      * WARNING: only call this in the correct queue!
      */
@@ -205,10 +283,8 @@ export class STInvoice extends Model {
 
         this.paidAt = new Date()
 
-        if (this.meta.priceWithoutVAT !== 0) {
-            // Only assign a number if it was an non empty invoice
-            await this.assignNextNumber()
-        }
+        // Only assign a number if it was an non empty invoice
+        await this.officialize()
 
         if (this.creditId !== null) {
             const credit = await STCredit.getByID(this.creditId)
@@ -306,48 +382,6 @@ export class STInvoice extends Model {
 
             // Force regeneration of organization meta data
             await STPackage.updateOrganizationPackages(this.organizationId)
-        }
-        
-        if (this.number !== null && !this.meta.pdf) {
-            await this.generatePdf()
-        }
-
-        if (this.organizationId && this.meta.pdf && this.number !== null && sendEmail && this.meta.priceWithVAT > 0) {
-            const organization = await Organization.getByID(this.organizationId)
-            if (organization) {
-                const invoicingTo = await organization.getInvoicingToEmails()
-
-                if (invoicingTo) {
-                    // Send the e-mail
-                    Email.sendInternal({
-                        to: invoicingTo,
-                        subject: "Factuur " + this.number + " voor " + organization.name,
-                        text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie factuur "+ this.number +" voor jullie administratie. Deze werd al betaald, je hoeft dus geen actie meer te ondernemen. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
-                        attachments: [
-                            {
-                                filename: "factuur-"+this.number+".pdf",
-                                href: this.meta.pdf.getPublicPath(),
-                                contentType: "application/pdf"
-                            }
-                        ]
-                    }, organization.i18n)
-                }
-            }
-        } else if (this.meta.pdf && this.number !== null && this.meta.priceWithVAT < 0) {
-            // Send the e-mail
-            Email.sendInternal({
-                to: 'hallo@stamhoofd.be',
-                bcc: "simon@stamhoofd.be",
-                subject: "Creditnota " + this.number,
-                text: "Beste, \n\nIn bijlage creditnota "+ this.number +" voor de administratie.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
-                attachments: [
-                    {
-                        filename: "creditnota-"+this.number+".pdf",
-                        href: this.meta.pdf.getPublicPath(),
-                        contentType: "application/pdf"
-                    }
-                ]
-            }, new I18n("nl", Country.Belgium))
         }
 
         // Reward if we have an open register code
@@ -471,7 +505,8 @@ export class STInvoice extends Model {
         invoice.meta = STInvoiceMeta.create({
             ...this.meta,
             date,
-            pdf: undefined
+            pdf: undefined,
+            xml: undefined
         })
         invoice.meta.items = this.meta.items.map(i => i.clone())
 
@@ -748,5 +783,431 @@ export class STInvoice extends Model {
             console.error(e)
         }
         return mandates;
+    }
+
+    async buildUBL() {
+        if (!this.number) {
+            throw new Error('Cannot generate UBL for invoice without number');
+        }
+
+        const companyNumberOrVAT = this.meta.companyVATNumber ?? this.meta.companyNumber;
+        if (!companyNumberOrVAT) {
+            throw new Error('Cannot generate UBL for invoice without VAT or company number');
+        }
+
+        if (this.meta.companyAddress.country !== Country.Belgium) {
+            throw new Error('Cannot generate UBL for invoice outside belgium');
+        }
+        const companyNumber = (this.meta.companyVATNumber ? this.meta.companyVATNumber.substring(2) : companyNumberOrVAT).replace(/[^0-9]+/g, '');
+        const recipient = `0208:${(companyNumber)}`
+
+        const payment = this.paymentId ? (await Payment.getByID(this.paymentId)) : null;
+
+        let ubl = ``;
+
+        function esc(a: string) {
+            return Formatter.escapeHtml(a);
+        }
+
+        // Docs: https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/
+        // Note: order is important
+
+        // General
+        ubl += `<cbc:ID>${esc(this.number.toFixed(0))}</cbc:ID>`;
+        const date = this.meta.date ?? this.paidAt ?? this.createdAt ?? new Date();
+        ubl += `<cbc:IssueDate>${esc(Formatter.dateIso(date))}</cbc:IssueDate>`;
+        ubl += `<cbc:DueDate>${esc(Formatter.dateIso(new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30)))}</cbc:DueDate>`;
+        // PEPPOL allows credit notes as negative invoices, so we always use invoice type code = invoice
+        ubl += `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`;
+
+        ubl += `<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>`;
+        ubl += `<cbc:BuyerReference>${esc(this.organizationId ?? this.id)}</cbc:BuyerReference>`;
+
+        // Attachments
+        if (this.meta.pdf) {
+            ubl += `
+                <cac:AdditionalDocumentReference>
+                    <cbc:ID>${esc('Factuur ' + this.number)}</cbc:ID>
+                    <cac:Attachment>
+                        <cac:ExternalReference>
+                            <cbc:URI>${esc(this.meta.pdf.getPublicPath())}</cbc:URI>
+                        </cac:ExternalReference>
+                    </cac:Attachment>
+                </cac:AdditionalDocumentReference>`;
+        }
+        
+        // Supplier
+        ubl += `
+            <cac:AccountingSupplierParty>
+                <cac:Party>
+                    <cbc:EndpointID schemeID="0002">0208:0747832683</cbc:EndpointID>
+                    <cac:PartyName>
+                        <cbc:Name>Codawood BV</cbc:Name>
+                    </cac:PartyName>
+                    <cac:PostalAddress>
+                        <cbc:StreetName>Collegiebaan 54</cbc:StreetName>
+                        <cbc:CityName>Wetteren</cbc:CityName>
+                        <cbc:PostalZone>9230</cbc:PostalZone>
+                        <cac:Country>
+                            <cbc:IdentificationCode>BE</cbc:IdentificationCode>
+                        </cac:Country>
+                    </cac:PostalAddress>
+                    <cac:PartyTaxScheme>
+                        <cbc:CompanyID>BE0747832683</cbc:CompanyID>
+                        <cac:TaxScheme>
+                            <cbc:ID>VAT</cbc:ID>
+                        </cac:TaxScheme>
+                    </cac:PartyTaxScheme>
+                    <cac:PartyLegalEntity>
+                        <cbc:RegistrationName>Codawood BV</cbc:RegistrationName>
+                        <cbc:CompanyID schemeID="0208">0747832683</cbc:CompanyID>
+                    </cac:PartyLegalEntity>
+                    <cac:Contact>
+                        <cbc:ElectronicMail>hallo@stamhoofd.be</cbc:ElectronicMail>
+                    </cac:Contact>
+                </cac:Party>
+            </cac:AccountingSupplierParty>`;
+
+        const vatUbl = this.meta.companyVATNumber 
+            ? `<cac:PartyTaxScheme>
+                    <cbc:CompanyID>${esc(this.meta.companyVATNumber.replace(/[^A-z0-9]+/g, ''))}</cbc:CompanyID>
+                    <cac:TaxScheme>
+                        <cbc:ID>VAT</cbc:ID>
+                    </cac:TaxScheme>
+                </cac:PartyTaxScheme>` 
+            : ``;
+
+
+        // Customer
+        ubl += `
+            <cac:AccountingCustomerParty>
+                <cac:Party>
+                    <cbc:EndpointID schemeID="0002">${esc(recipient)}</cbc:EndpointID>
+                    <cac:PartyName>
+                        <cbc:Name>${esc(this.meta.companyName)}</cbc:Name>
+                    </cac:PartyName>
+                    <cac:PostalAddress>
+                        <cbc:StreetName>${esc(this.meta.companyAddress.street)} ${esc(this.meta.companyAddress.number)}</cbc:StreetName>
+                        <cbc:CityName>${esc(this.meta.companyAddress.city)}</cbc:CityName>
+                        <cbc:PostalZone>${esc(this.meta.companyAddress.postalCode)}</cbc:PostalZone>
+                        <cac:Country>
+                            <cbc:IdentificationCode>${esc(this.meta.companyAddress.country)}</cbc:IdentificationCode>
+                        </cac:Country>
+                    </cac:PostalAddress>
+                    ${vatUbl}
+                    <cac:PartyLegalEntity>
+                        <cbc:RegistrationName>${esc(this.meta.companyName)}</cbc:RegistrationName>
+                        <cbc:CompanyID schemeID="0208">${esc(companyNumber)}</cbc:CompanyID>
+                    </cac:PartyLegalEntity>
+                </cac:Party>
+            </cac:AccountingCustomerParty>`;
+        
+        // Payment means
+        // Codes: 
+        // 49 = direct debit
+        // 48 = bank card
+        // 54 = credit card
+        // 55 = debit card
+        // 59 = SEPA direct debit
+        // 68 = Online payment service <- probably way to go for all except tranfer
+        // 30 = credit transfer (Payment by credit movement of funds from one account to another.) <- way to go for 
+
+        if (!payment) {
+            // Het bedrag werd reeds ingehouden van jouw Stripe balans.
+            // Don't include payment means information
+        } else {
+            if (this.meta.priceWithVAT < 0) {
+                // todo: add how we are going to pay back
+                // 99% chance we already have paid back using a refund
+                // in other cases we might transfer it manually or it will not have been paid already
+            } else {
+                if (payment.method === PaymentMethod.Transfer) {
+                    ubl += `<cac:PaymentMeans>
+                            <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+                            <cbc:PaymentID>${esc(payment.transferDescription ?? '')}</cbc:PaymentID>
+                            <cac:PayeeFinancialAccount>
+                                <cbc:ID>BE93733058873067</cbc:ID>
+                                <cbc:Name>Stamhoofd</cbc:Name>
+                            </cac:PayeeFinancialAccount>
+                            </cac:PaymentMeans>`;
+
+                } else if (payment.status === PaymentStatus.Succeeded) {
+                    let code = 48; // card
+
+                    if (payment.method === PaymentMethod.CreditCard) {
+                        code = 55;
+                    }
+
+                    if (payment.method === PaymentMethod.DirectDebit) {
+                        code = 59;
+                    }
+
+                    ubl += `<cac:PaymentMeans>
+                        <cbc:PaymentMeansCode>${esc(code.toFixed(0))}</cbc:PaymentMeansCode>
+                    </cac:PaymentMeans>`;
+                }
+            }
+        }
+
+        // Tax breakdown
+        ubl += `<cac:TaxTotal>
+            <cbc:TaxAmount currencyID="EUR">${(this.meta.VAT / 100).toFixed(2)}</cbc:TaxAmount>`;
+
+        if (this.meta.VATPercentage > 0 ) {
+            ubl += `<cac:TaxSubtotal>
+                    <cbc:TaxableAmount currencyID="EUR">${(this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="EUR">${(this.meta.VAT / 100).toFixed(2)}</cbc:TaxAmount>
+                    <cac:TaxCategory>
+                        <cbc:ID>S</cbc:ID>
+                        <cbc:Percent>${this.meta.VATPercentage.toFixed(2)}</cbc:Percent>
+                        <cac:TaxScheme>
+                            <cbc:ID>VAT</cbc:ID>
+                        </cac:TaxScheme>
+                    </cac:TaxCategory>
+                </cac:TaxSubtotal>`;
+        }
+            
+        ubl += `</cac:TaxTotal>`;
+
+        // Totals
+        // Since sometimes we have invoices that start with a given paid amount, and prices inclusive VAT, we can have rounding issues.
+        // In UBL, prices are always exclusive VAT.
+        // so start with calculating the rounding error.
+        // PayableRoundingAmount
+        ubl += `<cac:LegalMonetaryTotal>
+            <cbc:LineExtensionAmount currencyID="EUR">${(this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:LineExtensionAmount>
+            <cbc:TaxExclusiveAmount currencyID="EUR">${(this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:TaxExclusiveAmount>
+            <cbc:TaxInclusiveAmount currencyID="EUR">${(this.meta.priceWithVAT / 100).toFixed(2)}</cbc:TaxInclusiveAmount>
+            <cbc:PrepaidAmount currencyID="EUR">${!payment || payment.status === PaymentStatus.Succeeded ? (this.meta.totalPrice / 100).toFixed(2) : '0'}</cbc:PrepaidAmount>
+            <cbc:PayableRoundingAmount currencyID="EUR">${(this.meta.payableRoundingAmount / 100).toFixed(2)}</cbc:PayableRoundingAmount>
+            <cbc:PayableAmount currencyID="EUR">${!payment || payment.status === PaymentStatus.Succeeded ? '0' : (this.meta.totalPrice / 100).toFixed(2)}</cbc:PayableAmount>
+        </cac:LegalMonetaryTotal>`;
+
+        // Invoice lines
+        for (const item of this.meta.items) {
+            // We need to show prices exluding VAT and round here if needed
+            let unitPrice = item.unitPrice
+            let price = item.price
+            let amount = item.amount;
+
+            if (this.meta.areItemsIncludingVAT) {
+                unitPrice = this.meta.includingVATToExcludingVAT(unitPrice)
+                price = this.meta.includingVATToExcludingVAT(price)
+            }
+
+            // unitPrice cant be negative, amount can.
+            if (unitPrice < 0) {
+                amount = -amount;
+                unitPrice = -unitPrice;
+            }
+
+            ubl += `
+                <cac:InvoiceLine>
+                    <cbc:ID>${item.id}</cbc:ID>
+                    <cbc:InvoicedQuantity unitCode="EA">${amount.toFixed(0)}</cbc:InvoicedQuantity>
+                    <cbc:LineExtensionAmount currencyID="EUR">${(price / 100).toFixed(2)}</cbc:LineExtensionAmount>
+                    <cac:Item>
+                        ${item.description ? `<cbc:Description>${esc(item.description)}</cbc:Description>` : ''}
+                        <cbc:Name>${esc(item.name)}</cbc:Name>
+                        <cac:ClassifiedTaxCategory>
+                            <cbc:ID>${this.meta.VATPercentage > 0  ? 'S' : 'AE'}</cbc:ID>
+                            <cbc:Percent>${this.meta.VATPercentage.toFixed(2)}</cbc:Percent>
+                            <cac:TaxScheme>
+                                <cbc:ID>VAT</cbc:ID>
+                            </cac:TaxScheme>
+                        </cac:ClassifiedTaxCategory>
+                    </cac:Item>
+                    <cac:Price>
+                        <cbc:PriceAmount currencyID="EUR">${(unitPrice / 100).toFixed(2)}</cbc:PriceAmount>
+                    </cac:Price>
+                </cac:InvoiceLine>`;
+        }
+
+        return `<?xml version="1.0" encoding="UTF-8"?>
+                <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+                    <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
+                    <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+                    ${ubl}
+                </Invoice>`;
+    }
+
+    async generateUBL() {
+        if (this.didSendPeppol) {
+            return;
+        }
+        if (this.meta.companyVATNumber === null) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient not subject to VAT')
+            return;
+        }
+
+        // Check VAT number is belgian
+        if (!this.meta.companyVATNumber.startsWith('BE')) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient outside Belgium')
+            return;
+        }
+
+        let content: string;
+        try {
+            content = await this.buildUBL();
+        } catch (e) {
+            console.error(e);
+            return;
+        }
+
+        const fileId = uuidv4();
+
+        let prefix = (STAMHOOFD.SPACES_PREFIX ?? "")
+        if (prefix.length > 0) {
+            prefix += "/"
+        }
+        const key = prefix + (STAMHOOFD.environment ?? "development") + "/invoices/" + fileId + ".xml";
+
+        const s3 = new AWS.S3({
+            endpoint: STAMHOOFD.SPACES_ENDPOINT,
+            accessKeyId: STAMHOOFD.SPACES_KEY,
+            secretAccessKey: STAMHOOFD.SPACES_SECRET
+        });
+
+        const buffer = Buffer.from(content, 'utf-8')
+
+        const params = {
+            Bucket: STAMHOOFD.SPACES_BUCKET,
+            Key: key,
+            Body: buffer,
+            ContentType: 'application/xml',
+            ACL: "public-read"
+        };
+
+        await s3.putObject(params).promise()
+
+        this.meta.xml = new File({
+            id: fileId,
+            server: "https://"+STAMHOOFD.SPACES_BUCKET+"."+STAMHOOFD.SPACES_ENDPOINT,
+            path: key,
+            size: buffer.byteLength,
+            name: "Invoice "+this.id
+        });
+        await this.save()
+    }
+
+    async sendPeppol() {
+        // First try recommand
+        await this.sendRecommand();
+
+        // Other handlers
+        await this.sendPeppolViaEmail();
+    }
+
+    private async sendPeppolViaEmail() {
+        if (this.didSendPeppol) {
+            return;
+        }
+        if (!STAMHOOFD.PEPPOL_EMAIL_HANDLERS) {
+            console.error('PEPPOL email handlers NOT CONFIGURED')
+            return;
+        }
+
+        if (this.meta.companyVATNumber === null) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient not subject to VAT')
+            return;
+        }
+
+        // Check VAT number is belgian
+        if (!this.meta.companyVATNumber.startsWith('BE')) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient outside Belgium')
+            return;
+        }
+
+        if (!this.meta.xml) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', xml not set')
+            return;
+        }
+
+        if (!this.meta.pdf) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', pdf not set')
+            return;
+        }
+
+         // Send the e-mail
+        Email.sendInternal({
+            to: STAMHOOFD.PEPPOL_EMAIL_HANDLERS.map(d => {
+                return {
+                    email: d
+                }
+            }),
+            subject: "Factuur " + this.number,
+            text: "In bijlage factuur "+ this.number,
+            attachments: [
+                {
+                    filename: "factuur-"+this.number+".pdf",
+                    href: this.meta.pdf.getPublicPath(),
+                    contentType: "application/pdf"
+                },
+                ...(this.meta.xml ? [{
+                    filename: "factuur-"+this.number+".xml",
+                    href: this.meta.xml.getPublicPath(),
+                    contentType: "application/xml"
+                }] : [])
+            ]
+        }, new I18n('nl', 'BE'))
+
+        this.didSendPeppol = true;
+        await this.save();
+    }
+
+    private async sendRecommand() {
+        if (this.didSendPeppol) {
+            return;
+        }
+        if (!STAMHOOFD.RECOMMAND_COMPANY_ID || !STAMHOOFD.RECOMMAND_KEY || !STAMHOOFD.RECOMMAND_SECRET) {
+            console.error('RECOMMAND NOT CONFIGURED')
+            return;
+        }
+
+        if (this.meta.companyVATNumber === null) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient not subject to VAT')
+            return;
+        }
+
+        // Check VAT number is belgian
+        if (!this.meta.companyVATNumber.startsWith('BE')) {
+            console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient outside Belgium')
+            return;
+        }
+
+        const recipient = `0208:${this.meta.companyVATNumber.substring(2).replace(/[^0-9]+/g, '')}`
+
+        const ubl = await this.buildUBL();
+        const credentials = Buffer.from(`${STAMHOOFD.RECOMMAND_KEY}:${STAMHOOFD.RECOMMAND_SECRET}`).toString("base64");
+        const body = {
+            recipient,
+            documentType: "xml",
+            document: ubl,
+            doctypeId: "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1",
+        };
+
+        console.log('Request RECOMMAND', body);
+        const response = await fetch(`https://peppol.recommand.eu/api/peppol/${encodeURIComponent(STAMHOOFD.RECOMMAND_COMPANY_ID)}/sendDocument`, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic ' + credentials
+            }
+        });
+
+        try {
+            console.log('Response RECOMMAND', await response.json());
+        } catch (e) {
+            console.error('Non JSON response from RECOMMAND')
+        }
+
+        if (response.status < 200 || response.status > 299) {
+            // Went wrong
+            console.error('Failed to send invoice via recommand')
+        } else {
+            this.didSendPeppol = true;
+            await this.save();
+        }
     }
 }

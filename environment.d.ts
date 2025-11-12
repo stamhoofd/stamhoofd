@@ -119,6 +119,18 @@ declare global {
         readonly INTERNAL_SECRET_KEY: string
 
         readonly CRONS_DISABLED: boolean
+
+        // RECOMMAND
+        readonly RECOMMAND_TEAM_ID?: string;        
+        readonly RECOMMAND_COMPANY_ID?: string;
+        readonly RECOMMAND_KEY?: string;
+        readonly RECOMMAND_SECRET?: string;
+        readonly PEPPOL_EMAIL_HANDLERS?: string[];
+
+        /**
+         * Send each invoice in bcc to these recipients
+         */
+        readonly INVOICE_BCC?: string[];
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

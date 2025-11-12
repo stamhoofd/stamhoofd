@@ -304,7 +304,7 @@ export class STPackageStatus extends AutoEncoder {
 
         // Deactivate module if payment failed, and not reactivated after 4 weeks
         const expire = new Date()
-        expire.setDate(expire.getDate() - 28)
+        expire.setDate(expire.getDate() - 7)
         if (this.firstFailedPayment && this.firstFailedPayment < expire) {
             return false
         }
@@ -337,9 +337,9 @@ export class STPackageStatus extends AutoEncoder {
             return true
         }
 
-        // Deactivate module if payment failed, and not reactivated after 4 weeks
+        // Deactivate module if payment failed, and not reactivated after 7 days
         const expire = new Date()
-        expire.setDate(expire.getDate() - 28)
+        expire.setDate(expire.getDate() - 7)
         if (this.firstFailedPayment && this.firstFailedPayment < expire) {
             // did not pay!
             return true
@@ -360,7 +360,7 @@ export class STPackageStatus extends AutoEncoder {
 
         if (this.firstFailedPayment !== null) {
             const expire = new Date(this.firstFailedPayment)
-            expire.setDate(expire.getDate() + 28)
+            expire.setDate(expire.getDate() + 7)
             dates.push(expire)
         }
 

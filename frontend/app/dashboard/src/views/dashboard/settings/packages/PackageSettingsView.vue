@@ -130,19 +130,6 @@ export class SelectablePackage {
     get description() {
         return STPackageBundleHelper.getDescription(this.bundle)
     }
-
-    canSelect(all: SelectablePackage[]) {
-        for (const p of all) {
-            if (!p.selected || p.package.id === this.package.id) {
-                continue
-            }
-            if (!STPackageBundleHelper.isCombineable(this.bundle, p.package)) {
-                this.selected = false
-                return false
-            }
-        }
-        return true
-    }
 }
 
 @Component({
@@ -191,10 +178,6 @@ export default class PackageSettingsView extends Mixins(NavigationMixin) {
         this.reload().catch(e => {
             console.error(e)
         })
-    }
-
-    get hasSelected() {
-        return !!this.availablePackages.find(p => p.selected)
     }
 
     @Watch('status')
