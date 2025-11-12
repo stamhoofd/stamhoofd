@@ -13,7 +13,7 @@
                         <span>{{ $t('6de2861f-64bc-44fe-af80-5742c91d03d6') }}</span>
                     </a>
 
-                    <a v-if="!isPlatform" class="button primary" href="/aansluiten" @click.prevent="$navigate(Routes.Join)">
+                    <a v-if="!isPlatform" class="button primary" href="/aansluiten" data-testid="signup-link" @click.prevent="$navigate(Routes.Join)">
                         {{ $t("2cd40bd9-b158-42e3-81e2-c02c560ab2e5") }}
                     </a>
                 </template>
@@ -29,7 +29,10 @@
                 </p>
 
                 <form class="input-icon-container icon search gray" @submit.prevent>
-                    <input ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" @keydown.down.prevent="focusResult(0)">
+                    <input
+                        ref="input" v-model="query" autofocus class="input" :placeholder="$t('89b3f7fe-d2b2-4194-a971-886b0665a0df')" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" data-testid="organization-search-input"
+                        @keydown.down.prevent="focusResult(0)"
+                    >
                 </form>
 
                 <div v-if="showVersionFooter" class="version-box">
@@ -130,7 +133,7 @@ const help = () => {
     else {
         new CenteredMessage(
             $t('4c7b94c4-1f14-4a8f-881a-a643b3591144'),
-            $t("ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5"),
+            $t('ab1a1e43-9fbc-4ffa-bb96-e8b1b61f26c5'),
         )
             .addCloseButton()
             .show();
