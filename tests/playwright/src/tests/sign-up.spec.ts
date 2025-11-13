@@ -1,8 +1,8 @@
 import { expect } from "@playwright/test";
-import { test } from "../setup/fixtures";
+import { test } from "../setup/fixtures/services";
 
-test("Sign up - happy flow", async ({ page, backend }) => {
-    await page.goto(backend.urls.dashboard);
+test("Sign up - happy flow", async ({ page, workerContext }) => {
+    await page.goto(workerContext.urls.dashboard);
 
     // click signup
     await page.getByTestId("signup-link").click();

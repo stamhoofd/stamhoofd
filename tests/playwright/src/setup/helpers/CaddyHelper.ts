@@ -5,41 +5,18 @@ export class CaddyHelper {
 
     async configure(routes: any[], domains: string[]) {
         const existingRoutes = await this.getRoutes();
-        const filteredRoutes: any[] = [];
-        const lastRoutes: any[] = [];
 
-        for (const route of existingRoutes) {
-            if (routes.some((r) => r.group === route.group)) {
-                continue;
-            }
+        const newRoutes = routes.filter(
+            (r) => !existingRoutes.some((er) => er.group === r.group),
+        );
 
-            // route without match should be last
-            if (route.match === undefined) {
-                lastRoutes.push(route);
-                continue;
-            }
-
-            filteredRoutes.push(route);
-        }
-
-        await this.patchRoutes([...filteredRoutes, ...routes, ...lastRoutes]);
+        // put at the beginning
+        const putPromises = newRoutes.map((r) => this.putRoute(r, 0));
+        await Promise.all(putPromises);
 
         const subjects = await this.getPolicySubjects();
         const newSubjects = domains.filter((d) => !subjects.includes(d));
         await this.postPolicySubjects(newSubjects);
-
-        return {
-            cleanup: async () => {
-                await this.deleteRoutesWhere(
-                    (route) =>
-                        !!route.group &&
-                        routes.some((r) => r.group === route.group),
-                );
-
-                await this.deletePolicySubjectsWhere((subject) =>
-                    domains.includes(subject));
-            },
-        };
     }
 
     async deletePlaywrightConfig() {
@@ -61,19 +38,19 @@ export class CaddyHelper {
         });
     }
 
-    private async patchRoutes(routes: any[]) {
-        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
+    private async putRoute(route: any, index: number) {
+        const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/${index}`;
 
         const res = await fetch(url, {
-            method: "PATCH",
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(routes),
+            body: JSON.stringify(route),
         });
 
         if (!res.ok) {
             const text = await res.text();
             throw new Error(
-                `Failed to patch routes: ${res.status} ${res.statusText} - ${text}`,
+                `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
             );
         }
     }
