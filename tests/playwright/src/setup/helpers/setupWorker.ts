@@ -1,3 +1,4 @@
+import { WorkerInfo } from "@playwright/test";
 import { ApiServerHelper } from "./ApiServerHelper";
 import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
@@ -5,7 +6,7 @@ import { FrontendServerHelper } from "./FrontendServerHelper";
 import { getUrl } from "./getUrl";
 
 export type WorkerContext = {
-    workerIndex: string;
+    workerIndex: number;
     urls: {
         api: string;
         dashboard: string;
@@ -14,19 +15,20 @@ export type WorkerContext = {
     };
 };
 
-export async function setupWorker() {
+export async function setupWorker(workerInfo: WorkerInfo) {
     const caddyHelper = new CaddyHelper();
 
     const apiServerHelper = new ApiServerHelper();
     const frontendServerHelper = new FrontendServerHelper();
 
-    const workerIndex = process.env.TEST_WORKER_INDEX!;
+    const workerIndex = workerInfo.workerIndex;
+    const workerId = workerIndex.toString();
 
     // start api
-    const apiProcesses = await apiServerHelper.start(workerIndex);
+    const apiProcesses = await apiServerHelper.start(workerId);
 
     // start frontend services
-    const frontendProcesses = await frontendServerHelper.start(workerIndex);
+    const frontendProcesses = await frontendServerHelper.start(workerId);
 
     // configure caddy
     await caddyHelper.configure(
@@ -43,17 +45,17 @@ export async function setupWorker() {
 
     // clear database
     const databaseHelper = new DatabaseHelper();
-    await databaseHelper.clear(workerIndex);
+    await databaseHelper.clear(workerId);
 
     await frontendProcesses.wait();
 
     const workerContext: WorkerContext = {
         workerIndex,
         urls: {
-            api: getUrl("api", workerIndex),
-            dashboard: getUrl("dashboard", workerIndex),
-            webshop: getUrl("webshop", workerIndex),
-            registration: getUrl("registration", workerIndex),
+            api: getUrl("api", workerId),
+            dashboard: getUrl("dashboard", workerId),
+            webshop: getUrl("webshop", workerId),
+            registration: getUrl("registration", workerId),
         },
     };
 

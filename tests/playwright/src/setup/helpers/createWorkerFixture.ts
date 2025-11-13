@@ -14,8 +14,8 @@ export function createWorkerFixture<T extends {}>(
         }
     >({
         workerContext: [
-            async ({ browser }, use) => {
-                const { workerContext, teardown } = await setupWorker();
+            async ({ browser }, use, workerInfo) => {
+                const { workerContext, teardown } = await setupWorker(workerInfo);
                 const result = await callback({ browser }, workerContext);
                 await use({ ...workerContext, ...result });
                 await teardown();
