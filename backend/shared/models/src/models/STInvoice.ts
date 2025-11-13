@@ -81,6 +81,9 @@ export class STInvoice extends QueryableModel {
     @column({ type: 'string', nullable: true })
     reference: string | null = null;
 
+    @column({ type: 'boolean' })
+    didSendPeppol = false;
+
     // static organization = new ManyToOneRelation(Organization, 'organization');
     // static payment = new ManyToOneRelation(Payment, 'payment');
 
