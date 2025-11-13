@@ -1,7 +1,7 @@
 import getPort from "get-port";
+import { createRequire } from 'node:module';
 import { CaddyHelper } from "./CaddyHelper";
 import { NetworkHelper } from "./NetworkHelper";
-import { ProcessHelper } from "./ProcessHelper";
 import { ServerHelper } from "./ServerHelper";
 import { getDomain } from "./getDomain";
 
@@ -16,21 +16,7 @@ export class ApiServerHelper implements ServerHelper {
         console.log(
             `Starting backend server with id ${workerId} on port ${port}...`,
         );
-
-        const childProcess = ProcessHelper.spawnWithCleanup(
-            "yarn",
-            ["lerna", "run", "dev", "--scope", "@stamhoofd/backend"],
-            {
-                env: {
-                    ...process.env,
-                    NODE_ENV: "test",
-                    STAMHOOFD_ENV: "playwright",
-                    PORT: port.toString(),
-                    PLAYWRIGHT_WORKER_ID: workerId,
-                },
-                stdio: "inherit",
-            },
-        );
+        await this.startApi({ port, workerId });
 
         return {
             domains: [domain],
@@ -41,9 +27,30 @@ export class ApiServerHelper implements ServerHelper {
                 );
             },
             kill: async () => {
-                childProcess.kill();
+                // do nothing
             },
         };
+    }
+
+    private async startApi({
+        port,
+        workerId,
+    }: {
+        port: number;
+        workerId: string;
+    }) {
+        // set environment
+        Object.entries({
+            NODE_ENV: "test",
+            STAMHOOFD_ENV: "playwright",
+            PORT: port.toString(),
+            PLAYWRIGHT_WORKER_ID: workerId,
+        }).forEach(([key, value]) => {
+            process.env[key] = value;
+        });
+
+        const require = createRequire(import.meta.url);
+        await require("@stamhoofd/backend");
     }
 
     private createRoutes({
