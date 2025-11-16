@@ -25,12 +25,11 @@
 <script lang="ts" setup>
 import { GroupIconWithWaitingList, STListItemGrid, STListItemGridRow, usePlatform } from '@stamhoofd/components';
 import { Group, GroupGenderType, GroupStatus } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = defineProps<{ group: Group }>();
 const platform = usePlatform();
-
-const currency = '€';
 
 const groupIcon = computed(() => {
     const group = props.group;
@@ -67,9 +66,8 @@ const prices = computed(() => {
                 if (reducedPrice) return [standardPrice, reducedPrice];
                 return [standardPrice];
             })),
-    ).map(price => price / 100)
-        .sort((a, b) => a - b)
-        .map(price => `${currency} ${price}`)
+    ).sort((a, b) => a - b)
+        .map(price => Formatter.price(price))
         .join(' / ');
 });
 
