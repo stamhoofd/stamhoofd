@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Product } from './webshops/Product.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class SeatingSizeConfiguration {
     seatWidth = 30;
@@ -253,6 +254,7 @@ export class SeatingPlanCategory extends AutoEncoder {
      * Price added (can be negative) is always in cents, to avoid floating point errors
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     /**
@@ -665,6 +667,7 @@ export class CartReservedSeat extends ReservedSeat {
      * Additional price that was applied
      */
     @field({ decoder: IntegerDecoder, field: 'p', optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, field: 'p', optional: true })
     price = 0;
 
     calculatePrice(seatingPlan: SeatingPlan) {

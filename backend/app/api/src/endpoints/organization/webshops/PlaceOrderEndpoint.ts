@@ -156,8 +156,15 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         // The order now is valid, the stock is reserved for now (until the payment fails or expires)
         const totalPrice = request.body.totalPrice;
 
+        if (totalPrice % 100 !== 0) {
+            throw new SimpleError({
+                code: 'more_than_2_decimal_places',
+                message: 'Unexpected total price. The total price should be rounded to maximum 2 decimal places',
+            });
+        }
+
         try {
-            if (totalPrice == 0) {
+            if (totalPrice === 0) {
                 // Force unknown payment method
                 order.data.paymentMethod = PaymentMethod.Unknown;
 
@@ -306,7 +313,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         const molliePayment = await mollieClient.payments.create({
                             amount: {
                                 currency: 'EUR',
-                                value: (totalPrice / 100).toFixed(2),
+                                value: (totalPrice / 10000).toFixed(2), // from 4 decimals to 0 decimals
                             },
                             method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
                             testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',

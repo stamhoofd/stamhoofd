@@ -219,7 +219,7 @@ export class StripeHelper {
             });
         }
 
-        const totalPrice = payment.price;
+        const totalPrice = Math.round(payment.price / 100); // Convert from 4 decimal places to 2 decimal places
 
         if (totalPrice < 50) {
             throw new SimpleError({
@@ -252,14 +252,14 @@ export class StripeHelper {
             directCharge = true;
         }
 
-        payment.transferFee = fee;
-        const serviceFee = payment.serviceFeePayout;
+        payment.transferFee = fee * 100; // Convert back to 4 decimal places for storage
+        const serviceFee = Math.round(payment.serviceFeePayout / 100);
 
         const fullMetadata = {
             ...(metadata ?? {}),
             organizationVATNumber: organization.meta.VATNumber,
             transactionFee: fee,
-            serviceFee: serviceFee,
+            serviceFee: serviceFee, // For historic reasons, this is stored in cents
         };
 
         const stripe = StripeHelper.getInstance(directCharge ? stripeAccount.accountId : null);
@@ -334,7 +334,7 @@ export class StripeHelper {
                 const stripeLineItem = {
                     price_data: {
                         currency: 'eur',
-                        unit_amount: item.price,
+                        unit_amount: Math.round(item.price / 100),
                         product_data: {
                             name: item.balanceItem.description,
                         },
@@ -342,7 +342,7 @@ export class StripeHelper {
                     quantity: 1,
                 };
                 stripeLineItems.push(stripeLineItem);
-                lineItemsPrice += item.price;
+                lineItemsPrice += Math.round(item.price / 100);
             }
 
             if (lineItemsPrice !== totalPrice) {

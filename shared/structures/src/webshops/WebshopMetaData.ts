@@ -21,6 +21,7 @@ import { SponsorConfig } from '../SponsorConfig.js';
 import { Discount } from './Discount.js';
 import { TransferSettings } from './TransferSettings.js';
 import { WebshopField } from './WebshopField.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum WebshopLayout {
     Default = 'Default',
@@ -237,6 +238,7 @@ export class WebshopOnSiteMethod extends CheckoutMethod {
  */
 export class CheckoutMethodPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     /**
@@ -244,9 +246,11 @@ export class CheckoutMethodPrice extends AutoEncoder {
      * If it is null, the discount price will never get used
      */
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     minimumPrice: number | null = null;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     discountPrice = 0;
 }
 

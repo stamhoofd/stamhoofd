@@ -31,7 +31,7 @@ function createTestPeriod() {
     return { period, organizationRegistrationPeriod, organization };
 }
 
-function createTestGroups(organization: Organization, period: RegistrationPeriod, prices: number[] = [50_00, 40_00], names?: string[]) {
+function createTestGroups(organization: Organization, period: RegistrationPeriod, prices: number[] = [50_0000, 40_0000], names?: string[]) {
     return prices.map((price, index) => {
         return Group.create({
             organizationId: organization.id,
@@ -55,8 +55,8 @@ function createBundleDiscount({
     countWholeFamily = true,
     countPerGroup = false,
     discounts = [
-        { value: 10_00, type: GroupPriceDiscountType.Fixed },
-        { value: 15_00, type: GroupPriceDiscountType.Fixed },
+        { value: 10_0000, type: GroupPriceDiscountType.Fixed },
+        { value: 15_0000, type: GroupPriceDiscountType.Fixed },
     ],
 }: {
     name?: string;
@@ -98,7 +98,7 @@ function createTestFamily(memberCount = 3) {
 
 function setupDiscountTest({
     memberCount = 3,
-    groupPrices = [50_00, 40_00],
+    groupPrices = [50_0000, 40_0000],
     groupNames,
     bundleDiscount,
 }: {
@@ -164,8 +164,8 @@ describe('Unit.RegisterCart', () => {
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
                     discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Fixed },
-                        { value: 15_00, type: GroupPriceDiscountType.Fixed },
+                        { value: 10_0000, type: GroupPriceDiscountType.Fixed },
+                        { value: 15_0000, type: GroupPriceDiscountType.Fixed },
                     ],
                 }),
             });
@@ -186,38 +186,38 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for item A is 50.00
-            expect(itemA.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
             expect(itemA.calculatedRefund).toEqual(0);
             expect(itemA.calculatedPriceDueLater).toEqual(0);
 
             // Check price for items B and C
-            expect(itemB.calculatedPrice).toEqual(40_00);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
             expect(itemB.calculatedRefund).toEqual(0);
             expect(itemB.calculatedPriceDueLater).toEqual(0);
 
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
             expect(itemC.calculatedRefund).toEqual(0);
             expect(itemC.calculatedPriceDueLater).toEqual(0);
 
-            // Check calculated discount is 10_00 + 15_00 = 25_00
+            // Check calculated discount is 10_0000 + 15_0000 = 25_0000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(25_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 25_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 25_0000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -25_00,
+                    price: -25_0000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 25_00,
+                    price: 130_0000 - 25_0000,
                 }),
             ]);
         });
@@ -249,29 +249,83 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
-            expect(itemB.calculatedPrice).toEqual(40_00);
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
 
             // 15% will be applied to 50 euro (max), and 10% to one of the 40 euros
-            // Check calculated discount is 50_00 * 0.15 + 40_00 * 0.10 = 7_50 + 4_00 = 11_50
+            // Check calculated discount is 50_0000 * 0.15 + 40_0000 * 0.10 = 7_5000 + 4_0000 = 11_5000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(11_50);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(11_50);
+            expect(cart.bundleDiscounts[0].total).toEqual(11_5000);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(11_5000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 11_50);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 11_5000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -11_50,
+                    price: -11_5000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 11_50,
+                    price: 130_0000 - 11_5000,
+                }),
+            ]);
+        });
+
+        test('Percentage discounts are rounded to 1 cent', () => {
+            const { organization, groups, family } = setupDiscountTest({
+                bundleDiscount: createBundleDiscount({
+                    name: 'Bundle discount',
+                    discounts: [
+                        { value: 1_11, type: GroupPriceDiscountType.Percentage },
+                        { value: 1_52, type: GroupPriceDiscountType.Percentage },
+                    ],
+                }),
+            });
+            const [groupA, groupB] = groups;
+            const [memberA, memberB, memberC] = family.members;
+
+            const itemA = RegisterItem.defaultFor(memberA, groupA, organization);
+            const itemB = RegisterItem.defaultFor(memberB, groupB, organization);
+            const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
+
+            // Add to a single cart
+            const checkout = family.checkout;
+            const cart = checkout.cart;
+            cart.add(itemA);
+            cart.add(itemB);
+            cart.add(itemC);
+
+            cart.calculatePrices();
+
+            // Check price for items
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
+
+            // 1,5% will be applied to 50 euro (max), and 1% to one of the 40 euros
+            // Check calculated discount is 50_0000 * 0.0152 + 40_0000 * 0.0111 = 7500 + 4000 = 1_2040 normally, but not allowed, rounded to 1_2000
+            expect(cart.bundleDiscounts).toHaveLength(1);
+            expect(cart.bundleDiscounts[0].total).toEqual(1_2000);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(1_2000);
+
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 1_2000);
+
+            expect(checkout.priceBreakown).toEqual([
+                expect.objectContaining({
+                    price: 130_0000,
+                }),
+                {
+                    name: 'Bundle discount',
+                    price: -1_2000,
+                },
+                expect.objectContaining({
+                    price: 130_0000 - 1_2000,
                 }),
             ]);
         });
@@ -304,28 +358,28 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemB.calculatedPrice).toEqual(40_00);
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
 
             // 15% will be applied to 50 euro (max), and 10% to one of the 40 euros
-            // Check calculated discount is 50_00 * 0.15 + 40_00 * 0.10 = 7_50 + 4_00 = 11_50
+            // Check calculated discount is 50_0000 * 0.15 + 40_0000 * 0.10 = 7_5000 + 4_0000 = 11_5000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(11_50);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(11_50);
+            expect(cart.bundleDiscounts[0].total).toEqual(11_5000);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(11_5000);
 
-            expect(cart.price).toEqual(40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(40_00 + 40_00 - 11_50);
+            expect(cart.price).toEqual(40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(40_0000 + 40_0000 - 11_5000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 80_00,
+                    price: 80_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -11_50,
+                    price: -11_5000,
                 },
                 expect.objectContaining({
-                    price: 80_00 - 11_50,
+                    price: 80_0000 - 11_5000,
                 }),
             ]);
         });
@@ -348,7 +402,7 @@ describe('Unit.RegisterCart', () => {
                         { value: 15_00, type: GroupPriceDiscountType.Percentage },
                     ],
                 }),
-                groupPrices: [100_00, 40_00],
+                groupPrices: [100_0000, 40_0000],
             });
 
             const [groupA, groupB] = groups;
@@ -360,7 +414,7 @@ describe('Unit.RegisterCart', () => {
                     discount.id,
                     AppliedRegistrationDiscount.create({
                         name: discount.name,
-                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                        amount: 10_0000, // 10% discount on 100_0000 = 10_0000
                     }),
                 ],
             ]));
@@ -379,13 +433,13 @@ describe('Unit.RegisterCart', () => {
 
             expect(cart.bundleDiscounts).toHaveLength(0);
 
-            expect(checkout.totalPrice).toEqual(-30_00);
+            expect(checkout.totalPrice).toEqual(-30_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: -40_00 + 10_00,
+                    price: -40_0000 + 10_0000,
                 }),
                 expect.objectContaining({
-                    price: -40_00 + 10_00,
+                    price: -40_0000 + 10_0000,
                 }),
             ]);
 
@@ -408,19 +462,19 @@ describe('Unit.RegisterCart', () => {
 
             expect(cart.bundleDiscounts).toHaveLength(1);
             expect(cart.bundleDiscounts[0].total).toEqual(0);
-            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_00);
-            expect(checkout.totalPrice).toEqual(-90_00);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_0000); // The previous discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_0000);
+            expect(checkout.totalPrice).toEqual(-90_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: -100_00, // Reeds aangerekend
+                    price: -100_0000, // Reeds aangerekend
                 }),
                 {
                     name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
-                    price: 10_00,
+                    price: 10_0000,
                 },
                 expect.objectContaining({
-                    price: -90_00,
+                    price: -90_0000,
                 }),
             ]);
         });
@@ -443,7 +497,7 @@ describe('Unit.RegisterCart', () => {
                         { value: 15_00, type: GroupPriceDiscountType.Percentage },
                     ],
                 }),
-                groupPrices: [100_00, 40_00],
+                groupPrices: [100_0000, 40_0000],
             });
 
             const [groupA, groupB] = groups;
@@ -455,7 +509,7 @@ describe('Unit.RegisterCart', () => {
                     discount.id,
                     AppliedRegistrationDiscount.create({
                         name: discount.name,
-                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                        amount: 10_0000, // 10% discount on 100_00 = 10_00
                     }),
                 ],
             ]));
@@ -475,17 +529,17 @@ describe('Unit.RegisterCart', () => {
 
             expect(cart.bundleDiscounts).toHaveLength(0);
 
-            expect(checkout.totalPrice).toEqual(-15_00);
+            expect(checkout.totalPrice).toEqual(-15_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: -40_00 + 10_00, // Already charged amount
+                    price: -40_0000 + 10_0000, // Already charged amount
                 }),
-                // Cancellation fee = 50% of the balance total, 30_00 = 15_00
+                // Cancellation fee = 50% of the balance total, 30_0000 = 15_0000
                 expect.objectContaining({
-                    price: 15_00,
+                    price: 15_0000,
                 }),
                 expect.objectContaining({
-                    price: -15_00,
+                    price: -15_0000,
                 }),
             ]);
 
@@ -508,24 +562,24 @@ describe('Unit.RegisterCart', () => {
 
             expect(cart.bundleDiscounts).toHaveLength(1);
             expect(cart.bundleDiscounts[0].total).toEqual(0);
-            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_00);
-            expect(checkout.totalPrice).toEqual(-40_00);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_0000); // The previous discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_0000);
+            expect(checkout.totalPrice).toEqual(-40_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: -100_00, // Already charged for registration A that is being deleted
+                    price: -100_0000, // Already charged for registration A that is being deleted
                 }),
-                // Cancellation fee = 50% of the balance total, 100_00 = 50_00
+                // Cancellation fee = 50% of the balance total, 100_0000 = 50_0000
                 expect.objectContaining({
-                    price: 50_00,
+                    price: 50_0000,
                 }),
                 {
                     // Side effect in registration B
                     name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
-                    price: 10_00,
+                    price: 10_0000,
                 },
                 expect.objectContaining({
-                    price: -40_00,
+                    price: -40_0000,
                 }),
             ]);
         });
@@ -547,7 +601,7 @@ describe('Unit.RegisterCart', () => {
                         { value: 15_00, type: GroupPriceDiscountType.Percentage },
                     ],
                 }),
-                groupPrices: [100_00, 40_00],
+                groupPrices: [100_0000, 40_0000],
             });
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
@@ -557,14 +611,14 @@ describe('Unit.RegisterCart', () => {
                     discount.id,
                     AppliedRegistrationDiscount.create({
                         name: discount.name,
-                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                        amount: 10_0000, // 10% discount on 100_0000 = 10_0000
                     }),
                 ],
             ]));
 
             const groupCPrice = GroupPrice.create({
                 price: ReduceablePrice.create({
-                    price: 50_00,
+                    price: 50_0000,
                 }),
             });
             const groupC = Group.create({
@@ -592,32 +646,32 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
-            expect(itemA.calculatedRefund).toEqual(100_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemA.calculatedRefund).toEqual(100_0000);
             expect(itemA.calculatedPriceDueLater).toEqual(0);
 
             // Check discount should be given back
             expect(cart.bundleDiscounts).toHaveLength(1);
             expect(cart.bundleDiscounts[0].total).toEqual(0);
-            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_00);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_0000); // The previous discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_0000);
 
-            expect(checkout.totalPrice).toEqual(50_00 - 100_00 + 10_00);
+            expect(checkout.totalPrice).toEqual(50_0000 - 100_0000 + 10_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
                     // Subtotal (normal price)
-                    price: 50_00,
+                    price: 50_0000,
                 }),
                 expect.objectContaining({
                     // Refund for the previous registration
-                    price: -100_00,
+                    price: -100_0000,
                 }),
                 {
                     name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
-                    price: 10_00,
+                    price: 10_0000,
                 },
                 expect.objectContaining({
-                    price: -50_00 + 10_00,
+                    price: -50_0000 + 10_0000,
                 }),
             ]);
 
@@ -628,7 +682,7 @@ describe('Unit.RegisterCart', () => {
                     // Custom discount for this price
                     GroupPriceDiscount.create({
                         value: ReduceablePrice.create({
-                            price: 25_00,
+                            price: 25_0000,
                         }),
                         type: GroupPriceDiscountType.Fixed,
                     }),
@@ -640,26 +694,26 @@ describe('Unit.RegisterCart', () => {
 
             // Check discount should be given back
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(25_00);
-            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(15_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(25_0000);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_0000); // The previous discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(15_0000);
 
-            expect(checkout.totalPrice).toEqual(50_00 - 100_00 - 15_00);
+            expect(checkout.totalPrice).toEqual(50_0000 - 100_0000 - 15_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
                     // Subtotal (normal price)
-                    price: 50_00,
+                    price: 50_0000,
                 }),
                 expect.objectContaining({
                     // Refund for the previous registration
-                    price: -100_00,
+                    price: -100_0000,
                 }),
                 {
                     name: 'Multiple family members discount',
-                    price: -15_00,
+                    price: -15_0000,
                 },
                 expect.objectContaining({
-                    price: -50_00 - 15_00,
+                    price: -50_0000 - 15_0000,
                 }),
             ]);
         });
@@ -676,7 +730,7 @@ describe('Unit.RegisterCart', () => {
                         { value: 15_00, type: GroupPriceDiscountType.Percentage },
                     ],
                 }),
-                groupPrices: [100_00, 40_00],
+                groupPrices: [100_0000, 40_0000],
             });
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
@@ -685,7 +739,7 @@ describe('Unit.RegisterCart', () => {
                     discount.id,
                     AppliedRegistrationDiscount.create({
                         name: discount.name,
-                        amount: 10_00, // 10% discount on 100_00 = 10_00
+                        amount: 10_0000, // 10% discount on 100_0000 = 10_0000
                     }),
                 ],
             ]));
@@ -693,7 +747,7 @@ describe('Unit.RegisterCart', () => {
 
             const groupCPrice = GroupPrice.create({
                 price: ReduceablePrice.create({
-                    price: 50_00,
+                    price: 50_0000,
                 }),
             });
             const groupC = Group.create({
@@ -721,25 +775,25 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
-            expect(itemA.calculatedRefund).toEqual(90_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemA.calculatedRefund).toEqual(90_0000);
             expect(itemA.calculatedPriceDueLater).toEqual(0);
 
             // No discounts anymore
             expect(cart.bundleDiscounts).toHaveLength(0);
 
-            expect(checkout.totalPrice).toEqual(50_00 - 90_00);
+            expect(checkout.totalPrice).toEqual(50_0000 - 90_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
                     // Subtotal (normal price)
-                    price: 50_00,
+                    price: 50_0000,
                 }),
                 expect.objectContaining({
                     // Refund for the previous registration, without the discount that was granted
-                    price: -90_00,
+                    price: -90_0000,
                 }),
                 expect.objectContaining({
-                    price: 50_00 - 90_00,
+                    price: 50_0000 - 90_0000,
                 }),
             ]);
 
@@ -750,7 +804,7 @@ describe('Unit.RegisterCart', () => {
                     // Custom discount for this price
                     GroupPriceDiscount.create({
                         value: ReduceablePrice.create({
-                            price: 25_00,
+                            price: 25_0000,
                         }),
                         type: GroupPriceDiscountType.Fixed,
                     }),
@@ -762,26 +816,26 @@ describe('Unit.RegisterCart', () => {
 
             // Check discount should be given back
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(25_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0); // Not included here, because the registration will be removed including the applied discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_0000);
 
-            expect(checkout.totalPrice).toEqual(50_00 - 90_00 - 25_00);
+            expect(checkout.totalPrice).toEqual(50_0000 - 90_0000 - 25_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
                     // Subtotal (normal price)
-                    price: 50_00,
+                    price: 50_0000,
                 }),
                 expect.objectContaining({
                     // Refund for the previous registration
-                    price: -90_00,
+                    price: -90_0000,
                 }),
                 {
                     name: 'Multiple family members discount',
-                    price: -25_00,
+                    price: -25_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 - 90_00 - 25_00,
+                    price: 50_0000 - 90_0000 - 25_0000,
                 }),
             ]);
         });
@@ -792,7 +846,7 @@ describe('Unit.RegisterCart', () => {
 
             const { organization, groups, family, discount } = setupDiscountTest({
                 memberCount: 3,
-                groupPrices: [50_00, 40_00],
+                groupPrices: [50_0000, 40_0000],
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
@@ -815,35 +869,35 @@ describe('Unit.RegisterCart', () => {
             cart.add(itemC);
             cart.calculatePrices();
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
             expect(itemA.calculatedRefund).toEqual(0);
             expect(itemA.calculatedPriceDueLater).toEqual(0);
 
-            expect(itemB.calculatedPrice).toEqual(40_00);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
             expect(itemB.calculatedRefund).toEqual(0);
             expect(itemB.calculatedPriceDueLater).toEqual(0);
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
             expect(itemC.calculatedRefund).toEqual(0);
             expect(itemC.calculatedPriceDueLater).toEqual(0);
 
-            // Check calculated discount is 50_00 * 0.10 + 40_00 * 0.10 = 5_00 + 4_00 = 9_00
+            // Check calculated discount is 50_0000 * 0.10 + 40_0000 * 0.10 = 5_0000 + 4_0000 = 9_0000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(9_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(9_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(9_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(9_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 9_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 9_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -9_00,
+                    price: -9_0000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 9_00,
+                    price: 130_0000 - 9_0000,
                 }),
             ]);
         });
@@ -851,7 +905,7 @@ describe('Unit.RegisterCart', () => {
         test('The highest possible discount is granted', () => {
             const { organization, groups, family, discount } = setupDiscountTest({
                 memberCount: 3,
-                groupPrices: [50_00, 40_00],
+                groupPrices: [50_0000, 40_0000],
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
@@ -873,7 +927,7 @@ describe('Unit.RegisterCart', () => {
                 customDiscounts: [
                     GroupPriceDiscount.create({
                         value: ReduceablePrice.create({
-                            price: 20_00,
+                            price: 20_0000,
                         }),
                         type: GroupPriceDiscountType.Fixed,
                     }),
@@ -894,35 +948,35 @@ describe('Unit.RegisterCart', () => {
             cart.add(itemC);
             cart.calculatePrices();
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
             expect(itemA.calculatedRefund).toEqual(0);
             expect(itemA.calculatedPriceDueLater).toEqual(0);
 
-            expect(itemB.calculatedPrice).toEqual(40_00);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
             expect(itemB.calculatedRefund).toEqual(0);
             expect(itemB.calculatedPriceDueLater).toEqual(0);
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
             expect(itemC.calculatedRefund).toEqual(0);
             expect(itemC.calculatedPriceDueLater).toEqual(0);
 
-            // Check calculated discount is 50_00 * 0.10 + 20_00 fixed + 0 = 5_00 + 20_00 + 0 = 25_00
+            // Check calculated discount is 50_0000 * 0.10 + 20_0000 fixed + 0 = 5_0000 + 20_0000 + 0 = 25_0000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(25_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(25_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 25_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 25_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -25_00,
+                    price: -25_0000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 25_00,
+                    price: 130_0000 - 25_0000,
                 }),
             ]);
         });
@@ -935,12 +989,12 @@ describe('Unit.RegisterCart', () => {
 
             const { organization, groups, family, organizationRegistrationPeriod } = setupDiscountTest({
                 memberCount: 5,
-                groupPrices: [100_00, 150_00],
+                groupPrices: [100_0000, 150_0000],
                 groupNames: ['Camp A', 'Camp B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'All camp discount',
                     discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Fixed },
+                        { value: 10_0000, type: GroupPriceDiscountType.Fixed },
                     ],
                 }),
             });
@@ -951,7 +1005,7 @@ describe('Unit.RegisterCart', () => {
             const expensiveCampDiscount = createBundleDiscount({
                 name: 'Expensive camp discount',
                 discounts: [
-                    { value: 5_00, type: GroupPriceDiscountType.Fixed },
+                    { value: 5_0000, type: GroupPriceDiscountType.Fixed },
                 ],
             });
 
@@ -968,10 +1022,10 @@ describe('Unit.RegisterCart', () => {
             const cart = checkout.cart;
 
             const itemA = RegisterItem.defaultFor(memberA, campA, organization);
-            const itemB = RegisterItem.defaultFor(memberB, campB, organization); // +10_00 discount
-            const itemC = RegisterItem.defaultFor(memberC, campB, organization); // +10_00 discount and +5_00 discount
-            const itemD = RegisterItem.defaultFor(memberD, campA, organization); // +10_00 discount
-            const itemE = RegisterItem.defaultFor(memberE, campB, organization); // +10_00 discount and +5_00 discount
+            const itemB = RegisterItem.defaultFor(memberB, campB, organization); // +10_0000 discount
+            const itemC = RegisterItem.defaultFor(memberC, campB, organization); // +10_0000 discount and +5_0000 discount
+            const itemD = RegisterItem.defaultFor(memberD, campA, organization); // +10_0000 discount
+            const itemE = RegisterItem.defaultFor(memberE, campB, organization); // +10_0000 discount and +5_0000 discount
 
             cart.add(itemA);
             cart.add(itemB);
@@ -991,30 +1045,30 @@ describe('Unit.RegisterCart', () => {
             })).toEqual([
                 {
                     name: 'All camp discount',
-                    total: 10_00 * 4,
-                    netTotal: 10_00 * 4,
+                    total: 10_0000 * 4,
+                    netTotal: 10_0000 * 4,
                 },
                 {
                     name: 'Expensive camp discount',
-                    total: 5_00 * 2,
-                    netTotal: 5_00 * 2,
+                    total: 5_0000 * 2,
+                    netTotal: 5_0000 * 2,
                 },
             ]);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 100_00 * 2 + 150_00 * 3,
+                    price: 100_0000 * 2 + 150_0000 * 3,
                 }),
                 {
                     name: 'All camp discount',
-                    price: -10_00 * 4,
+                    price: -10_0000 * 4,
                 },
                 {
                     name: 'Expensive camp discount',
-                    price: -5_00 * 2,
+                    price: -5_0000 * 2,
                 },
                 expect.objectContaining({
-                    price: 100_00 * 2 + 150_00 * 3 - 10_00 * 4 - 5_00 * 2,
+                    price: 100_0000 * 2 + 150_0000 * 3 - 10_0000 * 4 - 5_0000 * 2,
                 }),
             ]);
         });
@@ -1037,7 +1091,7 @@ describe('Unit.RegisterCart', () => {
                         { value: 15_00, type: GroupPriceDiscountType.Percentage },
                     ],
                 }),
-                groupPrices: [100_00, 40_00],
+                groupPrices: [100_0000, 40_0000],
             });
 
             const [groupA, groupB] = groups;
@@ -1048,7 +1102,7 @@ describe('Unit.RegisterCart', () => {
 
             registrationA.discounts.set(discount.id, AppliedRegistrationDiscount.create({
                 name: discount.name,
-                amount: 10_00, // 10% discount on 100_00 = 10_00
+                amount: 10_0000, // 10% discount on 100_0000 = 10_0000
             }));
 
             // Now create itemC
@@ -1061,28 +1115,28 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
             expect(itemC.calculatedRefund).toEqual(0);
             expect(itemC.calculatedPriceDueLater).toEqual(0);
 
-            // Check calculated discount is 100_00 * 0.15 + 40_00 * 0.10 = 15_00 + 4_00 = 19_00
+            // Check calculated discount is 100_0000 * 0.15 + 40_0000 * 0.10 = 15_0000 + 4_0000 = 19_0000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(19_00);
-            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_00); // The previous discount
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(9_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(19_0000);
+            expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(10_0000); // The previous discount
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(9_0000);
 
-            expect(cart.price).toEqual(40_00);
-            expect(checkout.totalPrice).toEqual(40_00 - 9_00);
+            expect(cart.price).toEqual(40_0000);
+            expect(checkout.totalPrice).toEqual(40_0000 - 9_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 40_00,
+                    price: 40_0000,
                 }),
                 {
                     name: 'Multiple family members discount',
-                    price: -9_00,
+                    price: -9_0000,
                 },
                 expect.objectContaining({
-                    price: 40_00 - 9_00,
+                    price: 40_0000 - 9_0000,
                 }),
             ]);
         });
@@ -1093,7 +1147,7 @@ describe('Unit.RegisterCart', () => {
 
             const { organization, groups, family, discount } = setupDiscountTest({
                 memberCount: 3,
-                groupPrices: [50_00, 40_00],
+                groupPrices: [50_0000, 40_0000],
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
@@ -1117,35 +1171,35 @@ describe('Unit.RegisterCart', () => {
             cart.add(itemC);
             cart.calculatePrices();
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
             expect(itemA.calculatedRefund).toEqual(0);
             expect(itemA.calculatedPriceDueLater).toEqual(0);
 
-            expect(itemB.calculatedPrice).toEqual(40_00);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
             expect(itemB.calculatedRefund).toEqual(0);
             expect(itemB.calculatedPriceDueLater).toEqual(0);
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
             expect(itemC.calculatedRefund).toEqual(0);
             expect(itemC.calculatedPriceDueLater).toEqual(0);
 
-            // Check calculated discount is 50_00 * 0.10 = 5_00
+            // Check calculated discount is 50_0000 * 0.10 = 5_0000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(5_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(5_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(5_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(5_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 5_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 5_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -5_00,
+                    price: -5_0000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 5_00,
+                    price: 130_0000 - 5_0000,
                 }),
             ]);
         });
@@ -1158,7 +1212,7 @@ describe('Unit.RegisterCart', () => {
 
             const { organization, groups, family } = setupDiscountTest({
                 memberCount: 3,
-                groupPrices: [50_00, 40_00],
+                groupPrices: [50_0000, 40_0000],
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
@@ -1189,29 +1243,29 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
-            expect(itemB.calculatedPrice).toEqual(40_00);
-            expect(itemC.calculatedPrice).toEqual(40_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
+            expect(itemC.calculatedPrice).toEqual(40_0000);
 
-            // Check calculated discount is 40_00 * 1 + 50_00 * 5% = 40_00 + 2_50 = 42_50
+            // Check calculated discount is 40_0000 * 1 + 50_0000 * 5% = 40_0000 + 2_5000 = 42_5000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(42_50);
+            expect(cart.bundleDiscounts[0].total).toEqual(42_5000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(42_50);
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(42_5000);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
 
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 42_50);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 42_5000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -42_50,
+                    price: -42_5000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 42_50,
+                    price: 130_0000 - 42_5000,
                 }),
             ]);
 
@@ -1220,17 +1274,17 @@ describe('Unit.RegisterCart', () => {
 
             cart.calculatePrices();
 
-            // 10% on 50_00 + 5% on 40_00 = 5_00 + 2_00 = 7_00
+            // 10% on 50_0000 + 5% on 40_0000 = 5_0000 + 2_0000 = 7_0000
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 130_00,
+                    price: 130_0000,
                 }),
                 {
                     name: 'Bundle discount',
-                    price: -7_00,
+                    price: -7_0000,
                 },
                 expect.objectContaining({
-                    price: 130_00 - 7_00,
+                    price: 130_0000 - 7_0000,
                 }),
             ]);
         });
@@ -1266,28 +1320,28 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
-            expect(itemB.calculatedPrice).toEqual(40_00);
-            expect(itemC.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
+            expect(itemC.calculatedPrice).toEqual(50_0000);
 
-            // Check calculated discount is 50_00 * 0.10 = 5_00
+            // Check calculated discount is 50_0000 * 0.10 = 5_0000
             expect(cart.bundleDiscounts.map(c => c.netTotal)).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(5_00);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(5_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(5_0000);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(5_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 50_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 50_00 - 5_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 50_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 50_0000 - 5_0000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00,
+                    price: 50_0000 + 40_0000 + 50_0000,
                 }),
                 {
                     name: 'Multiple lessons discount (John)',
-                    price: -5_00,
+                    price: -5_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00 - 5_00,
+                    price: 50_0000 + 40_0000 + 50_0000 - 5_0000,
                 }),
             ]);
 
@@ -1297,18 +1351,18 @@ describe('Unit.RegisterCart', () => {
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00, // no change
+                    price: 50_0000 + 40_0000 + 50_0000, // no change
                 }),
                 {
                     name: 'Multiple lessons discount (John)',
-                    price: -5_00,
+                    price: -5_0000,
                 },
                 {
                     name: 'Multiple lessons discount (Jane)',
-                    price: -5_00,
+                    price: -5_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00 - 5_00 - 5_00,
+                    price: 50_0000 + 40_0000 + 50_0000 - 5_0000 - 5_0000,
                 }),
             ]);
         });
@@ -1342,7 +1396,7 @@ describe('Unit.RegisterCart', () => {
 
             // No discount should be applied yet (need at least 2 different groups)
             expect(cart.bundleDiscounts).toHaveLength(0);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000);
 
             // Now register one member for group B as well
             const itemC = RegisterItem.defaultFor(memberA, groupB, organization);
@@ -1351,22 +1405,22 @@ describe('Unit.RegisterCart', () => {
 
             // Now we should get a discount
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(4_00); // 10% of 40_00 (not 50_00)
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(4_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(4_0000); // 10% of 40_0000 (not 50_0000)
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(4_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 40_00 - 4_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 40_0000 - 4_0000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 40_00,
+                    price: 50_0000 + 40_0000 + 40_0000,
                 }),
                 {
                     name: 'Multiple family members discount (Group B)',
-                    price: -4_00,
+                    price: -4_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 40_00 - 4_00,
+                    price: 50_0000 + 40_0000 + 40_0000 - 4_0000,
                 }),
             ]);
 
@@ -1377,14 +1431,14 @@ describe('Unit.RegisterCart', () => {
             // Now we should get a discount for both groups
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 40_00,
+                    price: 50_0000 + 40_0000 + 40_0000,
                 }),
                 {
                     name: 'Multiple family members discount',
-                    price: -9_00,
+                    price: -9_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 40_00 - 9_00,
+                    price: 50_0000 + 40_0000 + 40_0000 - 9_0000,
                 }),
             ]);
         });
@@ -1420,28 +1474,28 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             // Check price for items
-            expect(itemA.calculatedPrice).toEqual(50_00);
-            expect(itemB.calculatedPrice).toEqual(40_00);
-            expect(itemC.calculatedPrice).toEqual(50_00);
+            expect(itemA.calculatedPrice).toEqual(50_0000);
+            expect(itemB.calculatedPrice).toEqual(40_0000);
+            expect(itemC.calculatedPrice).toEqual(50_0000);
 
             // Check calculated discount - should only apply to member A (who has multiple registrations)
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(5_00); // 10% of 50_00 (we always apply discounts to highest price first)
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(5_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(5_0000); // 10% of 50_0000 (we always apply discounts to highest price first)
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(5_0000);
 
-            expect(cart.price).toEqual(50_00 + 40_00 + 50_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 40_00 + 50_00 - 5_00);
+            expect(cart.price).toEqual(50_0000 + 40_0000 + 50_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 40_0000 + 50_0000 - 5_0000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00,
+                    price: 50_0000 + 40_0000 + 50_0000,
                 }),
                 {
                     name: 'Multiple lessons discount (John)',
-                    price: -5_00,
+                    price: -5_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00 - 5_00,
+                    price: 50_0000 + 40_0000 + 50_0000 - 5_0000,
                 }),
             ]);
 
@@ -1454,14 +1508,14 @@ describe('Unit.RegisterCart', () => {
             // Now we should get a discount for group A (since two members are registered for it)
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00,
+                    price: 50_0000 + 40_0000 + 50_0000,
                 }),
                 {
                     name: 'Multiple lessons discount (Group A)',
-                    price: -5_00, // 10% of the second 50_00
+                    price: -5_0000, // 10% of the second 50_0000
                 },
                 expect.objectContaining({
-                    price: 50_00 + 40_00 + 50_00 - 5_00,
+                    price: 50_0000 + 40_0000 + 50_0000 - 5_0000,
                 }),
             ]);
         });
@@ -1472,7 +1526,7 @@ describe('Unit.RegisterCart', () => {
 
             const { organization, groups, family, period, discount } = setupDiscountTest({
                 memberCount: 2,
-                groupPrices: [50_00, 40_00],
+                groupPrices: [50_0000, 40_0000],
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Multiple family members discount',
@@ -1491,7 +1545,7 @@ describe('Unit.RegisterCart', () => {
             const registrationB = addHistoricRegistration(memberB, groupB, organization);
 
             // Create a new group that is not applicable to the discount
-            const [groupC] = createTestGroups(organization, period, [30_00], ['Group C']);
+            const [groupC] = createTestGroups(organization, period, [30_0000], ['Group C']);
             const itemC = RegisterItem.defaultFor(memberA, groupC, organization);
 
             // Add to a single cart
@@ -1499,13 +1553,13 @@ describe('Unit.RegisterCart', () => {
             const cart = checkout.cart;
             cart.add(itemC);
             cart.calculatePrices();
-            expect(itemC.calculatedPrice).toEqual(30_00);
+            expect(itemC.calculatedPrice).toEqual(30_0000);
 
             expect(cart.bundleDiscounts).toHaveLength(0);
-            expect(checkout.totalPrice).toEqual(30_00);
+            expect(checkout.totalPrice).toEqual(30_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 30_00,
+                    price: 30_0000,
                 }),
             ]);
 
@@ -1515,27 +1569,27 @@ describe('Unit.RegisterCart', () => {
 
             cart.calculatePrices();
             // Check price for items
-            expect(itemD.calculatedPrice).toEqual(50_00);
-            expect(itemC.calculatedPrice).toEqual(30_00);
+            expect(itemD.calculatedPrice).toEqual(50_0000);
+            expect(itemC.calculatedPrice).toEqual(30_0000);
 
             // Check calculated discount: should also take old registrations into account
-            // 50_00 * 10% + 50_00 * 10% = 5_00 + 5_00 = 10_00
+            // 50_0000 * 10% + 50_0000 * 10% = 5_0000 + 5_0000 = 10_0000
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(10_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(10_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(10_00);
-            expect(cart.price).toEqual(50_00 + 30_00);
-            expect(checkout.totalPrice).toEqual(50_00 + 30_00 - 10_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(10_0000);
+            expect(cart.price).toEqual(50_0000 + 30_0000);
+            expect(checkout.totalPrice).toEqual(50_0000 + 30_0000 - 10_0000);
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 30_00,
+                    price: 50_0000 + 30_0000,
                 }),
                 {
                     name: 'Multiple family members discount',
-                    price: -10_00,
+                    price: -10_0000,
                 },
                 expect.objectContaining({
-                    price: 50_00 + 30_00 - 10_00,
+                    price: 50_0000 + 30_0000 - 10_0000,
                 }),
             ]);
         });
@@ -1549,7 +1603,7 @@ describe('Unit.RegisterCart', () => {
                     countWholeFamily: true,
                     countPerGroup: false,
                     discounts: [
-                        { value: 1000_00, type: GroupPriceDiscountType.Fixed },
+                        { value: 1000_0000, type: GroupPriceDiscountType.Fixed },
                     ],
                 }),
             });
@@ -1567,22 +1621,22 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             expect(cart.bundleDiscounts).toHaveLength(1);
-            expect(cart.bundleDiscounts[0].total).toEqual(50_00);
+            expect(cart.bundleDiscounts[0].total).toEqual(50_0000);
             expect(cart.bundleDiscounts[0].totalAlreadyApplied).toEqual(0);
-            expect(cart.bundleDiscounts[0].netTotal).toEqual(50_00);
-            expect(cart.price).toEqual(50_00 + 40_00);
-            expect(checkout.totalPrice).toEqual(40_00);
+            expect(cart.bundleDiscounts[0].netTotal).toEqual(50_0000);
+            expect(cart.price).toEqual(50_0000 + 40_0000);
+            expect(checkout.totalPrice).toEqual(40_0000);
 
             expect(checkout.priceBreakown).toEqual([
                 expect.objectContaining({
-                    price: 50_00 + 40_00,
+                    price: 50_0000 + 40_0000,
                 }),
                 {
                     name: 'Multiple family members discount',
-                    price: -50_00,
+                    price: -50_0000,
                 },
                 expect.objectContaining({
-                    price: 40_00,
+                    price: 40_0000,
                 }),
             ]);
         });

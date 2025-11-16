@@ -166,7 +166,7 @@ export class BuckarooHelper {
 
         const data = {
             Currency: 'EUR',
-            AmountDebit: (payment.price / 100).toFixed(2),
+            AmountDebit: (payment.price / 10000).toFixed(2), // 4 decimals to zero
             Invoice: 'ID ' + payment.id,
             ClientIP: {
                 Type: 0, // 0 = ipv4, 1 = ipv6

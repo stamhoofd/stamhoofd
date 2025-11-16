@@ -4,7 +4,7 @@ export const participation = DocumentTemplateDefinition.create({
     type: 'participation',
     name: $t(`c2fe9ab5-f728-4898-a36c-18ba68ea7057`),
     allowChangingMinPricePaid: true,
-    defaultMinPricePaid: 1,
+    defaultMinPricePaid: 1_00, // = 1 cent
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',

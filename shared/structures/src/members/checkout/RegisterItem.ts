@@ -23,6 +23,7 @@ import { type Registration } from '../Registration.js';
 import { type RegisterCart } from './RegisterCart.js';
 import { type RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -32,6 +33,7 @@ export class RegisterItemOption extends AutoEncoder {
     optionMenu: GroupOptionMenu;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amount = 1;
 }
 

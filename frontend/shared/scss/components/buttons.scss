@@ -447,6 +447,34 @@
             color: $color-primary;
         }
 
+        &.enabled {
+            &:after {
+                content: "";
+                position: absolute;
+                //left: 0px;
+                //right: 0px;
+                height: 34px;
+                top: 50% !important;
+                bottom: auto !important;
+                transform: translate(0%, -50%);
+                background-color: var(--color-current-background-shade, #{$color-background-shade});
+                border-radius: $border-radius;
+                z-index: -1;
+                will-change: opacity;
+                opacity: 1;
+                transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1);
+
+                // Inner shadow
+                box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
+            }
+
+            &.small {
+                &:after {
+                    height: 28px;
+                }
+            }
+        }
+
         &.unbold {
             font-weight: $font-weight-medium;
         }

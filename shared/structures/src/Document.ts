@@ -9,6 +9,7 @@ import { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js'
 import { RecordAnswer, RecordAnswerDecoder } from './members/records/RecordAnswer.js';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import { RecordSettings } from './members/records/RecordSettings.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum DocumentStatus {
     Draft = 'Draft',
@@ -43,9 +44,11 @@ export class DocumentSettings extends AutoEncoder {
     maxAge: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     minPrice: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 348 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     minPricePaid: number | null = null;
 
     /**
@@ -98,9 +101,11 @@ export class DocumentTemplateDefinition extends AutoEncoder {
     defaultMaxAge: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     defaultMinPrice: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 348 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     defaultMinPricePaid: number | null = null;
 
     @field({ decoder: BooleanDecoder, version: 347 })

@@ -157,7 +157,6 @@ export * from './src/members/Parent.js';
 export * from './src/members/ParentType.js';
 export * from './src/members/Payment.js';
 export * from './src/members/PaymentGeneral.js';
-export * from './src/members/PaymentPatch.js';
 export * from './src/members/PaymentWithRegistrations.js';
 export * from './src/members/PlatformMember.js';
 export * from './src/members/records/LegacyRecord.js';
@@ -168,7 +167,6 @@ export * from './src/members/records/RecordConfigurationFactory.js';
 export * from './src/members/records/RecordFactory.js';
 export * from './src/members/records/RecordSettings.js';
 export * from './src/members/Registration.js';
-export * from './src/members/RegistrationPatch.js';
 export * from './src/members/RegistrationWithEncryptedMember.js';
 export * from './src/members/RegistrationWithTinyMember.js';
 export * from './src/members/ReviewTime.js';
@@ -204,6 +202,9 @@ export * from './src/webshops/UitpasNumberAndPrice.js';
 
 // billing
 export * from './src/billing/index.js';
+
+// Checkout
+export * from './src/checkout/index.js';
 
 // Admin
 export * from './src/admin/MemberSummary.js';

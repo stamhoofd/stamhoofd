@@ -1,5 +1,5 @@
 <template>
-    <FloatInput v-bind="props" v-model="model" :suffix="currency" />
+    <FloatInput v-bind="props" v-model="model" :suffix="currency" :fraction-digits="4" :round-fraction-digits="2" />
 </template>
 
 <script lang="ts" setup generic="T extends number | null">

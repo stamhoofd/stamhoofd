@@ -12,12 +12,14 @@ import { PaymentMethod } from './PaymentMethod.js';
 import { PaymentProvider } from './PaymentProvider.js';
 import { PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
 import { StripeMetaData } from './StripeAccount.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class CreditItem extends AutoEncoder {
     /**
      * Credits in cents
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     change = 0;
 
     /**

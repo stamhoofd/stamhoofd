@@ -1,6 +1,7 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem } from '../../BalanceItem.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 
 /**
  * Contains an intention to pay for an outstanding balance item
@@ -17,6 +18,7 @@ export class BalanceItemCartItem extends AutoEncoder {
      * Amount you want to pay of that balance item
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     validate(data: { balanceItems?: BalanceItem[] }) {

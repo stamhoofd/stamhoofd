@@ -1,5 +1,5 @@
 import { column, Database } from '@simonbackx/simple-database';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment, VATExcemptReason } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -72,25 +72,67 @@ export class BalanceItem extends QueryableModel {
     amount = 1;
 
     /**
-     * Total prices
+     * Price per piece
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
      */
     @column({ type: 'integer' })
     unitPrice: number;
 
+    @column({ type: 'integer', nullable: true })
+    VATPercentage: number | null = null;
+
+    @column({ type: 'boolean' })
+    VATIncluded = true;
+
+    /**
+     * Whether there is a VAT excempt reason.
+     * Note: keep the original VAT in these cases. On time of payment or invoicing, the VAT excemption will be revalidated.
+     * If that fails, we can still charge the VAT.
+     */
+    @column({ type: 'string', nullable: true })
+    VATExcempt: VATExcemptReason | null = null;
+
     /**
      * Cached value, for optimizations
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
      */
     @column({ type: 'integer' })
     pricePaid = 0;
 
     /**
      * Cached value, for optimizations
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
      */
     @column({ type: 'integer' })
     pricePending = 0;
 
     /**
      * Cached value, for optimizations
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
      */
     @column({
         type: 'integer',
@@ -143,7 +185,67 @@ export class BalanceItem extends QueryableModel {
     })
     updatedAt: Date;
 
+    /**
+     * @deprecated: use priceWithVAT
+     * NOTE: This contains an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
     get price() {
+        return this.priceWithVAT;
+    }
+
+    /**
+     * Difference here is that when the VAT is excempt, this is still set, while VAT will be zero.
+     */
+    get calculatedVAT() {
+        if (!this.VATPercentage) {
+            // VAT percentage not set, so treat as 0%
+            return 0;
+        }
+
+        if (this.VATIncluded) {
+            // Calculate VAT on price incl. VAT, which is not 100% correct and causes roudning issues
+            return this.unitPrice * this.amount - Math.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
+        }
+
+        // Note: the rounding is only to avoid floating point errors in software, this should not cause any actual rounding
+        // That is the reason why we store it up to 4 digits after comma
+        return Math.round(this.VATPercentage * this.unitPrice * this.amount / 100);
+    }
+
+    /**
+     * Note, this is not 100% accurate.
+     * Legally we most often need to calculate the VAT on invoice level and round it there.
+     * Technically we cannot pass infinite accurate numbers around in a system to avoid rounding. The returned number is
+     * therefore rounded up to 4 digits after the comma. On normal amounts, with only 2 digits after the comma, this won't lose accuracy.
+     * So the VAT calculation needs to happen at the end again before payment.
+     */
+    get VAT() {
+        if (this.VATExcempt) {
+            // Exempt from VAT
+            return 0;
+        }
+
+        return this.calculatedVAT;
+    }
+
+    get priceWithVAT() {
+        return this.priceWithoutVAT + this.VAT;
+    }
+
+    /**
+     * Note: when the VAT is already included, the result of this will be unreliable because of rounding issues.
+     * Do not use this in calculations!
+     */
+    get priceWithoutVAT() {
+        if (this.VATIncluded) {
+            return this.unitPrice * this.amount - this.calculatedVAT;
+        }
+
         return this.unitPrice * this.amount;
     }
 
@@ -168,18 +270,26 @@ export class BalanceItem extends QueryableModel {
         return this.isAfterDueDate;
     }
 
+    /**
+     * NOTE: This contains an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
     get calculatedPriceOpen() {
         if (this.status !== BalanceItemStatus.Due) {
             return -this.pricePaid - this.pricePending;
         }
-        return this.price - this.pricePaid - this.pricePending;
+        return this.priceWithVAT - this.pricePaid - this.pricePending;
     }
 
     /**
      * price minus pricePaid
      */
     get priceUnpaid() {
-        return this.price - this.pricePaid;
+        return this.priceWithVAT - this.pricePaid;
     }
 
     get isPaid() {

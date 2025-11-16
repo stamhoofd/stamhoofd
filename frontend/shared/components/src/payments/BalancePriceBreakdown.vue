@@ -43,7 +43,7 @@ const priceBreakdown = computed(() => {
     if (all.length > 0) {
         all.unshift({
             name: $t(`c38e102e-a16b-4a02-a05f-e282eaead461`),
-            price: balance.price + laterBalance.price,
+            price: balance.priceWithVAT + laterBalance.priceWithVAT,
         });
     }
 

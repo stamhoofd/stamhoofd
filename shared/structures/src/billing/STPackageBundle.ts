@@ -185,7 +185,7 @@ export class STPackageBundleHelper {
                     removeAt,
                     meta: STPackageMeta.create({
                         type: STPackageType.Members,
-                        unitPrice: 100,
+                        unitPrice: 1_0000, // 1 euro
                         minimumAmount: 0,
                         allowRenew: true,
                         pricingType: STPricingType.PerMember,
@@ -206,7 +206,7 @@ export class STPackageBundleHelper {
                         pricingType: STPricingType.Fixed,
                         serviceFeeFixed: 0,
                         serviceFeePercentage: 2_00,
-                        serviceFeeMaximum: 20,
+                        serviceFeeMaximum: 2000, // 20 cent
                         startDate: new Date(date),
                         canDeactivate: true,
                     }),

@@ -430,7 +430,9 @@ export class Formatter {
         const formatted = new Intl.NumberFormat('nl-BE', {
             style: 'currency',
             currency: 'EUR',
-        }).format(Math.abs(value) / 100);
+            maximumFractionDigits: 4,
+            minimumFractionDigits: 2,
+        }).format(Math.abs(value) / 100_00);
 
         const v = (value < 0 ? '- ' : '') + formatted.replace(new RegExp('EUR', 'ig'), '€');
         if (removeZeroDecimals && (v.endsWith(',00') || v.endsWith('.00'))) {

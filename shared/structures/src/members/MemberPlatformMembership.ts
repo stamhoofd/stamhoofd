@@ -1,5 +1,6 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, IntegerDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces';
 
 export class MemberPlatformMembership extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -33,9 +34,11 @@ export class MemberPlatformMembership extends AutoEncoder {
     balanceItemId: string | null = null;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     priceWithoutDiscount = 0;
 
     @field({ decoder: IntegerDecoder, version: 336 })

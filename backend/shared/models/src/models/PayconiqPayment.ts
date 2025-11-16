@@ -92,7 +92,7 @@ export class PayconiqPayment extends QueryableModel {
 
         // Check and save amount
         if (typeof response.amount === 'number' && status === PaymentStatus.Succeeded) {
-            const amount = response.amount;
+            const amount = response.amount * 100; // Convert from integer with 2 decimal places to 4 places
             if (amount < payment.price) {
                 // We do NOT allow lower prices
                 console.error('Manual price change detected by Payconiq user. Failing the payment');
@@ -157,7 +157,7 @@ export class PayconiqPayment extends QueryableModel {
 
         const response = await this.request('POST', '/v3/payments', {
             reference: payment.id.replaceAll('-', ''), // 36 chars, max length is 35.... The actual id is also in the description
-            amount: payment.price,
+            amount: Math.round(payment.price / 100), // 4 decimals to 2 decimals
             currency: 'EUR',
             callbackUrl: callbackUrl ?? 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true',
             returnUrl,

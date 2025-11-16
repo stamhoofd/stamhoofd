@@ -266,13 +266,13 @@ describe('E2E.Stock', () => {
 
         productPrice1 = ProductPrice.create({
             name: 'productPrice1',
-            price: 100,
+            price: 1_0000,
             stock: 100,
         });
 
         productPrice2 = ProductPrice.create({
             name: 'productPrice2',
-            price: 150,
+            price: 1_5000,
             stock: 100,
         });
 
@@ -284,7 +284,7 @@ describe('E2E.Stock', () => {
 
         checkboxOption1 = Option.create({
             name: 'checkboxOption1',
-            price: 10,
+            price: 1000,
             stock: 100,
         });
 
@@ -296,7 +296,7 @@ describe('E2E.Stock', () => {
 
         radioOption1 = Option.create({
             name: 'radioOption1',
-            price: 10,
+            price: 1000,
             stock: 100,
         });
 

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Address } from '../addresses/Address.js';
 import { Country } from '../addresses/CountryDecoder.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)
@@ -77,6 +78,7 @@ export class STPackageMeta extends AutoEncoder {
      * One time price for the package, per year, or per member depending on pricingType
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     unitPrice = 0;
 
     /**
@@ -89,26 +91,31 @@ export class STPackageMeta extends AutoEncoder {
      * Fixed service fee per payment, in cents
      */
     @field({ decoder: IntegerDecoder, optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
     serviceFeeFixed = 0;
 
     /**
      * Fixed service fee per payment, in cents
      */
     @field({ decoder: IntegerDecoder, optional: true, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true, nullable: true })
     serviceFeeMinimum: number | null = null;
 
     /**
      * Fixed service fee per payment, in cents
      */
     @field({ decoder: IntegerDecoder, optional: true, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true, nullable: true })
     serviceFeeMaximum: number | null = null;
 
     /// Contains the (paid) invoiced amount
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     paidAmount = 0;
 
     /// Contains the (paid) invoiced price. Used for statistics and reporting
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     paidPrice = 0;
 
     /**
@@ -210,15 +217,18 @@ export class STPackage extends AutoEncoder {
 
 export class STPackageStatusServiceFee extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     fixed = 0;
 
     @field({ decoder: IntegerDecoder })
     percentage = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true, optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true, optional: true })
     minimum: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true, optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true, optional: true })
     maximum: number | null = null;
 
     @field({ decoder: DateDecoder })

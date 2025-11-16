@@ -8,6 +8,7 @@ import { Image } from '../files/Image.js';
 import { ReservedSeat } from '../SeatingPlan.js';
 import { Webshop } from './Webshop.js';
 import { WebshopField } from './WebshopField.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class ProductPrice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -20,10 +21,12 @@ export class ProductPrice extends AutoEncoder {
      * Price is always in cents, to avoid floating point errors
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     // Optional: different price if you reach a given amount of pieces (options and prices shouldn't be the same)
     @field({ decoder: IntegerDecoder, nullable: true, version: 93 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     discountPrice: number | null = null;
 
     // Only used if discountPrice is not null
@@ -80,6 +83,7 @@ export class Option extends AutoEncoder {
      * Price added (can be negative) is always in cents, to avoid floating point errors
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     /**

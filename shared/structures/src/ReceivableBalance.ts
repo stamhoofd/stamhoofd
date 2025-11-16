@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
 import { TranslateMethod } from './I18nInterface.js';
 import { PaymentGeneral } from './members/PaymentGeneral.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum ReceivableBalanceType {
     organization = 'organization',
@@ -74,19 +75,23 @@ export class ReceivableBalance extends AutoEncoder {
     organizationId: string;
 
     @field({ decoder: IntegerDecoder, version: 354 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amountPaid = 0;
 
     @field({ decoder: IntegerDecoder, field: 'amount' })
     @field({ decoder: IntegerDecoder, version: 354 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amountOpen = 0;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amountPending = 0;
 
     @field({ decoder: DateDecoder, nullable: true, version: 355 })
     lastReminderEmail: Date | null = null;
 
     @field({ decoder: IntegerDecoder, version: 355 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     lastReminderAmountOpen = 0;
 
     @field({ decoder: IntegerDecoder, version: 355 })

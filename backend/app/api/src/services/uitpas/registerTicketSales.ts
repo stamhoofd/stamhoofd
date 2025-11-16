@@ -76,7 +76,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         return {
             uitpasNumber: ticketSale.uitpasNumber,
             eventId,
-            regularPrice: (ticketSale.basePrice / 100).toFixed(2), // Convert from cents to euros
+            regularPrice: (ticketSale.basePrice / 10000).toFixed(2), // Convert from 4 decimals to 0 decimals
             regularPriceLabel: ticketSale.basePriceLabel,
             tariff: {
                 id: ticketSale.uitpasTariffId,
@@ -131,7 +131,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         }
         results.set(request, {
             ticketSaleId: ticketSale.id,
-            reducedPriceUitpas: Math.round(ticketSale.tariff.price * 100),
+            reducedPriceUitpas: Math.round(ticketSale.tariff.price * 100) * 100,
             registeredAt: now,
         });
     }

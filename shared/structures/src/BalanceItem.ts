@@ -1,10 +1,11 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum BalanceItemStatusV352 {
     Hidden = 'Hidden',
@@ -28,6 +29,19 @@ export enum BalanceItemStatus {
      * In case you don't want to refund the amount, you should change the status to 'Due' and change the amount to the amount that is not refundable.
     */
     Canceled = 'Canceled',
+}
+
+export enum VATExcemptReason {
+    /**
+     * Btw verlegd: Art. 39 bis – intracommunautaire levering
+     */
+    IntraCommunity = 'IntraCommunity',
+}
+
+export function getVATExcemptReasonName(reason: VATExcemptReason): string {
+    switch (reason) {
+        case VATExcemptReason.IntraCommunity: return $t('Intracommunautaire (EU) verleggingsregeling');
+    }
 }
 
 export enum BalanceItemType {
@@ -201,10 +215,45 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: IntegerDecoder, version: 307 })
     amount = 1;
 
+    /**
+     * Price per piece
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
     @field({ decoder: IntegerDecoder, field: 'price' })
     @field({ decoder: IntegerDecoder, field: 'unitPrice', version: 307 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     unitPrice = 0; // unit price
 
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    VATPercentage: number | null = null;
+
+    @field({ decoder: BooleanDecoder, ...NextVersion })
+    VATIncluded = true;
+
+    /**
+     * Whether there is a VAT excempt reason.
+     * Note: keep the original VAT in these cases. On time of payment or invoicing, the VAT excemption will be revalidated.
+     * If that fails, we can still charge the VAT.
+     */
+    @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, ...NextVersion })
+    VATExcempt: VATExcemptReason | null = null;
+
+    /**
+     * @deprecated use priceWithVAT in combination with isDue
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
     get price() {
         if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
             return 0;
@@ -212,18 +261,105 @@ export class BalanceItem extends AutoEncoder {
         return this.unitPrice * this.amount;
     }
 
-    get priceOpen() {
-        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
-            return -this.pricePaid - this.pricePending;
+    /**
+     * Difference here is that when the VAT is excempt, this is still set, while VAT will be zero.
+     */
+    get calculatedVAT() {
+        if (!this.VATPercentage) {
+            // VAT percentage not set, so treat as 0%
+            return 0;
         }
-        return this.price - this.pricePaid - this.pricePending;
+
+        if (this.VATIncluded) {
+            // Calculate VAT on price incl. VAT, which is not 100% correct and causes roudning issues
+            return this.unitPrice * this.amount - Math.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
+        }
+
+        // Note: the rounding is only to avoid floating point errors in software, this should not cause any actual rounding
+        // That is the reason why we store it up to 4 digits after comma
+        return Math.round(this.VATPercentage * this.unitPrice * this.amount / 100);
     }
 
+    /**
+     * Note, this is not 100% accurate.
+     * Legally we most often need to calculate the VAT on invoice level and round it there.
+     * Technically we cannot pass infinite accurate numbers around in a system to avoid rounding. The returned number is
+     * therefore rounded up to 4 digits after the comma. On normal amounts, with only 2 digits after the comma, this won't lose accuracy.
+     * So the VAT calculation needs to happen at the end again before payment.
+     */
+    get VAT() {
+        if (this.VATExcempt) {
+            // Exempt from VAT
+            return 0;
+        }
+
+        return this.calculatedVAT;
+    }
+
+    get priceWithVAT() {
+        return this.priceWithoutVAT + this.VAT;
+    }
+
+    /**
+     * Note: when the VAT is already included, the result of this will be unreliable because of rounding issues.
+     * Do not use this in calculations!
+     */
+    get priceWithoutVAT() {
+        if (this.VATIncluded) {
+            return this.unitPrice * this.amount - this.calculatedVAT;
+        }
+
+        return this.unitPrice * this.amount;
+    }
+
+    /**
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
+    get priceOpen() {
+        if (this.status !== BalanceItemStatus.Due) {
+            return -this.pricePaid - this.pricePending;
+        }
+        return this.priceWithVAT - this.pricePaid - this.pricePending;
+    }
+
+    /**
+     * Cached value, for optimizations
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     pricePaid = 0;
 
+    /**
+     * Cached value, for optimizations
+     *
+     * NOTE: We store an integer of the price up to 4 digits after the comma.
+     * 1 euro = 10000.
+     * 0,01 euro = 100
+     * 0,0001 euro = 1
+     *
+     * This is required for correct VAT calculations without intermediate rounding.
+     */
     @field({ decoder: IntegerDecoder, version: 335 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     pricePending = 0;
+
+    /**
+     * How much has been invoiced
+     */
+    @field({ decoder: IntegerDecoder, ...NextVersion })
+    priceInvoiced = 0;
 
     @field({ decoder: DateDecoder, nullable: true, version: 353 })
     dueAt: Date | null = null;
@@ -251,7 +387,7 @@ export class BalanceItem extends AutoEncoder {
     status: BalanceItemStatus = BalanceItemStatus.Due;
 
     get isPaid() {
-        return this.pricePaid === this.price;
+        return this.pricePaid === this.priceWithVAT;
     }
 
     get isDue() {
@@ -299,24 +435,11 @@ export class BalanceItem extends AutoEncoder {
         // Get sum of balance payments
         const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0);
         const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0);
-        const totalPrice = items.map(p => p.price).reduce((t, total) => total + t, 0);
+        const totalPrice = items.map(p => p.priceWithVAT).reduce((t, total) => total + t, 0);
         const totalOpen = items.map(p => p.priceOpen).reduce((t, total) => total + t, 0);
 
         return {
-            /**
-             * @deprecated
-             */
-            totalPending, // Pending payment
-            /**
-             * @deprecated
-             */
-            totalOpen, // Not yet started
-            /**
-             * @deprecated
-             */
-            total: totalPending + totalOpen, // total not yet paid
-
-            price: totalPrice,
+            priceWithVAT: totalPrice,
             pricePending: totalPending,
             priceOpen: totalOpen,
             pricePaid: totalPaid,
@@ -431,10 +554,24 @@ export class BalanceItem extends AutoEncoder {
             },
         ].filter(a => a.price !== 0);
 
-        if (all.length > 0) {
+        if (this.VATPercentage) {
+            // Add VAT
+            all.unshift({
+                name: $t(`Prijs excl. btw`),
+                price: this.priceWithoutVAT,
+            }, {
+                name: $t(`Btw`),
+                price: this.VAT,
+            },
+            {
+                name: $t(`Prijs incl. btw`),
+                price: this.priceWithVAT,
+            });
+        }
+        else if (all.length > 0) {
             all.unshift({
                 name: $t(`8dfbd01b-feb1-4b7e-a1f1-2daf19fb2775`),
-                price: this.price,
+                price: this.priceWithVAT,
             });
         }
 
@@ -632,6 +769,7 @@ export class BalanceItemPayment extends AutoEncoder {
     id: string;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price: number;
 }
 

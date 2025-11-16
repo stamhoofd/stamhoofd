@@ -16,6 +16,7 @@ import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
 import { User } from './User.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class PlatformPrivateConfig extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(PermissionRoleDetailed) })
@@ -144,6 +145,7 @@ export class PlatformMembershipTypeConfigPrice extends AutoEncoder {
      * If you set this, it will be possible to choose a custom start and end date within the startDate - endDate period
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     pricePerDay = 0;
 
     getBasePrice(tagIds: string[], shouldApplyReducedPrice: boolean) {

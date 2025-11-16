@@ -56,7 +56,7 @@ export class GroupFactory extends Factory<Options, Group> {
             prices: [
                 GroupPrice.create({
                     price: ReduceablePrice.create({
-                        price: this.options.price ?? 400,
+                        price: this.options.price ?? 4_0000,
                         reducedPrice: this.options.reducedPrice ?? null,
                     }),
                     stock: this.options.stock ?? null,
