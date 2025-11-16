@@ -122,7 +122,7 @@ const tariffDef = StamhoofdTariffs;
 const input = ref(new CalculationInput({
     module: ModuleType.Tickets,
     products: [
-        new CalculationProduct({ unitPrice: 7_00, amount: 100 }),
+        new CalculationProduct({ unitPrice: 7_0000, amount: 100 }),
     ],
     requestedPaymentMethods: country === Country.BE ? [PaymentMethod.Payconiq, PaymentMethod.Bancontact] : [PaymentMethod.iDEAL],
     options: {
