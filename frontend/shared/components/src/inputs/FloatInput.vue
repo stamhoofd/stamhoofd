@@ -16,8 +16,8 @@
                     step="any"
                     :disabled="disabled"
                     @blur="clean"
-                    @keydown.up.prevent="step(100)"
-                    @keydown.down.prevent="step(-100)"
+                    @keydown.up.prevent="step(multipier)"
+                    @keydown.down.prevent="step(-multipier)"
                 >
                 <div v-if="!valid">
                     <span>{{ valueString }}</span>
@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup generic="T extends number | null">
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 const props = withDefaults(defineProps<{
     min?: number | null;
@@ -47,6 +47,20 @@ const props = withDefaults(defineProps<{
     suffix?: string;
     disabled?: boolean;
     required?: boolean;
+
+    /**
+     * Defines how the values are stored as integers.
+     *
+     * 2 means that a value of 1 represents 0,01
+     * 4 means that a value of 1 represents 0,0001
+     */
+    fractionDigits?: number;
+
+    /**
+     * Whether to disallow input of certain fraction digits.
+     * E.g. fraction digits is set to 4, but you won't allow values smaller than 0,01, set this to 2 (= maximum).
+     */
+    roundFractionDigits?: number | null;
 }>(), {
     min: null,
     max: null,
@@ -54,6 +68,8 @@ const props = withDefaults(defineProps<{
     suffix: '',
     disabled: false,
     required: true,
+    fractionDigits: 2,
+    roundFractionDigits: null,
 });
 
 const model = defineModel<T>('modelValue', {
@@ -62,6 +78,12 @@ const model = defineModel<T>('modelValue', {
 
 const valueString = ref('');
 const valid = ref(true);
+
+const multipier = computed(() => Math.pow(10, props.fractionDigits));
+
+watch(multipier, (newValue, oldValue) => {
+    clean();
+});
 
 watch(model, (newValue, oldValue) => {
     const { value: currentValue, valid: wasValid } = stringToValue(valueString.value);
@@ -120,7 +142,7 @@ function stringToValue(str: string) {
         else {
             // Remove extra decimals
             return {
-                value: constrain(Math.round(v * 100)),
+                value: constrain(Math.round(v * multipier.value)),
                 valid: true,
             };
         }
@@ -149,17 +171,33 @@ function clean() {
     }
 
     // Check if has decimals
-    const float = value / 100;
+    const float = value / multipier.value;
     const decimals = float % 1;
     const abs = Math.abs(float);
 
     if (decimals !== 0) {
-        // Include decimals
-        valueString.value
-            = (float < 0 ? '-' : '')
+        const fractions = Math.round(Math.abs(decimals) * multipier.value);
+        let q = (float < 0 ? '-' : '')
             + Math.floor(abs)
             + whatDecimalSeparator()
-            + ('' + Math.round(Math.abs(decimals) * 100)).padStart(2, '0');
+            + ('' + fractions).padStart(props.fractionDigits, '0');
+
+        // Trim trailing zeros up until roundFractionDigits
+        if (fractions % 100 === 0) {
+            q = (float < 0 ? '-' : '')
+                + Math.floor(abs)
+                + whatDecimalSeparator()
+                + ('' + fractions / 100).padStart(props.fractionDigits - 2, '0');
+        }
+        else if (fractions % 10 === 0) {
+            q = (float < 0 ? '-' : '')
+                + Math.floor(abs)
+                + whatDecimalSeparator()
+                + ('' + fractions / 10).padStart(props.fractionDigits - 1, '0');
+        }
+
+        // Include decimals
+        valueString.value = q;
     }
     else {
         // Hide decimals

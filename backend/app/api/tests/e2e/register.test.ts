@@ -86,8 +86,8 @@ describe('E2E.Register', () => {
 
         const group = await new GroupFactory({
             organization,
-            price: 25,
-            reducedPrice: 21,
+            price: 2500,
+            reducedPrice: 2100,
             stock: 5,
         }).create();
 
@@ -131,7 +131,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 2500,
                 customer: null,
             });
 
@@ -144,9 +144,9 @@ describe('E2E.Register', () => {
                     pricePaid: 0,
                     type: BalanceItemType.Registration,
                     status: BalanceItemStatus.Due,
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     amount: 1,
-                    pricePending: 25,
+                    pricePending: 2500,
                     priceOpen: 0,
                 },
             ]);
@@ -158,16 +158,16 @@ describe('E2E.Register', () => {
             const option1 = GroupOption.create({
                 name: 'option 1',
                 price: ReduceablePrice.create({
-                    price: 5,
-                    reducedPrice: 3,
+                    price: 500,
+                    reducedPrice: 300,
                 }),
             });
 
             const option2 = GroupOption.create({
                 name: 'option 2',
                 price: ReduceablePrice.create({
-                    price: 3,
-                    reducedPrice: 1,
+                    price: 300,
+                    reducedPrice: 100,
                 }),
             });
 
@@ -214,7 +214,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50,
+                totalPrice: 5000,
                 customer: null,
             });
 
@@ -226,10 +226,10 @@ describe('E2E.Register', () => {
                 {
                     type: BalanceItemType.Registration,
                     amount: 2,
-                    unitPrice: 5,
-                    price: 10,
+                    unitPrice: 500,
+                    price: 1000,
                     pricePaid: 0,
-                    pricePending: 10,
+                    pricePending: 1000,
                     relations: new Map([
                         [
                             BalanceItemRelationType.Group,
@@ -257,10 +257,10 @@ describe('E2E.Register', () => {
                 {
                     type: BalanceItemType.Registration,
                     amount: 5,
-                    unitPrice: 3,
-                    price: 15,
+                    unitPrice: 300,
+                    price: 1500,
                     pricePaid: 0,
-                    pricePending: 15,
+                    pricePending: 1500,
                     relations: new Map([
                         [
                             BalanceItemRelationType.Group,
@@ -288,9 +288,9 @@ describe('E2E.Register', () => {
                 {
                     type: BalanceItemType.Registration,
                     amount: 1,
-                    price: 25,
+                    price: 2500,
                     pricePaid: 0,
-                    pricePending: 25,
+                    pricePending: 2500,
                     relations: new Map([
                         [
                             BalanceItemRelationType.Group,
@@ -325,9 +325,9 @@ describe('E2E.Register', () => {
                     deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
-                freeContribution: 31,
+                freeContribution: 3100,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 2500,
                 customer: null,
             });
 
@@ -344,7 +344,7 @@ describe('E2E.Register', () => {
             expect(receivableBalanceAfter.body.amountOpen).toBe(0);
             expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 25,
+                    price: 2500,
                     pricePaid: 0,
                 }),
             ]));
@@ -355,7 +355,7 @@ describe('E2E.Register', () => {
 
             organization.meta.recordsConfiguration.freeContribution = FreeContributionSettings.create({
                 description: 'free contribution settings',
-                amounts: [30, 20],
+                amounts: [3000, 2000],
             });
 
             await organization.save();
@@ -378,9 +378,9 @@ describe('E2E.Register', () => {
                     deleteRegistrationIds: [],
                 }),
                 administrationFee: 0,
-                freeContribution: 30,
+                freeContribution: 3000,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 55,
+                totalPrice: 5500,
                 customer: null,
             });
 
@@ -394,16 +394,16 @@ describe('E2E.Register', () => {
             const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
             expect(receivableBalanceAfter).toBeDefined();
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
-            expect(receivableBalanceAfter.body.amountPending).toBe(55);
+            expect(receivableBalanceAfter.body.amountPending).toBe(5500);
 
             expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 30,
+                    price: 3000,
                     pricePaid: 0,
                     type: BalanceItemType.FreeContribution,
                 }),
                 expect.objectContaining({
-                    price: 25,
+                    price: 2500,
                     pricePaid: 0,
                 }),
             ]));
@@ -413,7 +413,7 @@ describe('E2E.Register', () => {
             const { organization, group, groupPrice, token, member, user } = await initData();
 
             organization.meta.registrationPaymentConfiguration.administrationFee = AdministrationFeeSettings.create({
-                fixed: 33,
+                fixed: 3300,
             });
 
             await organization.save();
@@ -435,10 +435,10 @@ describe('E2E.Register', () => {
                     ],
                     deleteRegistrationIds: [],
                 }),
-                administrationFee: 33,
+                administrationFee: 3300,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 58,
+                totalPrice: 5800,
             });
 
             const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization
@@ -452,16 +452,16 @@ describe('E2E.Register', () => {
             const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
             expect(receivableBalanceAfter).toBeDefined();
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
-            expect(receivableBalanceAfter.body.amountPending).toBe(58);
+            expect(receivableBalanceAfter.body.amountPending).toBe(5800);
 
             expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    price: 25,
+                    price: 2500,
                     pricePaid: 0,
                     type: BalanceItemType.Registration,
                 }),
                 expect.objectContaining({
-                    price: 33,
+                    price: 3300,
                     pricePaid: 0,
                     type: BalanceItemType.AdministrationFee,
                 }),
@@ -478,12 +478,12 @@ describe('E2E.Register', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 10,
+                price: 1000,
             });
 
             const body = IDRegisterCheckout.create({
@@ -507,7 +507,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35,
+                totalPrice: 3500,
             });
 
             const response = await register(body, organization, token);
@@ -516,15 +516,15 @@ describe('E2E.Register', () => {
             const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
 
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
-            expect(receivableBalanceAfter.body.amountPending).toBe(35);
-            expect(receivableBalanceAfter.body.amountOpen).toBe(10);
+            expect(receivableBalanceAfter.body.amountPending).toBe(3500);
+            expect(receivableBalanceAfter.body.amountOpen).toBe(1000);
 
             expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
                 expect.objectContaining({
-                    pricePending: 10,
+                    pricePending: 1000,
                 }),
                 expect.objectContaining({
-                    pricePending: 25,
+                    pricePending: 2500,
                 }),
             ]));
         });
@@ -557,7 +557,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 21,
+                totalPrice: 2100,
                 customer: null,
             });
 
@@ -567,10 +567,10 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 21,
+                    unitPrice: 2100,
                     amount: 1,
                     pricePaid: 0,
-                    pricePending: 21,
+                    pricePending: 2100,
                     priceOpen: 0,
                     type: BalanceItemType.Registration,
                     status: BalanceItemStatus.Due,
@@ -589,16 +589,16 @@ describe('E2E.Register', () => {
             const option1 = GroupOption.create({
                 name: 'option 1',
                 price: ReduceablePrice.create({
-                    price: 5,
-                    reducedPrice: 3,
+                    price: 500,
+                    reducedPrice: 300,
                 }),
             });
 
             const option2 = GroupOption.create({
                 name: 'option 2',
                 price: ReduceablePrice.create({
-                    price: 3,
-                    reducedPrice: 1,
+                    price: 300,
+                    reducedPrice: 100,
                 }),
             });
 
@@ -645,7 +645,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 32,
+                totalPrice: 3200,
                 customer: null,
             });
 
@@ -655,23 +655,23 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 3,
+                    unitPrice: 300,
                     amount: 2,
-                    pricePending: 6,
+                    pricePending: 600,
                     pricePaid: 0,
                     status: BalanceItemStatus.Due,
                 },
                 {
-                    unitPrice: 21,
+                    unitPrice: 2100,
                     pricePaid: 0,
-                    pricePending: 21,
+                    pricePending: 2100,
                     amount: 1,
                     status: BalanceItemStatus.Due,
                 },
                 {
-                    unitPrice: 1,
+                    unitPrice: 100,
                     pricePaid: 0,
-                    pricePending: 5,
+                    pricePending: 500,
                     amount: 5,
                     status: BalanceItemStatus.Due,
                 },
@@ -700,7 +700,7 @@ describe('E2E.Register', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25,
+                totalPrice: 2500,
                 customer: null,
             });
 
@@ -712,10 +712,10 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     pricePaid: 0,
                     status: BalanceItemStatus.Due,
-                    pricePending: 25,
+                    pricePending: 2500,
                     priceOpen: 0,
                     registrationId: registrationToDelete.id,
                 },
@@ -723,7 +723,7 @@ describe('E2E.Register', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -742,7 +742,7 @@ describe('E2E.Register', () => {
                     ],
                     deleteRegistrationIds: [registrationToDelete.id],
                 }),
-                totalPrice: 30 - 25,
+                totalPrice: 3000 - 2500,
                 asOrganizationId: organization.id,
             });
 
@@ -750,19 +750,19 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     amount: 1,
                     pricePaid: 0,
                     status: BalanceItemStatus.Canceled,
                     registrationId: registrationToDelete.id,
-                    pricePending: 25,
-                    priceOpen: -25,
+                    pricePending: 2500,
+                    priceOpen: -2500,
                 },
                 {
-                    unitPrice: 30,
+                    unitPrice: 3000,
                     pricePaid: 0,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 30,
+                    priceOpen: 3000,
                     pricePending: 0,
                 },
             ]);
@@ -774,16 +774,16 @@ describe('E2E.Register', () => {
             const option1 = GroupOption.create({
                 name: 'option 1',
                 price: ReduceablePrice.create({
-                    price: 5,
-                    reducedPrice: 3,
+                    price: 500,
+                    reducedPrice: 300,
                 }),
             });
 
             const option2 = GroupOption.create({
                 name: 'option 2',
                 price: ReduceablePrice.create({
-                    price: 3,
-                    reducedPrice: 1,
+                    price: 300,
+                    reducedPrice: 100,
                 }),
             });
 
@@ -823,7 +823,7 @@ describe('E2E.Register', () => {
                         }),
                     ],
                 }),
-                totalPrice: 50,
+                totalPrice: 5000,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -836,25 +836,25 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 5,
+                    unitPrice: 500,
                     amount: 2,
                     pricePending: 0,
-                    priceOpen: 10,
+                    priceOpen: 1000,
                     status: BalanceItemStatus.Due,
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 3,
+                    unitPrice: 300,
                     amount: 5,
                     pricePending: 0,
-                    priceOpen: 15,
+                    priceOpen: 1500,
                     status: BalanceItemStatus.Due,
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     pricePending: 0,
-                    priceOpen: 25,
+                    priceOpen: 2500,
                     status: BalanceItemStatus.Due,
                     registrationId: registrationToDelete.id,
                 },
@@ -862,7 +862,7 @@ describe('E2E.Register', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -881,7 +881,7 @@ describe('E2E.Register', () => {
                     ],
                     deleteRegistrationIds: [registrationToDelete.id],
                 }),
-                totalPrice: 30 - 50,
+                totalPrice: 3000 - 5000,
                 asOrganizationId: organization.id,
             });
 
@@ -889,7 +889,7 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 5,
+                    unitPrice: 500,
                     amount: 2,
                     pricePending: 0,
                     priceOpen: 0,
@@ -897,7 +897,7 @@ describe('E2E.Register', () => {
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 3,
+                    unitPrice: 300,
                     amount: 5,
                     pricePending: 0,
                     priceOpen: 0,
@@ -905,19 +905,19 @@ describe('E2E.Register', () => {
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     pricePending: 0,
                     priceOpen: 0,
                     status: BalanceItemStatus.Canceled,
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 30,
+                    unitPrice: 3000,
                     pricePaid: 0,
                     amount: 1,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 30,
+                    priceOpen: 3000,
                 },
             ]);
         });
@@ -937,7 +937,7 @@ describe('E2E.Register', () => {
                         }),
                     ],
                 }),
-                totalPrice: 25,
+                totalPrice: 2500,
                 asOrganizationId: organization.id,
             });
 
@@ -949,19 +949,19 @@ describe('E2E.Register', () => {
 
             await assertBalances({ member }, [
                 {
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     pricePaid: 0,
                     status: BalanceItemStatus.Due,
                     type: BalanceItemType.Registration,
                     pricePending: 0,
-                    priceOpen: 25,
+                    priceOpen: 2500,
                     registrationId: registrationToDelete.id,
                 },
             ]);
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -982,7 +982,7 @@ describe('E2E.Register', () => {
                     ],
                     deleteRegistrationIds: [registrationToDelete.id],
                 }),
-                totalPrice: 30 - 25 + 5, // 20% of 25 is 5
+                totalPrice: 3000 - 2500 + 500, // 20% of 2500 is 500
                 asOrganizationId: organization.id,
                 cancellationFeePercentage: 20_00,
             });
@@ -990,7 +990,7 @@ describe('E2E.Register', () => {
             await register(body2, organization, token);
             await assertBalances({ member }, [
                 {
-                    unitPrice: 25,
+                    unitPrice: 2500,
                     pricePaid: 0,
                     status: BalanceItemStatus.Canceled,
                     pricePending: 0,
@@ -999,20 +999,20 @@ describe('E2E.Register', () => {
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 5,
+                    unitPrice: 500,
                     pricePaid: 0,
                     pricePending: 0,
-                    priceOpen: 5,
+                    priceOpen: 500,
                     amount: 1,
                     type: BalanceItemType.CancellationFee,
                     status: BalanceItemStatus.Due,
                     registrationId: registrationToDelete.id,
                 },
                 {
-                    unitPrice: 30,
+                    unitPrice: 3000,
                     pricePaid: 0,
                     pricePending: 0,
-                    priceOpen: 30,
+                    priceOpen: 3000,
                     amount: 1,
                     status: BalanceItemStatus.Due,
                     type: BalanceItemType.Registration,
@@ -1080,7 +1080,7 @@ describe('E2E.Register', () => {
                         }),
                     ],
                 }),
-                totalPrice: 25,
+                totalPrice: 2500,
                 asOrganizationId: organization.id,
             });
 

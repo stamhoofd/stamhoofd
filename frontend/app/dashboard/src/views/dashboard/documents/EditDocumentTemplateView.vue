@@ -264,16 +264,16 @@ const minPricePaid = computed({
 });
 
 const nonZeroPriceOnly = computed({
-    get: () => minPrice.value === 1,
+    get: () => minPrice.value === 1_00,
     set: (paidOnly: boolean) => {
-        minPrice.value = paidOnly ? 1 : 0;
+        minPrice.value = paidOnly ? 1_00 : 0;
     },
 });
 
 const paidOnly = computed({
-    get: () => minPricePaid.value === 1,
+    get: () => minPricePaid.value === 1_00,
     set: (paidOnly: boolean) => {
-        minPricePaid.value = paidOnly ? 1 : 0;
+        minPricePaid.value = paidOnly ? 1_00 : 0;
     },
 });
 

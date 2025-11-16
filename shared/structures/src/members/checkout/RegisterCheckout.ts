@@ -13,6 +13,7 @@ import { BalanceItemCartItem } from './BalanceItemCartItem.js';
 import { IDRegisterCart, RegisterCart } from './RegisterCart.js';
 import { RegisterItem } from './RegisterItem.js';
 import { type RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 
 export type RegisterContext = {
     members: PlatformMember[];
@@ -25,9 +26,11 @@ export class IDRegisterCheckout extends AutoEncoder {
     cart: IDRegisterCart = IDRegisterCart.create({});
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     administrationFee = 0;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     freeContribution = 0;
 
     @field({ decoder: IntegerDecoder, version: 362 })
@@ -63,6 +66,7 @@ export class IDRegisterCheckout extends AutoEncoder {
      * Cached price so we can detect inconsistencies between frontend and backend
      */
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     totalPrice: number | null = null;
 
     @field({ decoder: BooleanDecoder, version: 378 })

@@ -75,12 +75,12 @@ describe('E2E.Documents', () => {
 
         const group = await new GroupFactory({
             organization,
-            price: 25_00,
+            price: 25_0000,
         }).create();
 
         const group2 = await new GroupFactory({
             organization,
-            price: 15_00,
+            price: 15_0000,
         }).create();
 
         const documentTemplate = await new DocumentTemplateFactory({
@@ -159,7 +159,7 @@ describe('E2E.Documents', () => {
                 ],
             }),
             paymentMethod: PaymentMethod.Bancontact,
-            totalPrice: 25_00,
+            totalPrice: 25_0000,
             redirectUrl: new URL('https://example.com/redirect'),
             cancelUrl: new URL('https://example.com/cancel'),
         });
@@ -175,7 +175,7 @@ describe('E2E.Documents', () => {
         expect(registrationModel).not.toBeNull();
         expect(registrationModel?.registeredAt).not.toBeNull();
 
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 25_00 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
     });
 
     test('Documents are created for non-paid registrations by default', async () => {
@@ -194,20 +194,20 @@ describe('E2E.Documents', () => {
                 ],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
-            totalPrice: 25_00,
+            totalPrice: 25_0000,
         });
 
         const response = await post(checkout1, organization, token);
         const registration = response.body.registrations[0];
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 0 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
 
         // Mark paid
         await markPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 25_00 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
 
         // Mark unpaid
         await markNotPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 0 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
     });
 
     test('A paid-only document is only created when a payment is marked as paid', async () => {
@@ -226,7 +226,7 @@ describe('E2E.Documents', () => {
                 ],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
-            totalPrice: 25_00,
+            totalPrice: 25_0000,
         });
 
         const response = await post(checkout1, organization, token);
@@ -234,7 +234,7 @@ describe('E2E.Documents', () => {
         await assertNoDocument(registration);
 
         await markPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 25_00 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
 
         // Should be deleted again
         await markNotPaid({ payment: response.body.payment!, organization });
@@ -259,7 +259,7 @@ describe('E2E.Documents', () => {
                 ],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
-            totalPrice: 25_00,
+            totalPrice: 25_0000,
         });
 
         const response = await post(checkout1, organization, token);
@@ -279,9 +279,9 @@ describe('E2E.Documents', () => {
             }),
         });
 
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 25_00 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
         await markNotPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 0 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
 
         // Change age again
         await patchOrganizationMember({
@@ -307,7 +307,7 @@ describe('E2E.Documents', () => {
                 }),
             }),
         });
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 0 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
     });
 
     test('A document is updated when a registration is moved by an admin', async () => {
@@ -327,12 +327,12 @@ describe('E2E.Documents', () => {
                 ],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
-            totalPrice: 25_00,
+            totalPrice: 25_0000,
         });
 
         const response = await post(checkout1, organization, token);
         const registration = response.body.registrations[0];
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 0 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
 
         // Move
         const checkout2 = IDRegisterCheckout.create({
@@ -349,12 +349,12 @@ describe('E2E.Documents', () => {
             }),
             paymentMethod: PaymentMethod.PointOfSale,
             asOrganizationId: organization.id,
-            totalPrice: -10_00,
+            totalPrice: -10_0000,
         });
 
         const response2 = await post(checkout2, organization, adminToken);
         const registration2 = response2.body.registrations[0];
-        await assertDocument({ registration: registration2, organization, member, group: group2, price: 15_00, pricePaid: 0 });
+        await assertDocument({ registration: registration2, organization, member, group: group2, price: 15_0000, pricePaid: 0 });
         await assertNoDocument(registration);
     });
 
@@ -375,12 +375,12 @@ describe('E2E.Documents', () => {
                 ],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
-            totalPrice: 25_00,
+            totalPrice: 25_0000,
         });
 
         const response = await post(checkout1, organization, token);
         const registration = response.body.registrations[0];
-        await assertDocument({ registration, organization, member, group, price: 25_00, pricePaid: 0 });
+        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
 
         // Move
         const checkout2 = IDRegisterCheckout.create({
@@ -389,7 +389,7 @@ describe('E2E.Documents', () => {
             }),
             paymentMethod: PaymentMethod.PointOfSale,
             asOrganizationId: organization.id,
-            totalPrice: -25_00,
+            totalPrice: -25_0000,
         });
 
         await post(checkout2, organization, adminToken);

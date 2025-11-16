@@ -88,7 +88,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 25_00,
+                price: 25_0000,
                 bundleDiscount,
             })
                 .create();
@@ -108,7 +108,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response1 = await post(checkout1, organization, token);
@@ -123,10 +123,10 @@ describe('E2E.Bundle Discounts', () => {
                 {
                     type: BalanceItemType.Registration,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
             ]);
         });
@@ -144,14 +144,14 @@ describe('E2E.Bundle Discounts', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 25_00,
+                price: 25_0000,
             }).create();
 
             const groupPrice = group.settings.prices[0];
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 35_00,
+                price: 35_0000,
                 bundleDiscount,
             }).create();
 
@@ -170,7 +170,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response1 = await post(checkout1, organization, token);
@@ -191,7 +191,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35_00,
+                totalPrice: 35_0000,
             });
             const response2 = await post(checkout2, organization, token);
             expect(response2.body.registrations.length).toBe(1);
@@ -209,19 +209,19 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 35_00,
+                    price: 35_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 35_00,
+                    pricePending: 35_0000,
                 },
             ]);
         });
@@ -239,7 +239,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 25_00,
+                price: 25_0000,
                 bundleDiscount,
             }).create();
 
@@ -247,7 +247,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 15_00, // Lower price so discount is applied preferably on the first group
+                price: 15_0000, // Lower price so discount is applied preferably on the first group
                 bundleDiscount,
             }).create();
 
@@ -287,7 +287,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 15_00 - 5_00, // 20% discount on first group
+                totalPrice: 15_0000 - 5_0000, // 20% discount on first group
             });
             const response2 = await post(checkout2, organization, token);
             expect(response2.body.registrations.length).toBe(1);
@@ -302,7 +302,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(updatedRegistration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -311,28 +311,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 15_00,
+                    pricePending: 15_0000,
                 },
             ]);
         });
@@ -350,7 +350,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 25_00,
+                price: 25_0000,
                 bundleDiscount,
             })
                 .create();
@@ -359,7 +359,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 35_00, // Higher price so discount is applied preferably here
+                price: 35_0000, // Higher price so discount is applied preferably here
                 bundleDiscount,
             }).create();
 
@@ -378,7 +378,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response1 = await post(checkout1, organization, token);
@@ -399,7 +399,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35_00 - 7_00, // 20% discount on 35_00 = 7_00
+                totalPrice: 35_0000 - 7_0000, // 20% discount on 35_00 = 7_00
             });
             const response2 = await post(checkout2, organization, token);
             expect(response2.body.registrations.length).toBe(1);
@@ -411,7 +411,7 @@ describe('E2E.Bundle Discounts', () => {
                     bundleDiscount.id,
                     AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 7_00,
+                        amount: 7_0000,
                     }),
                 ],
             ]));
@@ -426,28 +426,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: -7_00,
+                    price: -7_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -7_00,
+                    pricePending: -7_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 35_00,
+                    price: 35_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 35_00,
+                    pricePending: 35_0000,
                 },
             ]);
         });
@@ -467,17 +467,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 35_00,
+                    price: 35_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 45_00,
+                    price: 45_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -497,7 +497,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 35_00,
+                unitPrice: 35_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -524,7 +524,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00 + 45_00 - 7_00 - 18_00, // 20% off 35_00 = 7_00, 40% off 45_00 = 18_00
+                totalPrice: 25_0000 + 45_0000 - 7_0000 - 18_0000, // 20% off 35_00 = 7_00, 40% off 45_00 = 18_00
             });
             const response = await post(checkout, organization, token);
             expect(response.body.registrations.length).toBe(2);
@@ -543,7 +543,7 @@ describe('E2E.Bundle Discounts', () => {
                         bundleDiscount.id,
                         AppliedRegistrationDiscount.create({
                             name: bundleDiscount.name,
-                            amount: 18_00,
+                            amount: 18_0000,
                         }),
                     ],
                 ]),
@@ -552,39 +552,39 @@ describe('E2E.Bundle Discounts', () => {
             await assertBalances({ user }, [
                 {
                     registrationId: registration1.id,
-                    unitPrice: 35_00,
+                    unitPrice: 35_0000,
                     amount: 1,
                     type: BalanceItemType.Registration,
-                    priceOpen: 35_00,
+                    priceOpen: 35_0000,
                 },
                 {
                     registrationId: registration2.id,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     amount: 1,
                     type: BalanceItemType.Registration,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     registrationId: registration3.id,
-                    unitPrice: 45_00,
+                    unitPrice: 45_0000,
                     amount: 1,
                     type: BalanceItemType.Registration,
-                    pricePending: 45_00,
+                    pricePending: 45_0000,
                 },
                 // Discounts
                 {
                     registrationId: registration1.id,
-                    unitPrice: -7_00,
+                    unitPrice: -7_0000,
                     amount: 1,
                     type: BalanceItemType.RegistrationBundleDiscount,
-                    pricePending: -7_00,
+                    pricePending: -7_0000,
                 },
                 {
                     registrationId: registration3.id,
-                    unitPrice: -18_00,
+                    unitPrice: -18_0000,
                     amount: 1,
                     type: BalanceItemType.RegistrationBundleDiscount,
-                    pricePending: -18_00,
+                    pricePending: -18_0000,
                 },
             ]);
         });
@@ -608,12 +608,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 35_00,
+                    price: 35_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -625,7 +625,7 @@ describe('E2E.Bundle Discounts', () => {
                 group: groups[0],
                 groupPrice: groups[0].settings.prices[0].patch({
                     price: ReduceablePrice.create({
-                        price: 30_00, // This has changed, the group normally 'costs' 35_00
+                        price: 30_0000, // This has changed, the group normally 'costs' 35_00
                     }),
                 }),
             }).create();
@@ -638,7 +638,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 30_00, // This has changed, the group normally 'costs' 35_00
+                unitPrice: 30_0000, // This has changed, the group normally 'costs' 35_00
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -658,7 +658,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00 - 6_00, // 20% of 30_00 = 6_00
+                totalPrice: 25_0000 - 6_0000, // 20% of 30_00 = 6_00
             });
             const response = await post(checkout, organization, token);
             expect(response.body.registrations.length).toBe(1);
@@ -672,25 +672,25 @@ describe('E2E.Bundle Discounts', () => {
             await assertBalances({ user }, [
                 {
                     registrationId: registration1.id,
-                    unitPrice: 30_00,
+                    unitPrice: 30_0000,
                     amount: 1,
                     type: BalanceItemType.Registration,
-                    priceOpen: 30_00,
+                    priceOpen: 30_0000,
                 },
                 {
                     registrationId: registration2.id,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     amount: 1,
                     type: BalanceItemType.Registration,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 // Discounts
                 {
                     registrationId: registration1.id,
-                    unitPrice: -6_00,
+                    unitPrice: -6_0000,
                     amount: 1,
                     type: BalanceItemType.RegistrationBundleDiscount,
-                    pricePending: -6_00,
+                    pricePending: -6_0000,
                 },
             ]);
         });
@@ -714,19 +714,19 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
 
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
 
                 await new GroupFactory({
                     organization,
-                    price: 35_00,
+                    price: 35_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -753,7 +753,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[0].id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due, // Still due, because we had a 100% cancellation fee
             }).create();
 
@@ -765,7 +765,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[0].id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due, // Still due, because we had a 100% cancellation fee
                 relations: new Map([
                     [
@@ -786,7 +786,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[1].id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 15_00,
+                unitPrice: 15_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -806,7 +806,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35_00 - 7_00, // 20% of 35 = 7_00
+                totalPrice: 35_0000 - 7_0000, // 20% of 35 = 7_00
             });
             const response = await post(checkout, organization, token);
             const registration3 = response.body.registrations[0];
@@ -819,7 +819,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 7_00,
+                        amount: 7_0000,
                     })],
                 ]),
             });
@@ -829,7 +829,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registrations[0].discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -839,46 +839,46 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registrations[1].id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration3.id,
                     amount: 1,
-                    price: -7_00,
+                    price: -7_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -7_00,
+                    pricePending: -7_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration3.id,
                     amount: 1,
-                    price: 35_00,
+                    price: 35_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 35_00,
+                    pricePending: 35_0000,
                 },
             ]);
         });
@@ -898,13 +898,13 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
 
                 await new GroupFactory({
                     organization,
-                    price: 35_00,
+                    price: 35_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -927,7 +927,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[0].id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -939,7 +939,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[0].id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -15_00, // not correct, this is what we'll correct
+                unitPrice: -15_0000, // not correct, this is what we'll correct
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -969,7 +969,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35_00 - 7_00 + 15_00, // - normal discount + wrong discount
+                totalPrice: 35_0000 - 7_0000 + 15_0000, // - normal discount + wrong discount
             });
             const response = await post(checkout, organization, token);
             const registration2 = response.body.registrations[0];
@@ -979,7 +979,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 7_00,
+                        amount: 7_0000,
                     })],
                 ]),
             });
@@ -994,47 +994,47 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: -15_00,
+                    price: -15_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -15_00,
+                    priceOpen: -15_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: -7_00,
+                    price: -7_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -7_00,
+                    pricePending: -7_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 35_00,
+                    price: 35_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 35_00,
+                    pricePending: 35_0000,
                 },
                 // Corrected discount:
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 15_00,
+                    pricePending: 15_0000,
                 },
             ]);
         });
@@ -1054,13 +1054,13 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
 
                 await new GroupFactory({
                     organization,
-                    price: 35_00,
+                    price: 35_0000,
                 }).create(),
             ];
 
@@ -1082,7 +1082,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[0].id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -1094,7 +1094,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registrations[0].id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -15_00, // not correct, this is what we'll correct
+                unitPrice: -15_0000, // not correct, this is what we'll correct
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -1124,7 +1124,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35_00,
+                totalPrice: 35_0000,
             });
             const response = await post(checkout, organization, token);
             const registration2 = response.body.registrations[0];
@@ -1139,7 +1139,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registrations[0].discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 15_00,
+                    amount: 15_0000,
                 })],
             ]));
 
@@ -1149,28 +1149,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registrations[0].id,
                     amount: 1,
-                    price: -15_00,
+                    price: -15_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -15_00,
+                    priceOpen: -15_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 35_00,
+                    price: 35_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 35_00,
+                    pricePending: 35_0000,
                 },
             ]);
         });
@@ -1189,12 +1189,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -1222,7 +1222,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00 + 15_00 - 5_00, // 20% discount on highest price (25_00 * 0.2 = 5_00)
+                totalPrice: 25_0000 + 15_0000 - 5_0000, // 20% discount on highest price (25_00 * 0.2 = 5_00)
             });
 
             const response1 = await post(checkout, organization, token);
@@ -1235,7 +1235,7 @@ describe('E2E.Bundle Discounts', () => {
                     discounts: new Map([
                         [bundleDiscount.id, AppliedRegistrationDiscount.create({
                             name: bundleDiscount.name,
-                            amount: 5_00,
+                            amount: 5_0000,
                         })],
                     ]),
                 }),
@@ -1251,28 +1251,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: expect.any(String),
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: expect.any(String),
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: expect.any(String),
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 15_00,
+                    pricePending: 15_0000,
                 },
             ]);
         });
@@ -1292,7 +1292,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 25_00,
+                price: 25_0000,
                 stock: 500,
                 bundleDiscount,
             })
@@ -1301,7 +1301,7 @@ describe('E2E.Bundle Discounts', () => {
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 15_00, // Lower price so discount is applied preferably on the first group
+                price: 15_0000, // Lower price so discount is applied preferably on the first group
                 bundleDiscount,
             }).create();
 
@@ -1340,10 +1340,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Hidden,
-                    priceOpen: -25_00, // hidden, so no payment expected yet
-                    pricePending: 25_00,
+                    priceOpen: -25_0000, // hidden, so no payment expected yet
+                    pricePending: 25_0000,
                     pricePaid: 0,
                 },
             ]);
@@ -1361,10 +1361,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePaid: 25_00,
+                    pricePaid: 25_0000,
                     pricePending: 0,
                     paidAt: expect.any(Date),
                 },
@@ -1387,7 +1387,7 @@ describe('E2E.Bundle Discounts', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 15_00 - 5_00, // 20% discount on first group
+                totalPrice: 15_0000 - 5_0000, // 20% discount on first group
                 redirectUrl: new URL('https://www.example.com/success'),
                 cancelUrl: new URL('https://www.example.com/cancel'),
             });
@@ -1409,20 +1409,20 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Hidden, // Pending
-                    priceOpen: -15_00, // hidden, so no payment expected yet
-                    pricePending: 15_00,
+                    priceOpen: -15_0000, // hidden, so no payment expected yet
+                    pricePending: 15_0000,
                     pricePaid: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Hidden, // Pending
-                    priceOpen: 5_00,
-                    pricePending: -5_00,
+                    priceOpen: 5_0000,
+                    pricePending: -5_0000,
                     pricePaid: 0,
                 },
             ]);
@@ -1436,7 +1436,7 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Hidden,
                     priceOpen: 0,
                     pricePending: 0,
@@ -1447,7 +1447,7 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Hidden,
                     priceOpen: 0,
                     pricePending: 0,
@@ -1477,10 +1477,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Hidden, // Pending
-                    priceOpen: -15_00, // hidden, so no payment expected yet
-                    pricePending: 15_00,
+                    priceOpen: -15_0000, // hidden, so no payment expected yet
+                    pricePending: 15_0000,
                     pricePaid: 0,
                     paidAt: null,
                 },
@@ -1488,10 +1488,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Hidden, // Pending
-                    priceOpen: 5_00,
-                    pricePending: -5_00,
+                    priceOpen: 5_0000,
+                    pricePending: -5_0000,
                     pricePaid: 0,
                     paidAt: null,
                 },
@@ -1511,7 +1511,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(updatedRegistration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -1521,22 +1521,22 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
                     pricePending: 0,
-                    pricePaid: 15_00,
+                    pricePaid: 15_0000,
                     paidAt: expect.any(Date),
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
                     pricePending: 0,
-                    pricePaid: -5_00,
+                    pricePaid: -5_0000,
                     paidAt: expect.any(Date),
                 },
             );
@@ -1561,8 +1561,8 @@ describe('E2E.Bundle Discounts', () => {
                     organizationRegistrationPeriod,
                     discount: {
                         discounts: [
-                            { value: 50, type: GroupPriceDiscountType.Fixed },
-                            { value: 5_00, type: GroupPriceDiscountType.Fixed },
+                            { value: 5000, type: GroupPriceDiscountType.Fixed },
+                            { value: 5_0000, type: GroupPriceDiscountType.Fixed },
                         ],
                     },
                 }),
@@ -1571,17 +1571,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 35_00,
+                    price: 35_0000,
                     bundleDiscounts,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscounts,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 45_00,
+                    price: 45_0000,
                     bundleDiscounts,
                 }).create(),
             ];
@@ -1601,7 +1601,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 35_00,
+                unitPrice: 35_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -1624,7 +1624,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00 + 45_00 - 7_00 - 18_00 - 50 - 5_00,
+                totalPrice: 25_0000 + 45_0000 - 7_0000 - 18_0000 - 5000 - 5_0000,
             });
             const response = await post(checkout, organization, token);
             expect(response.body.registrations.length).toBe(2);
@@ -1638,7 +1638,7 @@ describe('E2E.Bundle Discounts', () => {
                         bundleDiscounts[1].id,
                         AppliedRegistrationDiscount.create({
                             name: bundleDiscounts[1].name,
-                            amount: 50,
+                            amount: 5000,
                         }),
                     ],
                 ]),
@@ -1651,14 +1651,14 @@ describe('E2E.Bundle Discounts', () => {
                         bundleDiscounts[0].id,
                         AppliedRegistrationDiscount.create({
                             name: bundleDiscounts[0].name,
-                            amount: 18_00,
+                            amount: 18_0000,
                         }),
                     ],
                     [
                         bundleDiscounts[1].id,
                         AppliedRegistrationDiscount.create({
                             name: bundleDiscounts[1].name,
-                            amount: 5_00,
+                            amount: 5_0000,
                         }),
                     ],
                 ]),
@@ -1669,28 +1669,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 35_00,
+                    unitPrice: 35_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 35_00,
+                    priceOpen: 35_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: 45_00,
+                    unitPrice: 45_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 45_00,
+                    pricePending: 45_0000,
                 },
 
                 // Discounts (4)
@@ -1698,37 +1698,37 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: -50,
+                    unitPrice: -5000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -50,
+                    pricePending: -5000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: -18_00,
+                    unitPrice: -18_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -18_00,
+                    pricePending: -18_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -5_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -7_00,
+                    unitPrice: -7_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -7_00,
+                    pricePending: -7_0000,
                 },
             ]);
         });
@@ -1750,17 +1750,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00
+                    price: 25_0000, // 20% discount = 5_00
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as group 1)
+                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as groups 1 & 2)
+                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
                     bundleDiscount,
                 }).create(),
             ];
@@ -1786,7 +1786,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -1797,7 +1797,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -1817,7 +1817,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration2.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -1832,7 +1832,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -1849,7 +1849,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00 - 5_00, // 20% discount on new registration
+                totalPrice: 25_0000 - 5_0000, // 20% discount on new registration
             });
 
             const response = await post(checkout, organization, token);
@@ -1861,7 +1861,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 5_00,
+                        amount: 5_0000,
                     })],
                 ]),
             });
@@ -1874,7 +1874,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -1883,46 +1883,46 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration3.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration3.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -5_0000,
                 },
             ]);
         });
@@ -1941,14 +1941,14 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00
+                    price: 25_0000, // 20% discount = 5_00
                     bundleDiscount,
                 }).create(),
 
                 // Does not have discount:
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                 }).create(),
             ];
 
@@ -1967,7 +1967,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -1982,7 +1982,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -2004,7 +2004,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -2021,7 +2021,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response = await post(checkout, organization, token);
@@ -2038,7 +2038,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -2047,28 +2047,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
             ]);
         });
@@ -2088,12 +2088,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00
+                    price: 25_0000, // 20% discount = 5_00
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as group 1)
+                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
                     bundleDiscount,
                 }).create(),
             ];
@@ -2113,7 +2113,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -2137,7 +2137,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00 - 5_00, // 20% discount on new registration
+                totalPrice: 25_0000 - 5_0000, // 20% discount on new registration
             });
 
             const response = await post(checkout, organization, token);
@@ -2149,7 +2149,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 5_00,
+                        amount: 5_0000,
                     })],
                 ]),
             });
@@ -2163,28 +2163,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 25_00,
+                    pricePending: 25_0000,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -5_0000,
                 },
             ]);
         });
@@ -2215,12 +2215,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscounts,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 35_00, // Higher price so discount is applied preferably here
+                    price: 35_0000, // Higher price so discount is applied preferably here
                     bundleDiscounts,
                 }).create(),
             ];
@@ -2240,7 +2240,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -2256,7 +2256,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 35_00 - 42_00, // 120% discount on 35_00
+                totalPrice: 35_0000 - 42_0000, // 120% discount on 35_00
             });
             await expect(post(checkout, organization, token)).rejects
                 .toThrow(STExpect.simpleError({
@@ -2269,9 +2269,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
             ]);
@@ -2298,14 +2298,14 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
-                    reducedPrice: 20_00,
+                    price: 25_0000,
+                    reducedPrice: 20_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
-                    reducedPrice: 10_00,
+                    price: 15_0000,
+                    reducedPrice: 10_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -2323,7 +2323,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 20_00, // Reduced price
+                unitPrice: 20_0000, // Reduced price
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -2340,7 +2340,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 10_00 - 2_00, // 10% discount on first group
+                totalPrice: 10_0000 - 2_0000, // 10% discount on first group
             });
 
             const response2 = await post(checkout, organization, token);
@@ -2355,7 +2355,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 2_00,
+                    amount: 2_0000,
                 })],
             ]));
 
@@ -2364,28 +2364,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 20_00,
+                    price: 20_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 20_00,
+                    priceOpen: 20_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -2_00,
+                    price: -2_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -2_00,
+                    pricePending: -2_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 10_00,
+                    price: 10_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 10_00,
+                    pricePending: 10_0000,
                 },
             ]);
         });
@@ -2410,12 +2410,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscounts: new Map([
                         [
                             bundleDiscount,
@@ -2443,7 +2443,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -2460,7 +2460,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 15_00 - 7_50, // 50% discount on last group
+                totalPrice: 15_0000 - 7_5000, // 50% discount on last group
             });
 
             const response2 = await post(checkout, organization, token);
@@ -2471,7 +2471,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration2.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 7_50,
+                    amount: 7_5000,
                 })],
             ]));
 
@@ -2484,28 +2484,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: -7_50,
+                    price: -7_5000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -7_50,
+                    pricePending: -7_5000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 15_00,
+                    pricePending: 15_0000,
                 },
             ]);
         });
@@ -2534,12 +2534,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -2557,7 +2557,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -2574,7 +2574,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 15_00 - 5_00, // 20% discount on first group
+                totalPrice: 15_0000 - 5_0000, // 20% discount on first group
             });
 
             const response2 = await post(checkout, organization, token);
@@ -2589,7 +2589,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -2598,28 +2598,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: -5_00,
+                    pricePending: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 15_00,
+                    pricePending: 15_0000,
                 },
             ]);
         });
@@ -2648,12 +2648,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -2671,7 +2671,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -2688,7 +2688,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 15_00,
+                totalPrice: 15_0000,
             });
 
             const response2 = await post(checkout, organization, token);
@@ -2706,19 +2706,19 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
                     priceOpen: 0,
-                    pricePending: 15_00,
+                    pricePending: 15_0000,
                 },
             ]);
         });
@@ -2740,17 +2740,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 40_00,
+                    price: 40_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -2775,7 +2775,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -2786,7 +2786,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -2806,7 +2806,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration2.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 15_00,
+                unitPrice: 15_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -2819,7 +2819,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 5_00,
+                        amount: 5_0000,
                     })],
                 ]),
             });
@@ -2857,7 +2857,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 asOrganizationId: organization.id,
-                totalPrice: 40_00 - 15_00 + 5_00 - 8_00, // group 3 - group 2 + reverted discount - new discount
+                totalPrice: 40_0000 - 15_0000 + 5_0000 - 8_0000, // group 3 - group 2 + reverted discount - new discount
             });
 
             const response = await post(checkout, organization, adminToken);
@@ -2870,7 +2870,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 8_00,
+                        amount: 8_0000,
                     })],
                 ]),
             });
@@ -2888,25 +2888,25 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Canceled,
                     pricePending: 0,
                     priceOpen: 0,
@@ -2917,9 +2917,9 @@ describe('E2E.Bundle Discounts', () => {
                     memberId: member.id,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: 40_00,
+                    unitPrice: 40_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 40_00,
+                    priceOpen: 40_0000,
 
                     // Not pending because created by admin
                     pricePending: 0,
@@ -2931,9 +2931,9 @@ describe('E2E.Bundle Discounts', () => {
                     memberId: member.id,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 5_00,
+                    unitPrice: 5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 5_00,
+                    priceOpen: 5_0000,
 
                     // Not pending because created by admin
                     pricePending: 0,
@@ -2945,9 +2945,9 @@ describe('E2E.Bundle Discounts', () => {
                     memberId: member.id,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: -8_00,
+                    unitPrice: -8_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -8_00,
+                    priceOpen: -8_0000,
 
                     // Not pending because created by admin
                     pricePending: 0,
@@ -2973,7 +2973,7 @@ describe('E2E.Bundle Discounts', () => {
                     ],
                 }),
                 asOrganizationId: organization.id,
-                totalPrice: 40_00 - 25_00 + 5_00 - 8_00, // group 3 - group 1 + reverted discount - new discount
+                totalPrice: 40_0000 - 25_0000 + 5_0000 - 8_0000, // group 3 - group 1 + reverted discount - new discount
             });
 
             const response = await post(checkout, organization, adminToken);
@@ -2986,7 +2986,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 8_00,
+                        amount: 8_0000,
                     })],
                 ]),
             });
@@ -3004,7 +3004,7 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Canceled, // has been cancelled
                     priceOpen: 0,
                     pricePending: 0,
@@ -3013,7 +3013,7 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Canceled, // has been cancelled
                     pricePending: 0,
                     priceOpen: 0,
@@ -3022,10 +3022,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
@@ -3033,9 +3033,9 @@ describe('E2E.Bundle Discounts', () => {
                     memberId: member.id,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: 40_00,
+                    unitPrice: 40_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 40_00,
+                    priceOpen: 40_0000,
 
                     // Not pending because created by admin
                     pricePending: 0,
@@ -3047,9 +3047,9 @@ describe('E2E.Bundle Discounts', () => {
                     memberId: member.id,
                     registrationId: registration3.id,
                     amount: 1,
-                    unitPrice: -8_00,
+                    unitPrice: -8_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -8_00,
+                    priceOpen: -8_0000,
 
                     // Not pending because created by admin
                     pricePending: 0,
@@ -3067,7 +3067,7 @@ describe('E2E.Bundle Discounts', () => {
                     deleteRegistrationIds: [registration1.id],
                 }),
                 asOrganizationId: organization.id,
-                totalPrice: -25_00 + 5_00,
+                totalPrice: -25_0000 + 5_0000,
                 cancellationFeePercentage: 0,
             });
 
@@ -3086,7 +3086,7 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Canceled, // has been cancelled
                     priceOpen: 0,
                     pricePending: 0,
@@ -3095,7 +3095,7 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Canceled, // has been cancelled
                     pricePending: 0,
                     priceOpen: 0,
@@ -3104,10 +3104,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                 },
             ]);
         });
@@ -3135,7 +3135,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration1.deactivatedAt).not.toBeNull(); // should be cancelled
@@ -3146,28 +3146,28 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due, // NOT cancelled, because we charge a cancellation fee
-                    priceOpen: 25_00, // cancellation fee
+                    priceOpen: 25_0000, // cancellation fee
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due, // NOT cancelled, because we charge a cancellation fee
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                 },
             ]);
         });
@@ -3182,7 +3182,7 @@ describe('E2E.Bundle Discounts', () => {
                     deleteRegistrationIds: [registration2.id],
                 }),
                 asOrganizationId: organization.id,
-                totalPrice: -15_00 + 5_00, // -15 back, but also lose discount on registration 1, so add 5
+                totalPrice: -15_0000 + 5_0000, // -15 back, but also lose discount on registration 1, so add 5
                 cancellationFeePercentage: 0,
             });
 
@@ -3203,25 +3203,25 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due, // has NOT been cancelled
                     pricePending: 0,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Canceled,
                     pricePending: 0,
                     priceOpen: 0,
@@ -3231,10 +3231,10 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 5_00,
+                    unitPrice: 5_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 5_00,
+                    priceOpen: 5_0000,
                 },
             ]);
         });
@@ -3249,7 +3249,7 @@ describe('E2E.Bundle Discounts', () => {
                     deleteRegistrationIds: [registration2.id],
                 }),
                 asOrganizationId: organization.id,
-                totalPrice: 5_00, // Positive 5 because we lose the discount on registration 1
+                totalPrice: 5_0000, // Positive 5 because we lose the discount on registration 1
                 cancellationFeePercentage: 100_00, // we charge a cancellation fee
             });
 
@@ -3270,38 +3270,38 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 25_00,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: -5_00,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due, // has NOT been cancelled
                     pricePending: 0,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    unitPrice: 15_00,
+                    unitPrice: 15_0000,
                     status: BalanceItemStatus.Due, // still due because of cancellation fee
                     pricePending: 0,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                 },
                 // A new bundle discount balance item has been created to offset the difference
                 {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    unitPrice: 5_00,
+                    unitPrice: 5_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 5_00,
+                    priceOpen: 5_0000,
                 },
             ]);
         });
@@ -3343,12 +3343,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -3366,7 +3366,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -3382,7 +3382,7 @@ describe('E2E.Bundle Discounts', () => {
                         }),
                     ],
                 }),
-                totalPrice: 15_00 - 5_00, // 20% discount on first group
+                totalPrice: 15_0000 - 5_0000, // 20% discount on first group
                 asOrganizationId: organization.id,
             });
 
@@ -3402,7 +3402,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -3411,9 +3411,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                     userId: user.id,
                 },
@@ -3421,9 +3421,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                     userId: null,
                 },
@@ -3434,9 +3434,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                     pricePending: 0,
                     userId: null,
                 },
@@ -3461,12 +3461,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -3531,7 +3531,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -3547,7 +3547,7 @@ describe('E2E.Bundle Discounts', () => {
                         }),
                     ],
                 }),
-                totalPrice: 15_00, // Admin does not know there should be discount
+                totalPrice: 15_0000, // Admin does not know there should be discount
                 asOrganizationId: organization.id,
             });
 
@@ -3567,7 +3567,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -3576,9 +3576,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                     userId: user.id,
                 },
@@ -3586,9 +3586,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                     userId: null,
                 },
@@ -3599,9 +3599,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                     pricePending: 0,
                     userId: null,
                 },
@@ -3626,12 +3626,12 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00,
+                    price: 25_0000,
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 15_00,
+                    price: 15_0000,
                     bundleDiscount,
                 }).create(),
             ];
@@ -3687,7 +3687,7 @@ describe('E2E.Bundle Discounts', () => {
                 organizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
                 registrationId: registration1.id,
             }).create();
@@ -3703,7 +3703,7 @@ describe('E2E.Bundle Discounts', () => {
                         }),
                     ],
                 }),
-                totalPrice: 15_00, // Admin does not know there should be discount
+                totalPrice: 15_0000, // Admin does not know there should be discount
                 asOrganizationId: organization.id,
             });
 
@@ -3723,7 +3723,7 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -3732,9 +3732,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                     userId: user.id,
                 },
@@ -3742,9 +3742,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.RegistrationBundleDiscount,
                     registrationId: registration1.id,
                     amount: 1,
-                    price: -5_00,
+                    price: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_00,
+                    priceOpen: -5_0000,
                     pricePending: 0,
                     userId: null,
                 },
@@ -3755,9 +3755,9 @@ describe('E2E.Bundle Discounts', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration2.id,
                     amount: 1,
-                    price: 15_00,
+                    price: 15_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 15_00,
+                    priceOpen: 15_0000,
                     pricePending: 0,
                     userId: null,
                 },
@@ -3784,17 +3784,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00
+                    price: 25_0000, // 20% discount = 5_00
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as group 1)
+                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as groups 1 & 2)
+                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
                     bundleDiscount,
                 }).create(),
             ];
@@ -3826,7 +3826,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -3837,7 +3837,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -3857,7 +3857,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration2.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -3871,7 +3871,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration3.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -3882,7 +3882,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration3.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -3905,13 +3905,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration3.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -3951,13 +3951,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration3.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
         });
@@ -3982,17 +3982,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00
+                    price: 25_0000, // 20% discount = 5_00
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as group 1)
+                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as groups 1 & 2)
+                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
                     bundleDiscount,
                 }).create(),
             ];
@@ -4024,7 +4024,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -4035,7 +4035,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -4055,7 +4055,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration2.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -4069,7 +4069,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration3.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -4080,7 +4080,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration3.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -4103,13 +4103,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration3.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -4140,7 +4140,7 @@ describe('E2E.Bundle Discounts', () => {
                 discounts: new Map([
                     [bundleDiscount.id, AppliedRegistrationDiscount.create({
                         name: bundleDiscount.name,
-                        amount: 5_00,
+                        amount: 5_0000,
                     })],
                 ]),
             });
@@ -4154,13 +4154,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration3.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
         });
@@ -4185,17 +4185,17 @@ describe('E2E.Bundle Discounts', () => {
             const groups = [
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00
+                    price: 25_0000, // 20% discount = 5_00
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as group 1)
+                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
                     bundleDiscount,
                 }).create(),
                 await new GroupFactory({
                     organization,
-                    price: 25_00, // 20% discount = 5_00 (same as groups 1 & 2)
+                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
                     bundleDiscount,
                 }).create(),
             ];
@@ -4227,7 +4227,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -4238,7 +4238,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration1.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -4258,7 +4258,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration2.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -4272,7 +4272,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration3.id,
                 type: BalanceItemType.Registration,
                 amount: 1,
-                unitPrice: 25_00,
+                unitPrice: 25_0000,
                 status: BalanceItemStatus.Due,
             }).create();
 
@@ -4283,7 +4283,7 @@ describe('E2E.Bundle Discounts', () => {
                 registrationId: registration3.id,
                 type: BalanceItemType.RegistrationBundleDiscount,
                 amount: 1,
-                unitPrice: -5_00,
+                unitPrice: -5_0000,
                 status: BalanceItemStatus.Due,
                 relations: new Map([
                     [
@@ -4306,13 +4306,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration3.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
 
@@ -4352,7 +4352,7 @@ describe('E2E.Bundle Discounts', () => {
                     discounts: new Map([
                         [bundleDiscount.id, AppliedRegistrationDiscount.create({
                             name: bundleDiscount.name,
-                            amount: 5_00,
+                            amount: 5_0000,
                         })],
                     ]),
                 }),
@@ -4372,13 +4372,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration1.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
             expect(registration3.discounts).toMatchMap(new Map([
                 [bundleDiscount.id, AppliedRegistrationDiscount.create({
                     name: bundleDiscount.name,
-                    amount: 5_00,
+                    amount: 5_0000,
                 })],
             ]));
         });

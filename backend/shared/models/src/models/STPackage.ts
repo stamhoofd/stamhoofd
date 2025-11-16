@@ -194,7 +194,7 @@ export class STPackage extends QueryableModel {
             pack.meta.serviceFeeFixed = 0;
             pack.meta.serviceFeePercentage = 2_00;
             pack.meta.serviceFeeMinimum = 0;
-            pack.meta.serviceFeeMaximum = 20;
+            pack.meta.serviceFeeMaximum = 2000; // 20 cent
 
             pack.meta.unitPrice = 0;
             pack.meta.pricingType = STPricingType.Fixed;
@@ -207,7 +207,7 @@ export class STPackage extends QueryableModel {
             pack.meta.serviceFeeMinimum = 0;
             pack.meta.serviceFeeMaximum = 0;
 
-            pack.meta.unitPrice = 100;
+            pack.meta.unitPrice = 1_0000; // 1 euro
             pack.meta.pricingType = STPricingType.PerMember;
         }
 

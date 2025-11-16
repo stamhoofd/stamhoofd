@@ -1,11 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces';
 
 export class OldGroupPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     reducedPrice: number | null = null;
 }
 
@@ -78,12 +81,14 @@ export class OldGroupPrices extends AutoEncoder {
      * @deprecated
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     private price = 0;
 
     /**
      * @deprecated
      */
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     private reducedPrice: number | null = null;
 
     /**
@@ -91,6 +96,7 @@ export class OldGroupPrices extends AutoEncoder {
      * Second member in the family
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 22 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     private familyPrice: number | null = null;
 
     /**
@@ -98,5 +104,6 @@ export class OldGroupPrices extends AutoEncoder {
      * Third or later member
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 22 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     private extraFamilyPrice: number | null = null;
 }

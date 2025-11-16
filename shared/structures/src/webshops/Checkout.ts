@@ -22,6 +22,7 @@ import { DiscountCode } from './DiscountCode.js';
 import { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -64,6 +65,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     paymentMethod: PaymentMethod | null = null;
 
     @field({ decoder: IntegerDecoder, version: 207 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     administrationFee = 0;
 
     @field({ decoder: new ArrayDecoder(Discount), version: 235 })
@@ -76,6 +78,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
      * Applied fixed discount (not applicable to a specific cart item)
      */
     @field({ decoder: IntegerDecoder, version: 235 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     fixedDiscount = 0;
 
     /**
@@ -125,7 +128,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     }
 
     get appliedPercentageDiscount() {
-        return Math.round(this.cart.price * this.percentageDiscount / 10000);
+        return 100 * Math.round(this.cart.price * this.percentageDiscount / 10000_00);
     }
 
     get totalPrice() {

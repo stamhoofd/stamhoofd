@@ -5,3 +5,6 @@ export * from './STInvoice.js';
 export * from './STPackage.js';
 export * from './STPackageBundle.js';
 export * from './OrganizationPackagesStatus.js';
+
+export * from './Invoice.js';
+export * from './InvoicedBalanceItem.js';

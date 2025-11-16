@@ -8,6 +8,7 @@ import { PaymentProvider } from '../PaymentProvider.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { PaymentType, PaymentTypeHelper } from '../PaymentType.js';
 import { TransferSettings } from '../webshops/TransferSettings.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -35,9 +36,11 @@ export class Payment extends AutoEncoder {
     customer: PaymentCustomer | null = null;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 92 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     freeContribution: number | null = null;
 
     // Transfer description if paid via transfer
@@ -180,6 +183,7 @@ export class Settlement extends AutoEncoder {
     settledAt: Date;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amount: number;
 
     /**
@@ -187,6 +191,7 @@ export class Settlement extends AutoEncoder {
      * Only set if it is witheld from the settlement/payout
      */
     @field({ decoder: IntegerDecoder, version: 195 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     fee = 0;
 }
 
@@ -201,14 +206,18 @@ export class PrivatePayment extends Payment {
     ibanName: string | null = null;
 
     @field({ decoder: IntegerDecoder, version: 197 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     transferFee = 0;
 
     @field({ decoder: IntegerDecoder, optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
     serviceFeePayout = 0;
 
     @field({ decoder: IntegerDecoder, optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
     serviceFeeManual = 0;
 
     @field({ decoder: IntegerDecoder, optional: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true })
     serviceFeeManualCharged = 0;
 }

@@ -1,5 +1,5 @@
 <template>
-    <FloatInput v-bind="props" v-model="model" :suffix="suffix">
+    <FloatInput v-bind="props" v-model="model" :suffix="suffix" :fraction-digits="type === 'percentage' ? 2 : 4" :round-fraction-digits="2">
         <template #right>
             <button class="button icon arrow-down-small" type="button" @click="toggleType" />
         </template>

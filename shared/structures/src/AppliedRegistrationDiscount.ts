@@ -1,5 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
 import { TranslatedString } from './TranslatedString.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class AppliedRegistrationDiscount extends AutoEncoder {
     /**
@@ -10,9 +11,10 @@ export class AppliedRegistrationDiscount extends AutoEncoder {
     name = new TranslatedString('');
 
     /**
-     * Discount in cents.
+     * Discount in hunderd cents.
      * Positive means discount, negative means extra cost.
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amount: number;
 }

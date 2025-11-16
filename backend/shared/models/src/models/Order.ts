@@ -67,12 +67,17 @@ export class Order extends QueryableModel {
     @column({ type: 'string' })
     status = OrderStatus.Created;
 
-    // #region generated columns for filtering
+    /**
+     * Cached value for faster in database filtering
+     */
     @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
         return this.data.totalPrice;
     } })
     totalPrice: number = 0;
 
+    /**
+     * Cached value for faster in database filtering
+     */
     @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
         return this.data.amount;
     } })
@@ -82,7 +87,6 @@ export class Order extends QueryableModel {
         return this.data.timeSlot?.timeIndex ?? null;
     } })
     timeSlotTime: string | null = null;
-    // #endregion
 
     static webshop = new ManyToOneRelation(Webshop, 'webshop');
     static payment = new ManyToOneRelation(Payment, 'payment');

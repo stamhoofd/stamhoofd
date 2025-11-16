@@ -7,6 +7,7 @@ import { File } from '../files/File';
 import { Payment, Settlement } from '../members/Payment';
 import { OrganizationSimple } from '../OrganizationSimple';
 import { STPackage, STPricingType } from './STPackage';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces';
 
 export enum STInvoiceStatus {
     Created = 'Created',
@@ -32,6 +33,7 @@ export class STInvoiceItem extends AutoEncoder {
     amount = 1;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     unitPrice = 0;
 
     @field({ decoder: BooleanDecoder, version: 155 })

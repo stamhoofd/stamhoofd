@@ -9,21 +9,12 @@
             {{ $t('8a4c3084-e54d-474e-94b2-6e8d2bbc9f5e') }}
         </p>
 
-        <div class="split-inputs">
-            <div>
-                <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)">
-                    <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
-                </STInputBox>
-                <p v-if="balanceItem.relations.size" class="style-description-small">
-                    {{ $t('3dbf1fab-6adf-4050-a5dd-5c78886035cb', {platform: platform.config.name}) }}
-                </p>
-            </div>
-            <div>
-                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
-                    <DateSelection v-model="createdAt" />
-                </STInputBox>
-            </div>
-        </div>
+        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" class="max">
+            <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
+        </STInputBox>
+        <p v-if="balanceItem.relations.size" class="style-description-small">
+            {{ $t('3dbf1fab-6adf-4050-a5dd-5c78886035cb', {platform: platform.config.name}) }}
+        </p>
 
         <STInputBox v-if="balanceItem.status === BalanceItemStatus.Canceled" error-fields="status" :error-box="errors.errorBox" :title="$t('f21f3447-bb11-4474-8597-b9cae359faec')">
             <Dropdown v-model="status">
@@ -39,20 +30,98 @@
         <div v-if="balanceItem.status === BalanceItemStatus.Due" class="split-inputs">
             <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`)">
                 <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+
+                <template v-if="$feature('vat') || !VATIncluded" #right>
+                    <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
+                        <span v-if="VATIncluded">{{ $t('Incl. btw') }}</span>
+                        <span v-else>{{ $t('Excl. btw') }}</span>
+                        <span class="icon arrow-swap small" />
+                    </button>
+                </template>
             </STInputBox>
 
             <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
                 <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a`)" />
             </STInputBox>
         </div>
-        <template v-if="(patchedBalanceItem.price >= 0 && balanceItem.status === BalanceItemStatus.Due) || dueAt !== null">
-            <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`bf30128b-4c99-4a97-b4d2-1a4e62f33f41`)">
-                <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
-            </STInputBox>
-            <p class="style-description-small">
-                {{ $t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575') }}
-            </p>
-        </template>
+
+        <div class="split-inputs">
+            <div>
+                <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
+                    <DateSelection v-model="createdAt" />
+                </STInputBox>
+            </div>
+
+            <div v-if="(patchedBalanceItem.unitPrice >= 0 && balanceItem.status === BalanceItemStatus.Due) || dueAt !== null">
+                <STInputBox error-fields="dueAt" :error-box="errors.errorBox" :title="$t(`bf30128b-4c99-4a97-b4d2-1a4e62f33f41`)">
+                    <template #right>
+                        <span v-tooltip="$t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575')" class="style-tooltip"><span class="icon small gray help" /></span>
+                    </template>
+                    <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
+                </STInputBox>
+            </div>
+        </div>
+
+        <STInputBox v-if="$feature('vat') || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('Btw-percentage')" class="max">
+            <template #right>
+                <button v-if="!VATExcempt" class="button text small" type="button" @click="toggleVATExcempt">
+                    <span>Verleggen</span>
+                    <span class="icon arrow-down-small small" />
+                </button>
+            </template>
+
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="VATPercentage" :value="null" autocomplete="off" name="VATPercentage" />
+                    </template>
+                    <h4 class="style-list-title">
+                        {{ $t('Onbepaald') }}
+                        <span v-if="VATPercentage === null && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                    </h4>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="VATPercentage" :value="21" autocomplete="off" name="VATPercentage" />
+                    </template>
+                    <h4 class="style-list-title">
+                        21%
+                        <span v-if="VATPercentage === 21 && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                    </h4>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="VATPercentage" :value="12" autocomplete="off" name="VATPercentage" />
+                    </template>
+                    <h4 class="style-list-title">
+                        12%
+                        <span v-if="VATPercentage === 12 && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                    </h4>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio v-model="VATPercentage" :value="6" autocomplete="off" name="VATPercentage" />
+                    </template>
+                    <h4 class="style-list-title">
+                        6%
+                        <span v-if="VATPercentage === 6 && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                    </h4>
+                </STListItem>
+            </STList>
+        </STInputBox>
+        <p v-if="VATExcempt" class="style-description-small">
+            <I18nComponent :t="$t('De btw is verlegd met als reden: “{reden}”. <button>Wijzig</button>', {reden: getVATExcemptReasonName(VATExcempt)})">
+                <template #button="{content}">
+                    <button class="inline-link" type="button" @click="toggleVATExcempt">
+                        {{ content }}
+                    </button>
+                </template>
+            </I18nComponent>
+        </p>
+
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="family && family.members.length >= (originalMemberId ? 2 : 1)">
@@ -129,13 +198,14 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, Dropdown, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useContext, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, Dropdown, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useContext, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, PlatformFamily, UserWithMembers } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 const props = defineProps<{
     balanceItem: BalanceItemWithPayments | BalanceItem;
@@ -208,6 +278,21 @@ const memberId = computed({
     set: value => addPatch({ memberId: value }),
 });
 
+const VATPercentage = computed({
+    get: () => patchedBalanceItem.value.VATPercentage,
+    set: value => addPatch({ VATPercentage: value }),
+});
+
+const VATIncluded = computed({
+    get: () => patchedBalanceItem.value.VATIncluded,
+    set: value => addPatch({ VATIncluded: value }),
+});
+
+const VATExcempt = computed({
+    get: () => patchedBalanceItem.value.VATExcempt,
+    set: value => addPatch({ VATExcempt: value }),
+});
+
 const originalMemberId = computed(
     () => props.balanceItem.memberId,
 );
@@ -225,6 +310,28 @@ const outstanding = computed(() => {
         remaining,
     };
 });
+
+async function toggleVATExcempt(event: MouseEvent) {
+    const menu = new ContextMenu([
+        [
+            new ContextMenuItem({
+                name: $t('Niet verlegd'),
+                selected: VATExcempt.value === null,
+                action: () => {
+                    VATExcempt.value = null;
+                },
+            }),
+            new ContextMenuItem({
+                name: getVATExcemptReasonName(VATExcemptReason.IntraCommunity),
+                selected: VATExcempt.value === VATExcemptReason.IntraCommunity,
+                action: () => {
+                    VATExcempt.value = VATExcemptReason.IntraCommunity;
+                },
+            }),
+        ],
+    ]);
+    await menu.show({ clickEvent: event });
+}
 
 function hasPayments(balanceItem: BalanceItemWithPayments | BalanceItem): balanceItem is BalanceItemWithPayments {
     return (balanceItem instanceof BalanceItemWithPayments);

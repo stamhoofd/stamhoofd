@@ -84,21 +84,61 @@
                 {{ $t('a0044037-18fd-465d-8907-9f7064342279') }}
             </h2>
 
-            <Checkbox v-model="useTestPayments">
-                {{ $t('02fe4c35-562f-429c-9250-dbd25ca01357') }}
-            </Checkbox>
+            <STList>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('vat')" @update:model-value="setFeatureFlag('vat', !!$event)" />
+                    </template>
 
-            <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)">
-                {{ $t('8cdbbc91-88ab-4d25-8f42-b34369e959f0') }}
-            </Checkbox>
+                    <h3 class="style-title-list">
+                        {{ $t('Btw module') }} (wip)
+                    </h3>
 
-            <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)">
-                {{ $t('5573d401-88aa-4221-9ed7-44380d970177') }}
-            </Checkbox>
+                    <p class="style-description-small">
+                        {{ $t('Hou het btw-tarief van openstaande bedragen bij zodat het opstellen van facturen vereenvoudigd wordt.') }}
+                    </p>
+                </STListItem>
 
-            <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)">
-                {{ $t('47e866d9-5349-4318-b779-161da61c2250') }}
-            </Checkbox>
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox v-model="useTestPayments" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('02fe4c35-562f-429c-9250-dbd25ca01357') }}
+                    </h3>
+
+                    <p class="style-description-small">
+                        {{ $t('Betalingen worden niet naar een echte betaalpagina gestuurd. Let wel op dat de betalingen dan nog steeds op betaald kunnen gezet worden maar in werkelijkheid niet betaald zijn op jullie bankrekening.') }}
+                    </p>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('sso')" @update:model-value="setFeatureFlag('sso', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('8cdbbc91-88ab-4d25-8f42-b34369e959f0') }}
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('webshop-auth')" @update:model-value="setFeatureFlag('webshop-auth', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('5573d401-88aa-4221-9ed7-44380d970177') }}
+                    </h3>
+                </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('organization-receivable-balances')" @update:model-value="setFeatureFlag('organization-receivable-balances', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('47e866d9-5349-4318-b779-161da61c2250') }}
+                    </h3>
+                </STListItem>
+            </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
                 <span class="icon gift" /><span>{{ $t('5a58b689-5269-40a0-907e-c977b293c2fa') }}</span>

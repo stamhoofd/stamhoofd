@@ -2040,8 +2040,8 @@
     "translation": "voiture"
   },
   "15b6f0c8-6287-4b4d-bf34-4da2f4a0e575": {
-    "original": "*Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
-    "translation": "*Vous pouvez reporter un montant dû - par exemple pour un paiement échelonné ou une période d'essai. Il n'apparaît comme action rapide dans le portail des membres qu'à partir d'une semaine avant cette date (avec un éventuel e-mail automatique) et doit être payé à la date saisie. Il est possible de payer plus tôt, mais ce n'est pas obligatoire."
+    "original": "Je kan een openstaand bedrag uitstellen - bv. voor gespreid betalen of een proefperiode. Het verschijnt pas als snelle actie in het ledenportaal vanaf één week voor deze datum (samen met een eventuele automatische e-mail) en moet betaald zijn tegen de ingevulde datum. Het is mogelijk om het al vroeger te betalen, maar zeker niet verplicht.",
+    "translation": "Vous pouvez reporter un montant dû - par exemple pour un paiement échelonné ou une période d'essai. Il n'apparaît comme action rapide dans le portail des membres qu'à partir d'une semaine avant cette date (avec un éventuel e-mail automatique) et doit être payé à la date saisie. Il est possible de payer plus tôt, mais ce n'est pas obligatoire."
   },
   "15bb965e-b592-4954-a40e-3cbe5786e591": {
     "original": "Unieke identificatie van de lijn",
@@ -17016,8 +17016,8 @@
     "translation": "Disponibilité"
   },
   "bf30128b-4c99-4a97-b4d2-1a4e62f33f41": {
-    "original": "Te betalen tegen*",
-    "translation": "À payer pour le*"
+    "original": "Te betalen tegen",
+    "translation": "À payer pour le"
   },
   "bf43c364-65c2-4cbe-98ff-f9e6b4c7d659": {
     "original": "Delen",

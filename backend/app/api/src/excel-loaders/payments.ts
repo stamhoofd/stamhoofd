@@ -210,7 +210,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             name: $t(`7f7fdce2-1fcd-44c9-8c98-856aea11ffc3`),
             width: 20,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.unitPrice / 100,
+                value: object.balanceItemPayment.unitPrice / 100_00,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -223,7 +223,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
             width: 20,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.price / 100,
+                value: object.balanceItemPayment.price / 100_00,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -254,7 +254,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
             name: $t(`61b7b9cb-287a-4655-bac2-bb2d0b83fe47`),
             width: 10,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
-                value: object.price / 100,
+                value: object.price / 100_00,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -361,7 +361,7 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.settlement?.amount !== undefined ? (object.settlement?.amount / 100) : null,
+                    value: object.settlement?.amount !== undefined ? (object.settlement?.amount / 100_00) : null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -381,7 +381,7 @@ function getStripeColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 16,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.transferFee / 100,
+                    value: object.transferFee / 100_00,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,

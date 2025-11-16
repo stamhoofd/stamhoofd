@@ -277,6 +277,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        if (totalPrice % 100 !== 0) {
+            throw new SimpleError({
+                code: 'more_than_2_decimal_places',
+                message: 'Unexpected total price. The total price should be rounded to maximum 2 decimal places',
+            });
+        }
+
         const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
         registrationMemberRelation.foreignKey = 'memberId';
 

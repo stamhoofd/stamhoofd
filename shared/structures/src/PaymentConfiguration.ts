@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PaymentMethod } from './PaymentMethod.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
 import { PaymentCustomer } from './PaymentCustomer.js';
+import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class PayconiqAccount extends AutoEncoder {
     /**
@@ -80,6 +81,7 @@ export class AdministrationFeeSettings extends AutoEncoder {
      * In cents
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     fixed = 0;
 
     @field({ decoder: BooleanDecoder, version: 228 })
@@ -89,7 +91,7 @@ export class AdministrationFeeSettings extends AutoEncoder {
         if (price <= 0 && this.zeroIfZero) {
             return 0;
         }
-        return Math.round(price * this.percentage / 10000) + this.fixed;
+        return 100 * Math.round(price * this.percentage / 10000_00) + this.fixed; // we round the percentage fee up to 1 cent
     }
 
     isEqual(other: AdministrationFeeSettings) {
@@ -104,12 +106,14 @@ export class AdministrationFeeSettings extends AutoEncoder {
 export class PaymentMethodSettings extends AutoEncoder {
     // Note: these settings are public - don't store sensitive information here
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     minimumAmount = 0;
 
     /**
      * Only show warning if amount is higher than this
      */
     @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     warningAmount: number | null = null;
 
     @field({ decoder: StringDecoder })

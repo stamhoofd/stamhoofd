@@ -121,8 +121,8 @@ describe('Endpoint.RegisterMembers', () => {
 
         const group = await new GroupFactory({
             organization,
-            price: 25_00,
-            reducedPrice: 12_50,
+            price: 25_0000,
+            reducedPrice: 12_5000,
             stock: 500,
         })
             .create();
@@ -197,7 +197,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 25_00,
+                    totalPrice: 25_0000,
                     customer: null,
                 });
 
@@ -223,7 +223,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
             await expect(post(body, organization, token))
@@ -249,12 +249,12 @@ describe('Endpoint.RegisterMembers', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 20,
+                price: 2000,
             });
 
             const body = IDRegisterCheckout.create({
@@ -268,7 +268,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 20,
+                totalPrice: 2000,
                 customer: null,
             });
 
@@ -289,12 +289,12 @@ describe('Endpoint.RegisterMembers', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 30, // too much
+                price: 3000, // too much
             });
 
             const body = IDRegisterCheckout.create({
@@ -308,7 +308,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 customer: null,
             });
 
@@ -342,7 +342,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
             // #endregion
@@ -365,7 +365,7 @@ describe('Endpoint.RegisterMembers', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const body = IDRegisterCheckout.create({
@@ -379,7 +379,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 45,
+                totalPrice: 4500,
                 customer: null,
             });
             // #endregion
@@ -414,7 +414,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: groupPrice.price.price + 5, // too much
+                totalPrice: groupPrice.price.price + 500, // too much
                 customer: null,
             });
 
@@ -446,7 +446,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
 
@@ -488,7 +488,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50,
+                totalPrice: 5000,
                 customer: null,
             });
 
@@ -524,7 +524,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.CreditCard,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
             // #endregion
@@ -562,7 +562,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 cancelUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
@@ -597,7 +597,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.Bancontact,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 redirectUrl: new URL('https://www.stamhoofd.be'),
                 customer: null,
             });
@@ -629,7 +629,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response = await post(body, organization, token);
@@ -669,7 +669,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response = await post(body, organization, token);
@@ -703,7 +703,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response = await post(body, organization, token);
@@ -750,7 +750,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
             });
 
             const response = await post(body, organization, token);
@@ -781,7 +781,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
             // #endregion
@@ -822,7 +822,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
 
@@ -835,7 +835,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 15,
+                price: 1500,
                 stock: 4,
                 maxMembers: 1,
             }).create();
@@ -857,7 +857,7 @@ describe('Endpoint.RegisterMembers', () => {
                 paymentMethod: PaymentMethod.Payconiq,
                 redirectUrl: new URL('https://www.example.com'),
                 cancelUrl: new URL('https://www.example.com'),
-                totalPrice: 15,
+                totalPrice: 1500,
             });
 
             const response = await post(body, organization, token);
@@ -928,7 +928,7 @@ describe('Endpoint.RegisterMembers', () => {
             finally {
                 jest.useRealTimers();
             }
-        }, 20_000);
+        }, 20_00000);
 
         test('Should update group stock reservations', async () => {
             // #region arrange
@@ -955,7 +955,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
             });
             // #endregion
@@ -1005,7 +1005,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 75,
+                totalPrice: 7500,
                 customer: null,
             });
             // #endregion
@@ -1027,8 +1027,8 @@ describe('Endpoint.RegisterMembers', () => {
                 name: 'option 1',
                 stock: 4,
                 price: ReduceablePrice.create({
-                    price: 5,
-                    reducedPrice: 3,
+                    price: 500,
+                    reducedPrice: 300,
                 }),
             });
 
@@ -1036,8 +1036,8 @@ describe('Endpoint.RegisterMembers', () => {
                 name: 'option 2',
                 stock: 4,
                 price: ReduceablePrice.create({
-                    price: 3,
-                    reducedPrice: 1,
+                    price: 300,
+                    reducedPrice: 100,
                 }),
             });
 
@@ -1084,7 +1084,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50,
+                totalPrice: 5000,
                 customer: null,
             });
             // #endregion
@@ -1105,8 +1105,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 5,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 5_00,
-                    reducedPrice: 3_00,
+                    price: 5_0000,
+                    reducedPrice: 3_0000,
                 }),
             });
 
@@ -1116,8 +1116,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 2,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 3_00,
-                    reducedPrice: 1_00,
+                    price: 3_0000,
+                    reducedPrice: 1_0000,
                 }),
             });
 
@@ -1164,7 +1164,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50_00,
+                totalPrice: 50_0000,
                 customer: null,
             });
 
@@ -1182,8 +1182,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 5,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 5_00,
-                    reducedPrice: 3_00,
+                    price: 5_0000,
+                    reducedPrice: 3_0000,
                 }),
             });
 
@@ -1193,8 +1193,8 @@ describe('Endpoint.RegisterMembers', () => {
                 maximum: 5,
                 allowAmount: true,
                 price: ReduceablePrice.create({
-                    price: 3_00,
-                    reducedPrice: 1_00,
+                    price: 3_0000,
+                    reducedPrice: 1_0000,
                 }),
             });
 
@@ -1241,7 +1241,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 50_00,
+                totalPrice: 50_0000,
                 customer: null,
             });
 
@@ -1283,12 +1283,12 @@ describe('Endpoint.RegisterMembers', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.PlatformMembership,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 20,
+                price: 2000,
             });
 
             const body = IDRegisterCheckout.create({
@@ -1302,7 +1302,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 20,
+                totalPrice: 2000,
                 asOrganizationId: organization.id,
                 customer: PaymentCustomer.create({
                     firstName: user.firstName,
@@ -1320,9 +1320,9 @@ describe('Endpoint.RegisterMembers', () => {
 
             expect(balanceItem1).toMatchObject({
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
                 priceOpen: 0,
-                pricePending: 20,
+                pricePending: 2000,
                 pricePaid: 0,
             });
         });
@@ -1345,12 +1345,12 @@ describe('Endpoint.RegisterMembers', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.PlatformMembership,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 20,
+                price: 2000,
             });
 
             const body = IDRegisterCheckout.create({
@@ -1364,7 +1364,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 20,
+                totalPrice: 2000,
                 asOrganizationId: organization.id,
                 customer: PaymentCustomer.create({
                     firstName: user.firstName,
@@ -1416,7 +1416,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization.id,
             });
 
@@ -1435,12 +1435,12 @@ describe('Endpoint.RegisterMembers', () => {
                 payingOrganizationId: organization.id,
                 type: BalanceItemType.Registration,
                 amount: 10,
-                unitPrice: 2,
+                unitPrice: 200,
             }).create();
 
             const cartItem = BalanceItemCartItem.create({
                 item: balanceItem1.getStructure(),
-                price: 20,
+                price: 2000,
             });
 
             const body = IDRegisterCheckout.create({
@@ -1454,7 +1454,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 20,
+                totalPrice: 2000,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -1498,7 +1498,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00, // This is wrong, but the admin should not know that since he/she does not know the actual financial status of the member
+                totalPrice: 25_0000, // This is wrong, but the admin should not know that since he/she does not know the actual financial status of the member
                 asOrganizationId: organization.id,
             });
 
@@ -1519,9 +1519,9 @@ describe('Endpoint.RegisterMembers', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration.id,
                     amount: 1,
-                    price: 12_50,
+                    price: 12_5000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 12_50,
+                    priceOpen: 12_5000,
                     pricePending: 0,
                 },
             ]);
@@ -1561,7 +1561,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization.id,
             });
 
@@ -1579,9 +1579,9 @@ describe('Endpoint.RegisterMembers', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
             ]);
@@ -1598,8 +1598,8 @@ describe('Endpoint.RegisterMembers', () => {
             const { member, organization, token } = await initData({});
             const group = await new GroupFactory({
                 organization,
-                price: 25_00,
-                reducedPrice: 12_50,
+                price: 25_0000,
+                reducedPrice: 12_5000,
                 stock: 500,
                 period: previousPeriod,
             })
@@ -1626,7 +1626,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization.id,
             });
 
@@ -1661,7 +1661,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization.id,
             });
 
@@ -1682,9 +1682,9 @@ describe('Endpoint.RegisterMembers', () => {
                     type: BalanceItemType.Registration,
                     registrationId: registration.id,
                     amount: 1,
-                    price: 25_00,
+                    price: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_00,
+                    priceOpen: 25_0000,
                     pricePending: 0,
                 },
             ]);
@@ -1717,7 +1717,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization.id,
             });
 
@@ -1753,7 +1753,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization.id,
             });
 
@@ -1833,7 +1833,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: PaymentCustomer.create({
                     company,
                 }),
@@ -1875,7 +1875,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: PaymentCustomer.create({
                     company,
                 }),
@@ -1913,7 +1913,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
                 asOrganizationId: organization2.id,
             });
@@ -1946,7 +1946,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: null,
                 asOrganizationId: organization2.id,
             });
@@ -1984,7 +1984,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 500,
                 asOrganizationId: organization2.id,
                 customer: null,
             });
@@ -2017,7 +2017,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: PaymentCustomer.create({
                     company: null,
                 }),
@@ -2052,7 +2052,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 customer: PaymentCustomer.create({
                     company: Company.create({
                         name: 'test company',
@@ -2084,7 +2084,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2109,7 +2109,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -2138,8 +2138,8 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group1 = await new GroupFactory({
                 organization,
-                price: 25_00,
-                reducedPrice: 12_50,
+                price: 25_0000,
+                reducedPrice: 12_5000,
                 stock: 500,
                 period: previousPeriod,
             })
@@ -2170,7 +2170,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -2227,7 +2227,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_00,
+                totalPrice: 25_0000,
                 asOrganizationId: organization2.id,
                 customer: PaymentCustomer.create({
                     company,
@@ -2240,7 +2240,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30_00,
+                price: 30_0000,
                 stock: 5,
             }).create();
 
@@ -2265,7 +2265,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30_00 - 25_00,
+                totalPrice: 30_0000 - 25_0000,
                 asOrganizationId: organization.id,
                 customer: PaymentCustomer.create({
                     company,
@@ -2294,7 +2294,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2319,7 +2319,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 500,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -2347,7 +2347,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2372,7 +2372,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 500,
                 customer: null,
             });
 
@@ -2399,7 +2399,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization: organization1,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2424,7 +2424,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 asOrganizationId: organization1.id,
                 customer: null,
             });
@@ -2469,7 +2469,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization: organization1,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2496,7 +2496,7 @@ describe('Endpoint.RegisterMembers', () => {
                 paymentMethod: PaymentMethod.Payconiq,
                 redirectUrl: new URL('https://www.example.com'),
                 cancelUrl: new URL('https://www.example.com'),
-                totalPrice: 5,
+                totalPrice: 500,
                 customer: null,
             });
 
@@ -2514,7 +2514,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2539,7 +2539,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -2556,8 +2556,8 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group1 = await new GroupFactory({
                 organization,
-                price: 25_00,
-                reducedPrice: 12_50,
+                price: 25_0000,
+                reducedPrice: 12_5000,
                 stock: 500,
                 period: previousPeriod,
             })
@@ -2579,7 +2579,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 asOrganizationId: organization.id,
                 customer: null,
             });
@@ -2610,14 +2610,14 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 25_00,
+                    totalPrice: 25_0000,
                     asOrganizationId: organization.id,
                     customer: null,
                 });
 
                 const group2 = await new GroupFactory({
                     organization,
-                    price: 30,
+                    price: 3000,
                     stock: 5,
                 }).create();
 
@@ -2648,7 +2648,7 @@ describe('Endpoint.RegisterMembers', () => {
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 30 - 25 + Math.round(25 * cancellationFeePercentage / 10000),
+                    totalPrice: 3000 - 2500 + 100 * Math.round(25 * cancellationFeePercentage / 10000),
                     asOrganizationId: organization.id,
                     customer: null,
                 });
@@ -2700,7 +2700,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 500,
                 customer: null,
             });
 
@@ -2784,7 +2784,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2809,7 +2809,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 5,
+                totalPrice: 500,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -2833,7 +2833,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group2 = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2841,7 +2841,7 @@ describe('Endpoint.RegisterMembers', () => {
 
             const group3 = await new GroupFactory({
                 organization,
-                price: 30,
+                price: 3000,
                 stock: 5,
             }).create();
 
@@ -2866,7 +2866,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 customer: null,
                 asOrganizationId: organization.id,
             });
@@ -2890,7 +2890,7 @@ describe('Endpoint.RegisterMembers', () => {
                 administrationFee: 0,
                 freeContribution: 0,
                 paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 30,
+                totalPrice: 3000,
                 customer: null,
                 asOrganizationId: organization.id,
             });

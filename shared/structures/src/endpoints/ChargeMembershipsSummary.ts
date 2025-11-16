@@ -1,4 +1,5 @@
 import { AutoEncoder, BooleanDecoder, IntegerDecoder, MapDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces';
 
 export class ChargeMembershipsTypeSummary extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
@@ -8,6 +9,7 @@ export class ChargeMembershipsTypeSummary extends AutoEncoder {
     members = 0;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     @field({ decoder: IntegerDecoder })
@@ -25,6 +27,7 @@ export class ChargeMembershipsSummary extends AutoEncoder {
     members = 0;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     price = 0;
 
     @field({ decoder: IntegerDecoder })

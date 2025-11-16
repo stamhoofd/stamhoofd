@@ -18,16 +18,14 @@ export class ServiceFeeHelper {
             if (price === 0 && !minimumFee) {
                 return 0;
             }
-            let fee = Math.round(fixed + Math.max(1, price * percentageTimes100 / 100 / 100));
+            let fee = Math.round((fixed + Math.max(1_00, price * percentageTimes100 / 100 / 100)) / 100) * 100; // Round to 2 decimals
             if (minimumFee !== null && fee < minimumFee) {
                 fee = minimumFee;
             }
             if (maximumFee !== null && fee > maximumFee) {
                 fee = maximumFee;
             }
-            return Math.round(
-                fee * (100 + vat) / 100,
-            ); // € 0,21 + 0,2%
+            return fee;
         }
 
         let serviceFee = 0;
@@ -51,6 +49,12 @@ export class ServiceFeeHelper {
                 }, 0);
             }
         }
+
+        // Add VAT
+        serviceFee = serviceFee * (100 + vat) / 100;
+
+        // Round service fee to 2 decimal places
+        serviceFee = Math.round(serviceFee / 100) * 100;
 
         console.log('Service fee for payment', payment.id, type, 'is', serviceFee);
         if (payment.provider === PaymentProvider.Stripe && payment.stripeAccountId) {

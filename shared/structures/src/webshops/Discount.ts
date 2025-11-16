@@ -5,6 +5,7 @@ import { Checkout } from './Checkout.js';
 import { Webshop } from './Webshop.js';
 import { Formatter } from '@stamhoofd/utility';
 import { OptionMenu, Option } from './Product.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum OptionSelectionRequirement {
     Required = 'Required',
@@ -228,6 +229,7 @@ export class GeneralDiscount extends AutoEncoder {
      * Fixed discount on order
      */
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     fixedDiscount = 0;
 
     /**
@@ -254,6 +256,7 @@ export class ProductDiscount extends AutoEncoder {
     id: string;
 
     @field({ decoder: IntegerDecoder })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     discountPerPiece = 0;
 
     /**
@@ -265,7 +268,7 @@ export class ProductDiscount extends AutoEncoder {
     percentageDiscount = 0;
 
     calculate(price: number): number {
-        price = Math.min(price, Math.max(0, Math.round(price * (10000 - this.percentageDiscount) / 10000))); // Min is required to support negative prices: prices should never increase after applyign discounts
+        price = Math.min(price, Math.max(0, 100 * Math.round(price * (10000 - this.percentageDiscount) / 10000_00))); // Min is required to support negative prices: prices should never increase after applyign discounts
         price = Math.min(price, Math.max(0, price - this.discountPerPiece)); // Min is required to support negative prices: prices should never increase after applyign discounts
         return price;
     }
