@@ -509,7 +509,7 @@ describe('Unit.RegisterCart', () => {
                     discount.id,
                     AppliedRegistrationDiscount.create({
                         name: discount.name,
-                        amount: 10_0000, // 10% discount on 100_00 = 10_00
+                        amount: 10_0000, // 10% discount on 1_0000 = 10_00
                     }),
                 ],
             ]));
@@ -1218,7 +1218,7 @@ describe('Unit.RegisterCart', () => {
                     name: 'Bundle discount',
                     discounts: [
                         { value: 5_00, type: GroupPriceDiscountType.Percentage, reducedValue: 50_00 },
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage, reducedValue: 100_00 },
+                        { value: 10_00, type: GroupPriceDiscountType.Percentage, reducedValue: 1_0000 },
                     ],
                 }),
             });

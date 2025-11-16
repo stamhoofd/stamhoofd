@@ -108,7 +108,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: $t(`7f7fdce2-1fcd-44c9-8c98-856aea11ffc3`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.unitPrice / 100_00,
+                value: object.balanceItem.unitPrice / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -121,7 +121,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.priceWithVAT / 100_00,
+                value: object.balanceItem.priceWithVAT / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -134,7 +134,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: $t(`dc9f65e0-19ce-4908-8830-da48235faa70`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.pricePaid / 100_00,
+                value: object.balanceItem.pricePaid / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -147,7 +147,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.pricePending / 100_00,
+                value: object.balanceItem.pricePending / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -160,7 +160,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: $t(`eb0421f4-6ee9-4d81-b549-2bc4e16c4b63`),
             width: 20,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.priceOpen / 100_00,
+                value: object.balanceItem.priceOpen / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -261,7 +261,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
             name: $t(`eb0421f4-6ee9-4d81-b549-2bc4e16c4b63`),
             width: 10,
             getValue: (object: ReceivableBalance) => ({
-                value: object.amountOpen / 100_00,
+                value: object.amountOpen / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -274,7 +274,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<ReceivableBalance>[]
             name: $t(`5c75e9bf-1b64-4d28-a435-6e33247d5170`),
             width: 18,
             getValue: (object: ReceivableBalance) => ({
-                value: object.amountPending / 100_00,
+                value: object.amountPending / 1_0000,
                 style: {
                     numberFormat: {
                         id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,

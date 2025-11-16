@@ -18,7 +18,7 @@ export class ServiceFeeHelper {
             if (price === 0 && !minimumFee) {
                 return 0;
             }
-            let fee = Math.round((fixed + Math.max(1_00, price * percentageTimes100 / 100 / 100)) / 100) * 100; // Round to 2 decimals
+            let fee = Math.round((fixed + Math.max(100, price * percentageTimes100 / 100 / 100)) / 100) * 100; // Round to 2 decimals, minimum 1 cent
             if (minimumFee !== null && fee < minimumFee) {
                 fee = minimumFee;
             }
