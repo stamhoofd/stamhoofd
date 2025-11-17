@@ -1,4 +1,5 @@
 import { WorkerInfo } from "@playwright/test";
+import builder from "@stamhoofd/build-development-env";
 import { ApiServerHelper } from "./ApiServerHelper";
 import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
@@ -20,7 +21,6 @@ export async function setupWorker(workerInfo: WorkerInfo) {
 
     const apiServerHelper = new ApiServerHelper();
     const frontendServerHelper = new FrontendServerHelper();
-
     const workerIndex = workerInfo.workerIndex;
     const workerId = workerIndex.toString();
 
@@ -40,13 +40,16 @@ export async function setupWorker(workerInfo: WorkerInfo) {
         ],
     );
 
-    // wait until all services are reachable
+    // wait until api is ready
     await apiProcesses.wait();
 
     // clear database
     const databaseHelper = new DatabaseHelper();
     await databaseHelper.clear(workerId);
 
+    // expose frontend environment (should happen after api is ready)
+    await exposeFrontendEnvironment();
+    
     await frontendProcesses.wait();
 
     const workerContext: WorkerContext = {
@@ -65,9 +68,20 @@ export async function setupWorker(workerInfo: WorkerInfo) {
             // kill processes
             await apiProcesses.kill();
             await frontendProcesses.kill();
-
-            // cleanup caddy config
-            // await caddyCleanup();
         },
     };
+}
+
+async function exposeFrontendEnvironment() {
+    const name: "dashboard" | "registration" | "webshop" | "calculator" =
+        "dashboard";
+
+    const env: FrontendEnvironment = await builder.build(
+        process.env.STAMHOOFD_ENV ?? "",
+        {
+            frontend: name,
+        },
+    );
+
+    (STAMHOOFD as any).EXPOSE_FRONTEND_ENVIRONMENT = env;
 }

@@ -20,7 +20,8 @@
         ],
         "types": [
             "node",
-            "jest"
+            "jest",
+            "playwright/test"
         ]
     },
     "include": [

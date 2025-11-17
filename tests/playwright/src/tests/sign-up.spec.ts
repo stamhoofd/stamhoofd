@@ -1,7 +1,9 @@
 import { expect } from "@playwright/test";
-import { test } from "../setup/fixtures/services";
+import { test } from "../setup/fixtures/workerFixture";
 
-test("Sign up - happy flow", async ({ page, workerContext }) => {
+test("Sign up - happy flow", async ({ page, workerContext, TestUtils }) => {
+    TestUtils.setPermanentEnvironment('userMode', 'organization');
+
     await page.goto(workerContext.urls.dashboard);
 
     // click signup
