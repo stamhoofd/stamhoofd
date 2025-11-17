@@ -232,3 +232,6 @@ __screenshots__
 /playwright/.auth/
 /tests/playwright/playwright-report
 /tests/playwright/test-results
+/frontend/app/dashboard/dist-playwright
+/frontend/app/registration/dist-playwright
+/frontend/app/webshop/dist-playwright

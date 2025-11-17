@@ -20,8 +20,10 @@ export class CaddyHelper {
     }
 
     async deletePlaywrightConfig() {
+        console.log('Deleting playwright config...');
         await this.deleteAllPlaywrightRoutes();
         await this.deleteAllPlaywrightTlsPolicySubjects();
+        console.log('Done deleting playwright config.');
     }
 
     private async deleteAllPlaywrightTlsPolicySubjects() {
