@@ -358,8 +358,8 @@ export class BalanceItem extends AutoEncoder {
     /**
      * How much has been invoiced
      */
-    @field({ decoder: IntegerDecoder, ...NextVersion })
-    priceInvoiced = 0;
+    // @field({ decoder: IntegerDecoder, ... NextVersion })
+    // priceInvoiced = 0;
 
     @field({ decoder: DateDecoder, nullable: true, version: 353 })
     dueAt: Date | null = null;
