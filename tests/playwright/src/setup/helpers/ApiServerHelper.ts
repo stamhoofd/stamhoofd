@@ -1,5 +1,5 @@
 import getPort from "get-port";
-import { createRequire } from 'node:module';
+import { createRequire } from "node:module";
 import { CaddyHelper } from "./CaddyHelper";
 import { NetworkHelper } from "./NetworkHelper";
 import { ServerHelper } from "./ServerHelper";
@@ -16,6 +16,7 @@ export class ApiServerHelper implements ServerHelper {
         console.log(
             `Starting backend server with id ${workerId} on port ${port}...`,
         );
+
         await this.startApi({ port, workerId });
 
         return {
@@ -25,6 +26,7 @@ export class ApiServerHelper implements ServerHelper {
                 await NetworkHelper.waitForUrl(
                     "http://" + domain + "/organizations/search",
                 );
+                console.log("Backend server ready");
             },
             kill: async () => {
                 // do nothing

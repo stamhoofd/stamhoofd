@@ -1,7 +1,7 @@
 import { loadEnvironment } from './src/loadEnvironment.js';
 
 type AfterCallback = () => void | Promise<void>;
-class TestInstance {
+abstract class TestInstance {
     onceAfterEachCallbacks: AfterCallback[] = [];
     afterEachCallbacks: AfterCallback[] = [];
     beforeAllCallbacks: AfterCallback[] = [];
@@ -66,6 +66,23 @@ class TestInstance {
         }
     }
 
+    async beforeEach() {
+        await this.loadEnvironment();
+    }
+
+    abstract loadEnvironment(): Promise<void>;
+
+    abstract setup(initialEnvironment?: typeof STAMHOOFD): void;
+
+    /**
+     * Run this in each jest.global.setup.ts file
+     */
+    async globalSetup() {
+        await this.loadEnvironment();
+    }
+}
+
+class JestTestInstace extends TestInstance {
     async loadEnvironment() {
         // Clear env
         await loadEnvironment();
@@ -74,10 +91,6 @@ class TestInstance {
         for (const key in this.permanentEnvironmentOverrides) {
             this.setEnvironment(key as any, this.permanentEnvironmentOverrides[key]);
         }
-    }
-
-    async beforeEach() {
-        await this.loadEnvironment();
     }
 
     /**
@@ -101,16 +114,46 @@ class TestInstance {
             await this.afterAll();
         });
     }
+}
 
-    /**
-     * Run this in each jest.global.setup.ts file
-     */
-    async globalSetup() {
-        await this.loadEnvironment();
+class PlaywrightTestInstance extends TestInstance {
+    private environment?: string;
+
+    async loadEnvironment() {
+        if (!STAMHOOFD) {
+            // STAMHOOFD should be loaded outside of TestUtils
+            throw new Error('STAMHOOFD is not defined');
+        }
+
+        if (!this.environment) {
+            // init environment
+            this.environment = JSON.stringify(STAMHOOFD);
+        }
+
+        let globalObject: any = null;
+
+        if (typeof global === 'object') {
+            globalObject = global;
+        }
+
+        if (typeof self === 'object') {
+            globalObject = self;
+        }
+
+        (globalObject as any).STAMHOOFD = JSON.parse(this.environment);
+
+        // Reset permanent environment overrides
+        for (const key in this.permanentEnvironmentOverrides) {
+            this.setEnvironment(key as any, this.permanentEnvironmentOverrides[key]);
+        }
+    }
+
+    setup() {
+        // do nothing
     }
 }
 
-export const TestUtils = new TestInstance();
+export const TestUtils: TestInstance = process.env.STAMHOOFD_ENV === 'playwright' ? new PlaywrightTestInstance() : new JestTestInstace();
 
 export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,

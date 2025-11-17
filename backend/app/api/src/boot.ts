@@ -6,8 +6,10 @@ import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
+import { QueueHandler } from '@stamhoofd/queues';
 import { resumeEmails } from './helpers/EmailResumer';
 import { GlobalHelper } from './helpers/GlobalHelper';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater';
@@ -17,10 +19,8 @@ import { BalanceItemService } from './services/BalanceItemService';
 import { DocumentService } from './services/DocumentService';
 import { FileSignService } from './services/FileSignService';
 import { PlatformMembershipService } from './services/PlatformMembershipService';
-import { UniqueUserService } from './services/UniqueUserService';
-import { QueueHandler } from '@stamhoofd/queues';
-import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasService } from './services/uitpas/UitpasService';
+import { UniqueUserService } from './services/UniqueUserService';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -77,6 +77,8 @@ const start = async () => {
     // Note: we should load endpoints one by once to have a reliable order of url matching
     await router.loadAllEndpoints(__dirname + '/endpoints/global/*');
     await router.loadAllEndpoints(__dirname + '/endpoints/admin/*');
+    await router.loadAllEndpoints(__dirname + '/endpoints/frontend');
+
     await router.loadAllEndpoints(__dirname + '/endpoints/auth');
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/dashboard/*');
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/registration');

@@ -12,11 +12,13 @@
       "@your-org/server": ["../../server/src"]  // adjust relative path to backend package
     },
     "outDir": "dist",                      // optional, if you compile TS
-    "types": ["node", "playwright/test"]   // include Node and Playwright types
+    "types": ["node", "playwright/test"],   // include Node and Playwright types
   },
   "include": [
     "src/setup/**/*.ts",
-    "src/tests/**/*.ts"
+    "src/tests/**/*.ts",
+    "*.d.ts",
+    "../../*.d.ts",
   ],
   "exclude": [
     "dist",

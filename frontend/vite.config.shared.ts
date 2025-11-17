@@ -107,7 +107,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
             }),
         ] as any,
         define: isPlaywrightBuild ? undefined : use_env,
-        server: process.env.NODE_ENV !== 'production'
+        server: process.env.NODE_ENV !== 'production' && !isPlaywrightBuild
             ? {
                     host: '127.0.0.1',
                     port: loadedEnv?.PORT ?? options.port,
@@ -122,7 +122,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     },
                 }
             : undefined,
-        preview: process.env.NODE_ENV !== 'production'
+        preview: process.env.NODE_ENV !== 'production' && !isPlaywrightBuild
             ? {
                     host: '127.0.0.1',
                     port: loadedEnv?.PORT ?? options.port,
@@ -130,7 +130,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     allowedHosts: ['.stamhoofd'],
                 }
             : undefined,
-        build: process.env.NODE_ENV !== 'production'
+        build: process.env.NODE_ENV !== 'production' && !isPlaywrightBuild
             ? {
                     sourcemap: 'inline',
                     rollupOptions: {
@@ -140,13 +140,10 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                             inlineDynamicImports: true, // This is needed to make sure that the dynamic imports are inlined
                         },
                     },
-                    watch: isPlaywrightBuild
-                        ? undefined
-                        : {
-                                buildDelay: 1000,
-                            },
+                    watch: {
+                        buildDelay: 1000,
+                    },
                     cssCodeSplit: false,
-                    outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                 }
             : (options.name === 'calculator'
                     ? {
@@ -162,6 +159,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     : {
                             sourcemap: true,
                             cssCodeSplit: false,
+                            outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                         }),
         publicDir: resolve(__dirname, './public'),
         test: {
