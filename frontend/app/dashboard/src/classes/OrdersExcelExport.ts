@@ -293,19 +293,19 @@ export class OrdersExcelExport {
                         format: '0',
                     },
                     {
-                        value: (item.getUnitPrice(order.data.cart) ?? 0) / 100,
+                        value: (item.getUnitPrice(order.data.cart) ?? 0) / 10000,
                         format: '€0.00',
                     },
                     {
-                        value: ((item.getPartialExtraPrice(order.data.cart) ?? 0)) / 100,
+                        value: ((item.getPartialExtraPrice(order.data.cart) ?? 0)) / 10000,
                         format: '€0.00',
                     },
                     {
-                        value: ((item.getPriceWithDiscounts() - item.getPriceWithoutDiscounts())) / 100,
+                        value: ((item.getPriceWithDiscounts() - item.getPriceWithoutDiscounts())) / 10000,
                         format: '€0.00',
                     },
                     {
-                        value: (item.getPriceWithDiscounts() ?? 0) / 100,
+                        value: (item.getPriceWithDiscounts() ?? 0) / 10000,
                         format: '€0.00',
                     },
                     item.product.name,
@@ -511,23 +511,23 @@ export class OrdersExcelExport {
                 order.data.timeSlot ? Formatter.capitalizeFirstLetter(Formatter.dateWithDay(order.data.timeSlot.date)) : '/',
                 order.data.timeSlot ? Formatter.minutes(order.data.timeSlot.startTime) + ' - ' + Formatter.minutes(order.data.timeSlot.endTime) : '/',
                 {
-                    value: order.data.cart.priceWithDiscounts / 100,
+                    value: order.data.cart.priceWithDiscounts / 10000,
                     format: '€0.00',
                 },
                 {
-                    value: (order.data.appliedPercentageDiscount + order.data.fixedDiscount) / 100,
+                    value: (order.data.appliedPercentageDiscount + order.data.fixedDiscount) / 10000,
                     format: '€0.00',
                 },
                 {
-                    value: order.data.deliveryPrice / 100,
+                    value: order.data.deliveryPrice / 10000,
                     format: '€0.00',
                 },
                 {
-                    value: order.data.administrationFee / 100,
+                    value: order.data.administrationFee / 10000,
                     format: '€0.00',
                 },
                 {
-                    value: order.data.totalPrice / 100,
+                    value: order.data.totalPrice / 10000,
                     format: '€0.00',
                 },
                 PaymentMethodHelper.getNameCapitalized(order.data.paymentMethod),
@@ -599,15 +599,15 @@ export class OrdersExcelExport {
                 item.reference,
                 Formatter.capitalizeFirstLetter(Formatter.dateWithDay(item.settledAt)),
                 {
-                    value: item.total / 100,
+                    value: item.total / 10000,
                     format: '€0.00',
                 },
                 {
-                    value: item.amount / 100,
+                    value: item.amount / 10000,
                     format: '€0.00',
                 },
                 {
-                    value: item.fees / 100,
+                    value: item.fees / 10000,
                     format: '€0.00',
                 },
             ]);
