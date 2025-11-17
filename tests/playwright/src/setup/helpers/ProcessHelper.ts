@@ -1,4 +1,5 @@
-import { spawn, SpawnOptions } from "child_process";
+import { ChildProcess, spawn, SpawnOptions } from "child_process";
+import { once } from "events";
 
 export class ProcessHelper {
     static spawnWithCleanup(
@@ -21,5 +22,11 @@ export class ProcessHelper {
         process.on("SIGTERM", cleanup);
 
         return childProcess;
+    }
+
+    static async awaitChild(childProcess: ChildProcess) {
+        const [code] = await once(childProcess, "close");
+
+        if (code !== 0) throw new Error(`Exit code ${code}`);
     }
 }
