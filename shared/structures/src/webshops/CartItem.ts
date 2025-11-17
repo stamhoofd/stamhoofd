@@ -110,6 +110,7 @@ export class CartItem extends AutoEncoder {
      * Saved unitPrice (migration needed)
      */
     @field({ decoder: IntegerDecoder, nullable: true, version: 107 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
     unitPrice: number | null = null;
 
     /**
