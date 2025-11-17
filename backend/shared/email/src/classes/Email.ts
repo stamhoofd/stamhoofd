@@ -239,7 +239,7 @@ class EmailStatic {
             recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be"))
         }
         if (STAMHOOFD.environment === 'development') {
-            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com"))
+            recipients = recipients.filter(mail => mail.email.endsWith("@stamhoofd.be") || mail.email.endsWith("@bounce-testing.postmarkapp.com") || mail.email.endsWith("@out.cashfeed.com"))
         }
 
         if (recipients.length === 0) {

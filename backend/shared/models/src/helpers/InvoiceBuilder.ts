@@ -45,15 +45,7 @@ export class InvoiceBuilder {
         this.document = new PDFDocument({ size: [PAGE_WIDTH, PAGE_HEIGHT], margin: PAGE_MARGIN});
     }
 
-    async build() {
-        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
-            throw new SimpleError({
-                code: "not_available",
-                message: "Uploading is not available",
-                statusCode: 503
-            })
-        }
-
+     async buildBuffer() {
         this.payment = (this.invoice.paymentId ? await Payment.getByID(this.invoice.paymentId) : null) ?? null
         
         const buffer = await new Promise<Buffer>((resolve, reject) => {
@@ -79,6 +71,19 @@ export class InvoiceBuilder {
             }
         });
 
+        return buffer;
+    }
+
+    async build() {
+        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
+            throw new SimpleError({
+                code: "not_available",
+                message: "Uploading is not available",
+                statusCode: 503
+            })
+        }
+
+        const buffer = await this.buildBuffer();
         const fileId = uuidv4();
 
         let prefix = (STAMHOOFD.SPACES_PREFIX ?? "")

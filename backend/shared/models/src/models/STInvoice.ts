@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email } from "@stamhoofd/email";
 import { QueueHandler } from "@stamhoofd/queues";
-import { calculateVATPercentage, Country, File,OrganizationPaymentMandate, OrganizationPaymentMandateDetails,Payment as PaymentStruct, PaymentMethod, PaymentMethodHelper, PaymentStatus,STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
+import { calculateVATPercentage, Country, File, OrganizationPaymentMandate, OrganizationPaymentMandateDetails, Payment as PaymentStruct, PaymentMethod, PaymentStatus, STBillingStatus, STCredit as STCreditStruct, STInvoice as STInvoiceStruct, STInvoiceItem, STInvoiceMeta, STPackage as STPackageStruct, STPackageType, STPendingInvoice as STPendingInvoiceStruct } from '@stamhoofd/structures';
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import AWS from 'aws-sdk';
 import { v4 as uuidv4 } from "uuid";
@@ -233,12 +233,12 @@ export class STInvoice extends Model {
                             text: "Dag "+organization.name+", \n\nBedankt voor jullie vertrouwen in Stamhoofd. In bijlage vinden jullie factuur "+ this.number +" voor jullie administratie. Deze werd al betaald, je hoeft dus geen actie meer te ondernemen. Neem gerust contact met ons op (via "+organization.i18n.$t("shared.emails.general")+") als je denkt dat er iets fout is gegaan of als je nog bijkomende vragen zou hebben.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                             attachments: [
                                 {
-                                    filename: "factuur-"+this.number+".pdf",
+                                    filename: this.generateFilename('pdf'),
                                     href: this.meta.pdf.getPublicPath(),
                                     contentType: "application/pdf"
                                 },
                                 ...(this.meta.xml ? [{
-                                    filename: "factuur-"+this.number+".xml",
+                                    filename: this.generateFilename('xml'),
                                     href: this.meta.xml.getPublicPath(),
                                     contentType: "application/xml"
                                 }] : [])
@@ -255,12 +255,12 @@ export class STInvoice extends Model {
                     text: "Beste, \n\nIn bijlage creditnota "+ this.number +" voor de administratie.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                     attachments: [
                         {
-                            filename: "creditnota-"+this.number+".pdf",
+                            filename: this.generateFilename('pdf'),
                             href: this.meta.pdf.getPublicPath(),
                             contentType: "application/pdf"
                         },
                         ...(this.meta.xml ? [{
-                            filename: "creditnota-"+this.number+".xml",
+                            filename: this.generateFilename('xml'),
                             href: this.meta.xml.getPublicPath(),
                             contentType: "application/xml"
                         }] : [])
@@ -448,7 +448,7 @@ export class STInvoice extends Model {
                         text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat een betaling voor een eerdere factuur ("+this.number+") is mislukt (in bijlage). Dit kan voorvallen als jullie een betaling terugdraaien via jullie bank of als de domiciliëring is mislukt (bv. onvoldoende saldo). \n\nAls jullie de rekening van automatische betalingen willen wijzigen, kunnen jullie hiervoor deze gids volgen: https://"+organization.marketingDomain+"/docs/bankrekening-domiciliering-wijzigen/\n\nGelieve het openstaande bedrag zo snel mogelijk te betalen door in te loggen op Stamhoofd en in het tabblad 'Boekhouding' eventuele openstaande bedragen in orde te brengen. Bij vragen of bedenkingen over eventuele afrekeningen kan je ons ook steeds contacteren via "+organization.i18n.$t("shared.emails.general")+".\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
                             {
-                                filename: "factuur-"+this.number+".pdf",
+                                filename: this.generateFilename('pdf'),
                                 href: this.meta.pdf.getPublicPath(),
                                 contentType: "application/pdf"
                             }
@@ -462,7 +462,7 @@ export class STInvoice extends Model {
                         text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat een betaling voor een eerdere factuur ("+this.number+") is mislukt (in bijlage). Dit kan voorvallen als jullie een betaling terugdraaien via jullie bank of als de betaling is mislukt (bv. onvoldoende saldo). \n\nAls jullie de rekening van automatische betalingen willen wijzigen, kunnen jullie hiervoor deze gids volgen: https://"+organization.marketingDomain+"/docs/bankrekening-domiciliering-wijzigen/\n\nGelieve het openstaande bedrag zo snel mogelijk te betalen door in te loggen op Stamhoofd en in het tabblad 'Boekhouding' eventuele openstaande bedragen in orde te brengen. Bij vragen of bedenkingen over eventuele afrekeningen kan je ons ook steeds contacteren via "+organization.i18n.$t("shared.emails.general")+".\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
                             {
-                                filename: "factuur-"+this.number+".pdf",
+                                filename: this.generateFilename('pdf'),
                                 href: this.meta.pdf.getPublicPath(),
                                 contentType: "application/pdf"
                             }
@@ -476,7 +476,7 @@ export class STInvoice extends Model {
                         text: "Dag "+organization.name+", \n\nBij nazicht blijkt dat een betaling voor een eerdere factuur toch is mislukt.\n\nGelieve dit zo snel mogelijk na te kijken door in te loggen op Stamhoofd en in het tabblad 'Boekhouding' eventuele openstaande bedragen te betalen.\n\nBij vragen of bedenkingen bij eventuele afrekeningen kan je ons ook steeds contacteren via "+organization.i18n.$t("shared.emails.general")+".\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         attachments: [
                             {
-                                filename: "factuur-"+this.number+".pdf",
+                                filename: this.generateFilename('pdf'),
                                 href: this.meta.pdf.getPublicPath(),
                                 contentType: "application/pdf"
                             }
@@ -785,6 +785,14 @@ export class STInvoice extends Model {
         return mandates;
     }
 
+    generateFilename(ext: 'pdf' | 'xml') {
+        if (!this.number) {
+            return this.id + '.' + ext;
+        }
+        const date = this.meta.date ?? this.paidAt ?? this.createdAt ?? new Date();
+        return Formatter.dateIso(date) + ' - ' + (this.meta.priceWithVAT < 0 ? 'Creditnota' : 'Factuur') + ' ' + this.number + ' - Stamhoofd.' + ext;
+    }
+
     async buildUBL() {
         if (!this.number) {
             throw new Error('Cannot generate UBL for invoice without number');
@@ -803,6 +811,12 @@ export class STInvoice extends Model {
 
         const payment = this.paymentId ? (await Payment.getByID(this.paymentId)) : null;
 
+        const pdfBuilder = new InvoiceBuilder(this)
+        const pdfBuffer = await pdfBuilder.buildBuffer();
+
+        const type = this.meta.priceWithVAT < 0 ? 'CreditNote': 'Invoice';
+        const multiplyAmounts = this.meta.priceWithVAT < 0 ? -1 : 1;
+
         let ubl = ``;
 
         function esc(a: string) {
@@ -816,25 +830,29 @@ export class STInvoice extends Model {
         ubl += `<cbc:ID>${esc(this.number.toFixed(0))}</cbc:ID>`;
         const date = this.meta.date ?? this.paidAt ?? this.createdAt ?? new Date();
         ubl += `<cbc:IssueDate>${esc(Formatter.dateIso(date))}</cbc:IssueDate>`;
-        ubl += `<cbc:DueDate>${esc(Formatter.dateIso(new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30)))}</cbc:DueDate>`;
+
         // PEPPOL allows credit notes as negative invoices, so we always use invoice type code = invoice
-        ubl += `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`;
+        
+        if (type === 'Invoice') {
+            ubl += `<cbc:DueDate>${esc(Formatter.dateIso(new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30)))}</cbc:DueDate>`;
+            ubl += `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`;
+        } else {
+            ubl += `<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>`;
+        }
 
         ubl += `<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>`;
         ubl += `<cbc:BuyerReference>${esc(this.organizationId ?? this.id)}</cbc:BuyerReference>`;
 
         // Attachments
-        if (this.meta.pdf) {
-            ubl += `
-                <cac:AdditionalDocumentReference>
-                    <cbc:ID>${esc('Factuur ' + this.number)}</cbc:ID>
-                    <cac:Attachment>
-                        <cac:ExternalReference>
-                            <cbc:URI>${esc(this.meta.pdf.getPublicPath())}</cbc:URI>
-                        </cac:ExternalReference>
-                    </cac:Attachment>
-                </cac:AdditionalDocumentReference>`;
-        }
+        const filename = this.generateFilename('pdf');
+        const base64 = pdfBuffer.toString('base64'); // No escaping needed for this charset
+        ubl += `
+            <cac:AdditionalDocumentReference>
+                <cbc:ID>${esc(filename)}</cbc:ID>
+                <cac:Attachment>
+                    <cbc:EmbeddedDocumentBinaryObject mimeCode="application/pdf" filename="${esc(filename)}">${base64}</cbc:EmbeddedDocumentBinaryObject>
+                </cac:Attachment>
+            </cac:AdditionalDocumentReference>`;
         
         // Supplier
         ubl += `
@@ -951,12 +969,12 @@ export class STInvoice extends Model {
 
         // Tax breakdown
         ubl += `<cac:TaxTotal>
-            <cbc:TaxAmount currencyID="EUR">${(this.meta.VAT / 100).toFixed(2)}</cbc:TaxAmount>`;
+            <cbc:TaxAmount currencyID="EUR">${(multiplyAmounts * this.meta.VAT / 100).toFixed(2)}</cbc:TaxAmount>`;
 
         if (this.meta.VATPercentage > 0 ) {
             ubl += `<cac:TaxSubtotal>
-                    <cbc:TaxableAmount currencyID="EUR">${(this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:TaxableAmount>
-                    <cbc:TaxAmount currencyID="EUR">${(this.meta.VAT / 100).toFixed(2)}</cbc:TaxAmount>
+                    <cbc:TaxableAmount currencyID="EUR">${(multiplyAmounts * this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:TaxableAmount>
+                    <cbc:TaxAmount currencyID="EUR">${(multiplyAmounts * this.meta.VAT / 100).toFixed(2)}</cbc:TaxAmount>
                     <cac:TaxCategory>
                         <cbc:ID>S</cbc:ID>
                         <cbc:Percent>${this.meta.VATPercentage.toFixed(2)}</cbc:Percent>
@@ -975,12 +993,12 @@ export class STInvoice extends Model {
         // so start with calculating the rounding error.
         // PayableRoundingAmount
         ubl += `<cac:LegalMonetaryTotal>
-            <cbc:LineExtensionAmount currencyID="EUR">${(this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:LineExtensionAmount>
-            <cbc:TaxExclusiveAmount currencyID="EUR">${(this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:TaxExclusiveAmount>
-            <cbc:TaxInclusiveAmount currencyID="EUR">${(this.meta.priceWithVAT / 100).toFixed(2)}</cbc:TaxInclusiveAmount>
-            <cbc:PrepaidAmount currencyID="EUR">${!payment || payment.status === PaymentStatus.Succeeded ? (this.meta.totalPrice / 100).toFixed(2) : '0'}</cbc:PrepaidAmount>
-            <cbc:PayableRoundingAmount currencyID="EUR">${(this.meta.payableRoundingAmount / 100).toFixed(2)}</cbc:PayableRoundingAmount>
-            <cbc:PayableAmount currencyID="EUR">${!payment || payment.status === PaymentStatus.Succeeded ? '0' : (this.meta.totalPrice / 100).toFixed(2)}</cbc:PayableAmount>
+            <cbc:LineExtensionAmount currencyID="EUR">${(multiplyAmounts * this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:LineExtensionAmount>
+            <cbc:TaxExclusiveAmount currencyID="EUR">${(multiplyAmounts * this.meta.priceWithoutVAT / 100).toFixed(2)}</cbc:TaxExclusiveAmount>
+            <cbc:TaxInclusiveAmount currencyID="EUR">${(multiplyAmounts * this.meta.priceWithVAT / 100).toFixed(2)}</cbc:TaxInclusiveAmount>
+            <cbc:PrepaidAmount currencyID="EUR">${!payment || payment.status === PaymentStatus.Succeeded ? (multiplyAmounts * this.meta.totalPrice / 100).toFixed(2) : '0'}</cbc:PrepaidAmount>
+            <cbc:PayableRoundingAmount currencyID="EUR">${(multiplyAmounts * this.meta.payableRoundingAmount / 100).toFixed(2)}</cbc:PayableRoundingAmount>
+            <cbc:PayableAmount currencyID="EUR">${!payment || payment.status === PaymentStatus.Succeeded ? '0' : (multiplyAmounts * this.meta.totalPrice / 100).toFixed(2)}</cbc:PayableAmount>
         </cac:LegalMonetaryTotal>`;
 
         // Invoice lines
@@ -1001,10 +1019,14 @@ export class STInvoice extends Model {
                 unitPrice = -unitPrice;
             }
 
+            // Update sign for credit notes
+            amount = amount * multiplyAmounts;
+            price = price * multiplyAmounts;
+
             ubl += `
-                <cac:InvoiceLine>
+                <cac:${type}Line>
                     <cbc:ID>${item.id}</cbc:ID>
-                    <cbc:InvoicedQuantity unitCode="EA">${amount.toFixed(0)}</cbc:InvoicedQuantity>
+                    <cbc:${type === 'Invoice' ? 'Invoiced' : 'Credited'}Quantity unitCode="EA">${amount.toFixed(0)}</cbc:${type === 'Invoice' ? 'Invoiced' : 'Credited'}Quantity>
                     <cbc:LineExtensionAmount currencyID="EUR">${(price / 100).toFixed(2)}</cbc:LineExtensionAmount>
                     <cac:Item>
                         ${item.description ? `<cbc:Description>${esc(item.description)}</cbc:Description>` : ''}
@@ -1020,21 +1042,23 @@ export class STInvoice extends Model {
                     <cac:Price>
                         <cbc:PriceAmount currencyID="EUR">${(unitPrice / 100).toFixed(2)}</cbc:PriceAmount>
                     </cac:Price>
-                </cac:InvoiceLine>`;
+                </cac:${type}Line>`;
         }
 
         return `<?xml version="1.0" encoding="UTF-8"?>
-                <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+                <${type} xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:${type}-2">
                     <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0</cbc:CustomizationID>
                     <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
                     ${ubl}
-                </Invoice>`;
+                </${type}>`;
     }
 
     async generateUBL() {
         if (this.didSendPeppol) {
+            // Can't update if already generated/sent
             return;
         }
+
         if (this.meta.companyVATNumber === null) {
             console.log('Skipping PEPPOL for invoice ' + this.id + ', recipient not subject to VAT')
             return;
@@ -1123,33 +1147,25 @@ export class STInvoice extends Model {
             return;
         }
 
-        if (!this.meta.pdf) {
-            console.log('Skipping PEPPOL for invoice ' + this.id + ', pdf not set')
-            return;
-        }
-
          // Send the e-mail
-        Email.sendInternal({
+        Email.send({
+            // From address is fixed for sender validation
+            from: '"Stamhoofd" <simon@stamhoofd.be>',
             to: STAMHOOFD.PEPPOL_EMAIL_HANDLERS.map(d => {
                 return {
                     email: d
                 }
             }),
             subject: "Factuur " + this.number,
-            text: "In bijlage factuur "+ this.number,
+            text: "Zie bijlage",
             attachments: [
                 {
-                    filename: "factuur-"+this.number+".pdf",
-                    href: this.meta.pdf.getPublicPath(),
-                    contentType: "application/pdf"
-                },
-                ...(this.meta.xml ? [{
-                    filename: "factuur-"+this.number+".xml",
+                    filename: this.generateFilename('xml'),
                     href: this.meta.xml.getPublicPath(),
                     contentType: "application/xml"
-                }] : [])
+                }
             ]
-        }, new I18n('nl', 'BE'))
+        })
 
         this.didSendPeppol = true;
         await this.save();
