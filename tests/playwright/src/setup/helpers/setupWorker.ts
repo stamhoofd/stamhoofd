@@ -4,17 +4,6 @@ import { ApiServerHelper } from "./ApiServerHelper";
 import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendServerHelper } from "./FrontendServerHelper";
-import { getUrl } from "./getUrl";
-
-export type WorkerContext = {
-    workerIndex: number;
-    urls: {
-        api: string;
-        dashboard: string;
-        webshop: string;
-        registration: string;
-    };
-};
 
 export async function setupWorker(workerInfo: WorkerInfo) {
     const caddyHelper = new CaddyHelper();
@@ -52,18 +41,7 @@ export async function setupWorker(workerInfo: WorkerInfo) {
     
     await frontendProcesses.wait();
 
-    const workerContext: WorkerContext = {
-        workerIndex,
-        urls: {
-            api: getUrl("api", workerId),
-            dashboard: getUrl("dashboard", workerId),
-            webshop: getUrl("webshop", workerId),
-            registration: getUrl("registration", workerId),
-        },
-    };
-
     return {
-        workerContext,
         teardown: async () => {
             // kill processes
             await apiProcesses.kill();
@@ -83,5 +61,5 @@ async function exposeFrontendEnvironment() {
         },
     );
 
-    (STAMHOOFD as any).EXPOSE_FRONTEND_ENVIRONMENT = env;
+    STAMHOOFD.EXPOSE_FRONTEND_ENVIRONMENT = env;
 }

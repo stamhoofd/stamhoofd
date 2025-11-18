@@ -1,36 +1,131 @@
+import { expect } from "@playwright/test";
+import type { Organization, User } from "@stamhoofd/models";
+import { PermissionLevel, Permissions } from "@stamhoofd/structures";
 import { test } from "../setup/fixtures/workerFixture";
-import { AccountDetails, signup } from "../setup/helpers/signup";
 
-test("Login - happy flow", async ({ page, workerContext, TestUtils }) => {
-    TestUtils.setPermanentEnvironment("userMode", "organization");
+// login
+test.describe("userMode organization", () => {
+    let organization: Organization;
+    let user: User;
 
-    // todo: configure in DataBase instead
-    // signup
-    const organizationName = "vereniging";
-    const account: AccountDetails = {
-        email: "test@test.be",
-        password: "Stamhoofd",
-        organization: organizationName,
-        firstName: "voornaam",
-        lastName: "achternaam",
-        organizationType: "Youth",
-        umbrellaOrganization: "Other",
-        address: {
-            street: "straat 1",
-            postalCode: "9230",
-            city: "Wetteren",
+    const organizationName = "Test Organization";
+    const email = "john.doe@gmail.com";
+    const password = "testAbc123456";
+
+    test.beforeAll(
+        async ({
+            Models: { OrganizationFactory, UserFactory, Token },
+            TestUtils,
+        }) => {
+            TestUtils.setPermanentEnvironment("userMode", "organization");
+
+            organization = await new OrganizationFactory({
+                name: organizationName,
+            }).create();
+
+            user = await new UserFactory({
+                firstName: "John",
+                lastName: "Doe",
+                email,
+                password,
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const token = await Token.createToken(user);
         },
-    };
+    );
 
-    await signup({
-        account,
-        page,
-        workerContext,
+    test("happy flow", async ({ page, urls }) => {
+        await page.goto(urls.dashboard);
+
+        // click search input and fill in organization name
+        const searchInput = page.getByTestId("organization-search-input");
+        await searchInput.click();
+        await searchInput.fill(organizationName);
+
+        // click organization
+        await page
+            .getByTestId("organization-button")
+            .filter({ hasText: organizationName })
+            .click();
+
+        // fill in email
+        const emailInput = page.getByTestId("email-input");
+        await emailInput.click();
+        await emailInput.fill(email);
+
+        // fill in password
+        const passwordInput = page.getByTestId("password-input");
+        await passwordInput.click();
+        await passwordInput.fill(password);
+
+        // login
+        await page.getByTestId("login-button").click();
+
+        // wait for data-testid element to appear (h1 with name of organization)
+        await page.getByTestId("organization-name").waitFor();
+
+        // check if page contains name of organization
+        await expect(page.getByTestId("organization-name")).toContainText(
+            organizationName,
+        );
     });
+});
 
-    // todo: proper assert
-    // assert
-    await page
-        .getByRole("button", { name: organizationName })
-        .waitFor();
+test.describe("userMode platform", () => {
+    let organization: Organization;
+    let user: User;
+
+    const organizationName = "Test Organization";
+    const email = "john.doe@gmail.com";
+    const password = "testAbc123456";
+
+    test.beforeAll(
+        async ({
+            Models: { OrganizationFactory, UserFactory, Token },
+            TestUtils,
+        }) => {
+            TestUtils.setPermanentEnvironment("userMode", "platform");
+
+            organization = await new OrganizationFactory({
+                name: organizationName,
+            }).create();
+
+            user = await new UserFactory({
+                firstName: "John",
+                lastName: "Doe",
+                email,
+                password,
+                organization,
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            await Token.createToken(user);
+        },
+    );
+
+    test("happy flow", async ({ page, urls }) => {
+        await page.goto(urls.dashboard);
+
+        // fill in email
+        const emailInput = page.getByTestId("email-input");
+        await emailInput.click();
+        await emailInput.fill(email);
+
+        // fill in password
+        const passwordInput = page.getByTestId("password-input");
+        await passwordInput.click();
+        await passwordInput.fill(password);
+
+        // login
+        await page.getByTestId("login-button").click();
+
+        // wait for the organization search input
+        await page.getByTestId("organization-search-input").waitFor();
+    });
 });
