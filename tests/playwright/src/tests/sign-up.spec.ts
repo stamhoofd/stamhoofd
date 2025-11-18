@@ -1,10 +1,11 @@
 import { expect } from "@playwright/test";
 import { test } from "../setup/fixtures/workerFixture";
 
-test("Sign up - happy flow", async ({ page, workerContext, TestUtils }) => {
+// sign up
+test("happy flow", async ({ page, urls, TestUtils }) => {
     TestUtils.setPermanentEnvironment('userMode', 'organization');
 
-    await page.goto(workerContext.urls.dashboard);
+    await page.goto(urls.dashboard);
 
     // click signup
     await page.getByTestId("signup-link").click();
@@ -55,7 +56,7 @@ test("Sign up - happy flow", async ({ page, workerContext, TestUtils }) => {
     await page.locator('input[name="search-code_5"]').fill("1");
     await page.locator('input[name="search-code_6"]').fill("1");
 
-    // wait for data-testid element to appear
+    // wait for data-testid element to appear (h1 with name of organization)
     await page.getByTestId("organization-name").waitFor();
 
     // check if page contains name of organization

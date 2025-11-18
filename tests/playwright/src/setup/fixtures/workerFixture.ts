@@ -1,28 +1,34 @@
 import { test as base } from "@playwright/test";
-import { type TestUtils as TestInstance } from "@stamhoofd/test-utils";
+import type Models from "@stamhoofd/models";
 import { createRequire } from "node:module";
-import { setupWorker, WorkerContext } from "../helpers/setupWorker";
-
+import { getUrl } from "../helpers/getUrl";
+import { setupWorker } from "../helpers/setupWorker";
+import { TestInstance } from "../helpers/TestUtils";
 const require = createRequire(import.meta.url);
-const { TestUtils } = require("@stamhoofd/test-utils") as {
-    TestUtils: typeof TestInstance;
+
+export type Urls = {
+    api: string;
+    dashboard: string;
+    webshop: string;
+    registration: string;
 };
 
 export const test = base.extend<
-    { TestUtils: typeof TestInstance },
+    { TestUtils: TestInstance; Models: typeof Models },
     {
-        workerContext: WorkerContext;
+        setup: { TestUtils: TestInstance };
+        urls: Urls;
     }
 >({
-    workerContext: [
+    setup: [
         async ({}, use, workerInfo) => {
-            const { workerContext, teardown } = await setupWorker(workerInfo);
+            const { teardown } = await setupWorker(workerInfo);
 
-            TestUtils.setup();
-            await TestUtils.loadEnvironment();
+            const TestUtils = new TestInstance(STAMHOOFD);
+
             await TestUtils.beforeAll();
 
-            await use(workerContext);
+            await use({ TestUtils });
 
             await TestUtils.afterAll();
 
@@ -34,9 +40,24 @@ export const test = base.extend<
             auto: true,
         },
     ],
+    urls: [
+        async ({}, use, workerInfo) => {
+            const workerId = workerInfo.workerIndex.toString();
+
+            await use({
+                api: getUrl("api", workerId),
+                dashboard: getUrl("dashboard", workerId),
+                webshop: getUrl("webshop", workerId),
+                registration: getUrl("registration", workerId),
+            });
+        },
+        {
+            scope: "worker",
+        },
+    ],
     TestUtils: [
-        async ({}, use) => {
-            await TestUtils.beforeEach();
+        async ({ setup: { TestUtils } }, use) => {
+            TestUtils.beforeEach();
 
             await use(TestUtils);
 
@@ -46,4 +67,8 @@ export const test = base.extend<
             auto: true,
         },
     ],
+    Models: async ({}, use) => {
+        const models = require("@stamhoofd/models") as typeof Models;
+        await use(models);
+    },
 });

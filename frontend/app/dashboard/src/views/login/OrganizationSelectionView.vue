@@ -41,7 +41,7 @@
 
                 <Spinner v-else-if="loadingResults" class="gray center" />
                 <template v-else>
-                    <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
+                    <button v-for="(option, index) in visibleOptions" ref="resultElements" :key="option.id" type="button" class="search-result" data-testid="organization-button" @keydown.down.prevent="focusResult(index + 1)" @keydown.up.prevent="focusResult(index - 1)" @click="selectOption(option)">
                         <ContextLogo :organization="option.organization" :app="option.app" />
                         <div>
                             <h1>{{ getAppTitle(option.app, option.organization) }}</h1>

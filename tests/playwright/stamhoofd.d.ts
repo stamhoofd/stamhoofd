@@ -11,5 +11,7 @@ export { };
  * always suggest the possible keys.
  */
 declare global {
-    const STAMHOOFD: BackendEnvironment
+    const STAMHOOFD: BackendEnvironment & {
+        EXPOSE_FRONTEND_ENVIRONMENT: FrontendEnvironment
+    }
 }
