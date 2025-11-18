@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { test } from "../setup/fixtures/workerFixture";
+import { test } from "../setup/fixtures";
 
 // sign up
 test("happy flow", async ({ page, urls, TestUtils }) => {

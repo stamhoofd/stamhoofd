@@ -1,36 +1,40 @@
 import { test as base } from "@playwright/test";
 import type Models from "@stamhoofd/models";
 import { createRequire } from "node:module";
-import { getUrl } from "../helpers/getUrl";
-import { setupWorker } from "../helpers/setupWorker";
-import { TestInstance } from "../helpers/TestUtils";
+import { getUrl } from "./helpers/getUrl";
+import { setupWorker } from "./helpers/setupWorker";
+import { TestUtils } from "./helpers/TestUtils";
 const require = createRequire(import.meta.url);
 
-export type Urls = {
-    api: string;
-    dashboard: string;
-    webshop: string;
-    registration: string;
+export type StamhoofdUrls = {
+    readonly api: string;
+    readonly dashboard: string;
+    readonly webshop: string;
+    readonly registration: string;
 };
 
 export const test = base.extend<
-    { TestUtils: TestInstance; Models: typeof Models },
+    { TestUtils: TestUtils },
     {
-        setup: { TestUtils: TestInstance };
-        urls: Urls;
+        setup: { readonly TestUtils: TestUtils };
+        urls: StamhoofdUrls;
+        Models: typeof Models;
     }
 >({
+    // setup worker
     setup: [
         async ({}, use, workerInfo) => {
             const { teardown } = await setupWorker(workerInfo);
 
-            const TestUtils = new TestInstance(STAMHOOFD);
+            // call TestUtils hooks before and after all tests
+            const testUtils = new TestUtils(STAMHOOFD);
 
-            await TestUtils.beforeAll();
+            await testUtils.beforeAll();
 
-            await use({ TestUtils });
+            // run all tests for worker
+            await use({ TestUtils: testUtils });
 
-            await TestUtils.afterAll();
+            await testUtils.afterAll();
 
             await teardown();
         },
@@ -40,6 +44,7 @@ export const test = base.extend<
             auto: true,
         },
     ],
+    // urls to use in tests (dependent on worker id)
     urls: [
         async ({}, use, workerInfo) => {
             const workerId = workerInfo.workerIndex.toString();
@@ -55,6 +60,7 @@ export const test = base.extend<
             scope: "worker",
         },
     ],
+    // call TestUtils hooks before and after each test
     TestUtils: [
         async ({ setup: { TestUtils } }, use) => {
             TestUtils.beforeEach();
@@ -67,8 +73,14 @@ export const test = base.extend<
             auto: true,
         },
     ],
-    Models: async ({}, use) => {
-        const models = require("@stamhoofd/models") as typeof Models;
-        await use(models);
-    },
+    // import Models module (is dependent on worker environment)
+    Models: [
+        async ({}, use) => {
+            const models = require("@stamhoofd/models") as typeof Models;
+            await use(models);
+        },
+        {
+            scope: "worker",
+        },
+    ],
 });
