@@ -87,9 +87,6 @@ export class FrontendServerHelper implements ServerHelper {
     }
 
     async start(workerIndex: string) {
-        // in worker: copy build and change index.html to get environment from api
-        // configure caddy to open build folder when going to domain
-
         await this.build(workerIndex);
 
         return {
@@ -121,16 +118,12 @@ export class FrontendServerHelper implements ServerHelper {
     }
 
     async build(workerId: string) {
-        console.log(`Start building frontend for worker ${workerId}...`);
-
-        // copy playwright dist
+        // build each project
         await Promise.all(
             this.frontendProjects.map((project) =>
                 this.buildProject(project, workerId),
             ),
         );
-
-        console.log(`Done building frontend for worker ${workerId}.`);
     }
 
     private async buildProject(project: FrontendProjectType, workerId: string) {
@@ -199,7 +192,5 @@ export class FrontendServerHelper implements ServerHelper {
 
         // Write the modified file back
         await writeFile(path, html, "utf-8");
-
-        console.log("Script injected successfully!");
     }
 }

@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
 import type { Organization, User } from "@stamhoofd/models";
 import { PermissionLevel, Permissions } from "@stamhoofd/structures";
-import { test } from "../setup/fixtures/workerFixture";
+import { test } from "../setup/fixtures";
 
 // login
 test.describe("userMode organization", () => {

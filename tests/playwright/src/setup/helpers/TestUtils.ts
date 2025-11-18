@@ -1,8 +1,12 @@
 
 type AfterCallback = () => void | Promise<void>;
 
-// similar to test-utils package but for playwright
-export class TestInstance {
+/**
+ * Similar to test-utils package but for playwright.
+ * Never import this class directly in a test file: an instance is instantiated in the fixtures, reuse that instance.
+ */
+export class TestUtils {
+    static instanceCount = 0;
     onceAfterEachCallbacks: AfterCallback[] = [];
     afterEachCallbacks: AfterCallback[] = [];
     beforeAllCallbacks: AfterCallback[] = [];
@@ -13,6 +17,11 @@ export class TestInstance {
     private environment: string;
 
     constructor(environment: typeof STAMHOOFD) {
+        if(TestUtils.instanceCount > 0) {
+            throw new Error('Never import this class directly in a test file: an instance is instantiated in the fixtures, reuse that instance.');
+        }
+
+        TestUtils.instanceCount++;
         this.environment = JSON.stringify(environment);
     }
 
