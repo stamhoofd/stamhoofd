@@ -18,7 +18,23 @@ export class FreeContributionSettings extends AutoEncoder {
     description = '';
 
     @field({ decoder: new ArrayDecoder(IntegerDecoder) })
-    amounts: number[] = [500, 1500, 3000];
+    @field({
+        decoder: new ArrayDecoder(IntegerDecoder),
+        upgrade: (oldValue: number[]) => {
+            if (!Array.isArray(oldValue)) {
+                return oldValue;
+            }
+            return oldValue.map(o => o * 100);
+        },
+        downgrade: (newValue: number[]) => {
+            if (!Array.isArray(newValue)) {
+                return newValue;
+            }
+            return newValue.map(o => Math.round(o / 100));
+        },
+        version: 389,
+    })
+    amounts: number[] = [5_0000, 15_0000, 30_0000];
 }
 
 export class FinancialSupportSettings extends AutoEncoder {
