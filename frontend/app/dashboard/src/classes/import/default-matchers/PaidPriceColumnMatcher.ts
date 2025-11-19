@@ -51,6 +51,13 @@ export class PaidPriceColumnMatcher implements ColumnMatcher {
             });
         }
 
-        importResult.importRegistrationResult.paidPrice = Math.floor(b * 100);
+        if (Math.floor(b * 100) !== b * 100) {
+            throw new SimpleError({
+                code: 'invalid_type',
+                message: $t(`f78dea7f-d99d-4a0b-8557-0ff17d082dbb`, { value }),
+            });
+        }
+
+        importResult.importRegistrationResult.paidPrice = Math.floor(b * 100) * 100;
     }
 }

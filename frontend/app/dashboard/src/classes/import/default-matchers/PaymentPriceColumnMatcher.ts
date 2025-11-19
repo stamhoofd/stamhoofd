@@ -62,6 +62,6 @@ export class PaymentPriceColumnMatcher implements ColumnMatcher {
             });
         }
 
-        importResult.importRegistrationResult.price = Math.floor(b * 100);
+        importResult.importRegistrationResult.price = Math.floor(b * 100) * 100;
     }
 }
