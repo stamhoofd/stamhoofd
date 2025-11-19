@@ -357,7 +357,28 @@ export class RegisterCheckout {
     }
 
     get priceBreakown(): PriceBreakdown {
-        const all = [
+        const all: PriceBreakdown = [];
+
+        // Discounts
+        for (const discount of this.cart.bundleDiscounts) {
+            const value = discount.netTotal;
+            if (value !== 0) {
+                if (value < 0) {
+                    all.push({
+                        name: $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + discount.name + ')',
+                        price: -value,
+                    });
+                }
+                else {
+                    all.push({
+                        name: discount.name,
+                        price: -value,
+                    });
+                }
+            }
+        }
+
+        all.push(...[
             {
                 name: $t(`3a50492b-087a-4a83-a386-4d30fabbc3c2`),
                 price: -this.cart.refund,
@@ -374,26 +395,7 @@ export class RegisterCheckout {
                 name: $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`),
                 price: this.cart.getCancellationFees(this.cancellationFeePercentage),
             },
-        ].filter(a => a.price !== 0);
-
-        // Discounts
-        for (const discount of this.cart.bundleDiscounts) {
-            const value = discount.netTotal;
-            if (value !== 0) {
-                if (value < 0) {
-                    all.unshift({
-                        name: $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + discount.name + ')',
-                        price: -value,
-                    });
-                }
-                else {
-                    all.unshift({
-                        name: discount.name,
-                        price: -value,
-                    });
-                }
-            }
-        }
+        ].filter(a => a.price !== 0));
 
         if (all.length > 0 && (this.cart.price + this.cart.priceDueLater) !== 0) {
             all.unshift({

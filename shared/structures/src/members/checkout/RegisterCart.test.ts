@@ -466,13 +466,13 @@ describe('Unit.RegisterCart', () => {
             expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_0000);
             expect(checkout.totalPrice).toEqual(-90_0000);
             expect(checkout.priceBreakown).toEqual([
-                expect.objectContaining({
-                    price: -100_0000, // Reeds aangerekend
-                }),
                 {
                     name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_0000,
                 },
+                expect.objectContaining({
+                    price: -100_0000, // Reeds aangerekend
+                }),
                 expect.objectContaining({
                     price: -90_0000,
                 }),
@@ -566,6 +566,11 @@ describe('Unit.RegisterCart', () => {
             expect(cart.bundleDiscounts[0].netTotal).toEqual(-10_0000);
             expect(checkout.totalPrice).toEqual(-40_0000);
             expect(checkout.priceBreakown).toEqual([
+                {
+                    // Side effect in registration B
+                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
+                    price: 10_0000,
+                },
                 expect.objectContaining({
                     price: -100_0000, // Already charged for registration A that is being deleted
                 }),
@@ -573,11 +578,6 @@ describe('Unit.RegisterCart', () => {
                 expect.objectContaining({
                     price: 50_0000,
                 }),
-                {
-                    // Side effect in registration B
-                    name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
-                    price: 10_0000,
-                },
                 expect.objectContaining({
                     price: -40_0000,
                 }),
@@ -662,14 +662,14 @@ describe('Unit.RegisterCart', () => {
                     // Subtotal (normal price)
                     price: 50_0000,
                 }),
-                expect.objectContaining({
-                    // Refund for the previous registration
-                    price: -100_0000,
-                }),
                 {
                     name: '766a39be-a4af-4a04-baf0-1f064d2fed16 (Multiple family members discount)',
                     price: 10_0000,
                 },
+                expect.objectContaining({
+                    // Refund for the previous registration
+                    price: -100_0000,
+                }),
                 expect.objectContaining({
                     price: -50_0000 + 10_0000,
                 }),
@@ -704,14 +704,14 @@ describe('Unit.RegisterCart', () => {
                     // Subtotal (normal price)
                     price: 50_0000,
                 }),
-                expect.objectContaining({
-                    // Refund for the previous registration
-                    price: -100_0000,
-                }),
                 {
                     name: 'Multiple family members discount',
                     price: -15_0000,
                 },
+                expect.objectContaining({
+                    // Refund for the previous registration
+                    price: -100_0000,
+                }),
                 expect.objectContaining({
                     price: -50_0000 - 15_0000,
                 }),
@@ -826,14 +826,14 @@ describe('Unit.RegisterCart', () => {
                     // Subtotal (normal price)
                     price: 50_0000,
                 }),
-                expect.objectContaining({
-                    // Refund for the previous registration
-                    price: -90_0000,
-                }),
                 {
                     name: 'Multiple family members discount',
                     price: -25_0000,
                 },
+                expect.objectContaining({
+                    // Refund for the previous registration
+                    price: -90_0000,
+                }),
                 expect.objectContaining({
                     price: 50_0000 - 90_0000 - 25_0000,
                 }),
