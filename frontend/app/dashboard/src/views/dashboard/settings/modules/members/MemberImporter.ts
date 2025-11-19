@@ -422,10 +422,11 @@ export class MemberImporter {
                 }
             }
 
-            const stock = price.getRemainingStock(group);
-            if (stock !== 0) {
-                return price;
-            }
+            // Noite: we don't need to check stock if we import as admin.
+            // const stock = price.getRemainingStock(group);
+            // if (stock !== 0) {
+            return price;
+            // }
         }
 
         // Probably all sold out
