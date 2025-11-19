@@ -21,13 +21,13 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
     doesMatch(columnName: string, _examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase();
 
-        for (const word of ['lidnummer', 'rijksregister', 'bestel', ...this.negativeMatch]) {
+        for (const word of ['lidnummer', 'rijksregister', 'bestel', 'huis', ...this.negativeMatch]) {
             if (cleaned.includes(word)) {
                 return false;
             }
         }
 
-        const possibleMatch = ['telefoon', 'gsm', 'nummer', 'mobiel', 'mobile', 'phone'];
+        const possibleMatch = ['telefoon', 'gsm', 'mobiel', 'mobile', 'phone', 'tel'];
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {

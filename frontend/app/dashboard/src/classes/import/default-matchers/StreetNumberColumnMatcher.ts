@@ -16,13 +16,13 @@ export class StreetNumberColumnMatcher extends SharedMemberDetailsMatcher implem
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase();
 
-        for (const word of this.negativeMatch) {
+        for (const word of [...this.negativeMatch, 'telefoon', 'gsm', 'phone', 'tel']) {
             if (cleaned.includes(word)) {
                 return false;
             }
         }
 
-        const possibleMatch = ['huisnummer', 'street number', 'huis'];
+        const possibleMatch = ['huisnummer', 'street number', 'huis', 'nummer'];
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
