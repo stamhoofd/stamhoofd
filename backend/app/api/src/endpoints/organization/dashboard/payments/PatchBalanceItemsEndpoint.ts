@@ -231,6 +231,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             }
         });
 
+        // Update balances before we return the up to date versions
+        await BalanceItemService.flushCaches(organization.id);
+
         // Reload returnedModels
         const returnedModelsReloaded = await BalanceItem.getByIDs(...returnedModels.map(m => m.id));
 

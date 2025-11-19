@@ -273,6 +273,9 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             });
         }
 
+        // Update balances before we return the up to date versions
+        await BalanceItemService.flushCaches(organization.id);
+
         return new Response(
             await AuthenticatedStructures.paymentsGeneral(changedPayments, true),
         );
