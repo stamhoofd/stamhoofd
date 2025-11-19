@@ -26,7 +26,7 @@ export class CityColumnMatcher extends SharedMemberDetailsMatcher implements Col
             }
         }
 
-        const possibleMatch = ['gemeente'];
+        const possibleMatch = ['gemeente', 'stad', 'plaats'];
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
