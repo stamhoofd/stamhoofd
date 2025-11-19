@@ -44,10 +44,7 @@ export class ZipColumnMatcher extends SharedMemberDetailsMatcher implements Colu
         const postalCode = ((cell.w ?? cell.v) + '').trim();
 
         if (postalCode.length === 0) {
-            throw new SimpleError({
-                code: 'invalid_type',
-                message: $t(`4493ecc0-2b42-43c0-a978-73e6666350bc`),
-            });
+            return;
         }
 
         ColumnMatcherHelper.patchAddress(importResult, this.category, { postalCode });

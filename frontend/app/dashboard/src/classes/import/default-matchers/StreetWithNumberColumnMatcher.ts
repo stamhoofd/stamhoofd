@@ -56,10 +56,7 @@ export class StreetWithNumberColumnMatcher extends SharedMemberDetailsMatcher im
         const value = ((cell.w ?? cell.v) + '').trim();
 
         if (!value) {
-            throw new SimpleError({
-                code: 'invalid_type',
-                message: $t(`aa752f68-29f0-4f3b-b73f-9a7b363b277b`),
-            });
+            return;
         }
 
         const { street, number } = Address.splitAddressLine(value);
