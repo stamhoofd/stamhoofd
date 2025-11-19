@@ -57,8 +57,9 @@ const props = withDefaults(defineProps<{
     fractionDigits?: number;
 
     /**
-     * Whether to disallow input of certain fraction digits.
+     * Maximum decimal places to allow.
      * E.g. fraction digits is set to 4, but you won't allow values smaller than 0,01, set this to 2 (= maximum).
+     * when fractino digits is set to 4 and round fraction digits is set to 0, it will round all fractions (0,5 becomes 1)
      */
     roundFractionDigits?: number | null;
 }>(), {
@@ -110,6 +111,21 @@ watch(valueString, (value) => {
     model.value = newValue as T;
 }, { immediate: false });
 
+function roundFractions(v: number) {
+    if (props.roundFractionDigits === null) {
+        return v;
+    }
+
+    if (props.roundFractionDigits >= props.fractionDigits) {
+        return v;
+    }
+
+    const multiplyAmount = props.fractionDigits - props.roundFractionDigits;
+    const roundMultiplier = Math.pow(10, multiplyAmount);
+
+    return Math.round(v / roundMultiplier) * roundMultiplier;
+}
+
 function stringToValue(str: string) {
     // We need the modelValue string here! Vue does some converting to numbers automatically
     // but for our placeholder system we need exactly the same string
@@ -142,7 +158,7 @@ function stringToValue(str: string) {
         else {
             // Remove extra decimals
             return {
-                value: constrain(Math.round(v * multipier.value)),
+                value: constrain(roundFractions(Math.round(v * multipier.value))),
                 valid: true,
             };
         }
