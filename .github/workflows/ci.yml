@@ -246,6 +246,49 @@ jobs:
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
   
+  job_test_playwright:
+    name: 'Playwright Tests'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    if: needs.job_setup.outputs.changed_backend == 'true' || needs.job_setup.outputs.changed_frontend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'yarn'
+    - name: Install dependencies
+      run: yarn install --prefer-offline --frozen-lockfile
+    # build packages? -> normally already done by backend test? frontend built in code
+    - name: Install Playwright Browsers
+      run: yarn playwright install --with-deps
+    - name: Run Playwright tests
+      run: yarn test:playwright
+    - name: Notify Slack of failure
+      uses: slackapi/slack-github-action@v2.0.0
+      if: failure() && github.event_name != 'pull_request'
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+            text: "Playwright tests failed"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "@channel *Playwright tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
+                accessory:
+                  type: "button"
+                  text:
+                    type: "plain_text"
+                    text: "Open commit"
+                    emoji: false
+                  value: "click_me"
+                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
+                  action_id: "button-action"
+
   job_boot:
     name: 'API boot and shutdown'
     runs-on: ubuntu-latest
