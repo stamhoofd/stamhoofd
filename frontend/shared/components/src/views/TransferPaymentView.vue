@@ -336,7 +336,7 @@ const qrMessage = computed(() => {
     const bic = '_';
 
     // Note: structured reference still as normal description (the structured reference ISO is not supported)
-    return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditorValue + '\n' + ibanValue + '\nEUR' + (props.payment.price / 100).toFixed(2) + '\n\n\n' + transferDescription.value?.substring(0, 140) + '\n' + LocalizedDomains.getDocs('betalen-qr-code');
+    return 'BCD\n001\n1\nSCT\n' + bic + '\n' + creditorValue + '\n' + ibanValue + '\nEUR' + (Math.round(props.payment.price / 100) / 100).toFixed(2) + '\n\n\n' + transferDescription.value?.substring(0, 140) + '\n' + LocalizedDomains.getDocs('betalen-qr-code');
 });
 
 async function generateQRCode() {
