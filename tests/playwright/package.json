@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:e2e": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
-    "test:e2e:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
-    "test:e2e:trace": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test --trace on"
+    "test:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
+    "test:playwright:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
+    "test:playwright:trace": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test --trace on"
   },
    "dependencies": {
     "@stamhoofd/backend": "2.105.0"
