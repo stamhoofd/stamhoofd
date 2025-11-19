@@ -138,7 +138,7 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, useContext, useErrors, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
+import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, Toast, useContext, useErrors, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -195,7 +195,16 @@ async function reload() {
             }
         }
         else {
+            const lastPayment = detailedItem.value.payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))[0];
             detailedItem.value.deepSet(response.data);
+            const newLastPayment = detailedItem.value.payments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt))[0];
+
+            // Show a toast when an automatic reallocation happened because of some change
+            if ((newLastPayment && !lastPayment) || (newLastPayment && lastPayment && lastPayment.createdAt < newLastPayment.createdAt)) {
+                if (newLastPayment.type === PaymentType.Reallocation) {
+                    new Toast($t('Een nieuwe automatische saldoverrekening werd aangemaakt'), 'wand ' + newLastPayment.theme).show();
+                }
+            }
         }
 
         props.item.deepSet(response.data);
