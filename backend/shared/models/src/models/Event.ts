@@ -118,7 +118,8 @@ export class Event extends QueryableModel {
             if (waitingList) {
                 if (group.settings.allowRegistrationsByOrganization) {
                     waitingList.settings.allowRegistrationsByOrganization = true;
-                } else {
+                }
+                else {
                     waitingList.settings.allowRegistrationsByOrganization = false;
                 }
                 await this.syncGroupRequirements(waitingList);
