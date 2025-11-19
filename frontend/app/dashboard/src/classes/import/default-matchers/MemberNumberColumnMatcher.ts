@@ -15,7 +15,13 @@ export class MemberNumberColumnMatcher implements BaseColumnMatcher {
     doesMatch(columnName: string, _examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase();
 
-        const possibleMatch = ['lidnummer', 'member number', 'identifier'];
+        if (cleaned === 'id') {
+            // id is not the same as member number!
+            // should be an exact match, since it is too short
+            return false;
+        }
+
+        const possibleMatch = ['lidnummer', 'member number', 'membernumber'];
 
         for (const word of possibleMatch) {
             if (cleaned.includes(word)) {
@@ -24,10 +30,6 @@ export class MemberNumberColumnMatcher implements BaseColumnMatcher {
             }
         }
 
-        if (cleaned === 'id') {
-            // should be an exact match, since it is too short
-            return true;
-        }
         return false;
     }
 
