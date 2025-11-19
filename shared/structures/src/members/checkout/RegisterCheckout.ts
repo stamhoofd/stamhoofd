@@ -282,7 +282,7 @@ export class RegisterCheckout {
             this.administrationFee = 0;
         }
         else {
-            this.administrationFee = this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(this.cart.price) ?? 0;
+            this.administrationFee = this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(this.cart.price - this.bundleDiscount - this.cart.refund) ?? 0;
         }
     }
 
@@ -337,7 +337,7 @@ export class RegisterCheckout {
      * Only includes 'due now' items - so excludes trials (doesn't work 100% yet with deleted registrations but this is not a problem at the moment)
      */
     get totalPrice() {
-        return this.cart.price + this.administrationFee + this.freeContribution - this.bundleDiscount - this.cart.refund + this.cart.getCancellationFees(this.cancellationFeePercentage);
+        return this.cart.price - this.bundleDiscount - this.cart.refund + this.administrationFee + this.freeContribution + this.cart.getCancellationFees(this.cancellationFeePercentage);
     }
 
     /**
@@ -359,16 +359,16 @@ export class RegisterCheckout {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
+                name: $t(`3a50492b-087a-4a83-a386-4d30fabbc3c2`),
+                price: -this.cart.refund,
+            },
+            {
                 name: $t(`307f8b34-7f74-4045-9335-c7f0d7649b70`),
                 price: this.administrationFee,
             },
             {
                 name: $t(`16ca0372-9c8f-49f0-938d-aee012e59f8c`),
                 price: this.freeContribution,
-            },
-            {
-                name: $t(`3a50492b-087a-4a83-a386-4d30fabbc3c2`),
-                price: -this.cart.refund,
             },
             {
                 name: $t(`aaa4eb2d-cae9-4c5d-8e6a-7e1ee3709689`),
@@ -381,13 +381,13 @@ export class RegisterCheckout {
             const value = discount.netTotal;
             if (value !== 0) {
                 if (value < 0) {
-                    all.push({
+                    all.unshift({
                         name: $t('766a39be-a4af-4a04-baf0-1f064d2fed16') + ' (' + discount.name + ')',
                         price: -value,
                     });
                 }
                 else {
-                    all.push({
+                    all.unshift({
                         name: discount.name,
                         price: -value,
                     });
