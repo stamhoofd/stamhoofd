@@ -206,6 +206,7 @@ import { Ref, computed, ref } from 'vue';
 import PaymentRow from './components/PaymentRow.vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';
+import { SimpleError } from '@simonbackx/simple-errors';
 
 const props = defineProps<{
     balanceItem: BalanceItemWithPayments | BalanceItem;
@@ -349,6 +350,14 @@ async function save() {
         if (!valid) {
             loading.value = false;
             return;
+        }
+        if (patchedBalanceItem.value.unitPrice === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'unitPrice',
+                message: 'unitPrice cannot be zero',
+                human: $t('De eenheidsprijs kan niet 0 euro zijn')
+            })
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
