@@ -327,41 +327,24 @@ export class StripeHelper {
             await paymentIntentModel.save();
         }
         else {
-            // Build Stripe line items
-            const stripeLineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-            let lineItemsPrice = 0;
-            for (const item of lineItems) {
-                const stripeLineItem = {
-                    price_data: {
-                        currency: 'eur',
-                        unit_amount: Math.round(item.price / 100),
-                        product_data: {
-                            name: item.balanceItem.description,
-                        },
-                    },
-                    quantity: 1,
-                };
-                stripeLineItems.push(stripeLineItem);
-                lineItemsPrice += Math.round(item.price / 100);
-            }
-
-            if (lineItemsPrice !== totalPrice) {
-                console.error('Total price of line items does not match total price of payment', lineItemsPrice, totalPrice, payment.id);
-                throw new SimpleError({
-                    code: 'invalid_price',
-                    message: 'De totale prijs van de betaling komt niet overeen met de prijs van de items',
-                    human: $t(`e66b54d3-70fb-4b40-b3e5-21bc795ba704`),
-                    statusCode: 500,
-                });
-            }
-
             // Use checkout flow
-            const session = await stripe.checkout.sessions.create({
+            const data: Stripe.Checkout.SessionCreateParams = {
                 mode: 'payment',
                 success_url: redirectUrl,
                 cancel_url: cancelUrl,
                 payment_method_types: payment.method === PaymentMethod.DirectDebit ? ['sepa_debit'] : ['card'],
-                line_items: stripeLineItems,
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'eur',
+                            unit_amount: totalPrice,
+                            product_data: {
+                                name: statementDescriptor,
+                            },
+                        },
+                        quantity: 1,
+                    },
+                ],
                 currency: 'eur',
                 locale: i18n.language as 'nl',
                 payment_intent_data: {
@@ -385,7 +368,9 @@ export class StripeHelper {
                         request_three_d_secure: 'challenge', // Force usage of string customer authentication for card payments
                     },
                 },
-            });
+            };
+            console.log('Creating Stripe session', data);
+            const session = await stripe.checkout.sessions.create(data);
             console.log('Stripe session', session);
 
             if (!session.url) {
