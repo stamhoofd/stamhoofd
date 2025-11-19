@@ -351,6 +351,14 @@ async function save() {
             loading.value = false;
             return;
         }
+        if (patchedBalanceItem.value.description.length === 0 && patchedBalanceItem.value.relations.size === 0) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                field: 'description',
+                message: 'description cannot be empty',
+                human: $t('Vul een beschrijving in')
+            })
+        }
         if (patchedBalanceItem.value.unitPrice === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
