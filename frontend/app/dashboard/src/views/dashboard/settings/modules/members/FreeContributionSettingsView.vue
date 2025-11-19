@@ -153,7 +153,7 @@ export default class FreeContributionSettingsView extends Mixins(NavigationMixin
     addOption() {
         const last = this.organization.meta.recordsConfiguration.freeContribution?.amounts?.slice(-1)[0] ?? 0;
         const amounts = (this.organization.meta.recordsConfiguration.freeContribution?.amounts ?? []).slice();
-        amounts.push(last + 10 * 100);
+        amounts.push(last + 10_0000);
         this.organizationPatch = this.organizationPatch.patch({
             meta: OrganizationMetaData.patch({
                 recordsConfiguration: OrganizationRecordsConfiguration.patch({
