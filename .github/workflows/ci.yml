@@ -262,6 +262,12 @@ jobs:
     - name: Install dependencies
       run: yarn install --prefer-offline --frozen-lockfile
     # build packages? -> normally already done by backend test? frontend built in code
+      # Install Caddy
+    - name: Install Caddy
+      run: |
+        curl -fsSL https://github.com/caddyserver/caddy/releases/latest/download/caddy_linux_amd64.tar.gz \
+        | sudo tar -C /usr/local/bin -xz caddy
+        sudo chmod +x /usr/local/bin/caddy
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
     - name: Run Playwright tests
