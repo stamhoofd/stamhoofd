@@ -1,63 +1,65 @@
 import { WorkerInfo } from "@playwright/test";
 import builder from "@stamhoofd/build-development-env";
-import { ApiServerHelper } from "./ApiServerHelper";
+import { ApiService } from "./ApiService";
 import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
-import { FrontendServerHelper } from "./FrontendServerHelper";
+import { FrontendProjectName, FrontendService } from "./FrontendService";
 
 export async function setupWorker(workerInfo: WorkerInfo) {
+    const workerId = workerInfo.workerIndex.toString();
     const caddyHelper = new CaddyHelper();
 
-    const apiServerHelper = new ApiServerHelper();
-    const frontendServerHelper = new FrontendServerHelper();
-    const workerIndex = workerInfo.workerIndex;
-    const workerId = workerIndex.toString();
-
     // start api
-    const apiProcesses = await apiServerHelper.start(workerId);
+    const apiService = new ApiService(workerId);
+    const apiProcess = await apiService.start();
 
     // start frontend services
-    const frontendProcesses = await frontendServerHelper.start(workerId);
+    const frontendServiceNames: FrontendProjectName[] = [
+        "dashboard",
+        "registration",
+        "webshop",
+    ];
+    const frontendServices = frontendServiceNames.map(
+        (name) => new FrontendService(name, workerId),
+    );
+
+    const frontendProcesses = await Promise.all(
+        frontendServices.map((service) => service.start()),
+    );
 
     // configure caddy
+    const allProcesses = [...frontendProcesses, apiProcess];
     await caddyHelper.configure(
-        [...apiProcesses.caddyRoutes, ...frontendProcesses.caddyRoutes],
-        [
-            ...apiProcesses.domains,
-            ...apiProcesses.domains.map((domain) => "*." + domain),
-            ...frontendProcesses.domains,
-        ],
+        allProcesses.flatMap((s) => s.caddyConfig?.routes ?? []),
+        allProcesses.flatMap((s) => s.caddyConfig?.domains ?? []),
     );
 
     // wait until api is ready
-    await apiProcesses.wait();
+    await apiProcess.wait();
 
     // clear database
-    const databaseHelper = new DatabaseHelper();
-    await databaseHelper.clear(workerId);
+    const databaseHelper = new DatabaseHelper(workerId);
+    await databaseHelper.clear();
 
     // expose frontend environment (should happen after api is ready)
     await exposeFrontendEnvironment();
-    
-    await frontendProcesses.wait();
+
+    await Promise.all(frontendProcesses.map((p) => p.wait()));
 
     return {
         teardown: async () => {
             // kill processes
-            await apiProcesses.kill();
-            await frontendProcesses.kill();
+            await Promise.all(allProcesses.map((p) => p.kill?.()));
         },
     };
 }
 
 async function exposeFrontendEnvironment() {
-    const name: "dashboard" | "registration" | "webshop" | "calculator" =
-        "dashboard";
-
+    // todo: maybe should have different environment depending on frontend server?
     const env: FrontendEnvironment = await builder.build(
         process.env.STAMHOOFD_ENV ?? "",
         {
-            frontend: name,
+            frontend: "dashboard",
         },
     );
 

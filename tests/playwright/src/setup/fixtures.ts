@@ -1,7 +1,7 @@
 import { test as base } from "@playwright/test";
 import type Models from "@stamhoofd/models";
 import { createRequire } from "node:module";
-import { getUrl } from "./helpers/getUrl";
+import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
 import { setupWorker } from "./helpers/setupWorker";
 import { TestUtils } from "./helpers/TestUtils";
 const require = createRequire(import.meta.url);
@@ -50,10 +50,10 @@ export const test = base.extend<
             const workerId = workerInfo.workerIndex.toString();
 
             await use({
-                api: getUrl("api", workerId),
-                dashboard: getUrl("dashboard", workerId),
-                webshop: getUrl("webshop", workerId),
-                registration: getUrl("registration", workerId),
+                api: PlaywrightCaddyConfigHelper.getUrl("api", workerId),
+                dashboard: PlaywrightCaddyConfigHelper.getUrl("dashboard", workerId),
+                webshop: PlaywrightCaddyConfigHelper.getUrl("webshop", workerId),
+                registration: PlaywrightCaddyConfigHelper.getUrl("registration", workerId),
             });
         },
         {

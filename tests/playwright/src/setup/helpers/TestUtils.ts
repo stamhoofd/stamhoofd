@@ -6,7 +6,7 @@ type AfterCallback = () => void | Promise<void>;
  * Never import this class directly in a test file: an instance is instantiated in the fixtures, reuse that instance.
  */
 export class TestUtils {
-    static instanceCount = 0;
+    private static instanceCount = 0;
     onceAfterEachCallbacks: AfterCallback[] = [];
     afterEachCallbacks: AfterCallback[] = [];
     beforeAllCallbacks: AfterCallback[] = [];

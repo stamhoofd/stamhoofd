@@ -1,27 +1,38 @@
 import getPort from "get-port";
 import { createRequire } from "node:module";
-import { CaddyHelper } from "./CaddyHelper";
 import { NetworkHelper } from "./NetworkHelper";
-import { ServerHelper } from "./ServerHelper";
-import { getDomain } from "./getDomain";
+import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
+import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
 
-export class ApiServerHelper implements ServerHelper {
-    private caddyHelper = new CaddyHelper();
+export class ApiService implements ServiceHelper {
+    constructor(private workerId: string) {}
 
-    async start(workerId: string) {
-        const group = `${this.caddyHelper.GROUP_PREFIX}-api-${workerId}`;
-        const domain = getDomain("api", workerId);
+    getCaddyRoutes(): any[] {
+        throw new Error("Method not implemented.");
+    }
+    getDomains(): string[] {
+        throw new Error("Method not implemented.");
+    }
+
+    async start(): Promise<ServiceProcess> {
+        const group = `${PlaywrightCaddyConfigHelper.GROUP_PREFIX}-api-${this.workerId}`;
+        const domain = PlaywrightCaddyConfigHelper.getDomain(
+            "api",
+            this.workerId,
+        );
         const port = await getPort();
 
         console.log(
-            `Starting backend server with id ${workerId} on port ${port}...`,
+            `Starting backend server with id ${this.workerId} on port ${port}...`,
         );
 
-        await this.startApi({ port, workerId });
+        await this.startApi(port);
 
         return {
-            domains: [domain],
-            caddyRoutes: this.createRoutes({ domain, port, group }),
+            caddyConfig: {
+                domains: [domain, "*." + domain],
+                routes: this.createRoutes({ domain, port, group }),
+            },
             wait: async () => {
                 await NetworkHelper.waitForUrl(
                     "http://" + domain + "/organizations/search",
@@ -34,19 +45,13 @@ export class ApiServerHelper implements ServerHelper {
         };
     }
 
-    private async startApi({
-        port,
-        workerId,
-    }: {
-        port: number;
-        workerId: string;
-    }) {
+    private async startApi(port: number) {
         // set environment
         Object.entries({
             NODE_ENV: "test",
             STAMHOOFD_ENV: "playwright",
             PORT: port.toString(),
-            PLAYWRIGHT_WORKER_ID: workerId,
+            PLAYWRIGHT_WORKER_ID: this.workerId,
         }).forEach(([key, value]) => {
             process.env[key] = value;
         });

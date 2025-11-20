@@ -1,8 +1,5 @@
 module.exports = {
     presets: [
-        // Run on secundary ports
-        // "ports-secundary", 
-
         // Run local DNS server
         "services/coredns", 
 
