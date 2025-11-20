@@ -6,14 +6,7 @@ import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
 
 export class ApiService implements ServiceHelper {
     constructor(private workerId: string) {}
-
-    getCaddyRoutes(): any[] {
-        throw new Error("Method not implemented.");
-    }
-    getDomains(): string[] {
-        throw new Error("Method not implemented.");
-    }
-
+    
     async start(): Promise<ServiceProcess> {
         const group = `${PlaywrightCaddyConfigHelper.GROUP_PREFIX}-api-${this.workerId}`;
         const domain = PlaywrightCaddyConfigHelper.getDomain(
