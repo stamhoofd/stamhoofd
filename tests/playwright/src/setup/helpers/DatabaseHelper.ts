@@ -1,15 +1,12 @@
+import { type DatabaseInstance } from "@simonbackx/simple-database";
+
 export class DatabaseHelper {
-    private getDatabaseName(workerId: string) {
-        return `stamhoofd-playwright-${workerId}`;
-    }
+    private _database?: DatabaseInstance;
 
-    private setDatabaseName(workerId: string) {
-        process.env.DB_DATABASE = this.getDatabaseName(workerId);
-    }
+    constructor(private workerId: string) {}
 
-    async clear(workerId: string) {
-        this.setDatabaseName(workerId);
-        const { Database } = await import("@simonbackx/simple-database");
+    async clear() {
+        const Database = await this.getDatabase();
 
         await Database.delete("DELETE FROM `tokens`");
         await Database.delete("DELETE FROM `users`");
@@ -56,5 +53,15 @@ export class DatabaseHelper {
         //     "FILE_SIGNING_PRIVATE_KEY",
         //     exportedPrivateKey,
         // );
+    }
+
+    private async getDatabase(): Promise<DatabaseInstance> {
+        if (this._database) {
+            return this._database;
+        }
+
+        process.env.DB_DATABASE = `stamhoofd-playwright-${this.workerId}`;
+        const { Database } = await import("@simonbackx/simple-database");
+        return Database;
     }
 }

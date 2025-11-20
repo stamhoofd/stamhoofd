@@ -1,7 +1,75 @@
+import fs from "fs/promises";
+import { exec as execCallback } from "node:child_process";
+import { resolve } from "node:path";
+import { promisify } from "node:util";
+import { ChildProcessHelper } from "./ChildProcessHelper";
+import { getCurrentDir } from "./getCurrentDir";
+import { ProcessInfo } from "./ProcessInfo";
+
+const exec = promisify(execCallback);
+
 export class CaddyHelper {
     private cadyUrl = "http://localhost:2019";
     private serverName = "stamhoofd";
-    readonly GROUP_PREFIX = "playwright";
+
+    async isRunning() {
+        const result = await exec(
+            'pgrep -x caddy > /dev/null && echo "true" || echo "false"',
+        );
+        return result.stdout.trim() === "true";
+    }
+
+    async start(defaultConfig: any) {
+        // Get path to config
+        const currentDir = getCurrentDir(import.meta);
+        const pathToCaddyConfig = resolve(
+            currentDir,
+            "../../../dist/caddy.json",
+        );
+
+        // Write config
+        const caddyFileContent = JSON.stringify(defaultConfig, null, 2);
+        await fs.writeFile(pathToCaddyConfig, caddyFileContent);
+
+        // Run
+        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
+            "start",
+            "--config",
+            pathToCaddyConfig,
+        ]);
+
+        ProcessInfo.flagCaddyStarted();
+
+        return new Promise<void>((resolve) => {
+            childProcess.stdout?.on("data", (data) => {
+                const line = data.toString();
+                console.log("[Caddy]", line.trim());
+
+                // Detect successful startup
+                if (line.includes("Successfully started Caddy")) {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    async stop() {
+        // Make sure to kill any running caddy processes
+        try {
+            const cmd = "brew services stop caddy";
+            await exec(cmd);
+        } catch (error) {
+            // ignore
+        }
+
+        // Make sure to kill any running caddy processes
+        try {
+            const cmd = "caddy stop";
+            await exec(cmd);
+        } catch (error) {
+            // ignore
+        }
+    }
 
     async configure(routes: any[], domains: string[]) {
         const existingRoutes = await this.getRoutes();
@@ -17,27 +85,6 @@ export class CaddyHelper {
         const subjects = await this.getPolicySubjects();
         const newSubjects = domains.filter((d) => !subjects.includes(d));
         await this.postPolicySubjects(newSubjects);
-    }
-
-    async deletePlaywrightConfig() {
-        console.log('Deleting playwright config...');
-        await this.deleteAllPlaywrightRoutes();
-        await this.deleteAllPlaywrightTlsPolicySubjects();
-        console.log('Done deleting playwright config.');
-    }
-
-    private async deleteAllPlaywrightTlsPolicySubjects() {
-        await this.deletePolicySubjectsWhere((subject) => subject.includes(this.GROUP_PREFIX));
-    }
-
-    private async deleteAllPlaywrightRoutes() {
-        await this.deleteRoutesWhere((route: { group?: string }) => {
-            if (route.group === undefined) {
-                return false;
-            }
-
-            return route.group.startsWith(this.GROUP_PREFIX + "-");
-        });
     }
 
     private async putRoute(route: any, index: number) {
@@ -99,9 +146,7 @@ export class CaddyHelper {
         console.log(JSON.stringify(config, null, 2));
     }
 
-    private async deleteRoutesWhere(
-        predicate: (route: { group?: string }) => boolean,
-    ) {
+    async deleteRoutesWhere(predicate: (route: { group?: string }) => boolean) {
         const routes = await this.getRoutes();
         const routesToKeep = routes.filter((r) => !predicate(r));
 
@@ -121,9 +166,7 @@ export class CaddyHelper {
         }
     }
 
-    private async deletePolicySubjectsWhere(
-        predicate: (subject: string) => boolean,
-    ) {
+    async deletePolicySubjectsWhere(predicate: (subject: string) => boolean) {
         const subjects = await this.getPolicySubjects();
         const subjectsToKeep = subjects.filter((s) => !predicate(s));
 

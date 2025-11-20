@@ -1,10 +1,10 @@
-import { ProcessHelper } from "./ProcessHelper";
+import { ChildProcessHelper } from "./ChildProcessHelper";
 
 export class FrontendBuilder {
     async build() {
         console.log('Start building frontend...')
 
-        const childProcess = ProcessHelper.spawnWithCleanup(
+        const childProcess = ChildProcessHelper.spawnWithCleanup(
             "yarn",
             ["lerna", "run", "build:playwright", "--stream", "--parallel"],
             {
@@ -16,7 +16,7 @@ export class FrontendBuilder {
             },
         );
 
-        await ProcessHelper.awaitChild(childProcess);
+        await ChildProcessHelper.await(childProcess);
         console.log('Done building frontend.')
     }
 }
