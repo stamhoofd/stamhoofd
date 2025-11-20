@@ -1,9 +1,6 @@
-import fs from "fs/promises";
 import { exec as execCallback } from "node:child_process";
-import { resolve } from "node:path";
 import { promisify } from "node:util";
 import { ChildProcessHelper } from "./ChildProcessHelper";
-import { getCurrentDir } from "./getCurrentDir";
 import { ProcessInfo } from "./ProcessInfo";
 
 const exec = promisify(execCallback);
@@ -20,27 +17,15 @@ export class CaddyHelper {
     }
 
     async start(defaultConfig: any) {
-        // Get path to config
-        const currentDir = getCurrentDir(import.meta);
-        const pathToCaddyConfig = resolve(
-            currentDir,
-            "../../../dist/caddy.json",
-        );
-
-        // Write config
-        const caddyFileContent = JSON.stringify(defaultConfig, null, 2);
-        await fs.writeFile(pathToCaddyConfig, caddyFileContent);
-
-        // Run
+        // Start caddy
         const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
             "start",
-            "--config",
-            pathToCaddyConfig,
         ]);
 
         ProcessInfo.flagCaddyStarted();
 
-        return new Promise<void>((resolve) => {
+        // wait until caddy is ready
+        await new Promise<void>((resolve) => {
             childProcess.stdout?.on("data", (data) => {
                 const line = data.toString();
                 console.log("[Caddy]", line.trim());
@@ -51,6 +36,11 @@ export class CaddyHelper {
                 }
             });
         });
+
+        // post the initial config
+        console.log('Start posting caddy config...');
+        await this.postConfig(defaultConfig);
+        console.log('Done posting caddy config.');
     }
 
     async stop() {
@@ -100,6 +90,23 @@ export class CaddyHelper {
             const text = await res.text();
             throw new Error(
                 `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
+            );
+        }
+    }
+
+    private async postConfig(caddyConfig: any) {
+        const url = `${this.cadyUrl}/load`;
+
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(caddyConfig),
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(
+                `Failed to post config: ${res.status} ${res.statusText} - ${text}`,
             );
         }
     }
