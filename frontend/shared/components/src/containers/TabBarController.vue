@@ -252,18 +252,15 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
     const tabUrl = Formatter.slug(unref(item.name));
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
 
+    item.component.deleteHistoryIndex();
     if (appendHistory) {
         HistoryManager.pushState(undefined, old
             ? async () => {
                 await selectItem(old, false);
             }
             : null, { adjustHistory: true });
-
-        item.component.assignHistoryIndex();
     }
-    else {
-        item.component.returnToHistoryIndex();
-    }
+    item.component.assignHistoryIndex();
 
     // Switch
     selectedItem.value = item;
