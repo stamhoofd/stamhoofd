@@ -16,6 +16,8 @@ export class FrontendBuilder {
             },
         );
 
+        ChildProcessHelper.logErrors(childProcess);
+
         await ChildProcessHelper.await(childProcess);
         console.log('Done building frontend.')
     }
