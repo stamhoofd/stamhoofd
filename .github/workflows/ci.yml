@@ -261,13 +261,20 @@ jobs:
         cache: 'yarn'
     - name: Install dependencies
       run: yarn install --prefer-offline --frozen-lockfile
-    # build packages? -> normally already done by backend test? frontend built in code
-      # Install Caddy
-    - name: Install Caddy
+    - name: Cache Caddy
+      id: caddy-cache
+      uses: actions/cache@v4
+      with:
+        path: /usr/local/bin/caddy
+        key: caddy-${{ runner.os }}-v1
+    - name: Install Caddy if missing
+      if: steps.caddy-cache.outputs.cache-hit != 'true'
       run: |
         curl -fsSL https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_linux_amd64.tar.gz \
         | sudo tar -C /usr/local/bin -xz caddy
         sudo chmod +x /usr/local/bin/caddy
+    - name: Verify Caddy
+      run: caddy version
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
     - name: Run Playwright tests
