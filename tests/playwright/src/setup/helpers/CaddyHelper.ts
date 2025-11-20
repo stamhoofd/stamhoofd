@@ -24,23 +24,39 @@ export class CaddyHelper {
 
         ProcessInfo.flagCaddyStarted();
 
+        let isStarted = false;
+
+        // log stderr until caddy is ready
+        childProcess.stderr?.on("data", (data) => {
+            if (isStarted) {
+                return;
+            }
+            const line = data.toString();
+            console.log("[Caddy] stderr:", line.trim());
+        });
+
         // wait until caddy is ready
         await new Promise<void>((resolve) => {
+            // listen for stdout
             childProcess.stdout?.on("data", (data) => {
+                if (isStarted) {
+                    return;
+                }
                 const line = data.toString();
                 console.log("[Caddy]", line.trim());
 
                 // Detect successful startup
                 if (line.includes("Successfully started Caddy")) {
+                    isStarted = true;
                     resolve();
                 }
             });
         });
 
         // post the initial config
-        console.log('Start posting caddy config...');
+        console.log("Start posting caddy config...");
         await this.postConfig(defaultConfig);
-        console.log('Done posting caddy config.');
+        console.log("Done posting caddy config.");
     }
 
     async stop() {
