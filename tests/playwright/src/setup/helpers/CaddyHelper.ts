@@ -18,7 +18,8 @@ export class CaddyHelper {
 
     async start(defaultConfig: any) {
         // Start caddy
-        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
+        const childProcess = ChildProcessHelper.spawnWithCleanup("sudo", [
+            "caddy",
             "start",
         ]);
 

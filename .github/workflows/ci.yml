@@ -278,7 +278,7 @@ jobs:
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
     - name: Run Playwright tests
-      run: sudo yarn test:playwright
+      run: yarn test:playwright
     - name: Notify Slack of failure
       uses: slackapi/slack-github-action@v2.0.0
       if: failure() && github.event_name != 'pull_request'
