@@ -265,7 +265,7 @@ jobs:
       # Install Caddy
     - name: Install Caddy
       run: |
-        curl -fsSL https://github.com/caddyserver/caddy/releases/latest/download/caddy_linux_amd64.tar.gz \
+        curl -fsSL https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_linux_amd64.tar.gz \
         | sudo tar -C /usr/local/bin -xz caddy
         sudo chmod +x /usr/local/bin/caddy
     - name: Install Playwright Browsers
