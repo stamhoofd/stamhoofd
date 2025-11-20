@@ -284,6 +284,8 @@ jobs:
     - name: Install Playwright Browsers
       if: steps.cache-playwright.outputs.cache-hit != 'true'
       run: yarn playwright install --with-deps
+    - name: Build shared packages
+      run: yarn build:shared
     - name: Run Playwright tests
       run: yarn test:playwright
     - name: Notify Slack of failure
