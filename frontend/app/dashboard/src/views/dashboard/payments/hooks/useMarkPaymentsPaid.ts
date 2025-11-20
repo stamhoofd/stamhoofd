@@ -69,6 +69,6 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
     }
     else {
-        new Toast(paid ? $t(`37848bd6-919a-4f31-bfc7-e0e809e68847`) : payments.length === 1 ? $t(`d9e58e49-d5d5-4a89-9e6a-1bd8eaf0cb1e`) : $t(`d23f91da-079b-40fe-9da1-14b9ac7e65ab`), 'error red').setHide(2000).show();
+        new Toast(paid ? $t(`37848bd6-919a-4f31-bfc7-e0e809e68847`) : payments.length === 1 ? $t(`d9e58e49-d5d5-4a89-9e6a-1bd8eaf0cb1e`) : $t(`d23f91da-079b-40fe-9da1-14b9ac7e65ab`), 'error red').show();
     }
 }
