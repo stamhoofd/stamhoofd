@@ -7,7 +7,7 @@ module.exports = {
         "services/caddy", 
 
         // Start stripe webhook server
-        "services/stripe", 
+        // "services/stripe", 
 
         // Connect with maildev smtp server
         // "services/maildev", 
