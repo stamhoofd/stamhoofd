@@ -296,10 +296,6 @@ jobs:
         mysql version: '8.0'
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
-    - name: Add hosts entries
-      run: |
-        echo "127.0.0.1 myapp.local" | sudo tee -a /etc/hosts
-        echo "127.0.0.1 api.myapp.local" | sudo tee -a /etc/hosts
     - name: Run Playwright tests
       run: yarn test:playwright
     - name: Notify Slack of failure
