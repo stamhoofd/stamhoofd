@@ -1,11 +1,11 @@
 <template>
     <STInputBox :title="title" error-fields="address" :error-box="errorBox">
-        <input v-model="addressLine1" class="input" type="text" name="street-address" autocomplete="street-address" :placeholder="$t(`3bcf3354-b100-46cd-b4dd-a015683ff750`)" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"><div class="input-group">
+        <input v-model="addressLine1" data-testid="street-address-input" class="input" type="text" name="street-address" autocomplete="street-address" :placeholder="$t(`3bcf3354-b100-46cd-b4dd-a015683ff750`)" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"><div class="input-group">
             <div>
-                <input v-model="postalCode" class="input" type="text" name="postal-code" autocomplete="postal-code" :placeholder="$t(`5ed579c6-bfe4-453b-bc13-5e38690849e1`)" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
+                <input v-model="postalCode" data-testid="postal-code-input" class="input" type="text" name="postal-code" autocomplete="postal-code" :placeholder="$t(`5ed579c6-bfe4-453b-bc13-5e38690849e1`)" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur">
             </div>
             <div>
-                <input v-model="city" class="input" type="text" :placeholder="$t('3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"><!-- name needs to be city for safari autocomplete -->
+                <input v-model="city" data-testid="city-input" class="input" type="text" :placeholder="$t('3f4f6c6a-e2c5-4bee-83a3-77d8e55a1e60')" name="city" autocomplete="address-level2" @change="updateAddress" @input="updateAddressRealTime" @focus="onFocus" @blur="onBlur"><!-- name needs to be city for safari autocomplete -->
             </div>
         </div>
 

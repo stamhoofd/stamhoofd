@@ -246,6 +246,108 @@ jobs:
                   url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
                   action_id: "button-action"
   
+  job_test_playwright:
+    name: 'Playwright Tests'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    needs: [job_setup]
+    if: needs.job_setup.outputs.changed_backend == 'true' || needs.job_setup.outputs.changed_frontend == 'true'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'yarn'
+    - name: Restore CoreDNS cache
+      id: cache-coredns
+      uses: actions/cache@v3
+      with:
+        path: .coredns
+        key: coredns-v1.13.1
+        restore-keys: coredns-
+    - name: Install CoreDNS
+      if: steps.cache-coredns.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p .coredns
+        curl -L -o .coredns/coredns.tgz \
+        https://github.com/coredns/coredns/releases/download/v1.13.1/coredns_1.13.1_linux_amd64.tgz
+        tar -xzf .coredns/coredns.tgz -C .coredns
+        chmod +x .coredns/coredns
+    - name: Add CoreDNS to PATH
+      run: echo "${GITHUB_WORKSPACE}/.coredns" >> $GITHUB_PATH
+    - name: Check CoreDNS version
+      run: coredns -version
+    - name: Run coredns
+      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile &
+    - name: Configure resolver to use port 1053
+      run: echo "export RES_OPTIONS='port=1053'" >> $GITHUB_ENV
+    - name: Use local DNS
+      run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
+    - name: Install dependencies
+      run: yarn install --prefer-offline --frozen-lockfile
+    - name: Cache Caddy
+      id: caddy-cache
+      uses: actions/cache@v4
+      with:
+        path: /usr/local/bin/caddy
+        key: caddy-${{ runner.os }}-v1
+    - name: Install Caddy if missing
+      if: steps.caddy-cache.outputs.cache-hit != 'true'
+      run: |
+        curl -fsSL https://github.com/caddyserver/caddy/releases/download/v2.10.2/caddy_2.10.2_linux_amd64.tar.gz \
+        | sudo tar -C /usr/local/bin -xz caddy
+        sudo chmod +x /usr/local/bin/caddy
+    - name: Verify Caddy
+      run: caddy version
+    - name: Cache Playwright Browsers
+      id: cache-playwright
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+    - name: Install Playwright Browsers
+      if: steps.cache-playwright.outputs.cache-hit != 'true'
+      run: yarn playwright install --with-deps
+    - name: Build shared packages
+      run: yarn build:shared
+    - name: Build API
+      run: cd backend/app/api && yarn build
+    - name: Shutdown MySQL
+      run: sudo service mysql stop
+    - uses: daniellockyer/mysql-action@main
+      with:
+        authentication plugin: 'mysql_native_password'
+        mysql version: '8.0'
+        mysql database: 'stamhoofd-tests'
+        mysql root password: 'root'
+    - name: Run Playwright tests
+      env:
+        RES_OPTIONS: "port=1053"
+      run: yarn test:playwright
+    - name: Notify Slack of failure
+      uses: slackapi/slack-github-action@v2.0.0
+      if: failure() && github.event_name != 'pull_request'
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+            text: "Playwright tests failed"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "@channel *Playwright tests failed* for `${{ github.event.head_commit.message }}` by ${{ github.event.pull_request.user.name || github.event.head_commit.author.name }}"
+                accessory:
+                  type: "button"
+                  text:
+                    type: "plain_text"
+                    text: "Open commit"
+                    emoji: false
+                  value: "click_me"
+                  url: "${{ github.event.pull_request.url || github.event.head_commit.url }}"
+                  action_id: "button-action"
+
   job_boot:
     name: 'API boot and shutdown'
     runs-on: ubuntu-latest

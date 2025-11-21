@@ -6,7 +6,7 @@
                 {{ $t('d5d2e25f-588e-496e-925f-f7e375c3888a') }}
             </aside>
 
-            <h1>
+            <h1 data-testid="organization-name">
                 {{ organization.name }}
                 <span v-copyable class="title-suffix style-copyable">
                     {{ organization.uri }}

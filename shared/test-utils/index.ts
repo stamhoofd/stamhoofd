@@ -66,6 +66,10 @@ class TestInstance {
         }
     }
 
+    async beforeEach() {
+        await this.loadEnvironment();
+    }
+
     async loadEnvironment() {
         // Clear env
         await loadEnvironment();
@@ -74,10 +78,6 @@ class TestInstance {
         for (const key in this.permanentEnvironmentOverrides) {
             this.setEnvironment(key as any, this.permanentEnvironmentOverrides[key]);
         }
-    }
-
-    async beforeEach() {
-        await this.loadEnvironment();
     }
 
     /**
@@ -110,7 +110,7 @@ class TestInstance {
     }
 }
 
-export const TestUtils = new TestInstance();
+export const TestUtils: TestInstance = new TestInstance();
 
 export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,

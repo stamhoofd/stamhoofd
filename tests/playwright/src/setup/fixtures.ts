@@ -1,0 +1,85 @@
+import { test as base } from "@playwright/test";
+import type Models from "@stamhoofd/models";
+import { importModule } from "./helpers/importModule";
+import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
+import { setupWorker } from "./helpers/setupWorker";
+import { TestUtils } from "./helpers/TestUtils";
+
+export type StamhoofdUrls = {
+    readonly api: string;
+    readonly dashboard: string;
+    readonly webshop: string;
+    readonly registration: string;
+};
+
+export const test = base.extend<
+    { TestUtils: TestUtils },
+    {
+        setup: { readonly TestUtils: TestUtils };
+        urls: StamhoofdUrls;
+        Models: typeof Models;
+    }
+>({
+    // setup worker
+    setup: [
+        async ({}, use, workerInfo) => {
+            const { teardown } = await setupWorker(workerInfo);
+
+            // call TestUtils hooks before and after all tests
+            const testUtils = new TestUtils(STAMHOOFD);
+
+            await testUtils.beforeAll();
+
+            // run all tests for worker
+            await use({ TestUtils: testUtils });
+
+            await testUtils.afterAll();
+
+            await teardown();
+        },
+        {
+            scope: "worker",
+            timeout: 120000,
+            auto: true,
+        },
+    ],
+    // urls to use in tests (dependent on worker id)
+    urls: [
+        async ({}, use, workerInfo) => {
+            const workerId = workerInfo.workerIndex.toString();
+
+            await use({
+                api: PlaywrightCaddyConfigHelper.getUrl("api", workerId),
+                dashboard: PlaywrightCaddyConfigHelper.getUrl("dashboard", workerId),
+                webshop: PlaywrightCaddyConfigHelper.getUrl("webshop", workerId),
+                registration: PlaywrightCaddyConfigHelper.getUrl("registration", workerId),
+            });
+        },
+        {
+            scope: "worker",
+        },
+    ],
+    // call TestUtils hooks before and after each test
+    TestUtils: [
+        async ({ setup: { TestUtils } }, use) => {
+            TestUtils.beforeEach();
+
+            await use(TestUtils);
+
+            await TestUtils.afterEach();
+        },
+        {
+            auto: true,
+        },
+    ],
+    // import Models module (is dependent on worker environment)
+    Models: [
+        async ({}, use) => {
+            const models = (importModule("@stamhoofd/models")) as typeof Models;
+            await use(models);
+        },
+        {
+            scope: "worker",
+        },
+    ],
+});
