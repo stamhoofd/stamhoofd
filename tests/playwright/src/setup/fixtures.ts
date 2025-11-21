@@ -1,10 +1,9 @@
 import { test as base } from "@playwright/test";
 import type Models from "@stamhoofd/models";
-import { createRequire } from "node:module";
+import { importModule } from "./helpers/importModule";
 import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
 import { setupWorker } from "./helpers/setupWorker";
 import { TestUtils } from "./helpers/TestUtils";
-const require = createRequire(import.meta.url);
 
 export type StamhoofdUrls = {
     readonly api: string;
@@ -76,7 +75,7 @@ export const test = base.extend<
     // import Models module (is dependent on worker environment)
     Models: [
         async ({}, use) => {
-            const models = require("@stamhoofd/models") as typeof Models;
+            const models = (importModule("@stamhoofd/models")) as typeof Models;
             await use(models);
         },
         {
