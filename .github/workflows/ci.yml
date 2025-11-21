@@ -296,8 +296,27 @@ jobs:
         mysql version: '8.0'
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
+    - name: Restore CoreDNS cache
+      id: cache-coredns
+      uses: actions/cache@v3
+      with:
+        path: .coredns
+        key: coredns-v1.13.1
+        restore-keys: coredns-
+    - name: Install CoreDNS
+      if: steps.cache-coredns.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p .coredns
+        curl -L -o .coredns/coredns.tgz \
+        https://github.com/coredns/coredns/releases/download/v1.13.1/coredns_1.13.1_linux_amd64.tgz
+        tar -xzf .coredns/coredns.tgz -C .coredns
+        chmod +x .coredns/coredns
+    - name: Add CoreDNS to PATH
+      run: echo "${GITHUB_WORKSPACE}/.coredns" >> $GITHUB_PATH
+    - name: Check CoreDNS version
+      run: coredns -version
     - name: Run coredns
-      run: yarn dns
+      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && cd .development && sudo coredns
     - name: Use local DNS
       run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
     - name: Run Playwright tests
