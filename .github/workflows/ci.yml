@@ -279,7 +279,9 @@ jobs:
     - name: Check CoreDNS version
       run: coredns -version
     - name: Run coredns
-      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile
+      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile &
+    - name: Configure resolver to use port 1053
+      run: echo "export RES_OPTIONS='port=1053'" >> $GITHUB_ENV
     - name: Use local DNS
       run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
     - name: Install dependencies
@@ -320,6 +322,8 @@ jobs:
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
     - name: Run Playwright tests
+      env:
+        RES_OPTIONS: "port=1053"
       run: yarn test:playwright
     - name: Notify Slack of failure
       uses: slackapi/slack-github-action@v2.0.0
