@@ -19,8 +19,8 @@ export class CaddyHelper {
     async start(defaultConfig: any) {
         // Start caddy
         const childProcess = process.env.CI
-            // Run caddy as root on CI
-            ? ChildProcessHelper.spawnWithCleanup("sudo", ["caddy", "start"])
+            ? // Run caddy as root on CI
+              ChildProcessHelper.spawnWithCleanup("sudo", ["caddy", "start"])
             : ChildProcessHelper.spawnWithCleanup("caddy", ["start"]);
 
         ProcessInfo.flagCaddyStarted();
@@ -97,17 +97,24 @@ export class CaddyHelper {
     private async putRoute(route: any, index: number) {
         const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/${index}`;
 
-        const res = await fetch(url, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(route),
-        });
+        try {
+            const res = await fetch(url, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(route),
+            });
 
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(
-                `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
-            );
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(
+                    `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            console.error("Failed to put route for url: ", url);
+            console.error("route: ", JSON.stringify(route));
+            await this.logConfig();
         }
     }
 
