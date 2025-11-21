@@ -20,24 +20,30 @@ export class CaddyHelper {
         // Start caddy
         const childProcess = process.env.CI
             ? // Run caddy as root on CI
-              ChildProcessHelper.spawnWithCleanup("sudo", ["caddy", "start"])
-            : ChildProcessHelper.spawnWithCleanup("caddy", ["start"]);
+              ChildProcessHelper.spawnWithCleanup("sudo", ["caddy", "run"])
+            : ChildProcessHelper.spawnWithCleanup("caddy", ["run"]);
 
         ProcessInfo.flagCaddyStarted();
 
         let isStarted = false;
 
-        // log stderr until caddy is ready
-        childProcess.stderr?.on("data", (data) => {
-            if (isStarted) {
-                return;
-            }
-            const line = data.toString();
-            console.log("[Caddy] stderr:", line.trim());
-        });
-
         // wait until caddy is ready
         await new Promise<void>((resolve) => {
+            // log stderr until caddy is ready
+            childProcess.stderr?.on("data", (data) => {
+                if (isStarted) {
+                    return;
+                }
+                const line = data.toString();
+                console.log("[Caddy] stderr:", line.trim());
+
+                // Detect successful startup
+                if (line.includes("admin endpoint started")) {
+                    isStarted = true;
+                    resolve();
+                }
+            });
+
             // listen for stdout
             childProcess.stdout?.on("data", (data) => {
                 if (isStarted) {
@@ -47,7 +53,7 @@ export class CaddyHelper {
                 console.log("[Caddy]", line.trim());
 
                 // Detect successful startup
-                if (line.includes("Successfully started Caddy")) {
+                if (line.includes("admin endpoint started")) {
                     isStarted = true;
                     resolve();
                 }
