@@ -288,6 +288,10 @@ jobs:
       run: yarn build:shared
     - name: Build API
       run: cd backend/app/api && yarn build
+    - name: Add hosts entries
+      run: |
+        echo "127.0.0.1 myapp.local" | sudo tee -a /etc/hosts
+        echo "127.0.0.1 api.myapp.local" | sudo tee -a /etc/hosts
     - name: Run Playwright tests
       run: yarn test:playwright
     - name: Notify Slack of failure
