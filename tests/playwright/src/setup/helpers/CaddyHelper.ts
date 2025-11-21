@@ -18,10 +18,7 @@ export class CaddyHelper {
 
     async start(defaultConfig: any) {
         // Start caddy
-        const childProcess = process.env.CI
-            ? // Run caddy as root on CI
-              ChildProcessHelper.spawnWithCleanup("sudo", ["caddy", "run"])
-            : ChildProcessHelper.spawnWithCleanup("caddy", ["run"]);
+        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", ["run"]);
 
         ProcessInfo.flagCaddyStarted();
 
