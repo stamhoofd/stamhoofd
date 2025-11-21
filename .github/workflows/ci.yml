@@ -288,6 +288,14 @@ jobs:
       run: yarn build:shared
     - name: Build API
       run: cd backend/app/api && yarn build
+    - name: Shutdown MySQL
+      run: sudo service mysql stop
+    - uses: daniellockyer/mysql-action@main
+      with:
+        authentication plugin: 'mysql_native_password'
+        mysql version: '8.0'
+        mysql database: 'stamhoofd-tests'
+        mysql root password: 'root'
     - name: Add hosts entries
       run: |
         echo "127.0.0.1 myapp.local" | sudo tee -a /etc/hosts
