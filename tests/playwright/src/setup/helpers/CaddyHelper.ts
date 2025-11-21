@@ -6,7 +6,7 @@ import { ProcessInfo } from "./ProcessInfo";
 const exec = promisify(execCallback);
 
 export class CaddyHelper {
-    private cadyUrl = "http://localhost:2019";
+    private cadyUrl = "http://127.0.0.1:2019";
     private serverName = "stamhoofd";
 
     async isRunning() {
@@ -16,12 +16,25 @@ export class CaddyHelper {
         return result.stdout.trim() === "true";
     }
 
+    private async diagnosticTest() {
+        const result = await exec(`curl -v ${this.cadyUrl}/config`);
+        console.log('1 stdout:')
+        console.log(result.stdout);
+        console.log('1 stderr:')
+        console.log(result.stderr);
+
+        const result2 = await exec(`curl -v -X PUT http://localhost:2019/config -d '{}'`);
+        console.log('2 stdout:')
+        console.log(result2.stdout);
+        console.log('2 stderr:')
+        console.log(result2.stderr);
+    }
+
     async start(defaultConfig: any) {
         // Start caddy
-        const childProcess = process.env.CI
-            ? // Run caddy as root on CI
-              ChildProcessHelper.spawnWithCleanup("sudo", ["caddy", "run"])
-            : ChildProcessHelper.spawnWithCleanup("caddy", ["run"]);
+
+        // todo: check if caddy is still running in worker
+        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", ["run"]);
 
         ProcessInfo.flagCaddyStarted();
 
@@ -64,6 +77,12 @@ export class CaddyHelper {
         console.log("Start posting caddy config...");
         await this.postConfig(defaultConfig);
         console.log("Done posting caddy config.");
+
+        if(1 === 1) {
+            // test
+            await this.diagnosticTest();
+            // throw new Error('Fail on purpose for test')
+        }
     }
 
     async stop() {
@@ -117,10 +136,13 @@ export class CaddyHelper {
                 );
             }
         } catch (error) {
-            console.error(error);
+            // console.error(error);
             console.error("Failed to put route for url: ", url);
-            console.error("route: ", JSON.stringify(route));
-            await this.logConfig();
+            this.diagnosticTest();
+            // console.error("route: ", JSON.stringify(route));
+            // console.error('Still running: ', await this.isRunning());
+            // await this.logConfig();
+            throw error;
         }
     }
 
