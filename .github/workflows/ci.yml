@@ -286,6 +286,8 @@ jobs:
       run: yarn playwright install --with-deps
     - name: Build shared packages
       run: yarn build:shared
+    - name: Build API
+      run: cd backend/app/api && yarn build
     - name: Run Playwright tests
       run: yarn test:playwright
     - name: Notify Slack of failure
