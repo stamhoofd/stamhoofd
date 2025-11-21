@@ -1,8 +1,8 @@
 import getPort from "get-port";
-import { createRequire } from "node:module";
 import { NetworkHelper } from "./NetworkHelper";
 import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
 import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
+import { importModule } from "./importModule";
 
 export class ApiService implements ServiceHelper {
     constructor(private workerId: string) {}
@@ -56,8 +56,7 @@ export class ApiService implements ServiceHelper {
             process.env[key] = value;
         });
 
-        const require = createRequire(import.meta.url);
-        await require("@stamhoofd/backend");
+        await importModule("@stamhoofd/backend");
     }
 
     private createRoutes({
