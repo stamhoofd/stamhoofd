@@ -296,6 +296,10 @@ jobs:
         mysql version: '8.0'
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
+    - name: Run coredns
+      run: yarn dns
+    - name: Use local DNS
+      run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
     - name: Run Playwright tests
       run: yarn test:playwright
     - name: Notify Slack of failure
