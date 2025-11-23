@@ -69,14 +69,6 @@ defineRoutes(props.tabs.map((tab) => {
     };
 }));
 
-const saveCurrentItemState = () => {
-    const old = selectedItem.value;
-    if (old && old.component) {
-        // Keep current item alive
-        old.component.keepAlive = true;
-    }
-};
-
 const shouldNavigateAway = async () => {
     const old = root.value;
     if (old) {
@@ -95,7 +87,6 @@ async function selectItem(item: Item, appendHistory: boolean = true) {
         return;
     }
 
-    saveCurrentItemState();
     const old = selectedItem.value;
 
     if (currentComponent) {
@@ -106,7 +97,6 @@ async function selectItem(item: Item, appendHistory: boolean = true) {
     const tabUrl = Formatter.slug(unref(item.name));
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
 
-    item.component.deleteHistoryIndex();
     if (appendHistory) {
         HistoryManager.pushState(undefined, old
             ? async () => {

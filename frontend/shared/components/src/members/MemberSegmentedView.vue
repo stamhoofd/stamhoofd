@@ -16,17 +16,16 @@
                 <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? $t('06466432-eca6-41d0-a3d6-f262f8d6d2ac') : $t('dba51db1-ce45-4e09-9a2f-fcea4a7fa46e')" class="icon female pink icon-spacer" />
             </h1>
 
-            <SegmentedControl v-model="tab" :items="tabComponents" :labels="tabLabels" />
-            <component :is="tab" :member="member" />
+            <SegmentedView :tabs="tabs" :member="member" @change="currentItem = $event" />
         </main>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { SegmentedControl, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useGlobalEventListener, useOrganization } from '@stamhoofd/components';
-import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PermissionsResourceType, PlatformMember } from '@stamhoofd/structures';
-import { computed, markRaw, ref } from 'vue';
+import { ComponentWithProperties, HistoryManager, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { SegmentedView, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useGlobalEventListener, useOrganization } from '@stamhoofd/components';
+import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { computed } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
 import { useEditMember } from './composables/useEditMember';
@@ -56,38 +55,31 @@ const editMember = useEditMember();
 const organization = useOrganization();
 
 const tabs = computed(() => {
-    const base: { name: string; component: unknown }[] = [{
+    const base = [{
         name: $t(`120012bf-f877-46de-b6d9-55ea46f3f2ce`),
-        component: markRaw(MemberDetailsTab),
+        component: new ComponentWithProperties(MemberDetailsTab),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
             name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
-            component: markRaw(MemberPlatformMembershipTab),
+            component: new ComponentWithProperties(MemberPlatformMembershipTab),
         });
     }
 
     if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
             name: $t(`60dd9d3a-d48f-4e58-810c-1bd69bafa467`),
-            component: markRaw(MemberPaymentsTab),
+            component: new ComponentWithProperties(MemberPaymentsTab),
         });
     }
 
     return base;
 });
+let currentItem = tabs.value[0];
 
-const tabComponents = computed(() => {
-    return tabs.value.map(t => t.component);
-});
-const tabLabels = computed(() => {
-    return tabs.value.map(t => t.name);
-});
-
-const tab = ref(tabComponents.value[props.initialTab && props.initialTab < tabComponents.value.length ? (props.initialTab) : 0]);
 const tabIndex = computed(() => {
-    return Math.max(0, tabComponents.value.findIndex(t => t === tab.value));
+    return Math.max(0, tabs.value.findIndex(t => t.name === currentItem.name));
 });
 
 const hasWrite = computed(() => {

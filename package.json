@@ -54,7 +54,7 @@
     "@simonbackx/simple-encoding": "2.22.0",
     "@simonbackx/simple-errors": "^1.5.0",
     "@simonbackx/simple-networking": "1.20.0",
-    "@simonbackx/vue-app-navigation": "2.17.0",
+    "@simonbackx/vue-app-navigation": "2.17.1",
     "@zxcvbn-ts/core": "^0.3.0",
     "@zxcvbn-ts/language-common": "^0.1.2",
     "@zxcvbn-ts/language-nl-be": "^0.3.0",

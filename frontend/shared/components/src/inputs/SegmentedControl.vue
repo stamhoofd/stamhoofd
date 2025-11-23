@@ -69,19 +69,16 @@ $segmented-control-inner-height: $segmented-control-height - $segmented-control-
 
 $border-radius: 9px;
 
-.st-view > main > h1 + .segmented-control{
-    margin-bottom: 20px;
-
-    @media (max-width: 550px) {
-        margin-bottom: 15px;
-    }
-}
-
 .segmented-control.with-margin {
     margin-bottom: 15px;
 }
 
 .segmented-control {
+    margin-bottom: 15px;
+
+    @media (max-width: 550px) {
+        margin-bottom: 15px;
+    }
     user-select: none;
     -webkit-touch-callout: none;
     background: $color-gray-3;
