@@ -252,15 +252,18 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
     const tabUrl = Formatter.slug(unref(item.name));
     item.component.provide.reactive_navigation_url = computed(() => urlHelpers.extendUrl(tabUrl));
 
-    item.component.deleteHistoryIndex();
-    if (appendHistory) {
+    if (item.component.hasHistoryIndex()) {
+        item.component.returnToHistoryIndex();
+    } else {
+        item.component.deleteHistoryIndex();
         HistoryManager.pushState(undefined, old
             ? async () => {
                 await selectItem(old, false);
             }
-            : null, { adjustHistory: true });
+            : null, { adjustHistory: appendHistory });
+        item.component.assignHistoryIndex();
     }
-    item.component.assignHistoryIndex();
+
 
     // Switch
     selectedItem.value = item;
@@ -346,6 +349,7 @@ const selectTabById = async (id: string) => {
 };
 
 const show = async (options: PushOptions) => {
+    console.log('Showing manually', options)
     if (options.components.length > 1) {
         throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController');
     }
