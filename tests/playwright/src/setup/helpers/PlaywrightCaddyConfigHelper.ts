@@ -119,6 +119,9 @@ export class PlaywrightCaddyConfigHelper {
         });
 
         const config = {
+            admin: {
+                listen: "0.0.0.0:2019"
+            },
             apps: {
                 http: {
                     servers: {
