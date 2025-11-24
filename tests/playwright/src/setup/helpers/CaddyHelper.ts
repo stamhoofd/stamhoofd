@@ -17,17 +17,17 @@ export class CaddyHelper {
     }
 
     private async diagnosticTest() {
-        const result = await exec(`curl -v ${this.cadyUrl}/config`);
-        console.log('1 stdout:')
-        console.log(result.stdout);
-        console.log('1 stderr:')
-        console.log(result.stderr);
+        // const result = await exec(`curl -v ${this.cadyUrl}/config`);
+        // console.log('1 stdout:')
+        // console.log(result.stdout);
+        // console.log('1 stderr:')
+        // console.log(result.stderr);
 
-        const result2 = await exec(`curl -v -X PUT http://localhost:2019/config -d '{}'`);
-        console.log('2 stdout:')
-        console.log(result2.stdout);
-        console.log('2 stderr:')
-        console.log(result2.stderr);
+        // const result2 = await exec(`curl -v -X PUT http://localhost:2019/config -d '{}'`);
+        // console.log('2 stdout:')
+        // console.log(result2.stdout);
+        // console.log('2 stderr:')
+        // console.log(result2.stderr);
     }
 
     async start(defaultConfig: any) {
@@ -78,11 +78,11 @@ export class CaddyHelper {
         await this.postConfig(defaultConfig);
         console.log("Done posting caddy config.");
 
-        if(1 === 1) {
-            // test
-            await this.diagnosticTest();
-            // throw new Error('Fail on purpose for test')
-        }
+        // if(1 === 1) {
+        //     // test
+        //     await this.diagnosticTest();
+        //     // throw new Error('Fail on purpose for test')
+        // }
     }
 
     async stop() {
