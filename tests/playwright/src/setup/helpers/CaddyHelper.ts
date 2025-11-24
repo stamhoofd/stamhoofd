@@ -22,7 +22,6 @@ export class CaddyHelper {
         // console.log(result.stdout);
         // console.log('1 stderr:')
         // console.log(result.stderr);
-
         // const result2 = await exec(`curl -v -X PUT http://localhost:2019/config -d '{}'`);
         // console.log('2 stdout:')
         // console.log(result2.stdout);
@@ -34,7 +33,9 @@ export class CaddyHelper {
         // Start caddy
 
         // todo: check if caddy is still running in worker
-        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", ["run"]);
+        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
+            "run",
+        ]);
 
         ProcessInfo.flagCaddyStarted();
 
@@ -123,18 +124,25 @@ export class CaddyHelper {
         const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/${index}`;
 
         try {
-            const res = await fetch(url, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(route),
-            });
+            const result2 = await exec(
+                `curl -v -X PUT ${url} -d '${JSON.stringify(route)}' -H "Content-Type: application/json"`,
+            );
+            console.log("2 stdout:");
+            console.log(result2.stdout);
+            console.log("2 stderr:");
+            console.log(result2.stderr);
+            // const res = await fetch(url, {
+            //     method: "PUT",
+            //     headers: { "Content-Type": "application/json" },
+            //     body: JSON.stringify(route),
+            // });
 
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(
-                    `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
-                );
-            }
+            // if (!res.ok) {
+            //     const text = await res.text();
+            //     throw new Error(
+            //         `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
+            //     );
+            // }
         } catch (error) {
             // console.error(error);
             console.error("Failed to put route for url: ", url);
@@ -166,17 +174,32 @@ export class CaddyHelper {
     private async postPolicySubjects(policySubjects: string[]) {
         const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects/...`;
 
-        const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(policySubjects),
-        });
+        // const res = await fetch(url, {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify(policySubjects),
+        // });
 
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(
-                `Failed to post: ${res.status} ${res.statusText} - ${text}`,
+        // if (!res.ok) {
+        //     const text = await res.text();
+        //     throw new Error(
+        //         `Failed to post: ${res.status} ${res.statusText} - ${text}`,
+        //     );
+        // }
+
+        try {
+            const result2 = await exec(
+                `curl -v -X POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
             );
+            console.log("2 stdout:");
+            console.log(result2.stdout);
+            console.log("2 stderr:");
+            console.log(result2.stderr);
+        } catch (error) {
+            // console.error(error);
+            console.error("Failed to post policy subjects for url: ", url);
+            await this.logConfig();
+            throw error;
         }
     }
 
