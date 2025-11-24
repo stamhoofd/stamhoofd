@@ -45,8 +45,23 @@
                 </p>
                 <p class="style-description-small">
                     <template v-if="VATPercentage > 0">
-                        Incl. {{ VATPercentage }}% BTW
-                    </template>
+                        Excl. {{ VATPercentage }}% BTW -
+                    </template>Dit bedrag wordt achteraf aangerekend via jouw ingestelde betaalmethode.
+                </p>
+            </STListItem>
+
+            <STListItem v-if="totalServiceFeesPayout">
+                <h3 class="style-definition-label">
+                    Servicekosten via Stripe
+                </h3>
+
+                <p class="style-definition-text">
+                    {{ formatPrice(totalServiceFeesPayout) }}
+                </p>
+                <p class="style-description-small">
+                    <template v-if="VATPercentage > 0">
+                        Incl. {{ VATPercentage }}% BTW -
+                    </template>Dit bedrag wordt automatisch ingehouden van je uitbetalingen.
                 </p>
             </STListItem>
 
@@ -648,7 +663,20 @@ export default class PaymentExportView extends Mixins(NavigationMixin) {
 
         let total = 0
         for (const payment of this.payments) {
-            total += payment.serviceFeeManual + payment.serviceFeePayout
+            total += payment.serviceFeeManual
+        }
+        return total
+    }
+
+    get totalServiceFeesPayout() {
+        if (this.filterBalanceItems !== null) {
+            // Not possible atm
+            return 0
+        }
+
+        let total = 0
+        for (const payment of this.payments) {
+            total += payment.serviceFeePayout
         }
         return total
     }

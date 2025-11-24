@@ -138,7 +138,7 @@
                             {{ formatPrice(payment.serviceFeeManual) }}
                         </p>
                         <p class="style-description-small">
-                            Excl. BTW
+                            Excl. BTW - Dit bedrag wordt achteraf aangerekend via jouw ingestelde betaalmethode.
                         </p>
                     </STListItem>
                 </STList>

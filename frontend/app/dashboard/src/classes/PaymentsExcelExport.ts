@@ -34,7 +34,8 @@ export class PaymentsExcelExport {
                 "Betaald op",
                 "Bedrag",
                 "Transactiekosten",
-                "Servicekosten",
+                "Servicekosten achteraf aangerekend (excl. BTW)",
+                "Servicekosten ingehouden van uitbetaling (Stripe, incl. BTW)",
                 "Uitbetaald op",
                 "Uitbetalingsbedrag",
                 "Referentie",
@@ -120,7 +121,11 @@ export class PaymentsExcelExport {
                     format: "€0.00"
                 },
                 {
-                    value: (payment.serviceFeePayout + payment.serviceFeeManual) / 100,
+                    value: (payment.serviceFeeManual) / 100,
+                    format: "€0.00"
+                },
+                {
+                    value: (payment.serviceFeePayout) / 100,
                     format: "€0.00"
                 },
                 {
