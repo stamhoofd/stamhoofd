@@ -189,7 +189,7 @@ export class CaddyHelper {
 
         try {
             const result2 = await exec(
-                `curl -v -X POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
+                `curl -v POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
             );
             console.log("2 stdout:");
             console.log(result2.stdout);
