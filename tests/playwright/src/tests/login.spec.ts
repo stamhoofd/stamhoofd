@@ -1,7 +1,10 @@
-import { expect } from "@playwright/test";
-import type { Organization, User } from "@stamhoofd/models";
-import { PermissionLevel, Permissions } from "@stamhoofd/structures";
+// test should always be imported first
 import { test } from "../setup/fixtures";
+
+import { expect } from "@playwright/test";
+import { Organization, OrganizationFactory, Token, User, UserFactory } from "@stamhoofd/models";
+import { PermissionLevel, Permissions } from "@stamhoofd/structures";
+console.log(`login - top, TEST_WORKER_INDEX: ${process.env.TEST_WORKER_INDEX}, db: ${process.env.DB_DATABASE}`);
 
 // login
 test.describe("userMode organization", () => {
@@ -14,7 +17,6 @@ test.describe("userMode organization", () => {
 
     test.beforeAll(
         async ({
-            Models: { OrganizationFactory, UserFactory, Token },
             TestUtils,
         }) => {
             TestUtils.setPermanentEnvironment("userMode", "organization");
@@ -85,7 +87,6 @@ test.describe("userMode platform", () => {
 
     test.beforeAll(
         async ({
-            Models: { OrganizationFactory, UserFactory, Token },
             TestUtils,
         }) => {
             TestUtils.setPermanentEnvironment("userMode", "platform");

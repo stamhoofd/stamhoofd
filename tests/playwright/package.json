@@ -1,8 +1,7 @@
 {
   "name": "@stamhoofd/playwright",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
+  "private": true, 
   "scripts": {
     "test:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
     "test:playwright:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",

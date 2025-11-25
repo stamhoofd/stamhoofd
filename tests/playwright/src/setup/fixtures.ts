@@ -1,9 +1,8 @@
 import { test as base } from "@playwright/test";
-import type Models from "@stamhoofd/models";
-import { importModule } from "./helpers/importModule";
 import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
-import { setupWorker } from "./helpers/setupWorker";
 import { TestUtils } from "./helpers/TestUtils";
+import { WorkerHelper } from "./helpers/WorkerHelper";
+WorkerHelper.loadDatabaseEnvironment();
 
 export type StamhoofdUrls = {
     readonly api: string;
@@ -17,13 +16,12 @@ export const test = base.extend<
     {
         setup: { readonly TestUtils: TestUtils };
         urls: StamhoofdUrls;
-        Models: typeof Models;
     }
 >({
     // setup worker
     setup: [
         async ({}, use, workerInfo) => {
-            const { teardown } = await setupWorker(workerInfo);
+            const { teardown } = await WorkerHelper.startServices(workerInfo);
 
             // call TestUtils hooks before and after all tests
             const testUtils = new TestUtils(STAMHOOFD);
@@ -70,16 +68,6 @@ export const test = base.extend<
         },
         {
             auto: true,
-        },
-    ],
-    // import Models module (is dependent on worker environment)
-    Models: [
-        async ({}, use) => {
-            const models = (importModule("@stamhoofd/models")) as typeof Models;
-            await use(models);
-        },
-        {
-            scope: "worker",
         },
     ],
 });

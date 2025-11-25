@@ -1,5 +1,7 @@
-import { expect } from "@playwright/test";
+// test should always be imported first
 import { test } from "../setup/fixtures";
+
+import { expect } from "@playwright/test";
 
 // sign up
 test("happy flow", async ({ page, urls, TestUtils }) => {

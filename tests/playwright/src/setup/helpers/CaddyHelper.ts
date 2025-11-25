@@ -6,7 +6,7 @@ import { ProcessInfo } from "./ProcessInfo";
 const exec = promisify(execCallback);
 
 export class CaddyHelper {
-    private cadyUrl = "http://127.0.0.1:2019";
+    private cadyUrl = "http://localhost:2019";
     private serverName = "stamhoofd";
 
     async isRunning() {
@@ -16,23 +16,8 @@ export class CaddyHelper {
         return result.stdout.trim() === "true";
     }
 
-    private async diagnosticTest() {
-        // const result = await exec(`curl -v ${this.cadyUrl}/config`);
-        // console.log('1 stdout:')
-        // console.log(result.stdout);
-        // console.log('1 stderr:')
-        // console.log(result.stderr);
-        // const result2 = await exec(`curl -v -X PUT http://localhost:2019/config -d '{}'`);
-        // console.log('2 stdout:')
-        // console.log(result2.stdout);
-        // console.log('2 stderr:')
-        // console.log(result2.stderr);
-    }
-
     async start(defaultConfig: any) {
         // Start caddy
-
-        // todo: check if caddy is still running in worker
         const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
             "run",
         ]);
@@ -78,12 +63,6 @@ export class CaddyHelper {
         console.log("Start posting caddy config...");
         await this.postConfig(defaultConfig);
         console.log("Done posting caddy config.");
-
-        // if(1 === 1) {
-        //     // test
-        //     await this.diagnosticTest();
-        //     // throw new Error('Fail on purpose for test')
-        // }
     }
 
     async stop() {
@@ -124,32 +103,20 @@ export class CaddyHelper {
         const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes/${index}`;
 
         try {
-            const result2 = await exec(
-                `curl -v -X PUT ${url} -d '${JSON.stringify(route)}' -H "Content-Type: application/json"`,
-            );
-            console.log("2 stdout:");
-            console.log(result2.stdout);
-            console.log("2 stderr:");
-            console.log(result2.stderr);
-            // const res = await fetch(url, {
-            //     method: "PUT",
-            //     headers: { "Content-Type": "application/json" },
-            //     body: JSON.stringify(route),
-            // });
+            const res = await fetch(url, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(route),
+            });
 
-            // if (!res.ok) {
-            //     const text = await res.text();
-            //     throw new Error(
-            //         `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
-            //     );
-            // }
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(
+                    `Failed to put route at index ${index}: ${res.status} ${res.statusText} - ${text}`,
+                );
+            }
         } catch (error) {
-            // console.error(error);
-            console.error("Failed to put route for url: ", url);
-            this.diagnosticTest();
-            // console.error("route: ", JSON.stringify(route));
-            // console.error('Still running: ', await this.isRunning());
-            // await this.logConfig();
+            console.error(`Failed to put route at index ${index}. Url: ${url}`);
             throw error;
         }
     }
@@ -174,32 +141,17 @@ export class CaddyHelper {
     private async postPolicySubjects(policySubjects: string[]) {
         const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects/...`;
 
-        // const res = await fetch(url, {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify(policySubjects),
-        // });
+        const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(policySubjects),
+        });
 
-        // if (!res.ok) {
-        //     const text = await res.text();
-        //     throw new Error(
-        //         `Failed to post: ${res.status} ${res.statusText} - ${text}`,
-        //     );
-        // }
-
-        try {
-            const result2 = await exec(
-                `curl -v POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(
+                `Failed to post: ${res.status} ${res.statusText} - ${text}`,
             );
-            console.log("2 stdout:");
-            console.log(result2.stdout);
-            console.log("2 stderr:");
-            console.log(result2.stderr);
-        } catch (error) {
-            // console.error(error);
-            console.error("Failed to post policy subjects for url: ", url);
-            await this.logConfig();
-            throw error;
         }
     }
 

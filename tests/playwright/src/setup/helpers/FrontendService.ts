@@ -3,7 +3,6 @@ import { resolve } from "node:path";
 import { NetworkHelper } from "./NetworkHelper";
 import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
 import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
-import { getCurrentDir } from "./getCurrentDir";
 
 export type FrontendProjectName = "dashboard" | "registration" | "webshop";
 
@@ -81,12 +80,12 @@ export class FrontendService implements ServiceHelper {
         const pathFromRoot = "frontend/app";
         const distFolder = "dist-playwright";
         const sourcePath = `${thisDirectoryToRoot}/${pathFromRoot}/${this.name}/${distFolder}`;
-        return resolve(getCurrentDir(import.meta), sourcePath);
+        return resolve(__dirname, sourcePath);
     }
 
     private getDestinationDistPath(workerId: string) {
         return resolve(
-            getCurrentDir(import.meta),
+            __dirname,
             `../../../dist/${this.name}/${workerId}`,
         );
     }
