@@ -5,7 +5,12 @@ export function build(): any {
         throw new Error('PLAYWRIGHT_WORKER_ID is not set');
     }
 
+    if (process.env.PORT === undefined) {
+        throw new Error('PORT is not set');
+    }
+
     const config = {
+        PORT: process.env.PORT,
         domains: {
             dashboard: `playwright-dashboard-${playwrightWorkerId}.stamhoofd`,
             registration: {
@@ -34,10 +39,6 @@ export function build(): any {
         DB_PASS: 'root',
         DB_DATABASE: `stamhoofd-playwright-${playwrightWorkerId}`,
     };
-
-    if (process.env.PORT) {
-        (config as any).PORT = process.env.PORT;
-    }
 
     return config;
 }

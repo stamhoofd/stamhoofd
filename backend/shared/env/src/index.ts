@@ -17,28 +17,33 @@ async function load(settings?: { path?: string; service?: 'redirecter' | 'api' |
 
     const isLocalPlaywrightTest = process.env.STAMHOOFD_ENV === 'playwright' && process.env.NODE_ENV === 'test';
 
-    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test' && !isLocalPlaywrightTest) {
+    if (!isLocalPlaywrightTest) {
+        if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
         // Force load the cjs version of test-utils because the esm version gives issues with the json environment
-        const builder = await import('@stamhoofd/test-utils');
-        await builder.TestUtils.loadEnvironment();
-        env = STAMHOOFD;
-    }
-    else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development' || isLocalPlaywrightTest) && process.env.STAMHOOFD_ENV) {
-        const builder = await import('@stamhoofd/build-development-env');
-        env = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
-            backend: settings?.service ?? 'api',
-        });
-
-        if (await fileExists(settings?.path ?? '.env.json')) {
-            console.warn(chalk.red('Warning: please delete your local .env.json file, as it is not used in development any longer.'));
+            const builder = await import('@stamhoofd/test-utils');
+            await builder.TestUtils.loadEnvironment();
+            env = STAMHOOFD;
         }
+        else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
+            const builder = await import('@stamhoofd/build-development-env');
+            env = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+                backend: settings?.service ?? 'api',
+            });
+
+            if (await fileExists(settings?.path ?? '.env.json')) {
+                console.warn(chalk.red('Warning: please delete your local .env.json file, as it is not used in development any longer.'));
+            }
+        }
+        else {
+            env = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
+        }
+
+        // Read environment from file: .env.json
+        (global as any).STAMHOOFD = env;
     }
     else {
-        env = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
+        console.log('Skipping building environment for playwright tests');
     }
-
-    // Read environment from file: .env.json
-    (global as any).STAMHOOFD = env;
 
     // Mapping out environment for dependencies that need environment variables
     process.env.NODE_ENV = STAMHOOFD.environment === 'production' ? 'production' : 'development';

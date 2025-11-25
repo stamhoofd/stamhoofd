@@ -8,7 +8,7 @@ export default async function globalSetup() {
             "Global setup should not run if not in test environment",
         );
     }
-
+    
     const frontendBuilder = new FrontendBuilder();
     const caddyHelper = new CaddyHelper();
 
@@ -17,9 +17,11 @@ export default async function globalSetup() {
             // make sure all caddy configuration for playwrigth is deleted
             await PlaywrightCaddyConfigHelper.clear(caddyHelper);
         } else {
-            console.log('Starting caddy...');
-            await caddyHelper.start(PlaywrightCaddyConfigHelper.createDefault());
-            console.log('Caddy started.');
+            console.log("Starting caddy...");
+            await caddyHelper.start(
+                PlaywrightCaddyConfigHelper.createDefault(),
+            );
+            console.log("Caddy started.");
         }
     };
 

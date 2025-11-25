@@ -1,6 +1,5 @@
 import { resolve } from "node:path";
 import { CaddyHelper } from "./CaddyHelper";
-import { getCurrentDir } from "./getCurrentDir";
 
 /**
  * Helper to create caddy configuration for playwright
@@ -112,7 +111,7 @@ export class PlaywrightCaddyConfigHelper {
         const defaultRoute = this.createFrontendRoute({
             domains: [defaultDomain],
             root: resolve(
-                getCurrentDir(import.meta),
+                __dirname,
                 `../../../dist/${service}/${workerId}`,
             ),
             group: this.getGroup(service, workerId),

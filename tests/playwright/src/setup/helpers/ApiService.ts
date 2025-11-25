@@ -1,18 +1,11 @@
-import getPort from "get-port";
 import { NetworkHelper } from "./NetworkHelper";
 import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
 import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
+import { WorkerHelper } from "./WorkerHelper";
 import { importModule } from "./importModule";
 
 export class ApiService implements ServiceHelper {
     constructor(private workerId: string) {}
-
-    getCaddyRoutes(): any[] {
-        throw new Error("Method not implemented.");
-    }
-    getDomains(): string[] {
-        throw new Error("Method not implemented.");
-    }
 
     async start(): Promise<ServiceProcess> {
         const group = `${PlaywrightCaddyConfigHelper.GROUP_PREFIX}-api-${this.workerId}`;
@@ -20,18 +13,14 @@ export class ApiService implements ServiceHelper {
             "api",
             this.workerId,
         );
-        const port = await getPort();
 
-        console.log(
-            `Starting backend server with id ${this.workerId} on port ${port}...`,
-        );
-
-        await this.startApi(port);
+        // start api
+        await importModule("@stamhoofd/backend");
 
         return {
             caddyConfig: {
                 domains: [domain, "*." + domain],
-                routes: this.createRoutes({ domain, port, group }),
+                routes: this.createRoutes({ domain, group }),
             },
             wait: async () => {
                 await NetworkHelper.waitForUrl(
@@ -45,29 +34,14 @@ export class ApiService implements ServiceHelper {
         };
     }
 
-    private async startApi(port: number) {
-        // set environment
-        Object.entries({
-            NODE_ENV: "test",
-            STAMHOOFD_ENV: "playwright",
-            PORT: port.toString(),
-            PLAYWRIGHT_WORKER_ID: this.workerId,
-        }).forEach(([key, value]) => {
-            process.env[key] = value;
-        });
-
-        await importModule("@stamhoofd/backend");
-    }
-
     private createRoutes({
         domain,
-        port,
         group,
     }: {
         domain: string;
-        port: number;
         group: string;
     }) {
+        
         return [
             {
                 group,
@@ -81,7 +55,7 @@ export class ApiService implements ServiceHelper {
                         handler: "reverse_proxy",
                         upstreams: [
                             {
-                                dial: `127.0.0.1:${port}`,
+                                dial: `127.0.0.1:${WorkerHelper.port}`,
                             },
                         ],
                         headers: {
