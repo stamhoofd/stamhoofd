@@ -3,13 +3,12 @@ import { test } from "../setup/fixtures";
 
 import { expect } from "@playwright/test";
 import { TestUtils } from "@stamhoofd/test-utils";
-import { WorkerData } from "../setup/helpers/WorkerData";
 
 // sign up
-test("happy flow", async ({ page }) => {
+test("happy flow", async ({ page, dashboard }) => {
     TestUtils.setPermanentEnvironment("userMode", "organization");
 
-    await page.goto(WorkerData.urls.dashboard);
+    await dashboard.goto();
 
     // click signup
     await page.getByTestId("signup-link").click();
