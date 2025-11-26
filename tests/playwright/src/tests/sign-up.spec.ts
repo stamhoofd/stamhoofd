@@ -3,16 +3,6 @@ import { test } from "../setup/fixtures";
 
 import { expect } from "@playwright/test";
 import { TestUtils } from "@stamhoofd/test-utils";
-import { WorkerHelper } from "../setup/helpers/WorkerHelper";
-
-// test.beforeAll(async () => {
-//     WorkerHelper.setupTestFile();
-// })
-
-if (process.env.TEST_WORKER_INDEX === undefined) {
-    console.log('setup test file')
-    WorkerHelper.setupTestFile();
-}
 
 // sign up
 test("happy flow", async ({ page, urls }) => {

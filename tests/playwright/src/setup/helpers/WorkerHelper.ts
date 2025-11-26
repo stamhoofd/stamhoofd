@@ -12,10 +12,6 @@ class WorkerHelperInstance {
     private readonly ENVIRONMENTE_NAME = "playwright";
     private _isInitialized = false;
     private _didLoadDatabaseEnvironment = false;
-    private _resolve?: () => void;
-    private _promise = new Promise<void>((resolve) => {
-        this._resolve = resolve;
-    });
 
     get workerId() {
         return process.env.TEST_WORKER_INDEX;
@@ -156,19 +152,10 @@ class WorkerHelperInstance {
         });
     }
 
-    async setupTestFile() {
-        // if(!this.isWorker) {
-        // await this._promise;
-        TestUtils.globalSetup(PlaywrightTestUtilsHelper);
-        TestUtils.setup();
-        console.log("finished setup test file");
-        // }
-    }
-
     private async setupTestUtils() {
         PlaywrightTestUtilsHelper.setDefaultEnvironment(STAMHOOFD);
         TestUtils.globalSetup(PlaywrightTestUtilsHelper);
-        this._resolve!();
+        TestUtils.setup();
     }
 }
 

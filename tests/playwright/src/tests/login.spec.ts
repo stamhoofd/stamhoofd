@@ -5,17 +5,7 @@ import { expect } from "@playwright/test";
 import { Organization, OrganizationFactory, Token, User, UserFactory } from "@stamhoofd/models";
 import { PermissionLevel, Permissions } from "@stamhoofd/structures";
 import { TestUtils } from "@stamhoofd/test-utils";
-
-// test.beforeAll(async () => {
-//     WorkerHelper.setupTestFile();
-// })
-
-
-console.log('add after each')
-TestUtils.addAfterEach(() => {
-    'after each - inside'
-})
-
+            
 // login
 test.describe("userMode organization", () => {
     let organization: Organization;

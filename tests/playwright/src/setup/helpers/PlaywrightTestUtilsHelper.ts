@@ -1,16 +1,7 @@
-import { test } from "@playwright/test";
 import { TestHelper } from "@stamhoofd/test-utils";
 
 export class PlaywrightTestUtilsHelperInstance implements TestHelper {
     private environment: string | null = null;
-    private _test: typeof test | null = null;
-
-    private get base() {
-        if (this._test === null) {
-            throw new Error("Test not set.");
-        }
-        return this._test;
-    }
 
     setDefaultEnvironment(environment: typeof STAMHOOFD) {
         this.environment = JSON.stringify(environment);
@@ -22,10 +13,6 @@ export class PlaywrightTestUtilsHelperInstance implements TestHelper {
     ): void {
         STAMHOOFD.EXPOSE_FRONTEND_ENVIRONMENT[value] =
             newValue as FrontendEnvironment[Key];
-    }
-
-    setTest(value: typeof test) {
-        this._test = value;
     }
 
     async loadEnvironment(): Promise<void> {
@@ -46,20 +33,56 @@ export class PlaywrightTestUtilsHelperInstance implements TestHelper {
         (globalObject as any).STAMHOOFD = JSON.parse(this.environment);
     }
 
+    private beforeAllCallback: (() => void | Promise<void>) | null = null;
     beforeAll(callback: () => void | Promise<void>) {
-        this.base.beforeAll(callback);
+        this.beforeAllCallback = callback;
     }
 
-    beforeEach(callback: () => void | Promise<void>) {
-        this.base.beforeEach(callback);
+    async executeBeforeAll() {
+        if (this.beforeAllCallback !== null) {
+            await this.beforeAllCallback();
+        } else {
+            console.warn("No beforeAll callback set.");
+        }
     }
 
-    afterEach(callback: () => void | Promise<void>) {
-        this.base.afterEach(callback);
-    }
-
+    private afterAllCallback: (() => void | Promise<void>) | null = null;
     afterAll(callback: () => void | Promise<void>) {
-        this.base.afterAll(callback);
+        this.afterAllCallback = callback;
+    }
+
+    async executeAfterAll() {
+        if (this.afterAllCallback !== null) {
+            await this.afterAllCallback();
+        } else {
+            console.warn("No afterAll callback set.");
+        }
+    }
+
+    private beforeEachCallback: (() => void | Promise<void>) | null = null;
+    beforeEach(callback: () => void | Promise<void>) {
+        this.beforeEachCallback = callback;
+    }
+
+    async executeBeforeEach() {
+        if (this.beforeEachCallback !== null) {
+            await this.beforeEachCallback();
+        } else {
+            console.warn("No beforeEach callback set.");
+        }
+    }
+
+    private afterEachCallback: (() => void | Promise<void>) | null = null;
+    afterEach(callback: () => void | Promise<void>) {
+        this.afterEachCallback = callback;
+    }
+
+    async executeAfterEach() {
+        if (this.afterEachCallback !== null) {
+            await this.afterEachCallback();
+        } else {
+            console.warn("No afterEach callback set.");
+        }
     }
 }
 
