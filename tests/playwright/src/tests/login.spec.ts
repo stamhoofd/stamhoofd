@@ -5,6 +5,7 @@ import { expect } from "@playwright/test";
 import { Organization, OrganizationFactory, Token, User, UserFactory } from "@stamhoofd/models";
 import { PermissionLevel, Permissions } from "@stamhoofd/structures";
 import { TestUtils } from "@stamhoofd/test-utils";
+import { WorkerData } from "../setup/helpers/WorkerData";
             
 // login
 test.describe("userMode organization", () => {
@@ -38,8 +39,8 @@ test.describe("userMode organization", () => {
         },
     );
 
-    test("happy flow", async ({ page, urls }) => {
-        await page.goto(urls.dashboard);
+    test("happy flow", async ({ page }) => {
+        await page.goto(WorkerData.urls.dashboard);
 
         // click search input and fill in organization name
         const searchInput = page.getByTestId("organization-search-input");
@@ -106,8 +107,8 @@ test.describe("userMode platform", () => {
         },
     );
 
-    test("happy flow", async ({ page, urls }) => {
-        await page.goto(urls.dashboard);
+    test("happy flow", async ({ page }) => {
+        await page.goto(WorkerData.urls.dashboard);
 
         // fill in email
         const emailInput = page.getByTestId("email-input");

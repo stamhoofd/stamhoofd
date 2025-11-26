@@ -1,16 +1,7 @@
 import { test as base } from "@playwright/test";
-import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
 import { PlaywrightTestUtilsHelper } from "./helpers/PlaywrightTestUtilsHelper";
 import { WorkerHelper } from "./helpers/WorkerHelper";
 WorkerHelper.loadDatabaseEnvironment();
-
-
-export type StamhoofdUrls = {
-    readonly api: string;
-    readonly dashboard: string;
-    readonly webshop: string;
-    readonly registration: string;
-};
 
 export const test = base.extend<
     {
@@ -18,7 +9,6 @@ export const test = base.extend<
     },
     {
         setup: void;
-        urls: StamhoofdUrls;
     }
 >({
     // setup worker
@@ -51,31 +41,5 @@ export const test = base.extend<
             scope: "test",
             auto: true,
         },
-    ],
-    // todo: move to WorkerHelper?
-    // urls to use in tests (dependent on worker id)
-    urls: [
-        async ({}, use, workerInfo) => {
-            const workerId = workerInfo.workerIndex.toString();
-
-            await use({
-                api: PlaywrightCaddyConfigHelper.getUrl("api", workerId),
-                dashboard: PlaywrightCaddyConfigHelper.getUrl(
-                    "dashboard",
-                    workerId,
-                ),
-                webshop: PlaywrightCaddyConfigHelper.getUrl(
-                    "webshop",
-                    workerId,
-                ),
-                registration: PlaywrightCaddyConfigHelper.getUrl(
-                    "registration",
-                    workerId,
-                ),
-            });
-        },
-        {
-            scope: "worker",
-        },
-    ],
+    ]
 });

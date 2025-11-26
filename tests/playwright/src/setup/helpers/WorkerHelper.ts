@@ -7,15 +7,12 @@ import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendProjectName, FrontendService } from "./FrontendService";
 import { PlaywrightTestUtilsHelper } from "./PlaywrightTestUtilsHelper";
+import { WorkerData } from "./WorkerData";
 
 class WorkerHelperInstance {
     private readonly ENVIRONMENTE_NAME = "playwright";
-    private _isInitialized = false;
-    private _didLoadDatabaseEnvironment = false;
-
-    get workerId() {
-        return process.env.TEST_WORKER_INDEX;
-    }
+    private isInitialized = false;
+    private didLoadDatabaseEnvironment = false;
 
     get port() {
         const result = process.env.PORT;
@@ -25,26 +22,22 @@ class WorkerHelperInstance {
         return result;
     }
 
-    get isWorker() {
-        return this.workerId !== undefined;
-    }
-
     /**
      * The database environment should be loaded once before importing dependent modules such as @stamhoofd/models
      */
     loadDatabaseEnvironment() {
-        if (this._didLoadDatabaseEnvironment) {
+        if (this.didLoadDatabaseEnvironment) {
             throw new Error("Database environment already loaded");
         }
         Object.entries({
             DB_HOST: "127.0.0.1",
             DB_USER: "root",
             DB_PASS: "root",
-            DB_DATABASE: `stamhoofd-playwright-${this.workerId}`,
+            DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
         }).forEach(([key, value]) => {
             process.env[key] = value;
         });
-        this._didLoadDatabaseEnvironment = true;
+        this.didLoadDatabaseEnvironment = true;
     }
 
     /**
@@ -101,22 +94,22 @@ class WorkerHelperInstance {
     }
 
     private async loadEnvironment() {
-        if (this._isInitialized) {
+        if (this.isInitialized) {
             throw new Error("Already initialized");
         }
 
-        if (!this._didLoadDatabaseEnvironment) {
+        if (!this.didLoadDatabaseEnvironment) {
             throw new Error(
                 "Database environment not loaded. The database environment should be loaded before importing dependent modules such as @stamhoofd/models",
             );
         }
 
-        if (this.isWorker) {
+        if (WorkerData.isInWorkerProcess) {
             // set environment variables
             Object.entries({
                 NODE_ENV: "test",
                 STAMHOOFD_ENV: "playwright",
-                PLAYWRIGHT_WORKER_ID: this.workerId,
+                PLAYWRIGHT_WORKER_ID: WorkerData.id,
             }).forEach(([key, value]) => {
                 process.env[key] = value;
             });
@@ -124,7 +117,7 @@ class WorkerHelperInstance {
             await this.setPort();
             await this.loadEnvironmentForServices();
             await this.setupTestUtils();
-            this._isInitialized = true;
+            this.isInitialized = true;
         }
     }
 
