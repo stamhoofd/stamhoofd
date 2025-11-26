@@ -1,5 +1,28 @@
 import { TestHelper } from "@stamhoofd/test-utils";
 
+/**
+ * Custom implementation of TestHelper methods. This helper gets injected in TestUtils.
+ *
+ * HOOKS
+ * Problem:
+ * The test hooks (beforeAll, afterAll, beforeEach, afterEach) can only be called in a test file. This should require the TestUtils to be setup in each test file which is code repitition and extra complexity. Also this throws errors because of the way Playwright works.
+ *
+ * Solution:
+ * An alternative approach (according to oficial documentation) is to execute a function in the fixtures. Therefore this class is used as a workaround. The execute methods are automatically called on the right moment in the fixtures (before all and after all in a worker scoped fixture, before each and after each in a test scoped fixture).
+ *
+ * ENVIRONMENT
+ * Problem 1:
+ * The environment depends on the worker index, therefore the environment cannot be read from a file.
+ *
+ * Solution 1:
+ * The environment is set in the PlaywrightTestUtilsHelperInstance after the environment is loaded. Now this default environment is loaded every time the environment is loaded.
+ *
+ * Problem 2:
+ * The frontend environment is exposed and has to be set also. TestUtils only sets the shared environment on STAMHOOFD.
+ *
+ * Solution 2:
+ * With the afterSetEnvironment hook the exposed frontend environment will be set also.
+ */
 export class PlaywrightTestUtilsHelperInstance implements TestHelper {
     private environment: string | null = null;
 
