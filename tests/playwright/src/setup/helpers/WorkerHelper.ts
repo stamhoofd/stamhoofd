@@ -1,15 +1,21 @@
 import { WorkerInfo } from "@playwright/test";
 import { build } from "@stamhoofd/build-development-env";
+import { TestUtils } from "@stamhoofd/test-utils";
 import getPort from "get-port";
 import { ApiService } from "./ApiService";
 import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendProjectName, FrontendService } from "./FrontendService";
+import { PlaywrightTestUtilsHelper } from "./PlaywrightTestUtilsHelper";
 
 class WorkerHelperInstance {
     private readonly ENVIRONMENTE_NAME = "playwright";
     private _isInitialized = false;
     private _didLoadDatabaseEnvironment = false;
+    private _resolve?: () => void;
+    private _promise = new Promise<void>((resolve) => {
+        this._resolve = resolve;
+    });
 
     get workerId() {
         return process.env.TEST_WORKER_INDEX;
@@ -31,7 +37,7 @@ class WorkerHelperInstance {
      * The database environment should be loaded once before importing dependent modules such as @stamhoofd/models
      */
     loadDatabaseEnvironment() {
-        if(this._didLoadDatabaseEnvironment) {
+        if (this._didLoadDatabaseEnvironment) {
             throw new Error("Database environment already loaded");
         }
         Object.entries({
@@ -47,8 +53,8 @@ class WorkerHelperInstance {
 
     /**
      * Start all the services that are needed for the tests.
-     * @param workerInfo 
-     * @returns 
+     * @param workerInfo
+     * @returns
      */
     async startServices(workerInfo: WorkerInfo) {
         await this.loadEnvironment();
@@ -103,8 +109,10 @@ class WorkerHelperInstance {
             throw new Error("Already initialized");
         }
 
-        if(!this._didLoadDatabaseEnvironment) {
-            throw new Error("Database environment not loaded. The database environment should be loaded before importing dependent modules such as @stamhoofd/models");
+        if (!this._didLoadDatabaseEnvironment) {
+            throw new Error(
+                "Database environment not loaded. The database environment should be loaded before importing dependent modules such as @stamhoofd/models",
+            );
         }
 
         if (this.isWorker) {
@@ -148,8 +156,19 @@ class WorkerHelperInstance {
         });
     }
 
+    async setupTestFile() {
+        // if(!this.isWorker) {
+        // await this._promise;
+        TestUtils.globalSetup(PlaywrightTestUtilsHelper);
+        TestUtils.setup();
+        console.log("finished setup test file");
+        // }
+    }
+
     private async setupTestUtils() {
-        // todo
+        PlaywrightTestUtilsHelper.setDefaultEnvironment(STAMHOOFD);
+        TestUtils.globalSetup(PlaywrightTestUtilsHelper);
+        this._resolve!();
     }
 }
 

@@ -4,7 +4,17 @@ import { test } from "../setup/fixtures";
 import { expect } from "@playwright/test";
 import { Organization, OrganizationFactory, Token, User, UserFactory } from "@stamhoofd/models";
 import { PermissionLevel, Permissions } from "@stamhoofd/structures";
-console.log(`login - top, TEST_WORKER_INDEX: ${process.env.TEST_WORKER_INDEX}, db: ${process.env.DB_DATABASE}`);
+import { TestUtils } from "@stamhoofd/test-utils";
+
+// test.beforeAll(async () => {
+//     WorkerHelper.setupTestFile();
+// })
+
+
+console.log('add after each')
+TestUtils.addAfterEach(() => {
+    'after each - inside'
+})
 
 // login
 test.describe("userMode organization", () => {
@@ -16,9 +26,7 @@ test.describe("userMode organization", () => {
     const password = "testAbc123456";
 
     test.beforeAll(
-        async ({
-            TestUtils,
-        }) => {
+        async () => {
             TestUtils.setPermanentEnvironment("userMode", "organization");
 
             organization = await new OrganizationFactory({
@@ -86,9 +94,7 @@ test.describe("userMode platform", () => {
     const password = "testAbc123456";
 
     test.beforeAll(
-        async ({
-            TestUtils,
-        }) => {
+        async () => {
             TestUtils.setPermanentEnvironment("userMode", "platform");
 
             organization = await new OrganizationFactory({
