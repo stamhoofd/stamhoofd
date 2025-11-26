@@ -286,10 +286,10 @@ jobs:
         echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
     - name: Run coredns
       run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile &
-    - name: Test DNS
-      run: nslookup github.com
     - name: Use local DNS
       run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
+    - name: Test DNS
+      run: nslookup github.com
     - name: Install dependencies
       run: yarn install --prefer-offline --frozen-lockfile
     - name: Cache Caddy

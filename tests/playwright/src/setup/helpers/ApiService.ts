@@ -23,9 +23,15 @@ export class ApiService implements ServiceHelper {
                 routes: this.createRoutes({ domain, group }),
             },
             wait: async () => {
+                // temporary test
                 await NetworkHelper.waitForUrl(
-                    "http://" + domain + "/organizations/search",
+                    "http://127.0.0.1:" +
+                        WorkerHelper.port +
+                        "/organizations/search",
                 );
+                // await NetworkHelper.waitForUrl(
+                //     "http://" + domain + "/organizations/search",
+                // );
                 console.log("Backend server ready");
             },
             kill: async () => {
@@ -34,14 +40,7 @@ export class ApiService implements ServiceHelper {
         };
     }
 
-    private createRoutes({
-        domain,
-        group,
-    }: {
-        domain: string;
-        group: string;
-    }) {
-        
+    private createRoutes({ domain, group }: { domain: string; group: string }) {
         return [
             {
                 group,
