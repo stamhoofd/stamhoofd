@@ -1,4 +1,5 @@
-import { loadEnvironment } from './src/loadEnvironment.js';
+import { JestHelper } from './src/JestHelper.js';
+import { TestHelper } from './src/TestHelper.js';
 
 type AfterCallback = () => void | Promise<void>;
 class TestInstance {
@@ -9,8 +10,11 @@ class TestInstance {
 
     permanentEnvironmentOverrides: Record<string, any> = {};
 
+    private testHelper: TestHelper = new JestHelper();
+
     setEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
-        (STAMHOOFD as any)[value] = newValue;
+        STAMHOOFD[value] = newValue as (typeof STAMHOOFD)[Key];
+        this.testHelper.afterSetEnvironment?.(value, newValue);
     }
 
     setPermanentEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
@@ -72,7 +76,7 @@ class TestInstance {
 
     async loadEnvironment() {
         // Clear env
-        await loadEnvironment();
+        await this.testHelper.loadEnvironment();
 
         // Reset permanent environment overrides
         for (const key in this.permanentEnvironmentOverrides) {
@@ -84,20 +88,20 @@ class TestInstance {
      * Run this in each jest.setup.ts file
      */
     setup() {
-        beforeAll(async () => {
+        this.testHelper.beforeAll(async () => {
             await this.loadEnvironment();
             await this.beforeAll();
         });
 
-        beforeEach(async () => {
+        this.testHelper.beforeEach(async () => {
             await this.beforeEach();
         });
 
-        afterEach(async () => {
+        this.testHelper.afterEach(async () => {
             await this.afterEach();
         });
 
-        afterAll(async () => {
+        this.testHelper.afterAll(async () => {
             await this.afterAll();
         });
     }
@@ -105,12 +109,17 @@ class TestInstance {
     /**
      * Run this in each jest.global.setup.ts file
      */
-    async globalSetup() {
+    async globalSetup(testHelper?: TestHelper) {
+        if (testHelper) {
+            this.testHelper = testHelper;
+        }
         await this.loadEnvironment();
     }
 }
 
 export const TestUtils: TestInstance = new TestInstance();
+
+export * from './src/TestHelper.js';
 
 export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,

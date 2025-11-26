@@ -1,6 +1,6 @@
 import { test as base } from "@playwright/test";
 import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
-import { TestUtils } from "./helpers/TestUtils";
+import { PlaywrightTestUtilsHelper } from "./helpers/PlaywrightTestUtilsHelper";
 import { WorkerHelper } from "./helpers/WorkerHelper";
 WorkerHelper.loadDatabaseEnvironment();
 
@@ -12,9 +12,9 @@ export type StamhoofdUrls = {
 };
 
 export const test = base.extend<
-    { TestUtils: TestUtils },
+    {},
     {
-        setup: { readonly TestUtils: TestUtils };
+        setup: void;
         urls: StamhoofdUrls;
     }
 >({
@@ -23,15 +23,8 @@ export const test = base.extend<
         async ({}, use, workerInfo) => {
             const { teardown } = await WorkerHelper.startServices(workerInfo);
 
-            // call TestUtils hooks before and after all tests
-            const testUtils = new TestUtils(STAMHOOFD);
-
-            await testUtils.beforeAll();
-
             // run all tests for worker
-            await use({ TestUtils: testUtils });
-
-            await testUtils.afterAll();
+            await use();
 
             await teardown();
         },
@@ -41,6 +34,7 @@ export const test = base.extend<
             auto: true,
         },
     ],
+    // todo: move to WorkerHelper?
     // urls to use in tests (dependent on worker id)
     urls: [
         async ({}, use, workerInfo) => {
@@ -48,26 +42,26 @@ export const test = base.extend<
 
             await use({
                 api: PlaywrightCaddyConfigHelper.getUrl("api", workerId),
-                dashboard: PlaywrightCaddyConfigHelper.getUrl("dashboard", workerId),
-                webshop: PlaywrightCaddyConfigHelper.getUrl("webshop", workerId),
-                registration: PlaywrightCaddyConfigHelper.getUrl("registration", workerId),
+                dashboard: PlaywrightCaddyConfigHelper.getUrl(
+                    "dashboard",
+                    workerId,
+                ),
+                webshop: PlaywrightCaddyConfigHelper.getUrl(
+                    "webshop",
+                    workerId,
+                ),
+                registration: PlaywrightCaddyConfigHelper.getUrl(
+                    "registration",
+                    workerId,
+                ),
             });
         },
         {
             scope: "worker",
         },
     ],
-    // call TestUtils hooks before and after each test
-    TestUtils: [
-        async ({ setup: { TestUtils } }, use) => {
-            TestUtils.beforeEach();
-
-            await use(TestUtils);
-
-            await TestUtils.afterEach();
-        },
-        {
-            auto: true,
-        },
-    ],
 });
+
+// console.log('set test')
+// // the extended test has to be set to the test utils helper (because the hooks have to be called on this test instance)
+PlaywrightTestUtilsHelper.setTest(test);
