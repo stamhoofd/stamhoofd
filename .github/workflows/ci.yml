@@ -259,31 +259,6 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'yarn'
-    - name: Restore CoreDNS cache
-      id: cache-coredns
-      uses: actions/cache@v3
-      with:
-        path: .coredns
-        key: coredns-v1.13.1
-        restore-keys: coredns-
-    - name: Install CoreDNS
-      if: steps.cache-coredns.outputs.cache-hit != 'true'
-      run: |
-        mkdir -p .coredns
-        curl -L -o .coredns/coredns.tgz \
-        https://github.com/coredns/coredns/releases/download/v1.13.1/coredns_1.13.1_linux_amd64.tgz
-        tar -xzf .coredns/coredns.tgz -C .coredns
-        chmod +x .coredns/coredns
-    - name: Add CoreDNS to PATH
-      run: echo "${GITHUB_WORKSPACE}/.coredns" >> $GITHUB_PATH
-    - name: Check CoreDNS version
-      run: coredns -version
-    - name: Run coredns
-      run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile &
-    - name: Configure resolver to use port 1053
-      run: echo "export RES_OPTIONS='port=1053'" >> $GITHUB_ENV
-    - name: Use local DNS
-      run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
     - name: Install dependencies
       run: yarn install --prefer-offline --frozen-lockfile
     - name: Cache Caddy
@@ -321,9 +296,15 @@ jobs:
         mysql version: '8.0'
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
+    - name: Set custom DNS
+      run: |
+        echo "nameserver 178.128.249.69" | sudo tee /etc/resolv.conf
+        cat /etc/resolv.conf
+    - name: Test DNS
+      run: nslookup github.com
+    - name: Give Caddy permissions to bind to privileged ports
+      run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
     - name: Run Playwright tests
-      env:
-        RES_OPTIONS: "port=1053"
       run: yarn test:playwright
     - name: Notify Slack of failure
       uses: slackapi/slack-github-action@v2.0.0
