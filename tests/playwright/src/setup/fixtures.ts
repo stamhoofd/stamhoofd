@@ -1,4 +1,5 @@
 import { test as base } from "@playwright/test";
+import { DashboardPage } from "./helpers/DashboardPage";
 import { PlaywrightTestUtilsHelper } from "./helpers/PlaywrightTestUtilsHelper";
 import { WorkerHelper } from "./helpers/WorkerHelper";
 WorkerHelper.loadDatabaseEnvironment();
@@ -6,6 +7,7 @@ WorkerHelper.loadDatabaseEnvironment();
 export const test = base.extend<
     {
         forEach: void;
+        dashboard: DashboardPage;
     },
     {
         setup: void;
@@ -41,5 +43,14 @@ export const test = base.extend<
             scope: "test",
             auto: true,
         },
-    ]
+    ],
+    // create dashboard page
+    dashboard: [
+        async ({ page }, use) => {
+            await use(new DashboardPage(page));
+        },
+        {
+            scope: "test",
+        },
+    ],
 });
