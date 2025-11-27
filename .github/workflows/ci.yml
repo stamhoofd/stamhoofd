@@ -334,14 +334,7 @@ jobs:
       run: caddy version
     - name: Caddy trust
       run: caddy start && caddy trust && caddy stop
-    - name: Cache Playwright Browsers
-      id: cache-playwright
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/ms-playwright
-        key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
     - name: Install Playwright Browsers
-      if: steps.cache-playwright.outputs.cache-hit != 'true'
       run: yarn playwright install --with-deps
     - name: Build shared packages
       run: yarn build:shared
