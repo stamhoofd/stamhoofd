@@ -27,12 +27,12 @@
                                     <span class="icon help" />
                                 </button>
                             </template>
-                            <input id="password" v-model="password" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`e2cec378-4ed6-40c1-bc1b-ca93718bacf1`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
+                            <input id="password" v-model="password" data-testid="password-input" :autofocus="!!initialEmail" enterkeyhint="go" class="input" name="current-password" autocomplete="current-password" type="password" :placeholder="$t(`e2cec378-4ed6-40c1-bc1b-ca93718bacf1`)" @input="(event: any) => password = event.target.value" @change="(event: any) => password = event.target.value">
                         </STInputBox>
                         <VersionFooter v-if="showVersionFooter" />
                         <div v-else class="style-form-buttons ">
                             <LoadingButton :loading="loading" class="block">
-                                <button id="submit" class="button primary full" type="submit">
+                                <button id="submit" class="button primary full" type="submit" data-testid="login-button">
                                     <span class="lock icon" />
                                     <span>{{ $t('1627a32a-56b8-4c74-8715-b885c1795af6') }}</span>
                                 </button>

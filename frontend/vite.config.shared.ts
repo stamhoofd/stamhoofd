@@ -3,10 +3,10 @@ import fs from 'fs';
 import path, { resolve } from 'path';
 import viteSvgToWebfont from 'vite-svg-2-webfont';
 
+import postcssDiscardDulicates from 'postcss-discard-duplicates';
 import { type ViteUserConfig } from 'vitest/config';
 import iconConfig from './shared/assets/images/icons/icons.font';
 import svgNamespacePlugin from './svgNamespacePlugin';
-import postcssDiscardDulicates from 'postcss-discard-duplicates';
 
 // https://vitejs.dev/config/
 export async function buildConfig(options: { name: 'dashboard' | 'registration' | 'webshop' | 'calculator'; port: number; clientFiles?: string[] }): Promise<ViteUserConfig> {
@@ -14,56 +14,61 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
         console.log('Building for production...');
     }
 
-    let loadedEnv: FrontendEnvironment | undefined = undefined;
-
-    if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
-        // Force load the cjs version of test-utils because the esm version gives issues with the json environment
-        const builder = await import('@stamhoofd/test-utils/cjs');
-        await builder.TestUtils.loadEnvironment();
-        loadedEnv = STAMHOOFD;
-    }
-    else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-        console.log('Building for development...', process.env.NODE_ENV);
-        const builder = await import('@stamhoofd/build-development-env');
-        loadedEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
-            frontend: options.name,
-        });
-    }
-    else if (process.env.LOAD_ENV) {
-        // Load this in the environment
-        const decode = JSON.parse(process.env.LOAD_ENV);
-
-        // We restringify to make sure encoding is minified
-        loadedEnv = decode;
-    }
-    else if (process.env.ENV_FILE) {
-        // Reading environment from a JSON env file (JSON is needed)
-        const file = path.resolve(process.env.ENV_FILE);
-
-        // Load this in the environment
-        const contents = fs.readFileSync(file, { encoding: 'utf-8' });
-        const decode = JSON.parse(contents);
-        loadedEnv = decode;
-    }
-
-    if (!loadedEnv) {
-        throw new Error('Failed to load environment variables');
-    }
-
-    // Validation
-    if (!loadedEnv.userMode || !loadedEnv.translationNamespace) {
-        console.error('Invalid environement:', loadedEnv);
-        throw new Error('Invalid environement: missing some variables');
-    }
+    const isPlaywrightBuild = process.env.STAMHOOFD_ENV === 'playwright';
 
     // Build env
     const use_env: Record<string, string> = {};
+    let loadedEnv: FrontendEnvironment | undefined = undefined;
 
-    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env['STAMHOOFD'] = JSON.stringify(loadedEnv);
+    if (!isPlaywrightBuild) {
+        if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
+        // Force load the cjs version of test-utils because the esm version gives issues with the json environment
+            const builder = await import('@stamhoofd/test-utils/cjs');
+            await builder.TestUtils.loadEnvironment();
+            loadedEnv = STAMHOOFD;
+        }
+        else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+            console.log('Building for development...', process.env.NODE_ENV);
+            const builder = await import('@stamhoofd/build-development-env');
+            const builtEnv = await builder.build(process.env.STAMHOOFD_ENV ?? '', {
+                frontend: options.name,
+            });
 
-    // use runtimeValue, because cache can be optimized if webpack knows which cache to get
-    use_env['process.env.NODE_ENV'] = JSON.stringify(loadedEnv.environment);
+            loadedEnv = builtEnv;
+        }
+        else if (process.env.LOAD_ENV) {
+        // Load this in the environment
+            const decode = JSON.parse(process.env.LOAD_ENV);
+
+            // We restringify to make sure encoding is minified
+            loadedEnv = decode;
+        }
+        else if (process.env.ENV_FILE) {
+        // Reading environment from a JSON env file (JSON is needed)
+            const file = path.resolve(process.env.ENV_FILE);
+
+            // Load this in the environment
+            const contents = fs.readFileSync(file, { encoding: 'utf-8' });
+            const decode = JSON.parse(contents);
+            loadedEnv = decode;
+        }
+
+        if (!loadedEnv) {
+            throw new Error('Failed to load environment variables');
+        }
+
+        // Validation
+        if (!loadedEnv.userMode || !loadedEnv.translationNamespace) {
+            console.error('Invalid environement:', loadedEnv);
+            throw new Error('Invalid environement: missing some variables');
+        }
+
+        // use runtimeValue, because cache can be optimized if webpack knows which cache to get
+        use_env['STAMHOOFD'] = JSON.stringify(loadedEnv);
+
+        // use runtimeValue, because cache can be optimized if webpack knows which cache to get
+        use_env['process.env.NODE_ENV'] = JSON.stringify(loadedEnv.environment);
+    }
 
     return {
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
@@ -101,11 +106,11 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                 },
             }),
         ] as any,
-        define: use_env,
-        server: process.env.NODE_ENV !== 'production'
+        define: isPlaywrightBuild ? undefined : use_env,
+        server: process.env.NODE_ENV !== 'production' && !isPlaywrightBuild
             ? {
                     host: '127.0.0.1',
-                    port: loadedEnv.PORT ?? options.port,
+                    port: loadedEnv?.PORT ?? options.port,
                     strictPort: true,
                     allowedHosts: ['.stamhoofd'],
                     warmup: {
@@ -117,15 +122,15 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     },
                 }
             : undefined,
-        preview: process.env.NODE_ENV !== 'production'
+        preview: process.env.NODE_ENV !== 'production' && !isPlaywrightBuild
             ? {
                     host: '127.0.0.1',
-                    port: loadedEnv.PORT ?? options.port,
+                    port: loadedEnv?.PORT ?? options.port,
                     strictPort: true,
                     allowedHosts: ['.stamhoofd'],
                 }
             : undefined,
-        build: process.env.NODE_ENV !== 'production'
+        build: process.env.NODE_ENV !== 'production' && !isPlaywrightBuild
             ? {
                     sourcemap: 'inline',
                     rollupOptions: {
@@ -154,6 +159,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     : {
                             sourcemap: true,
                             cssCodeSplit: false,
+                            outDir: isPlaywrightBuild ? 'dist-playwright' : undefined,
                         }),
         publicDir: resolve(__dirname, './public'),
         test: {

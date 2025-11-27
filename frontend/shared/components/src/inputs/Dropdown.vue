@@ -1,6 +1,6 @@
 <template>
     <div class="input-icon-container right icon arrow-down-small gray">
-        <select v-model="mappedValue" class="input" :autocomplete="autocomplete" :name="name" :disabled="disabled" @blur="$emit('blur', $event)" @focus="$emit('focus', $event)">
+        <select v-model="mappedValue" class="input" :autocomplete="autocomplete" :name="name" :disabled="disabled" :data-testid="dataTestid" @blur="$emit('blur', $event)" @focus="$emit('focus', $event)">
             <slot />
         </select>
     </div>
@@ -25,6 +25,9 @@ export default class Dropdown extends Mixins(NavigationMixin) {
 
     @Prop({ default: false })
     disabled?: boolean;
+
+    @Prop({ default: undefined })
+    dataTestid?: string;
 
     get mappedValue() {
         return this.modelValue;

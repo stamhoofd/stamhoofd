@@ -1,6 +1,6 @@
 <template>
     <div>
-        <label :class="{'checkbox': !onlyLine, 'checkbox-line': onlyLine, manual, 'with-text': hasDefaultSlot }" @click="handleClick">
+        <label :class="{'checkbox': !onlyLine, 'checkbox-line': onlyLine, manual, 'with-text': hasDefaultSlot }" :data-testid="dataTestid" @click="handleClick">
             <input ref="checkbox" v-model="checkboxValue" type="checkbox" :disabled="disabled" :indeterminate.prop="indeterminate">
             <div>
                 <div>
@@ -46,6 +46,9 @@ export default class Checkbox extends VueComponent {
     @Prop({ default: false })
     indeterminate!: boolean;
 
+    @Prop({ default: undefined })
+    dataTestid?: string;
+
     get hasDefaultSlot() {
         return !!this.$slots.default;
     }
@@ -70,7 +73,7 @@ export default class Checkbox extends VueComponent {
     handleClick(e: MouseEvent) {
         if (e.shiftKey || e.ctrlKey || e.metaKey) {
             e.preventDefault(); // prevent text-selection behavior
-            //this.checkboxValue = !this.checkboxValue;
+            // this.checkboxValue = !this.checkboxValue;
         }
     }
 }

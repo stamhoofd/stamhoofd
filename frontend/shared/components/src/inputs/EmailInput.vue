@@ -1,6 +1,6 @@
 <template>
     <STInputBox :title="title" error-fields="email" :error-box="errorBox" :class="this.class">
-        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" @change="validate(false)" @input="(event: any) => {emailRaw = event.currentTarget.value; onTyping();}">
+        <input ref="input" v-model="emailRaw" class="email-input-field input" type="email" :class="{ error: !valid }" :disabled="disabled" v-bind="$attrs" data-testid="email-input" @change="validate(false)" @input="(event: any) => {emailRaw = event.currentTarget.value; onTyping();}">
         <template #right>
             <slot name="right" />
         </template>
