@@ -358,7 +358,7 @@ jobs:
     - name: Give Caddy permissions to bind to privileged ports
       run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
     - name: Run Playwright tests
-      run: yarn test:playwright
+      run: CI=true && yarn test:playwright
     - name: Notify Slack of failure
       uses: slackapi/slack-github-action@v2.0.0
       if: failure() && github.event_name != 'pull_request'
