@@ -32,27 +32,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="false" :selectable="true" element-name="button" class="theme-secundary" @click="createBalanceItem">
-                    <template #left>
-                        <IconContainer icon="wand">
-                            <template #aside>
-                                <span class="icon add small primary" />
-                            </template>
-                        </IconContainer>
-                    </template>
-                    <h3 class="style-title-list">
-                        {{ $t('f70ecedf-608c-4330-89e6-8e0a7a5ac264') }}
-                    </h3>
-                    <p class="style-description-small">
-                        {{ $t('f3f810dd-cd4b-4766-b19e-ec995c9cca77') }}
-                    </p>
-
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
-
-                <STListItem v-if="detailedItem.amountOpen >= 0" :selectable="true" element-name="button" @click="createPayment">
+                <STListItem v-if="detailedItem.amountOpen >= 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" @click="createPayment(PaymentType.Payment)">
                     <template #left>
                         <IconContainer icon="receive">
                             <template #aside>
@@ -65,7 +45,7 @@
                         {{ $t('b60dbf08-bc14-4cf0-81c4-a4bcb20e28cd') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('98b14eb7-4a8c-42a4-ab84-fec2c2322a17') }}
+                        {{ PaymentTypeHelper.getDescription(PaymentType.Payment) }}
                     </p>
 
                     <template #right>
@@ -73,7 +53,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-else :selectable="true" element-name="button" class="theme-error" @click="createPayment">
+                <STListItem v-else-if="detailedItem.amountOpen < 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" class="theme-error" @click="createPayment(PaymentType.Refund)">
                     <template #left>
                         <IconContainer icon="undo">
                             <template #aside>
@@ -86,7 +66,27 @@
                         {{ $t('81f26de9-5a67-4ea2-985e-069aa4803409') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('98b14eb7-4a8c-42a4-ab84-fec2c2322a17') }}
+                        {{ PaymentTypeHelper.getDescription(PaymentType.Refund) }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="detailedItem.amountOpen === 0 && detailedItem.filteredBalanceItems.length" :selectable="true" element-name="button" class="theme-secundary" @click="createPayment(PaymentType.Reallocation)">
+                    <template #left>
+                        <IconContainer icon="wand">
+                            <template #aside>
+                                <span class="icon add small primary" />
+                            </template>
+                        </IconContainer>
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('f70ecedf-608c-4330-89e6-8e0a7a5ac264') }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ PaymentTypeHelper.getDescription(PaymentType.Reallocation) }}
                     </p>
 
                     <template #right>
@@ -140,7 +140,7 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, Toast, useContext, useErrors, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
@@ -233,7 +233,7 @@ async function reloadFamily() {
     await loadFamily(props.member, { shouldRetry: false });
 }
 
-async function createPayment() {
+async function createPayment(type: PaymentType) {
     if (!detailedItem.value) {
         return;
     }
@@ -241,7 +241,7 @@ async function createPayment() {
     const payment = PaymentGeneral.create({
         method: PaymentMethod.Transfer,
         status: PaymentStatus.Succeeded,
-        type: detailedItem.value.amountOpen >= 0 ? PaymentType.Payment : PaymentType.Refund,
+        type,
         paidAt: new Date(),
         customer: detailedItem.value.object.contacts.length > 0
             ? PaymentCustomer.create({

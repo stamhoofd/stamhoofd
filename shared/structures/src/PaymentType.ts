@@ -43,6 +43,15 @@ export class PaymentTypeHelper {
         }
     }
 
+    static getDescription(type: PaymentType): string {
+        switch (type) {
+            case PaymentType.Payment: return $t(`Een betaling van een lid of supporter aan jouw vereniging`);
+            case PaymentType.Refund: return $t(`Een terugbetaling van jouw vereniging richting een lid of supporter`);
+            case PaymentType.Chargeback: return $t(`Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw vereniging. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.`);
+            case PaymentType.Reallocation: return $t(`Positieve en negatieve openstaande bedragen worden samengebracht zodat het totaal op 0 euro uitkomt, zodat die items elkaar opheffen.`);
+        }
+    }
+
     static getIcon(type: PaymentType): string {
         switch (type) {
             case PaymentType.Payment: return 'card';

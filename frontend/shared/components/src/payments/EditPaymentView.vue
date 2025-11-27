@@ -15,31 +15,34 @@
                         </option>
                     </Dropdown>
                 </STInputBox>
-
-                <STInputBox :title="type === PaymentType.Payment ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`1d8b2fd0-3e5c-4364-9476-b7b40ca39c50`)" error-fields="method" :error-box="errors.errorBox">
-                    <Dropdown v-model="method">
-                        <option v-for="m in availableMethods" :key="m" :value="m">
-                            {{ PaymentMethodHelper.getNameCapitalized(m) }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-
-                <STInputBox v-if="!isNew" error-fields="status" :error-box="errors.errorBox" :title="$t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`)">
-                    <Dropdown v-model="status">
-                        <option v-for="m in availableStatuses" :key="m" :value="m">
-                            {{ PaymentStatusHelper.getNameCapitalized(m) }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
             </div>
             <div>
-                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`)" error-fields="paidAt" :error-box="errors.errorBox">
+                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('Datum') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
                     <DateSelection v-model="paidAt" />
                 </STInputBox>
             </div>
         </div>
+        <p class="style-description-small" v-text="capitalizeFirstLetter(PaymentTypeHelper.getDescription(type))" />
 
-        <template v-if="method === PaymentMethod.Transfer">
+        <div v-if="!isNew || type !== PaymentType.Reallocation" class="split-inputs">
+            <STInputBox v-if="type !== PaymentType.Reallocation" :title="type === PaymentType.Payment ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`1d8b2fd0-3e5c-4364-9476-b7b40ca39c50`)" error-fields="method" :error-box="errors.errorBox">
+                <Dropdown v-model="method">
+                    <option v-for="m in availableMethods" :key="m" :value="m">
+                        {{ PaymentMethodHelper.getNameCapitalized(m) }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+
+            <STInputBox v-if="!isNew" error-fields="status" :error-box="errors.errorBox" :title="$t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`)">
+                <Dropdown v-model="status">
+                    <option v-for="m in availableStatuses" :key="m" :value="m">
+                        {{ PaymentStatusHelper.getNameCapitalized(m) }}
+                    </option>
+                </Dropdown>
+            </STInputBox>
+        </div>
+
+        <template v-if="method === PaymentMethod.Transfer && type !== PaymentType.Reallocation">
             <hr><h2 v-if="type === PaymentType.Payment">
                 {{ $t('1a34199f-e779-4947-b0d3-a41aeefa901a') }}
             </h2>
@@ -103,7 +106,7 @@ import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
 import { BalanceItem, BalanceItemRelationType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
@@ -118,6 +121,7 @@ import STListItem from '../layout/STListItem.vue';
 import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
+import { Toast } from '../overlays/Toast';
 
 const props = withDefaults(
     defineProps<{
@@ -137,7 +141,6 @@ const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
 
-
 const availableMethods = [
     PaymentMethod.Transfer,
     PaymentMethod.PointOfSale,
@@ -146,6 +149,7 @@ const availableMethods = [
 const availableTypes = [
     PaymentType.Payment,
     PaymentType.Refund,
+    PaymentType.Reallocation,
 ];
 
 const availableStatuses = [
@@ -153,6 +157,28 @@ const availableStatuses = [
     PaymentStatus.Succeeded,
     PaymentStatus.Failed,
 ];
+const total = computed(() => {
+    return patchedPayment.value.balanceItemPayments.reduce((total, item) => total + item.price, 0);
+});
+
+function autoUpdateType() {
+    const v = total.value;
+    if (v === 0 && type.value !== PaymentType.Reallocation) {
+        type.value = PaymentType.Reallocation;
+        new Toast($t('Het type van de betaling is gewijzigd in een saldoverrekening omdat het totaalbedrag 0 euro bedraagt. Kijk alles nog even na.'), 'wand theme-secundary').show();
+        return true;
+    }
+    if (v > 0 && type.value !== PaymentType.Payment) {
+        type.value = PaymentType.Payment;
+        new Toast($t('Het type van de betaling is gewijzigd in een gewone betaling omdat het totaalbedrag positief is. Kijk alles nog even na.'), 'receive').show();
+        return true;
+    }
+    if (v < 0 && type.value !== PaymentType.Refund) {
+        type.value = PaymentType.Refund;
+        new Toast($t('Het type van de betaling is gewijzigd in een terugbetaling omdat het totaalbedrag negatief is. Kijk alles nog even na.'), 'undo theme-error').show();
+        return true;
+    }
+}
 
 const title = computed(() => {
     if (props.isNew) {
@@ -281,7 +307,9 @@ async function save() {
     try {
         errors.errorBox = null;
         if (!await errors.validator.validate()) {
-            saving.value = false;
+            return;
+        }
+        if (autoUpdateType()) {
             return;
         }
         await props.saveHandler(patch.value);

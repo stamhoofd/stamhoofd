@@ -42,7 +42,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const returnedModels: BalanceItem[] = [];
-        const updateOutstandingBalance: BalanceItem[] = [];
 
         // Tracking changes
         const additionalItems: { memberId: string; organizationId: string }[] = [];
@@ -60,6 +59,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.createdAt = put.createdAt;
                 model.dueAt = put.dueAt;
                 model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Due;
+                model.VATIncluded = put.VATIncluded;
+                model.VATPercentage = put.VATPercentage;
+                model.VATExcempt = put.VATExcempt;
 
                 if (put.userId) {
                     model.userId = (await this.validateUserId(model, put.userId)).id;
@@ -113,8 +115,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 await model.save();
                 returnedModels.push(model);
-
-                updateOutstandingBalance.push(model);
             }
 
             for (const patch of request.body.getPatches()) {
@@ -186,6 +186,9 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;
+                model.VATIncluded = patch.VATIncluded === undefined ? model.VATIncluded : patch.VATIncluded;
+                model.VATPercentage = patch.VATPercentage === undefined ? model.VATPercentage : patch.VATPercentage;
+                model.VATExcempt = patch.VATExcempt === undefined ? model.VATExcempt : patch.VATExcempt;
 
                 if ((patch.dueAt !== undefined || patch.unitPrice !== undefined) && model.dueAt && model.price < 0) {
                     throw new SimpleError({
@@ -224,10 +227,6 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
                 await model.save();
                 returnedModels.push(model);
-
-                if (patch.unitPrice || patch.amount || patch.status || patch.dueAt !== undefined || patch.memberId || patch.userId) {
-                    updateOutstandingBalance.push(model);
-                }
             }
         });
 

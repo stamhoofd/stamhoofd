@@ -99,6 +99,20 @@ export class BalanceItem extends QueryableModel {
     VATExcempt: VATExcemptReason | null = null;
 
     /**
+     * This is a cached value for storing in the database.
+     * It stores the calculated price with VAT.
+     * 
+     * price should = pricePaid + pricePending + priceOpen
+     */
+    @column({ 
+        type: 'integer',
+        beforeSave: function () {
+            return this.priceWithVAT;
+        },
+    })
+    priceTotal = 0;
+
+    /**
      * Cached value, for optimizations
      *
      * NOTE: We store an integer of the price up to 4 digits after the comma.
@@ -484,7 +498,7 @@ export class BalanceItem extends QueryableModel {
         SET balance_items.pricePaid = coalesce(paid.price, 0),
             balance_items.pricePending = coalesce(pending.price, 0),
             balance_items.priceOpen = (CASE
-                WHEN balance_items.status = '${BalanceItemStatus.Due}' THEN (balance_items.unitPrice * balance_items.amount - balance_items.pricePaid - balance_items.pricePending)
+                WHEN balance_items.status = '${BalanceItemStatus.Due}' THEN (balance_items.priceTotal - balance_items.pricePaid - balance_items.pricePending)
                 ELSE (-balance_items.pricePaid - balance_items.pricePending)
             END)
         ${secondWhere}`;

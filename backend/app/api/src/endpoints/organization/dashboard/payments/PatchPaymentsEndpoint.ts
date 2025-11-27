@@ -73,6 +73,10 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             payment.customer = put.customer;
             payment.type = put.type;
 
+            if (payment.type === PaymentType.Reallocation) {
+                payment.method = PaymentMethod.Unknown;
+            }
+
             if (payment.method === PaymentMethod.Transfer) {
                 if (!put.transferSettings) {
                     throw new SimpleError({

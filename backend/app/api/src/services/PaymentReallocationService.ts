@@ -36,7 +36,7 @@ export const PaymentReallocationService = {
         const didMerge: BalanceItem[] = [];
 
         // First try to merge balance items that are the same and have canceled variants
-        /* for (const balanceItem of balanceItems) {
+        for (const balanceItem of balanceItems) {
             if (balanceItem.status !== BalanceItemStatus.Due) {
                 continue;
             }
@@ -53,7 +53,7 @@ export const PaymentReallocationService = {
                 await this.mergeBalanceItems(balanceItem, similarCanceledItems);
                 didMerge.push(balanceItem, ...similarCanceledItems);
             }
-        } */
+        }
 
         if (didMerge.length) {
             // Update outstanding
@@ -79,6 +79,13 @@ export const PaymentReallocationService = {
         const negativeItems = balanceItems.filter(b => b.priceOpen < 0).map(balanceItem => ({ balanceItem, remaining: balanceItem.priceOpen }));
         const positiveItems = balanceItems.filter(b => b.priceOpen > 0).map(balanceItem => ({ balanceItem, remaining: balanceItem.priceOpen }));
 
+        // If the total remaining is zero, we'll just merge everything together. This removes the restriction that two merged balance items should have the same remaining amount.
+        const canReachZero = (negativeItems.reduce((p, i) => p + i.remaining, 0) === -positiveItems.reduce((p, i) => p + i.remaining, 0));
+
+        // Rules:
+        // Total outstanding amount should be zero to merge all items into one payment reallocation
+        // otherwise, only swap if the amounts match exactly
+
         if (negativeItems.length === 0 || positiveItems.length === 0) {
             return;
         }
@@ -88,48 +95,58 @@ export const PaymentReallocationService = {
 
         const matchMethods: { alterPayments: boolean; match: (negativeItem: BalanceItemWithRemaining, positive: BalanceItemWithRemaining) => boolean }[] = [
             {
-                // Priority 1: same relation ids, same amount
+                // Priority 1: same type, same relation ids, same amount
                 alterPayments: true,
                 match: (negativeItem, p) => {
                     return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
                 },
             },
             {
-                // Priority 1: same relation ids, same amount
+                // Priority 1: same type, same relation ids, same amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
                     return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
                 },
             },
             {
-                // Priority 2: same relation ids, different amount
+                // Priority 2: same type, same relation ids, different amount
                 alterPayments: true,
                 match: (negativeItem, p) => {
                     return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
                 },
             },
             {
-                // Priority 2: same relation ids, different amount
+                // Priority 2: same type, same relation ids, different amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
                     return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
                 },
             },
-
-            // For now I would skip the next priorties because merging these often creates a lot of confusion
-            /* {
+            {
+                // Priority 3: same type, one mismatching relation id, same amount
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 1);
+                },
+            },
+            {
                 // Priority 3: same type, one mismatching relation id
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    // todo: maybe do allow this, but only if the amount is the same
                     return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 1);
+                },
+            },
+            {
+                // Priority 4: same type, two mismatching relation ids, same amount
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 2);
                 },
             },
             {
                 // Priority 4: same type, two mismatching relation ids
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    // todo: maybe do allow this, but only if the amount is the same
                     return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 2);
                 },
             },
@@ -139,8 +156,15 @@ export const PaymentReallocationService = {
                 match: (negativeItem, p) => {
                     return p.balanceItem.type === negativeItem.balanceItem.type && p.remaining === -negativeItem.remaining;
                 },
-            }, */
-            /* {
+            },
+            {
+                // Priority 6: same amount
+                alterPayments: false,
+                match: (negativeItem, p) => {
+                    return p.remaining === -negativeItem.remaining;
+                },
+            },
+            {
                 // Priority 6: same type
                 alterPayments: false,
                 match: (negativeItem, p) => {
@@ -150,10 +174,10 @@ export const PaymentReallocationService = {
             {
                 // Priority: any
                 alterPayments: false,
-                match: () => {
+                match: (negativeItem, p) => {
                     return true;
                 },
-            }, */
+            },
         ];
 
         for (const matchMethod of matchMethods) {
@@ -172,7 +196,7 @@ export const PaymentReallocationService = {
                 }
 
                 const match = positiveItems.find((p) => {
-                    return p.remaining > 0 && matchMethod.match(negativeItem, p);
+                    return p.remaining > 0 && matchMethod.match(negativeItem, p) && (matchMethod.alterPayments || canReachZero || p.remaining === -negativeItem.remaining);
                 });
 
                 if (!match) {
@@ -183,6 +207,12 @@ export const PaymentReallocationService = {
                     await this.swapPayments(negativeItem, match);
                 }
                 else {
+                    if (match.remaining !== -negativeItem.remaining) {
+                        if (!canReachZero) {
+                            continue;
+                        }
+                    }
+
                     // Add to pending payment
                     const moveAmount = Math.min(match.remaining, -negativeItem.remaining);
 

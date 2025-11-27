@@ -70,9 +70,8 @@ export const BalanceItemService = {
             // status, unitPrice, dueAt, amount
             if (
                 'status' in event.changedFields
-                || 'unitPrice' in event.changedFields
                 || 'dueAt' in event.changedFields
-                || 'amount' in event.changedFields
+                || 'priceTotal' in event.changedFields
                 || 'memberId' in event.changedFields
                 || 'userId' in event.changedFields
                 || 'payingOrganizationId' in event.changedFields
