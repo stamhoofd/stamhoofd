@@ -288,6 +288,10 @@ jobs:
       run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile &
     - name: Use local DNS
       run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
+    - name: Allow port 53
+      run: |
+        sudo ufw allow 53
+        sudo ufw allow 53/udp
     - name: Test DNS
       run: nslookup github.com
     - name: Install dependencies
