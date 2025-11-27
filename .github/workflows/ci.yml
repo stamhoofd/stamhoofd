@@ -288,12 +288,34 @@ jobs:
       run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo ./.coredns/coredns -conf .development/Corefile &
     - name: Use local DNS
       run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
-    - name: Allow port 53
+    - name: Log coredns corefile path
+      run: ps aux | grep coredns
+    - name: Log corefile
+      run: cat .development/Corefile
+    - name: List DNS servers
+      run: sudo cat /etc/resolv.conf
+    - name: Log if DNS is running
+      run: ps aux | grep coredns
+    - name: Log if DNS is listening
+      run: sudo netstat -tulnp | grep ":53"
+    - name: Check DNS resolver
+      run: dig test.stamhoofd @127.0.0.1
+    - name: Check DNS resolution
       run: |
-        sudo ufw allow 53
-        sudo ufw allow 53/udp
-    - name: Test DNS
-      run: nslookup github.com
+        DOMAIN="test.stamhoofd"
+        EXPECTED_IP="127.0.0.1"
+
+        ACTUAL_IP=$(dig +short A "$DOMAIN" | head -n1)
+
+        echo "Expected IP: $EXPECTED_IP"
+        echo "Actual IP:   $ACTUAL_IP"
+
+        if [[ "$ACTUAL_IP" != "$EXPECTED_IP" ]]; then
+            echo "❌ DNS check failed! $DOMAIN resolved to $ACTUAL_IP"
+            exit 1
+        fi
+
+          echo "✅ DNS check passed!"
     - name: Install dependencies
       run: yarn install --prefer-offline --frozen-lockfile
     - name: Cache Caddy
