@@ -20,10 +20,12 @@ export const test = base.extend<
 
             await PlaywrightTestUtilsHelper.executeBeforeAll();
             // run all tests for worker
+            console.log('Running tests for worker ', workerInfo.workerIndex);
             await use();
             await PlaywrightTestUtilsHelper.executeAfterAll();
 
             await teardown();
+            console.log('Finished teardown for worker  ', workerInfo.workerIndex);
         },
         {
             scope: "worker",
