@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true, 
   "scripts": {
-    "test:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
+    "test:playwright": "NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* yarn playwright test",
     "test:playwright:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test",
     "test:playwright:trace": "NODE_ENV=test STAMHOOFD_ENV=playwright yarn playwright test --trace on"
   },
