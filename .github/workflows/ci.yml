@@ -332,6 +332,8 @@ jobs:
         sudo chmod +x /usr/local/bin/caddy
     - name: Verify Caddy
       run: caddy version
+    - name: Caddy trust
+      run: caddy start && caddy trust && caddy stop
     - name: Cache Playwright Browsers
       id: cache-playwright
       uses: actions/cache@v4
