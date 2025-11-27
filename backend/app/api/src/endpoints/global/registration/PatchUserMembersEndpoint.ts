@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, isEmptyPatch, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Document, Member, RateLimiter } from '@stamhoofd/models';
+import { Document, Group, Member, RateLimiter, Registration } from '@stamhoofd/models';
 import { MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
@@ -9,6 +9,7 @@ import { Context } from '../../../helpers/Context';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
 import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate';
+import { OneToManyRelation } from '@simonbackx/simple-database';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -52,16 +53,20 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         for (const put of request.body.getPuts()) {
             const struct = put.put;
 
-            const member = new Member();
+            const member = new Member()
+                .setManyRelation(Member.registrations as any as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
+                .setManyRelation(Member.users, []);
             member.id = struct.id;
             member.organizationId = organization?.id ?? null;
 
+            const securityCode = struct.details.securityCode; // will get cleared after the filter
+            Context.auth.filterMemberPut(member, struct);
             struct.details.cleanData();
             member.details = struct.details;
 
             this.throwIfInvalidDetails(member.details);
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'put');
             if (duplicate) {
                 addedMembers.push(duplicate);
                 continue;

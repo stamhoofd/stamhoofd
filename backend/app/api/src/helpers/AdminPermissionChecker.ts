@@ -1504,6 +1504,17 @@ export class AdminPermissionChecker {
         return cloned;
     }
 
+    /**
+     * Only for creating new members
+     */
+    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob) {
+        // Do not allow setting the member number
+        data.details.memberNumber = null;
+
+        // Do not allow setting the security code
+        data.details.securityCode = null;
+     }
+
     async filterMemberPatch(member: MemberWithRegistrations, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
         if (!data.details) {
             return data;
@@ -1523,6 +1534,9 @@ export class AdminPermissionChecker {
                 statusCode: 400,
             });
         }
+
+        // Do not allow setting the member number
+        delete data.details.memberNumber;
 
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;

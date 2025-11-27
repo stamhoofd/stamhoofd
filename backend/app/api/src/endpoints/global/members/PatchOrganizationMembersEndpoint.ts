@@ -89,11 +89,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (organization && STAMHOOFD.userMode !== 'platform') {
                 member.organizationId = organization.id;
             }
-
+            const securityCode = struct.details.securityCode; // will get cleared after the filter
+            Context.auth.filterMemberPut(member, struct);
             struct.details.cleanData();
             member.details = struct.details;
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, struct.details.securityCode, 'put');
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'put');
             if (duplicate) {
                 // Merge data
                 member = duplicate;
