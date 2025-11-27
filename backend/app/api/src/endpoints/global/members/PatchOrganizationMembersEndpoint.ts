@@ -90,7 +90,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 member.organizationId = organization.id;
             }
             const securityCode = struct.details.securityCode; // will get cleared after the filter
-            Context.auth.filterMemberPut(member, struct);
+            Context.auth.filterMemberPut(member, struct, {asUserManager: false});
             struct.details.cleanData();
             member.details = struct.details;
 

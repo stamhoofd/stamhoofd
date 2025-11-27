@@ -1507,9 +1507,11 @@ export class AdminPermissionChecker {
     /**
      * Only for creating new members
      */
-    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob) {
-        // Do not allow setting the member number
-        data.details.memberNumber = null;
+    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob, options: {asUserManager: boolean}) {
+        if (options.asUserManager || STAMHOOFD.userMode === 'platform') {
+            // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
+            data.details.memberNumber = null;
+        }
 
         // Do not allow setting the security code
         data.details.securityCode = null;
@@ -1535,8 +1537,6 @@ export class AdminPermissionChecker {
             });
         }
 
-        // Do not allow setting the member number
-        delete data.details.memberNumber;
 
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
@@ -1589,6 +1589,12 @@ export class AdminPermissionChecker {
 
         const isUserManager = this.isUserManager(member);
 
+        // Do not allow setting the member number
+        if (isUserManager || STAMHOOFD.userMode === 'platform') {
+            // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
+            delete data.details.memberNumber;
+        }
+        
         if (hasNotes && isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full))) {
             throw new SimpleError({
                 code: 'permission_denied',
