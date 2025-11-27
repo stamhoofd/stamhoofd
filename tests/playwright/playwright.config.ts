@@ -25,6 +25,7 @@ export default defineConfig({
         trace: "on-first-retry",
 
         // todo
+        headless: process.env.CI ? true : false,
         ignoreHTTPSErrors: true,
     },
 
