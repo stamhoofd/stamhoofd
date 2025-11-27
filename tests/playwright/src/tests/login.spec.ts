@@ -8,6 +8,7 @@ import { TestUtils } from "@stamhoofd/test-utils";
             
 // login
 test.describe("userMode organization", () => {
+    console.log('inside: login - userMode organization')
     let organization: Organization;
     let user: User;
 
@@ -17,6 +18,7 @@ test.describe("userMode organization", () => {
 
     test.beforeAll(
         async () => {
+            console.log('inside: login - userMode organization - beforeAll start')
             TestUtils.setPermanentEnvironment("userMode", "organization");
 
             organization = await new OrganizationFactory({
@@ -35,10 +37,12 @@ test.describe("userMode organization", () => {
             }).create();
 
             await Token.createToken(user);
+            console.log('inside: login - userMode organization - beforeAll finished')
         },
     );
 
     test("happy flow", async ({ page, dashboard }) => {
+        console.log('inside: login - test userMode organization - start')
         await dashboard.goto();
 
         // click search input and fill in organization name
@@ -72,10 +76,12 @@ test.describe("userMode organization", () => {
         await expect(page.getByTestId("organization-name")).toContainText(
             organizationName,
         );
+        console.log('inside: login - test userMode organization - done')
     });
 });
 
 test.describe("userMode platform", () => {
+    console.log('inside: userMode platform')
     let organization: Organization;
     let user: User;
 
