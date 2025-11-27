@@ -17,7 +17,30 @@ export class CaddyHelper {
     }
 
     async start(defaultConfig: any) {
+        // // Trust certificate
+        // await exec('sudo caddy trust');
+
         // Start caddy
+        await this.runCaddy();
+
+        if (process.env.CI) {
+            console.log("Execute caddy trust and restart caddy...");
+            // Trust certificate
+            await exec("sudo caddy trust");
+
+            await this.stop();
+            await this.runCaddy();
+            console.log('Caddy restarted.');
+        }
+
+        // post the initial config
+        console.log("Start posting caddy config...");
+        await this.postConfig(defaultConfig);
+        console.log("Done posting caddy config.");
+    }
+
+    private async runCaddy() {
+        // Run caddy
         const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
             "run",
         ]);
@@ -58,11 +81,6 @@ export class CaddyHelper {
                 }
             });
         });
-
-        // post the initial config
-        console.log("Start posting caddy config...");
-        await this.postConfig(defaultConfig);
-        console.log("Done posting caddy config.");
     }
 
     async stop() {

@@ -19,9 +19,11 @@ export class NetworkHelper {
                 if (res.status === 200) {
                     return;
                 }
-            } catch (error) {
-                console.log('failed wait for: ', url);
-                console.error(error);
+            } catch (error: any) {
+                console.log('Failed to waitForUrl: ', url);
+                console.error("name:", error.name);      // e.g., TypeError
+                console.error("message:", error.message);
+                console.error('cause: ', error.cause);
                 // ignore connection errors
             }
 
