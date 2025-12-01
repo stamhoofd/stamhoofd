@@ -356,6 +356,8 @@ jobs:
         sudo cp "$CERT_PATH" /usr/local/share/ca-certificates/caddy.crt
         sudo update-ca-certificates
         echo "Caddy certificate trusted for CI tools"
+    - name: Check if Caddy certificate is trusted
+      run: openssl verify /usr/local/share/ca-certificates/caddy.crt
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API
