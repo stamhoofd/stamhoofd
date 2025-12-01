@@ -80,6 +80,7 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
     startTime = new Date();
 
     mounted() {
+        console.error('playwright debug - confirm email mounted');
         this.timer = setTimeout(this.poll.bind(this), 10000);
     }
 
@@ -136,11 +137,13 @@ export default class ConfirmEmailView extends Mixins(NavigationMixin) {
 
         try {
             if (this.$context && this.$context.user && this.$context.user.verified && this.$context.user.email === this.email) {
+                console.error('playwright debug - user already verified, stop polling');
                 // User is already verified, stop polling
                 this.stopPolling();
                 this.dismiss({ force: true });
                 return;
             }
+            console.error('playwright debug - poll email');
             const stop = await LoginHelper.pollEmail(this.$context, this.token);
             if (stop) {
                 this.dismiss({ force: true });
