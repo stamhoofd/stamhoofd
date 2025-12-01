@@ -129,7 +129,7 @@
                 <h2>Facturen</h2>
 
                 <STList v-if="status && status.invoices.length > 0">
-                    <STListItem v-for="invoice of status.invoices" :key="invoice.id" :selectable="true" @click="downloadInvoice(invoice)">
+                    <STListItem v-for="invoice of status.invoices" :key="invoice.id" :selectable="true" class="right-stack" @click="downloadInvoice(invoice)">
                         <h3 class="style-title-list">
                             {{ invoice.meta.priceWithoutVAT < 0 ? 'Creditnota' : 'Factuur' }} {{ invoice.number }}
                         </h3>
@@ -137,7 +137,10 @@
                             {{ (invoice.meta.date || invoice.paidAt || invoice.createdAt) | date }}
                         </p>
 
-                        <span slot="right" class="icon download gray" />
+                        <template #right>
+                            <button v-if="invoice.meta.xml && invoice.meta.pdf" v-tooltip="'Download PDF in plaats van XML (niet officieel)'" type="button" class="button icon color-pdf file-pdf" @click.stop="downloadInvoicePdf(invoice)" />
+                            <span class="icon download gray" />
+                        </template>
                     </STListItem>
                 </STList>
 
@@ -238,19 +241,34 @@ export default class BillingSettingsView extends Mixins(NavigationMixin) {
     }
 
     downloadInvoice(invoice: STInvoice) {
+        const url = invoice.meta.xml ? invoice.meta.xml?.getPublicPath() : invoice.meta.pdf?.getPublicPath()
+
+        if (url) {
+            const a = document.createElement("a");
+            a.href = url;
+            a.target = "_blank"
+            a.setAttribute("download", (invoice.meta.date ? (Formatter.dateIso(invoice.meta.date) + " - ") : "")) + "Stamhoofd " + (invoice.number ?? invoice.id);
+            a.click();
+        } else {
+            this.present(new ComponentWithProperties(InvoiceDetailsView, { invoice }).setDisplayStyle("popup"))
+            new CenteredMessage("PDF of XML ontbreekt", "Door een technische fout was het niet mogelijk om de PDF of XML van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via "+this.$t('shared.emails.general')+" als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
+        }
+        
+    }
+
+    downloadInvoicePdf(invoice: STInvoice) {
         const url = invoice.meta.pdf?.getPublicPath()
 
         if (url) {
             const a = document.createElement("a");
             a.href = url;
             a.target = "_blank"
-            a.setAttribute("download", "Stamhoofd factuur " + (invoice.number ?? invoice.id) + (invoice.meta.date ? (" - "+Formatter.dateIso(invoice.meta.date)) : ""));
+            a.setAttribute("download", (invoice.meta.date ? (Formatter.dateIso(invoice.meta.date) + " - ") : "")) + "Stamhoofd " + (invoice.number ?? invoice.id);
             a.click();
         } else {
             this.present(new ComponentWithProperties(InvoiceDetailsView, { invoice }).setDisplayStyle("popup"))
             new CenteredMessage("PDF ontbreekt", "Door een technische fout was het niet mogelijk om de PDF van de factuur op te halen. Probeer het later opnieuw. We tonen voorlopig de gegevens van de factuur, maar dit is geen officiële factuur. Neem contact op via "+this.$t('shared.emails.general')+" als dit probleem na één dag nog niet is opgelost.").addCloseButton().show()
         }
-        
     }
 
     showCreditsHistory() {
