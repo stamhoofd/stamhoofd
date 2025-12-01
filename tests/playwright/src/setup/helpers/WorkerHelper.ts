@@ -13,6 +13,17 @@ class WorkerHelperInstance {
     private readonly ENVIRONMENTE_NAME = "playwright";
     private isInitialized = false;
     private didLoadDatabaseEnvironment = false;
+    private _databaseHelper: DatabaseHelper | null = null;
+
+    private get databaseHelper() {
+        if (!this._databaseHelper) {
+            if(!WorkerData.id) {
+                throw new Error("Worker id is not set");
+            }
+            this._databaseHelper = new DatabaseHelper(WorkerData.id);
+        }
+        return this._databaseHelper;
+    }
 
     get port() {
         const result = process.env.PORT;
@@ -149,6 +160,10 @@ class WorkerHelperInstance {
         PlaywrightTestUtilsHelper.setDefaultEnvironment(STAMHOOFD);
         TestUtils.globalSetup(PlaywrightTestUtilsHelper);
         TestUtils.setup();
+    }
+
+    async clearDatabase() {
+        await this.databaseHelper.clear();
     }
 }
 
