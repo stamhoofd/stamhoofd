@@ -358,26 +358,26 @@ jobs:
         sudo update-ca-certificates
     - name: Check if Caddy certificate is trusted
       run: openssl verify ~/.local/share/ca-certificates/caddy.crt
-    - name: Install certutil
-      run: sudo apt-get update && sudo apt-get install -y libnss3-tools
-    - name: Import Caddy certificate into Chromium
-      run: |
-        # Path to the Caddy root certificate
-        CERT="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
+    # - name: Install certutil
+    #   run: sudo apt-get update && sudo apt-get install -y libnss3-tools
+    # - name: Import Caddy certificate into Chromium
+    #   run: |
+    #     # Path to the Caddy root certificate
+    #     CERT="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
         
-        # Create a temporary Chromium profile
-        CHROMIUM_PROFILE="$HOME/chromium-profile"
-        mkdir -p "$CHROMIUM_PROFILE"
+    #     # Create a temporary Chromium profile
+    #     CHROMIUM_PROFILE="$HOME/chromium-profile"
+    #     mkdir -p "$CHROMIUM_PROFILE"
         
-        # Create an empty NSS database
-        certutil -N -d sql:"$CHROMIUM_PROFILE" --empty-password
+    #     # Create an empty NSS database
+    #     certutil -N -d sql:"$CHROMIUM_PROFILE" --empty-password
         
-        # Import the Caddy certificate
-        certutil -A -d sql:"$CHROMIUM_PROFILE" -n "Caddy Root CA" -t "TCu,Cu,Tu" -i "$CERT"
+    #     # Import the Caddy certificate
+    #     certutil -A -d sql:"$CHROMIUM_PROFILE" -n "Caddy Root CA" -t "TCu,Cu,Tu" -i "$CERT"
 
-        sudo update-ca-certificates
+    #     sudo update-ca-certificates
         
-        echo "Caddy certificate imported into Chromium NSS DB"
+    #     echo "Caddy certificate imported into Chromium NSS DB"
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API

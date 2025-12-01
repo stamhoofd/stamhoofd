@@ -26,7 +26,7 @@ export default defineConfig({
 
         // todo
         headless: process.env.CI ? true : false,
-        // ignoreHTTPSErrors: true,
+        ignoreHTTPSErrors: true,
     },
 
     /* Configure projects for major browsers */
@@ -36,7 +36,9 @@ export default defineConfig({
             use: {
                 ...devices["Desktop Chrome"],
                 // todo only add for ci
-                // launchPersistentContext: async ({ browserName }, options) => {
+
+            },
+                //             launchPersistentContext: async ({ browserName }, options) => {
                 //     const { chromium } = require("playwright");
                 //     const context = await chromium.launchPersistentContext(
                 //         "/home/runner/chromium-profile", // path to NSS profile
@@ -44,7 +46,6 @@ export default defineConfig({
                 //     );
                 //     return context;
                 // },
-            },
         },
 
         // {
