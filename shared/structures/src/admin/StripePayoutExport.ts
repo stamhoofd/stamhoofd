@@ -9,7 +9,7 @@ function isInvoiceComplete(invoice: STInvoice, payoutExport: StripePayoutExport)
     // Get total sum of all payout items
     const totalPayout = payoutItems.reduce((total, item) => total + item.amount, 0)
 
-    return totalPayout === invoice.meta.priceWithVAT
+    return totalPayout === invoice.meta.totalPrice
 }
 
 export enum StripePayoutItemType {
@@ -132,7 +132,7 @@ export class StripePayoutExport extends AutoEncoder {
                 }
 
                 const invoiceVAT = item.invoices.reduce((total, invoice) => total + invoice.meta.VAT, 0)
-                const invoiceTotal = item.invoices.reduce((total, invoice) => total + invoice.meta.priceWithVAT, 0)
+                const invoiceTotal = item.invoices.reduce((total, invoice) => total + invoice.meta.totalPrice, 0)
 
                 if (invoiceTotal === 0) {
                     continue;

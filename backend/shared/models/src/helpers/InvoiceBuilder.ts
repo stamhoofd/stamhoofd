@@ -429,7 +429,7 @@ export class InvoiceBuilder {
         if (this.invoice.meta.payableRoundingAmount !== 0) {
             y = this.document.y + 5*MM
             this.document.font('Metropolis-SemiBold')
-            this.document.text("Afrondingsverschil*", x4 - 40*MM, y, { align: 'right', width: 40*MM })
+            this.document.text("Afrondingsverschil", x4 - 40*MM, y, { align: 'right', width: 40*MM })
             this.document.font('Metropolis-Medium')
             // eslint-disable-next-line no-irregular-whitespace
             this.document.text(Formatter.price(this.invoice.meta.payableRoundingAmount).replace(/ /g, " ").replace(/,00/g, ""), x4, y, { align: 'right', width: PAGE_WIDTH - x4 - PAGE_MARGIN })
@@ -453,7 +453,7 @@ export class InvoiceBuilder {
         if (!this.invoice.number) {
             text = "Druk dit document niet af. Dit is nog geen officiële factuur"
         }
-        if (this.invoice.number && this.invoice.meta.priceWithVAT < 0) {
+        if (this.invoice.number && this.invoice.meta.totalPrice < 0) {
             text = "Hou deze creditnota bij voorkeur digitaal bij"
         }
 
@@ -462,7 +462,7 @@ export class InvoiceBuilder {
         this.document.text(text, PAGE_MARGIN + 8*MM, y + 12/2 - hh/2, { align: 'left' })
 
 
-        if (this.invoice.meta.priceWithVAT < 0) {
+        if (this.invoice.meta.totalPrice < 0) {
             // Don't mention something atm
         } else if (this.payment && this.payment.method) {
             if (this.payment.status === PaymentStatus.Succeeded) {

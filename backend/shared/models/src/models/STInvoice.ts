@@ -220,7 +220,7 @@ export class STInvoice extends Model {
 
         // Send via e-mail if not sending via PEPPOL
         if (!this.didSendPeppol) {
-            if (this.organizationId && this.meta.pdf && this.number !== null && this.meta.priceWithVAT > 0) {
+            if (this.organizationId && this.meta.pdf && this.number !== null && this.meta.totalPrice > 0) {
                 const organization = await Organization.getByID(this.organizationId)
                 if (organization) {
                     const invoicingTo = await organization.getInvoicingToEmails()
@@ -246,7 +246,7 @@ export class STInvoice extends Model {
                         }, organization.i18n)
                     }
                 }
-            } else if (this.meta.pdf && this.number !== null && this.meta.priceWithVAT < 0) {
+            } else if (this.meta.pdf && this.number !== null && this.meta.totalPrice < 0) {
                 // Send the e-mail
                 Email.sendInternal({
                     to: 'hallo@stamhoofd.be',
@@ -318,11 +318,11 @@ export class STInvoice extends Model {
         }
 
         // Search for all packages and activate them if needed (might be possible that they are already validated)
-        if (this.meta.priceWithVAT >= 0) {
+        if (this.meta.totalPrice >= 0) {
             await this.activatePackages(true)
         }
 
-        if (packages.length === 0 && this.meta.priceWithVAT >= 0) {
+        if (packages.length === 0 && this.meta.totalPrice >= 0) {
             // Mark payments succeeded
             const orgPackages = await this.getOrganizationActivePackages()
             for (const p of orgPackages) {
@@ -385,7 +385,7 @@ export class STInvoice extends Model {
         }
 
         // Reward if we have an open register code
-        if (this.meta.priceWithVAT >= 100 && this.organizationId) {
+        if (this.meta.totalPrice >= 100 && this.organizationId) {
             // We spend some money
             const code = await UsedRegisterCode.getFor(this.organizationId)
             if (code && !code.creditId) {
@@ -405,7 +405,7 @@ export class STInvoice extends Model {
         if (this.paidAt === null || this.negativeInvoiceId) {
             return
         }
-        if (this.meta.priceWithVAT <= 0) {
+        if (this.meta.totalPrice <= 0) {
             return;
         }
         if (!this.paymentId) {
@@ -790,7 +790,7 @@ export class STInvoice extends Model {
             return this.id + '.' + ext;
         }
         const date = this.meta.date ?? this.paidAt ?? this.createdAt ?? new Date();
-        return Formatter.dateIso(date) + ' - ' + (this.meta.priceWithVAT < 0 ? 'Creditnota' : 'Factuur') + ' ' + this.number + ' - Stamhoofd.' + ext;
+        return Formatter.dateIso(date) + ' - ' + (this.meta.totalPrice < 0 ? 'Creditnota' : 'Factuur') + ' ' + this.number + ' - Stamhoofd.' + ext;
     }
 
     async buildUBL() {
@@ -814,8 +814,16 @@ export class STInvoice extends Model {
         const pdfBuilder = new InvoiceBuilder(this)
         const pdfBuffer = await pdfBuilder.buildBuffer();
 
-        const type = this.meta.priceWithVAT < 0 ? 'CreditNote': 'Invoice';
-        const multiplyAmounts = this.meta.priceWithVAT < 0 ? -1 : 1;
+        const type = this.meta.totalPrice < 0 ? 'CreditNote': 'Invoice';
+        const multiplyAmounts = this.meta.totalPrice < 0 ? -1 : 1;
+
+        let customerEmail: string | null = this.meta.companyEmail ?? null
+        if (!customerEmail && this.organizationId) {
+            const organization = await Organization.getByID(this.organizationId)
+            if (organization) {
+                customerEmail = (await organization.getInvoicingToEmail()) ?? null
+            }
+        }
 
         let ubl = ``;
 
@@ -895,6 +903,11 @@ export class STInvoice extends Model {
                 </cac:PartyTaxScheme>` 
             : ``;
 
+        const contactUbl = customerEmail
+            ? `<cac:Contact>
+                    <cbc:ElectronicMail>${esc(customerEmail)}</cbc:ElectronicMail>
+                </cac:Contact>`
+            : '';
 
         // Customer
         ubl += `
@@ -917,6 +930,7 @@ export class STInvoice extends Model {
                         <cbc:RegistrationName>${esc(this.meta.companyName)}</cbc:RegistrationName>
                         <cbc:CompanyID schemeID="0208">${esc(companyNumber)}</cbc:CompanyID>
                     </cac:PartyLegalEntity>
+                    ${contactUbl}
                 </cac:Party>
             </cac:AccountingCustomerParty>`;
         
@@ -934,7 +948,7 @@ export class STInvoice extends Model {
             // Het bedrag werd reeds ingehouden van jouw Stripe balans.
             // Don't include payment means information
         } else {
-            if (this.meta.priceWithVAT < 0) {
+            if (this.meta.totalPrice < 0) {
                 // todo: add how we are going to pay back
                 // 99% chance we already have paid back using a refund
                 // in other cases we might transfer it manually or it will not have been paid already

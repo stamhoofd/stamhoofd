@@ -90,7 +90,7 @@
             </div>
         </main>
 
-        <STToolbar v-if="!invoice.number && invoice.meta.priceWithVAT > 0">
+        <STToolbar v-if="!invoice.number && invoice.meta.totalPrice > 0">
             <template slot="right">
                 <button class="button primary" :disabled="invoice.invoice" type="button" @click="charge">
                     Afrekenen

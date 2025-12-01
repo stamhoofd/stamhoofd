@@ -39,9 +39,9 @@ export class Sorter {
             return 0
         }
         if (a && !b) {
-            return -1
+            return -1 // a first
         }
-        return 1
+        return 1 // b first
     }
 
     static byEnumValue<T extends {}>( a: string, b: string, enumObject: T) {
@@ -69,9 +69,9 @@ export class Sorter {
             return 0
         }
         if (a > b) {
-            return -1
+            return -1 // a first
         }
-        return 1
+        return 1 // b first
     }
 
     /**

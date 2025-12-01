@@ -227,6 +227,9 @@ export class STInvoiceMeta extends AutoEncoder {
     @field({ decoder: StringDecoder })
     companyContact: string
 
+    @field({ decoder: StringDecoder, optional: true, nullable: true })
+    companyEmail: string | null = null;
+
     @field({ decoder: Address })
     companyAddress: Address
 
@@ -276,7 +279,7 @@ export class STInvoiceMeta extends AutoEncoder {
         // In the past we didn't round the price without VAT if we calculated starting from a price inclusive VAT
         // in that case, we only rounded the VAT
         // todo: based on number!
-        return false;
+        return this.date && this.date < new Date('2025-11-24');
     }
 
     get priceWithoutVAT(): number {

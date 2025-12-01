@@ -172,6 +172,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
             
             const invoice = STInvoice.createFor(organization)
+            invoice.meta.companyEmail = user.email
             const date = new Date()
 
             invoice.meta.ipAddress = request.request.getIP()

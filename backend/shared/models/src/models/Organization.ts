@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from "@stamhoofd/backend-i18n";
 import { Email, EmailInterfaceRecipient } from "@stamhoofd/email";
 import { Address, Country, DNSRecordStatus, EmailTemplateType, Organization as OrganizationStruct, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRecordsConfiguration, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from "@stamhoofd/structures";
-import { Formatter } from "@stamhoofd/utility";
+import { Formatter, Sorter } from "@stamhoofd/utility";
 import { AWSError } from 'aws-sdk';
 import SES from 'aws-sdk/clients/sesv2';
 import { PromiseResult } from 'aws-sdk/lib/request';
@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { validateDNSRecords } from "../helpers/DNSValidator";
 import { getEmailBuilder } from "../helpers/EmailBuilder";
 import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { EmailTemplate, Group, StripeAccount } from "./";
+import { EmailTemplate, Group, StripeAccount, Token } from "./";
 
 export class Organization extends Model {
     static table = "organizations";
@@ -909,6 +909,42 @@ export class Organization extends Model {
                 }
                 return '"'+cleanedName+'" <'+recipient.email+'>'
             }).join(", ")
+        }
+
+        return undefined
+    }
+
+    /**
+     * Returns one email for invoices. since in ubl we can only add one address.
+     * We choose the oldest user that was active in the last 3 months (otherwise the oldest user if noone was active)
+     */
+     async getInvoicingToEmail(): Promise<string | undefined> {
+        // Circular reference fix
+        const User = (await import('./User')).User;
+        const admins = await User.where({ organizationId: this.id, permissions: { sign: "!=", value: null }})
+
+        const tokens = await Token.where({userId: {
+            sign: 'IN',
+            value: admins.map(a => a.id)
+        }})
+
+        // Sort by admins that were active in the last 3 months, then creation date
+        const cutoffDate = new Date(Date.now() - 1000*60*60*24*31*3)
+        admins.sort((a, b) => {
+            const aTokens = tokens.filter(t => t.userId === a.id);
+            const bTokens = tokens.filter(t => t.userId === b.id);
+            const aActive = !!aTokens.find(t => t.updatedAt > cutoffDate)
+            const bActive = !!bTokens.find(t => t.updatedAt > cutoffDate)
+            return Sorter.stack(
+                Sorter.byBooleanValue(aActive, bActive),
+                Sorter.byDateValue(b.createdAt, a.createdAt)
+            )
+        })
+
+        const filtered = admins.filter(a => a.verified && a.permissions && (a.permissions.hasFullAccess(this.privateMeta.roles) || a.permissions.hasFinanceAccess(this.privateMeta.roles)))
+
+        if (filtered.length > 0) {
+            return filtered.map(f => f.email)[0]
         }
 
         return undefined

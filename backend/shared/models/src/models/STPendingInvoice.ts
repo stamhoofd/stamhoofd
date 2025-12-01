@@ -190,7 +190,7 @@ export class STPendingInvoice extends Model {
     static async charge(organization: Organization) {
         const pendingInvoice = await this.getForOrganization(organization.id)
 
-        if (!pendingInvoice || pendingInvoice.meta.priceWithVAT === 0) {
+        if (!pendingInvoice || pendingInvoice.meta.totalPrice === 0) {
             throw new SimpleError({
                 code: "no_pending_invoice",
                 message: "No pending invoice",
@@ -219,7 +219,7 @@ export class STPendingInvoice extends Model {
 
         invoice.meta.items = pendingInvoice.meta.items.slice() // make a copy (needed to prevent mutating pending invoice and invoice at the same time)
 
-        if (invoice.meta.priceWithVAT == 0) {
+        if (invoice.meta.totalPrice == 0) {
             throw new SimpleError({
                 code: "no_pending_invoice",
                 message: "No pending invoice",
@@ -229,7 +229,7 @@ export class STPendingInvoice extends Model {
 
         await STCredit.applyCredits(organization.id, invoice, false)
 
-        const price = invoice.meta.priceWithVAT
+        const price = invoice.meta.totalPrice
         
          // Create payment
         const payment = new Payment()

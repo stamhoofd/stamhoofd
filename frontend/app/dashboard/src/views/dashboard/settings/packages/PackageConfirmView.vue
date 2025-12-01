@@ -97,7 +97,7 @@
                 /> 
             </template>
 
-            <template v-if="proFormaInvoice && proFormaInvoice.meta.priceWithVAT > 0 && selectedMandateId === null">
+            <template v-if="proFormaInvoice && proFormaInvoice.meta.totalPrice > 0 && selectedMandateId === null">
                 <hr>
 
                 <h2>Kies je betaalmethode</h2>
@@ -109,7 +109,7 @@
                 <PaymentSelectionList v-model="selectedPaymentMethod" :payment-methods="paymentMethods" :organization="organization" />
             </template>
 
-            <template v-else-if="proFormaInvoice && proFormaInvoice.meta.priceWithVAT == 0 && selectedMandateId === null">
+            <template v-else-if="proFormaInvoice && proFormaInvoice.meta.totalPrice == 0 && selectedMandateId === null">
                 <hr>
 
                 <h2>Koppel de bankkaart of creditcard van je vereniging</h2>
@@ -127,7 +127,7 @@
 
             <Spinner v-if="loadingProForma" />
 
-            <template v-else-if="proFormaInvoice && proFormaInvoice.meta.priceWithVAT > 0">
+            <template v-else-if="proFormaInvoice && proFormaInvoice.meta.totalPrice > 0">
                 <hr>
                 <h2>Overzicht</h2>
                 <STList>
@@ -171,7 +171,7 @@
                             Te betalen
 
                             <template slot="right">
-                                {{ proFormaInvoice.meta.priceWithVAT | price }}
+                                {{ proFormaInvoice.meta.totalPrice | price }}
                             </template> 
                         </STListItem>
                     </STList>
