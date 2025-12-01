@@ -40,7 +40,7 @@ export class PlaywrightCaddyConfigHelper {
     static createFrontendRoute({
         domains,
         group,
-        root
+        root,
     }: {
         domains: string[];
         root: string;
@@ -76,7 +76,7 @@ export class PlaywrightCaddyConfigHelper {
                             handle: [
                                 {
                                     handler: "file_server",
-                                    root
+                                    root,
                                 },
                             ],
                         },
@@ -111,6 +111,7 @@ export class PlaywrightCaddyConfigHelper {
                 //     ],
                 // },
             ],
+            terminal: true,
         };
     }
 

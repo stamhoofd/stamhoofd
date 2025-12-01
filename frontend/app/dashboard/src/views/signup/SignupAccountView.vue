@@ -118,6 +118,7 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
     acceptDataAgreement = false;
 
     async goNext() {
+        console.error('playwright debug - start goNext');
         if (this.loading) {
             return;
         }
@@ -197,7 +198,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 return;
             }
 
+            console.error('playwright debug - get token - start');
             const token = await LoginHelper.signUpOrganization(this.organization, this.email, this.password, this.firstName, this.lastName, this.registerCode?.code);
+            console.error('playwright debug - get token - done');
             plausible('signup');
 
             this.loading = false;
@@ -210,8 +213,11 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                 console.error(e);
             }
 
+            console.error('playwright debug - new session');
             const session = new SessionContext(this.organization);
+            console.error('playwright debug - prepare session');
             await SessionManager.prepareSessionForUsage(session, true);
+            console.error('playwright debug - dasbboard context');
             const dashboardContext = await getScopedAutoRoot(session, {
                 initialPresents: [
                     {
@@ -222,7 +228,9 @@ export default class SignupAccountView extends Mixins(NavigationMixin) {
                     },
                 ],
             });
+            console.error('playwright debug - dismiss');
             await this.dismiss({ force: true });
+            console.error('playwright debug - send event');
             await ReplaceRootEventBus.sendEvent('replace', dashboardContext);
 
             // Show popup to confirm e-mail
