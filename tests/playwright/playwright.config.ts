@@ -27,9 +27,6 @@ export default defineConfig({
         // todo
         headless: process.env.CI ? true : false,
         ignoreHTTPSErrors: true,
-        launchOptions: {
-            args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
-        },
     },
 
     /* Configure projects for major browsers */
