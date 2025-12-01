@@ -334,6 +334,8 @@ jobs:
         sudo chmod +x /usr/local/bin/caddy
     - name: Verify Caddy
       run: caddy version
+    - name: Give Caddy permissions to bind to privileged ports
+      run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
     - name: Caddy trust
       run: caddy start && caddy trust --config /dev/null && caddy stop
     - name: Check if Caddy certificate exists
@@ -354,11 +356,6 @@ jobs:
         sudo cp "$CERT_PATH" /usr/local/share/ca-certificates/caddy.crt
         sudo update-ca-certificates
         echo "Caddy certificate trusted for CI tools"
-    - name: Update certificates
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ca-certificates
-        sudo update-ca-certificates
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API
@@ -371,8 +368,6 @@ jobs:
         mysql version: '8.0'
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
-    - name: Give Caddy permissions to bind to privileged ports
-      run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
     - name: Run Playwright tests
       run: CI=true && yarn test:playwright
       continue-on-error: true   # allows uploading artifacts even if tests fail
