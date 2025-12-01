@@ -2900,7 +2900,11 @@ describe('E2E.Bundle Discounts', () => {
                     unitPrice: -5_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: -5_0000,
+                    priceTotal: -5_0000,
+
+                    // Payment reallocation
+                    pricePaid: -5_0000,
+                    priceOpen: 0,
                 },
                 {
                     type: BalanceItemType.Registration,
@@ -2933,10 +2937,14 @@ describe('E2E.Bundle Discounts', () => {
                     amount: 1,
                     unitPrice: 5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 5_0000,
+                    priceTotal: 5_0000,
 
                     // Not pending because created by admin
                     pricePending: 0,
+
+                    // Payment reallocation
+                    pricePaid: 5_0000,
+                    priceOpen: 0,
                 },
                 // Add new discount
                 {
@@ -3215,7 +3223,11 @@ describe('E2E.Bundle Discounts', () => {
                     unitPrice: -5_0000,
                     status: BalanceItemStatus.Due, // has NOT been cancelled
                     pricePending: 0,
-                    priceOpen: -5_0000,
+                    priceTotal: -5_0000,
+
+                    // Payment reallocation
+                    priceOpen: 0,
+                    pricePaid: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
@@ -3234,7 +3246,11 @@ describe('E2E.Bundle Discounts', () => {
                     unitPrice: 5_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 5_0000,
+                    priceTotal: 5_0000,
+
+                    // Payment reallocation
+                    priceOpen: 0,
+                    pricePaid: 5_0000,
                 },
             ]);
         });
@@ -3282,7 +3298,11 @@ describe('E2E.Bundle Discounts', () => {
                     unitPrice: -5_0000,
                     status: BalanceItemStatus.Due, // has NOT been cancelled
                     pricePending: 0,
-                    priceOpen: -5_0000,
+                    priceTotal: -5_0000,
+
+                    // Payment reallocation
+                    priceOpen: 0,
+                    pricePaid: -5_0000,
                 },
                 {
                     type: BalanceItemType.Registration,
@@ -3301,7 +3321,11 @@ describe('E2E.Bundle Discounts', () => {
                     unitPrice: 5_0000,
                     status: BalanceItemStatus.Due,
                     pricePending: 0,
-                    priceOpen: 5_0000,
+                    priceTotal: 5_0000,
+
+                    // Payment reallocation
+                    priceOpen: 0,
+                    pricePaid: 5_0000,
                 },
             ]);
         });

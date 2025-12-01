@@ -153,18 +153,18 @@ describe('PaymentReallocationService', () => {
     describe('swapPayments', () => {
         it('Equal balance item payments', async () => {
             const b1 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [30 * 100],
-                priceOpen: -30 * 100, // This adds internal assert
+                paid: [30_00],
+                priceOpen: -30_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -180,24 +180,24 @@ describe('PaymentReallocationService', () => {
 
             await expectItem(b2, {
                 priceOpen: 0,
-                paid: [30 * 100],
+                paid: [30_00],
             });
         });
 
         it('Equal pending balance items', async () => {
             const b1 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                pending: [30 * 100],
-                priceOpen: -30 * 100, // This adds internal assert
+                pending: [30_00],
+                priceOpen: -30_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 pending: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -213,22 +213,22 @@ describe('PaymentReallocationService', () => {
 
             await expectItem(b2, {
                 priceOpen: 0,
-                pending: [30 * 100],
+                pending: [30_00],
             });
         });
 
         it('Failed payments are not moved', async () => {
             const b1 = await createItem({
-                unitPrice: -30 * 100,
+                unitPrice: -30_00,
                 amount: 1,
-                failed: [30 * 100],
-                priceOpen: -30 * 100, // This adds internal assert
+                failed: [30_00],
+                priceOpen: -30_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -238,30 +238,30 @@ describe('PaymentReallocationService', () => {
             );
 
             await expectItem(b1, {
-                priceOpen: -30 * 100,
-                failed: [30 * 100],
+                priceOpen: -30_00,
+                failed: [30_00],
             });
 
             await expectItem(b2, {
-                priceOpen: 30 * 100,
+                priceOpen: 30_00,
                 pending: [],
             });
         });
 
         it('Larger negative balance', async () => {
             const b1 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [30 * 100],
-                priceOpen: -30 * 100, // This adds internal assert
+                paid: [30_00],
+                priceOpen: -30_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 15 * 100, // This adds internal assert
+                priceOpen: 15_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -271,30 +271,30 @@ describe('PaymentReallocationService', () => {
             );
 
             await expectItem(b1, {
-                priceOpen: -15 * 100,
-                paid: [15 * 100],
+                priceOpen: -15_00,
+                paid: [15_00],
             });
 
             await expectItem(b2, {
                 priceOpen: 0,
-                paid: [15 * 100],
+                paid: [15_00],
             });
         });
 
         it('Larger positive balance', async () => {
             const b1 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [15 * 100],
-                priceOpen: -15 * 100, // This adds internal assert
+                paid: [15_00],
+                priceOpen: -15_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -309,25 +309,25 @@ describe('PaymentReallocationService', () => {
             });
 
             await expectItem(b2, {
-                priceOpen: 15 * 100,
-                paid: [15 * 100],
+                priceOpen: 15_00,
+                paid: [15_00],
             });
         });
 
         it('Spits up payments', async () => {
             const b1 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [50 * 100],
-                priceOpen: -50 * 100, // This adds internal assert
+                paid: [50_00],
+                priceOpen: -50_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -337,30 +337,30 @@ describe('PaymentReallocationService', () => {
             );
 
             await expectItem(b1, {
-                paid: [20 * 100],
-                priceOpen: -20 * 100, // This adds internal assert
+                paid: [20_00],
+                priceOpen: -20_00, // This adds internal assert
             });
 
             await expectItem(b2, {
                 priceOpen: 0,
-                paid: [30 * 100],
+                paid: [30_00],
             });
         });
 
         it('Moves multiple payments', async () => {
             const b1 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [20 * 100, 5 * 100, 10 * 100],
-                priceOpen: -35 * 100, // This adds internal assert
+                paid: [20_00, 5_00, 10_00],
+                priceOpen: -35_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 15 * 100, // This adds internal assert
+                priceOpen: 15_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -370,29 +370,29 @@ describe('PaymentReallocationService', () => {
             );
 
             await expectItem(b1, {
-                priceOpen: -20 * 100,
-                paid: [20 * 100],
+                priceOpen: -20_00,
+                paid: [20_00],
             });
 
             await expectItem(b2, {
                 priceOpen: 0,
-                paid: [5 * 100, 10 * 100],
+                paid: [5_00, 10_00],
             });
         });
 
         it('Moves multiple payments in both directions', async () => {
             const b1 = await createItem({
-                unitPrice: -30 * 100,
+                unitPrice: -30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: -30 * 100, // This adds internal assert
+                priceOpen: -30_00, // This adds internal assert
             });
 
             const b2 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
-                paid: [-20 * 100, -10 * 100],
-                priceOpen: 45 * 100, // This adds internal assert
+                paid: [-20_00, -10_00],
+                priceOpen: 45_00, // This adds internal assert
             });
 
             // Now do a swap
@@ -403,11 +403,11 @@ describe('PaymentReallocationService', () => {
 
             await expectItem(b1, {
                 priceOpen: 0,
-                paid: [-20 * 100, -10 * 100],
+                paid: [-20_00, -10_00],
             });
 
             await expectItem(b2, {
-                priceOpen: 15 * 100,
+                priceOpen: 15_00,
                 paid: [],
             });
         });
@@ -417,11 +417,11 @@ describe('PaymentReallocationService', () => {
         it('Balances with same relations should move existing payments first', async () => {
             const memberId = (await getMember()).id;
             const b1 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [30 * 100],
-                priceOpen: -30 * 100, // This adds internal assert
+                paid: [30_00],
+                priceOpen: -30_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -431,10 +431,10 @@ describe('PaymentReallocationService', () => {
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -457,18 +457,18 @@ describe('PaymentReallocationService', () => {
 
             await expectItem(b2, {
                 priceOpen: 0,
-                paid: [30 * 100],
+                paid: [30_00],
             });
         });
 
-        it.skip('Balances with different relations should create a reallocation payment', async () => {
+        it('Balances with different relations should create a reallocation payment', async () => {
             const memberId = (await getMember()).id;
             const b1 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [30 * 100],
-                priceOpen: -30 * 100, // This adds internal assert
+                paid: [30_00],
+                priceOpen: -30_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -478,10 +478,10 @@ describe('PaymentReallocationService', () => {
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -499,83 +499,23 @@ describe('PaymentReallocationService', () => {
             // Check if the balance items are now equal
             await expectItem(b1, {
                 priceOpen: 0,
-                paid: [30 * 100, -30 * 100],
+                paid: [30_00, -30_00],
             });
 
             await expectItem(b2, {
                 priceOpen: 0,
-                paid: [30 * 100],
-            });
-        });
-
-        it.skip('Balances with different relations should create a reallocation payment with 3 items', async () => {
-            const memberId = (await getMember()).id;
-            const b1 = await createItem({
-                unitPrice: 45 * 100,
-                amount: 1,
-                status: BalanceItemStatus.Canceled,
-                paid: [45 * 100],
-                priceOpen: -45 * 100, // This adds internal assert
-                objectId: memberId,
-                relations: {
-                    [BalanceItemRelationType.Group]: 'group1',
-                    [BalanceItemRelationType.GroupPrice]: 'defaultprice',
-                    [BalanceItemRelationType.Member]: 'member1',
-                },
-            });
-
-            const b2 = await createItem({
-                unitPrice: 30 * 100,
-                amount: 1,
-                paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
-                objectId: memberId,
-                relations: {
-                    [BalanceItemRelationType.Group]: 'group1',
-                    [BalanceItemRelationType.GroupPrice]: 'price2', // This one is different
-                    [BalanceItemRelationType.Member]: 'member1',
-                },
-            });
-
-            const b3 = await createItem({
-                unitPrice: 15 * 100,
-                amount: 1,
-                paid: [],
-                priceOpen: 15 * 100, // This adds internal assert
-                objectId: memberId,
-            });
-
-            await PaymentReallocationService.reallocate(
-                (await getOrganization()).id,
-                memberId,
-                ReceivableBalanceType.member,
-            );
-
-            // Check if the balance items are now equal
-            await expectItem(b1, {
-                priceOpen: 0,
-                paid: [45 * 100, -45 * 100],
-            });
-
-            await expectItem(b2, {
-                priceOpen: 0,
-                paid: [30 * 100],
-            });
-
-            await expectItem(b3, {
-                priceOpen: 0,
-                paid: [15 * 100],
+                paid: [30_00],
             });
         });
 
         it.skip('Balances with different relations should create a reallocation payment with 3 items and remaining open should prefer most similar item', async () => {
             const memberId = (await getMember()).id;
             const b1 = await createItem({
-                unitPrice: 40 * 100,
+                unitPrice: 40_00,
                 amount: 1,
                 status: BalanceItemStatus.Canceled,
-                paid: [40 * 100],
-                priceOpen: -40 * 100, // This adds internal assert
+                paid: [40_00],
+                priceOpen: -40_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -585,18 +525,18 @@ describe('PaymentReallocationService', () => {
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
             });
 
             const b3 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 15 * 100, // This adds internal assert
+                priceOpen: 15_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -614,32 +554,28 @@ describe('PaymentReallocationService', () => {
             // Check if the balance items are now equal
             await expectItem(b1, {
                 priceOpen: 0,
-                paid: [40 * 100, -40 * 100],
+                paid: [40_00, -40_00],
             });
 
             await expectItem(b2, {
-                priceOpen: 5 * 100,
-                paid: [25 * 100],
+                priceOpen: 5_00,
+                paid: [25_00],
             });
 
             // b3 was more similar to b1 and takes all first
             await expectItem(b3, {
-                priceOpen: 0 * 100,
-                paid: [15 * 100],
+                priceOpen: 0,
+                paid: [15_00],
             });
         });
 
-        /**
-         * Note: if this one fails randomly, it might because it isn't working stable enough and doesn't fulfil the requirements
-         */
-        it.skip('Balances with different relations should create a reallocation payment with 3 items and remaining open should prefer largest amount', async () => {
+        it('Balances with same amount should create a reallocation payment over different amounts with more than 2 different relations', async () => {
             const memberId = (await getMember()).id;
             const b1 = await createItem({
-                unitPrice: 40 * 100,
+                unitPrice: 15_00,
                 amount: 1,
-                status: BalanceItemStatus.Canceled,
-                paid: [40 * 100],
-                priceOpen: -40 * 100, // This adds internal assert
+                paid: [],
+                priceOpen: 15_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -649,18 +585,82 @@ describe('PaymentReallocationService', () => {
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: -30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: -30_00, // This adds internal assert
                 objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'price2', // This one is different
+                    [BalanceItemRelationType.Member]: 'member2', // This one is different
+                },
             });
 
             const b3 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 15 * 100, // This adds internal assert
+                priceOpen: 30_00, // This adds internal assert
+                objectId: memberId,
+            });
+
+            await PaymentReallocationService.reallocate(
+                (await getOrganization()).id,
+                memberId,
+                ReceivableBalanceType.member,
+            );
+
+            // Check if the balance items are now equal
+            await expectItem(b1, {
+                priceOpen: 15_00,
+                paid: [],
+            });
+
+            await expectItem(b2, {
+                priceOpen: 0,
+                paid: [-30_00],
+            });
+
+            await expectItem(b3, {
+                priceOpen: 0,
+                paid: [30_00],
+            });
+        });
+
+        it('Balances with same relations are prioritized over same amount', async () => {
+            const memberId = (await getMember()).id;
+            const b1 = await createItem({
+                unitPrice: 30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
+                objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'defaultprice',
+                    [BalanceItemRelationType.Member]: 'member1',
+                },
+            });
+
+            const b2 = await createItem({
+                unitPrice: -30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: -30_00, // This adds internal assert
+                objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'defaultprice', 
+                    [BalanceItemRelationType.Member]: 'member1', 
+                },
+            });
+
+            const b3 = await createItem({
+                unitPrice: 30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
             });
 
@@ -673,28 +673,36 @@ describe('PaymentReallocationService', () => {
             // Check if the balance items are now equal
             await expectItem(b1, {
                 priceOpen: 0,
-                paid: [40 * 100, -40 * 100],
+                paid: [30_00],
             });
 
             await expectItem(b2, {
-                priceOpen: 0 * 100,
-                paid: [30 * 100],
+                priceOpen: 0,
+                paid: [-30_00],
             });
 
             await expectItem(b3, {
-                priceOpen: 5 * 100,
-                paid: [10 * 100],
+                priceOpen: 30_00,
+                paid: [],
             });
         });
 
-        it('Balances due in the future should not be reallocated', async () => {
+        it('Balances with one different relation are prioritized over same amount', async () => {
             const memberId = (await getMember()).id;
-            const b1 = await createItem({
-                unitPrice: 40 * 100,
+            
+            const b3 = await createItem({
+                unitPrice: 30_00,
                 amount: 1,
-                status: BalanceItemStatus.Canceled,
-                paid: [40 * 100],
-                priceOpen: -40 * 100, // This adds internal assert
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
+                objectId: memberId,
+            });
+            
+            const b1 = await createItem({
+                unitPrice: 30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -704,10 +712,172 @@ describe('PaymentReallocationService', () => {
             });
 
             const b2 = await createItem({
-                unitPrice: 30 * 100,
+                unitPrice: -30_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 30 * 100, // This adds internal assert
+                priceOpen: -30_00, // This adds internal assert
+                objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'price2', // This one is different
+                    [BalanceItemRelationType.Member]: 'member1', 
+                },
+            });
+            await PaymentReallocationService.reallocate(
+                (await getOrganization()).id,
+                memberId,
+                ReceivableBalanceType.member,
+            );
+
+            // Check if the balance items are now equal
+            await expectItem(b1, {
+                priceOpen: 0,
+                paid: [30_00],
+            });
+
+            await expectItem(b2, {
+                priceOpen: 0,
+                paid: [-30_00],
+            });
+
+            await expectItem(b3, {
+                priceOpen: 30_00,
+                paid: [],
+            });
+        });
+
+
+        it('Balances with different amount should not create a reallocation payment', async () => {
+            const memberId = (await getMember()).id;
+            const b1 = await createItem({
+                unitPrice: 40_00,
+                amount: 1,
+                status: BalanceItemStatus.Canceled,
+                paid: [40_00],
+                priceOpen: -40_00, // This adds internal assert
+                objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'defaultprice',
+                    [BalanceItemRelationType.Member]: 'member1',
+                },
+            });
+
+            const b2 = await createItem({
+                unitPrice: 30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
+                objectId: memberId,
+            });
+
+            const b3 = await createItem({
+                unitPrice: 15_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 15_00, // This adds internal assert
+                objectId: memberId,
+            });
+
+            await PaymentReallocationService.reallocate(
+                (await getOrganization()).id,
+                memberId,
+                ReceivableBalanceType.member,
+            );
+
+            // Check if the balance items are now equal
+            await expectItem(b1, {
+                priceOpen: -40_00,
+                paid: [40_00],
+            });
+
+            await expectItem(b2, {
+                priceOpen: 30_00, 
+                paid: [],
+            });
+
+            await expectItem(b3, {
+                priceOpen: 15_00,
+                paid: [],
+            });
+        });
+
+        it('Balances with different amount should only create a reallocation payment if total sum is zero', async () => {
+            const memberId = (await getMember()).id;
+            const b1 = await createItem({
+                unitPrice: 40_00,
+                amount: 1,
+                status: BalanceItemStatus.Canceled,
+                paid: [40_00],
+                priceOpen: -40_00, // This adds internal assert
+                objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'defaultprice',
+                    [BalanceItemRelationType.Member]: 'member1',
+                },
+            });
+
+            const b2 = await createItem({
+                unitPrice: 30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
+                objectId: memberId,
+            });
+
+            const b3 = await createItem({
+                unitPrice: 10_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 10_00, // This adds internal assert
+                objectId: memberId,
+            });
+
+            await PaymentReallocationService.reallocate(
+                (await getOrganization()).id,
+                memberId,
+                ReceivableBalanceType.member,
+            );
+
+            // Check if the balance items are now equal
+            await expectItem(b1, {
+                priceOpen: 0,
+                paid: [40_00, -40_00],
+            });
+
+            await expectItem(b2, {
+                priceOpen: 0,
+                paid: [30_00],
+            });
+
+            await expectItem(b3, {
+                priceOpen: 0,
+                paid: [10_00],
+            });
+        });
+
+        it('Balances due in the future should not be reallocated', async () => {
+            const memberId = (await getMember()).id;
+            const b1 = await createItem({
+                unitPrice: 40_00,
+                amount: 1,
+                status: BalanceItemStatus.Canceled,
+                paid: [40_00],
+                priceOpen: -40_00, // This adds internal assert
+                objectId: memberId,
+                relations: {
+                    [BalanceItemRelationType.Group]: 'group1',
+                    [BalanceItemRelationType.GroupPrice]: 'defaultprice',
+                    [BalanceItemRelationType.Member]: 'member1',
+                },
+            });
+
+            const b2 = await createItem({
+                unitPrice: 30_00,
+                amount: 1,
+                paid: [],
+                priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
                 // This is due later, so it should be the last one to be paid
                 dueAt: new Date('2050-01-01'),
@@ -719,10 +889,10 @@ describe('PaymentReallocationService', () => {
             });
 
             const b3 = await createItem({
-                unitPrice: 15 * 100,
+                unitPrice: 15_00,
                 amount: 1,
                 paid: [],
-                priceOpen: 15 * 100, // This adds internal assert
+                priceOpen: 15_00, // This adds internal assert
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
@@ -739,18 +909,18 @@ describe('PaymentReallocationService', () => {
 
             // Check if the balance items are now equal
             await expectItem(b1, {
-                priceOpen: -25_00, // Still paid 25 too much
-                paid: [25_00],
+                priceOpen: 0, 
+                paid: [],
             });
 
             await expectItem(b2, {
-                priceOpen: 30 * 100,
+                priceOpen: 30_00,
                 paid: [],
             });
 
             await expectItem(b3, {
-                priceOpen: 0 * 100, // Paid with canceled balance item that was already paid and should be refunded
-                paid: [15 * 100],
+                priceOpen: -25_00, // Paid too much
+                paid: [40_00],
             });
         });
     });
