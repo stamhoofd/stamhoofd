@@ -371,7 +371,7 @@ jobs:
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
     - name: Run Playwright tests
-      run: CI=true && sudo yarn test:playwright
+      run: CI=true && yarn test:playwright
       continue-on-error: true   # allows uploading artifacts even if tests fail
     - name: Upload Playwright artifacts
       if: always()
