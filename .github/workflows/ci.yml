@@ -374,6 +374,8 @@ jobs:
         
         # Import the Caddy certificate
         certutil -A -d sql:"$CHROMIUM_PROFILE" -n "Caddy Root CA" -t "TCu,Cu,Tu" -i "$CERT"
+
+        sudo update-ca-certificates
         
         echo "Caddy certificate imported into Chromium NSS DB"
     - name: Build shared packages
