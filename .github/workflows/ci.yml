@@ -333,12 +333,42 @@ jobs:
     - name: Verify Caddy
       run: caddy version
     - name: Caddy trust
-      run: sudo caddy start && sudo caddy trust && sudo caddy stop
+      run: sudo caddy start && sudo caddy trust --config /dev/null && sudo caddy stop
+    - name: Check if Caddy certificate exists
+      id: check_cert
+      run: |
+        CERT_PATH="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
+        if [ -f "$CERT_PATH" ]; then
+            echo "Caddy certificate found at $CERT_PATH"
+            echo "exists=true" >> $GITHUB_OUTPUT
+        else
+            echo "Caddy certificate NOT found."
+            echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+    - name: Check if Caddy certificate exists 2
+      run: |
+        CERT_PATH="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
+        if [ -f "$CERT_PATH" ]; then
+            echo "Caddy certificate found at $CERT_PATH"
+            echo "exists=true" >> $GITHUB_OUTPUT
+        else
+            echo "Caddy certificate NOT found."
+            echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+    - name: Trust Caddy certificate in CI
+      if: steps.check_cert.outputs.exists == 'true'
+      run: |
+        CERT_PATH="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
+        sudo cp "$CERT_PATH" /usr/local/share/ca-certificates/caddy.crt
+        sudo update-ca-certificates
+        echo "Caddy certificate trusted for CI tools"
     - name: Update certificates
       run: |
         sudo apt-get update
         sudo apt-get install -y ca-certificates
         sudo update-ca-certificates
+    - name: 'check caddy env (todo: remove)'
+      run: caddy environ
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
     - name: Build shared packages
