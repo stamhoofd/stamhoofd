@@ -2,13 +2,20 @@
 import { test } from "../setup/fixtures";
 
 import { expect } from "@playwright/test";
-import { Organization, OrganizationFactory, Token, User, UserFactory } from "@stamhoofd/models";
+import {
+    Organization,
+    OrganizationFactory,
+    Token,
+    User,
+    UserFactory,
+} from "@stamhoofd/models";
 import { PermissionLevel, Permissions } from "@stamhoofd/structures";
 import { TestUtils } from "@stamhoofd/test-utils";
-            
+import { WorkerHelper } from "../setup/helpers/WorkerHelper";
+
 // login
 test.describe("userMode organization", () => {
-    console.log('inside: login - userMode organization')
+    console.log("inside: login - userMode organization");
     let organization: Organization;
     let user: User;
 
@@ -16,33 +23,37 @@ test.describe("userMode organization", () => {
     const email = "john.doe@gmail.com";
     const password = "testAbc123456";
 
-    test.beforeAll(
-        async () => {
-            console.log('inside: login - userMode organization - beforeAll start')
-            TestUtils.setPermanentEnvironment("userMode", "organization");
+    test.beforeAll(async () => {
+        console.log("inside: login - userMode organization - beforeAll start");
+        TestUtils.setPermanentEnvironment("userMode", "organization");
 
-            organization = await new OrganizationFactory({
-                name: organizationName,
-            }).create();
+        organization = await new OrganizationFactory({
+            name: organizationName,
+        }).create();
 
-            user = await new UserFactory({
-                firstName: "John",
-                lastName: "Doe",
-                email,
-                password,
-                organization,
-                permissions: Permissions.create({
-                    level: PermissionLevel.Full,
-                }),
-            }).create();
+        user = await new UserFactory({
+            firstName: "John",
+            lastName: "Doe",
+            email,
+            password,
+            organization,
+            permissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+        }).create();
 
-            await Token.createToken(user);
-            console.log('inside: login - userMode organization - beforeAll finished')
-        },
-    );
+        await Token.createToken(user);
+        console.log(
+            "inside: login - userMode organization - beforeAll finished",
+        );
+    });
+
+    test.afterAll(async () => {
+        await WorkerHelper.clearDatabase();
+    });
 
     test("happy flow", async ({ page, dashboard }) => {
-        console.log('inside: login - test userMode organization - start')
+        console.log("inside: login - test userMode organization - start");
         await dashboard.goto();
 
         // click search input and fill in organization name
@@ -76,12 +87,12 @@ test.describe("userMode organization", () => {
         await expect(page.getByTestId("organization-name")).toContainText(
             organizationName,
         );
-        console.log('inside: login - test userMode organization - done')
+        console.log("inside: login - test userMode organization - done");
     });
 });
 
 test.describe("userMode platform", () => {
-    console.log('inside: userMode platform')
+    console.log("inside: userMode platform");
     let organization: Organization;
     let user: User;
 
@@ -89,28 +100,30 @@ test.describe("userMode platform", () => {
     const email = "john.doe@gmail.com";
     const password = "testAbc123456";
 
-    test.beforeAll(
-        async () => {
-            TestUtils.setPermanentEnvironment("userMode", "platform");
+    test.beforeAll(async () => {
+        TestUtils.setPermanentEnvironment("userMode", "platform");
 
-            organization = await new OrganizationFactory({
-                name: organizationName,
-            }).create();
+        organization = await new OrganizationFactory({
+            name: organizationName,
+        }).create();
 
-            user = await new UserFactory({
-                firstName: "John",
-                lastName: "Doe",
-                email,
-                password,
-                organization,
-                globalPermissions: Permissions.create({
-                    level: PermissionLevel.Full,
-                }),
-            }).create();
+        user = await new UserFactory({
+            firstName: "John",
+            lastName: "Doe",
+            email,
+            password,
+            organization,
+            globalPermissions: Permissions.create({
+                level: PermissionLevel.Full,
+            }),
+        }).create();
 
-            await Token.createToken(user);
-        },
-    );
+        await Token.createToken(user);
+    });
+
+    test.afterAll(async () => {
+        await WorkerHelper.clearDatabase();
+    });
 
     test("happy flow", async ({ page, dashboard }) => {
         await dashboard.goto();
