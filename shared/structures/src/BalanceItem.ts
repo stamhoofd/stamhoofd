@@ -53,6 +53,10 @@ export enum BalanceItemType {
     PlatformMembership = 'PlatformMembership',
     CancellationFee = 'CancellationFee',
     RegistrationBundleDiscount = 'RegistrationBundleDiscount',
+    /**
+     * Small differences that occurred when creating a payment or invoice
+     */
+    Rounding = 'Rounding'
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -73,6 +77,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.PlatformMembership: return $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`);
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
+        case BalanceItemType.Rounding: return $t('Afrondingscorrectie');
     }
 }
 
@@ -86,6 +91,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.PlatformMembership: return 'membership-filled';
         case BalanceItemType.CancellationFee: return 'canceled';
         case BalanceItemType.RegistrationBundleDiscount: return 'label';
+        case BalanceItemType.Rounding: return 'calculator';
     }
 }
 
@@ -490,6 +496,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`03df4cd8-446f-4f40-8d27-90a51bb5a6ba`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`ab4ad0cf-53df-4f35-96a8-59747075417f`);
+            case BalanceItemType.Rounding: return this.description;
         }
     }
 
@@ -511,6 +518,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
+            case BalanceItemType.Rounding: return $t('afrondingen');
         }
     }
 
@@ -636,6 +644,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`8ce0947e-8681-4abd-b8ef-27d0218fa4a1`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
+            case BalanceItemType.Rounding: return $t(`Afrondingscorrectie`);
         }
     }
 
@@ -677,6 +686,14 @@ export class BalanceItem extends AutoEncoder {
                 break;
             }
             case BalanceItemType.CancellationFee: {
+                const list: string[] = [];
+                // List all relations
+                for (const [key, value] of this.relations.entries()) {
+                    list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name.toString());
+                }
+                return list.join('\n');
+            }
+            case BalanceItemType.Rounding: {
                 const list: string[] = [];
                 // List all relations
                 for (const [key, value] of this.relations.entries()) {

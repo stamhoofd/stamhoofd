@@ -1,11 +1,11 @@
 import createMollieClient, { PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
 import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { BuckarooHelper } from '../helpers/BuckarooHelper';
 import { StripeHelper } from '../helpers/StripeHelper';
-import { BalanceItemPaymentService } from './BalanceItemPaymentService';
 import { AuditLogService } from './AuditLogService';
+import { BalanceItemPaymentService } from './BalanceItemPaymentService';
 import { BalanceItemService } from './BalanceItemService';
 
 export const PaymentService = {
@@ -331,4 +331,51 @@ export const PaymentService = {
         }
         return false;
     },
+
+    /**
+     * Say the total amount to pay is 15,238 because (e.g. because of VAT). In that case,
+     * we'll need to round the payment to 1 cent. That can cause issues in the financial statements because
+     * the total amount of balances does not match the total amount received/paid.
+     * 
+     * To fix that, we create an extra balance item with the difference. So the rounding always matches.
+     */
+    async round(payment: Payment) {
+        if (!payment.organizationId) {
+            throw new Error('Cannot round payments without organizationId')
+        }
+        
+        const amount = payment.price;
+        const rounded = Payment.roundPrice(payment.price)
+        const difference = rounded - amount;
+
+        if (difference === 0) {
+            return;
+        }
+
+        if (difference > 100) {
+            throw new Error('Unexpected rounding difference.')
+        }
+
+        const balanceItem = new BalanceItem();
+        balanceItem.type = BalanceItemType.Rounding;
+        balanceItem.userId = payment.payingUserId;
+        balanceItem.payingOrganizationId = payment.payingOrganizationId
+        balanceItem.unitPrice = difference;
+        balanceItem.pricePaid = 0;
+        balanceItem.organizationId = payment.organizationId;
+        balanceItem.status = BalanceItemStatus.Hidden;
+        await balanceItem.save();
+
+        // Create balance item payment
+        const balanceItemPayment = new BalanceItemPayment();
+        balanceItemPayment.organizationId = payment.organizationId;
+        balanceItemPayment.balanceItemId = balanceItem.id;
+        balanceItemPayment.price = difference;
+        balanceItemPayment.paymentId = payment.id;
+        await balanceItemPayment.save();
+
+        // Change payment total price
+        payment.price += difference
+        await payment.save();
+    }
 };

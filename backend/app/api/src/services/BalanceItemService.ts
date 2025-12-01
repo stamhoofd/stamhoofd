@@ -267,6 +267,13 @@ export const BalanceItemService = {
                 await order.undoPaid(payment, organization);
             }
         }
+
+        // If a rounded payment was canceled, make sure the balance item is hidden again (will become visible again when marking paid)
+        if (this.type === BalanceItemType.Rounding && balanceItem.status !== BalanceItemStatus.Hidden) {
+            // Mark undue
+            balanceItem.status = BalanceItemStatus.Hidden;
+            await balanceItem.save();
+        }
     },
 
     async markFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
@@ -281,6 +288,13 @@ export const BalanceItemService = {
                     await balanceItem.save();
                 }
             }
+        }
+
+        // If a rounded payment was canceled, make sure the balance item is hidden again (will become visible again when marking paid)
+        if (this.type === BalanceItemType.Rounding && balanceItem.status !== BalanceItemStatus.Hidden) {
+            // Mark undue
+            balanceItem.status = BalanceItemStatus.Hidden;
+            await balanceItem.save();
         }
     },
 

@@ -3,7 +3,7 @@ import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, Payme
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Organization } from './';
+import { BalanceItem, Organization } from './';
 import { QueryableModel } from '@stamhoofd/sql';
 
 export class Payment extends QueryableModel {
@@ -163,6 +163,10 @@ export class Payment extends QueryableModel {
     generateDescription(organization: Organization, reference: string, replacements: { [key: string]: string } = {}) {
         const settings = this.transferSettings ?? organization.meta.transferSettings;
         this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements);
+    }
+
+    static roundPrice(price: number) {
+        return Math.round(price / 100) * 100;
     }
 
     static async getGeneralStructure(payments: Payment[], includeSettlements = false): Promise<PaymentGeneral[]> {
