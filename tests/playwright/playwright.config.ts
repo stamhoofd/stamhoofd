@@ -26,7 +26,6 @@ export default defineConfig({
 
         // todo
         headless: process.env.CI ? true : false,
-        ignoreHTTPSErrors: true,
     },
 
     /* Configure projects for major browsers */
