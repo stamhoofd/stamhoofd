@@ -318,6 +318,8 @@ jobs:
           echo "✅ DNS check passed!"
     - name: Install dependencies
       run: yarn install --prefer-offline --frozen-lockfile
+    - name: Install Playwright Browsers
+      run: yarn playwright install --with-deps
     - name: Cache Caddy
       id: caddy-cache
       uses: actions/cache@v4
@@ -345,14 +347,6 @@ jobs:
             echo "Caddy certificate NOT found."
             echo "exists=false" >> $GITHUB_OUTPUT
         fi
-    - name: 'check caddy env (todo: remove)'
-      run: caddy environ
-    - name: Test log caddy dir content
-      run: |
-        ls $HOME/.local/share/caddy
-        ls $HOME/.local/share/caddy/pki
-        ls $HOME/.local/share/caddy/pki/authorities
-        ls $HOME/.local/share/caddy/pki/authorities/local
     - name: Trust Caddy certificate in CI
       if: steps.check_cert.outputs.exists == 'true'
       run: |
@@ -365,8 +359,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ca-certificates
         sudo update-ca-certificates
-    - name: Install Playwright Browsers
-      run: yarn playwright install --with-deps
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API
