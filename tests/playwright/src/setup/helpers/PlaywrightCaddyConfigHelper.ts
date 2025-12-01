@@ -40,7 +40,7 @@ export class PlaywrightCaddyConfigHelper {
     static createFrontendRoute({
         domains,
         group,
-        root,
+        root
     }: {
         domains: string[];
         root: string;
@@ -65,38 +65,51 @@ export class PlaywrightCaddyConfigHelper {
                 //         },
                 //     ],
                 // },
+                // {
+                //     handler: "file_server",
+                //     root,
+                // },
                 {
-                    handler: "file_server",
-                    root,
+                    handler: "subroute",
+                    routes: [
+                        {
+                            handle: [
+                                {
+                                    handler: "file_server",
+                                    root
+                                },
+                            ],
+                        },
+                    ],
                 },
                 // {
                 //     handler: "rewrite",
                 //     uri: "{http.request.uri.path}",
                 //     rewrite: "{http.request.uri.path}",
                 // },
-                {
-                    handler: "subroute",
-                    routes: [
-                        {
-                            match: [
-                                {
-                                    file: {
-                                        try_files: [
-                                            "{http.request.uri.path}",
-                                            "/index.html",
-                                        ],
-                                    },
-                                },
-                            ],
-                            handle: [
-                                {
-                                    handler: "file_server",
-                                    root,
-                                },
-                            ],
-                        },
-                    ],
-                },
+                // {
+                //     handler: "subroute",
+                //     routes: [
+                //         {
+                //             match: [
+                //                 {
+                //                     file: {
+                //                         try_files: [
+                //                             "{http.request.uri.path}",
+                //                             "/index.html",
+                //                         ],
+                //                     },
+                //                 },
+                //             ],
+                //             handle: [
+                //                 {
+                //                     handler: "file_server",
+                //                     root,
+                //                 },
+                //             ],
+                //         },
+                //     ],
+                // },
             ],
         };
     }
@@ -110,16 +123,13 @@ export class PlaywrightCaddyConfigHelper {
         const defaultDomain = this.getDomain(service, workerId);
         const defaultRoute = this.createFrontendRoute({
             domains: [defaultDomain],
-            root: resolve(
-                __dirname,
-                `../../../dist/${service}/${workerId}`,
-            ),
+            root: resolve(__dirname, `../../../dist/${service}/${workerId}`),
             group: this.getGroup(service, workerId),
         });
 
         const config = {
             admin: {
-                listen: "0.0.0.0:2019"
+                listen: "0.0.0.0:2019",
             },
             apps: {
                 http: {
