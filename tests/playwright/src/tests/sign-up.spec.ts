@@ -6,7 +6,6 @@ import { TestUtils } from "@stamhoofd/test-utils";
 
 // sign up
 test("happy flow", async ({ page, dashboard }) => {
-    test.setTimeout(120_000);
     TestUtils.setPermanentEnvironment("userMode", "organization");
 
     await dashboard.goto();
