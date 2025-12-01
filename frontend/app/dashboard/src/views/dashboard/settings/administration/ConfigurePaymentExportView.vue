@@ -515,7 +515,7 @@ export default class ConfigurePaymentExportView extends Mixins(NavigationMixin) 
             method: "GET",
             query: {
                 methods: this.methods.join(','),
-                providers: [...this.providers, 'null'].join(','),
+                providers: this.providers.length === this.allPaymentProviders.length ? [...Object.values(PaymentProvider), 'null'].join(',') : [...this.providers, 'null'].join(','),
                 paidSince: this.correctedStartDate.getTime(),
                 paidBefore: this.correctedEndDate.getTime(),
                 limit,
