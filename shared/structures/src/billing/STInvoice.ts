@@ -205,6 +205,12 @@ export class STInvoiceMeta extends AutoEncoder {
     xml?: File
 
     /**
+     * Has this been charged automatically via outstanding amount?
+     */
+    @field({ decoder: BooleanDecoder, optional: true })
+    backgroundCharge = false;
+
+    /**
      * VATPercentage should be zero in countries outside Belgium in EU
      */
     @field({ decoder: IntegerDecoder})

@@ -28,6 +28,10 @@
                 Een (deel) van de betaling van deze proforma factuur is in behandeling. Dit kan tot 3 werkdagen duren. Je kan in tussentijd zelf niet de betaling in orde brengen (om dubbele betaling te voorkomen). Gestart op: {{ invoice.invoice.createdAt | dateTime }}
             </p>
 
+            <p v-if="!invoice.number && isPaymentFailed" class="error-box selectable with-button">
+                De automatische betaling via de standaard betaalmethode is {{ paymentFailedCount }} keer mislukt, eerste keer op {{ paymentFailedDate | dateTime }}. Breng de betaling zelf in orde.
+            </p>
+
             <STErrorsDefault :error-box="errorBox" />
 
             <p v-if="!invoice.number && invoice.meta.items.length == 0" class="info-box">
@@ -146,22 +150,31 @@ export default class InvoiceDetailsView extends Mixins(NavigationMixin) {
         return OrganizationManager.organization
     }
 
-    get paymentFailedDeactivateDate() {
+    get paymentFailedDate() {
         let d: Date | null = null
-        for (const [_, pack] of this.organization.meta.packages.packages) {
-            if (pack.deactivateDate === null || pack.firstFailedPayment === null) {
-                continue
+        for (const item of this.invoice.meta.items) {
+            if (item.package && item.package.meta.firstFailedPayment && (d === null || d > item.package.meta.firstFailedPayment)) {
+                d = item.package.meta.firstFailedPayment
             }
-            if (d && d < pack.deactivateDate) {
-                continue
+
+            if (item.firstFailedPayment && (d === null || d > item.firstFailedPayment)) {
+                d = item.firstFailedPayment
             }
-            d = pack.deactivateDate
+
         }
         return d
     }
     
     get isPaymentFailed() {
-        return this.paymentFailedDeactivateDate !== null && this.invoice.meta.items.length > 0
+        return this.paymentFailedCount > 0
+    }
+
+    get paymentFailedCount() {
+        let d = 0
+        for (const item of this.invoice.meta.items) {
+            d = Math.max(d, item.package?.meta.paymentFailedCount ?? 0, item.paymentFailedCount ?? 0)
+        }
+        return d
     }
 }
 </script>

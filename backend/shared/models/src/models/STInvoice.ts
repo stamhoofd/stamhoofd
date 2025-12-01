@@ -573,7 +573,7 @@ export class STInvoice extends Model {
 
         const packages = await this.getPackages()
 
-        if (markFailed && (payment.method === PaymentMethod.DirectDebit || payment.method === PaymentMethod.Transfer)) {
+        if (markFailed && (this.meta.backgroundCharge || payment.method === PaymentMethod.DirectDebit || payment.method === PaymentMethod.Transfer)) {
             // Only mark failed payments for background payments
             for (const pack of packages) {
                 console.log("Marking package with failed payment "+pack.id)
@@ -596,12 +596,14 @@ export class STInvoice extends Model {
                 }
             }
         }
-        
+
+        let isPendingInvoicePayment = false;
 
         if (this.organizationId) {
             const pendingInvoice = await STPendingInvoice.getForOrganization(this.organizationId)
             if (pendingInvoice && pendingInvoice.invoiceId === this.id) {
                 pendingInvoice.invoiceId = null
+                isPendingInvoicePayment = true;
 
                 // Also update the packages in the pending invoice itself
                 for (const item of pendingInvoice.meta.items) {
@@ -639,7 +641,16 @@ export class STInvoice extends Model {
         }
 
         if (!this.number) {
-            if (markFailed && this.organizationId && payment.method === PaymentMethod.DirectDebit) {
+            if (
+                markFailed 
+                && this.organizationId 
+                && (
+                    this.meta.backgroundCharge 
+                    || (
+                        isPendingInvoicePayment && (payment.method === PaymentMethod.DirectDebit || payment.method === PaymentMethod.CreditCard)
+                    )
+                )
+            ) {
                 const organization = await Organization.getByID(this.organizationId)
                 if (organization) {
                     const invoicingTo = await organization.getInvoicingToEmails()
@@ -650,15 +661,13 @@ export class STInvoice extends Model {
                             to: invoicingTo,
                             bcc: "simon@stamhoofd.be",
                             subject: "Betaling mislukt voor "+organization.name,
-                            text: "Dag "+organization.name+", \n\nDe betaling van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Betalen kan via Stamhoofd > Instellingen > Facturen en betaalinstellingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
+                            text: "Dag "+organization.name+", \n\nDe betaling van jullie openstaande bedrag is mislukt (zie daarvoor onze vorige e-mail). Kijk even na wat er fout ging en betaal het openstaande bedrag manueel om te vermijden dat bepaalde diensten tijdelijk worden uitgeschakeld. Gebruik hiervoor nooit een persoonlijke rekening. Betalen kan via Stamhoofd > Instellingen > Facturen en betaalinstellingen > Openstaand bedrag > Afrekenen. Neem gerust contact met ons op als je bijkomende vragen hebt.\n\nMet vriendelijke groeten,\nStamhoofd\n\n",
                         }, organization.i18n)
                     } else {
                         console.warn("No invoicing e-mail found for "+organization.name)
                     }
                 }
-            }
-
-            if (markFailed && this.organizationId && payment.method === PaymentMethod.Transfer) {
+            } else if (markFailed && this.organizationId && payment.method === PaymentMethod.Transfer) {
                 const organization = await Organization.getByID(this.organizationId)
                 if (organization) {
                     const invoicingTo = await organization.getInvoicingToEmails()

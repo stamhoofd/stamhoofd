@@ -216,6 +216,7 @@ export class STPendingInvoice extends Model {
     
         // Step 1: create the invoice
         const invoice = STInvoice.createFor(organization)
+        invoice.meta.backgroundCharge = true;
 
         invoice.meta.items = pendingInvoice.meta.items.slice() // make a copy (needed to prevent mutating pending invoice and invoice at the same time)
 
