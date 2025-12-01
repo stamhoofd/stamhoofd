@@ -62,9 +62,10 @@ class WorkerHelperInstance {
         const caddyHelper = new CaddyHelper();
 
         // start api
-        console.log("Starting api...");
+        console.log(`Start api for worker ${workerId}...`);
         const apiService = new ApiService(workerId);
         const apiProcess = await apiService.start();
+        console.log(`API started for worker ${workerId}.`);
 
         // start frontend services
         const frontendServiceNames: FrontendProjectName[] = [
@@ -79,6 +80,7 @@ class WorkerHelperInstance {
         const frontendProcesses = await Promise.all(
             frontendServices.map((service) => service.start()),
         );
+        console.log(`Frontend processes started for worker ${workerId}.`);
 
         // configure caddy
         const allProcesses = [...frontendProcesses, apiProcess];
@@ -86,15 +88,19 @@ class WorkerHelperInstance {
             allProcesses.flatMap((s) => s.caddyConfig?.routes ?? []),
             allProcesses.flatMap((s) => s.caddyConfig?.domains ?? []),
         );
+        console.log(`Caddy configured for worker ${workerId}.`);
 
         // wait until api is ready
         await apiProcess.wait();
+        console.log(`API ready for worker ${workerId}.`);
 
         // clear database
         const databaseHelper = new DatabaseHelper(workerId);
         await databaseHelper.clear();
+        console.log(`Database cleared for worker ${workerId}.`);
 
         await Promise.all(frontendProcesses.map((p) => p.wait()));
+        console.log(`Frontend processes ready for worker ${workerId}.`);
 
         return {
             teardown: async () => {
