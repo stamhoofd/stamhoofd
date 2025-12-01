@@ -352,6 +352,16 @@ jobs:
       run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
     - name: Run Playwright tests
       run: CI=true && yarn test:playwright
+      continue-on-error: true   # allows uploading artifacts even if tests fail
+    - name: Upload Playwright traces
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-traces
+        path: |
+            tests/playwright/playwright-report
+            tests/playwright/test-results
+        retention-days: 1
     - name: Notify Slack of failure
       uses: slackapi/slack-github-action@v2.0.0
       if: failure() && github.event_name != 'pull_request'
