@@ -80,55 +80,55 @@ test.describe("userMode organization", () => {
     });
 });
 
-// test.describe("userMode platform", () => {
-//     console.log('inside: userMode platform')
-//     let organization: Organization;
-//     let user: User;
+test.describe("userMode platform", () => {
+    console.log('inside: userMode platform')
+    let organization: Organization;
+    let user: User;
 
-//     const organizationName = "Test Organization";
-//     const email = "john.doe@gmail.com";
-//     const password = "testAbc123456";
+    const organizationName = "Test Organization";
+    const email = "john.doe@gmail.com";
+    const password = "testAbc123456";
 
-//     test.beforeAll(
-//         async () => {
-//             TestUtils.setPermanentEnvironment("userMode", "platform");
+    test.beforeAll(
+        async () => {
+            TestUtils.setPermanentEnvironment("userMode", "platform");
 
-//             organization = await new OrganizationFactory({
-//                 name: organizationName,
-//             }).create();
+            organization = await new OrganizationFactory({
+                name: organizationName,
+            }).create();
 
-//             user = await new UserFactory({
-//                 firstName: "John",
-//                 lastName: "Doe",
-//                 email,
-//                 password,
-//                 organization,
-//                 globalPermissions: Permissions.create({
-//                     level: PermissionLevel.Full,
-//                 }),
-//             }).create();
+            user = await new UserFactory({
+                firstName: "John",
+                lastName: "Doe",
+                email,
+                password,
+                organization,
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
 
-//             await Token.createToken(user);
-//         },
-//     );
+            await Token.createToken(user);
+        },
+    );
 
-//     test("happy flow", async ({ page, dashboard }) => {
-//         await dashboard.goto();
+    test("happy flow", async ({ page, dashboard }) => {
+        await dashboard.goto();
 
-//         // fill in email
-//         const emailInput = page.getByTestId("email-input");
-//         await emailInput.click();
-//         await emailInput.fill(email);
+        // fill in email
+        const emailInput = page.getByTestId("email-input");
+        await emailInput.click();
+        await emailInput.fill(email);
 
-//         // fill in password
-//         const passwordInput = page.getByTestId("password-input");
-//         await passwordInput.click();
-//         await passwordInput.fill(password);
+        // fill in password
+        const passwordInput = page.getByTestId("password-input");
+        await passwordInput.click();
+        await passwordInput.fill(password);
 
-//         // login
-//         await page.getByTestId("login-button").click();
+        // login
+        await page.getByTestId("login-button").click();
 
-//         // wait for the organization search input
-//         await page.getByTestId("organization-search-input").waitFor();
-//     });
-// });
+        // wait for the organization search input
+        await page.getByTestId("organization-search-input").waitFor();
+    });
+});
