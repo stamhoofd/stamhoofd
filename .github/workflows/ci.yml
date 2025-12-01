@@ -333,7 +333,12 @@ jobs:
     - name: Verify Caddy
       run: caddy version
     - name: Caddy trust
-      run: caddy start && caddy trust && caddy stop
+      run: sudo caddy start && sudo caddy trust && sudo caddy stop
+    - name: Update certificates
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates
+        sudo update-ca-certificates
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps
     - name: Build shared packages
