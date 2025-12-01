@@ -36,14 +36,14 @@ export default defineConfig({
             use: {
                 ...devices["Desktop Chrome"],
                 // todo only add for ci
-                launchPersistentContext: async ({ browserName }, options) => {
-                    const { chromium } = require("playwright");
-                    const context = await chromium.launchPersistentContext(
-                        "/home/runner/chromium-profile", // path to NSS profile
-                        options,
-                    );
-                    return context;
-                },
+                // launchPersistentContext: async ({ browserName }, options) => {
+                //     const { chromium } = require("playwright");
+                //     const context = await chromium.launchPersistentContext(
+                //         "/home/runner/chromium-profile", // path to NSS profile
+                //         options,
+                //     );
+                //     return context;
+                // },
             },
         },
 
