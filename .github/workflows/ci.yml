@@ -154,6 +154,8 @@ jobs:
         fi
     - name: Log CA config
       run: sudo cat /etc/ca-certificates.conf
+    - name: Log ca certificates
+      run: sudo ls -la /usr/local/share/ca-certificates
     - name: Add Caddy certificate to user-level trust store
       if: steps.check_cert.outputs.exists == 'true'
       run: |
@@ -161,6 +163,14 @@ jobs:
         sudo cp "$CERT_PATH" /usr/local/share/ca-certificates/caddy.crt
         sudo chmod 644 /usr/local/share/ca-certificates/caddy.crt
         sudo update-ca-certificates
+    - name: Log CA config again 2
+      run: sudo cat /etc/ca-certificates.conf
+    - name: Run dpkg-reconfigure
+      run: sudo dpkg-reconfigure ca-certificates
+    - name: Log CA config again 3
+      run: sudo cat /etc/ca-certificates.conf
+    - name: Log ca certificates in other location
+      run: sudo ls -la /usr/share/ca-certificates
     - name: Check if Caddy certificate is trusted
       run: openssl verify /usr/local/share/ca-certificates/caddy.crt
     - name: Build shared packages

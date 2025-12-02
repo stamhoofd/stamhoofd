@@ -25,7 +25,7 @@ export class ApiService implements ServiceHelper {
             wait: async () => {
                 console.log("Waiting for backend server...");
                 await NetworkHelper.waitForUrl(
-                    "http://" + domain + "/organizations/search",
+                    "https://" + domain + "/organizations/search",
                 );
                 console.log("Backend server ready");
             },
