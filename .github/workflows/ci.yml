@@ -156,7 +156,7 @@ jobs:
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
     - name: Run Playwright tests
-      run: CI=1 yarn test:playwright
+      run: NODE_OPTIONS=--use-openssl-ca CI=1 yarn test:playwright
       continue-on-error: true   # allows uploading artifacts even if tests fail
     - name: Upload Playwright artifacts
       if: always()
