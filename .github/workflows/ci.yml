@@ -141,25 +141,8 @@ jobs:
       run: sudo setcap 'cap_net_bind_service=+ep' $(which caddy)
     - name: Caddy trust
       run: caddy start && sudo caddy trust && caddy stop
-    - name: Check if Caddy certificate exists
-      id: check_cert
-      run: |
-        CERT_PATH="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
-        if [ -f "$CERT_PATH" ]; then
-            echo "Caddy certificate found at $CERT_PATH"
-            echo "exists=true" >> $GITHUB_OUTPUT
-        else
-            echo "Caddy certificate NOT found."
-            echo "exists=false" >> $GITHUB_OUTPUT
-        fi
-    - name: Log CA config
-      run: sudo cat /etc/ca-certificates.conf
     - name: Log ca certificates
       run: sudo ls -la /usr/local/share/ca-certificates
-    - name: Log CA config again 2
-      run: sudo cat /etc/ca-certificates.conf
-    - name: Check if Caddy certificate is trusted
-      run: openssl verify /usr/local/share/ca-certificates/caddy.crt
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API
