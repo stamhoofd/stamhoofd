@@ -1,5 +1,6 @@
-import { JestHelper } from './src/JestHelper.js';
-import { TestHelper } from './src/TestHelper.js';
+import { JestHooks } from './src/JestHooks.js';
+import { getGlobalObject, loadEnvironment, updateLinkedEnvs } from './src/loadEnvironment.js';
+import { TestHooks } from './src/TestHooks.js';
 
 type AfterCallback = () => void | Promise<void>;
 class TestInstance {
@@ -10,16 +11,22 @@ class TestInstance {
 
     permanentEnvironmentOverrides: Record<string, any> = {};
 
-    private testHelper: TestHelper = new JestHelper();
+    private hooks: TestHooks = new JestHooks();
 
     setEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
         STAMHOOFD[value] = newValue as (typeof STAMHOOFD)[Key];
-        this.testHelper.afterSetEnvironment?.(value, newValue);
+
+        // Update process.env that might be linked to STAMHOOFD
+        updateLinkedEnvs();
     }
 
     setPermanentEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
         this.permanentEnvironmentOverrides[value] = newValue;
-        this.setEnvironment(value, newValue);
+
+        if (getGlobalObject().STAMHOOFD && typeof getGlobalObject().STAMHOOFD === 'object') {
+            // If already loaded the environment, set it immediately
+            this.setEnvironment(value, newValue);
+        }
     }
 
     /**
@@ -76,7 +83,7 @@ class TestInstance {
 
     async loadEnvironment() {
         // Clear env
-        await this.testHelper.loadEnvironment();
+        await loadEnvironment();
 
         // Reset permanent environment overrides
         for (const key in this.permanentEnvironmentOverrides) {
@@ -88,20 +95,20 @@ class TestInstance {
      * Run this in each jest.setup.ts file
      */
     setup() {
-        this.testHelper.beforeAll(async () => {
+        this.hooks.beforeAll(async () => {
             await this.loadEnvironment();
             await this.beforeAll();
         });
 
-        this.testHelper.beforeEach(async () => {
+        this.hooks.beforeEach(async () => {
             await this.beforeEach();
         });
 
-        this.testHelper.afterEach(async () => {
+        this.hooks.afterEach(async () => {
             await this.afterEach();
         });
 
-        this.testHelper.afterAll(async () => {
+        this.hooks.afterAll(async () => {
             await this.afterAll();
         });
     }
@@ -109,9 +116,9 @@ class TestInstance {
     /**
      * Run this in each jest.global.setup.ts file
      */
-    async globalSetup(testHelper?: TestHelper) {
+    async globalSetup(testHelper?: TestHooks) {
         if (testHelper) {
-            this.testHelper = testHelper;
+            this.hooks = testHelper;
         }
         await this.loadEnvironment();
     }
@@ -119,7 +126,7 @@ class TestInstance {
 
 export const TestUtils: TestInstance = new TestInstance();
 
-export * from './src/TestHelper.js';
+export * from './src/TestHooks.js';
 
 export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) as jest.Constructable,

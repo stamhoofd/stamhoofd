@@ -1,6 +1,5 @@
 import { test as base } from "@playwright/test";
 import { DashboardPage } from "./helpers/DashboardPage";
-import { PlaywrightTestUtilsHelper } from "./helpers/PlaywrightTestUtilsHelper";
 import { WorkerHelper } from "./helpers/WorkerHelper";
 WorkerHelper.loadDatabaseEnvironment();
 
@@ -18,14 +17,15 @@ export const test = base.extend<
         async ({}, use, workerInfo) => {
             const { teardown } = await WorkerHelper.startServices(workerInfo);
 
-            await PlaywrightTestUtilsHelper.executeBeforeAll();
+            //await PlaywrightTestUtilsHelper.executeBeforeAll();
             // run all tests for worker
             console.log('Running tests for worker ', workerInfo.workerIndex);
             await use();
-            await PlaywrightTestUtilsHelper.executeAfterAll();
+            //await PlaywrightTestUtilsHelper.executeAfterAll();
 
+            console.log('Tearing down worker', workerInfo.workerIndex)
             await teardown();
-            console.log('Finished teardown for worker  ', workerInfo.workerIndex);
+            console.log('Finished teardown for worker ', workerInfo.workerIndex);
         },
         {
             scope: "worker",
@@ -36,10 +36,10 @@ export const test = base.extend<
     // run beforeEach and afterEach of TestUtils automatically for each test
     forEach: [
         async ({}, use) => {
-            await PlaywrightTestUtilsHelper.executeBeforeEach();
+            //await PlaywrightTestUtilsHelper.executeBeforeEach();
             // run test
             await use();
-            await PlaywrightTestUtilsHelper.executeAfterEach();
+            //await PlaywrightTestUtilsHelper.executeAfterEach();
         },
         {
             scope: "test",

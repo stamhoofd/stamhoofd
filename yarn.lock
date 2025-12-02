@@ -2845,10 +2845,10 @@
     "@sigstore/core" "^1.1.0"
     "@sigstore/protobuf-specs" "^0.3.2"
 
-"@simonbackx/simple-database@1.33.0":
-  version "1.33.0"
-  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.33.0.tgz#5fcfc842f209957effd72d5da87a668f3a65b4c3"
-  integrity sha512-d3erbXnNPRgVLhyVuzoHRNHrvQ/Zw03dlbtquCeK1tOLFRBAQ/3HKK3tjrPsm5SJIuTfL1aELo9yhcstPigy/Q==
+"@simonbackx/simple-database@1.34.0":
+  version "1.34.0"
+  resolved "https://registry.yarnpkg.com/@simonbackx/simple-database/-/simple-database-1.34.0.tgz#d23dec069d05d1a56532746f8acd1ddfe5edfdc6"
+  integrity sha512-+KY62gCoMYRbeyu/9tusRWuAhYylBYF0D8JpXC4JRIwK0X3mWI0FXbF7LtZ99ugKR1GQ18p5crUmtf8Hfu+MnA==
   dependencies:
     "@simonbackx/simple-logging" "^1.0.0"
     colors "^1.4.0"

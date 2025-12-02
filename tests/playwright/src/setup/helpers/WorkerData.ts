@@ -1,4 +1,4 @@
-import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
+import { CaddyConfigHelper } from "./CaddyConfigHelper";
 
 export type StamhoofdUrls = {
     readonly api: string;
@@ -19,6 +19,10 @@ class WorkerDataInstance {
         return this._id;
     }
 
+    get number() {
+        return this._id !== undefined ? parseInt(this._id) : undefined;
+    }
+
     get isInWorkerProcess() {
         return this._id !== undefined;
     }
@@ -36,13 +40,13 @@ class WorkerDataInstance {
         }
 
         return {
-            api: PlaywrightCaddyConfigHelper.getUrl("api", workerId),
-            dashboard: PlaywrightCaddyConfigHelper.getUrl(
+            api: CaddyConfigHelper.getUrl("api", workerId),
+            dashboard: CaddyConfigHelper.getUrl(
                 "dashboard",
                 workerId,
             ),
-            webshop: PlaywrightCaddyConfigHelper.getUrl("webshop", workerId),
-            registration: PlaywrightCaddyConfigHelper.getUrl(
+            webshop: CaddyConfigHelper.getUrl("webshop", workerId),
+            registration: CaddyConfigHelper.getUrl(
                 "registration",
                 workerId,
             ),

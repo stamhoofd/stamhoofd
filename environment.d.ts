@@ -221,8 +221,6 @@ declare global {
         // UiTPAS
         readonly UITPAS_API_CLIENT_ID?: string 
         readonly UITPAS_API_CLIENT_SECRET?: string
-
-        readonly EXPOSE_FRONTEND_ENVIRONMENT?: FrontendEnvironment;
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

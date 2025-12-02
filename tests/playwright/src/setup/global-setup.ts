@@ -1,6 +1,5 @@
 import { CaddyHelper } from "./helpers/CaddyHelper";
 import { FrontendBuilder } from "./helpers/FrontendBuilder";
-import { PlaywrightCaddyConfigHelper } from "./helpers/PlaywrightCaddyConfigHelper";
 
 export default async function globalSetup() {
     if (process.env.NODE_ENV !== "test") {
@@ -13,16 +12,12 @@ export default async function globalSetup() {
     const caddyHelper = new CaddyHelper();
 
     const startCaddy = async () => {
-        if (await caddyHelper.isRunning()) {
-            // make sure all caddy configuration for playwrigth is deleted
-            await PlaywrightCaddyConfigHelper.clear(caddyHelper);
-        } else {
+        if (!await caddyHelper.isRunning()) {
             console.log("Starting caddy...");
-            await caddyHelper.start(
-                PlaywrightCaddyConfigHelper.createDefault(),
-            );
+            await caddyHelper.start();
             console.log("Caddy started.");
         }
+        await caddyHelper.configure();
     };
 
     const buildFrontend = async () => {

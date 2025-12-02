@@ -59,8 +59,11 @@ function productionLog(message: string) {
     }
 }
 
-const start = async () => {
+export const boot = async () => {
     productionLog('Running server at v' + Version);
+    productionLog('Running server at port ' + STAMHOOFD.PORT);
+    productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here
+
     loadLogger();
 
     await GlobalHelper.load();
@@ -206,24 +209,28 @@ const start = async () => {
         }
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
-        process.exit(0);
+        if (STAMHOOFD.environment !== 'test') {
+            process.exit(0);
+        }
     };
 
-    process.on('SIGTERM', () => {
-        productionLog('SIGTERM signal received.');
-        shutdown().catch((e) => {
-            console.error(e);
-            process.exit(1);
+    if (STAMHOOFD.environment !== 'test') {
+        process.on('SIGTERM', () => {
+            productionLog('SIGTERM signal received.');
+            shutdown().catch((e) => {
+                console.error(e);
+                process.exit(1);
+            });
         });
-    });
 
-    process.on('SIGINT', () => {
-        productionLog('SIGINT signal received.');
-        shutdown().catch((e) => {
-            console.error(e);
-            process.exit(1);
+        process.on('SIGINT', () => {
+            productionLog('SIGINT signal received.');
+            shutdown().catch((e) => {
+                console.error(e);
+                process.exit(1);
+            });
         });
-    });
+    }
 
     // Register crons
     await import('./crons');
@@ -236,9 +243,6 @@ const start = async () => {
 
     startCrons();
     seeds().catch(console.error);
-};
 
-start().catch((error) => {
-    console.error('unhandledRejection', error);
-    process.exit(1);
-});
+    return { shutdown };
+};

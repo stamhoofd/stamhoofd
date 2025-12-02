@@ -1,7 +1,7 @@
 import { cp, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { NetworkHelper } from "./NetworkHelper";
-import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
+import { CaddyConfigHelper } from "./CaddyConfigHelper";
 import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
 
 export type FrontendProjectName = "dashboard" | "registration" | "webshop";
@@ -19,34 +19,11 @@ export class FrontendService implements ServiceHelper {
     async start(): Promise<ServiceProcess> {
         await this.build();
 
-        const domain = PlaywrightCaddyConfigHelper.getDomain(
-            this.name,
-            this.workerId,
-        );
-
-        const route = PlaywrightCaddyConfigHelper.createFrontendRoute({
-            root: this.getDestinationDistPath(this.workerId),
-            domains: [domain],
-            group: PlaywrightCaddyConfigHelper.getGroup(
-                this.name,
-                this.workerId,
-            ),
-        });
-
         return {
-            caddyConfig: {
-                domains: [
-                    PlaywrightCaddyConfigHelper.getDomain(
-                        this.name,
-                        this.workerId,
-                    ),
-                ],
-                routes: [route],
-            },
             wait: async () => {
                 await NetworkHelper.waitForUrl(
                     "http://" +
-                        PlaywrightCaddyConfigHelper.getDomain(
+                        CaddyConfigHelper.getDomain(
                             this.name,
                             this.workerId,
                         ),
@@ -59,20 +36,14 @@ export class FrontendService implements ServiceHelper {
     }
 
     private async build() {
-        console.log("Start copy project dist...");
         await this.copyProjectDist();
-        console.log("Done copy project dist.");
-        console.log("Start inject script...");
         await this.injectScript();
-        console.log("Done inject script.");
     }
 
     private async copyProjectDist() {
         const sourcePath = this.getProjectDistPath();
-        console.log(`Source path: ${sourcePath}`);
 
         const destinationPath = this.getDestinationDistPath(this.workerId);
-        console.log(`Destination path: ${destinationPath}`);
 
         // copy source to destination
         try {
@@ -80,7 +51,6 @@ export class FrontendService implements ServiceHelper {
                 recursive: true,
                 force: true,
             });
-            console.log("Done copy project dist.");
         } catch (err) {
             console.error('Failed to copy project dist')
             console.error(err);
@@ -89,7 +59,6 @@ export class FrontendService implements ServiceHelper {
     }
 
     private getProjectDistPath() {
-        console.log("Getting project dist path...");
         const thisDirectoryToRoot = "../../../../..";
         const pathFromRoot = "frontend/app";
         const distFolder = "dist-playwright";
@@ -97,9 +66,12 @@ export class FrontendService implements ServiceHelper {
         return resolve(__dirname, sourcePath);
     }
 
-    private getDestinationDistPath(workerId: string) {
-        console.log("Getting destination dist path...");
-        return resolve(__dirname, `../../../dist/${this.name}/${workerId}`);
+    static getDestinationDistPath(service: FrontendProjectName, workerId: string) {
+        return resolve(__dirname, `../../../dist/${service}/${workerId}`);
+    }
+
+    getDestinationDistPath(workerId: string) {
+        return FrontendService.getDestinationDistPath(this.name, workerId)
     }
 
     private async injectScript() {
@@ -107,12 +79,10 @@ export class FrontendService implements ServiceHelper {
         const path = resolve(directory, "index.html");
 
         // Read the file
-        console.log("Start reading file...");
         let html = await readFile(path, "utf-8");
-        console.log("Done reading file...");
 
         // Define the script you want to inject
-        const apiUrl = PlaywrightCaddyConfigHelper.getUrl("api", this.workerId);
+        const apiUrl = CaddyConfigHelper.getUrl("api", this.workerId);
         const scriptSrc = `${apiUrl}/frontend-environment`;
         const scriptToInject = `<script src="${scriptSrc}"></script>`;
 
@@ -124,9 +94,7 @@ export class FrontendService implements ServiceHelper {
             throw new Error(`Placeholder ${placeholder} not found in ${path}`);
         }
 
-        console.log("Start writing file...");
         // Write the modified file back
         await writeFile(path, html, "utf-8");
-        console.log("Done writing file.");
     }
 }

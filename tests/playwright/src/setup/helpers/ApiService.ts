@@ -1,27 +1,30 @@
+import { CaddyConfigHelper } from "./CaddyConfigHelper";
+import { DatabaseHelper } from "./DatabaseHelper";
 import { NetworkHelper } from "./NetworkHelper";
-import { PlaywrightCaddyConfigHelper } from "./PlaywrightCaddyConfigHelper";
 import { ServiceHelper, ServiceProcess } from "./ServiceHelper";
-import { WorkerHelper } from "./WorkerHelper";
-import { importModule } from "./importModule";
-
 export class ApiService implements ServiceHelper {
     constructor(private workerId: string) {}
 
     async start(): Promise<ServiceProcess> {
-        const group = `${PlaywrightCaddyConfigHelper.GROUP_PREFIX}-api-${this.workerId}`;
-        const domain = PlaywrightCaddyConfigHelper.getDomain(
-            "api",
-            this.workerId,
-        );
+        const domain = CaddyConfigHelper.getDomain("api", this.workerId);
 
-        // start api
-        await importModule("@stamhoofd/backend");
+        // Reload database so we have the right one
+        const {Database} = await import("@simonbackx/simple-database")
+        await Database.reload();
+
+        // Start api
+        const {run: runMigrations} = await require('@stamhoofd/backend/src/migrate');
+        await runMigrations();
+
+        // Clear database before we start
+        const databaseHelper = new DatabaseHelper(this.workerId);
+        await databaseHelper.clear();
+        console.log(`Database cleared for worker ${this.workerId}.`);
+
+        const {boot} = await require('@stamhoofd/backend/src/boot');
+        const { shutdown } = await boot();
 
         return {
-            caddyConfig: {
-                domains: [domain, "*." + domain],
-                routes: this.createRoutes({ domain, group }),
-            },
             wait: async () => {
                 console.log("Waiting for backend server...");
                 await NetworkHelper.waitForUrl(
@@ -30,46 +33,8 @@ export class ApiService implements ServiceHelper {
                 console.log("Backend server ready");
             },
             kill: async () => {
-                // do nothing
+                await shutdown()
             },
         };
-    }
-
-    private createRoutes({ domain, group }: { domain: string; group: string }) {
-        return [
-            {
-                group,
-                match: [
-                    {
-                        host: [domain, "*." + domain],
-                    },
-                ],
-                handle: [
-                    {
-                        handler: "reverse_proxy",
-                        upstreams: [
-                            {
-                                dial: `127.0.0.1:${WorkerHelper.port}`,
-                            },
-                        ],
-                        headers: {
-                            request: {
-                                set: {
-                                    "x-real-ip": ["{http.request.remote}"],
-                                },
-                            },
-                        },
-                    },
-                    {
-                        handler: "headers",
-                        response: {
-                            set: {
-                                "Cache-Control": ["no-store"],
-                            },
-                        },
-                    },
-                ],
-            },
-        ];
     }
 }

@@ -29,7 +29,7 @@
     "dev:init": "wait-on shared/build-development-env/dist/src/init.js && node shared/build-development-env/dist/src/init.js",
     "migrate": "yarn -s build:shared && lerna run migrations --concurrency 1",
     "test": "lerna run test -- --passWithNoTests",
-    "test:playwright": "lerna run test:playwright",
+    "test:playwright": "yarn -s build:shared && cd backend/app/api && yarn build && cd ../../.. && cd tests/playwright && yarn -s test",
     "lint": "lerna run lint",
     "vitest": "NODE_ENV=test vitest",
     "clear:shared": "yarn -s clear:global:shared && yarn clear:backend:shared",

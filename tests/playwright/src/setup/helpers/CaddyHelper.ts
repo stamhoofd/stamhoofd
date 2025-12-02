@@ -1,7 +1,8 @@
 import { exec as execCallback } from "node:child_process";
 import { promisify } from "node:util";
-import { ChildProcessHelper } from "./ChildProcessHelper";
+import { CaddyConfigHelper } from "./CaddyConfigHelper";
 import { ProcessInfo } from "./ProcessInfo";
+import { STChildProcess } from "./STChildProcess";
 
 const exec = promisify(execCallback);
 
@@ -16,57 +17,43 @@ export class CaddyHelper {
         return result.stdout.trim() === "true";
     }
 
-    async start(defaultConfig: any) {
-        // Start caddy
-        await this.runCaddy();
-
+    async configure() {
         // post the initial config
         console.log("Start posting caddy config...");
-        await this.postConfig(defaultConfig);
+        await this.postConfig(CaddyConfigHelper.createDefault());
         console.log("Done posting caddy config.");
     }
 
-    private async runCaddy() {
+    async start() {
         // Run caddy
-        const childProcess = ChildProcessHelper.spawnWithCleanup("caddy", [
+        const childProcess = new STChildProcess("caddy", [
             "run",
         ]);
 
         ProcessInfo.flagCaddyStarted();
 
-        let isStarted = false;
-
         // wait until caddy is ready
         await new Promise<void>((resolve) => {
+            let isStarted = false;
+            const onData = (data: any) => {
+                if (isStarted) {
+                    return;
+                }
+                const line = data.toString();
+                console.log("[Caddy]", line);
+
+                // Detect successful startup
+                if (line.includes("admin endpoint started")) {
+                    isStarted = true;
+                    resolve();
+
+                    // Remove listeners
+                    childProcess.offData(onData)
+                }
+            };
+
             // log stderr until caddy is ready
-            childProcess.stderr?.on("data", (data) => {
-                if (isStarted) {
-                    return;
-                }
-                const line = data.toString();
-                console.log("[Caddy] stderr:", line.trim());
-
-                // Detect successful startup
-                if (line.includes("admin endpoint started")) {
-                    isStarted = true;
-                    resolve();
-                }
-            });
-
-            // listen for stdout
-            childProcess.stdout?.on("data", (data) => {
-                if (isStarted) {
-                    return;
-                }
-                const line = data.toString();
-                console.log("[Caddy]", line.trim());
-
-                // Detect successful startup
-                if (line.includes("admin endpoint started")) {
-                    isStarted = true;
-                    resolve();
-                }
-            });
+            childProcess.onData(onData);
         });
     }
 
@@ -86,30 +73,6 @@ export class CaddyHelper {
         } catch (error) {
             // ignore
         }
-    }
-
-    async configure(routes: any[], domains: string[]) {
-        console.log('Caddy configure', '\nroutes: ', routes, '\ndomains: ', domains)
-        const existingRoutes = await this.getRoutes();
-
-        const newRoutes = routes.filter(
-            (r) => !existingRoutes.some((er) => er.group === r.group),
-        );
-
-        // put at the beginning
-        const putPromises = newRoutes.map((r) => this.putRoute(r, 0));
-        await Promise.all(putPromises);
-
-        const subjects = await this.getPolicySubjects();
-        const newSubjects = domains.filter((d) => !subjects.includes(d));
-
-        await this.postPolicySubjects(newSubjects);
-
-        const endingRoutes = await this.getRoutes();
-        const endingSubjects = await this.getPolicySubjects();
-
-        console.log('Caddy current config', '\nroutes: ', endingRoutes, '\npolicies: ', endingSubjects)
-
     }
 
     private async putRoute(route: any, index: number) {

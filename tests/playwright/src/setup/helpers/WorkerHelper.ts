@@ -1,19 +1,15 @@
 import { WorkerInfo } from "@playwright/test";
-import { build } from "@stamhoofd/build-development-env";
 import { TestUtils } from "@stamhoofd/test-utils";
-import getPort from "get-port";
 import { ApiService } from "./ApiService";
-import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendProjectName, FrontendService } from "./FrontendService";
-import { PlaywrightTestUtilsHelper } from "./PlaywrightTestUtilsHelper";
+import { CaddyConfigHelper } from "./CaddyConfigHelper";
+import { PlaywrightHooks } from "./PlaywrightHooks";
 import { ServiceProcess } from "./ServiceHelper";
 import { WorkerData } from "./WorkerData";
 
 class WorkerHelperInstance {
-    private readonly ENVIRONMENTE_NAME = "playwright";
     private isInitialized = false;
-    private didLoadDatabaseEnvironment = false;
     private _databaseHelper: DatabaseHelper | null = null;
 
     private get databaseHelper() {
@@ -26,31 +22,11 @@ class WorkerHelperInstance {
         return this._databaseHelper;
     }
 
-    get port() {
-        const result = process.env.PORT;
-        if (result === undefined) {
-            throw new Error("PORT is not set");
-        }
-        return result;
-    }
-
     /**
      * The database environment should be loaded once before importing dependent modules such as @stamhoofd/models
      */
     loadDatabaseEnvironment() {
-        console.log("Loading database environment for worker ", WorkerData.id);
-        if (this.didLoadDatabaseEnvironment) {
-            throw new Error("Database environment already loaded");
-        }
-        Object.entries({
-            DB_HOST: "127.0.0.1",
-            DB_USER: "root",
-            DB_PASS: "root",
-            DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
-        }).forEach(([key, value]) => {
-            process.env[key] = value;
-        });
-        this.didLoadDatabaseEnvironment = true;
+        this.loadEnvironment()
     }
 
     /**
@@ -59,9 +35,10 @@ class WorkerHelperInstance {
      * @returns
      */
     async startServices(workerInfo: WorkerInfo) {
-        await this.loadEnvironment();
         const workerId = workerInfo.workerIndex.toString();
-        const caddyHelper = new CaddyHelper();
+        console.log(`Starting services for worker ${workerId}`);
+
+        await this.loadEnvironment();
 
         // start api
         console.log(`Start api for worker ${workerId}...`);
@@ -79,31 +56,20 @@ class WorkerHelperInstance {
         const frontendProcesses: ServiceProcess[] = [];
 
         for(const name of frontendServiceNames) {
-            console.log(`Start frontend service ${name} for worker ${workerId}...`);
             const service = new FrontendService(name, workerId);
             const process = await service.start();
-            console.log(`Frontend service ${name} started for worker ${workerId}.`);
             frontendProcesses.push(process);
         }
 
-        console.log(`Frontend processes started for worker ${workerId}.`);
+        console.log(`Frontend processes built for worker ${workerId}.`);
 
         // configure caddy
         const allProcesses = [...frontendProcesses, apiProcess];
-        await caddyHelper.configure(
-            allProcesses.flatMap((s) => s.caddyConfig?.routes ?? []),
-            allProcesses.flatMap((s) => s.caddyConfig?.domains ?? []),
-        );
         console.log(`Caddy configured for worker ${workerId}.`);
 
         // wait until api is ready
         await apiProcess.wait();
         console.log(`API ready for worker ${workerId}.`);
-
-        // clear database
-        const databaseHelper = new DatabaseHelper(workerId);
-        await databaseHelper.clear();
-        console.log(`Database cleared for worker ${workerId}.`);
 
         await Promise.all(frontendProcesses.map((p) => p.wait()));
         console.log(`Frontend processes ready for worker ${workerId}.`);
@@ -116,62 +82,80 @@ class WorkerHelperInstance {
         };
     }
 
-    private async loadEnvironment() {
-        if (this.isInitialized) {
-            throw new Error("Already initialized");
+    /**
+     * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
+     * This method changes the defaults for this worker.
+     */
+    overrideDefaultEvironment() {
+        if (WorkerData.id === undefined) {
+            throw new Error('WorkerData.id is not set');
         }
 
-        if (!this.didLoadDatabaseEnvironment) {
-            throw new Error(
-                "Database environment not loaded. The database environment should be loaded before importing dependent modules such as @stamhoofd/models",
-            );
+        const config: Partial<BackendEnvironment> = {
+            PORT: CaddyConfigHelper.getPort('api', WorkerData.id),
+            domains: {
+                dashboard: CaddyConfigHelper.getDomain('dashboard', WorkerData.id),
+                registration: {
+                    '': CaddyConfigHelper.getDomain('registration', WorkerData.id),
+                },
+                // For external links, not really used at the moment apart from documentation
+                marketing: {
+                    '': 'www.be.stamhoofd',
+                    'BE': 'www.be.stamhoofd',
+                    'NL': 'www.nl.stamhoofd',
+                },
+                webshop: {
+                    '': CaddyConfigHelper.getDomain('webshop', WorkerData.id),
+                },
+                api: CaddyConfigHelper.getDomain('api', WorkerData.id),
+                rendererApi: CaddyConfigHelper.getDomain('renderer', WorkerData.id),
+                defaultTransactionalEmail: {
+                    '': 'stamhoofd.be',
+                    'NL': 'stamhoofd.nl',
+                },
+
+                defaultBroadcastEmail: {
+                    '': 'stamhoofd.email',
+                },
+
+                // Todo: these don't work yet
+                webshopCname: CaddyConfigHelper.getDomain('webshop', WorkerData.id),
+                registrationCname: CaddyConfigHelper.getDomain('registration', WorkerData.id),
+            },
+            translationNamespace: 'stamhoofd',
+            platformName: 'stamhoofd',
+            DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
+        };
+
+        for (const key in config) {
+            TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment])
+        }
+    }
+
+    /**
+     * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
+     */
+    loadEnvironment() {
+        if (this.isInitialized) {
+            console.log('Environment already loaded')
+            return;
         }
 
         if (WorkerData.isInWorkerProcess) {
             // set environment variables
-            Object.entries({
-                NODE_ENV: "test",
-                STAMHOOFD_ENV: "playwright",
-                PLAYWRIGHT_WORKER_ID: WorkerData.id,
-            }).forEach(([key, value]) => {
-                process.env[key] = value;
-            });
+            console.log('Loading environment')
+            this.overrideDefaultEvironment();
+            TestUtils.globalSetup(new PlaywrightHooks());
+            TestUtils.setup();
+            console.log('Environment has been loaded')
 
-            await this.setPort();
-            await this.loadEnvironmentForServices();
-            await this.setupTestUtils();
             this.isInitialized = true;
+        } else {
+            console.log('Not in a worker process')
+
+            // Load defaults only (not specific to a worker)
+            TestUtils.globalSetup(new PlaywrightHooks());
         }
-    }
-
-    private async setPort() {
-        const port = await getPort();
-        process.env.PORT = port.toString();
-    }
-
-    private async loadEnvironmentForServices() {
-        const env = await this.buildApiEnvironment();
-        (env as any).EXPOSE_FRONTEND_ENVIRONMENT =
-            await this.buildDashboardEnvironment();
-        (global as any).STAMHOOFD = env;
-    }
-
-    private async buildApiEnvironment(): Promise<BackendEnvironment> {
-        return await build(this.ENVIRONMENTE_NAME, {
-            backend: "api",
-        });
-    }
-
-    private async buildDashboardEnvironment(): Promise<FrontendEnvironment> {
-        return await build(this.ENVIRONMENTE_NAME, {
-            frontend: "dashboard",
-        });
-    }
-
-    private async setupTestUtils() {
-        PlaywrightTestUtilsHelper.setDefaultEnvironment(STAMHOOFD);
-        TestUtils.globalSetup(PlaywrightTestUtilsHelper);
-        TestUtils.setup();
     }
 
     async clearDatabase() {

@@ -1,12 +1,6 @@
-import { TestHelper } from './TestHelper';
-import { loadEnvironment } from './loadEnvironment.js';
+import { TestHooks } from './TestHooks';
 
-export class JestHelper implements TestHelper {
-    async loadEnvironment(): Promise<void> {
-        // Clear env
-        await loadEnvironment();
-    }
-
+export class JestHooks implements TestHooks {
     beforeAll(callback: () => void | Promise<void>, timeout?: number) {
         beforeAll(callback, timeout);
     }

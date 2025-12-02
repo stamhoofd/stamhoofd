@@ -5,15 +5,19 @@ import { expect } from "@playwright/test";
 import { TestUtils } from "@stamhoofd/test-utils";
 import { WorkerHelper } from "../setup/helpers/WorkerHelper";
 
-// sign up
-test.describe("userMode organization", () => {
+/**
+ * Onboarding a new organization
+ */
+test.describe("Onboarding new organization", () => {
+    test.beforeAll(() => {
+        TestUtils.setPermanentEnvironment("userMode", "organization");
+    });
+
     test.afterAll(async () => {
         await WorkerHelper.clearDatabase();
     });
 
-    test("happy flow", async ({ page, dashboard }) => {
-        TestUtils.setPermanentEnvironment("userMode", "organization");
-
+    test("happy path", async ({ page, dashboard }) => {
         await dashboard.goto();
 
         // click signup

@@ -16,11 +16,12 @@
     },
     "github.copilot.enable": {
         "*": true,
-        "vue": true,
-        "markdown": false,
         "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "vue": true,
         "yaml": false,
-        "json": true
+        "json": false
     },
     "editor.codeLens": true,
     "editor.formatOnPaste": false,

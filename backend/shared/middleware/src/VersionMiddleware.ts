@@ -26,7 +26,7 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('missing_version')) {
                 // Allow missing version on /openid/ path
-                if (STAMHOOFD.environment === 'development' || request.url.startsWith('/openid/')) {
+                if (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test' || request.url.startsWith('/openid/')) {
                     request.version = this.latestVersions.web;
                     return;
                 }
