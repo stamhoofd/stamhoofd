@@ -143,6 +143,11 @@ jobs:
       run: caddy start && sudo caddy trust && caddy stop
     - name: Log ca certificates
       run: sudo ls -la /usr/local/share/ca-certificates
+    # Now Caddy certificates are trusted by the system. Now we need to add it to Chromium as well.
+    - name: Install certutil
+      run: sudo apt-get update && sudo apt-get install -y libnss3-tools      
+    - name: Add certificate
+      run: certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n Caddy_Local_Authority -i /usr/local/share/ca-certificates/Caddy_Local_Authority*
     - name: Build shared packages
       run: yarn build:shared
     - name: Build API
@@ -156,7 +161,7 @@ jobs:
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
     - name: Run Playwright tests
-      run: NODE_OPTIONS=--use-openssl-ca CI=1 yarn test:playwright
+      run: NODE_OPTIONS=--use-system-ca CI=1 yarn test:playwright
       continue-on-error: true   # allows uploading artifacts even if tests fail
     - name: Upload Playwright artifacts
       if: always()
