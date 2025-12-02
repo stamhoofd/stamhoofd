@@ -54,62 +54,20 @@ export class PlaywrightCaddyConfigHelper {
                 },
             ],
             handle: [
-                // {
-                //     handler: "reverse_proxy",
-                //     load_balancing: {
-                //         retries: 5,
-                //     },
-                //     upstreams: [
-                //         {
-                //             dial: `127.0.0.1:${port}`,
-                //         },
-                //     ],
-                // },
-                // {
-                //     handler: "file_server",
-                //     root,
-                // },
+                // todo cache and compression headers
                 {
-                    handler: "subroute",
-                    routes: [
-                        {
-                            handle: [
-                                {
-                                    handler: "file_server",
-                                    root,
-                                },
-                            ],
-                        },
-                    ],
+                    handler: 'file_server',
+                    root,
+                    pass_thru: true,
                 },
-                // {
-                //     handler: "rewrite",
-                //     uri: "{http.request.uri.path}",
-                //     rewrite: "{http.request.uri.path}",
-                // },
-                // {
-                //     handler: "subroute",
-                //     routes: [
-                //         {
-                //             match: [
-                //                 {
-                //                     file: {
-                //                         try_files: [
-                //                             "{http.request.uri.path}",
-                //                             "/index.html",
-                //                         ],
-                //                     },
-                //                 },
-                //             ],
-                //             handle: [
-                //                 {
-                //                     handler: "file_server",
-                //                     root,
-                //                 },
-                //             ],
-                //         },
-                //     ],
-                // },
+                {
+                    handler: 'rewrite',
+                    uri: '/index.html',
+                },
+                {
+                    handler: 'file_server',
+                    root
+                },
             ],
             terminal: true,
         };
