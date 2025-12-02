@@ -17,10 +17,11 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $user = useUser();
 
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
-    const financialSupportSettings = useFinancialSupportSettings();
-    const auth = useAuth();
-    const organization = useOrganization();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
+    const financialSupportSettings = useFinancialSupportSettings();
+    const organization = useOrganization();
+
+    const auth = useAuth();
 
     return {
         loading: computed(() => loading.value || loadingMembershipFilters.value),
