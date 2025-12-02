@@ -89,6 +89,7 @@ export class CaddyHelper {
     }
 
     async configure(routes: any[], domains: string[]) {
+        console.log('Caddy configure', '\nroutes: ', routes, '\ndomains: ', domains)
         const existingRoutes = await this.getRoutes();
 
         const newRoutes = routes.filter(
@@ -101,7 +102,14 @@ export class CaddyHelper {
 
         const subjects = await this.getPolicySubjects();
         const newSubjects = domains.filter((d) => !subjects.includes(d));
+
         await this.postPolicySubjects(newSubjects);
+
+        const endingRoutes = await this.getRoutes();
+        const endingSubjects = await this.getPolicySubjects();
+
+        console.log('Caddy current config', '\nroutes: ', endingRoutes, '\npolicies: ', endingSubjects)
+
     }
 
     private async putRoute(route: any, index: number) {

@@ -81,12 +81,9 @@ export class FrontendService implements ServiceHelper {
                 force: true,
             });
             console.log("Done copy project dist.");
-        } catch (err: any) {
-            console.error("cp threw an error:");
-            console.error(`    name:    ${err.name}`);
-            console.error(`    message: ${err.message}`);
-            console.error(`    code:    ${err.code}`);
-            console.error(`    stack:\n${err.stack}`);
+        } catch (err) {
+            console.error('Failed to copy project dist')
+            console.error(err);
             throw err; // re-throw so CI fails
         }
     }
