@@ -349,7 +349,7 @@ jobs:
             echo "Caddy certificate NOT found."
             echo "exists=false" >> $GITHUB_OUTPUT
         fi
-    - name: Add Caddy certificate to user-level trust store
+    - name: Add Caddy certificate to trust store
       if: steps.check_cert.outputs.exists == 'true'
       run: |
         CERT_PATH="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
@@ -391,7 +391,7 @@ jobs:
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
     - name: Run Playwright tests
-      run: CI=true && yarn test:playwright
+      run: CI=true yarn test:playwright
       continue-on-error: true   # allows uploading artifacts even if tests fail
     - name: Upload Playwright artifacts
       if: always()
