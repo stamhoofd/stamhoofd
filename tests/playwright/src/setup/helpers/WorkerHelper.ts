@@ -7,6 +7,7 @@ import { CaddyHelper } from "./CaddyHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendProjectName, FrontendService } from "./FrontendService";
 import { PlaywrightTestUtilsHelper } from "./PlaywrightTestUtilsHelper";
+import { ServiceProcess } from "./ServiceHelper";
 import { WorkerData } from "./WorkerData";
 
 class WorkerHelperInstance {
@@ -37,6 +38,7 @@ class WorkerHelperInstance {
      * The database environment should be loaded once before importing dependent modules such as @stamhoofd/models
      */
     loadDatabaseEnvironment() {
+        console.log("Loading database environment for worker ", WorkerData.id);
         if (this.didLoadDatabaseEnvironment) {
             throw new Error("Database environment already loaded");
         }
@@ -73,13 +75,17 @@ class WorkerHelperInstance {
             "registration",
             "webshop",
         ];
-        const frontendServices = frontendServiceNames.map(
-            (name) => new FrontendService(name, workerId),
-        );
 
-        const frontendProcesses = await Promise.all(
-            frontendServices.map((service) => service.start()),
-        );
+        const frontendProcesses: ServiceProcess[] = [];
+
+        for(const name of frontendServiceNames) {
+            console.log(`Start frontend service ${name} for worker ${workerId}...`);
+            const service = new FrontendService(name, workerId);
+            const process = await service.start();
+            console.log(`Frontend service ${name} started for worker ${workerId}.`);
+            frontendProcesses.push(process);
+        }
+
         console.log(`Frontend processes started for worker ${workerId}.`);
 
         // configure caddy
