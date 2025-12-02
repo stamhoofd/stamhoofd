@@ -352,12 +352,12 @@ jobs:
     - name: Add Caddy certificate to user-level trust store
       if: steps.check_cert.outputs.exists == 'true'
       run: |
-        mkdir -p ~/.local/share/ca-certificates
         CERT_PATH="$HOME/.local/share/caddy/pki/authorities/local/root.crt"
-        cp "$CERT_PATH" ~/.local/share/ca-certificates/caddy.crt
+        sudo cp "$CERT_PATH" /usr/local/share/ca-certificates/caddy.crt
+        sudo chmod 644 /usr/local/share/ca-certificates/caddy.crt
         sudo update-ca-certificates
     - name: Check if Caddy certificate is trusted
-      run: openssl verify ~/.local/share/ca-certificates/caddy.crt
+      run: openssl verify /usr/local/share/ca-certificates/caddy.crt
     # - name: Install certutil
     #   run: sudo apt-get update && sudo apt-get install -y libnss3-tools
     # - name: Import Caddy certificate into Chromium
