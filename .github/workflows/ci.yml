@@ -167,10 +167,9 @@ jobs:
         mysql database: 'stamhoofd-tests'
         mysql root password: 'root'
     - name: Run Playwright tests
-      run: NODE_OPTIONS=--use-system-ca CI=1 yarn test:playwright
-      continue-on-error: true   # allows uploading artifacts even if tests fail
+      run: cd tests/playwright && yarn -s test --bail=1
     - name: Upload Playwright artifacts
-      if: always()
+      if: failure() && github.event_name != 'pull_request'
       uses: actions/upload-artifact@v4
       with:
         name: playwright-traces
