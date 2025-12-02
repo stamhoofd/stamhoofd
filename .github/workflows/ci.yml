@@ -123,7 +123,7 @@ jobs:
     - name: Install libnss3-tools
       run: sudo apt-get update && sudo apt-get install -y libnss3-tools
     - name: Install dependencies
-      run: yarn install --prefer-offline --frozen-lockfile
+      run: yarn install --frozen-lockfile
     - name: Install Playwright Browsers
       run: yarn playwright install --with-deps --only-shell
     - name: Cache Caddy
