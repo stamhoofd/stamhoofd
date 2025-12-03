@@ -1047,10 +1047,8 @@ export function getFilterBuildersForRecordCategories(categories: RecordCategory[
                             recordAnswers: {
                                 [record.id]: {
                                     selectedChoices: {
-                                        $elemMatch: {
-                                            id: {
-                                                $in: FilterWrapperMarker,
-                                            },
+                                        id: {
+                                            $in: FilterWrapperMarker,
                                         },
                                     },
                                 },

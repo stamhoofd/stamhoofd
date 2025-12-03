@@ -391,10 +391,8 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                     recordAnswers: {
                         [recordId]: {
                             selectedChoices: {
-                                $elemMatch: {
-                                    id: {
-                                        $in: choiceIds,
-                                    },
+                                id: {
+                                    $in: choiceIds,
                                 },
                             },
                         },
@@ -409,10 +407,8 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                             $and: choiceIds.map((choiceId) => {
                                 return {
                                     selectedChoices: {
-                                        $elemMatch: {
-                                            id: {
-                                                $eq: choiceId,
-                                            },
+                                        id: {
+                                            $eq: choiceId,
                                         },
                                     },
                                 };
