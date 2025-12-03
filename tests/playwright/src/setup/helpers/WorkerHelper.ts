@@ -1,10 +1,10 @@
 import { WorkerInfo } from "@playwright/test";
+import { EmailMocker } from "@stamhoofd/email";
 import { TestUtils } from "@stamhoofd/test-utils";
 import { ApiService } from "./ApiService";
+import { CaddyConfigHelper } from "./CaddyConfigHelper";
 import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendProjectName, FrontendService } from "./FrontendService";
-import { CaddyConfigHelper } from "./CaddyConfigHelper";
-import { PlaywrightHooks } from "./PlaywrightHooks";
 import { ServiceProcess } from "./ServiceHelper";
 import { WorkerData } from "./WorkerData";
 
@@ -23,13 +23,6 @@ class WorkerHelperInstance {
     }
 
     /**
-     * The database environment should be loaded once before importing dependent modules such as @stamhoofd/models
-     */
-    loadDatabaseEnvironment() {
-        this.loadEnvironment()
-    }
-
-    /**
      * Start all the services that are needed for the tests.
      * @param workerInfo
      * @returns
@@ -37,8 +30,6 @@ class WorkerHelperInstance {
     async startServices(workerInfo: WorkerInfo) {
         const workerId = workerInfo.workerIndex.toString();
         console.log(`Starting services for worker ${workerId}`);
-
-        await this.loadEnvironment();
 
         // start api
         console.log(`Start api for worker ${workerId}...`);
@@ -141,20 +132,18 @@ class WorkerHelperInstance {
             return;
         }
 
+        if (!WorkerData.isInWorkerProcess) {
+            throw new Error('Loading env not possible: not in a worker process')
+        }
+
         if (WorkerData.isInWorkerProcess) {
             // set environment variables
             console.log('Loading environment')
             this.overrideDefaultEvironment();
-            TestUtils.globalSetup(new PlaywrightHooks());
-            TestUtils.setup();
+            EmailMocker.infect();
             console.log('Environment has been loaded')
 
             this.isInitialized = true;
-        } else {
-            console.log('Not in a worker process')
-
-            // Load defaults only (not specific to a worker)
-            TestUtils.globalSetup(new PlaywrightHooks());
         }
     }
 

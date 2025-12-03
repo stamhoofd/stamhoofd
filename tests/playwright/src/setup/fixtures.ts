@@ -1,7 +1,12 @@
 import { test as base } from "@playwright/test";
 import { DashboardPage } from "./helpers/DashboardPage";
 import { WorkerHelper } from "./helpers/WorkerHelper";
-WorkerHelper.loadDatabaseEnvironment();
+import { TestUtils } from "@stamhoofd/test-utils";
+import { PlaywrightHooks } from "./helpers/PlaywrightHooks";
+
+// Setup environment + register beforeAll/before/... hooks with Playwright
+TestUtils.globalSetup(new PlaywrightHooks());
+TestUtils.setup();
 
 export const test = base.extend<
     {
@@ -15,13 +20,15 @@ export const test = base.extend<
     // setup worker
     setup: [
         async ({}, use, workerInfo) => {
+            // Override environment with specific environment for this worker
+            await WorkerHelper.loadEnvironment();
+
+            // Start services
             const { teardown } = await WorkerHelper.startServices(workerInfo);
 
-            //await PlaywrightTestUtilsHelper.executeBeforeAll();
             // run all tests for worker
             console.log('Running tests for worker ', workerInfo.workerIndex);
             await use();
-            //await PlaywrightTestUtilsHelper.executeAfterAll();
 
             console.log('Tearing down worker', workerInfo.workerIndex)
             await teardown();

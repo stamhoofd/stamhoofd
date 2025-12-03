@@ -1,5 +1,10 @@
+import { TestUtils } from "@stamhoofd/test-utils";
 import { CaddyHelper } from "./helpers/CaddyHelper";
 import { FrontendBuilder } from "./helpers/FrontendBuilder";
+import { PlaywrightHooks } from "./helpers/PlaywrightHooks";
+
+// Make sure initial env is loaded
+TestUtils.globalSetup(new PlaywrightHooks());
 
 export default async function globalSetup() {
     if (process.env.NODE_ENV !== "test") {
