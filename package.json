@@ -115,7 +115,8 @@
     "vitest": "^3.2.4",
     "vitest-browser-vue": "^1.0.0",
     "vue-tsc": "^2.0.14",
-    "wait-on": "^8.0.3"
+    "wait-on": "^8.0.3",
+    "@playwright/test": "^1.56.1"
   },
   "resolutions": {
     "**/@mollie/api-client/axios": "^0.30.0",
