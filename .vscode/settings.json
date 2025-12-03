@@ -83,6 +83,7 @@
         "**/android/app/build": true,
         "**/android/app/src/main/assets": true,
         "**/dist": true,
+        "**/dist-platywright": true,
         "**/dist-prefix": true,
         "**/ios/App/App/public": true,
         "**/node_modules": true,
