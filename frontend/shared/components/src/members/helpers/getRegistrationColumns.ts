@@ -1,6 +1,6 @@
 import { Column } from '@stamhoofd/components';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupPrice, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
@@ -27,40 +27,6 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             minimumWidth: 100,
             recommendedWidth: 200,
             grow: true,
-        }),
-
-        new Column<ObjectType, Group>({
-            id: 'group.name',
-            allowSorting: false,
-            name: $t('c3d036e9-60ec-48e1-85a8-e801dc305466'),
-            getValue: (registration) => {
-                return registration.group;
-            },
-            format: (g) => {
-                return g.settings.name.toString();
-            },
-            minimumWidth: 100,
-            recommendedWidth: 300,
-            enabled: !group,
-        }),
-
-        new Column<ObjectType, string | null>({
-            id: 'group.defaultAgeGroup',
-            allowSorting: false,
-            name: $t('aa592704-705f-47f8-97ed-805b46c87e40'),
-            getValue: (registration) => {
-                return registration.group.defaultAgeGroupId;
-            },
-            format: (g) => {
-                if (!g) {
-                    return $t('3ef9e622-426f-4913-89a0-0ce08f4542d4');
-                }
-                return Platform.shared.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb');
-            },
-            getStyle: g => !g ? 'gray' : '',
-            minimumWidth: 100,
-            recommendedWidth: 300,
-            enabled: !group,
         }),
 
         new Column<ObjectType, Date | null>({
@@ -190,18 +156,6 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             enabled: false,
         }),
     ].filter(column => column !== null);
-
-    allColumns.push(
-        new Column<ObjectType, string>({
-            id: 'groupPrice',
-            allowSorting: false,
-            name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
-            getValue: registration => registration.groupPrice.name.toString(),
-            minimumWidth: 100,
-            recommendedWidth: 300,
-            enabled: !!group,
-        }),
-    );
 
     if (group) {
         for (const optionMenu of group.settings.optionMenus) {
@@ -539,6 +493,51 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             }),
         );
     }
+
+    allColumns.push(...[
+        new Column<ObjectType, string | null>({
+            id: 'group.defaultAgeGroup',
+            allowSorting: false,
+            name: $t('aa592704-705f-47f8-97ed-805b46c87e40'),
+            getValue: (registration) => {
+                return registration.group.defaultAgeGroupId;
+            },
+            format: (g) => {
+                if (!g) {
+                    return $t('3ef9e622-426f-4913-89a0-0ce08f4542d4');
+                }
+                return Platform.shared.config.defaultAgeGroups.find(a => a.id === g)?.name.toString() || $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb');
+            },
+            getStyle: g => !g ? 'gray' : '',
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: !group,
+        }),
+        new Column<ObjectType, Group>({
+            id: 'group.name',
+            allowSorting: false,
+            name: $t('c3d036e9-60ec-48e1-85a8-e801dc305466'),
+            getValue: (registration) => {
+                return registration.group;
+            },
+            format: (g) => {
+                return g.settings.name.toString();
+            },
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: !group,
+        }),
+
+        new Column<ObjectType, string>({
+            id: 'groupPrice',
+            allowSorting: false,
+            name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
+            getValue: registration => registration.groupPrice.name.toString(),
+            minimumWidth: 100,
+            recommendedWidth: 300,
+            enabled: !!group,
+        }),
+    ]);
 
     return allColumns.filter(column => column !== null);
 }
