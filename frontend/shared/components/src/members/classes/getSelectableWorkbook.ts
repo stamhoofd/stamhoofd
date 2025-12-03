@@ -22,6 +22,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
     };
 
     const columns: SelectableColumn[] = [
+        // member
         new SelectableColumn({
             id: 'id',
             name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
@@ -73,7 +74,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             enabled: false,
             description: $t(`aa45000f-8cff-4cb6-99b2-3202eb64c4a8`),
         }),
-
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'requiresFinancialSupport',
             name: financialSupportTitle,
@@ -83,7 +83,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             id: 'uitpasNumber',
             name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
         }), [AccessRight.MemberReadFinancialData]),
-
         new SelectableColumn({
             id: 'notes',
             name: $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
@@ -94,8 +93,8 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
         }), [AccessRight.MemberManageNRN]),
 
+        // group
         ...(groupColumns ?? []),
-
         ...((!organization || organization.id === platform.membershipOrganizationId)
             ? [
                     new SelectableColumn({
@@ -126,6 +125,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                 ]
             : []),
 
+        // parents
         ...[1, 2].flatMap((parentNumber, parentIndex) => {
             const getId = (value: string) => `parent.${parentIndex}.${value}`;
             const category = `Ouder ${parentNumber}`;
@@ -178,6 +178,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             ];
         }),
 
+        // unverified data
         new SelectableColumn({
             id: 'unverifiedPhones',
             name: $t(`62ce5fa4-3ea4-4fa8-a495-ff5eef1ec5d4`),
@@ -190,7 +191,6 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
             enabled: false,
         }),
-
         ...[1, 2].map((number, index) => {
             return new SelectableColumn({
                 id: `unverifiedAddresses.${index}`,
@@ -200,6 +200,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             });
         }),
 
+        // record answers
         ...flattenedCategories.flatMap((category) => {
             return category.getAllRecords().flatMap((record) => {
                 return new SelectableColumn({
