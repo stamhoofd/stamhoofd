@@ -29,13 +29,14 @@
                 {{ $t('0289e748-906d-453a-b54f-dce6a0355da0') }}
             </p>
 
-            <div v-if="tree.categories.length > 1" class="container">
+            <div v-if="showAll" class="container">
                 <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.All) }" @click="$navigate(Routes.All)">
                     <span class="icon ul" />
                     <span>{{ $t('379d43fb-034f-4280-bb99-ea658eaec729') }}</span>
                 </button>
             </div>
-            <hr v-if="tree.categories.length > 1"><div v-for="(category, index) in tree.categories" :key="category.id" class="container">
+            <hr v-if="showAll">
+            <div v-for="(category, index) in tree.categories" :key="category.id" class="container">
                 <div class="grouped">
                     <button class="menu-button button" type="button" :class="{ selected: checkRoute(Routes.Category, {properties: {category, period}}) }" @click="$navigate('category', {properties: {category, period}})">
                         <span :class="'icon ' + getCategoryIcon(category)" />
@@ -76,7 +77,7 @@ import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, MembersTableView, PromiseComponent, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useGetPeriods, useOrganizationManager, usePatchOrganizationPeriods } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategoryTree, GroupType, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
@@ -106,12 +107,20 @@ const { period, switchPeriod, openPeriod } = useSwitchablePeriod({
     onSwitch: async () => {
         // Make sure we open the first group again
         if (!splitViewController.value?.shouldCollapse()) {
-            await $navigate(Routes.Group, {
-                properties: {
-                    group: tree.value.getAllGroups()[0],
-                    period: period.value,
-                },
-            });
+            if (showAll.value) {
+                await $navigate(Routes.All, {
+                    properties: {
+                        periodId: period.value.period.id,
+                    },
+                });
+            } else if (tree.value.getAllGroups().length) {
+                await $navigate(Routes.Group, {
+                    properties: {
+                        group: tree.value.getAllGroups()[0],
+                        period: period.value,
+                    },
+                });
+            }
         }
     },
 });
@@ -163,6 +172,10 @@ const isCategoryDeactivated = (category: GroupCategoryTree) => {
     return period.value.isCategoryDeactivated($organization.value!, category);
 };
 
+const showAll = computed(() => {
+    return tree.value.categories.length > 1 || tree.value.getAllGroups().length > 1
+});
+
 enum Routes {
     All = 'all',
     Category = 'category',
@@ -188,6 +201,13 @@ defineRoutes([
                 },
             };
         },
+        isDefault: showAll.value
+            ? {
+                    properties: {
+                        periodId: period.value.period.id,
+                    },
+                }
+            : undefined,
     },
     {
         url: 'categorie/@slug',
