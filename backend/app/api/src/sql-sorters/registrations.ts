@@ -63,7 +63,7 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
     },
     'member.birthDay': {
         getValue(a) {
-            return a.member.details.birthDay === null ? null : Formatter.dateIso(a.member.details.birthDay as Date);
+            return a.member.details.birthDay === null ? null : Formatter.dateIso(a.member.details.birthDay);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
