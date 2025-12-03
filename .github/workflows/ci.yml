@@ -171,7 +171,7 @@ jobs:
     - name: Run Playwright tests
       run: cd tests/playwright && yarn -s test
     - name: Upload Playwright artifacts
-      if: failure() && github.event_name != 'pull_request'
+      if: failure()
       uses: actions/upload-artifact@v4
       with:
         name: playwright-traces
