@@ -8,7 +8,6 @@
         "test:trace": "yarn -s test:playwright --trace on"
     },
     "dependencies": {
-        "@stamhoofd/backend": "2.105.0",
         "@simonbackx/simple-database": "1.34.0"
     },
     "devDependencies": {
