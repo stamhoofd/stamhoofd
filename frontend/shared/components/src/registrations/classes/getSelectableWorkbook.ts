@@ -62,12 +62,6 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
     };
 
     const columns: (SelectableColumn | null) [] = [
-        new SelectableColumn({
-            id: 'id',
-            name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-            description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
-            enabled: false,
-        }),
         // member
         new SelectableColumn({
             id: 'member.id',
@@ -175,6 +169,14 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         new SelectableColumn({
             id: 'price',
             name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+        }),
+
+        // id of registration
+        new SelectableColumn({
+            id: 'id',
+            name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
+            description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
+            enabled: false,
         }),
 
         // parents
