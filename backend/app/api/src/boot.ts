@@ -59,7 +59,7 @@ function productionLog(message: string) {
     }
 }
 
-export const boot = async () => {
+export const boot = async (options: { killProcess: boolean }) => {
     productionLog('Running server at v' + Version);
     productionLog('Running server at port ' + STAMHOOFD.PORT);
     productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here
@@ -209,12 +209,12 @@ export const boot = async () => {
         }
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
-        if (STAMHOOFD.environment !== 'test') {
+        if (options.killProcess) {
             process.exit(0);
         }
     };
 
-    if (STAMHOOFD.environment !== 'test') {
+    if (options.killProcess) {
         process.on('SIGTERM', () => {
             productionLog('SIGTERM signal received.');
             shutdown().catch((e) => {

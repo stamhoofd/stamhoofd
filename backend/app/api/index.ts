@@ -10,7 +10,7 @@ backendEnv.load({ service: 'api' }).catch((error) => {
     }
     const { boot } = await import('./src/boot');
 
-    boot().catch((error) => {
+    boot({ killProcess: true }).catch((error) => {
         console.error('unhandledRejection', error);
         process.exit(1);
     });

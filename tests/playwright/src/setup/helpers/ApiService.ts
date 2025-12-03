@@ -22,7 +22,7 @@ export class ApiService implements ServiceHelper {
         console.log(`Database cleared for worker ${this.workerId}.`);
 
         const {boot} = await require('@stamhoofd/backend/src/boot');
-        const { shutdown } = await boot();
+        const { shutdown } = await boot({ killProcess: false });
 
         return {
             wait: async () => {
