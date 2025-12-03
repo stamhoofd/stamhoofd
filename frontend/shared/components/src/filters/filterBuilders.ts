@@ -445,9 +445,9 @@ export function useGetOrganizationUIFilterBuilders() {
                     const elemMatch = (f as any).setupSteps?.$elemMatch;
                     if (!elemMatch) return null;
 
-                        const periodId = elemMatch.periodId?.$eq;
+                    const periodId = elemMatch.periodId?.$eq;
 
-                        if (periodId !== platform.value.period.id) return null;
+                    if (periodId !== platform.value.period.id) return null;
 
                     const enumValues = Object.values(SetupStepType);
                     const stringifiedValueToMatch = JSON.stringify({

@@ -1,3 +1,4 @@
+import { SimpleError } from '@simonbackx/simple-errors';
 import { StamhoofdCompareValue, StamhoofdFilter } from './StamhoofdFilter.js';
 
 function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, StamhoofdCompareValue> {
@@ -43,7 +44,11 @@ export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitio
                 const firstKey = key.substring(0, dotIndex);
                 const k = definitions[firstKey];
                 if (!k) {
-                    throw new Error('Unknown filter ' + key);
+                    throw new SimpleError({
+                        code: 'unknown_filter',
+                        message: 'Unknown filter ' + key,
+                        human: $t('Deze filter wordt niet ondersteund of er ging iets fout met deze filter'),
+                    });
                 }
                 const subKey = key.substring(dotIndex + 1);
 
@@ -84,7 +89,11 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
         for (const subFilter of filter) {
             const runner = parentCompiler(subFilter, parentCompiler, '$and');
             if (runner === undefined) {
-                throw new Error('Unknown filter ' + '$and');
+                throw new SimpleError({
+                    code: 'unknown_filter',
+                    message: 'Unknown filter $and',
+                    human: $t('Deze filter wordt niet ondersteund of er ging iets fout met deze filter'),
+                });
             }
             runners.push(runner);
         }
@@ -95,7 +104,11 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
             const subFilter = f[key] as StamhoofdFilter;
             const runner = parentCompiler(subFilter, parentCompiler, key);
             if (runner === undefined) {
-                throw new Error('Unknown filter ' + key);
+                throw new SimpleError({
+                    code: 'unknown_filter',
+                    message: 'Unknown filter ' + key,
+                    human: $t('Deze filter wordt niet ondersteund of er ging iets fout met deze filter'),
+                });
             }
             runners.push(
                 runner,
