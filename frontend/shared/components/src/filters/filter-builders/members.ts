@@ -1001,7 +1001,7 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
 export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration) {
     const all: UIFilterBuilders = [];
 
-    if (!recordConfiguration || recordConfiguration.birthDay) {
+    if (!recordConfiguration || recordConfiguration.birthDay) {
         all.push(new DateFilterBuilder({
             name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
             key: 'birthDay',
