@@ -54,7 +54,7 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            {{ $t('33119a7d-4e82-4123-8742-dc7ec6da4a30') }}
+                            {{ shouldShowRegistrations ? $t('Alle inschrijvingen in deze categorie') : $t('33119a7d-4e82-4123-8742-dc7ec6da4a30') }}
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
@@ -104,8 +104,8 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, MembersTableView, STErrorsDefault, STList, STListItem, STNavigationBar, useErrors } from '@stamhoofd/components';
-import { useContext, useRequiredOrganization } from '@stamhoofd/components/src/hooks';
+import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, MembersTableView, RegistrationsTableView, STErrorsDefault, STList, STListItem, STNavigationBar, useErrors } from '@stamhoofd/components';
+import { useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components/src/hooks';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -125,6 +125,10 @@ const show = useShow();
 const navigationController = useNavigationController();
 const context = useContext();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
+
+// show registrations table if enabled and if maximum registrations in category is 1
+const shouldShowRegistrations = computed(() => isRegistrationsTableEnabled && props.category.settings.maximumRegistrations === 1);
 
 const parentCategories = computed(() => [
     ...(!isRoot.value && props.period.settings.rootCategory ? [props.period.settings.rootCategory] : []),
@@ -228,12 +232,19 @@ function openGroup(group: Group) {
 }
 
 function openAll(animated = true) {
+    const displayedComponent = shouldShowRegistrations.value
+        ? new ComponentWithProperties(RegistrationsTableView, {
+            category: tree.value,
+            periodId: props.period.period.id,
+        })
+        : new ComponentWithProperties(MembersTableView, {
+            category: tree.value,
+            periodId: props.period.period.id,
+        });
+
     show({
         components: [
-            new ComponentWithProperties(MembersTableView, {
-                category: tree.value,
-                periodId: props.period.period.id,
-            }),
+            displayedComponent,
         ],
         animated,
     }).catch(console.error);
