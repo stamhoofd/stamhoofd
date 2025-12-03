@@ -340,7 +340,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
                                                         },
                                                     }
                                                 : {},
-                                            value: options.length === 1 && returnAmount ? options[0].amount : options.map(option => returnAmount ? option.amount : option).join(', '),
+                                            value: options.map(option => returnAmount ? option.amount : option.option.name).join(', '),
                                         };
                                     },
                                 },
