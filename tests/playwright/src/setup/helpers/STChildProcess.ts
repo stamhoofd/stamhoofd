@@ -23,7 +23,7 @@ export class STChildProcess {
         // Stop the server when this process exits (e.g. Ctrl+C or test end)
         const cleanup = () => {
             if (!childProcess.killed) {
-                console.log("Stopping child process...");
+                console.log("Stopping child process... (" + this.command + ")");
                 childProcess.kill("SIGTERM");
             }
         };

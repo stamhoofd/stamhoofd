@@ -1,6 +1,7 @@
 // test should always be imported first
 import { test } from "../setup/fixtures";
 
+// other imports
 import { expect } from "@playwright/test";
 import { TestUtils } from "@stamhoofd/test-utils";
 import { WorkerHelper } from "../setup/helpers/WorkerHelper";

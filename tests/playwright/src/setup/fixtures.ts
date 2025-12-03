@@ -1,12 +1,14 @@
+
+// Setup environment + register beforeAll/before/... hooks with Playwright
+import { TestUtils } from "@stamhoofd/test-utils";
+import { PlaywrightHooks } from "./helpers/PlaywrightHooks";
+TestUtils.globalSetup(new PlaywrightHooks());
+TestUtils.setup();
+
+// All other imports perferably later
 import { test as base } from "@playwright/test";
 import { DashboardPage } from "./helpers/DashboardPage";
 import { WorkerHelper } from "./helpers/WorkerHelper";
-import { TestUtils } from "@stamhoofd/test-utils";
-import { PlaywrightHooks } from "./helpers/PlaywrightHooks";
-
-// Setup environment + register beforeAll/before/... hooks with Playwright
-TestUtils.globalSetup(new PlaywrightHooks());
-TestUtils.setup();
 
 export const test = base.extend<
     {
@@ -24,6 +26,7 @@ export const test = base.extend<
             await WorkerHelper.loadEnvironment();
 
             // Start services
+            console.log('Starting services for worker', workerInfo.workerIndex)
             const { teardown } = await WorkerHelper.startServices(workerInfo);
 
             // run all tests for worker
