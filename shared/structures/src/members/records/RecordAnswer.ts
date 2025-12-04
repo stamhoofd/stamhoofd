@@ -10,6 +10,7 @@ import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogRepl
 import { File } from '../../files/File.js';
 import { Image } from '../../files/Image.js';
 import { TranslatedString } from '../../TranslatedString.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
 
 export class RecordAnswer extends AutoEncoder {
@@ -504,9 +505,42 @@ export class RecordIntegerAnswer extends RecordAnswer {
     }
 }
 
-export class RecordPriceAnswer extends RecordIntegerAnswer {
+export class RecordPriceAnswer extends RecordAnswer {
+    @field({ decoder: IntegerDecoder, nullable: true })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces, nullable: true })
+    value: number | null = null;
+
     get stringValue() {
         return this.value !== null ? Formatter.price(this.value) : '/';
+    }
+
+    get objectValue() {
+        return this.value;
+    }
+
+    getWarnings(): RecordWarning[] {
+        const base = super.getWarnings();
+        if (!this.settings.warning) {
+            return base;
+        }
+        if (this.settings.warning.inverted) {
+            return this.value === null || this.value === 0 ? [this.settings.warning, ...base] : base;
+        }
+        return this.value !== null && this.value !== 0 ? [this.settings.warning, ...base] : base;
+    }
+
+    override validate() {
+        if (this.settings.required && (this.value === null)) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: $t(`22531919-79f1-466f-b58d-30f709973ffb`),
+                field: 'input',
+            });
+        }
+    }
+
+    get isEmpty() {
+        return (this.value === null);
     }
 }
 
