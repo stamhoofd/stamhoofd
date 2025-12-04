@@ -18,7 +18,7 @@ import {
     MergedMember,
     Registration,
     User,
-} from '../models';
+} from '../models/index.js';
 
 export async function mergeMultipleMembers(members: Member[]) {
     const { base, others } = selectBaseMember(members);

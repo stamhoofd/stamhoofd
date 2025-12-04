@@ -1,5 +1,5 @@
 import { PlatformConfig, PlatformMembershipType } from '@stamhoofd/structures';
-import { Platform } from './Platform';
+import { Platform } from './Platform.js';
 import { Database } from '@simonbackx/simple-database';
 
 describe('Model.Platform', () => {

@@ -3,7 +3,7 @@ import { Country } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { Province } from './Province';
+import { Province } from './Province.js';
 
 export class City extends QueryableModel {
     static table = 'cities';

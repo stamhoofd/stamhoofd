@@ -2,7 +2,7 @@ import { Factory } from '@simonbackx/simple-database';
 import { Gender, Parent, ParentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { AddressFactory } from './AddressFactory';
+import { AddressFactory } from './AddressFactory.js';
 
 interface Options {
     type?: ParentType;

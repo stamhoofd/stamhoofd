@@ -6,7 +6,7 @@ import { MollieOnboarding, MollieProfile, MollieStatus } from '@stamhoofd/struct
 import { IncomingMessage } from 'http';
 import https from 'https';
 
-import { Organization } from './Organization';
+import { Organization } from './Organization.js';
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));

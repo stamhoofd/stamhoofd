@@ -3,9 +3,9 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { validateDNSRecords } from '../helpers/DNSValidator';
+import { validateDNSRecords } from '../helpers/DNSValidator.js';
 
-import { Organization } from './';
+import { Organization } from './index.js';
 
 export class Webshop extends QueryableModel {
     static table = 'webshops';

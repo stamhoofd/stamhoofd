@@ -13,8 +13,8 @@ import {
     TranslatedString,
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Member } from '../models';
-import { mergeMemberDetails, selectBaseMember } from './MemberMerger';
+import { Member } from '../models/index.js';
+import { mergeMemberDetails, selectBaseMember } from './MemberMerger.js';
 
 describe('member merge', () => {
     describe('mergeMemberDetails', () => {

@@ -1,8 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { BackupHealth, getHealth } from '../helpers/backup';
+import { BackupHealth, getHealth } from '../helpers/backup.js';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { checkReplicaStatus } from '../helpers/replica-status';
+import { checkReplicaStatus } from '../helpers/replica-status.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

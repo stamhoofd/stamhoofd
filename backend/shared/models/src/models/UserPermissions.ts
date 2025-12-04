@@ -3,7 +3,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { Permissions } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Organization, User } from './';
+import { Organization, User } from './index.js';
 
 export class UserPermissions extends QueryableModel {
     static table = 'user_permissions';

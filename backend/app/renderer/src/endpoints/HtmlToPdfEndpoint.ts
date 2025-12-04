@@ -7,7 +7,7 @@ import { firstValues } from 'formidable/src/helpers/firstValues.js';
 import { promises as fs } from 'fs';
 import puppeteer, { Browser } from 'puppeteer';
 
-import { FileCache } from '../helpers/FileCache';
+import { FileCache } from '../helpers/FileCache.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

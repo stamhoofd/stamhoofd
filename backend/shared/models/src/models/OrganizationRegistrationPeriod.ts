@@ -3,8 +3,8 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { Group as GroupStruct, OrganizationRegistrationPeriodSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, SetupSteps } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { Group, RegistrationPeriod } from '.';
-
+import { Group } from './Group.js';
+import { RegistrationPeriod } from './RegistrationPeriod.js';
 export class OrganizationRegistrationPeriod extends QueryableModel {
     static table = 'organization_registration_periods';
 

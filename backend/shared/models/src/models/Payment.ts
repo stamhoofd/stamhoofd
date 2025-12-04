@@ -3,7 +3,7 @@ import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentCustomer, Payme
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BalanceItem, Organization } from './';
+import { BalanceItem, Organization } from './index.js';
 import { QueryableModel } from '@stamhoofd/sql';
 
 export class Payment extends QueryableModel {
@@ -233,8 +233,8 @@ export class Payment extends QueryableModel {
         if (payments.length === 0) {
             return { balanceItemPayments: [], balanceItems: [] };
         }
-        const { BalanceItemPayment } = await import('./BalanceItemPayment');
-        const { BalanceItem } = await import('./BalanceItem');
+        const { BalanceItemPayment } = await import('./BalanceItemPayment.js');
+        const { BalanceItem } = await import('./BalanceItem.js');
 
         // Load all the related models from the database so we can build the structures
         const balanceItemPayments = await BalanceItemPayment.where({
@@ -261,8 +261,8 @@ export class Payment extends QueryableModel {
     }
 
     static async loadBalanceItemRelations(balanceItems: import('./BalanceItem').BalanceItem[]) {
-        const { Order } = await import('./Order');
-        const { Member } = await import('./Member');
+        const { Order } = await import('./Order.js');
+        const { Member } = await import('./Member.js');
 
         // Load members and orders
         const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []));

@@ -4,7 +4,7 @@ import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Group, MemberResponsibilityRecord, Payment, Registration, User } from './';
+import { Group, MemberResponsibilityRecord, Payment, Registration, User } from './index.js';
 export type MemberWithUsers = Member & {
     users: User[];
 };
@@ -185,7 +185,7 @@ export class Member extends QueryableModel {
      * Fetch all registrations with members with their corresponding (valid) registrations and payment
      */
     static async getRegistrationWithMembersForPayment(paymentId: string): Promise<RegistrationWithMember[]> {
-        const { BalanceItem, BalanceItemPayment } = await import('./');
+        const { BalanceItem, BalanceItemPayment } = await import('./index.js');
 
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
 

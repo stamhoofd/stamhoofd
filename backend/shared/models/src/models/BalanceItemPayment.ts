@@ -1,7 +1,7 @@
 import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { v4 as uuidv4 } from 'uuid';
 
-import { BalanceItem, Payment } from './';
+import { BalanceItem, Payment } from './index.js';
 import { QueryableModel } from '@stamhoofd/sql';
 
 /**

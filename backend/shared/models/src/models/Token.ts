@@ -3,8 +3,8 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { ApiUser, ApiUserRateLimits } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
-import { RateLimiter } from '../helpers/RateLimiter';
-import { User } from './';
+import { RateLimiter } from '../helpers/RateLimiter.js';
+import { User } from './index.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 export type TokenWithUser = Token & { user: User };

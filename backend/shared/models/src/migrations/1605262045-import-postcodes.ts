@@ -2,9 +2,9 @@ import { column, Migration } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
-import { City } from '../models/addresses/City';
-import { PostalCode } from '../models/addresses/PostalCode';
-import { Province } from '../models/addresses/Province';
+import { City } from '../models/addresses/City.js';
+import { PostalCode } from '../models/addresses/PostalCode.js';
+import { Province } from '../models/addresses/Province.js';
 
 export class Gemeente extends QueryableModel {
     static table = 'gemeenten';

@@ -2,7 +2,7 @@ import { column, ManyToOneRelation } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 
-import { City } from './City';
+import { City } from './City.js';
 
 export class Street extends QueryableModel {
     static table = 'streets';

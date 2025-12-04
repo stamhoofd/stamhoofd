@@ -3,7 +3,7 @@ import { MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { EventNotificationStatus, RecordAnswer, RecordAnswerDecoder } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Event } from './Event';
+import { Event } from './Event.js';
 
 export class EventNotification extends QueryableModel {
     static table = 'event_notifications';

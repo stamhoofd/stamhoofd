@@ -6,7 +6,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './';
+import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');

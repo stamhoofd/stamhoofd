@@ -1,10 +1,10 @@
 import { Database } from '@simonbackx/simple-database';
 
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { UserFactory } from '../factories/UserFactory';
-import { Organization } from './Organization';
-import { Token } from './Token';
-import { User } from './User';
+import { OrganizationFactory } from '../factories/OrganizationFactory.js';
+import { UserFactory } from '../factories/UserFactory.js';
+import { Organization } from './Organization.js';
+import { Token } from './Token.js';
+import { User } from './User.js';
 
 describe('Model.Token', () => {
     const existingToken = 'ABCDEFG';

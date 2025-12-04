@@ -5,7 +5,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { deepFreeze } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { RegistrationPeriod } from './RegistrationPeriod';
+import { RegistrationPeriod } from './RegistrationPeriod.js';
 
 export class Platform extends QueryableModel {
     static table = 'platform';

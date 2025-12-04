@@ -3,8 +3,8 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { Product, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Webshop } from '../models';
-import { OrganizationFactory } from './OrganizationFactory';
+import { Webshop } from '../models/index.js';
+import { OrganizationFactory } from './OrganizationFactory.js';
 
 class Options {
     organizationId?: string;

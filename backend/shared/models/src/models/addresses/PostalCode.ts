@@ -5,7 +5,7 @@ import { Country } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { City } from './City';
+import { City } from './City.js';
 
 export class PostalCode extends QueryableModel {
     static table = 'postal_codes';

@@ -1,7 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 import { PlatformEventType } from '@stamhoofd/structures';
 
-import { Platform } from '../models/Platform';
+import { Platform } from '../models/Platform.js';
 
 class Options {
     name?: string;

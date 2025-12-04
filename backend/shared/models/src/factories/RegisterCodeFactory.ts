@@ -1,6 +1,6 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { RegisterCode } from '../models';
+import { RegisterCode } from '../models/index.js';
 
 type OrganizationOptions = {
     organizationId: string;

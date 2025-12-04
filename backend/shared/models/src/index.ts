@@ -1,13 +1,13 @@
 // Helpers
-export * from './helpers/EmailBuilder';
-export * from './helpers/GroupBuilder';
-export * from './helpers/MemberMerger';
-export * from './helpers/RateLimiter';
-export * from './helpers/WebshopCounter';
+export * from './helpers/EmailBuilder.js';
+export * from './helpers/GroupBuilder.js';
+export * from './helpers/MemberMerger.js';
+export * from './helpers/RateLimiter.js';
+export * from './helpers/WebshopCounter.js';
 
 // Models
-export * from './models';
-export * from './structures/OrganizationServerMetaData';
+export * from './models/index.js';
+export * from './structures/OrganizationServerMetaData.js';
 
 // Factories
-export * from './factories';
+export * from './factories/index.js';

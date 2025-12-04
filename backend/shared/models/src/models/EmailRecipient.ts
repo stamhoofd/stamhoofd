@@ -6,7 +6,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
-import { Member } from './Member';
+import { Member } from './Member.js';
 
 export class EmailRecipient extends QueryableModel {
     static table = 'email_recipients';

@@ -4,9 +4,9 @@ import { StringCompare } from '@stamhoofd/utility';
 import fs from 'fs';
 import readline from 'readline';
 
-import { City } from '../models/addresses/City';
-import { PostalCode } from '../models/addresses/PostalCode';
-import { Province } from '../models/addresses/Province';
+import { City } from '../models/addresses/City.js';
+import { PostalCode } from '../models/addresses/PostalCode.js';
+import { Province } from '../models/addresses/Province.js';
 
 async function getProvince(name: string, provinces: Province[]): Promise<Province> {
     const p = provinces.find(p => StringCompare.typoCount(p.name, name) == 0 && p.country == Country.Netherlands);

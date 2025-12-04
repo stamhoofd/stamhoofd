@@ -92,7 +92,8 @@ export default {
                     }
                 }
             },
-            ...baseRules
+            ...baseRules,
+            ...node
         ],
         shared: [
             ...baseRules,

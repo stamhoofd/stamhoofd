@@ -2,7 +2,7 @@ import { column } from '@simonbackx/simple-database';
 import { QueryableModel } from '@stamhoofd/sql';
 import { EventMeta, Event as EventStruct, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Group } from './Group';
+import { Group } from './Group.js';
 
 export class Event extends QueryableModel {
     static table = 'events';

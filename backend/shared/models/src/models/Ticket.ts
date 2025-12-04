@@ -5,7 +5,7 @@ import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Order, Organization, Webshop } from './';
+import { Order, Organization, Webshop } from './index.js';
 
 // Note: 0 and O is removed to prevent typing it in wrong
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ';

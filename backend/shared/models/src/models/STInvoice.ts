@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { OrganizationPaymentMandate, OrganizationPaymentMandateDetails, STInvoiceMeta } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { Organization } from './';
+import { Organization } from './index.js';
 
 export class STInvoice extends QueryableModel {
     static table = 'stamhoofd_invoices';

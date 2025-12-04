@@ -1,6 +1,6 @@
 import { Factory } from '@simonbackx/simple-database';
 import { File, Image, RecordAddressAnswer, RecordAnswer, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { AddressFactory } from './AddressFactory';
+import { AddressFactory } from './AddressFactory.js';
 
 type Options = ({
     records: RecordSettings[];

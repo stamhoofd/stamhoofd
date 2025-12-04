@@ -4,7 +4,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';
 
-import { Organization, User } from './';
+import { Organization, User } from './index.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);

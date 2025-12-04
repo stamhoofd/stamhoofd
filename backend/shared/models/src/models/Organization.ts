@@ -11,10 +11,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
-import { validateDNSRecords } from '../helpers/DNSValidator';
-import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData';
-import { OrganizationRegistrationPeriod, StripeAccount } from './';
+import { validateDNSRecords } from '../helpers/DNSValidator.js';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
+import { OrganizationServerMetaData } from '../structures/OrganizationServerMetaData.js';
+import { OrganizationRegistrationPeriod, StripeAccount } from './index.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
@@ -815,7 +815,7 @@ export class Organization extends QueryableModel {
 
     async getAdmins() {
         // Circular reference fix
-        const User = (await import('./User')).User;
+        const User = (await import('./User.js')).User;
         return await User.getAdmins(this.id, { verified: true });
     }
 

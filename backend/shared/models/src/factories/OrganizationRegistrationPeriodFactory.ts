@@ -1,8 +1,8 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { OrganizationRegistrationPeriod } from '../models';
-import { Organization } from '../models/Organization';
-import { RegistrationPeriod } from '../models/RegistrationPeriod';
+import { OrganizationRegistrationPeriod } from '../models/index.js';
+import { Organization } from '../models/Organization.js';
+import { RegistrationPeriod } from '../models/RegistrationPeriod.js';
 
 class Options {
     organization: Organization;

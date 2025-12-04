@@ -6,8 +6,8 @@ import { EmailTemplateType, Recipient, Replacement } from '@stamhoofd/structures
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Platform } from './Platform';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
+import { Platform } from './Platform.js';
 
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
@@ -323,7 +323,7 @@ export class EmailVerificationCode extends QueryableModel {
             return;
         }
 
-        const { User } = await import('./User');
+        const { User } = await import('./User.js');
         const user = await User.getByID(verificationCode.userId);
         if (!user) {
             return;

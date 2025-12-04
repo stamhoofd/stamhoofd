@@ -1,7 +1,7 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { backup } from '../helpers/backup';
+import { backup } from '../helpers/backup.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

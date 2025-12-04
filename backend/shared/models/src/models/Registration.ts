@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { Group, Organization, OrganizationRegistrationPeriod, User } from './';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
+import { Group, Organization, OrganizationRegistrationPeriod, User } from './index.js';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -181,7 +181,7 @@ export class Registration extends QueryableModel {
     }
 
     async getRecipients(organization: Organization, group: import('./').Group) {
-        const { Member } = await import('./Member');
+        const { Member } = await import('./Member.js');
 
         const member = await Member.getWithRegistrations(this.memberId);
 
@@ -220,7 +220,7 @@ export class Registration extends QueryableModel {
     async sendEmailTemplate(data: {
         type: EmailTemplateType;
     }) {
-        const Group = (await import('./')).Group;
+        const Group = (await import('./index.js')).Group;
         const group = await Group.getByID(this.groupId);
 
         if (!group) {
@@ -309,7 +309,7 @@ export class Registration extends QueryableModel {
         let group: Group | undefined | null = null;
 
         if (groupIds.length == 1) {
-            const Group = (await import('./')).Group;
+            const Group = (await import('./index.js')).Group;
             group = await Group.getByID(groupIds[0]);
         }
 

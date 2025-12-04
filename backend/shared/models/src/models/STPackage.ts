@@ -5,9 +5,9 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { GroupBuilder } from '../helpers/GroupBuilder';
-import { Organization } from './';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
+import { GroupBuilder } from '../helpers/GroupBuilder.js';
+import { Organization } from './index.js';
 
 export class STPackage extends QueryableModel {
     static table = 'stamhoofd_packages';

@@ -1,7 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { STPackage } from '../models';
-import { Organization } from '../models/Organization';
+import { STPackage } from '../models/index.js';
+import { Organization } from '../models/Organization.js';
 import { STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 
 class Options {

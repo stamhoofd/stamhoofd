@@ -6,14 +6,14 @@ import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { render } from '../helpers/Handlebars';
-import { BalanceItem } from './BalanceItem';
-import { Document } from './Document';
-import { Group } from './Group';
-import { Member, RegistrationWithMember } from './Member';
-import { Organization } from './Organization';
-import { Registration } from './Registration';
-import { User } from './User';
+import { render } from '../helpers/Handlebars.js';
+import { BalanceItem } from './BalanceItem.js';
+import { Document } from './Document.js';
+import { Group } from './Group.js';
+import { Member, RegistrationWithMember } from './Member.js';
+import { Organization } from './Organization.js';
+import { Registration } from './Registration.js';
+import { User } from './User.js';
 
 export class DocumentTemplate extends QueryableModel {
     static table = 'document_templates';

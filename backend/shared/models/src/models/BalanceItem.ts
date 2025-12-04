@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Payment } from './';
+import { Payment } from './index.js';
 
 /**
  * Keeps track of how much a member/user owes or needs to be reimbursed.
@@ -512,7 +512,7 @@ export class BalanceItem extends QueryableModel {
         }
 
         // Load balance payment items
-        const { BalanceItemPayment } = await import('./BalanceItemPayment');
+        const { BalanceItemPayment } = await import('./BalanceItemPayment.js');
         const balanceItemPayments = await BalanceItemPayment.select()
             .where('balanceItemId', items.map(i => i.id))
             .fetch();

@@ -1,5 +1,5 @@
 import { Group as GroupStruct, GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, TranslatedString } from '@stamhoofd/structures';
-import { Group, Organization } from '../models';
+import { Group, Organization } from '../models/index.js';
 
 export class GroupBuilder {
     organization: Organization;

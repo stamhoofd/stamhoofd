@@ -1,9 +1,9 @@
 import { Factory } from '@simonbackx/simple-database';
 import { NewUser, Permissions, UserPermissions } from '@stamhoofd/structures';
 
-import { Organization } from '../models/Organization';
-import { User } from '../models/User';
-import { OrganizationFactory } from './OrganizationFactory';
+import { Organization } from '../models/Organization.js';
+import { User } from '../models/User.js';
+import { OrganizationFactory } from './OrganizationFactory.js';
 
 class Options {
     organization?: Organization;

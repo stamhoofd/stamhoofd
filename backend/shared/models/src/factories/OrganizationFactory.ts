@@ -2,9 +2,9 @@ import { Factory } from '@simonbackx/simple-database';
 import { Address, Country, OrganizationMetaData, OrganizationType, PermissionRoleDetailed } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Organization } from '../models/Organization';
-import { RegistrationPeriod } from '../models/RegistrationPeriod';
-import { RegistrationPeriodFactory } from './RegistrationPeriodFactory';
+import { Organization } from '../models/Organization.js';
+import { RegistrationPeriod } from '../models/RegistrationPeriod.js';
+import { RegistrationPeriodFactory } from './RegistrationPeriodFactory.js';
 
 class Options {
     uri?: string;

@@ -1,7 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 
-import { EmailTemplate } from '../models';
-import { Organization } from '../models/Organization';
+import { EmailTemplate } from '../models/index.js';
+import { Organization } from '../models/Organization.js';
 import { EmailTemplateType, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 
 class Options {

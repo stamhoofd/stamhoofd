@@ -1,12 +1,12 @@
 import { BalanceItemType, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, LimitedFilteredRequest, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
-import { Email } from './Email';
-import { EmailRecipient } from './EmailRecipient';
+import { Email } from './Email.js';
+import { EmailRecipient } from './EmailRecipient.js';
 import { EmailMocker } from '@stamhoofd/email';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { OrganizationFactory } from '../factories/OrganizationFactory';
-import { Platform } from './Platform';
-import { BalanceItemFactory, MemberFactory, UserFactory } from '../factories';
-import { CachedBalance } from './CachedBalance';
+import { OrganizationFactory } from '../factories/OrganizationFactory.js';
+import { Platform } from './Platform.js';
+import { BalanceItemFactory, MemberFactory, UserFactory } from '../factories/index.js';
+import { CachedBalance } from './CachedBalance.js';
 import { Formatter } from '@stamhoofd/utility';
 
 async function buildEmail(data: {

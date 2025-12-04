@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Organization } from './';
+import { Organization } from './index.js';
 
 export class User extends QueryableModel {
     static table = 'users';
@@ -213,7 +213,7 @@ export class User extends QueryableModel {
             }
         }
 
-        const Member = (await import('./Member')).Member;
+        const Member = (await import('./Member.js')).Member;
 
         // Delete placeholder account, but migrate members first
         const members = await Member.getMembersWithRegistrationForUser(other);

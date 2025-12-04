@@ -8,12 +8,12 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import { Email as EmailClass, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { isAbortedError, QueueHandler, QueueHandlerOptions } from '@stamhoofd/queues';
 import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCalculation, SQLCount, SQLPlusSign, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder';
-import { EmailRecipient } from './EmailRecipient';
-import { EmailTemplate } from './EmailTemplate';
-import { Organization } from './Organization';
-import { User } from './User';
-import { Platform } from './Platform';
+import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
+import { EmailRecipient } from './EmailRecipient.js';
+import { EmailTemplate } from './EmailTemplate.js';
+import { Organization } from './Organization.js';
+import { User } from './User.js';
+import { Platform } from './Platform.js';
 
 type Attachment = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string };
 

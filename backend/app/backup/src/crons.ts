@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { backup, backupBinlogs, cleanBackups, cleanBinaryLogBackups } from './helpers/backup';
+import { backup, backupBinlogs, cleanBackups, cleanBinaryLogBackups } from './helpers/backup.js';
 import { Formatter } from '@stamhoofd/utility';
 
 let lastFullBackup: Date | null = null;

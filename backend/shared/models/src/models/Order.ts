@@ -6,9 +6,9 @@ import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, Ba
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { sendEmailTemplate } from '../helpers/EmailBuilder';
-import { WebshopCounter } from '../helpers/WebshopCounter';
-import { BalanceItem, BalanceItemPayment, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './';
+import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
+import { WebshopCounter } from '../helpers/WebshopCounter.js';
+import { BalanceItem, BalanceItemPayment, Organization, Payment, Ticket, Webshop, WebshopDiscountCode } from './index.js';
 
 export class Order extends QueryableModel {
     static table = 'webshop_orders';

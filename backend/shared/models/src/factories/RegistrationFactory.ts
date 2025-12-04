@@ -1,11 +1,11 @@
 import { Factory } from '@simonbackx/simple-database';
 
 import { BundleDiscount, GroupPrice } from '@stamhoofd/structures';
-import { Group } from '../models/Group';
-import { Member } from '../models/Member';
-import { Registration } from '../models/Registration';
-import { Organization } from '../models';
-import { GroupFactory } from './GroupFactory';
+import { Group } from '../models/Group.js';
+import { Member } from '../models/Member.js';
+import { Registration } from '../models/Registration.js';
+import { Organization } from '../models/index.js';
+import { GroupFactory } from './GroupFactory.js';
 
 type Options = ({
     member: Member;

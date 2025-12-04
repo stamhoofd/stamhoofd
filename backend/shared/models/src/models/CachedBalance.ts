@@ -2,8 +2,8 @@ import { column } from '@simonbackx/simple-database';
 import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhere, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { BalanceItem } from './BalanceItem';
-import { MemberUser } from './MemberUser';
+import { BalanceItem } from './BalanceItem.js';
+import { MemberUser } from './MemberUser.js';
 import { Formatter } from '@stamhoofd/utility';
 
 /**

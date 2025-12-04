@@ -6,7 +6,7 @@ import { IncomingMessage } from 'http';
 import https from 'https';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Organization, Payment } from './';
+import { Organization, Payment } from './index.js';
 import { Formatter } from '@stamhoofd/utility';
 
 export class PayconiqPayment extends QueryableModel {

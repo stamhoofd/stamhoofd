@@ -4,7 +4,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
-import { EmailRecipient, CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models';
+import { EmailRecipient, CachedBalance, EmailTemplate, Group, Organization, Platform, User, Webshop } from '../models/index.js';
 
 export type EmailTemplateOptions = {
     type: EmailTemplateType;
@@ -617,7 +617,7 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
             const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
             const suffixes: string[] = [];
             if (STAMHOOFD.userMode === 'platform') {
-                const { Member } = await import('../models/Member');
+                const { Member } = await import('../models/Member.js');
                 const memberIds = await Member.getMemberIdsForUser(recipientUser);
                 const members = await Member.getByIDs(...memberIds);
                 if (members.length > 0) {

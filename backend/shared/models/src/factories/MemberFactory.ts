@@ -2,12 +2,12 @@ import { Factory } from '@simonbackx/simple-database';
 import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Member, MemberWithRegistrations } from '../models/Member';
-import { Organization } from '../models/Organization';
-import { User } from '../models/User';
-import { EmergencyContactFactory } from './EmergencyContactFactory';
-import { OrganizationFactory } from './OrganizationFactory';
-import { ParentFactory } from './ParentFactory';
+import { Member, MemberWithRegistrations } from '../models/Member.js';
+import { Organization } from '../models/Organization.js';
+import { User } from '../models/User.js';
+import { EmergencyContactFactory } from './EmergencyContactFactory.js';
+import { OrganizationFactory } from './OrganizationFactory.js';
+import { ParentFactory } from './ParentFactory.js';
 
 class Options {
     organization?: Organization;

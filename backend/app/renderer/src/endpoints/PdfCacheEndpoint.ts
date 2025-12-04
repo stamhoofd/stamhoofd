@@ -2,7 +2,7 @@ import { AutoEncoder, DateDecoder, Decoder, field, StringDecoder } from '@simonb
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 
-import { FileCache } from '../helpers/FileCache';
+import { FileCache } from '../helpers/FileCache.js';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {

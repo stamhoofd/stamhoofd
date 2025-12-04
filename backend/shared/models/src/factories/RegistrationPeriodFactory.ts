@@ -1,7 +1,7 @@
 import { Factory } from '@simonbackx/simple-database';
 import { RegistrationPeriodSettings } from '@stamhoofd/structures';
 
-import { Organization, RegistrationPeriod } from '../models';
+import { Organization, RegistrationPeriod } from '../models/index.js';
 
 class Options {
     startDate?: Date;

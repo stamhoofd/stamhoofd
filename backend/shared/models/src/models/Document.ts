@@ -4,10 +4,10 @@ import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import { render } from '../helpers/Handlebars';
-import { RegistrationWithMember } from './Member';
-import { Organization } from './Organization';
-import { Registration } from './Registration';
+import { render } from '../helpers/Handlebars.js';
+import { RegistrationWithMember } from './Member.js';
+import { Organization } from './Organization.js';
+import { Registration } from './Registration.js';
 
 export class Document extends QueryableModel {
     static table = 'documents';
@@ -121,7 +121,7 @@ export class Document extends QueryableModel {
     }
 
     async updateData(): Promise<void> {
-        const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
+        const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
         const template = await DocumentTemplate.getByID(this.templateId);
         if (!template) {
             console.log('No template, skipping update');
@@ -141,7 +141,7 @@ export class Document extends QueryableModel {
             return;
         }
 
-        const Member = (await import('./Member')).Member;
+        const Member = (await import('./Member.js')).Member;
         const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId]);
         if (!registration) {
             console.log('No registration when updating document', this.id);
@@ -155,7 +155,7 @@ export class Document extends QueryableModel {
     static async updateForMember(memberId: string) {
         try {
             console.log('Updating documents for member', memberId);
-            const Member = (await import('./Member')).Member;
+            const Member = (await import('./Member.js')).Member;
             const member = await Member.getWithRegistrations(memberId);
             if (member) {
                 const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
@@ -173,7 +173,7 @@ export class Document extends QueryableModel {
         try {
             console.log('Updating documents for registration', registration.id);
 
-            const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
+            const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
             const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId: registration.organizationId });
 
             for (const template of templates) {
@@ -205,11 +205,11 @@ export class Document extends QueryableModel {
         try {
             console.log('Updating documents for updateForRegistrations', registrationIds, organizationId);
 
-            const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
+            const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
             const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
 
             if (templates.length) {
-                const Member = (await import('./Member')).Member;
+                const Member = (await import('./Member.js')).Member;
                 const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds);
 
                 for (const template of templates) {
@@ -226,11 +226,11 @@ export class Document extends QueryableModel {
         try {
             console.log('Updating documents for group', groupId);
 
-            const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
+            const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
             const templates = await DocumentTemplate.where({ updatesEnabled: 1, organizationId });
 
             if (templates.length) {
-                const Member = (await import('./Member')).Member;
+                const Member = (await import('./Member.js')).Member;
                 const registrations = await Member.getRegistrationWithMembersForGroup(groupId);
 
                 for (const template of templates) {
@@ -245,7 +245,7 @@ export class Document extends QueryableModel {
 
     // Rander handlebars template
     async getRenderedHtml(organization: Organization): Promise<string | null> {
-        const DocumentTemplate = (await import('./DocumentTemplate')).DocumentTemplate;
+        const DocumentTemplate = (await import('./DocumentTemplate.js')).DocumentTemplate;
         const template = await DocumentTemplate.getByID(this.templateId);
         if (!template) {
             return null;
