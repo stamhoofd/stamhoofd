@@ -56,7 +56,6 @@ import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, usePlatform, useValidation } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { LimitedFilteredRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -107,7 +106,7 @@ count(props.filter)
     .catch(console.error);
 
 const selectionCount = ref<number | null>(null);
-const selectedOrganization = ref(props.organization) as Ref<Organization | null>;
+const selectedOrganization = ref<Organization | null>(props.organization) as Ref<Organization | null>;
 const showSelectOrganization = computed(() => props.organization === null);
 const description = ref('');
 const price = ref(0);
