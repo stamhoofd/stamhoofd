@@ -111,6 +111,7 @@ export class Order extends QueryableModel {
     getUrl(this: Order & { webshop: Webshop & { organization: Organization } }) {
         // Country locales are disabled on webshops (always the same country). But we need to add the language if it isn't the same as the organization default language
         let locale = '';
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         if (this.data.consumerLanguage !== this.webshop.organization.i18n.language) {
             locale = '/' + this.data.consumerLanguage;
         }

@@ -1,5 +1,5 @@
-import { Formatter } from './Formatter';
-import { StringCompare } from './StringCompare';
+import { Formatter } from './Formatter.js';
+import { StringCompare } from './StringCompare.js';
 
 export class DataValidator {
     static readonly UITPAS_NUMBER_REGEX = /^\d{10,13}$/;

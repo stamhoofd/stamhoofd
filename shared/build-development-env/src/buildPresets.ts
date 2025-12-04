@@ -1,5 +1,5 @@
 import { type ConcurrentlyCommandInput } from 'concurrently';
-import { Service } from './Service';
+import { Service } from './Service.js';
 
 export type InitFunction = (config: SharedEnvironment) => Promise<undefined | ConcurrentlyCommandInput[]>;
 export async function buildPresets(presets: string[], service: Service): Promise<{ config: any; initFunctions: InitFunction[] }> {

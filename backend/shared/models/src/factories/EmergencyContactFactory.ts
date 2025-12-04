@@ -26,16 +26,16 @@ export class EmergencyContactFactory extends Factory<Options, EmergencyContact> 
 
         contact.phone
             = '+32 47'
-            + Math.floor(Math.random() * 10)
-            + ' '
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10)
-            + ' '
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10)
-            + ' '
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10);
+                + Math.floor(Math.random() * 10)
+                + ' '
+                + Math.floor(Math.random() * 10)
+                + Math.floor(Math.random() * 10)
+                + ' '
+                + Math.floor(Math.random() * 10)
+                + Math.floor(Math.random() * 10)
+                + ' '
+                + Math.floor(Math.random() * 10)
+                + Math.floor(Math.random() * 10);
 
         return Promise.resolve(contact);
     }

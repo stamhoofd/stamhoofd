@@ -6,7 +6,7 @@
  */
 
 import fs from 'node:fs/promises';
-import { getProjectPath } from './project-path';
+import { getProjectPath } from './project-path.js';
 
 // Wait max 60 seconds to acquire the lock
 const LOCK_RETRY_INTERVAL = 100; // ms

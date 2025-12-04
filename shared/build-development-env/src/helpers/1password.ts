@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import util from 'util';
-import { cache } from './cache';
+import { cache } from './cache.js';
 import { Formatter } from '@stamhoofd/utility';
 const execPromise = util.promisify(exec);
 

@@ -1,5 +1,5 @@
-import { escapeXml } from './escapeXml';
-import { XlsxFileWriter } from './XlsxFileWriter';
+import { escapeXml } from './escapeXml.js';
+import { XlsxFileWriter } from './XlsxFileWriter.js';
 
 export class XlsxCorePropsWriter extends XlsxFileWriter {
     creator = 'Stamhoofd';

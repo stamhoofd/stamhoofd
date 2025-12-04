@@ -55,7 +55,6 @@ const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 
-
 const props = defineProps<{
     deadline: EventNotificationDeadline;
     isNew: boolean;

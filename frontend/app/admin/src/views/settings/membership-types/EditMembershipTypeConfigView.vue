@@ -64,7 +64,6 @@ const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
 
-
 const props = defineProps<{
     type: PlatformMembershipType;
     config: PlatformMembershipTypeConfig;

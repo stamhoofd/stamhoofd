@@ -1,4 +1,4 @@
-import { XlsxFileWriter } from './XlsxFileWriter';
+import { XlsxFileWriter } from './XlsxFileWriter.js';
 
 export class XlsxWorkbookWriter extends XlsxFileWriter {
     sheets: { name; sheetId; relationId }[] = [];

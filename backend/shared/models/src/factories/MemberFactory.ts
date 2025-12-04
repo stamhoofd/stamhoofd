@@ -77,16 +77,16 @@ export class MemberFactory extends Factory<Options, MemberWithRegistrations> {
             if (memberDetails.age! >= 14) {
                 memberDetails.phone
                     = '+32 47'
-                    + Math.floor(Math.random() * 10)
-                    + ' '
-                    + Math.floor(Math.random() * 10)
-                    + Math.floor(Math.random() * 10)
-                    + ' '
-                    + Math.floor(Math.random() * 10)
-                    + Math.floor(Math.random() * 10)
-                    + ' '
-                    + Math.floor(Math.random() * 10)
-                    + Math.floor(Math.random() * 10);
+                        + Math.floor(Math.random() * 10)
+                        + ' '
+                        + Math.floor(Math.random() * 10)
+                        + Math.floor(Math.random() * 10)
+                        + ' '
+                        + Math.floor(Math.random() * 10)
+                        + Math.floor(Math.random() * 10)
+                        + ' '
+                        + Math.floor(Math.random() * 10)
+                        + Math.floor(Math.random() * 10);
             }
 
             let parentFactory = new ParentFactory({});

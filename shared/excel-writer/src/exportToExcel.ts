@@ -1,6 +1,6 @@
-import { XlsxTransformerSheet, XlsxWorkbookFilter, XlsxWriterAdapter } from './interfaces';
-import { XlsxColumnFilterer } from './XlsxColumnFilterer';
-import { XlsxTransformer } from './XlsxTransformer';
+import { XlsxTransformerSheet, XlsxWorkbookFilter, XlsxWriterAdapter } from './interfaces.js';
+import { XlsxColumnFilterer } from './XlsxColumnFilterer.js';
+import { XlsxTransformer } from './XlsxTransformer.js';
 
 export async function exportToExcel<T>({ definitions, writer, dataGenerator, filter }: {
     filter: XlsxWorkbookFilter;

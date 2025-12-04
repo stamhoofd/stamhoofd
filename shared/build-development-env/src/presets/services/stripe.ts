@@ -1,8 +1,8 @@
 import { type ConcurrentlyCommandInput } from 'concurrently';
 import util from 'util';
 import { exec } from 'child_process';
-import { cache } from '../../helpers/cache';
-import { Service } from '../../Service';
+import { cache } from '../../helpers/cache.js';
+import { Service } from '../../Service.js';
 const execPromise = util.promisify(exec);
 
 export async function inject(config: BackendEnvironment, service: Service) {

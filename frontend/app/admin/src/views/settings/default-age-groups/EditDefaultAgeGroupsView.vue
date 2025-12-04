@@ -39,7 +39,6 @@ const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
 
-
 const originalGroups = computed(() => platform.value.config.defaultAgeGroups);
 const { patched: groups, patch, addArrayPatch, hasChanges } = usePatchArray(originalGroups);
 const draggableGroups = useDraggableArray(() => groups.value, addArrayPatch);

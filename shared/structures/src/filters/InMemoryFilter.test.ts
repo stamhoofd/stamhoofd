@@ -1,5 +1,5 @@
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector, InMemoryFilterDefinitions } from './InMemoryFilter';
-import { StamhoofdFilter } from './StamhoofdFilter';
+import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector, InMemoryFilterDefinitions } from './InMemoryFilter.js';
+import { StamhoofdFilter } from './StamhoofdFilter.js';
 
 function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: InMemoryFilterDefinitions; error: string | RegExp }) {
     expect(() => {

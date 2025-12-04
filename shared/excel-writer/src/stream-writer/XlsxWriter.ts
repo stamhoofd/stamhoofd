@@ -1,14 +1,14 @@
-import { CellValue, XlsxWriterAdapter } from '../interfaces';
-import { ZipWriterAdapter } from './interfaces';
-import { XlsxAppPropsWriter } from './XlsxAppPropsWriter';
-import { XlsxContentTypesWriter } from './XlsxContentTypesWriter';
-import { XlsxCorePropsWriter } from './XlsxCorePropsWriter';
-import { XlsxRelationsWriter } from './XlsxRelationsWriter';
-import { XlsxSharedStringsWriter } from './XlsxSharedStringsWriter';
-import { XlsxSheetWriter } from './XlsxSheetWriter';
-import { XlsxStylesWriter } from './XlsxStylesWriter';
-import { XlsxThemeWriter } from './XlsxThemeWriter';
-import { XlsxWorkbookWriter } from './XlsxWorkbookWriter';
+import { CellValue, XlsxWriterAdapter } from '../interfaces.js';
+import { ZipWriterAdapter } from './interfaces.js';
+import { XlsxAppPropsWriter } from './XlsxAppPropsWriter.js';
+import { XlsxContentTypesWriter } from './XlsxContentTypesWriter.js';
+import { XlsxCorePropsWriter } from './XlsxCorePropsWriter.js';
+import { XlsxRelationsWriter } from './XlsxRelationsWriter.js';
+import { XlsxSharedStringsWriter } from './XlsxSharedStringsWriter.js';
+import { XlsxSheetWriter } from './XlsxSheetWriter.js';
+import { XlsxStylesWriter } from './XlsxStylesWriter.js';
+import { XlsxThemeWriter } from './XlsxThemeWriter.js';
+import { XlsxWorkbookWriter } from './XlsxWorkbookWriter.js';
 
 export class XlsxWriter implements XlsxWriterAdapter {
     sheetWriters: Map<symbol, XlsxSheetWriter> = new Map();

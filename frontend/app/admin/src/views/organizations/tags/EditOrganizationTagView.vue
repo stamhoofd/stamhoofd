@@ -71,7 +71,6 @@ const props = defineProps<{
     saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => Promise<void>;
 }>();
 
-
 const title = computed(() => props.isNew ? $t(`969ae056-dd8b-49ba-aeb5-ca810c65f599`) : Formatter.capitalizeFirstLetter($t('cd52133a-d8bf-4dde-a924-962f3f0e3fe9', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 

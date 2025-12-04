@@ -38,7 +38,6 @@ const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
 
-
 const originalTypes = computed(() => platform.value.config.membershipTypes);
 const { patched: types, patch, addArrayPatch, hasChanges } = usePatchArray(originalTypes);
 const draggableTypes = useDraggableArray(() => types.value, addArrayPatch);

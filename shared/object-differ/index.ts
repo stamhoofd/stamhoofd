@@ -1,1 +1,1 @@
-export * from './src/ObjectDiffer';
+export * from './src/ObjectDiffer.js';

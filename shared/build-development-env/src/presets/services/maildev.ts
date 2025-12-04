@@ -1,5 +1,5 @@
 import { type ConcurrentlyCommandInput } from 'concurrently';
-import { Service } from '../../Service';
+import { Service } from '../../Service.js';
 
 export function build(service: Service): any {
     const config = {

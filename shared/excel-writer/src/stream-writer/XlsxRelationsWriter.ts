@@ -1,5 +1,5 @@
-import { escapeXml } from './escapeXml';
-import { XlsxFileWriter } from './XlsxFileWriter';
+import { escapeXml } from './escapeXml.js';
+import { XlsxFileWriter } from './XlsxFileWriter.js';
 
 export class XlsxRelationsWriter extends XlsxFileWriter {
     relations: { target: string; type: string; id: string }[] = [];

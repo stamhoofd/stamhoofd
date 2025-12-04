@@ -1,4 +1,4 @@
-import { StringCompare } from './StringCompare';
+import { StringCompare } from './StringCompare.js';
 
 describe('StringCompare', () => {
     test('Ignore special characters', () => {

@@ -101,10 +101,10 @@ export class BalanceItem extends QueryableModel {
     /**
      * This is a cached value for storing in the database.
      * It stores the calculated price with VAT.
-     * 
+     *
      * price should = pricePaid + pricePending + priceOpen
      */
-    @column({ 
+    @column({
         type: 'integer',
         beforeSave: function () {
             return this.priceWithVAT;

@@ -38,7 +38,6 @@ const errors = useErrors();
 const pop = usePop();
 const present = usePresent();
 
-
 const originalTags = computed(() => platform.value.config.tags);
 
 const { patched: tags, patch, addArrayPatch, hasChanges } = usePatchArray(originalTags);

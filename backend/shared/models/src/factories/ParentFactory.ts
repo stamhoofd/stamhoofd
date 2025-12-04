@@ -23,16 +23,16 @@ export class ParentFactory extends Factory<Options, Parent> {
         parent.address = await new AddressFactory({}).create();
         parent.phone
             = '+32 47'
-            + Math.floor(Math.random() * 10)
-            + ' '
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10)
-            + ' '
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10)
-            + ' '
-            + Math.floor(Math.random() * 10)
-            + Math.floor(Math.random() * 10);
+                + Math.floor(Math.random() * 10)
+                + ' '
+                + Math.floor(Math.random() * 10)
+                + Math.floor(Math.random() * 10)
+                + ' '
+                + Math.floor(Math.random() * 10)
+                + Math.floor(Math.random() * 10)
+                + ' '
+                + Math.floor(Math.random() * 10)
+                + Math.floor(Math.random() * 10);
 
         parent.email
             = Formatter.slugEmail(

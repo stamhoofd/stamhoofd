@@ -1,2 +1,2 @@
-export * from './src/build';
-export * from './src/helpers/1password';
+export * from './src/build.js';
+export * from './src/helpers/1password.js';

@@ -1,14 +1,14 @@
-import { Group } from '../../Group';
-import { GroupSettings } from '../../GroupSettings';
-import { GroupType } from '../../GroupType';
-import { Organization } from '../../Organization';
-import { Platform } from '../../Platform';
-import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod';
-import { MemberDetails } from '../MemberDetails';
-import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob';
-import { PlatformFamily } from '../PlatformMember';
-import { Registration } from '../Registration';
-import { RegisterItem } from './RegisterItem';
+import { Group } from '../../Group.js';
+import { GroupSettings } from '../../GroupSettings.js';
+import { GroupType } from '../../GroupType.js';
+import { Organization } from '../../Organization.js';
+import { Platform } from '../../Platform.js';
+import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod.js';
+import { MemberDetails } from '../MemberDetails.js';
+import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
+import { PlatformFamily } from '../PlatformMember.js';
+import { Registration } from '../Registration.js';
+import { RegisterItem } from './RegisterItem.js';
 
 describe('Unit.RegisterItem', () => {
     it('group without restrictions should be valid', () => {

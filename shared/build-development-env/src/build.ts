@@ -1,6 +1,6 @@
-import { buildPresets, InitFunction } from './buildPresets';
-import { getProjectPath } from './helpers/project-path';
-import { Service } from './Service';
+import { buildPresets, InitFunction } from './buildPresets.js';
+import { getProjectPath } from './helpers/project-path.js';
+import { Service } from './Service.js';
 import fs from 'node:fs/promises';
 
 async function fileExists(path: string): Promise<boolean> {

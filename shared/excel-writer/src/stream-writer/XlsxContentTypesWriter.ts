@@ -1,4 +1,4 @@
-import { XlsxFileWriter } from './XlsxFileWriter';
+import { XlsxFileWriter } from './XlsxFileWriter.js';
 
 export class XlsxContentTypesWriter extends XlsxFileWriter {
     overrides: { partName: string; contentType: string }[] = [];

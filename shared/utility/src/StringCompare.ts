@@ -1,4 +1,4 @@
-import { Formatter } from './Formatter';
+import { Formatter } from './Formatter.js';
 
 export class StringCompare {
     /**

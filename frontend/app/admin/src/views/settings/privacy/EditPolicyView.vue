@@ -60,7 +60,6 @@ const props = defineProps<{
 const title = computed(() => props.isNew ? $t(`2e109d45-8777-45fe-9596-4a08785f5923`) : $t(`ced74e50-34b9-4d83-a89d-542c4b0c4c45`));
 const pop = usePop();
 
-
 const { patched, addPatch, hasChanges, patch } = usePatch(props.policy);
 
 const save = async () => {

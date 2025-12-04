@@ -1,5 +1,5 @@
 import { concurrently, type ConcurrentlyCommandInput } from 'concurrently';
-import { buildConfig } from './build';
+import { buildConfig } from './build.js';
 import chalk from 'chalk';
 
 async function init() {

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { friendlyFormatIBAN } from 'ibantools';
-import { Sorter } from './Sorter';
+import { Sorter } from './Sorter.js';
 
 export class Formatter {
     static timezone = 'Europe/Brussels';
