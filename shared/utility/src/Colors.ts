@@ -246,8 +246,8 @@ export class Colors {
     static getLuminance(color: RGB) {
         const y
             = 0.2126729 * this.linearize(color.r)
-            + 0.7151522 * this.linearize(color.g)
-            + 0.072175 * this.linearize(color.b);
+                + 0.7151522 * this.linearize(color.g)
+                + 0.072175 * this.linearize(color.b);
         return this.clampLuminance(y);
     }
 
