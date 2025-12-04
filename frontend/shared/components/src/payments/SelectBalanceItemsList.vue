@@ -10,7 +10,7 @@
             <div v-if="isItemSelected(item) && isCustomizeItemValue(item)" class="split-inputs option" @click.stop>
                 <div>
                     <STInputBox :title="item.priceOpen >= 0 ? $t('aeed7048-efaa-410d-bec1-796b5fe581a6') : $t('1d864313-d956-41b6-b95b-77227297fb0e')">
-                        <PriceInput :currency="getItemPrice(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(Math.abs(item.priceOpen) / 100) + ' euro')" :model-value="Math.abs(getItemPrice(item))" :min="0" :max="Math.abs(item.priceOpen)" :placeholder="$t(`240b3e60-bab9-47d6-bcfb-71e138d2cd2c`)" @update:model-value="setItemPrice(item, Math.abs($event) * Math.sign(item.priceOpen))" />
+                        <PriceInput :currency="getItemPrice(item) === item.priceOpen ? 'euro' : ('/ ' + formatFloat(Math.abs(item.priceOpen) / 100_00) + ' euro')" :model-value="Math.abs(getItemPrice(item))" :min="0" :max="Math.abs(item.priceOpen)" :placeholder="$t(`240b3e60-bab9-47d6-bcfb-71e138d2cd2c`)" @update:model-value="setItemPrice(item, Math.abs($event) * Math.sign(item.priceOpen))" />
                     </STInputBox>
                 </div>
             </div>

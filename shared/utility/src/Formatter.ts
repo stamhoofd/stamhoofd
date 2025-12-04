@@ -411,7 +411,7 @@ export class Formatter {
     }
 
     static float(value: number): string {
-        const formatted = new Intl.NumberFormat('nl-BE', { maximumFractionDigits: 2 }).format(Math.abs(value));
+        const formatted = new Intl.NumberFormat('nl-BE', { maximumFractionDigits: 4 }).format(Math.abs(value));
 
         const v = (value < 0 ? '- ' : '') + formatted;
 
