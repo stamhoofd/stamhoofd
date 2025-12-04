@@ -9,6 +9,8 @@ import frontend from './configs/frontend.js';
 import typescript from './configs/typescript.js';
 import defaultRules from './configs/default.js';
 import jest from 'eslint-plugin-jest'
+import node from './configs/node.js';
+import globals from "globals";
 
 const baseRules = [
     eslint.configs.recommended,
@@ -83,10 +85,18 @@ export default {
             ...frontend
         ],
         backend: [
+            {
+                languageOptions: {
+                    globals: {
+                        ...globals.node,
+                    }
+                }
+            },
             ...baseRules
         ],
         shared: [
-            ...baseRules
+            ...baseRules,
+            ...node
         ]
     },
 };
