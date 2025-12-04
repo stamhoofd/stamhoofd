@@ -7,8 +7,8 @@ android {
         applicationId "be.fos.keeo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 336
-        versionName "2.106.1"
+        versionCode 339
+        versionName "2.107.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
