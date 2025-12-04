@@ -325,4 +325,8 @@ const actions: TableAction<ObjectType>[] = [
     }),
     ...registrationActions,
 ];
+
+if (app !== 'admin' && auth.canManagePayments()) {
+    actions.push(actionBuilder.getChargeAction(organizationScope.value!));
+}
 </script>

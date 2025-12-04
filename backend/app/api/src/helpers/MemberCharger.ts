@@ -3,17 +3,29 @@ import { BalanceItemType, MemberWithRegistrationsBlob } from '@stamhoofd/structu
 
 export class MemberCharger {
     static async chargeMany({ chargingOrganizationId, membersToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {
-        const balanceItems = membersToCharge.map(memberBeingCharged => MemberCharger.createBalanceItem({
+        await Promise.all(membersToCharge.map(memberToCharge => MemberCharger.charge({
             price,
             amount,
             description,
             chargingOrganizationId,
-            memberBeingCharged,
+            memberToCharge,
             dueAt,
             createdAt,
-        }));
+        })));
+    }
 
-        await Promise.all(balanceItems.map(balanceItem => balanceItem.save()));
+    static async charge({ chargingOrganizationId, memberToCharge, price, amount, description, dueAt, createdAt }: { chargingOrganizationId: string; memberToCharge: MemberWithRegistrationsBlob; price: number; amount?: number; description: string; dueAt: Date | null; createdAt: Date | null }) {
+        const balanceItem = MemberCharger.createBalanceItem({
+            price,
+            amount,
+            description,
+            chargingOrganizationId,
+            memberBeingCharged: memberToCharge,
+            dueAt,
+            createdAt,
+        });
+
+        await balanceItem.save();
     }
 
     private static createBalanceItem({ price, amount, description, chargingOrganizationId, memberBeingCharged, dueAt, createdAt }: { price: number; amount?: number; description: string; chargingOrganizationId: string; memberBeingCharged: MemberWithRegistrationsBlob; dueAt: Date | null; createdAt: Date | null }): BalanceItem {

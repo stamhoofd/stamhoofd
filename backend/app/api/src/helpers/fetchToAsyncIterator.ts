@@ -1,5 +1,5 @@
 import { IPaginatedResponse, LimitedFilteredRequest } from '@stamhoofd/structures';
-import { FileSignService } from '../services/FileSignService';
+import { FileSignService } from '../services/FileSignService.js';
 
 export function fetchToAsyncIterator<T>(
     initialFilter: LimitedFilteredRequest,
