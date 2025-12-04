@@ -1031,6 +1031,10 @@
     "original": "Beroepsgroep",
     "translation": "Groupe professionnel"
   },
+  "b15e330d-589f-4709-b34a-a3c29389650c": {
+    "original": "Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw groep. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.",
+    "translation": "Un remboursement annule un paiement précédemment réussi d'un membre ou d'un supporter, sans intervention de votre groupe. Par exemple, en cas d'échec de paiement tardif ou d’un remboursement effectué via la carte de crédit ou la banque."
+  },
   "b19e199f-2b0e-444c-a4ee-0cdd0b3c6a35": {
     "original": "Je hebt nog geen instellingen toegevoegd.",
     "translation": "Vous n'avez encore ajouté aucun paramètre."
@@ -1219,6 +1223,10 @@
     "original": ". Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": ". Allez dans « Mon compte » si vous souhaitez vous inscrire comme membre."
   },
+  "cfd5d1ac-6997-45b5-bba5-3629695f4a8b": {
+    "original": "Een terugbetaling van jouw groep richting een lid of supporter",
+    "translation": "Un remboursement de la part de votre groupe vers un membre ou un supporter."
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw groep",
     "translation": "Nom de votre groupe"
@@ -1346,6 +1354,10 @@
   "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
     "original": "Deze functies worden gekoppeld aan een lid samen met een lokale groep, door een hoofdbeheerder van die groep. Een lokale groep kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
     "translation": "Ces fonctions sont attribuées à un membre et associées à un groupe local, par un administrateur principal de ce groupe. Un groupe local peut également ajouter ses propres fonctions spécifiques pour les étendre."
+  },
+  "e739f15a-d80a-4d12-9b3f-e672a773c406": {
+    "original": "Een betaling van een lid of supporter aan jouw groep",
+    "translation": "Un paiement effectué par un membre ou un supporter à destination de votre groupe."
   },
   "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een groep terug stabiel te zijn.",

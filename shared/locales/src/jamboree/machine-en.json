@@ -1007,6 +1007,10 @@
     "original": "Beroepseenheid",
     "translation": "Professional unit"
   },
+  "b15e330d-589f-4709-b34a-a3c29389650c": {
+    "original": "Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw eenheid. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.",
+    "translation": "A chargeback reverses a previously successful payment from a member or supporter, without any involvement from your unit. For example, this could happen in the case of a late failed payment or a chargeback through a credit card or bank."
+  },
   "b19c1fb0-f1a7-4435-9150-01bb2bb0799c": {
     "original": "Dit aansluitingstype is (nog) niet beschikbaar voor dit scoutsjaar",
     "translation": "This affiliation type is not (yet) available for this scout year"
@@ -1203,6 +1207,10 @@
     "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Jamboree kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Jamboree kunnen inschrijven.",
     "translation": "Check if all group settings are correct. If everything is set up correctly, you can ensure that all members can register and pay via Jamboree. So pay close attention to the tariffs you set, and the age restrictions you use. Once you are ready, you can open an age group so that members can register via Jamboree."
   },
+  "cfd5d1ac-6997-45b5-bba5-3629695f4a8b": {
+    "original": "Een terugbetaling van jouw eenheid richting een lid of supporter",
+    "translation": "A refund from your unit to a member or supporter"
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw eenheid",
     "translation": "Name of your unit"
@@ -1354,6 +1362,10 @@
   "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
     "original": "Deze functies worden gekoppeld aan een lid samen met een eenheid, door een hoofdbeheerder van die eenheid. Een eenheid kan zelf ook nog eenheidseigenfuncties toevoegen om deze uit te breiden.",
     "translation": "These roles are assigned to a member together with a unit, by a main administrator of that unit. A unit can also add extra custom unit roles to expand the list."
+  },
+  "e739f15a-d80a-4d12-9b3f-e672a773c406": {
+    "original": "Een betaling van een lid of supporter aan jouw eenheid",
+    "translation": "A payment from a member or supporter to your unit"
   },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen scoutsjaar liggen",

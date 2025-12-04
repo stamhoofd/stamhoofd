@@ -111,6 +111,10 @@
     "original": "Uitverkocht",
     "translation": "Sold out"
   },
+  "01225a70-b108-4f12-ad86-46e7b23a1043": {
+    "original": "Positieve en negatieve openstaande bedragen worden samengebracht zodat het totaal op 0 euro uitkomt, zodat die items elkaar opheffen.",
+    "translation": "Positive and negative open amounts are combined so that the total comes to 0 euro, effectively offsetting each other."
+  },
   "0125db4f-75ca-4ede-a4dc-8d5173d0456f": {
     "original": "Webshops (max. 10) voor één jaar",
     "translation": "Webshops (max. 10) for one year"
@@ -902,6 +906,10 @@
   "0950002e-2bd7-4451-90f3-34288c48e33b": {
     "original": "Uitnodiging beheerder: bestaande gebruiker",
     "translation": "Administrator invitation: existing user"
+  },
+  "097441a3-6b49-4768-87c3-8b290bb073ed": {
+    "original": "afrondingen",
+    "translation": "roundings"
   },
   "09754a12-7918-47a6-a783-dde118f45368": {
     "original": "Als iemand een nieuwe e-mail opstelt, gericht aan bestellingen, zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.",
@@ -1890,6 +1898,10 @@
   "14abcd1e-7e65-4e84-be4c-ab2e162ae44d": {
     "original": "Opslaan",
     "translation": "Save"
+  },
+  "14ad1dfb-6ab9-4945-8735-7e22526120c9": {
+    "original": "Prijs excl. btw",
+    "translation": "Price excl. VAT"
   },
   "14b43fee-f3bc-45cd-a0db-098805ffda04": {
     "original": "Het adres is te lang. Controleer of het correct werd ingevuld.",
@@ -4515,6 +4527,10 @@
     "original": "Bevestig dat je groepsgegevens correct zijn",
     "translation": "Confirm that your group data is correct."
   },
+  "31e38bb6-60be-47b7-a713-7f430b7d08c4": {
+    "original": "Btw",
+    "translation": "VAT"
+  },
   "31e85868-a04b-42be-bf89-0b691378852c": {
     "original": "Verplichte functies",
     "translation": "Mandatory features"
@@ -5150,6 +5166,10 @@
   "39d0d9ca-2f37-40b6-84a4-51fb29b4cce6": {
     "original": "Deze invoervelden zijn nodig op elk document, maar je moet hier instellen welke gegevens je uit Stamhoofd daarin wilt invullen. Koppel je met meerdere gegevens uit Stamhoofd, dan gaan we de eerste beschikbare op het document invullen. Bv. als er bij het lid zelf geen adres werd ingevuld, neem dan het adres van de eerste ouder.",
     "translation": "These input fields are required on each document, but you must set here which data you want to fill in from Stamhoofd. If you link with multiple data from Stamhoofd, we will fill in the first available on the document. E.g. if no address was filled in by the member, then take the address of the first parent."
+  },
+  "39e5d1d1-7058-4ba0-a477-df2c7707b531": {
+    "original": "Prijs incl. btw",
+    "translation": "Price incl. VAT"
   },
   "39f41938-8165-49bb-bffe-6800155f02a4": {
     "original": "Kies je leveringsadres",
@@ -7803,6 +7823,10 @@
     "original": "Verplaats naar vragenlijst",
     "translation": "Move to form"
   },
+  "5841f72b-67d8-4add-8cfa-801bcb71cba7": {
+    "original": "Afrondingscorrectie",
+    "translation": "Rounding correction"
+  },
   "5842a365-ee3e-452c-85d8-2967e4e172ef": {
     "original": "zit",
     "translation": "is"
@@ -7810,6 +7834,10 @@
   "5845f5e2-b1fe-4453-9e55-b46ebcd76191": {
     "original": "adres van een persoon",
     "translation": "address of a person"
+  },
+  "584f3cc4-679e-4803-b923-033eb552aed5": {
+    "original": "Hou het btw-tarief van openstaande bedragen bij zodat het opstellen van facturen vereenvoudigd wordt.",
+    "translation": "Keep track of the VAT rate for open amounts to make invoice creation easier."
   },
   "58649f04-8b21-43ba-9193-3fd3eb02b5ef": {
     "original": "Nieuwe wachtlijst maken",
@@ -8615,6 +8643,10 @@
     "original": "Andere",
     "translation": "Other"
   },
+  "60faa1ad-58e5-484a-b10e-21835398ca84": {
+    "original": "Niet verlegd",
+    "translation": "Not shifted"
+  },
   "610a54d0-5ae5-4e4c-bac3-205fd56b65c8": {
     "original": "Vaste mededeling",
     "translation": "Fixed message"
@@ -8831,6 +8863,10 @@
     "original": "Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.",
     "translation": "Edit and add new tickets and vouchers to your webshop."
   },
+  "63713e8d-73e7-4013-a7be-549f035b563f": {
+    "original": "Excl. btw",
+    "translation": "Excl. VAT"
+  },
   "63786627-79e7-4ab7-b759-774ef3f856d9": {
     "original": "{name} definitief verwijderen?",
     "translation": "Permanently delete {name}?"
@@ -8842,6 +8878,10 @@
   "638202df-48b7-49c7-b5d6-b5dca451896a": {
     "original": "Ticketverkoop voor personen",
     "translation": "Ticket sales for individuals"
+  },
+  "639bca94-1e40-4176-99b0-f1a3a9b62165": {
+    "original": "Het type van de betaling is gewijzigd in een gewone betaling omdat het totaalbedrag positief is. Kijk alles nog even na.",
+    "translation": "The payment type was changed to a regular payment because the total amount is positive. Please double-check everything."
   },
   "63af45b3-7fc7-4c32-b299-2fab446d4f13": {
     "original": "Nieuwe functionaliteiten in elkaar timmeren...",
@@ -9190,6 +9230,10 @@
   "6802d7c7-44d0-43d3-ab91-956ab5edc1f6": {
     "original": "geen rechten",
     "translation": "no rights"
+  },
+  "68039ee8-fdfe-40ad-bee2-0670651b0e09": {
+    "original": "Een nieuwe automatische saldoverrekening werd aangemaakt",
+    "translation": "A new automatic balance adjustment has been created"
   },
   "6804cf8f-b057-41ce-a1b6-9b4f314dcab8": {
     "original": "Toon in het ledenportaal",
@@ -10095,6 +10139,10 @@
     "original": "Maak documenten aan en deel ze met jouw leden. Daarbij is het mogelijk om gegevens van leden automatisch in te vullen in de documenten, bijvoorbeeld voor een fiscaal attest of een deelnamebewijs voor de mutualiteit.",
     "translation": "Create documents and share them with your members. It is possible to automatically fill in member data in the documents, for example for a tax certificate or a participation certificate for the mutual insurance company."
   },
+  "7288e80f-000d-4409-a7ad-12a6353ea6c2": {
+    "original": "Onbepaald",
+    "translation": "Undefined"
+  },
   "7289b10e-a284-40ea-bc57-8287c6566a82": {
     "original": "Groepsinschrijving",
     "translation": "Group registration"
@@ -10406,6 +10454,10 @@
   "75913b92-4a79-4902-91ad-cb56e0549b7c": {
     "original": "Andere domeinnaam voor registratie",
     "translation": "Other domain name for registration"
+  },
+  "7596149b-b7cf-4624-99e1-b8fd949d593d": {
+    "original": "De eenheidsprijs kan niet 0 euro zijn",
+    "translation": "The unit price cannot be 0 euro"
   },
   "759abb2c-48d9-4eb6-bf3a-bd8284b28ffa": {
     "original": "Dit lid is niet ingeschreven voor een standaard leeftijdsgroep in het huidige werkjaar. Verwijder de functie of schrijf het lid in voor het huidige werkjaar.",
@@ -12139,6 +12191,10 @@
     "original": "Controleer alle betalingen die in het systeem aanwezig zijn, inclusief eventueel mislukte betaalpogingen.",
     "translation": "Check all payments present in the system, including any failed payment attempts."
   },
+  "8a3444b1-38a5-4199-bd71-c40eec709833": {
+    "original": "De btw is verlegd met als reden: “{reden}”. <button>Wijzig</button>",
+    "translation": "VAT has been shifted for the following reason: “{reden}”. <button>Change</button>"
+  },
   "8a4842b5-6304-4b02-a8c5-4b837edcd77d": {
     "original": "Altijd",
     "translation": "Always"
@@ -13526,6 +13582,10 @@
   "9ac518c6-00fc-47c1-bd01-2f1f6fa17613": {
     "original": "Alle betalingen",
     "translation": "All payments"
+  },
+  "9ad5f13f-0c61-4109-b733-7015740c64cf": {
+    "original": "Btw-percentage",
+    "translation": "VAT percentage"
   },
   "9ad86597-3455-4837-bfee-249835678f7c": {
     "original": "Prijs voor organisatie tag",
@@ -15027,6 +15087,10 @@
     "original": "Leveren",
     "translation": "Deliver"
   },
+  "abd4da99-df2c-4672-b8f8-d133db28f406": {
+    "original": "Het type van de betaling is gewijzigd in een saldoverrekening omdat het totaalbedrag 0 euro bedraagt. Kijk alles nog even na.",
+    "translation": "The payment type was changed to a balance adjustment because the total amount is 0 euro. Please double-check everything."
+  },
   "abd71533-048e-45c7-baf8-78769e5287de": {
     "original": "{count} leden uit jouw lijst zijn al ingeschreven. Hun huidige inschrijving(en) zullen niet worden aangepast, ze zullen ook geen nieuwe inschrijvingen krijgen. Hun andere gegevens uit het bestand zullen wel in Stamhoofd worden overgenomen.",
     "translation": "{count} members on your list are already registered. Their current registration(s) will not be changed, and they won't receive new registrations. However, other data from your file will be updated in Stamhoofd."
@@ -15311,6 +15375,10 @@
     "original": "Volgende ontvanger",
     "translation": "Next recipient"
   },
+  "af74b9c2-7be3-4d95-a6d7-ba36a4671be8": {
+    "original": "Het type van de betaling is gewijzigd in een terugbetaling omdat het totaalbedrag negatief is. Kijk alles nog even na.",
+    "translation": "The payment type was changed to a refund because the total amount is negative. Please double-check everything."
+  },
   "af8afc36-22de-4f22-8235-e1e8f5eef7ca": {
     "original": "Geavanceerd",
     "translation": "Advanced"
@@ -15475,6 +15543,10 @@
     "original": "Markeer als gescand",
     "translation": "Mark as scanned"
   },
+  "b15e330d-589f-4709-b34a-a3c29389650c": {
+    "original": "Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw vereniging. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.",
+    "translation": "A chargeback undoes a previously successful payment from a member or supporter, without any intervention from your association. For example, in the case of a late failed payment or a chargeback via credit card or bank."
+  },
   "b1632f76-4597-402b-99bf-9f53efb5ed32": {
     "original": "Vul jouw achternaam in",
     "translation": "Enter your surname"
@@ -15526,6 +15598,10 @@
   "b1cb5299-5325-4505-ba30-a7b0ae327679": {
     "original": "Je kan een API-key verschillende rollen geven, net zoals een externe beheerder. Hiermee kan je jouw key beter beveiligen en enkel toegang geven waarvoor je het nodig hebt.",
     "translation": "You can give an API key different roles, just like an external administrator. This allows you to better secure your key and only grant access where you need it."
+  },
+  "b1ceeb6c-1f84-4534-872c-9b4a23e502a6": {
+    "original": "Datum",
+    "translation": "Date"
   },
   "b1d424aa-4d55-48f7-80c1-d6d4b5708f07": {
     "original": "Stel in welke rechten deze leden automatisch krijgen tot het beheerderportaal",
@@ -17059,6 +17135,10 @@
     "original": "Vul hierboven de HEX-kleurcode van jouw hoofdkleur in. Laat leeg om de kleur van je vereniging te behouden (bij algemene instellingen > personalisatie).",
     "translation": "Enter the HEX colour code for your main colour above. Leave blank to retain your association's colour (under general settings > personalisation)."
   },
+  "c250f8f3-b32a-42bf-8b91-85600115e811": {
+    "original": "Intracommunautaire (EU) verleggingsregeling",
+    "translation": "Intra-community (EU) reverse charge system"
+  },
   "c251e956-4c8e-455c-b648-ca26d37beea7": {
     "original": "Status",
     "translation": "Status"
@@ -17374,6 +17454,10 @@
   "c654281e-1993-4643-a876-94caa3a192ff": {
     "original": "Huisstijl",
     "translation": "Branding"
+  },
+  "c6635e05-c09a-4c55-acc5-1c07280a608f": {
+    "original": "Verlegd",
+    "translation": "Shifted"
   },
   "c66d114d-2ef3-476f-ad00-98fbe3195365": {
     "original": "Je moet een verlaagd tarief opgeven voor de UiTPAS.",
@@ -18251,6 +18335,10 @@
     "original": "Webshop dupliceren",
     "translation": "Duplicate webshop"
   },
+  "cfd5d1ac-6997-45b5-bba5-3629695f4a8b": {
+    "original": "Een terugbetaling van jouw vereniging richting een lid of supporter",
+    "translation": "A refund from your association to a member or supporter"
+  },
   "cfeed757-1e11-4fb0-ab01-e5980918d078": {
     "original": "Leveringsgebied",
     "translation": "Delivery area"
@@ -18472,8 +18560,8 @@
     "translation": "Change the content of automatic emails to orderers."
   },
   "d23f91da-079b-40fe-9da1-14b9ac7e65ab": {
-    "original": "Deze betalingen werden nog niet betaald",
-    "translation": "These payments have not yet been paid"
+    "original": "Deze actie heeft geen effect. Deze betalingen werden nog niet betaald, je kan ze niet nog eens als niet betaald markeren.",
+    "translation": "This action has no effect. These payments have not yet been made, so you cannot mark them as unpaid again."
   },
   "d241c647-1fd2-4ce4-8356-3891abca19e9": {
     "original": "Afhaal/leveringsmethode",
@@ -18935,6 +19023,10 @@
     "original": "Beschrijving van ander soort dieet. Allergieën hoef je hier niet nog eens te vermelden.",
     "translation": "Description of other type of diet.  You don't need to mention allergies here again."
   },
+  "d7b87b55-d76c-420a-a88e-c571edb75e7b": {
+    "original": "Deze filter wordt niet ondersteund of er ging iets fout met deze filter",
+    "translation": "This filter is not supported or something went wrong with this filter"
+  },
   "d7d3677f-6225-4769-a5b1-389a769bb84a": {
     "original": "Wijzig keuzemenu",
     "translation": "Change selection menu"
@@ -19104,8 +19196,8 @@
     "translation": "To be refunded"
   },
   "d9e58e49-d5d5-4a89-9e6a-1bd8eaf0cb1e": {
-    "original": "Deze betaling werd nog niet betaald",
-    "translation": "This payment has not yet been paid"
+    "original": "Deze actie heeft geen effect. Deze betaling werd nog niet betaald, je kan het niet nog eens als niet betaald markeren.",
+    "translation": "This action has no effect. This payment has not yet been made, so you cannot mark it as unpaid again."
   },
   "d9ec27f3-dafa-41e8-bcfb-9da564a4a675": {
     "original": "Eenzelfde UiTPAS-nummer kan niet meerdere keren gebruikt worden.",
@@ -20399,6 +20491,10 @@
     "original": "is niet leeg",
     "translation": "is not empty"
   },
+  "e739f15a-d80a-4d12-9b3f-e672a773c406": {
+    "original": "Een betaling van een lid of supporter aan jouw vereniging",
+    "translation": "A payment from a member or supporter to your association"
+  },
   "e73b24c3-584d-4a0c-beae-c50f46c33d90": {
     "original": "De organisatie werd niet gevonden",
     "translation": "The organisation was not found"
@@ -21263,6 +21359,10 @@
     "original": "Je kan geen documenten aanmaken in de gratis versie van Stamhoofd",
     "translation": "You cannot create documents in the free version of Stamhoofd"
   },
+  "f107bcb8-5414-4abf-954f-3e63855d65e1": {
+    "original": "Incl. btw",
+    "translation": "Incl. VAT"
+  },
   "f10a9486-34c7-46d8-950b-21fd9f41b2b4": {
     "original": "Bestelling per lijn",
     "translation": "Order per line"
@@ -21939,6 +22039,10 @@
     "original": "Betaalstatus gewijzigd",
     "translation": "Payment status changed"
   },
+  "f7fe1fae-5b35-4491-9184-ab47b9c8f4ce": {
+    "original": "Btw module",
+    "translation": "VAT module"
+  },
   "f80e230f-9621-439d-b4ba-bc49fb921698": {
     "original": "De wijzigingen zijn opgeslagen",
     "translation": "The changes have been saved"
@@ -22403,6 +22507,10 @@
     "original": "Koptekst",
     "translation": "Heading"
   },
+  "fc883ab4-2743-4f39-9048-4afbf548ba76": {
+    "original": "Vul een beschrijving in",
+    "translation": "Enter a description"
+  },
   "fca0ce20-d696-4966-a50c-441f54f046c4": {
     "original": "dagen",
     "translation": "days"
@@ -22622,6 +22730,10 @@
   "ff818d9d-658a-42cd-924e-75fc839aa9ea": {
     "original": "Rijksregisternummer",
     "translation": "National register number"
+  },
+  "ff823505-f417-4e8c-a6bd-4eb05551c6cb": {
+    "original": "Betalingen worden niet naar een echte betaalpagina gestuurd. Let wel op dat de betalingen dan nog steeds op betaald kunnen gezet worden maar in werkelijkheid niet betaald zijn op jullie bankrekening.",
+    "translation": "Payments are not processed on a real payment page. Please note that payments can still be marked as paid, but in reality, they are not received on your bank account."
   },
   "ff993893-62e4-459c-88e2-54b5bf760c13": {
     "original": "Registratie domein",

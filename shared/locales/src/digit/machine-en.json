@@ -871,6 +871,10 @@
     "original": "Beroepsgroep",
     "translation": "Professional group"
   },
+  "b15e330d-589f-4709-b34a-a3c29389650c": {
+    "original": "Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw groep. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.",
+    "translation": "A chargeback reverses a previously successful payment from a member or supporter, without any action needed from your group. For example, this can happen because of a late failed payment, or if a payment is reversed by the credit card company or bank."
+  },
   "b263fa75-5a47-43a6-94a5-95eeac94567f": {
     "original": "Sommige inschrijvingen werden door een groep betaald. In dat geval zal de annuleringskost aangerekend worden aan de betalende groep (van organisator naar betalende groep) én het lid (van de betalende groep naar lid).",
     "translation": "Some registrations were paid for by a group. In that case, the cancellation fee will be charged to the paying group (from organiser to paying group) and the member (from the paying group to member)."
@@ -1023,6 +1027,10 @@
     "original": ". Ga naar ‘Mijn account’ als je je wilt inschrijven als lid.",
     "translation": ". Go to 'My account' if you want to register as a member."
   },
+  "cfd5d1ac-6997-45b5-bba5-3629695f4a8b": {
+    "original": "Een terugbetaling van jouw groep richting een lid of supporter",
+    "translation": "A refund from your group to a member or supporter."
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw groep",
     "translation": "Name of your group"
@@ -1146,6 +1154,10 @@
   "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
     "original": "Deze functies worden gekoppeld aan een lid samen met een lokale groep, door een hoofdbeheerder van die groep. Een lokale groep kan zelf ook nog groepseigenfuncties toevoegen om deze uit te breiden.",
     "translation": "These roles are assigned to a member together with a local group, by a main administrator of that group. A local group can also add custom group-specific roles to expand the list."
+  },
+  "e739f15a-d80a-4d12-9b3f-e672a773c406": {
+    "original": "Een betaling van een lid of supporter aan jouw groep",
+    "translation": "A payment from a member or supporter to your group."
   },
   "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een groep terug stabiel te zijn.",

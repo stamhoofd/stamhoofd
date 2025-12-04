@@ -1019,6 +1019,10 @@
     "original": "Beroepseenheid",
     "translation": "Unité professionnelle"
   },
+  "b15e330d-589f-4709-b34a-a3c29389650c": {
+    "original": "Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw eenheid. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.",
+    "translation": "Un remboursement annule un paiement précédemment réussi d’un membre ou supporter, sans intervention de votre unité. Par exemple, en cas de paiement échoué tardivement ou de remboursement via la carte de crédit ou la banque."
+  },
   "b19c1fb0-f1a7-4435-9150-01bb2bb0799c": {
     "original": "Dit aansluitingstype is (nog) niet beschikbaar voor dit scoutsjaar",
     "translation": "Ce type d'affiliation n'est pas (encore) disponible pour cette année scoute"
@@ -1215,6 +1219,10 @@
     "original": "Kijk na of alle instellingen van de groepen correct zijn. Als alles goed staat ingesteld kan je ervoor zorgen dat alle leden via Jamboree kunnen inschrijven én betalen. Let dus goed op welke tarieven je instelt, en welke leeftijdsrestricties je gebruikt. Als je klaar bent kan je een leeftijdsgroep openen zodat leden via Jamboree kunnen inschrijven.",
     "translation": "Vérifiez si tous les paramètres des groupes sont corrects. Si tout est correctement configuré, vous pouvez faire en sorte que tous les membres puissent s'inscrire et payer via Jamboree. Faites donc attention aux tarifs que vous définissez et aux restrictions d'âge que vous utilisez. Une fois que vous avez terminé, vous pouvez ouvrir un groupe d'âge afin que les membres puissent s'inscrire via Jamboree."
   },
+  "cfd5d1ac-6997-45b5-bba5-3629695f4a8b": {
+    "original": "Een terugbetaling van jouw eenheid richting een lid of supporter",
+    "translation": "Un remboursement de votre unité vers un membre ou un supporter"
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw eenheid",
     "translation": "Nom de votre unité"
@@ -1370,6 +1378,10 @@
   "e6da382b-6acc-4a77-ab74-ece7ea002d5f": {
     "original": "Deze functies worden gekoppeld aan een lid samen met een eenheid, door een hoofdbeheerder van die eenheid. Een eenheid kan zelf ook nog eenheidseigenfuncties toevoegen om deze uit te breiden.",
     "translation": "Ces fonctions sont attribuées à un membre et associées à une unité, par un administrateur principal de cette unité. Une unité peut également ajouter ses propres fonctions spécifiques pour les étendre."
+  },
+  "e739f15a-d80a-4d12-9b3f-e672a773c406": {
+    "original": "Een betaling van een lid of supporter aan jouw eenheid",
+    "translation": "Un paiement d’un membre ou supporter vers votre unité"
   },
   "e821b318-928b-4eee-9bca-d00366554792": {
     "original": "De aansluitingsperiode moet binnen de periode van het gekozen scoutsjaar liggen",
