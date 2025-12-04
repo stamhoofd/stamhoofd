@@ -17,7 +17,7 @@
                 </STInputBox>
             </div>
             <div>
-                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('Datum') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
+                <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('b1ceeb6c-1f84-4534-872c-9b4a23e502a6') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
                     <DateSelection v-model="paidAt" />
                 </STInputBox>
             </div>
@@ -165,17 +165,17 @@ function autoUpdateType() {
     const v = total.value;
     if (v === 0 && type.value !== PaymentType.Reallocation) {
         type.value = PaymentType.Reallocation;
-        new Toast($t('Het type van de betaling is gewijzigd in een saldoverrekening omdat het totaalbedrag 0 euro bedraagt. Kijk alles nog even na.'), 'wand theme-secundary').show();
+        new Toast($t('abd4da99-df2c-4672-b8f8-d133db28f406'), 'wand theme-secundary').show();
         return true;
     }
     if (v > 0 && type.value !== PaymentType.Payment) {
         type.value = PaymentType.Payment;
-        new Toast($t('Het type van de betaling is gewijzigd in een gewone betaling omdat het totaalbedrag positief is. Kijk alles nog even na.'), 'receive').show();
+        new Toast($t('639bca94-1e40-4176-99b0-f1a3a9b62165'), 'receive').show();
         return true;
     }
     if (v < 0 && type.value !== PaymentType.Refund) {
         type.value = PaymentType.Refund;
-        new Toast($t('Het type van de betaling is gewijzigd in een terugbetaling omdat het totaalbedrag negatief is. Kijk alles nog even na.'), 'undo theme-error').show();
+        new Toast($t('af74b9c2-7be3-4d95-a6d7-ba36a4671be8'), 'undo theme-error').show();
         return true;
     }
 }

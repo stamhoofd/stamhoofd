@@ -202,7 +202,7 @@ async function reload() {
             // Show a toast when an automatic reallocation happened because of some change
             if ((newLastPayment && !lastPayment) || (newLastPayment && lastPayment && lastPayment.createdAt < newLastPayment.createdAt)) {
                 if (newLastPayment.type === PaymentType.Reallocation) {
-                    new Toast($t('Een nieuwe automatische saldoverrekening werd aangemaakt'), 'wand ' + newLastPayment.theme).show();
+                    new Toast($t('68039ee8-fdfe-40ad-bee2-0670651b0e09'), 'wand ' + newLastPayment.theme).show();
                 }
             }
         }

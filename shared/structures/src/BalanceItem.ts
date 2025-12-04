@@ -40,7 +40,7 @@ export enum VATExcemptReason {
 
 export function getVATExcemptReasonName(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunity: return $t('Intracommunautaire (EU) verleggingsregeling');
+        case VATExcemptReason.IntraCommunity: return $t('c250f8f3-b32a-42bf-8b91-85600115e811');
     }
 }
 
@@ -77,7 +77,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.PlatformMembership: return $t(`c0277e8e-a2e0-4ec3-9339-c2e1be2e6e2d`);
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
-        case BalanceItemType.Rounding: return $t('Afrondingscorrectie');
+        case BalanceItemType.Rounding: return $t('5841f72b-67d8-4add-8cfa-801bcb71cba7');
     }
 }
 
@@ -518,7 +518,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`b05702b7-72bc-4dbd-8197-cf758442dc5f`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
-            case BalanceItemType.Rounding: return $t('afrondingen');
+            case BalanceItemType.Rounding: return $t('097441a3-6b49-4768-87c3-8b290bb073ed');
         }
     }
 
@@ -565,14 +565,14 @@ export class BalanceItem extends AutoEncoder {
         if (this.VATPercentage) {
             // Add VAT
             all.unshift({
-                name: $t(`Prijs excl. btw`),
+                name: $t(`14ad1dfb-6ab9-4945-8735-7e22526120c9`),
                 price: this.priceWithoutVAT,
             }, {
-                name: $t(`Btw`),
+                name: $t(`31e38bb6-60be-47b7-a713-7f430b7d08c4`),
                 price: this.VAT,
             },
             {
-                name: $t(`Prijs incl. btw`),
+                name: $t(`39e5d1d1-7058-4ba0-a477-df2c7707b531`),
                 price: this.priceWithVAT,
             });
         }

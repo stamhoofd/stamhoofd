@@ -45,10 +45,10 @@ export class PaymentTypeHelper {
 
     static getDescription(type: PaymentType): string {
         switch (type) {
-            case PaymentType.Payment: return $t(`Een betaling van een lid of supporter aan jouw vereniging`);
-            case PaymentType.Refund: return $t(`Een terugbetaling van jouw vereniging richting een lid of supporter`);
-            case PaymentType.Chargeback: return $t(`Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw vereniging. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.`);
-            case PaymentType.Reallocation: return $t(`Positieve en negatieve openstaande bedragen worden samengebracht zodat het totaal op 0 euro uitkomt, zodat die items elkaar opheffen.`);
+            case PaymentType.Payment: return $t(`e739f15a-d80a-4d12-9b3f-e672a773c406`);
+            case PaymentType.Refund: return $t(`cfd5d1ac-6997-45b5-bba5-3629695f4a8b`);
+            case PaymentType.Chargeback: return $t(`b15e330d-589f-4709-b34a-a3c29389650c`);
+            case PaymentType.Reallocation: return $t(`01225a70-b108-4f12-ad86-46e7b23a1043`);
         }
     }
 

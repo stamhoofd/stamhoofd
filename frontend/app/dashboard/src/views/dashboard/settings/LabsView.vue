@@ -91,11 +91,11 @@
                     </template>
 
                     <h3 class="style-title-list">
-                        {{ $t('Btw module') }} (wip)
+                        {{ $t('f7fe1fae-5b35-4491-9184-ab47b9c8f4ce') }} (wip)
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('Hou het btw-tarief van openstaande bedragen bij zodat het opstellen van facturen vereenvoudigd wordt.') }}
+                        {{ $t('584f3cc4-679e-4803-b923-033eb552aed5') }}
                     </p>
                 </STListItem>
 
@@ -108,7 +108,7 @@
                     </h3>
 
                     <p class="style-description-small">
-                        {{ $t('Betalingen worden niet naar een echte betaalpagina gestuurd. Let wel op dat de betalingen dan nog steeds op betaald kunnen gezet worden maar in werkelijkheid niet betaald zijn op jullie bankrekening.') }}
+                        {{ $t('ff823505-f417-4e8c-a6bd-4eb05551c6cb') }}
                     </p>
                 </STListItem>
 

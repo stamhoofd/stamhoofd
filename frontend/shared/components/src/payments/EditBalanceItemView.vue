@@ -33,8 +33,8 @@
 
                 <template v-if="$feature('vat') || !VATIncluded" #right>
                     <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
-                        <span v-if="VATIncluded">{{ $t('Incl. btw') }}</span>
-                        <span v-else>{{ $t('Excl. btw') }}</span>
+                        <span v-if="VATIncluded">{{ $t('f107bcb8-5414-4abf-954f-3e63855d65e1') }}</span>
+                        <span v-else>{{ $t('63713e8d-73e7-4013-a7be-549f035b563f') }}</span>
                         <span class="icon arrow-swap small" />
                     </button>
                 </template>
@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <STInputBox v-if="$feature('vat') || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('Btw-percentage')" class="max">
+        <STInputBox v-if="$feature('vat') || VATPercentage !== null" error-fields="VATPercentage" :error-box="errors.errorBox" :title="$t('9ad5f13f-0c61-4109-b733-7015740c64cf')" class="max">
             <template #right>
                 <button v-if="!VATExcempt" class="button text small" type="button" @click="toggleVATExcempt">
                     <span>Verleggen</span>
@@ -76,8 +76,8 @@
                         <Radio v-model="VATPercentage" :value="null" autocomplete="off" name="VATPercentage" />
                     </template>
                     <h4 class="style-list-title">
-                        {{ $t('Onbepaald') }}
-                        <span v-if="VATPercentage === null && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                        {{ $t('7288e80f-000d-4409-a7ad-12a6353ea6c2') }}
+                        <span v-if="VATPercentage === null && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
                     </h4>
                 </STListItem>
 
@@ -87,7 +87,7 @@
                     </template>
                     <h4 class="style-list-title">
                         21%
-                        <span v-if="VATPercentage === 21 && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                        <span v-if="VATPercentage === 21 && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
                     </h4>
                 </STListItem>
 
@@ -97,7 +97,7 @@
                     </template>
                     <h4 class="style-list-title">
                         12%
-                        <span v-if="VATPercentage === 12 && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                        <span v-if="VATPercentage === 12 && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
                     </h4>
                 </STListItem>
 
@@ -107,13 +107,13 @@
                     </template>
                     <h4 class="style-list-title">
                         6%
-                        <span v-if="VATPercentage === 6 && VATExcempt" class="style-tag inline-first">{{ $t('Verlegd') }}</span>
+                        <span v-if="VATPercentage === 6 && VATExcempt" class="style-tag inline-first">{{ $t('c6635e05-c09a-4c55-acc5-1c07280a608f') }}</span>
                     </h4>
                 </STListItem>
             </STList>
         </STInputBox>
         <p v-if="VATExcempt" class="style-description-small">
-            <I18nComponent :t="$t('De btw is verlegd met als reden: “{reden}”. <button>Wijzig</button>', {reden: getVATExcemptReasonName(VATExcempt)})">
+            <I18nComponent :t="$t('8a3444b1-38a5-4199-bd71-c40eec709833', {reden: getVATExcemptReasonName(VATExcempt)})">
                 <template #button="{content}">
                     <button class="inline-link" type="button" @click="toggleVATExcempt">
                         {{ content }}
@@ -316,7 +316,7 @@ async function toggleVATExcempt(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Niet verlegd'),
+                name: $t('60faa1ad-58e5-484a-b10e-21835398ca84'),
                 selected: VATExcempt.value === null,
                 action: () => {
                     VATExcempt.value = null;
@@ -356,7 +356,7 @@ async function save() {
                 code: 'invalid_field',
                 field: 'description',
                 message: 'description cannot be empty',
-                human: $t('Vul een beschrijving in')
+                human: $t('fc883ab4-2743-4f39-9048-4afbf548ba76')
             })
         }
         if (patchedBalanceItem.value.unitPrice === 0) {
@@ -364,7 +364,7 @@ async function save() {
                 code: 'invalid_field',
                 field: 'unitPrice',
                 message: 'unitPrice cannot be zero',
-                human: $t('De eenheidsprijs kan niet 0 euro zijn')
+                human: $t('7596149b-b7cf-4624-99e1-b8fd949d593d')
             })
         }
         await props.saveHandler(patch.value);

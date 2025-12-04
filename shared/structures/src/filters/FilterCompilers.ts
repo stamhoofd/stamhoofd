@@ -47,7 +47,7 @@ export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitio
                     throw new SimpleError({
                         code: 'unknown_filter',
                         message: 'Unknown filter ' + key,
-                        human: $t('Deze filter wordt niet ondersteund of er ging iets fout met deze filter'),
+                        human: $t('d7b87b55-d76c-420a-a88e-c571edb75e7b'),
                     });
                 }
                 const subKey = key.substring(dotIndex + 1);
@@ -92,7 +92,7 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
                 throw new SimpleError({
                     code: 'unknown_filter',
                     message: 'Unknown filter $and',
-                    human: $t('Deze filter wordt niet ondersteund of er ging iets fout met deze filter'),
+                    human: $t('d7b87b55-d76c-420a-a88e-c571edb75e7b'),
                 });
             }
             runners.push(runner);
@@ -107,7 +107,7 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
                 throw new SimpleError({
                     code: 'unknown_filter',
                     message: 'Unknown filter ' + key,
-                    human: $t('Deze filter wordt niet ondersteund of er ging iets fout met deze filter'),
+                    human: $t('d7b87b55-d76c-420a-a88e-c571edb75e7b'),
                 });
             }
             runners.push(
