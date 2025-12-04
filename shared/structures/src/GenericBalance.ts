@@ -13,6 +13,7 @@ export class GenericBalance extends AutoEncoder {
     organizationId: string;
 
     @field({ decoder: IntegerDecoder, version: 354 })
+    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     amountPaid = 0;
 
     @field({ decoder: IntegerDecoder, field: 'amount' })
