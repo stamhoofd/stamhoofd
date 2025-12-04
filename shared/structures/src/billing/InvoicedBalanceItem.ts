@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { VATExcemptReason } from '../BalanceItem';
+import { VATExcemptReason } from '../BalanceItem.js';
 
 export class InvoicedBalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

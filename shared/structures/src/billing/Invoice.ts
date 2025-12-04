@@ -1,9 +1,9 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
-import { Company } from '../Company';
-import { PaymentCustomer } from '../PaymentCustomer';
-import { File } from '../files/File';
-import { InvoicedBalanceItem } from './InvoicedBalanceItem';
+import { Company } from '../Company.js';
+import { PaymentCustomer } from '../PaymentCustomer.js';
+import { File } from '../files/File.js';
+import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 export class Invoice extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })

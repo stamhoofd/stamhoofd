@@ -2,12 +2,12 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerD
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Address } from '../addresses/Address';
-import { File } from '../files/File';
-import { Payment, Settlement } from '../members/Payment';
-import { OrganizationSimple } from '../OrganizationSimple';
-import { STPackage, STPricingType } from './STPackage';
-import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces';
+import { Address } from '../addresses/Address.js';
+import { File } from '../files/File.js';
+import { Payment, Settlement } from '../members/Payment.js';
+import { OrganizationSimple } from '../OrganizationSimple.js';
+import { STPackage, STPricingType } from './STPackage.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum STInvoiceStatus {
     Created = 'Created',
