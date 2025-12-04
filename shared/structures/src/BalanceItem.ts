@@ -236,10 +236,10 @@ export class BalanceItem extends AutoEncoder {
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     unitPrice = 0; // unit price
 
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 390 })
     VATPercentage: number | null = null;
 
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 390 })
     VATIncluded = true;
 
     /**
@@ -247,7 +247,7 @@ export class BalanceItem extends AutoEncoder {
      * Note: keep the original VAT in these cases. On time of payment or invoicing, the VAT excemption will be revalidated.
      * If that fails, we can still charge the VAT.
      */
-    @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, ...NextVersion })
+    @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true, version: 390 })
     VATExcempt: VATExcemptReason | null = null;
 
     /**
