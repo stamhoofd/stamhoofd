@@ -1,12 +1,12 @@
-import { AccessRight } from './AccessRight';
-import { LoadedPermissions } from './LoadedPermissions';
-import { MemberResponsibility } from './MemberResponsibility';
-import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord';
-import { PermissionLevel } from './PermissionLevel';
-import { PermissionRoleForResponsibility } from './PermissionRole';
-import { Permissions } from './Permissions';
-import { PermissionsResourceType } from './PermissionsResourceType';
-import { ResourcePermissions } from './ResourcePermissions';
+import { AccessRight } from './AccessRight.js';
+import { LoadedPermissions } from './LoadedPermissions.js';
+import { MemberResponsibility } from './MemberResponsibility.js';
+import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
+import { PermissionLevel } from './PermissionLevel.js';
+import { PermissionRoleForResponsibility } from './PermissionRole.js';
+import { Permissions } from './Permissions.js';
+import { PermissionsResourceType } from './PermissionsResourceType.js';
+import { ResourcePermissions } from './ResourcePermissions.js';
 
 describe('Unit.LoadedPermissions', () => {
     describe('LoadedPermissions.from', () => {
