@@ -8,13 +8,13 @@ import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedRespo
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { RegistrationsBlob } from '@stamhoofd/structures/dist/src/members/RegistrationsBlob';
 import { RegistrationWithMemberBlob } from '@stamhoofd/structures/dist/src/members/RegistrationWithMemberBlob';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper';
-import { groupJoin, registrationFilterCompilers } from '../../../sql-filters/registrations';
-import { registrationSorters } from '../../../sql-sorters/registrations';
-import { GetMembersEndpoint } from '../members/GetMembersEndpoint';
-import { validateGroupFilter } from '../members/helpers/validateGroupFilter';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
+import { groupJoin, registrationFilterCompilers } from '../../../sql-filters/registrations.js';
+import { registrationSorters } from '../../../sql-sorters/registrations.js';
+import { GetMembersEndpoint } from '../members/GetMembersEndpoint.js';
+import { validateGroupFilter } from '../members/helpers/validateGroupFilter.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -159,6 +159,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         const query = this.selectRegistrationWithGroup()
             .setMaxExecutionTime(15 * 1000)
             .where('registeredAt', '!=', null);
+
+        query;
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));

@@ -17,10 +17,11 @@ export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
     const $user = useUser();
 
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
-    const financialSupportSettings = useFinancialSupportSettings();
-    const auth = useAuth();
-    const organization = useOrganization();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
+    const financialSupportSettings = useFinancialSupportSettings();
+    const organization = useOrganization();
+
+    const auth = useAuth();
 
     return {
         loading: computed(() => loading.value || loadingMembershipFilters.value),
@@ -1000,7 +1001,7 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
 export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration) {
     const all: UIFilterBuilders = [];
 
-    if (!recordConfiguration || recordConfiguration.birthDay) {
+    if (!recordConfiguration || recordConfiguration.birthDay) {
         all.push(new DateFilterBuilder({
             name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
             key: 'birthDay',

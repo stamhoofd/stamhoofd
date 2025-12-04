@@ -1,18 +1,19 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupType, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, PlatformRegistration, RegistrationWithPlatformMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogsView } from '../../audit-logs';
+import { CommunicationView } from '../../communication';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import { EmailView, RecipientChooseOneOption } from '../../email';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import { checkoutDefaultItem, chooseOrganizationMembersForGroup, getActionsForCategory, PlatformFamilyManager, presentDeleteMembers, presentEditMember, presentEditResponsibilities, presentExportMembersToPdf, usePlatformFamilyManager } from '../../members';
 import { RegistrationsActionBuilder } from '../../members/classes/RegistrationsActionBuilder';
-import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
-import { getSelectableWorkbook } from './getSelectableWorkbook';
-import { AuditLogsView } from '../../audit-logs';
 import { Toast } from '../../overlays/Toast';
-import { CommunicationView } from '../../communication';
+import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables';
+import ChargeRegistrationsView from '../ChargeRegistrationsView.vue';
+import { getSelectableWorkbook } from './getSelectableWorkbook';
 
 export function useDirectRegistrationActions(options?: { groups?: Group[];
     organizations?: Organization[];
@@ -240,6 +241,26 @@ export class RegistrationActionBuilder {
             enabled: this.hasWrite,
             handler: async (registrations: PlatformRegistration[]) => {
                 await this.deleteRegistrations(registrations);
+            },
+        });
+    }
+
+    getChargeAction(organization: Organization) {
+        return new AsyncTableAction({
+            name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
+            icon: 'calculator',
+            priority: 13,
+            groupIndex: 4,
+            handler: async (selection: TableActionSelection<PlatformRegistration>) => {
+                await this.present({
+                    modalDisplayStyle: 'popup',
+                    components: [
+                        new ComponentWithProperties(ChargeRegistrationsView, {
+                            filter: selection.filter.filter,
+                            organization,
+                        }),
+                    ],
+                });
             },
         });
     }

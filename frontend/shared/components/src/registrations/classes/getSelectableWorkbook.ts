@@ -43,77 +43,6 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }
     }
 
-    const memberColumns = getSelectableColumnsForMembers({ platform, organization, auth });
-
-    const columns: (SelectableColumn | null) [] = [
-        new SelectableColumn({
-            id: 'id',
-            name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
-            description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
-            enabled: false,
-        }),
-        new SelectableColumn({
-            id: 'member.id',
-            name: $t('a512b8a2-163c-4f69-94f7-ed9c1c3ab4f7'),
-            description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
-            enabled: false,
-        }),
-        new SelectableColumn({
-            id: 'member.memberNumber',
-            name: $t(`7c4ca473-3c49-45fb-bdd2-b87399a69e62`),
-        }),
-        new SelectableColumn({
-            id: 'member.firstName',
-            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
-        }),
-        new SelectableColumn({
-            id: 'member.lastName',
-            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
-        }),
-        new SelectableColumn({
-            id: 'group',
-            name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
-            enabled: (!organization || organization.id === platform.membershipOrganizationId),
-        }),
-        ...((!organization || organization.id === platform.membershipOrganizationId)
-            ? [
-                    new SelectableColumn({
-                        id: 'defaultAgeGroup',
-                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
-                        enabled: true,
-                    }),
-                    new SelectableColumn({
-                        id: 'organization',
-                        name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
-                        enabled: true,
-                    }),
-                    new SelectableColumn({
-                        id: 'uri',
-                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
-                        enabled: true,
-                    }),
-                ]
-            : []),
-        new SelectableColumn({
-            id: 'price',
-            name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
-        }),
-        ...groupColumns,
-        ...memberColumns,
-    ];
-
-    return new SelectableWorkbook({
-        sheets: [
-            new SelectableSheet({
-                id: 'registrations',
-                name: $t(`3f4c9896-7f02-4b49-ad29-2d363a8af71f`),
-                columns: columns.filter(column => column !== null),
-            }),
-        ],
-    });
-}
-
-function getSelectableColumnsForMembers({ platform, organization, auth }: { platform: Platform; organization: Organization | null; auth: ContextPermissions }) {
     const recordCategories = [
         ...(organization?.meta.recordsConfiguration.recordCategories ?? []),
         ...platform.config.recordsConfiguration.recordCategories,
@@ -132,7 +61,26 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
         return column;
     };
 
-    const columns: SelectableColumn[] = [
+    const columns: (SelectableColumn | null) [] = [
+        // member
+        new SelectableColumn({
+            id: 'member.id',
+            name: $t('a512b8a2-163c-4f69-94f7-ed9c1c3ab4f7'),
+            description: $t(`b697f010-9b5f-4944-8cae-8c8649d2c2f2`),
+            enabled: false,
+        }),
+        new SelectableColumn({
+            id: 'member.memberNumber',
+            name: $t(`7c4ca473-3c49-45fb-bdd2-b87399a69e62`),
+        }),
+        new SelectableColumn({
+            id: 'member.firstName',
+            name: $t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`),
+        }),
+        new SelectableColumn({
+            id: 'member.lastName',
+            name: $t(`171bd1df-ed4b-417f-8c5e-0546d948469a`),
+        }),
         new SelectableColumn({
             id: 'member.birthDay',
             name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
@@ -169,7 +117,6 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
             enabled: false,
             description: $t(`aa45000f-8cff-4cb6-99b2-3202eb64c4a8`),
         }),
-
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.requiresFinancialSupport',
             name: financialSupportTitle,
@@ -180,7 +127,6 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
             name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
             enabled: false,
         }), [AccessRight.MemberReadFinancialData]),
-
         new SelectableColumn({
             id: 'member.notes',
             name: $t(`7f3af27c-f057-4ce3-8385-36dfb99745e8`),
@@ -192,6 +138,48 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
             enabled: false,
         }), [AccessRight.MemberManageNRN]),
 
+        // group
+        ...groupColumns,
+        ...((!organization || organization.id === platform.membershipOrganizationId)
+            ? [
+                    new SelectableColumn({
+                        id: 'organization',
+                        name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
+                        enabled: true,
+                    }),
+                    new SelectableColumn({
+                        id: 'uri',
+                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        enabled: true,
+                    }),
+                    new SelectableColumn({
+                        id: 'defaultAgeGroup',
+                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+                        enabled: true,
+                    }),
+                ]
+            : []),
+        new SelectableColumn({
+            id: 'group',
+            name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
+            enabled: (!organization || organization.id === platform.membershipOrganizationId),
+        }),
+
+        // price
+        new SelectableColumn({
+            id: 'price',
+            name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+        }),
+
+        // id of registration
+        new SelectableColumn({
+            id: 'id',
+            name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
+            description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
+            enabled: false,
+        }),
+
+        // parents
         ...[1, 2].flatMap((parentNumber, parentIndex) => {
             const getId = (value: string) => `member.parent.${parentIndex}.${value}`;
             const category = `Ouder ${parentNumber}`;
@@ -244,6 +232,7 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
             ];
         }),
 
+        // unverified data
         new SelectableColumn({
             id: 'member.unverifiedPhones',
             name: $t(`62ce5fa4-3ea4-4fa8-a495-ff5eef1ec5d4`),
@@ -256,7 +245,6 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
             category: $t(`94823cfc-f583-4288-bf44-0a7cfec9e61f`),
             enabled: false,
         }),
-
         ...[1, 2].map((number, index) => {
             return new SelectableColumn({
                 id: `member.unverifiedAddresses.${index}`,
@@ -266,6 +254,7 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
             });
         }),
 
+        // record answers
         ...flattenedCategories.flatMap((category) => {
             return category.getAllRecords().flatMap((record) => {
                 return new SelectableColumn({
@@ -279,5 +268,13 @@ function getSelectableColumnsForMembers({ platform, organization, auth }: { plat
         }),
     ].filter(column => column !== null);
 
-    return columns;
+    return new SelectableWorkbook({
+        sheets: [
+            new SelectableSheet({
+                id: 'registrations',
+                name: $t(`3f4c9896-7f02-4b49-ad29-2d363a8af71f`),
+                columns: columns.filter(column => column !== null),
+            }),
+        ],
+    });
 }

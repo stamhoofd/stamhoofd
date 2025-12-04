@@ -72,7 +72,7 @@ const estimatedRows = computed(() => {
 });
 
 const app = useAppContext();
-const organization = useOrganization();
+const organizationScope = useOrganization();
 
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const auth = useAuth();
@@ -273,7 +273,7 @@ const actionBuilder = useDirectRegistrationActions({
 
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 let canAdd = (props.group ? auth.canRegisterMembersInGroup(props.group) : false);
-if (!organization.value) {
+if (!organizationScope.value) {
     // For now not possible via admin panel
     canAdd = false;
 }
@@ -299,7 +299,7 @@ const isLimitedGroup = computed(() => {
     if (app === 'admin') {
         return false;
     }
-    if (organization.value && props.group.organizationId !== organization.value.id) {
+    if (organizationScope.value && props.group.organizationId !== organizationScope.value.id) {
         return true;
     }
     if (!auth.canAccessGroup(props.group)) {
@@ -325,4 +325,8 @@ const actions: TableAction<ObjectType>[] = [
     }),
     ...registrationActions,
 ];
+
+if (app !== 'admin' && auth.canManagePayments()) {
+    actions.push(actionBuilder.getChargeAction(organizationScope.value!));
+}
 </script>

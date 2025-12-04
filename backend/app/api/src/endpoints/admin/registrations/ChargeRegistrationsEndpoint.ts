@@ -7,14 +7,15 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context.js';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator.js';
 import { MemberCharger } from '../../../helpers/MemberCharger.js';
-import { GetMembersEndpoint } from '../../global/members/GetMembersEndpoint.js';
+import { GetRegistrationsEndpoint } from '../../global/registration/GetRegistrationsEndpoint.js';
+import { ChargeMembersEndpoint } from '../members/ChargeMembersEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = ChargeMembersRequest;
 type ResponseBody = undefined;
 
-export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
     bodyDecoder = ChargeMembersRequest as Decoder<ChargeMembersRequest>;
 
@@ -23,41 +24,12 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/admin/charge-members', {});
+        const params = Endpoint.parseParameters(request.url, '/admin/charge-registrations', {});
 
         if (params) {
             return [true, params as Params];
         }
         return [false];
-    }
-
-    static throwIfInvalidBody(body: Body) {
-        if (!body.description?.trim()?.length) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Invalid description',
-                human: $t(`2449fba5-99dc-496f-a9d6-a67263d56616`),
-                field: 'description',
-            });
-        }
-
-        if (!body.price) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Invalid price',
-                human: $t(`1e165aac-8a58-45c5-bdd8-c58131a7b7f5`),
-                field: 'price',
-            });
-        }
-
-        if (body.amount === 0) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Invalid amount',
-                human: $t(`0bdf4953-1eae-41fd-b142-5ad3287f17a7`),
-                field: 'amount',
-            });
-        }
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
@@ -72,31 +44,41 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
 
         ChargeMembersEndpoint.throwIfInvalidBody(body);
 
-        const queueId = 'charge-members';
+        const queueId = 'charge-registrations';
 
         if (QueueHandler.isRunning(queueId)) {
             throw new SimpleError({
                 code: 'charge_pending',
-                message: 'Charge members already pending',
+                message: 'Charge registrations already pending',
                 human: $t(`d2b84fdd-035b-4307-a897-000081aa814f`),
             });
         }
 
         await QueueHandler.schedule(queueId, async () => {
             const dataGenerator = fetchToAsyncIterator(request.query, {
-                fetch: request => GetMembersEndpoint.buildData(request, PermissionLevel.Write),
+                fetch: request => GetRegistrationsEndpoint.buildData(request, PermissionLevel.Write),
             });
 
+            const chargedMemberIds = new Set<string>();
+
             for await (const data of dataGenerator) {
-                await MemberCharger.chargeMany({
-                    chargingOrganizationId: organization.id,
-                    membersToCharge: data.members,
-                    price: body.price,
-                    amount: body.amount ?? 1,
-                    description: body.description,
-                    dueAt: body.dueAt,
-                    createdAt: body.createdAt,
-                });
+                for (const registration of data.registrations) {
+                    const memberId = registration.member.id;
+
+                    // only charge members once
+                    if (!chargedMemberIds.has(memberId)) {
+                        chargedMemberIds.add(memberId);
+                        await MemberCharger.charge({
+                            chargingOrganizationId: organization.id,
+                            memberToCharge: registration.member,
+                            price: body.price,
+                            amount: body.amount ?? 1,
+                            description: body.description,
+                            dueAt: body.dueAt,
+                            createdAt: body.createdAt,
+                        });
+                    }
+                }
             }
         });
 
