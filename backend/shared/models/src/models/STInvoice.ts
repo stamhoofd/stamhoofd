@@ -964,24 +964,16 @@ export class STInvoice extends Model {
             } else {
                 if (payment.method === PaymentMethod.Transfer) {
                     ubl += `<cac:PaymentMeans>
-                            <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
-                            <cbc:PaymentID>${esc(payment.transferDescription ?? '')}</cbc:PaymentID>
-                            <cac:PayeeFinancialAccount>
-                                <cbc:ID>BE93733058873067</cbc:ID>
-                                <cbc:Name>Stamhoofd</cbc:Name>
-                            </cac:PayeeFinancialAccount>
+                                <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+                                <cbc:PaymentID>${esc(payment.transferDescription ?? '')}</cbc:PaymentID>
+                                <cac:PayeeFinancialAccount>
+                                    <cbc:ID>BE93733058873067</cbc:ID>
+                                    <cbc:Name>Stamhoofd</cbc:Name>
+                                </cac:PayeeFinancialAccount>
                             </cac:PaymentMeans>`;
 
                 } else if (payment.status === PaymentStatus.Succeeded) {
-                    let code = 48; // card
-
-                    if (payment.method === PaymentMethod.CreditCard) {
-                        code = 55;
-                    }
-
-                    if (payment.method === PaymentMethod.DirectDebit) {
-                        code = 59;
-                    }
+                    const code = 48; // card - don't specify more
 
                     ubl += `<cac:PaymentMeans>
                         <cbc:PaymentMeansCode>${esc(code.toFixed(0))}</cbc:PaymentMeansCode>
