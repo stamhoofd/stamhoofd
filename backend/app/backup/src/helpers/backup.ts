@@ -1,17 +1,17 @@
 import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { Database } from '@simonbackx/simple-database';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 import fs from 'fs';
 import { DateTime } from 'luxon';
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import path from 'path';
 import util from 'util';
 const execPromise = util.promisify(exec);
-import { createHash } from 'node:crypto';
-import { createReadStream } from 'node:fs';
-import { QueueHandler } from '@stamhoofd/queues';
 
 // Normally we'll have ±24 binary logs per day (if max size is set to 50MB)
 // Since well create a backup every day, keeping 1000 binary logs would give
@@ -86,14 +86,14 @@ export function getHealth(): BackupHealth {
     return BackupHealth.create({
         lastBinaryBackup: LAST_BINARY_BACKUP
             ? BackupDateSize.create({
-                date: Formatter.dateTimeIso(LAST_BINARY_BACKUP.date),
-            })
+                    date: Formatter.dateTimeIso(LAST_BINARY_BACKUP.date),
+                })
             : null,
         lastBackup: LAST_BACKUP
             ? BackupDateSize.create({
-                date: Formatter.dateTimeIso(LAST_BACKUP.date),
-                size: Formatter.fileSize(LAST_BACKUP.size),
-            })
+                    date: Formatter.dateTimeIso(LAST_BACKUP.date),
+                    size: Formatter.fileSize(LAST_BACKUP.size),
+                })
             : null,
         status,
     });
