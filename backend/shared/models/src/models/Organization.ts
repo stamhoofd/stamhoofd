@@ -941,7 +941,7 @@ export class Organization extends Model {
             )
         })
 
-        const filtered = admins.filter(a => a.verified && a.permissions && (a.permissions.hasFullAccess(this.privateMeta.roles) || a.permissions.hasFinanceAccess(this.privateMeta.roles)))
+        const filtered = admins.filter(a => a.verified && a.permissions && !a.email.endsWith('@stamhoofd.be') && (a.permissions.hasFullAccess(this.privateMeta.roles) || a.permissions.hasFinanceAccess(this.privateMeta.roles)))
 
         if (filtered.length > 0) {
             return filtered.map(f => f.email)[0]
