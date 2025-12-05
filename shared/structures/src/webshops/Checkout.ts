@@ -196,6 +196,20 @@ export class Checkout extends AutoEncoder {
             })
         }
 
+        const totalItems = this.cart.items.reduce(
+            (a, b) => a + b.calculatedPrices.length,
+            0
+        );
+
+        if (totalItems > 1000) {
+            throw new SimpleError({
+            code: "too_many_items",
+            message: "Too many items",
+            human: "Je kan maximaal 1000 items tegelijkertijd bestellen",
+            field: "cart",
+            });
+        }
+
         try {
             this.cart.validate(webshop, asAdmin)
         } catch (e) {
