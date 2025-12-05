@@ -14,6 +14,7 @@ import { RecordSettings } from '../members/records/RecordSettings.js';
 import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { PaymentMethod } from '../PaymentMethod.js';
 import { PriceBreakdown } from '../PriceBreakdown.js';
+import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { User } from '../User.js';
 import { Cart } from './Cart.js';
 import { Customer } from './Customer.js';
@@ -22,7 +23,6 @@ import { DiscountCode } from './DiscountCode.js';
 import { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import { AnyCheckoutMethodDecoder, CheckoutMethod, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
-import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -240,6 +240,20 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 code: 'cart_empty',
                 message: 'Cart is empty',
                 human: $t(`db37b836-f898-4f9d-8a5f-488e65dd5480`),
+                field: 'cart',
+            });
+        }
+
+        const totalItems = this.cart.items.reduce(
+            (a, b) => a + b.calculatedPrices.length,
+            0,
+        );
+
+        if (totalItems > 1000) {
+            throw new SimpleError({
+                code: 'too_many_items',
+                message: 'Too many items',
+                human: 'Je kan maximaal 1000 items tegelijkertijd bestellen',
                 field: 'cart',
             });
         }
