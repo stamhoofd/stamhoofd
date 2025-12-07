@@ -158,7 +158,7 @@ export class EmailTemplate extends AutoEncoder {
     updatedAt: Date = new Date();
 
     static getDefaultForRecipient(type: EmailRecipientFilterType): EmailTemplateType | null {
-        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents) {
+        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents || type === EmailRecipientFilterType.RegistrationMembers || type === EmailRecipientFilterType.RegistrationParents) {
             return EmailTemplateType.DefaultMembersEmail;
         }
 
@@ -174,7 +174,7 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSavedForRecipient(type: EmailRecipientFilterType): EmailTemplateType | null {
-        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents) {
+        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents || type === EmailRecipientFilterType.RegistrationMembers || type === EmailRecipientFilterType.RegistrationParents) {
             return EmailTemplateType.SavedMembersEmail;
         }
 
