@@ -57,7 +57,7 @@
                         Verstuur e-mails vanaf je zelf gekozen e-mailadres
                     </p>
                     <template slot="right">
-                        <span v-if="!hasPolicy" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" class="icon warning yellow" />
+                        <span v-if="shouldShowEmailWarning" v-tooltip="'We hebben zeker één e-mailadres nodig voor communicatie en indien leden antwoorden op automatische e-mails'" class="icon warning yellow" />
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
@@ -326,7 +326,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, Toast, TooltipDirective } from "@stamhoofd/components";
+import { AsyncComponent, BackButton, CenteredMessage, LoadComponent, STList, STListItem, STNavigationBar, TooltipDirective } from "@stamhoofd/components";
 import { AppManager, SessionManager, UrlHelper } from '@stamhoofd/networking';
 import { OrganizationType, PaymentMethod, StripeAccount, UmbrellaOrganization } from "@stamhoofd/structures";
 import { Component, Mixins } from "vue-property-decorator";
@@ -711,6 +711,11 @@ export default class SettingsView extends Mixins(NavigationMixin) {
                 })
             ]
         })
+    }
+
+    get shouldShowEmailWarning() {
+        if(!this.organization.privateMeta) return true
+        return !this.organization.privateMeta.emails.some(e => e.default);
     }
 
     get hasPolicy() {
