@@ -1,12 +1,12 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
 import { ExcelExportType, LimitedFilteredRequest, PlatformMember, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
-import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint';
-import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
-import { Context } from '../helpers/Context';
-import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
-import { baseMemberColumns } from './members';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
+import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
+import { Context } from '../helpers/Context.js';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
+import { baseMemberColumns } from './members.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
@@ -30,6 +30,19 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                     value: registration.groupPrice.name.toString(),
                 };
             },
+        },
+        {
+            id: 'registeredAt',
+            name: $t(`Inschrijvingsdatum`),
+            width: 20,
+            getValue: (registration: PlatformRegistration) => ({
+                value: registration.registeredAt,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
         },
         // option menu
         {
