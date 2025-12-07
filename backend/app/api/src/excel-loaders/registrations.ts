@@ -22,12 +22,27 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             }),
         },
         {
-            id: 'price',
+            id: 'priceName',
             name: $t(`dcc53f25-f0e9-4e3e-9f4f-e8cfa4e88755`),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
                     value: registration.groupPrice.name.toString(),
+                };
+            },
+        },
+        {
+            id: 'price',
+            name: $t(`dcc53f25-f0e9-4e3e-9f4f-e8cfa4e88755`),
+            width: 30,
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0) / 1_0000,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
                 };
             },
         },

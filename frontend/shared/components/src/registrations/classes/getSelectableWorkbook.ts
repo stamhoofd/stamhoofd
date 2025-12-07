@@ -167,8 +167,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
         // price
         new SelectableColumn({
-            id: 'price',
+            id: 'priceName',
             name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
+        }),
+
+        new SelectableColumn({
+            id: 'price',
+            name: $t(`Prijs`),
         }),
 
         new SelectableColumn({
