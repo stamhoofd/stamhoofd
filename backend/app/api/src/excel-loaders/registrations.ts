@@ -59,6 +59,28 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 },
             }),
         },
+        {
+            id: 'organization',
+            name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                const organization = registration.member.family.getOrganization(registration.group.organizationId);
+                return ({
+                    value: organization?.name ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
+                });
+            },
+        },
+        {
+            id: 'uri',
+            name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                const organization = registration.member.family.getOrganization(registration.group.organizationId);
+                return ({
+                    value: organization?.uri ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
+                });
+            },
+        },
         // option menu
         {
             match(id) {

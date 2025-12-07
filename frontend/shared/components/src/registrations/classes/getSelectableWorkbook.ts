@@ -164,24 +164,34 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
             enabled: (!organization || organization.id === platform.membershipOrganizationId),
         }),
-
+        organization === null
+            ? new SelectableColumn({
+                id: 'uri',
+                name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
+                enabled: false,
+            })
+            : null,
+        organization === null
+            ? new SelectableColumn({
+                id: 'organization',
+                name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
+                enabled: false,
+            })
+            : null,
         // price
         new SelectableColumn({
             id: 'priceName',
             name: $t(`ae21b9bf-7441-4f38-b789-58f34612b7af`),
         }),
-
         new SelectableColumn({
             id: 'price',
             name: $t(`Prijs`),
         }),
-
         new SelectableColumn({
             id: 'registeredAt',
             name: $t(`Inschrijvingsdatum`),
             enabled: false,
         }),
-
         // id of registration
         new SelectableColumn({
             id: 'id',
@@ -189,7 +199,6 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             description: $t('2428a4da-4d23-4ff3-9194-9dbe17134dcc'),
             enabled: false,
         }),
-
         // parents
         ...[1, 2].flatMap((parentNumber, parentIndex) => {
             const getId = (value: string) => `member.parent.${parentIndex}.${value}`;
