@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { CachedBalance, Registration } from '@stamhoofd/models';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAlias, SQLFilterDefinitions, SQLNamedExpression, SQLSelectAs, SQLSum, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAlias, SQLFilterDefinitions, SQLIfNull, SQLNamedExpression, SQLSelectAs, SQLSum, SQLValueType } from '@stamhoofd/sql';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { organizationFilterCompilers } from './organizations.js';
@@ -167,7 +167,7 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             ),
         {
             value: createColumnFilter({
-                expression: SQL.column('cb', 'outstandingBalance'),
+                expression: new SQLIfNull(SQL.column('cb', 'outstandingBalance'), 0),
                 type: SQLValueType.Number,
                 nullable: false,
             }),

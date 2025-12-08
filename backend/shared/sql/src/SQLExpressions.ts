@@ -1,6 +1,6 @@
 import { Database } from '@simonbackx/simple-database';
-import { joinSQLQuery, SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression';
-import { ParseWhereArguments, SQLEmptyWhere } from './SQLWhere';
+import { joinSQLQuery, SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
+import { ParseWhereArguments, SQLEmptyWhere } from './SQLWhere.js';
 
 export type SQLScalarValue = string | number | boolean | Date;
 export type SQLDynamicExpression = SQLScalarValue | SQLScalarValue[] | null | SQLExpression;
@@ -417,6 +417,21 @@ export class SQLColumnExpression implements SQLExpression {
             this.namespace.getSQL(options),
             '.',
             Database.escapeId(this.column),
+        ]);
+    }
+}
+
+export class SQLIfNull implements SQLExpression {
+    constructor(private readonly columnExpression: SQLColumnExpression, private readonly value: string | number) {
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'IFNULL(',
+            this.columnExpression.getSQL(options),
+            ',',
+            new SQLSafeValue(this.value).getSQL(),
+            ')',
         ]);
     }
 }
