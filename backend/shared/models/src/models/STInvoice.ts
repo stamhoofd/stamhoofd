@@ -875,9 +875,9 @@ export class STInvoice extends Model {
         ubl += `
             <cac:AccountingSupplierParty>
                 <cac:Party>
-                    <cbc:EndpointID schemeID="0002">0208:0747832683</cbc:EndpointID>
+                    <cbc:EndpointID schemeID="0208">0747832683</cbc:EndpointID>
                     <cac:PartyName>
-                        <cbc:Name>Codawood BV</cbc:Name>
+                        <cbc:Name>Stamhoofd</cbc:Name>
                     </cac:PartyName>
                     <cac:PostalAddress>
                         <cbc:StreetName>Collegiebaan 54</cbc:StreetName>
