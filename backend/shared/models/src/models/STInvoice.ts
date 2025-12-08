@@ -816,7 +816,6 @@ export class STInvoice extends Model {
             throw new Error('Cannot generate UBL for invoice outside belgium');
         }
         const companyNumber = (this.meta.companyVATNumber ? this.meta.companyVATNumber.substring(2) : companyNumberOrVAT).replace(/[^0-9]+/g, '');
-        const recipient = `0208:${(companyNumber)}`
 
         const payment = this.paymentId ? (await Payment.getByID(this.paymentId)) : null;
 
@@ -922,7 +921,7 @@ export class STInvoice extends Model {
         ubl += `
             <cac:AccountingCustomerParty>
                 <cac:Party>
-                    <cbc:EndpointID schemeID="0002">${esc(recipient)}</cbc:EndpointID>
+                    <cbc:EndpointID schemeID="0208">${esc(companyNumber)}</cbc:EndpointID>
                     <cac:PartyName>
                         <cbc:Name>${esc(this.meta.companyName)}</cbc:Name>
                     </cac:PartyName>
