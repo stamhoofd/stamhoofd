@@ -35,7 +35,7 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
             });
         },
     },
-    'cachedOutstandingBalances.outstandingBalance': {
+    'cachedOutstandingBalanceForMember.value': {
         getValue(a) {
             return a.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
         },

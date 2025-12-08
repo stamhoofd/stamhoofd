@@ -151,7 +151,7 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             ),
         organizationFilterCompilers,
     ),
-    cachedOutstandingBalances: createExistsFilter(
+    cachedOutstandingBalanceForMember: createExistsFilter(
         SQL.select()
             .from(Registration.table, CachedBalance.table)
             .join(
@@ -166,7 +166,7 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
                     .andWhere(SQL.column('cb', 'organizationId'), SQL.column(Registration.table, 'organizationId')),
             ),
         {
-            outstandingBalance: createColumnFilter({
+            value: createColumnFilter({
                 expression: SQL.column('cb', 'outstandingBalance'),
                 type: SQLValueType.Number,
                 nullable: false,
