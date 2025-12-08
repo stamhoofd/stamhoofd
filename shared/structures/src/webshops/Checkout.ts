@@ -245,7 +245,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         }
 
         const totalItems = this.cart.items.reduce(
-            (a, b) => a + b.calculatedPrices.length,
+            (a, b) => a + b.amount,
             0,
         );
 
