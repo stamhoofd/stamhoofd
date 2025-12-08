@@ -1,7 +1,7 @@
 import { Group, Member, Registration } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
-import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
-import { memberFilterCompilers } from './members';
+import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
+import { memberFilterCompilers } from './members.js';
 
 export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 

@@ -458,9 +458,10 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
     allColumns.push(
         new Column<ObjectType, number>({
+            id: 'cachedOutstandingBalances.outstandingBalance',
             name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
             description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
-            allowSorting: false,
+            allowSorting: true,
             getValue: v => v.member.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
             format: (outstandingBalance) => {
                 return Formatter.price(outstandingBalance);

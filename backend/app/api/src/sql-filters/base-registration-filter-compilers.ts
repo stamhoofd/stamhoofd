@@ -1,8 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { CachedBalance, Registration } from '@stamhoofd/models';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAlias, SQLFilterDefinitions, SQLNamedExpression, SQLSelectAs, SQLSum, SQLValueType } from '@stamhoofd/sql';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
-import { Context } from '../helpers/Context';
-import { organizationFilterCompilers } from './organizations';
+import { Context } from '../helpers/Context.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
     const groupIds = typeof filter === 'string'
@@ -149,5 +150,27 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('registrations', 'organizationId'),
             ),
         organizationFilterCompilers,
+    ),
+    cachedOutstandingBalances: createExistsFilter(
+        SQL.select()
+            .from(Registration.table, CachedBalance.table)
+            .join(
+                SQL.leftJoin(SQL.select('objectId', 'organizationId', new SQLSelectAs(
+                    new SQLSum(
+                        SQL.column('amountOpen'),
+                    ),
+                    new SQLAlias('outstandingBalance'),
+                ))
+                    .from(CachedBalance.table)
+                    .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId')).as('cb') as SQLNamedExpression, 'cb').where(SQL.column('cb', 'objectId'), SQL.column(Registration.table, 'memberId'))
+                    .andWhere(SQL.column('cb', 'organizationId'), SQL.column(Registration.table, 'organizationId')),
+            ),
+        {
+            outstandingBalance: createColumnFilter({
+                expression: SQL.column('cb', 'outstandingBalance'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+        },
     ),
 };

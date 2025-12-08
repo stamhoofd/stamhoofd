@@ -1,10 +1,10 @@
 import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
-import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
-import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
-import { SQLJoin } from './SQLJoin';
-import { Orderable } from './SQLOrderBy';
-import { Whereable } from './SQLWhere';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
+import { SQLJoin } from './SQLJoin.js';
+import { Orderable } from './SQLOrderBy.js';
+import { Whereable } from './SQLWhere.js';
 
 class EmptyClass {}
 
@@ -29,6 +29,8 @@ export type IterableSQLSelectOptions = {
     maxQueries?: number;
 };
 
+export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
+
 export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
     _columns: SQLExpression[];
     _from: SQLNamedExpression;
@@ -38,6 +40,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _groupBy: SQLExpression[] = [];
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
     _max_execution_time: number | null = null;
+    private _name: string | null = null;
 
     _transformer: ((row: SQLResultNamespacedRow) => T) | null = null;
 
@@ -488,5 +491,15 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                 return this;
             },
         } as IterableSQLSelect<T[]> as any;
+    }
+
+    getName(): string | null {
+        return this._name;
+    }
+
+    as(name: string): SQLNamedSelect {
+        this._name = name;
+
+        return this as SQLNamedSelect;
     }
 }

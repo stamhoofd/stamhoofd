@@ -1,5 +1,6 @@
-import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery } from './SQLExpression';
-import { Whereable } from './SQLWhere';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery } from './SQLExpression.js';
+import { SQLSelect } from './SQLSelect.js';
+import { Whereable } from './SQLWhere.js';
 
 export enum SQLJoinType {
     Left = 'Left',
@@ -29,6 +30,21 @@ export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (this.table instanceof SQLSelect) {
+            return joinSQLQuery([
+                this.getJoinPrefix(),
+                '(',
+                this.table?.getSQL(options),
+                `) as ${this.table.getName()}`,
+                this._where ? 'ON' : undefined,
+                this._where?.getSQL({
+                    ...options,
+                    parentNamespace: options?.defaultNamespace,
+                    defaultNamespace: this.table.getName(),
+                }),
+            ], ' ');
+        }
+
         return joinSQLQuery([
             this.getJoinPrefix(),
             this.table?.getSQL(options),

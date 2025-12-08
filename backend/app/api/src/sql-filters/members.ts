@@ -1,10 +1,10 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member } from '@stamhoofd/models';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar, createWildcardColumnFilter, SQLJsonExtract } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
-import { Context } from '../helpers/Context';
-import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers';
-import { organizationFilterCompilers } from './organizations';
+import { Context } from '../helpers/Context.js';
+import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 const membersTable = SQL.table(Member.table);
 

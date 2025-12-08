@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform, Registration } from '@stamhoofd/models';
-import { SQL, SQLExpression, SQLSelect, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { SQL, SQLExpression, SQLSelect, SQLSortDefinitions, applySQLSorter, compileToSQLFilter, normalizeSQLQuery } from '@stamhoofd/sql';
 import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
@@ -201,6 +201,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             group: Group;
         })[];
 
+        console.error('TEST ABC123:');
+        console.error(normalizeSQLQuery(query.getSQL()));
         try {
             data = await query.fetch();
         }
