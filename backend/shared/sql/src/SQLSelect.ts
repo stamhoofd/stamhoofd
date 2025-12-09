@@ -255,7 +255,6 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         this._orderBy = null;
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
-        // console.log(query, params);
 
         const [rows] = await Database.select(query, params, { nestTables: true });
         if (rows.length === 1) {
@@ -501,6 +500,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return this._name;
     }
 
+    /**
+     * By calling this method we make sure a name is set so we can return an SQLNamedSelect.
+     * @param name name of the select
+     * @returns an SQLNamedSelect
+     */
     as(name: string): SQLNamedSelect {
         this._name = name;
 

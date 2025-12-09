@@ -30,6 +30,7 @@ export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        // add parenthesis if the table is a select
         if (this.table instanceof SQLSelect) {
             return joinSQLQuery([
                 this.getJoinPrefix(),
