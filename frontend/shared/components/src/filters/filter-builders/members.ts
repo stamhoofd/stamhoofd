@@ -713,6 +713,31 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 { includeNullable: true },
             ),
         );
+
+        all.push(
+            new NumberFilterBuilder({
+                name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+                key: 'cachedOutstandingBalanceForMember.value',
+                type: NumberFilterFormat.Currency,
+                wrapFilter: (f: StamhoofdFilter) => {
+                    return {
+                        registrations: {
+                            $elemMatch: {
+                                $and: [{ organizationId: organization.value!.id }, f],
+                            },
+                        },
+                    };
+                },
+                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
+                    const value = (f as object)?.['registrations']?.['$elemMatch'];
+                    if (value?.['cachedOutstandingBalanceForMember.value']) {
+                        return {
+                            'cachedOutstandingBalanceForMember.value': value['cachedOutstandingBalanceForMember.value'],
+                        };
+                    }
+                    return null;
+                },
+            }));
     }
 
     if (recordCategoriesFilterBuilders.length > 0) {
