@@ -47,6 +47,22 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             },
         },
         {
+            id: 'outstandingBalance',
+            name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+            width: 30,
+            getValue: (v) => {
+                return {
+                    value: v.member.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0) / 1_0000,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
+
+        },
+        {
             id: 'registeredAt',
             name: $t(`Inschrijvingsdatum`),
             width: 20,
