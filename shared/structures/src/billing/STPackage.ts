@@ -213,6 +213,69 @@ export class STPackage extends AutoEncoder {
             firstFailedPayment: this.meta.firstFailedPayment,
         });
     }
+
+    /**
+     * Create a renewed package, but not yet saved!
+     */
+    createRenewed(): STPackage {
+        if (!this.meta.allowRenew) {
+            throw new SimpleError({
+                code: 'not_allowed',
+                message: 'Not allowed',
+                human: 'Je kan dit pakket niet verlengen',
+            });
+        }
+
+        const pack = new STPackage();
+        pack.id = uuidv4();
+        pack.meta = this.meta;
+
+        // Not yet valid / active (ignored until valid)
+        pack.validAt = null;
+
+        pack.meta.startDate = new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0));
+        pack.meta.paidAmount = 0;
+        pack.meta.paidPrice = 0;
+        pack.meta.firstFailedPayment = null;
+        pack.meta.didRenewId = this.id;
+
+        // Duration for renewals is always a year ATM
+        pack.validUntil = new Date(pack.meta.startDate);
+        pack.validUntil.setFullYear(pack.validUntil.getFullYear() + 1);
+
+        // Remove (= not renewable) if not renewed after 3 months
+        pack.removeAt = new Date(pack.validUntil);
+        pack.removeAt.setMonth(pack.removeAt.getMonth() + 3);
+
+        if (this.meta.type === STPackageType.SingleWebshop) {
+            pack.meta.type = STPackageType.Webshops;
+        }
+
+        // Todo: sometimes we should not change the prices
+        // Change prices
+        if (pack.meta.type === STPackageType.Webshops) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 2_00;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 20;
+
+            pack.meta.unitPrice = 0;
+            pack.meta.pricingType = STPricingType.Fixed;
+            pack.validUntil = null;
+            pack.removeAt = null;
+        }
+        else if (pack.meta.type === STPackageType.Members) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 0;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 0;
+
+            pack.meta.unitPrice = 100;
+            pack.meta.pricingType = STPricingType.PerMember;
+        }
+
+        return pack;
+    }
 }
 
 export class STPackageStatusServiceFee extends AutoEncoder {

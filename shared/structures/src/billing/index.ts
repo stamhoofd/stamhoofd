@@ -12,4 +12,4 @@ export * from './OrganizationPackagesStatus.js';
 export * from './STPendingInvoice.js';
 
 export * from './Invoice.js';
-export * from './InvoicedBalanceItem.js';
+export * from './InvoiceItem.js';
