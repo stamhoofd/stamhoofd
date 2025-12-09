@@ -29,6 +29,8 @@ export type IterableSQLSelectOptions = {
     maxQueries?: number;
 };
 
+export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
+
 export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(EmptyClass)) implements SQLExpression {
     _columns: SQLExpression[];
     _from: SQLNamedExpression;
@@ -38,6 +40,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _groupBy: SQLExpression[] = [];
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
     _max_execution_time: number | null = null;
+    private _name: string | null = null;
 
     _transformer: ((row: SQLResultNamespacedRow) => T) | null = null;
 
@@ -74,7 +77,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     join(join: InstanceType<typeof SQLJoin>): this {
-        this._joins.push(join);
+        // prevent duplicate joins (reference of join should be the same)
+        if (!this._joins.includes(join)) {
+            this._joins.push(join);
+        }
+
         return this;
     }
 
@@ -248,7 +255,6 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         this._orderBy = null;
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
-        // console.log(query, params);
 
         const [rows] = await Database.select(query, params, { nestTables: true });
         if (rows.length === 1) {
@@ -488,5 +494,20 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                 return this;
             },
         } as IterableSQLSelect<T[]> as any;
+    }
+
+    getName(): string | null {
+        return this._name;
+    }
+
+    /**
+     * By calling this method we make sure a name is set so we can return an SQLNamedSelect.
+     * @param name name of the select
+     * @returns an SQLNamedSelect
+     */
+    as(name: string): SQLNamedSelect {
+        this._name = name;
+
+        return this as SQLNamedSelect;
     }
 }

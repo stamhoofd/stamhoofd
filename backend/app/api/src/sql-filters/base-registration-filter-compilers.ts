@@ -1,8 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
-import { Context } from '../helpers/Context';
-import { organizationFilterCompilers } from './organizations';
+import { Context } from '../helpers/Context.js';
+import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
     const groupIds = typeof filter === 'string'
@@ -149,5 +150,15 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('registrations', 'organizationId'),
             ),
         organizationFilterCompilers,
+    ),
+    cachedOutstandingBalanceForMember: createJoinedRelationFilter(
+        outstandingBalanceJoin,
+        {
+            value: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('cb', 'outstandingBalance'), 0),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+        },
     ),
 };

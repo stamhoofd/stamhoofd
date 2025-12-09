@@ -6,6 +6,7 @@ import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
@@ -58,7 +59,14 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                     },
                 },
             }));
-        };
+        }
+        else {
+            all.push(new NumberFilterBuilder({
+                key: 'cachedOutstandingBalanceForMember.value',
+                name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+                type: NumberFilterFormat.Currency,
+            }));
+        }
 
         const originalFilters = createMemberWithRegistrationsBlobFilterBuilders({
             organization,

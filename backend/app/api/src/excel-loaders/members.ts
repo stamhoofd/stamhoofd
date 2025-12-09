@@ -2,11 +2,11 @@ import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerSheet } 
 import { Platform } from '@stamhoofd/models';
 import { ExcelExportType, Gender, GroupType, LimitedFilteredRequest, PlatformFamily, PlatformMember, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint';
-import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
-import { Context } from '../helpers/Context';
-import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
+import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
+import { Context } from '../helpers/Context.js';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
     {

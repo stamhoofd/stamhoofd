@@ -8,11 +8,11 @@ import { DataValidator } from '@stamhoofd/utility';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import parsePhoneNumber from 'libphonenumber-js/max';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { memberFilterCompilers } from '../../../sql-filters/members';
-import { memberSorters } from '../../../sql-sorters/members';
-import { validateGroupFilter } from './helpers/validateGroupFilter';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { memberFilterCompilers } from '../../../sql-filters/members.js';
+import { memberSorters } from '../../../sql-sorters/members.js';
+import { validateGroupFilter } from './helpers/validateGroupFilter.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

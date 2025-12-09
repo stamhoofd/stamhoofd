@@ -2,7 +2,8 @@ import { Member } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { memberJoin } from '../sql-filters/registrations';
+import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { memberJoin } from '../sql-filters/registrations.js';
 
 export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
@@ -34,6 +35,19 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
                 direction,
             });
         },
+    },
+    'cachedOutstandingBalanceForMember.value': {
+        getValue(a) {
+            return a.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('cb', 'outstandingBalance'),
+                direction,
+            });
+        },
+        join: outstandingBalanceJoin,
+        select: [SQL.column('cb', 'outstandingBalance')],
     },
     'member.firstName': {
         getValue(a) {

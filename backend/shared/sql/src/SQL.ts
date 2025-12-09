@@ -1,6 +1,6 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete';
-import { isSQLExpression, SQLExpression, SQLNamedExpression } from './SQLExpression';
+import { isSQLExpression, SQLExpression } from './SQLExpression';
 import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
 import { SQLInsert } from './SQLInsert';
 import { SQLJoin, SQLJoinType } from './SQLJoin';

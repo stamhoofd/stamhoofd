@@ -421,6 +421,21 @@ export class SQLColumnExpression implements SQLExpression {
     }
 }
 
+export class SQLIfNull implements SQLExpression {
+    constructor(private readonly columnExpression: SQLColumnExpression, private readonly value: string | number) {
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'IFNULL(',
+            this.columnExpression.getSQL(options),
+            ',',
+            new SQLSafeValue(this.value).getSQL(),
+            ')',
+        ]);
+    }
+}
+
 export class SQLTableExpression implements SQLNamedExpression {
     /**
      * By default the table name will be used as the namespace by MySQL.

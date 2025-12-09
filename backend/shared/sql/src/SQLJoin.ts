@@ -1,4 +1,5 @@
 import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery } from './SQLExpression';
+import { SQLSelect } from './SQLSelect';
 import { Whereable } from './SQLWhere';
 
 export enum SQLJoinType {
@@ -29,6 +30,22 @@ export class SQLJoin extends Whereable(EmptyClass) implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        // add parenthesis if the table is a select
+        if (this.table instanceof SQLSelect) {
+            return joinSQLQuery([
+                this.getJoinPrefix(),
+                '(',
+                this.table?.getSQL(options),
+                `) as ${this.table.getName()}`,
+                this._where ? 'ON' : undefined,
+                this._where?.getSQL({
+                    ...options,
+                    parentNamespace: options?.defaultNamespace,
+                    defaultNamespace: this.table.getName(),
+                }),
+            ], ' ');
+        }
+
         return joinSQLQuery([
             this.getJoinPrefix(),
             this.table?.getSQL(options),
