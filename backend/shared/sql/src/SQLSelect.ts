@@ -77,7 +77,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     join(join: InstanceType<typeof SQLJoin>): this {
-        this._joins.push(join);
+        // prevent duplicate joins (reference of join should be the same)
+        if (!this._joins.includes(join)) {
+            this._joins.push(join);
+        }
+
         return this;
     }
 

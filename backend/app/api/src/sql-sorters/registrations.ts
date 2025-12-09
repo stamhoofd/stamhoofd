@@ -1,7 +1,8 @@
-import { CachedBalance, Member, Registration } from '@stamhoofd/models';
-import { SQL, SQLAlias, SQLNamedExpression, SQLOrderBy, SQLOrderByDirection, SQLSelectAs, SQLSortDefinitions, SQLSum } from '@stamhoofd/sql';
+import { Member } from '@stamhoofd/models';
+import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { memberJoin } from '../sql-filters/registrations.js';
 
 export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob> = {
@@ -45,19 +46,7 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
                 direction,
             });
         },
-        join: SQL.leftJoin(
-            SQL.select('objectId', 'organizationId',
-                new SQLSelectAs(
-                    new SQLSum(
-                        SQL.column('amountOpen'),
-                    ),
-                    new SQLAlias('outstandingBalance'),
-                ))
-                .from(CachedBalance.table)
-                .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId')).as('cb') as SQLNamedExpression, 'cb',
-        )
-            .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
-            .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId')),
+        join: outstandingBalanceJoin,
         select: [SQL.column('cb', 'outstandingBalance')],
     },
     'member.firstName': {
