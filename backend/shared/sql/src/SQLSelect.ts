@@ -1,10 +1,10 @@
 import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
-import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
-import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
-import { SQLJoin } from './SQLJoin.js';
-import { Orderable } from './SQLOrderBy.js';
-import { Whereable } from './SQLWhere.js';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
+import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
+import { SQLJoin } from './SQLJoin';
+import { Orderable } from './SQLOrderBy';
+import { Whereable } from './SQLWhere';
 
 class EmptyClass {}
 
