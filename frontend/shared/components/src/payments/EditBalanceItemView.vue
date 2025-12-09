@@ -172,25 +172,25 @@
             <STList v-else>
                 <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" :price="payment.payment.isFailed ? 0 : payment.price" />
             </STList>
+        </template>
 
-            <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
-                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+        <template v-if="(!isNew && hasPayments(patchedBalanceItem) && outstanding.pending === 0 && outstanding.paid === 0) || STAMHOOFD.environment === 'development'">
+            <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
-                <STList>
-                    <STListItem :selectable="true" @click="doDelete">
-                        <h2 class="style-title-list">
-                            {{ $t('382c3c3e-7ac0-4d9d-871f-2316c85b51ae') }}
-                        </h2>
-                        <template #right>
-                            <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon trash" />
-                                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
-                            </button>
-                            <button type="button" class="button icon trash only-smartphone" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
+            <STList>
+                <STListItem :selectable="true" @click="doDelete">
+                    <h2 class="style-title-list">
+                        {{ $t('382c3c3e-7ac0-4d9d-871f-2316c85b51ae') }}
+                    </h2>
+                    <template #right>
+                        <button type="button" class="button secundary danger hide-smartphone">
+                            <span class="icon trash" />
+                            <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
+                        </button>
+                        <button type="button" class="button icon trash only-smartphone" />
+                    </template>
+                </STListItem>
+            </STList>
         </template>
     </SaveView>
 </template>
@@ -356,16 +356,16 @@ async function save() {
                 code: 'invalid_field',
                 field: 'description',
                 message: 'description cannot be empty',
-                human: $t('fc883ab4-2743-4f39-9048-4afbf548ba76')
-            })
+                human: $t('fc883ab4-2743-4f39-9048-4afbf548ba76'),
+            });
         }
         if (patchedBalanceItem.value.unitPrice === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'unitPrice',
                 message: 'unitPrice cannot be zero',
-                human: $t('7596149b-b7cf-4624-99e1-b8fd949d593d')
-            })
+                human: $t('7596149b-b7cf-4624-99e1-b8fd949d593d'),
+            });
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
@@ -393,7 +393,6 @@ async function doDelete() {
         loading.value = true;
         await props.saveHandler(BalanceItemWithPayments.patch({
             status: BalanceItemStatus.Hidden,
-            price: 0,
         }));
         await pop({ force: true });
     }

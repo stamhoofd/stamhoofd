@@ -33,6 +33,9 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
         return this.price / this.unitPrice;
     }
 
+    /**
+     * NOTE! This unit price could be including or exluding vat depending on the balance item
+     */
     get unitPrice() {
         if (this.price < 0 && this.balanceItem.unitPrice > 0) {
             return -this.balanceItem.unitPrice;

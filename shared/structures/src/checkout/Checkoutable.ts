@@ -1,7 +1,19 @@
-import { PaymentMethod } from '../PaymentMethod.js';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, URLDecoder } from '@simonbackx/simple-encoding';
+import { BalanceItem } from '../BalanceItem.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { PaymentMandate } from '../PaymentMandate.js';
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
+import { PaymentMethod } from '../PaymentMethod.js';
+
+export class PayBalanceItem extends AutoEncoder {
+    @field({ decoder: BalanceItem })
+    balanceItem: BalanceItem;
+
+    /**
+     * How much to pay for this specific balance item
+     */
+    @field({ decoder: IntegerDecoder })
+    amount: number;
+}
 
 /**
  * We have multiple checkout flows in Stamhoofd. They all share a similar way of selecting a payment method,
@@ -18,8 +30,8 @@ export abstract class Checkoutable<T> extends AutoEncoder {
     abstract purchases: T;
 
     // A way to select existing balance items that you want to pay, and how much you want to pay
-    @field({ decoder: new MapDecoder(StringDecoder, IntegerDecoder) })
-    balances: Map<string, number> = new Map();
+    @field({ decoder: new ArrayDecoder(PayBalanceItem) })
+    balances: PayBalanceItem[] = [];
 
     /**
      * If null, mandate should be set instead.
@@ -36,7 +48,7 @@ export abstract class Checkoutable<T> extends AutoEncoder {
     /**
      * Invoice details. Will get saved into the created payment and/or invoice.
      */
-    @field({ decoder: PaymentCustomer, nullable: true })
+    @field({ decoder: PaymentCustomer })
     customer = PaymentCustomer.create({});
 
     /**

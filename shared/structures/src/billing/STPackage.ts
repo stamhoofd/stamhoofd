@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Address } from '../addresses/Address.js';
 import { Country } from '../addresses/CountryDecoder.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
+import { InvoiceItem } from './InvoiceItem.js';
+import { Formatter } from '@stamhoofd/utility';
 
 export enum STPackageType {
     // Members without activities (not available in frontend anymore)
@@ -212,6 +214,131 @@ export class STPackage extends AutoEncoder {
             removeAt: this.removeAt,
             firstFailedPayment: this.meta.firstFailedPayment,
         });
+    }
+
+    /**
+     * Create a renewed package, but not yet saved!
+     */
+    createRenewed(): STPackage {
+        if (!this.meta.allowRenew) {
+            throw new SimpleError({
+                code: 'not_allowed',
+                message: 'Not allowed',
+                human: 'Je kan dit pakket niet verlengen',
+            });
+        }
+
+        const pack = new STPackage();
+        pack.id = uuidv4();
+        pack.meta = this.meta;
+
+        // Not yet valid / active (ignored until valid)
+        pack.validAt = null;
+
+        pack.meta.startDate = new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0));
+        pack.meta.paidAmount = 0;
+        pack.meta.paidPrice = 0;
+        pack.meta.firstFailedPayment = null;
+        pack.meta.didRenewId = this.id;
+
+        // Duration for renewals is always a year ATM
+        pack.validUntil = new Date(pack.meta.startDate);
+        pack.validUntil.setFullYear(pack.validUntil.getFullYear() + 1);
+
+        // Remove (= not renewable) if not renewed after 3 months
+        pack.removeAt = new Date(pack.validUntil);
+        pack.removeAt.setMonth(pack.removeAt.getMonth() + 3);
+
+        if (this.meta.type === STPackageType.SingleWebshop) {
+            pack.meta.type = STPackageType.Webshops;
+        }
+
+        // Todo: sometimes we should not change the prices
+        // Change prices
+        if (pack.meta.type === STPackageType.Webshops) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 2_00;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 20;
+
+            pack.meta.unitPrice = 0;
+            pack.meta.pricingType = STPricingType.Fixed;
+            pack.validUntil = null;
+            pack.removeAt = null;
+        }
+        else if (pack.meta.type === STPackageType.Members) {
+            pack.meta.serviceFeeFixed = 0;
+            pack.meta.serviceFeePercentage = 0;
+            pack.meta.serviceFeeMinimum = 0;
+            pack.meta.serviceFeeMaximum = 0;
+
+            pack.meta.unitPrice = 100;
+            pack.meta.pricingType = STPricingType.PerMember;
+        }
+
+        return pack;
+    }
+
+    /**
+     * Create the initial invoice item for this package with the initial amounts.
+     */
+    createInvoiceItem({ amount = 1, date }: { amount: number; date?: Date }): InvoiceItem {
+        let unitPrice = Math.round(this.meta.unitPrice);
+
+        if (amount < this.meta.minimumAmount) {
+            // Minimum should get applied first, because we might already have paid for the minimum (paid amount)
+            amount = this.meta.minimumAmount;
+        }
+
+        amount -= this.meta.paidAmount;
+        if (amount <= 0) {
+            amount = 0;
+        }
+
+        /// When pricing type is memebrs, the price is calculated per year.
+        /// If a shorter period is remaining, we give a discount in order
+        /// to no need to handle it more complicated
+        let now = date ?? new Date();
+        if (now < this.meta.startDate) {
+            // When creating a new package, we sometimes buy it for the future, so use that date instead of now
+            now = this.meta.startDate;
+        }
+
+        if (this.validUntil && this.meta.pricingType !== STPricingType.Fixed) {
+            const totalDays = Math.round((this.validUntil.getTime() - this.meta.startDate.getTime()) / (1000 * 60 * 60 * 24));
+            let remainingDays = Math.round((this.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+            /// First 3 months are full price
+            const paidDays = 30 * 3;
+
+            if (remainingDays > totalDays) {
+                remainingDays = totalDays;
+            }
+
+            if (totalDays > 366) {
+                // Increase unit price
+                unitPrice = unitPrice * (totalDays / 365);
+            }
+
+            if (this.meta.pricingType === STPricingType.PerMember) {
+                unitPrice = Math.round(Math.min(unitPrice, unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)));
+            }
+            else {
+                unitPrice = Math.round(unitPrice);
+            }
+        }
+
+        const item = InvoiceItem.create({
+            name: this.meta.name,
+            description: this.validUntil ? ('Van ' + Formatter.date(now, true) + ' tot ' + Formatter.date(this.validUntil, true)) : ('Vanaf ' + Formatter.date(this.meta.startDate, true)),
+            unitPrice: unitPrice,
+            baseAmount: 1,
+            amount: amount,
+            VATPercentage: 21,
+            packageId: this.id,
+        });
+
+        return item;
     }
 }
 

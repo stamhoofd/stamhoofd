@@ -57,6 +57,7 @@ export enum BalanceItemType {
      * Small differences that occurred when creating a payment or invoice
      */
     Rounding = 'Rounding',
+    Invoice = 'Invoice',
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -78,6 +79,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
         case BalanceItemType.Rounding: return $t('5841f72b-67d8-4add-8cfa-801bcb71cba7');
+        case BalanceItemType.Invoice: return $t('Factuur');
     }
 }
 
@@ -92,6 +94,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.CancellationFee: return 'canceled';
         case BalanceItemType.RegistrationBundleDiscount: return 'label';
         case BalanceItemType.Rounding: return 'calculator';
+        case BalanceItemType.Invoice: return 'file';
     }
 }
 
@@ -104,6 +107,8 @@ export enum BalanceItemRelationType {
     Member = 'Member', // Contains the name of the member you registered
     MembershipType = 'MembershipType',
     Discount = 'Discount', // Name and id of the related discount
+    Package = 'Package',
+    Invoice = 'Invoice', // Invoice number or id
 }
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
@@ -116,6 +121,8 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.Member: return $t(`f4052a0b-9564-49c4-a6b6-41af3411f3b0`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
         case BalanceItemRelationType.Discount: return $t(`40939025-cebb-4afb-90e9-847233cb256f`);
+        case BalanceItemRelationType.Package: return $t(`Pakket`);
+        case BalanceItemRelationType.Invoice: return $t('Factuur');
     }
 }
 
@@ -129,6 +136,8 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
         case BalanceItemRelationType.Discount: return $t(`4d5cd18a-ad96-4b2b-aa91-80af307cb8cd`);
+        case BalanceItemRelationType.Package: return $t(`Pakket geassocieerd aan dit item`);
+        case BalanceItemRelationType.Invoice: return $t('Factuur geassocieerd aan dit item');
     }
 }
 
@@ -424,6 +433,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     registrationId: string | null = null;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    invoiceId: string | null = null;
+
     @field({ decoder: StringDecoder, nullable: true, version: 353 })
     payingOrganizationId: string | null = null;
 
@@ -497,6 +509,14 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`03df4cd8-446f-4f40-8d27-90a51bb5a6ba`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`ab4ad0cf-53df-4f35-96a8-59747075417f`);
             case BalanceItemType.Rounding: return this.description;
+            case BalanceItemType.Invoice: {
+                const invoice = this.relations.get(BalanceItemRelationType.Invoice)?.name.toString();
+
+                if (invoice) {
+                    return invoice;
+                }
+                return $t(`Pro-forma factuur`);
+            }
         }
     }
 
@@ -519,6 +539,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
             case BalanceItemType.Rounding: return $t('097441a3-6b49-4768-87c3-8b290bb073ed');
+            case BalanceItemType.Invoice: return $t('facturen');
         }
     }
 
@@ -645,6 +666,14 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
             case BalanceItemType.Rounding: return $t(`Afrondingscorrectie`);
+            case BalanceItemType.Invoice: {
+                const invoice = this.relations.get(BalanceItemRelationType.Invoice)?.name.toString();
+
+                if (invoice) {
+                    return invoice;
+                }
+                return $t(`Pro-forma factuur`);
+            }
         }
     }
 
@@ -764,14 +793,14 @@ export class BalanceItem extends AutoEncoder {
                 if (description) {
                     description += `\n`;
                 }
-                description += `Betaald: ${Formatter.price(item.pricePaid)}`;
+                description += `${$t('Betaald')}: ${Formatter.price(item.pricePaid)}`;
             }
 
             if (item.pricePending !== 0) {
                 if (description) {
                     description += `\n`;
                 }
-                description += `In verwerking: ${Formatter.price(item.pricePending)}`;
+                description += `${$t('In verwerking')}: ${Formatter.price(item.pricePending)}`;
             }
 
             str += `<tr><td>${prefix ? `<p class="email-style-title-prefix-list${prefixClass ? ' ' + prefixClass : ''}">${Formatter.escapeHtml(prefix)}</p>` : ''}<h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : ''}</td><td>${Formatter.escapeHtml(price)}</td></tr>`;

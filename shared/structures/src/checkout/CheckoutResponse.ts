@@ -1,5 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 
+import { Invoice } from '../billing/Invoice.js';
 import { Payment } from '../members/Payment.js';
 
 /**
@@ -17,8 +18,8 @@ export class CheckoutResponse extends AutoEncoder {
      * If an invoice is available and created, it will be set here already.
      * When asked for a pro forma invoice, this will be set.
      */
-    @field({ decoder: Payment, nullable: true })
-    invoice: Payment | null = null;
+    @field({ decoder: Invoice, nullable: true })
+    invoice: Invoice | null = null;
 
     /**
      * External page to finish the payment
