@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/models",
-    "version": "2.107.3",
+    "version": "2.108.0",
     "main": "./dist/src/index.js",
     "types": "./dist/src/index.d.ts",
     "license": "UNLICENCED",
