@@ -16,7 +16,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             minimumWidth: 100,
             recommendedWidth: 150,
             grow: true,
-            allowSorting: false,
+            allowSorting: true,
             enabled: false,
         }),
 
