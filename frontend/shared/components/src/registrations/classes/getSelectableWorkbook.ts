@@ -140,34 +140,35 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
         // group
         ...groupColumns,
-        ...((organization === null || organization.id === platform.membershipOrganizationId)
+        ...((organization === null)
             ? [
                     new SelectableColumn({
                         id: 'organization',
                         name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
-                        enabled: true,
+                        enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'uri',
                         name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
-                        enabled: true,
+                        enabled: false,
                     }),
                 ]
             : []),
-        ...groups.length > 1 || organization === null || organization.id === platform.membershipOrganizationId
+        ...organization === null || groups.length > 0
             ? [
                     new SelectableColumn({
                         id: 'defaultAgeGroup',
                         name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
-                        enabled: true,
+                        enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'group',
                         name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
-                        enabled: true,
+                        enabled: false,
                     }),
                 ]
             : [],
+        // will always be 0 if organization is null
         organization !== null
             ? new SelectableColumn({
                 id: 'outstandingBalance',

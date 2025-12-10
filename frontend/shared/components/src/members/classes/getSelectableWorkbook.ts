@@ -95,7 +95,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
 
         // group
         ...(groupColumns ?? []),
-        ...((!organization || organization.id === platform.membershipOrganizationId)
+        ...((organization === null)
             ? [
                     new SelectableColumn({
                         id: 'organization',
@@ -107,25 +107,20 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                         name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
                         enabled: false,
                     }),
-                    new SelectableColumn({
-                        id: 'defaultAgeGroup',
-                        name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
-                        enabled: false,
-                    }),
                 ]
             : []),
-
-        ...(organization
-            ? [
-                    new SelectableColumn({
-                        id: 'group',
-                        name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
-                        enabled: false,
-                    }),
-                ]
-            : []),
-
-        organization
+        new SelectableColumn({
+            id: 'defaultAgeGroup',
+            name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+            enabled: false,
+        }),
+        new SelectableColumn({
+            id: 'group',
+            name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
+            enabled: false,
+        }),
+        // will always be 0 if organization is null
+        organization !== null
             ? new SelectableColumn({
                 id: 'outstandingBalance',
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
