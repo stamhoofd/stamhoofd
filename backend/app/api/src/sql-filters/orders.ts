@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar, createExistsFilter, createWildcardColumnFilter, SQLJsonExtract } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -26,12 +26,12 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     timeSlotEndTime: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.endTime'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
     timeSlotStartTime: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.startTime'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.startTime'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
@@ -51,17 +51,17 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     paymentMethod: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.paymentMethod'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.paymentMethod'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
     checkoutMethod: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.checkoutMethod.type'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
     timeSlotDate: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.date'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.date'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
@@ -73,21 +73,21 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
     name: createColumnFilter({
         expression: new SQLCast(
             new SQLConcat(
-                new SQLJsonUnquote(SQL.jsonValue(SQL.column('data'), '$.value.customer.firstName')),
+                new SQLJsonUnquote(SQL.jsonExtract(SQL.column('data'), '$.value.customer.firstName')),
                 new SQLScalar(' '),
-                new SQLJsonUnquote(SQL.jsonValue(SQL.column('data'), '$.value.customer.lastName')),
+                new SQLJsonUnquote(SQL.jsonExtract(SQL.column('data'), '$.value.customer.lastName')),
             ),
             'CHAR'),
         type: SQLValueType.String,
         nullable: false,
     }),
     email: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.customer.email'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.customer.email'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
     phone: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.customer.phone'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.customer.phone'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
@@ -119,7 +119,7 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             .join(
                 SQL.join(
                     SQL.jsonTable(
-                        SQL.jsonValue(SQL.column('innerOrders', 'data'), '$.value.cart.items'),
+                        SQL.jsonExtract(SQL.column('innerOrders', 'data'), '$.value.cart.items'),
                         'items',
                     )
                         .addColumn(
@@ -168,21 +168,21 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
 
     recordAnswers: createWildcardColumnFilter(
         (key: string) => ({
-            expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
+            expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
             type: SQLValueType.JSONObject,
             nullable: true,
         }),
         (key: string) => ({
             ...baseSQLFilterCompilers,
             selected: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
+                expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
                 type: SQLValueType.JSONBoolean,
                 nullable: true,
             }),
             selectedChoice: {
                 ...baseSQLFilterCompilers,
                 id: createColumnFilter({
-                    expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
+                    expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
                     type: SQLValueType.JSONString,
                     nullable: true,
                 }),
@@ -190,13 +190,13 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             selectedChoices: {
                 ...baseSQLFilterCompilers,
                 id: createColumnFilter({
-                    expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
+                    expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
                     type: SQLValueType.JSONArray,
                     nullable: true,
                 }),
             },
             value: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
+                expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),

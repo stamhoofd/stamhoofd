@@ -343,7 +343,7 @@ describe('$contains', () => {
             };
             const filters = {
                 ...baseSQLFilterCompilers,
-                'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
+                'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
             };
 
             it('Can actually search for %', async () => {
@@ -549,7 +549,7 @@ describe('$contains', () => {
                 ...baseSQLFilterCompilers,
                 settings: {
                     ...baseSQLFilterCompilers,
-                    names: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false }),
+                    names: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false }),
                 },
             };
 
@@ -684,7 +684,7 @@ describe('$contains', () => {
             };
             const filters = {
                 ...baseSQLFilterCompilers,
-                'settings.names': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
+                'settings.names': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
             };
 
             it('Can search in the array', async () => {

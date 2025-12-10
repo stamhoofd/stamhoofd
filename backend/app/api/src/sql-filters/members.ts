@@ -48,7 +48,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         nullable: true,
     }),
     'gender': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.gender'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.gender'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
@@ -64,7 +64,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     'details.requiresFinancialSupport': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.requiresFinancialSupport.value'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.requiresFinancialSupport.value'),
         type: SQLValueType.JSONBoolean,
         nullable: true,
         checkPermission: async () => {
@@ -94,12 +94,12 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         },
     }),
     'email': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.email'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.email'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
     'parentEmail': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].email'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.parents[*].email'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
@@ -132,34 +132,34 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         }),
     },
     'unverifiedEmail': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedEmails'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.unverifiedEmails'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'phone': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.phone'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.phone'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
     'details.address': {
         ...baseSQLFilterCompilers,
         city: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.city'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.address.city'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
         postalCode: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.postalCode'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.address.postalCode'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
         street: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.street'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.address.street'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
         number: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.address.number'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.address.number'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
@@ -167,33 +167,33 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
     'details.parents[*].address': {
         ...baseSQLFilterCompilers,
         city: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.city'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.parents[*].address.city'),
             type: SQLValueType.JSONArray,
             nullable: true,
         }),
         postalCode: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.postalCode'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.parents[*].address.postalCode'),
             type: SQLValueType.JSONArray,
             nullable: true,
         }),
         street: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.street'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.parents[*].address.street'),
             type: SQLValueType.JSONArray,
             nullable: true,
         }),
         number: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].address.number'),
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.parents[*].address.number'),
             type: SQLValueType.JSONArray,
             nullable: true,
         }),
     },
     'parentPhone': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.parents[*].phone'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.parents[*].phone'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'unverifiedPhone': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column(membersTable, 'details'), '$.value.unverifiedPhones'),
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.unverifiedPhones'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
@@ -458,21 +458,21 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         ...baseSQLFilterCompilers,
         recordAnswers: createWildcardColumnFilter(
             (key: string) => ({
-                expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
+                expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
                 type: SQLValueType.JSONObject,
                 nullable: true,
             }),
             (key: string) => ({
                 ...baseSQLFilterCompilers,
                 selected: createColumnFilter({
-                    expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
+                    expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
                     type: SQLValueType.JSONBoolean,
                     nullable: true,
                 }),
                 selectedChoice: {
                     ...baseSQLFilterCompilers,
                     id: createColumnFilter({
-                        expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
+                        expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
                         type: SQLValueType.JSONString,
                         nullable: true,
                     }),
@@ -480,13 +480,13 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
                 selectedChoices: {
                     ...baseSQLFilterCompilers,
                     id: createColumnFilter({
-                        expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
+                        expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
                         type: SQLValueType.JSONArray,
                         nullable: true,
                     }),
                 },
                 value: createColumnFilter({
-                    expression: SQL.jsonValue(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
+                    expression: SQL.jsonExtract(SQL.column('details'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
                     type: SQLValueType.JSONString,
                     nullable: true,
                 }),

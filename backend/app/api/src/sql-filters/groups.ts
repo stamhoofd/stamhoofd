@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLFilterDefinitions, SQLJsonExtract, SQLValueType } from '@stamhoofd/sql';
 
 export const groupFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -18,7 +18,7 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     name: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('settings'), '$.value.name'),
+        expression: SQL.jsonExtract(SQL.column('settings'), '$.value.name'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
@@ -34,14 +34,14 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
     }),
     bundleDiscounts: createWildcardColumnFilter(
         (key: string) => ({
-            expression: SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true),
+            expression: SQL.jsonExtract(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true),
             type: SQLValueType.JSONArray,
             nullable: true,
         }),
         (key: string) => ({
             ...baseSQLFilterCompilers,
             name: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}.name`, true),
+                expression: SQL.jsonExtract(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}.name`, true),
                 type: SQLValueType.JSONArray,
                 nullable: true,
             }),

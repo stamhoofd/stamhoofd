@@ -431,14 +431,14 @@ describe('$eq', () => {
         };
         const filters = {
             ...baseSQLFilterCompilers,
-            'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
+            'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
             // wip:
-            'settings.parents[*].name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
-            'settings.parents[*].age': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.parents[*].age'), type: SQLValueType.JSONArray, nullable: false }),
-            'settings.randomValues': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.randomValues'), type: SQLValueType.JSONArray, nullable: true }),
+            'settings.parents[*].name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
+            'settings.parents[*].age': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.parents[*].age'), type: SQLValueType.JSONArray, nullable: false }),
+            'settings.randomValues': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.randomValues'), type: SQLValueType.JSONArray, nullable: true }),
             'settings': createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: true }),
-            'settings.enabled': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.enabled'), type: SQLValueType.JSONBoolean, nullable: true }),
-            'settings.age': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
+            'settings.enabled': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.enabled'), type: SQLValueType.JSONBoolean, nullable: true }),
+            'settings.age': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
         };
 
         it('JSON strings match case insensitive and whole string', async () => {

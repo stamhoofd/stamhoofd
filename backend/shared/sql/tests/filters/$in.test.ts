@@ -221,9 +221,9 @@ describe('$in', () => {
         };
         const filters = {
             ...baseSQLFilterCompilers,
-            'settings.randomValues': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.randomValues'), type: SQLValueType.JSONArray, nullable: true },
+            'settings.randomValues': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.randomValues'), type: SQLValueType.JSONArray, nullable: true },
             ),
-            'settings.name': createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
+            'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
             ),
         };
 

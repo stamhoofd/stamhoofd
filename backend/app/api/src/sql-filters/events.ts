@@ -28,7 +28,7 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     'groupIds': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('meta'), '$.value.groups[*].id'),
+        expression: SQL.jsonExtract(SQL.column('meta'), '$.value.groups[*].id'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
@@ -43,27 +43,27 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     'defaultAgeGroupIds': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
+        expression: SQL.jsonExtract(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'organizationTagIds': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('meta'), '$.value.organizationTagIds'),
+        expression: SQL.jsonExtract(SQL.column('meta'), '$.value.organizationTagIds'),
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
     'minAge': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('meta'), '$.value.minAge'),
+        expression: SQL.jsonExtract(SQL.column('meta'), '$.value.minAge'),
         type: SQLValueType.JSONNumber,
         nullable: true,
     }),
     'maxAge': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('meta'), '$.value.maxAge'),
+        expression: SQL.jsonExtract(SQL.column('meta'), '$.value.maxAge'),
         type: SQLValueType.JSONNumber,
         nullable: true,
     }),
     'meta.visible': createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('meta'), '$.value.visible'),
+        expression: SQL.jsonExtract(SQL.column('meta'), '$.value.visible'),
         type: SQLValueType.JSONBoolean,
         nullable: false,
     }),

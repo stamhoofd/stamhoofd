@@ -9,12 +9,12 @@ describe('Dot syntax', () => {
         age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
         settings: {
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true }),
-            age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
+            name: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true }),
+            age: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
             dog: {
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true }),
-                age: createColumnFilter({ expression: SQL.jsonValue(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true }),
+                name: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true }),
+                age: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true }),
             },
         },
     };

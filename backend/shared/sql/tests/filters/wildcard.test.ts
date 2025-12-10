@@ -10,10 +10,10 @@ describe('Wildcards', () => {
         settings: {
             ...baseSQLFilterCompilers,
             records: createWildcardColumnFilter(
-                (key: string) => ({ expression: SQL.jsonValue(SQL.jsonValue(SQL.column('settings'), '$.records'), '$.' + key, true), type: SQLValueType.JSONObject, nullable: true }),
+                (key: string) => ({ expression: SQL.jsonExtract(SQL.jsonExtract(SQL.column('settings'), '$.records'), '$.' + key, true), type: SQLValueType.JSONObject, nullable: true }),
                 (key: string) => ({
                     ...baseSQLFilterCompilers,
-                    name: createColumnFilter({ expression: SQL.jsonValue(SQL.jsonValue(SQL.jsonValue(SQL.column('settings'), '$.records'), '$.' + key, true), '$.name'), type: SQLValueType.JSONString, nullable: true }),
+                    name: createColumnFilter({ expression: SQL.jsonExtract(SQL.jsonExtract(SQL.jsonExtract(SQL.column('settings'), '$.records'), '$.' + key, true), '$.name'), type: SQLValueType.JSONString, nullable: true }),
                 }),
             ),
         },

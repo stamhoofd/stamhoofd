@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLNow, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLNow, SQLNull, SQLScalar, SQLValueType, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
 import { SetupStepType } from '@stamhoofd/structures';
 
 export const organizationFilterCompilers: SQLFilterDefinitions = {
@@ -29,32 +29,32 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     city: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.city'),
+        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.city'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
     postalCode: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.postalCode'),
+        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.postalCode'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
     country: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('organizations', 'address'), '$.value.country'),
+        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.country'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
     umbrellaOrganization: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
+        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
         type: SQLValueType.JSONString,
         nullable: true,
     }),
     type: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.type'),
+        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.type'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
     tags: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('organizations', 'meta'), '$.value.tags'),
+        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.tags'),
         type: SQLValueType.JSONArray,
         nullable: false,
     }),
@@ -80,7 +80,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                             {
                                 ...baseSQLFilterCompilers,
                                 reviewedAt: createColumnFilter({
-                                    expression: SQL.jsonValue(
+                                    expression: SQL.jsonExtract(
                                         SQL.column('organization_registration_periods', 'setupSteps'),
                                         `$.value.steps.${setupStep}.review.date`,
                                     ),
@@ -140,7 +140,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
         {
             ...baseSQLFilterCompilers,
             type: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('meta'), '$.value.type'),
+                expression: SQL.jsonExtract(SQL.column('meta'), '$.value.type'),
                 type: SQLValueType.JSONString,
                 nullable: false,
             }),
@@ -181,7 +181,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
                 nullable: false,
             }),
             email: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('details'), '$.value.email'),
+                expression: SQL.jsonExtract(SQL.column('details'), '$.value.email'),
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),
@@ -199,7 +199,7 @@ export const organizationFilterCompilers: SQLFilterDefinitions = {
             .join(
                 SQL.join(
                     SQL.jsonTable(
-                        SQL.jsonValue(SQL.column('innerOrganizations', 'meta'), '$.value.companies'),
+                        SQL.jsonExtract(SQL.column('innerOrganizations', 'meta'), '$.value.companies'),
                         'companies',
                     )
                         .addColumn(

@@ -1,4 +1,4 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { balanceItemPaymentsCompilers } from './balance-item-payments';
 
 /**
@@ -59,26 +59,26 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
     customer: {
         ...baseSQLFilterCompilers,
         email: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column('customer'), '$.value.email'),
+            expression: SQL.jsonExtract(SQL.column('customer'), '$.value.email'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
         firstName: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column('customer'), '$.value.firstName'),
+            expression: SQL.jsonExtract(SQL.column('customer'), '$.value.firstName'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
         lastName: createColumnFilter({
-            expression: SQL.jsonValue(SQL.column('customer'), '$.value.lastName'),
+            expression: SQL.jsonExtract(SQL.column('customer'), '$.value.lastName'),
             type: SQLValueType.JSONString,
             nullable: true,
         }),
         name: createColumnFilter({
             expression: new SQLCast(
                 new SQLConcat(
-                    new SQLJsonUnquote(SQL.jsonValue(SQL.column('customer'), '$.value.firstName')),
+                    new SQLJsonUnquote(SQL.jsonExtract(SQL.column('customer'), '$.value.firstName')),
                     new SQLScalar(' '),
-                    new SQLJsonUnquote(SQL.jsonValue(SQL.column('customer'), '$.value.lastName')),
+                    new SQLJsonUnquote(SQL.jsonExtract(SQL.column('customer'), '$.value.lastName')),
                 ),
                 'CHAR',
             ),
@@ -88,22 +88,22 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         company: {
             ...baseSQLFilterCompilers,
             name: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.name'),
+                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.name'),
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),
             VATNumber: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.VATNumber'),
+                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.VATNumber'),
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),
             companyNumber: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.companyNumber'),
+                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.companyNumber'),
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),
             administrationEmail: createColumnFilter({
-                expression: SQL.jsonValue(SQL.column('customer'), '$.value.company.administrationEmail'),
+                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.administrationEmail'),
                 type: SQLValueType.JSONString,
                 nullable: true,
             }),

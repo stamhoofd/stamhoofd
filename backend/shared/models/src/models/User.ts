@@ -123,7 +123,7 @@ export class User extends QueryableModel {
             .where('organizationId', null)
             .where('permissions', '!=', null)
             .where(
-                SQL.jsonValue(SQL.column('permissions'), '$.value.globalPermissions'),
+                SQL.jsonExtract(SQL.column('permissions'), '$.value.globalPermissions'),
                 '!=',
                 SQLJSONNull,
             )
@@ -148,8 +148,8 @@ export class User extends QueryableModel {
                 .where('organizationId', null)
                 .where('permissions', '!=', null)
                 .where(
-                    SQL.jsonValue(
-                        SQL.jsonValue(SQL.column('permissions'), '$.value.organizationPermissions'),
+                    SQL.jsonExtract(
+                        SQL.jsonExtract(SQL.column('permissions'), '$.value.organizationPermissions'),
                         '$."' + organizationId + '"',
                         true,
                     ),

@@ -71,7 +71,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('data'), '$.value.paymentMethod'),
+                column: SQL.jsonExtract(SQL.column('data'), '$.value.paymentMethod'),
                 direction,
             });
         },
@@ -82,7 +82,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('data'), '$.value.checkoutMethod.type'),
+                column: SQL.jsonExtract(SQL.column('data'), '$.value.checkoutMethod.type'),
                 direction,
             });
         },
@@ -93,7 +93,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.date'),
+                column: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.date'),
                 direction,
             });
         },
@@ -104,7 +104,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('data'), '$.value.timeSlot.endTime'),
+                column: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.endTime'),
                 direction,
             });
         },
@@ -126,7 +126,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('data'), '$.value.totalPrice'),
+                column: SQL.jsonExtract(SQL.column('data'), '$.value.totalPrice'),
                 direction,
             });
         },

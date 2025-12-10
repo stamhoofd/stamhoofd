@@ -8,7 +8,7 @@ export const documentFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     description: createColumnFilter({
-        expression: SQL.jsonValue(SQL.column('data'), '$.value.description'),
+        expression: SQL.jsonExtract(SQL.column('data'), '$.value.description'),
         type: SQLValueType.JSONString,
         nullable: false,
     }),
