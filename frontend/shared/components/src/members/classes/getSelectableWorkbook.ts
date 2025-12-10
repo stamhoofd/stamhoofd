@@ -125,6 +125,15 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                 ]
             : []),
 
+        organization
+            ? new SelectableColumn({
+                id: 'outstandingBalance',
+                name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
+                description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
+                enabled: false,
+            })
+            : null,
+
         // parents
         ...[1, 2].flatMap((parentNumber, parentIndex) => {
             const getId = (value: string) => `parent.${parentIndex}.${value}`;
