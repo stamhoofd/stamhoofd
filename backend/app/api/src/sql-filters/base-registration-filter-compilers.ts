@@ -3,6 +3,7 @@ import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJ
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { organizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
@@ -77,6 +78,11 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
         expression: SQL.column('pricePaid'),
         type: SQLValueType.Number,
         nullable: false,
+    }),
+    groupPrice: createColumnFilter({
+        expression: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
+        type: SQLValueType.String,
+        nullable: true,
     }),
     canRegister: createColumnFilter({
         expression: SQL.column('canRegister'),
