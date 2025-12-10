@@ -140,7 +140,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
 
         // group
         ...groupColumns,
-        ...((organization === null)
+        ...((organization === null || organization.id === platform.membershipOrganizationId)
             ? [
                     new SelectableColumn({
                         id: 'organization',

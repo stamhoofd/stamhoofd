@@ -95,7 +95,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
 
         // group
         ...(groupColumns ?? []),
-        ...((organization === null)
+        ...((organization === null || organization.id === platform.membershipOrganizationId)
             ? [
                     new SelectableColumn({
                         id: 'organization',
