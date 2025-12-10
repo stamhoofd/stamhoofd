@@ -1,13 +1,13 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQLDelete } from './SQLDelete';
-import { isSQLExpression, SQLExpression } from './SQLExpression';
-import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
-import { SQLInsert } from './SQLInsert';
-import { SQLJoin, SQLJoinType } from './SQLJoin';
-import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions';
-import { parseTable, SQLSelect } from './SQLSelect';
-import { SQLUpdate } from './SQLUpdate';
-import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere';
+import { SQLDelete } from './SQLDelete.js';
+import { isSQLExpression, SQLExpression } from './SQLExpression.js';
+import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
+import { SQLInsert } from './SQLInsert.js';
+import { SQLJoin, SQLJoinType } from './SQLJoin.js';
+import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions.js';
+import { parseTable, SQLSelect } from './SQLSelect.js';
+import { SQLUpdate } from './SQLUpdate.js';
+import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere.js';
 
 class StaticSQL {
     wildcard(namespace?: string) {
@@ -26,8 +26,16 @@ class StaticSQL {
         return new SQLJsonExtract(column, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
     }
 
+    jsonValue(column: SQLExpression, path: string, type?: SQLJsonValueType, asScalar = false): SQLJsonExtract {
+        return new SQLJsonValue(column, type, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
+    }
+
     jsonKeys(column: SQLExpression): SQLJsonKeys {
         return new SQLJsonKeys(column);
+    }
+
+    jsonType(column: SQLExpression): SQLJsonType {
+        return new SQLJsonType(column);
     }
 
     lpad(column: SQLExpression, length: number, value: string): SQLLpad {
@@ -99,6 +107,10 @@ class StaticSQL {
 
     if(...args: ConstructorParameters<typeof SQLIf>): SQLIf {
         return new SQLIf(...args);
+    }
+
+    coalesce(...args: ConstructorParameters<typeof SQLCoalesce>): SQLCoalesce {
+        return new SQLCoalesce(...args);
     }
 }
 

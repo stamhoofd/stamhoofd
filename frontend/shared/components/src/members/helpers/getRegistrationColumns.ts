@@ -158,10 +158,10 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     ].filter(column => column !== null);
 
     // do not show if only 1 price
-    if (!(group && group.settings.prices.length < 2)) {
+    if (!group || !(group && group.settings.prices.length < 2)) {
         allColumns.push(new Column<ObjectType, string>({
             id: 'groupPrice',
-            allowSorting: false,
+            allowSorting: true,
             name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
             getValue: registration => registration.groupPrice.name.toString(),
             minimumWidth: 100,
@@ -301,6 +301,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, Organization | undefined>({
                 id: 'organization',
+                // todo?
                 allowSorting: false,
                 name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
@@ -315,6 +316,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, Organization | undefined>({
                 id: 'uri',
+                // todo?
                 allowSorting: false,
                 name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
@@ -354,6 +356,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, Date | null>({
                 name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
+                // todo?
                 allowSorting: false,
                 getValue: (registration) => {
                     if (registration.trialUntil && registration.trialUntil > new Date()) {
@@ -377,6 +380,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date | null>({
             name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            // todo?
             allowSorting: false,
             getValue: (registration) => {
                 const startDate = registration.startDate;
@@ -398,6 +402,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         new Column<ObjectType, Date | null>({
             id: 'registeredAt',
             name: waitingList ? $t(`2a96fc1f-3710-4eae-bd01-b95ef8c2622b`) : $t(`8895f354-658f-48bd-9d5d-2e0203ca2a36`),
+            // todo?
             allowSorting: true,
             getValue: registration => registration.registeredAt,
             format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
@@ -411,6 +416,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, number>({
                 name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
+                // todo?
                 allowSorting: false,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
@@ -435,6 +441,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             new Column<ObjectType, number>({
                 name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
                 description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
+                // todo?
                 allowSorting: false,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
@@ -508,6 +515,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(...[
             new Column<ObjectType, string | null>({
                 id: 'group.defaultAgeGroup',
+                // todo?
                 allowSorting: false,
                 name: $t('aa592704-705f-47f8-97ed-805b46c87e40'),
                 getValue: (registration) => {
@@ -526,6 +534,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             }),
             new Column<ObjectType, Group>({
                 id: 'group.name',
+                // todo?
                 allowSorting: false,
                 name: $t('c3d036e9-60ec-48e1-85a8-e801dc305466'),
                 getValue: (registration) => {

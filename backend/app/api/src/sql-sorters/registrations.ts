@@ -3,6 +3,7 @@ import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamh
 import { MemberWithRegistrationsBlob, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { memberJoin } from '../sql-filters/registrations.js';
 
 export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob> = {
@@ -32,6 +33,15 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column('registeredAt'),
+                direction,
+            });
+        },
+    },
+    'groupPrice': {
+        getValue: registration => registration.groupPrice.name.toString(),
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
                 direction,
             });
         },
