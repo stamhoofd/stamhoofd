@@ -1,6 +1,6 @@
 import { Member } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
-import { RegistrationWithMemberBlob } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { memberJoin } from '../sql-filters/registrations.js';
@@ -49,6 +49,11 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         join: outstandingBalanceJoin,
         select: [SQL.column('cb', 'outstandingBalance')],
     },
+    'member.memberNumber': createMemberColumnSorter({
+        columnName: 'memberNumber',
+        getValue: member => member.details.memberNumber ?? '',
+
+    }),
     'member.firstName': {
         getValue(a) {
             return a.member.firstName;
@@ -89,3 +94,22 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         select: [SQL.column(Member.table, 'birthDay')],
     },
 };
+
+/**
+ * Helper function for simple sort on member column
+ * @param param0
+ * @returns
+ */
+function createMemberColumnSorter<T>({ columnName, getValue }: { columnName: string; getValue: (member: MemberWithRegistrationsBlob) => T }) {
+    return {
+        getValue: (registration: RegistrationWithMemberBlob) => getValue(registration.member),
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column(Member.table, columnName),
+                direction,
+            });
+        },
+        join: memberJoin,
+        select: [SQL.column(Member.table, columnName)],
+    };
+}
