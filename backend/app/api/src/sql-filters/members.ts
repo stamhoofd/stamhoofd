@@ -20,7 +20,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
     }),
     'memberNumber': createColumnFilter({
         expression: SQL.column(membersTable, 'memberNumber'),
-        type: SQLValueType.Number,
+        type: SQLValueType.String,
         nullable: true,
     }),
     'firstName': createColumnFilter({
