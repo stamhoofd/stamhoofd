@@ -300,9 +300,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (app === 'admin' || (group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration && auth.hasSomePlatformAccess())) {
         allColumns.push(
             new Column<ObjectType, Organization | undefined>({
-                id: 'organization',
-                // todo?
-                allowSorting: false,
+                id: 'organization.name',
+                allowSorting: true,
                 name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
                 format: organization => organization?.name ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),

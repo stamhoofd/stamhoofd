@@ -46,4 +46,28 @@ export class LimitedFilteredRequestHelper {
 
         return next;
     }
+
+    static fixInfiniteLoadingLoopWithTransform<R, T>({ request, results, sorters, transformer }: { request: LimitedFilteredRequest; results: R[]; sorters: SQLSortDefinitions<T>; transformer: (r: R) => T }): LimitedFilteredRequest | undefined {
+        let next: LimitedFilteredRequest | undefined;
+
+        if (results.length >= request.limit) {
+            const lastObject = transformer(results[results.length - 1]);
+            const nextFilter = getSortFilter(lastObject, sorters, request.sort);
+
+            next = new LimitedFilteredRequest({
+                filter: request.filter,
+                pageFilter: nextFilter,
+                sort: request.sort,
+                limit: request.limit,
+                search: request.search,
+            });
+
+            if (JSON.stringify(nextFilter) === JSON.stringify(request.pageFilter)) {
+                console.error('Found infinite loading loop for', request);
+                next = undefined;
+            }
+        }
+
+        return next;
+    }
 }

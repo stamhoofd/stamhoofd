@@ -1,12 +1,26 @@
-import { Member } from '@stamhoofd/models';
+import { Member, Organization } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
-import { MemberWithRegistrationsBlob, RegistrationWithMemberBlob } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
-import { memberJoin } from '../sql-filters/registrations.js';
+import { memberJoin, organizationJoin } from '../sql-filters/registrations.js';
 
-export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob> = {
+export class RegistrationSortData {
+    readonly registration: RegistrationWithMemberBlob;
+    private getOrganization: (registration: RegistrationWithMemberBlob) => OrganizationStruct;
+
+    constructor({ registration, getOrganization }: { registration: RegistrationWithMemberBlob; getOrganization: (registration: RegistrationWithMemberBlob) => OrganizationStruct }) {
+        this.registration = registration;
+        this.getOrganization = getOrganization;
+    }
+
+    get organization() {
+        return this.getOrganization(this.registration);
+    }
+}
+
+export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -16,8 +30,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
     'id': {
-        getValue(a) {
-            return a.id;
+        getValue({ registration }) {
+            return registration.id;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -27,8 +41,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         },
     },
     'registeredAt': {
-        getValue(a) {
-            return a.registeredAt;
+        getValue({ registration }) {
+            return registration.registeredAt;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -38,7 +52,7 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         },
     },
     'groupPrice': {
-        getValue: registration => registration.groupPrice.name.toString(),
+        getValue: ({ registration }) => registration.groupPrice.name.toString(),
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
@@ -47,8 +61,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         },
     },
     'cachedOutstandingBalanceForMember.value': {
-        getValue(a) {
-            return a.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
+        getValue({ registration }) {
+            return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -65,8 +79,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
 
     }),
     'member.firstName': {
-        getValue(a) {
-            return a.member.firstName;
+        getValue({ registration }) {
+            return registration.member.firstName;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -78,8 +92,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         select: [SQL.column(Member.table, 'firstName')],
     },
     'member.lastName': {
-        getValue(a) {
-            return a.member.lastName;
+        getValue({ registration }) {
+            return registration.member.lastName;
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -91,8 +105,8 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         select: [SQL.column(Member.table, 'lastName')],
     },
     'member.birthDay': {
-        getValue(a) {
-            return a.member.details.birthDay === null ? null : Formatter.dateIso(a.member.details.birthDay);
+        getValue({ registration }) {
+            return registration.member.details.birthDay === null ? null : Formatter.dateIso(registration.member.details.birthDay);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -103,6 +117,17 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
         join: memberJoin,
         select: [SQL.column(Member.table, 'birthDay')],
     },
+    'organization.name': {
+        getValue: ({ organization }) => organization.name,
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column(Organization.table, 'name'),
+                direction,
+            });
+        },
+        join: organizationJoin,
+        select: [SQL.column(Organization.table, 'name')],
+    },
 };
 
 /**
@@ -112,7 +137,7 @@ export const registrationSorters: SQLSortDefinitions<RegistrationWithMemberBlob>
  */
 function createMemberColumnSorter<T>({ columnName, getValue }: { columnName: string; getValue: (member: MemberWithRegistrationsBlob) => T }) {
     return {
-        getValue: (registration: RegistrationWithMemberBlob) => getValue(registration.member),
+        getValue: ({ registration }: RegistrationSortData) => getValue(registration.member),
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column(Member.table, columnName),
