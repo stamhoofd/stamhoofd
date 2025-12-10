@@ -16,7 +16,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 100,
             recommendedWidth: 150,
             grow: true,
-            allowSorting: false,
+            allowSorting: true,
             enabled: false,
         }),
 

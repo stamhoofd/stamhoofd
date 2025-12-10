@@ -22,6 +22,17 @@ export const memberSorters: SQLSortDefinitions<MemberWithRegistrations> = {
             });
         },
     },
+    memberNumber: {
+        getValue(a) {
+            return a.memberNumber;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('memberNumber'),
+                direction,
+            });
+        },
+    },
     firstName: {
         getValue(a) {
             return a.firstName;
