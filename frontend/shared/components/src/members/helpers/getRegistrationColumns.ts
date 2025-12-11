@@ -314,9 +314,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
         allColumns.push(
             new Column<ObjectType, Organization | undefined>({
-                id: 'uri',
-                // todo?
-                allowSorting: false,
+                id: 'organization.uri',
+                allowSorting: true,
                 name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
                 format: organization => organization?.uri ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
