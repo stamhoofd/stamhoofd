@@ -410,6 +410,19 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         }),
     );
 
+    allColumns.push(
+        new Column<ObjectType, Date>({
+            id: 'member.createdAt',
+            name: $t('Aanmaakdatum lid'),
+            allowSorting: true,
+            getValue: registration => registration.member.member.createdAt,
+            format: (v, width) => width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true)),
+            getStyle: v => v === null ? 'gray' : '',
+            minimumWidth: 80,
+            recommendedWidth: 220,
+        }),
+    );
+
     if (!waitingList && financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({

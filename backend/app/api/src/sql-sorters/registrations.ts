@@ -170,6 +170,19 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         join: memberJoin,
         select: [SQL.column(Member.table, 'birthDay')],
     },
+    'member.createdAt': {
+        getValue({ registration }) {
+            return registration.member.createdAt;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column(Member.table, 'createdAt'),
+                direction,
+            });
+        },
+        join: memberJoin,
+        select: [SQL.column(Member.table, 'createdAt')],
+    },
     'organization.name': {
         getValue: ({ organization }) => organization.name,
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
