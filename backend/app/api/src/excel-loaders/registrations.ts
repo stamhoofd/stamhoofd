@@ -113,6 +113,26 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 });
             },
         },
+        {
+            id: 'groupRegistration',
+            name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                let value: string;
+
+                if (registration.payingOrganizationId) {
+                    const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
+                    value = organization ? organization.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`);
+                }
+                else {
+                    value = $t(`b8b730fb-f1a3-4c13-8ec4-0aebe08a1449`);
+                }
+
+                return ({
+                    value,
+                });
+            },
+        },
         // option menu
         {
             match(id) {
