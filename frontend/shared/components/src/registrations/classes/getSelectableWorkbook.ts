@@ -1,6 +1,6 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AccessRight, FinancialSupportSettings, Group, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, Group, GroupType, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
     const groupColumns: SelectableColumn[] = [];
@@ -142,6 +142,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
             enabled: false,
         }),
+        groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
+            ? new SelectableColumn({
+                id: 'groupRegistration',
+                name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
+                enabled: false,
+            })
+            : null,
 
         // group
         ...groupColumns,
