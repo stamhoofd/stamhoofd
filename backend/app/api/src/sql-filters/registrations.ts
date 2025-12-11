@@ -1,5 +1,6 @@
 import { Group, Member, Organization, Registration } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { memberFilterCompilers } from './members.js';
 
@@ -31,9 +32,9 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
                 nullable: false,
             }),
             name: createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('groups', 'settings'), '$.value.name'),
-                type: SQLValueType.JSONString,
-                nullable: false,
+                expression: new SQLTranslatedString(SQL.column('groups', 'settings'), '$.value.name'),
+                type: SQLValueType.String,
+                nullable: true,
             }),
             status: createColumnFilter({
                 expression: SQL.column('groups', 'status'),

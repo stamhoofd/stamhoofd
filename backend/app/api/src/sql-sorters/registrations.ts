@@ -1,10 +1,10 @@
-import { Member, Organization } from '@stamhoofd/models';
+import { Group, Member, Organization } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
-import { memberJoin, organizationJoin } from '../sql-filters/registrations.js';
+import { groupJoin, memberJoin, organizationJoin } from '../sql-filters/registrations.js';
 
 export class RegistrationSortData {
     readonly registration: RegistrationWithMemberBlob;
@@ -165,6 +165,17 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: organizationJoin,
         select: [SQL.column(Organization.table, 'uri')],
+    },
+    'group.name': {
+        getValue: ({ registration }) => registration.group.settings.name.toString(),
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLTranslatedString(SQL.column(Group.table, 'settings'), '$.value.name'),
+                direction,
+            });
+        },
+        join: groupJoin,
+        // select: [SQL.column(Group.table, 'uri')],
     },
 };
 
