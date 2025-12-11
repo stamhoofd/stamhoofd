@@ -137,6 +137,11 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
             enabled: false,
         }), [AccessRight.MemberManageNRN]),
+        new SelectableColumn({
+            id: 'member.membership',
+            name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
+            enabled: false,
+        }),
 
         // group
         ...groupColumns,
