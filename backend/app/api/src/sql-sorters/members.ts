@@ -66,4 +66,15 @@ export const memberSorters: SQLSortDefinitions<MemberWithRegistrations> = {
             });
         },
     },
+    createdAt: {
+        getValue(a) {
+            return a.createdAt;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('createdAt'),
+                direction,
+            });
+        },
+    },
 };
