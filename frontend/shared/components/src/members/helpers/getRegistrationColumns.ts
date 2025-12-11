@@ -355,7 +355,6 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, Date | null>({
                 id: 'trialUntil',
-                // todo
                 name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
                 allowSorting: true,
                 getValue: (registration) => {

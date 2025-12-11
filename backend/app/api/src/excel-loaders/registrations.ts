@@ -146,6 +146,26 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 });
             },
         },
+        {
+            id: 'trialUntil',
+            name: $t(`Proefperiode`),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                let value: Date | null = null;
+                if (registration.trialUntil && registration.trialUntil > new Date()) {
+                    value = new Date(registration.trialUntil.getTime());
+                }
+
+                return {
+                    value,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.DateSlash,
+                        },
+                    },
+                };
+            },
+        },
         // option menu
         {
             match(id) {

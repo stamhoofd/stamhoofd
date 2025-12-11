@@ -149,7 +149,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                 enabled: false,
             })
             : null,
-
+        groups.some(group => group.settings.trialDays)
+            ? new SelectableColumn({
+                id: 'trialUntil',
+                name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
+                enabled: false,
+            })
+            : null,
         // group
         ...groupColumns,
         ...((organization === null || organization.id === platform.membershipOrganizationId)
