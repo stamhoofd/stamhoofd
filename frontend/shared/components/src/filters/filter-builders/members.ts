@@ -717,7 +717,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         all.push(
             new NumberFilterBuilder({
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
-                key: 'cachedOutstandingBalanceForMember.value',
+                key: 'cachedBalance.amountOpen',
                 type: NumberFilterFormat.Currency,
                 wrapFilter: (f: StamhoofdFilter) => {
                     return {
@@ -730,9 +730,9 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 },
                 unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
                     const value = (f as object)?.['registrations']?.['$elemMatch'];
-                    if (value?.['cachedOutstandingBalanceForMember.value']) {
+                    if (value?.['cachedBalance.amountOpen']) {
                         return {
-                            'cachedOutstandingBalanceForMember.value': value['cachedOutstandingBalanceForMember.value'],
+                            'cachedBalance.amountOpen': value['cachedBalance.amountOpen'],
                         };
                     }
                     return null;

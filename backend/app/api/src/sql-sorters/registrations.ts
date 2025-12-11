@@ -2,7 +2,7 @@ import { Group, Member, Organization } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { cachedBalanceGroupedJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { groupJoin, memberJoin, organizationJoin } from '../sql-filters/registrations.js';
 
@@ -87,18 +87,18 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
             });
         },
     },
-    'cachedOutstandingBalanceForMember.value': {
+    'cachedBalance.amountOpen': {
         getValue({ registration }) {
             return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('cb', 'outstandingBalance'),
+                column: SQL.column('cb', 'amountOpen'),
                 direction,
             });
         },
-        join: outstandingBalanceJoin,
-        select: [SQL.column('cb', 'outstandingBalance')],
+        join: cachedBalanceGroupedJoin,
+        select: [SQL.column('cb', 'amountOpen')],
     },
     'member.memberNumber': createMemberColumnSorter({
         columnName: 'memberNumber',
@@ -175,7 +175,6 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
             });
         },
         join: groupJoin,
-        // select: [SQL.column(Group.table, 'uri')],
     },
 };
 
