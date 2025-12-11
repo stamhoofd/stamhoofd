@@ -437,6 +437,21 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
         }),
     );
 
+    allColumns.push(
+        new Column<ObjectType, Date>({
+            id: 'createdAt',
+            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            allowSorting: true,
+            getValue: (v) => {
+                return v.member.createdAt;
+            },
+            format: (v, width) => width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true)),
+            getStyle: v => v === null ? 'gray' : '',
+            minimumWidth: 80,
+            recommendedWidth: 220,
+        }),
+    );
+
     if (!waitingList && financialRead && groups.length > 0) {
         allColumns.push(
             new Column<ObjectType, number>({
