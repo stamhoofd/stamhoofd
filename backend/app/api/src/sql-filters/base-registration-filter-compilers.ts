@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
-import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { cachedBalanceGroupedJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { organizationFilterCompilers } from './organizations.js';
 
@@ -167,11 +167,11 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             ),
         organizationFilterCompilers,
     ),
-    cachedOutstandingBalanceForMember: createJoinedRelationFilter(
-        outstandingBalanceJoin,
+    cachedBalance: createJoinedRelationFilter(
+        cachedBalanceGroupedJoin,
         {
-            value: createColumnFilter({
-                expression: new SQLIfNull(SQL.column('cb', 'outstandingBalance'), 0),
+            amountOpen: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('cb', 'amountOpen'), 0),
                 type: SQLValueType.Number,
                 nullable: false,
             }),

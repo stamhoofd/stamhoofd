@@ -463,7 +463,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (organization !== null) {
         allColumns.push(
             new Column<ObjectType, number>({
-                id: 'cachedOutstandingBalanceForMember.value',
+                id: 'cachedBalance.amountOpen',
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
                 description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
                 allowSorting: true,
