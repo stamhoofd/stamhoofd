@@ -353,9 +353,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (groups.find(g => g.settings.trialDays)) {
         allColumns.push(
             new Column<ObjectType, Date | null>({
+                id: 'trialUntil',
                 name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
-                // todo?
-                allowSorting: false,
+                allowSorting: true,
                 getValue: (registration) => {
                     if (registration.trialUntil && registration.trialUntil > new Date()) {
                         return new Date(registration.trialUntil.getTime());

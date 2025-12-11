@@ -65,6 +65,17 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
             });
         },
     },
+    'trialUntil': {
+        getValue({ registration }) {
+            return registration.trialUntil;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('trialUntil'),
+                direction,
+            });
+        },
+    },
     'cachedOutstandingBalanceForMember.value': {
         getValue({ registration }) {
             return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
