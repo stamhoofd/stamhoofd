@@ -187,6 +187,11 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`Prijs`),
         }),
         new SelectableColumn({
+            id: 'toPay',
+            name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+            description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
+        }),
+        new SelectableColumn({
             id: 'registeredAt',
             name: $t(`Inschrijvingsdatum`),
             enabled: false,
