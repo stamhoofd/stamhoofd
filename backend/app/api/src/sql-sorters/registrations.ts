@@ -8,15 +8,20 @@ import { memberJoin, organizationJoin } from '../sql-filters/registrations.js';
 
 export class RegistrationSortData {
     readonly registration: RegistrationWithMemberBlob;
-    private getOrganization: (registration: RegistrationWithMemberBlob) => OrganizationStruct;
+    private organizations: OrganizationStruct[];
 
-    constructor({ registration, getOrganization }: { registration: RegistrationWithMemberBlob; getOrganization: (registration: RegistrationWithMemberBlob) => OrganizationStruct }) {
+    constructor({ registration, organizations }: { registration: RegistrationWithMemberBlob; organizations: OrganizationStruct[] }) {
         this.registration = registration;
-        this.getOrganization = getOrganization;
+        this.organizations = organizations;
     }
 
     get organization() {
-        return this.getOrganization(this.registration);
+        const organization = this.organizations.find(o => o.id === this.registration.organizationId);
+        if (!organization) {
+            throw new Error('Organization not found for registration');
+        }
+
+        return organization;
     }
 }
 
@@ -127,6 +132,17 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
         },
         join: organizationJoin,
         select: [SQL.column(Organization.table, 'name')],
+    },
+    'organization.uri': {
+        getValue: ({ organization }) => organization.uri,
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column(Organization.table, 'uri'),
+                direction,
+            });
+        },
+        join: organizationJoin,
+        select: [SQL.column(Organization.table, 'uri')],
     },
 };
 

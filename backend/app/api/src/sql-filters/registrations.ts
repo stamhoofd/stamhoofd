@@ -60,6 +60,11 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
                 type: SQLValueType.String,
                 nullable: false,
             }),
+            uri: createColumnFilter({
+                expression: SQL.column('organizations', 'uri'),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
         },
     ),
 };

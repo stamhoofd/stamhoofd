@@ -238,7 +238,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             results: registrationsBlob.registrations,
             transformer: registration => new RegistrationSortData({
                 registration,
-                getOrganization: registration => registrationsBlob.organizations.find(o => o.id === registration.organizationId)!,
+                organizations: registrationsBlob.organizations,
             }),
             sorters,
         });
