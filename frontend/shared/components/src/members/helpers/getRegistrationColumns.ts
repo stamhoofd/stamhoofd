@@ -412,9 +412,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (!waitingList && financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({
+                id: 'registrationCachedBalance.price',
                 name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
-                // todo?
-                allowSorting: false,
+                allowSorting: true,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
                 },
@@ -436,10 +436,10 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
         allColumns.push(
             new Column<ObjectType, number>({
+                id: 'registrationCachedBalance.toPay',
                 name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
                 description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
-                // todo?
-                allowSorting: false,
+                allowSorting: true,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
                 },
@@ -463,7 +463,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (organization !== null) {
         allColumns.push(
             new Column<ObjectType, number>({
-                id: 'cachedBalance.amountOpen',
+                id: 'memberCachedBalance.amountOpen',
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
                 description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
                 allowSorting: true,

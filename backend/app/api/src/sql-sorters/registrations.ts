@@ -1,8 +1,8 @@
 import { Group, Member, Organization } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
+import { SQL, SQLIfNull, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { MemberWithRegistrationsBlob, Organization as OrganizationStruct, RegistrationWithMemberBlob } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { cachedBalanceGroupedJoin } from '../helpers/outstandingBalanceJoin.js';
+import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { groupJoin, memberJoin, organizationJoin } from '../sql-filters/registrations.js';
 
@@ -87,18 +87,44 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
             });
         },
     },
-    'cachedBalance.amountOpen': {
+    'memberCachedBalance.amountOpen': {
         getValue({ registration }) {
             return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('cb', 'amountOpen'),
+                column: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
                 direction,
             });
         },
-        join: cachedBalanceGroupedJoin,
-        select: [SQL.column('cb', 'amountOpen')],
+        join: memberCachedBalanceForOrganizationJoin,
+        select: [SQL.column('memberCachedBalance', 'amountOpen')],
+    },
+    'registrationCachedBalance.toPay': {
+        getValue({ registration }) {
+            return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLIfNull(SQL.column('registrationCachedBalance', 'toPay'), 0),
+                direction,
+            });
+        },
+        join: registrationCachedBalanceJoin,
+        select: [SQL.column('registrationCachedBalance', 'toPay')],
+    },
+    'registrationCachedBalance.price': {
+        getValue({ registration }) {
+            return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: new SQLIfNull(SQL.column('registrationCachedBalance', 'price'), 0),
+                direction,
+            });
+        },
+        join: registrationCachedBalanceJoin,
+        select: [SQL.column('registrationCachedBalance', 'price')],
     },
     'member.memberNumber': createMemberColumnSorter({
         columnName: 'memberNumber',
