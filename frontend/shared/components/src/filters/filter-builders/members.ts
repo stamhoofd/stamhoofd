@@ -562,6 +562,11 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         );
     }
 
+    all.push(new DateFilterBuilder({
+        key: 'createdAt',
+        name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+    }));
+
     const currentPeriodId = STAMHOOFD.userMode === 'platform' ? platform.period.id : organization.value?.period.period.id;
 
     if (currentPeriodId) {
