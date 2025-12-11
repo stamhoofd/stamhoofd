@@ -128,6 +128,11 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                 enabled: false,
             })
             : null,
+        new SelectableColumn({
+            id: 'createdAt',
+            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            enabled: false,
+        }),
 
         // parents
         ...[1, 2].flatMap((parentNumber, parentIndex) => {
