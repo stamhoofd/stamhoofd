@@ -47,6 +47,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 120,
             enabled: false,
         }),
+        // todo
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'member.membership',
             name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
@@ -97,7 +98,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
                 id: 'member.continuousMembership',
-                name: 'Doorlopende aansluiting',
+                name: $t('Doorlopende aansluiting'),
                 getValue: registration => registration.member.getContinuousMembershipStatus(dateRange!),
                 format: (status) => {
                     switch (status) {
@@ -333,6 +334,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             new Column<ObjectType, string | null>({
                 id: 'groupRegistration',
                 allowSorting: false,
+                // todo
                 name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
                 getValue: (registration) => {
                     if (registration.payingOrganizationId) {
@@ -354,6 +356,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(
             new Column<ObjectType, Date | null>({
                 id: 'trialUntil',
+                // todo
                 name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
                 allowSorting: true,
                 getValue: (registration) => {
@@ -378,6 +381,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'startDate',
+            // todo
             name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
             allowSorting: true,
             getValue: (registration) => {
