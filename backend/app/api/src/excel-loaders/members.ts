@@ -286,6 +286,19 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
             },
 
         },
+        {
+            id: 'createdAt',
+            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            width: 20,
+            getValue: v => ({
+                value: v.member.createdAt,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
+        },
 
         // Registration records
         {
