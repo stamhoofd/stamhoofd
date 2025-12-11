@@ -208,6 +208,11 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`Inschrijvingsdatum`),
             enabled: false,
         }),
+        new SelectableColumn({
+            id: 'startDate',
+            name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            enabled: false,
+        }),
         // id of registration
         new SelectableColumn({
             id: 'id',
