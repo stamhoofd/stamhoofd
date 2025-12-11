@@ -334,7 +334,6 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             new Column<ObjectType, string | null>({
                 id: 'groupRegistration',
                 allowSorting: false,
-                // todo
                 name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
                 getValue: (registration) => {
                     if (registration.payingOrganizationId) {
@@ -381,7 +380,6 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'startDate',
-            // todo
             name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
             allowSorting: true,
             getValue: (registration) => {
