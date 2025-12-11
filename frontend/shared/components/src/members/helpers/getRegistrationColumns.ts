@@ -377,9 +377,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
+            id: 'startDate',
             name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
-            // todo?
-            allowSorting: false,
+            allowSorting: true,
             getValue: (registration) => {
                 const startDate = registration.startDate;
                 if (startDate === null) {
