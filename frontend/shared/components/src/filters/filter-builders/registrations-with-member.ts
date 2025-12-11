@@ -62,7 +62,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
         }
         else {
             all.push(new NumberFilterBuilder({
-                key: 'cachedBalance.amountOpen',
+                key: 'memberCachedBalance.amountOpen',
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
                 type: NumberFilterFormat.Currency,
             }));

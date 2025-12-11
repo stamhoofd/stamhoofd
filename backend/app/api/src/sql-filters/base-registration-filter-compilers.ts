@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
-import { cachedBalanceGroupedJoin } from '../helpers/outstandingBalanceJoin.js';
+import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { organizationFilterCompilers } from './organizations.js';
 
@@ -167,11 +167,26 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             ),
         organizationFilterCompilers,
     ),
-    cachedBalance: createJoinedRelationFilter(
-        cachedBalanceGroupedJoin,
+    memberCachedBalance: createJoinedRelationFilter(
+        memberCachedBalanceForOrganizationJoin,
         {
             amountOpen: createColumnFilter({
-                expression: new SQLIfNull(SQL.column('cb', 'amountOpen'), 0),
+                expression: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+        },
+    ),
+    registrationCachedBalance: createJoinedRelationFilter(
+        registrationCachedBalanceJoin,
+        {
+            toPay: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('registrationCachedBalance', 'toPay'), 0),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            price: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('registrationCachedBalance', 'price'), 0),
                 type: SQLValueType.Number,
                 nullable: false,
             }),
