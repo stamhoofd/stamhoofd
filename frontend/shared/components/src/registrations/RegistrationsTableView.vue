@@ -50,7 +50,9 @@ const props = withDefaults(
 
 const waitingList = computed(() => props.group && props.group.type === GroupType.WaitingList);
 
-const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders();
+const { filterBuilders, loading } = useAdvancedRegistrationWithMemberUIFilterBuilders({
+    multipleGroups: props.organization === null || props.category !== null,
+});
 
 const title = computed(() => {
     if (props.customTitle) {

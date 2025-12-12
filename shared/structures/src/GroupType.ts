@@ -16,3 +16,14 @@ export enum GroupType {
     // idea: EventPreRegistration = "EventPreRegistration", // let know in advance that you want to join
     // idea: EventAttendance = "EventAttendance", // attendance list for an event, by admins only
 }
+
+export function getGroupTypeName(type: GroupType) {
+    switch (type) {
+        case GroupType.Membership:
+            return $t('Inschrijvingsgroep');
+        case GroupType.WaitingList:
+            return $t('Wachtlijst');
+        case GroupType.EventRegistration:
+            return $t('Activiteit');
+    }
+}
