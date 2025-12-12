@@ -132,8 +132,8 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
                 new MultipleChoiceFilterBuilder({
                     name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
                     options: [
-                        new MultipleChoiceUIFilterOption($t(`fd0de77c-fa11-465b-9a6e-27a766a54efc`), null),
                         ...$platform.value.config.defaultAgeGroups.filter(defaultAgeGroup => organization.value !== null ? defaultAgeGroup.isEnabledForTags(allTags) : true).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
+                        new MultipleChoiceUIFilterOption($t(`fd0de77c-fa11-465b-9a6e-27a766a54efc`), null),
                     ],
                     wrapper: {
                         defaultAgeGroupId: {
