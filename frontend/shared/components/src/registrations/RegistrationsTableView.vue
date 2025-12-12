@@ -90,10 +90,12 @@ function getDefaultFilter(): StamhoofdFilter {
         }
         else {
             let filter: StamhoofdFilter = {
-                $not: {
-                    group: {
-                        defaultAgeGroupId: {
-                            $in: [null],
+                group: {
+                    $elemMatch: {
+                        $not: {
+                            defaultAgeGroupId: {
+                                $in: [null],
+                            },
                         },
                     },
                 },
