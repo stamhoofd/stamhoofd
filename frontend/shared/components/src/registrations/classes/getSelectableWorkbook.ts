@@ -184,6 +184,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
                         enabled: false,
                     }),
+                    groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
+                        ? new SelectableColumn({
+                            id: 'group.type',
+                            name: $t('Type'),
+                            enabled: false,
+                        })
+                        : null,
                 ]
             : [],
         // will always be 0 if organization is null
