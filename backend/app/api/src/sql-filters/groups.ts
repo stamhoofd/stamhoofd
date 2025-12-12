@@ -1,4 +1,5 @@
 import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLFilterDefinitions, SQLJsonExtract, SQLValueType } from '@stamhoofd/sql';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
 export const groupFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -18,9 +19,9 @@ export const groupFilterCompilers: SQLFilterDefinitions = {
         nullable: false,
     }),
     name: createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('settings'), '$.value.name'),
-        type: SQLValueType.JSONString,
-        nullable: false,
+        expression: new SQLTranslatedString(SQL.column('settings'), '$.value.name'),
+        type: SQLValueType.String,
+        nullable: true,
     }),
     status: createColumnFilter({
         expression: SQL.column('status'),
