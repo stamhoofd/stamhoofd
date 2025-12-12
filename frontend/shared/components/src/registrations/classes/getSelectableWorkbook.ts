@@ -172,7 +172,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
                 ]
             : []),
-        ...organization === null || groups.length > 0
+        ...organization === null || groups.length > 1
             ? [
                     new SelectableColumn({
                         id: 'defaultAgeGroup',
