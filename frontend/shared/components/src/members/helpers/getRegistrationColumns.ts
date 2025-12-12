@@ -1,12 +1,12 @@
 import { Column } from '@stamhoofd/components';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { AppType, ContinuousMembershipStatus, getGroupTypeName, Group, GroupCategoryTree, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
 
 export function getRegistrationColumns({ organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
-    const allColumns: Column<ObjectType, any>[] = [
+    const allColumns: (Column<ObjectType, any> | null)[] = [
         new Column<ObjectType, string>({
             id: 'member.memberNumber',
             name: '#',
@@ -156,7 +156,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 200,
             enabled: false,
         }),
-    ].filter(column => column !== null);
+    ];
 
     // do not show if only 1 price
     if (!group || !(group && group.settings.prices.length < 2)) {
@@ -557,6 +557,22 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 recommendedWidth: 300,
                 enabled: !group,
             }),
+            groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
+                ? new Column<ObjectType, GroupType>({
+                    id: 'group.type',
+                    allowSorting: false,
+                    name: $t('Type'),
+                    getValue: (registration) => {
+                        return registration.group.type;
+                    },
+                    format: (type) => {
+                        return getGroupTypeName(type);
+                    },
+                    minimumWidth: 100,
+                    recommendedWidth: 200,
+                    enabled: false,
+                })
+                : null,
         ]);
     }
 

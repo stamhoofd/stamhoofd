@@ -1,6 +1,6 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import { ExcelExportType, LimitedFilteredRequest, PlatformMember, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, getGroupTypeName, LimitedFilteredRequest, PlatformMember, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
@@ -323,6 +323,16 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 }
                 return {
                     value: PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`),
+                };
+            },
+        },
+        {
+            id: 'group.type',
+            name: $t('Type'),
+            width: 20,
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: getGroupTypeName(registration.group.type),
                 };
             },
         },
