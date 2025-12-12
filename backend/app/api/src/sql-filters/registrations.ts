@@ -3,6 +3,7 @@ import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter,
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { memberFilterCompilers } from './members.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 
@@ -55,17 +56,6 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
     ),
     organization: createJoinedRelationFilter(
         organizationJoin,
-        {
-            name: createColumnFilter({
-                expression: SQL.column('organizations', 'name'),
-                type: SQLValueType.String,
-                nullable: false,
-            }),
-            uri: createColumnFilter({
-                expression: SQL.column('organizations', 'uri'),
-                type: SQLValueType.String,
-                nullable: false,
-            }),
-        },
+        organizationFilterCompilers,
     ),
 };

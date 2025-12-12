@@ -9,6 +9,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
+import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
 export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
@@ -19,6 +20,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
 
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
+    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const organization = useOrganization();
 
@@ -89,6 +91,21 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                     },
                 },
             }));
+
+        if (organization.value === null) {
+            all.push(
+                new GroupUIFilterBuilder({
+                    name: $t('Bijhorende organisatie'),
+                    description: $t('Filter op organisatie waarvoor is ingeschreven'),
+                    builders: getOrganizationUIFilterBuilders(auth.user),
+                    wrapper: {
+                        organization: {
+                            $elemMatch: FilterWrapperMarker,
+                        },
+                    },
+                }),
+            );
+        }
 
         all.unshift(
             new GroupUIFilterBuilder({
