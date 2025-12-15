@@ -1,6 +1,6 @@
 import { SelectableColumn, SelectableSheet, SelectableWorkbook } from '@stamhoofd/frontend-excel-export';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AccessRight, FinancialSupportSettings, Group, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
+import { AccessRight, FinancialSupportSettings, Group, GroupType, Organization, Platform, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
     const groupColumns: SelectableColumn[] = [];
@@ -137,7 +137,25 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`439176a5-dd35-476b-8c65-3216560cac2f`),
             enabled: false,
         }), [AccessRight.MemberManageNRN]),
-
+        new SelectableColumn({
+            id: 'member.membership',
+            name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
+            enabled: false,
+        }),
+        groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
+            ? new SelectableColumn({
+                id: 'groupRegistration',
+                name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
+                enabled: false,
+            })
+            : null,
+        groups.some(group => group.settings.trialDays)
+            ? new SelectableColumn({
+                id: 'trialUntil',
+                name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
+                enabled: false,
+            })
+            : null,
         // group
         ...groupColumns,
         ...((organization === null || organization.id === platform.membershipOrganizationId)
@@ -154,7 +172,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
                 ]
             : []),
-        ...organization === null || groups.length > 0
+        ...organization === null || groups.length > 1
             ? [
                     new SelectableColumn({
                         id: 'defaultAgeGroup',
@@ -166,6 +184,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                         name: $t(`fb629dba-088e-4c97-b201-49787bcda0ac`),
                         enabled: false,
                     }),
+                    groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
+                        ? new SelectableColumn({
+                            id: 'group.type',
+                            name: $t('Type'),
+                            enabled: false,
+                        })
+                        : null,
                 ]
             : [],
         // will always be 0 if organization is null
@@ -187,8 +212,23 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`Prijs`),
         }),
         new SelectableColumn({
+            id: 'toPay',
+            name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+            description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
+        }),
+        new SelectableColumn({
             id: 'registeredAt',
             name: $t(`Inschrijvingsdatum`),
+            enabled: false,
+        }),
+        new SelectableColumn({
+            id: 'startDate',
+            name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            enabled: false,
+        }),
+        new SelectableColumn({
+            id: 'createdAt',
+            name: $t('Aanmaakdatum lid'),
             enabled: false,
         }),
         // id of registration

@@ -1,0 +1,377 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SQLTranslatedStringHelper Different languages should select the correct value for comparison EN: SQL Query for filter: {"settings:name":"juist"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "juist",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Different languages should select the correct value for comparison EN: SQL Query for not match filter: {"settings:name":"fout"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "fout",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Different languages should select the correct value for comparison FR: SQL Query for filter: {"settings:name":"juist"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "juist",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Different languages should select the correct value for comparison FR: SQL Query for not match filter: {"settings:name":"fout"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "fout",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Different languages should select the correct value for comparison NL: SQL Query for filter: {"settings:name":"juist"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "juist",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Different languages should select the correct value for comparison NL: SQL Query for not match filter: {"settings:name":"fout"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "fout",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Empty json value should not match filter: SQL Query for not match filter: {"settings:name":""} 1`] = `
+{
+  "params": [
+    "STRING",
+    "",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Empty json value should not match filter: SQL Query for not match filter: {"settings:name":"test"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Missing language value should select the next language value in order for comparison EN: SQL Query for filter: {"settings:name":"juist"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "juist",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Missing language value should select the next language value in order for comparison EN: SQL Query for not match filter: {"settings:name":"fout"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "fout",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Missing language value should select the next language value in order for comparison FR: SQL Query for filter: {"settings:name":"juist"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "juist",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Missing language value should select the next language value in order for comparison FR: SQL Query for not match filter: {"settings:name":"fout"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "fout",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Missing language value should select the next language value in order for comparison NL: SQL Query for filter: {"settings:name":"juist"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "juist",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper Missing language value should select the next language value in order for comparison NL: SQL Query for not match filter: {"settings:name":"fout"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "fout",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is case insensitive: SQL Query for filter: {"settings:name":"ALICE"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is case insensitive: SQL Query for filter: {"settings:name":"Alice"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is case insensitive: SQL Query for filter: {"settings:name":"alICe"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is case insensitive: SQL Query for filter: {"settings:name":"alice"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"settings:name":"alic"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alic",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Comparing string values is case insensitive: SQL Query for not match filter: {"settings:name":"b"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "b",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string and TranslatedString value: SQL Query for filter: {"settings:name":"ALICE"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string and TranslatedString value: SQL Query for filter: {"settings:name":"Alice"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string and TranslatedString value: SQL Query for filter: {"settings:name":"alICe"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string and TranslatedString value: SQL Query for filter: {"settings:name":"alice"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alice",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string and TranslatedString value: SQL Query for not match filter: {"settings:name":"alic"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "alic",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter matches both string and TranslatedString value: SQL Query for not match filter: {"settings:name":"b"} 1`] = `
+{
+  "params": [
+    "STRING",
+    "b",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <=> ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for filter: {"settings:name":{"$gt":"test a"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test a",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) > ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for filter: {"settings:name":{"$gte":"test b"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test b",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) >= ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for filter: {"settings:name":{"$lt":"test c"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test c",
+    "STRING",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for filter: {"settings:name":{"$lte":"test b"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test b",
+    "STRING",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <= ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$gt":"test b"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test b",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) > ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$gt":"test c"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test c",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) > ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$gte":"test c"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test c",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) >= ?",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$lt":"test a"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test a",
+    "STRING",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$lt":"test b"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test b",
+    "STRING",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$lt":"test b"}} 2`] = `
+{
+  "params": [
+    "STRING",
+    "test b",
+    "STRING",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) < ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+}
+`;
+
+exports[`SQLTranslatedStringHelper MySQL behaviour Filter on gt, gte, lt and lte works: SQL Query for not match filter: {"settings:name":{"$lte":"test a"}} 1`] = `
+{
+  "params": [
+    "STRING",
+    "test a",
+    "STRING",
+  ],
+  "query": "SELECT \`test_table\`.* FROM \`test_table\` WHERE IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) <= ? OR IF(JSON_TYPE(JSON_EXTRACT(\`test_table\`.\`settings\`,"$.name")) = ?,JSON_VALUE(\`test_table\`.\`settings\`,"$.name" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR),COALESCE(JSON_VALUE(\`test_table\`.\`settings\`,"$.name.nl" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.en" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR), JSON_VALUE(\`test_table\`.\`settings\`,"$.name.fr" RETURNING CHAR CHARACTER SET utf8mb4 ERROR ON ERROR))) IS NULL",
+}
+`;

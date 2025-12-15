@@ -6,6 +6,7 @@ export * from './UIFilter';
 export * from './NumberUIFilter';
 export * from './SimpleNumberUIFilter';
 export * from './filterBuilders';
+export * from './filter-builders';
 
 export { default as PropertyFilterInput } from './PropertyFilterInput.vue';
 export { default as PropertyFilterView } from './PropertyFilterView.vue';

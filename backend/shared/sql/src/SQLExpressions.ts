@@ -554,3 +554,19 @@ export class SQLIf implements SQLExpression {
         ]);
     }
 }
+
+export class SQLCoalesce implements SQLExpression {
+    expressions: SQLExpression[] = [];
+
+    constructor(...expressions: SQLExpression[]) {
+        this.expressions = expressions;
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            'COALESCE(',
+            joinSQLQuery(this.expressions.map(e => e.getSQL(options)), ', '),
+            ')',
+        ]);
+    }
+}

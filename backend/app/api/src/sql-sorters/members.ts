@@ -22,6 +22,17 @@ export const memberSorters: SQLSortDefinitions<MemberWithRegistrations> = {
             });
         },
     },
+    memberNumber: {
+        getValue(a) {
+            return a.memberNumber;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('memberNumber'),
+                direction,
+            });
+        },
+    },
     firstName: {
         getValue(a) {
             return a.firstName;
@@ -51,6 +62,17 @@ export const memberSorters: SQLSortDefinitions<MemberWithRegistrations> = {
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
                 column: SQL.column('birthDay'),
+                direction,
+            });
+        },
+    },
+    createdAt: {
+        getValue(a) {
+            return a.createdAt;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('createdAt'),
                 direction,
             });
         },

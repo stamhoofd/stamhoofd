@@ -1,11 +1,15 @@
-import { Group, Member, Registration } from '@stamhoofd/models';
+import { Group, Member, Organization, Registration } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { memberFilterCompilers } from './members.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const memberJoin = SQL.join(Member.table).where(SQL.column(Member.table, 'id'), SQL.column(Registration.table, 'memberId'));
 
 export const groupJoin = SQL.join(Group.table).where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId'));
+
+export const organizationJoin = SQL.join(Organization.table).where(SQL.column(Organization.table, 'id'), SQL.column(Registration.table, 'organizationId'));
 
 export const registrationFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -29,9 +33,9 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
                 nullable: false,
             }),
             name: createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('groups', 'settings'), '$.value.name'),
-                type: SQLValueType.JSONString,
-                nullable: false,
+                expression: new SQLTranslatedString(SQL.column('groups', 'settings'), '$.value.name'),
+                type: SQLValueType.String,
+                nullable: true,
             }),
             status: createColumnFilter({
                 expression: SQL.column('groups', 'status'),
@@ -49,5 +53,9 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
                 nullable: true,
             }),
         },
+    ),
+    organization: createJoinedRelationFilter(
+        organizationJoin,
+        organizationFilterCompilers,
     ),
 };

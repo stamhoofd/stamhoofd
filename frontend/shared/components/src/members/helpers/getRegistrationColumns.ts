@@ -1,12 +1,12 @@
 import { Column } from '@stamhoofd/components';
 import { ContextPermissions } from '@stamhoofd/networking';
-import { AppType, ContinuousMembershipStatus, Group, GroupCategoryTree, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
+import { AppType, ContinuousMembershipStatus, getGroupTypeName, Group, GroupCategoryTree, GroupType, MembershipStatus, Organization, PermissionLevel, Platform, PlatformRegistration, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformRegistration;
 
 export function getRegistrationColumns({ organization, dateRange, group, groups, filterPeriodId, auth, category, app, waitingList, financialRead }: { organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
-    const allColumns: Column<ObjectType, any>[] = [
+    const allColumns: (Column<ObjectType, any> | null)[] = [
         new Column<ObjectType, string>({
             id: 'member.memberNumber',
             name: '#',
@@ -16,7 +16,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             minimumWidth: 100,
             recommendedWidth: 150,
             grow: true,
-            allowSorting: false,
+            allowSorting: true,
             enabled: false,
         }),
 
@@ -47,6 +47,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 120,
             enabled: false,
         }),
+        // todo
         new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
             id: 'member.membership',
             name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
@@ -97,7 +98,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
                 id: 'member.continuousMembership',
-                name: 'Doorlopende aansluiting',
+                name: $t('Doorlopende aansluiting'),
                 getValue: registration => registration.member.getContinuousMembershipStatus(dateRange!),
                 format: (status) => {
                     switch (status) {
@@ -155,13 +156,13 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             recommendedWidth: 200,
             enabled: false,
         }),
-    ].filter(column => column !== null);
+    ];
 
     // do not show if only 1 price
-    if (!(group && group.settings.prices.length < 2)) {
+    if (!group || !(group && group.settings.prices.length < 2)) {
         allColumns.push(new Column<ObjectType, string>({
             id: 'groupPrice',
-            allowSorting: false,
+            allowSorting: true,
             name: $t('a5ecc2e0-c1f2-4cfb-b4b2-8a17782787bc'),
             getValue: registration => registration.groupPrice.name.toString(),
             minimumWidth: 100,
@@ -300,8 +301,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (app === 'admin' || (group && group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration && auth.hasSomePlatformAccess())) {
         allColumns.push(
             new Column<ObjectType, Organization | undefined>({
-                id: 'organization',
-                allowSorting: false,
+                id: 'organization.name',
+                allowSorting: true,
                 name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
                 format: organization => organization?.name ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
@@ -314,8 +315,8 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
         allColumns.push(
             new Column<ObjectType, Organization | undefined>({
-                id: 'uri',
-                allowSorting: false,
+                id: 'organization.uri',
+                allowSorting: true,
                 name: $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
                 getValue: registration => registration.member.family.getOrganization(registration.group.organizationId),
                 format: organization => organization?.uri ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
@@ -353,8 +354,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (groups.find(g => g.settings.trialDays)) {
         allColumns.push(
             new Column<ObjectType, Date | null>({
+                id: 'trialUntil',
                 name: $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`),
-                allowSorting: false,
+                allowSorting: true,
                 getValue: (registration) => {
                     if (registration.trialUntil && registration.trialUntil > new Date()) {
                         return new Date(registration.trialUntil.getTime());
@@ -376,8 +378,9 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
+            id: 'startDate',
             name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
-            allowSorting: false,
+            allowSorting: true,
             getValue: (registration) => {
                 const startDate = registration.startDate;
                 if (startDate === null) {
@@ -407,11 +410,25 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         }),
     );
 
+    allColumns.push(
+        new Column<ObjectType, Date>({
+            id: 'member.createdAt',
+            name: $t('Aanmaakdatum lid'),
+            allowSorting: true,
+            getValue: registration => registration.member.member.createdAt,
+            format: (v, width) => width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true)),
+            getStyle: v => v === null ? 'gray' : '',
+            minimumWidth: 80,
+            recommendedWidth: 220,
+        }),
+    );
+
     if (!waitingList && financialRead) {
         allColumns.push(
             new Column<ObjectType, number>({
+                id: 'registrationCachedBalance.price',
                 name: $t(`6f3104d4-9b8f-4946-8434-77202efae9f0`),
-                allowSorting: false,
+                allowSorting: true,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
                 },
@@ -433,9 +450,10 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
 
         allColumns.push(
             new Column<ObjectType, number>({
+                id: 'registrationCachedBalance.toPay',
                 name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
                 description: $t('7a8d174e-2807-4ada-ad94-6f519edc9c14'),
-                allowSorting: false,
+                allowSorting: true,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0);
                 },
@@ -459,7 +477,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     if (organization !== null) {
         allColumns.push(
             new Column<ObjectType, number>({
-                id: 'cachedOutstandingBalanceForMember.value',
+                id: 'memberCachedBalance.amountOpen',
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
                 description: $t('6c5de33a-dbbd-4b9c-866d-104e007836b3'),
                 allowSorting: true,
@@ -508,6 +526,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         allColumns.push(...[
             new Column<ObjectType, string | null>({
                 id: 'group.defaultAgeGroup',
+                // todo?
                 allowSorting: false,
                 name: $t('aa592704-705f-47f8-97ed-805b46c87e40'),
                 getValue: (registration) => {
@@ -526,7 +545,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             }),
             new Column<ObjectType, Group>({
                 id: 'group.name',
-                allowSorting: false,
+                allowSorting: true,
                 name: $t('c3d036e9-60ec-48e1-85a8-e801dc305466'),
                 getValue: (registration) => {
                     return registration.group;
@@ -538,6 +557,22 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 recommendedWidth: 300,
                 enabled: !group,
             }),
+            groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
+                ? new Column<ObjectType, GroupType>({
+                    id: 'group.type',
+                    allowSorting: false,
+                    name: $t('Type'),
+                    getValue: (registration) => {
+                        return registration.group.type;
+                    },
+                    format: (type) => {
+                        return getGroupTypeName(type);
+                    },
+                    minimumWidth: 100,
+                    recommendedWidth: 200,
+                    enabled: false,
+                })
+                : null,
         ]);
     }
 

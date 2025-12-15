@@ -1,6 +1,6 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import { ExcelExportType, Gender, GroupType, LimitedFilteredRequest, PlatformFamily, PlatformMember, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, Gender, GroupType, LimitedFilteredRequest, MembershipStatus, PlatformFamily, PlatformMember, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
@@ -150,6 +150,16 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
             value: object.details.nationalRegisterNumber?.toString() ?? '',
         }),
     },
+    {
+        id: 'membership',
+        name: $t(`c7d995f1-36a0-446e-9fcf-17ffb69f3f45`),
+        width: 20,
+        getValue: (member: PlatformMember) => {
+            return {
+                value: formatMembershipStatus(member.membershipStatus),
+            };
+        },
+    },
 
     ...XlsxTransformerColumnHelper.creatColumnsForParents(),
 
@@ -275,6 +285,19 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
                 };
             },
 
+        },
+        {
+            id: 'createdAt',
+            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            width: 20,
+            getValue: v => ({
+                value: v.member.createdAt,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
         },
 
         // Registration records
@@ -443,10 +466,25 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
     ],
 });
 
-function formatGender(gender: Gender) {
+function formatGender(gender: Gender): string {
     switch (gender) {
         case Gender.Male: return $t(`f972abd4-de1e-484b-b7da-ad4c75d37808`);
         case Gender.Female: return $t(`e21f499d-1078-4044-be5d-6693d2636699`);
         default: return $t(`60f13ba4-c6c9-4388-9add-43a996bf6bee`);
+    }
+}
+
+function formatMembershipStatus(status: MembershipStatus): string {
+    switch (status) {
+        case MembershipStatus.Trial:
+            return $t(`47c7c3c4-9246-40b7-b1e0-2cb408d5f79e`);
+        case MembershipStatus.Active:
+            return $t(`b56351e9-4847-4a0c-9eec-348d75c794c4`);
+        case MembershipStatus.Expiring:
+            return $t(`d9858110-37d9-4b4a-8bfb-d76b3cc5ef27`);
+        case MembershipStatus.Temporary:
+            return $t(`75e62d3c-f348-4104-8a1e-e11e6e7fbe32`);
+        case MembershipStatus.Inactive:
+            return $t(`1f8620fa-e8a5-4665-99c8-c1907a5b5768`);
     }
 }

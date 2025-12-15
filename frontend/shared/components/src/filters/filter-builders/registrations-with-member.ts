@@ -1,4 +1,5 @@
-import { FilterWrapperMarker } from '@stamhoofd/structures';
+import { FilterWrapperMarker, getGroupStatusName, getGroupTypeName, GroupStatus, GroupType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useAppContext } from '../../context';
 import { useFinancialSupportSettings } from '../../groups';
@@ -7,11 +8,13 @@ import { DateFilterBuilder } from '../DateUIFilter';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
+import { StringFilterBuilder } from '../StringUIFilter';
 import { UIFilter, UIFilterBuilder } from '../UIFilter';
 import { createMemberWithRegistrationsBlobFilterBuilders, useAdvancedPlatformMembershipUIFilterBuilders } from './members';
+import { useGetOrganizationUIFilterBuilders } from './organizations';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
-export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
+export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGroups }: { multipleGroups: boolean }) {
     const $platform = usePlatform();
     const $user = useUser();
     const auth = useAuth();
@@ -19,6 +22,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
 
     const { loading, filterBuilders: registrationFilters } = useAdvancedRegistrationsUIFilterBuilders();
     const { loading: loadingMembershipFilters, filterBuilders: membershipFilters } = useAdvancedPlatformMembershipUIFilterBuilders();
+    const { getOrganizationUIFilterBuilders } = useGetOrganizationUIFilterBuilders();
     const financialSupportSettings = useFinancialSupportSettings();
     const organization = useOrganization();
 
@@ -45,24 +49,10 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                     },
                 ],
             }));
-
-            all.push(new MultipleChoiceFilterBuilder({
-                name: $t('6705ae0e-8239-4bc0-895d-10128cb5c6c4'),
-                options: [...$platform.value.config.defaultAgeGroups.map((group) => {
-                    return new MultipleChoiceUIFilterOption(group.name, group.id);
-                }), new MultipleChoiceUIFilterOption($t('3ef9e622-426f-4913-89a0-0ce08f4542d4'), null)],
-                wrapper: {
-                    group: {
-                        defaultAgeGroupId: {
-                            $in: FilterWrapperMarker,
-                        },
-                    },
-                },
-            }));
         }
         else {
             all.push(new NumberFilterBuilder({
-                key: 'cachedOutstandingBalanceForMember.value',
+                key: 'memberCachedBalance.amountOpen',
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
                 type: NumberFilterFormat.Currency,
             }));
@@ -89,6 +79,87 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders() {
                     },
                 },
             }));
+
+        if (organization.value === null) {
+            all.push(
+                new GroupUIFilterBuilder({
+                    name: $t('Organisatie'),
+                    description: $t('Filter op organisatie waarvoor is ingeschreven'),
+                    builders: getOrganizationUIFilterBuilders(auth.user),
+                    wrapper: {
+                        organization: {
+                            $elemMatch: FilterWrapperMarker,
+                        },
+                    },
+                }),
+            );
+        }
+
+        if (organization.value === null || multipleGroups) {
+            const allTags = organization.value ? organization.value.meta.tags : [];
+
+            const groupFilters: UIFilterBuilder[] = [
+                new StringFilterBuilder({
+                    name: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+                    key: 'name',
+                }),
+                new MultipleChoiceFilterBuilder({
+                    name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
+                    options: Object.values(GroupStatus)
+                        // filter out deprecated status
+                        .filter(status => status !== GroupStatus.Archived)
+                        .map((status) => {
+                            return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(getGroupStatusName(status)), status);
+                        }),
+                    wrapper: {
+                        status: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                }),
+                new MultipleChoiceFilterBuilder({
+                    name: $t('Type'),
+                    options: Object.values(GroupType)
+                        .map((type) => {
+                            return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(getGroupTypeName(type)), type);
+                        }),
+                    wrapper: {
+                        type: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                }),
+                new MultipleChoiceFilterBuilder({
+                    name: $t(`494ad9b9-c644-4b71-bd38-d6845706231f`),
+                    options: [
+                        ...$platform.value.config.defaultAgeGroups.filter(defaultAgeGroup => organization.value !== null ? defaultAgeGroup.isEnabledForTags(allTags) : true).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
+                        new MultipleChoiceUIFilterOption($t(`3ef9e622-426f-4913-89a0-0ce08f4542d4`), null),
+                    ],
+                    wrapper: {
+                        defaultAgeGroupId: {
+                            $in: FilterWrapperMarker,
+                        },
+                    },
+                }),
+
+            ];
+
+            groupFilters.unshift(new GroupUIFilterBuilder({
+                builders: groupFilters,
+            }));
+
+            all.push(
+                new GroupUIFilterBuilder({
+                    name: $t('Inschrijvingsgroep'),
+                    builders: groupFilters,
+                    wrapper: {
+                        group: {
+                            $elemMatch: FilterWrapperMarker,
+                        },
+                    },
+                }),
+            );
+        }
 
         all.unshift(
             new GroupUIFilterBuilder({

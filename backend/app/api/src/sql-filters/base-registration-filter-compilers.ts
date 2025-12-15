@@ -2,7 +2,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLFilterDefinitions, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
-import { outstandingBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { organizationFilterCompilers } from './organizations.js';
 
 async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel: PermissionLevel) {
@@ -78,6 +79,11 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Number,
         nullable: false,
     }),
+    groupPrice: createColumnFilter({
+        expression: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     canRegister: createColumnFilter({
         expression: SQL.column('canRegister'),
         type: SQLValueType.Boolean,
@@ -108,6 +114,16 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
     }),
     deactivatedAt: createColumnFilter({
         expression: SQL.column('registrations', 'deactivatedAt'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
+    trialUntil: createColumnFilter({
+        expression: SQL.column('registrations', 'trialUntil'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
+    startDate: createColumnFilter({
+        expression: SQL.column('registrations', 'startDate'),
         type: SQLValueType.Datetime,
         nullable: true,
     }),
@@ -151,11 +167,26 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             ),
         organizationFilterCompilers,
     ),
-    cachedOutstandingBalanceForMember: createJoinedRelationFilter(
-        outstandingBalanceJoin,
+    memberCachedBalance: createJoinedRelationFilter(
+        memberCachedBalanceForOrganizationJoin,
         {
-            value: createColumnFilter({
-                expression: new SQLIfNull(SQL.column('cb', 'outstandingBalance'), 0),
+            amountOpen: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+        },
+    ),
+    registrationCachedBalance: createJoinedRelationFilter(
+        registrationCachedBalanceJoin,
+        {
+            toPay: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('registrationCachedBalance', 'toPay'), 0),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+            price: createColumnFilter({
+                expression: new SQLIfNull(SQL.column('registrationCachedBalance', 'price'), 0),
                 type: SQLValueType.Number,
                 nullable: false,
             }),

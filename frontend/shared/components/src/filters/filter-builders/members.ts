@@ -562,6 +562,11 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         );
     }
 
+    all.push(new DateFilterBuilder({
+        key: 'createdAt',
+        name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+    }));
+
     const currentPeriodId = STAMHOOFD.userMode === 'platform' ? platform.period.id : organization.value?.period.period.id;
 
     if (currentPeriodId) {
@@ -717,7 +722,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         all.push(
             new NumberFilterBuilder({
                 name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
-                key: 'cachedOutstandingBalanceForMember.value',
+                key: 'memberCachedBalance.amountOpen',
                 type: NumberFilterFormat.Currency,
                 wrapFilter: (f: StamhoofdFilter) => {
                     return {
@@ -730,9 +735,10 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 },
                 unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
                     const value = (f as object)?.['registrations']?.['$elemMatch'];
-                    if (value?.['cachedOutstandingBalanceForMember.value']) {
+                    const key = 'memberCachedBalance.amountOpen';
+                    if (value?.[key]) {
                         return {
-                            'cachedOutstandingBalanceForMember.value': value['cachedOutstandingBalanceForMember.value'],
+                            [key]: value[key],
                         };
                     }
                     return null;

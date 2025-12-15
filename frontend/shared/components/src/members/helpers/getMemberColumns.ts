@@ -16,7 +16,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
             minimumWidth: 100,
             recommendedWidth: 150,
             grow: true,
-            allowSorting: false,
+            allowSorting: true,
             enabled: false,
         }),
 
@@ -431,6 +431,21 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
                 return new Date(Math.min(...filtered));
             },
             format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+            getStyle: v => v === null ? 'gray' : '',
+            minimumWidth: 80,
+            recommendedWidth: 220,
+        }),
+    );
+
+    allColumns.push(
+        new Column<ObjectType, Date>({
+            id: 'createdAt',
+            name: $t('c38e774e-e8ab-4549-b119-4eed380c626c'),
+            allowSorting: true,
+            getValue: (v) => {
+                return v.member.createdAt;
+            },
+            format: (v, width) => width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true)),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 220,

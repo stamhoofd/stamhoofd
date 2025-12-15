@@ -1,6 +1,6 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import { ExcelExportType, LimitedFilteredRequest, PlatformMember, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, getGroupTypeName, LimitedFilteredRequest, PlatformMember, PlatformRegistration, Platform as PlatformStruct, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
@@ -47,6 +47,22 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             },
         },
         {
+            id: 'toPay',
+            width: 30,
+            name: $t(`3a97e6cb-012d-4007-9c54-49d3e5b72909`),
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0) / 1_0000,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
+                        },
+                    },
+                };
+            },
+
+        },
+        {
             id: 'outstandingBalance',
             name: $t(`beb45452-dee7-4a7f-956c-e6db06aac20f`),
             width: 30,
@@ -76,6 +92,32 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             }),
         },
         {
+            id: 'startDate',
+            name: $t(`bbe0af99-b574-4719-a505-ca2285fa86e4`),
+            width: 20,
+            getValue: (registration: PlatformRegistration) => ({
+                value: registration.startDate,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
+        },
+        {
+            id: 'createdAt',
+            name: $t('Aanmaakdatum lid'),
+            width: 20,
+            getValue: (registration: PlatformRegistration) => ({
+                value: registration.member.member.createdAt,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
+        },
+        {
             id: 'organization',
             name: $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
             width: 40,
@@ -95,6 +137,46 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 return ({
                     value: organization?.uri ?? $t('836c2cd3-32a3-43f2-b09c-600170fcd9cb'),
                 });
+            },
+        },
+        {
+            id: 'groupRegistration',
+            name: $t('7289b10e-a284-40ea-bc57-8287c6566a82'),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                let value: string;
+
+                if (registration.payingOrganizationId) {
+                    const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
+                    value = organization ? organization.name : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`);
+                }
+                else {
+                    value = $t(`b8b730fb-f1a3-4c13-8ec4-0aebe08a1449`);
+                }
+
+                return ({
+                    value,
+                });
+            },
+        },
+        {
+            id: 'trialUntil',
+            name: $t(`Proefperiode`),
+            width: 40,
+            getValue: (registration: PlatformRegistration) => {
+                let value: Date | null = null;
+                if (registration.trialUntil && registration.trialUntil > new Date()) {
+                    value = new Date(registration.trialUntil.getTime());
+                }
+
+                return {
+                    value,
+                    style: {
+                        numberFormat: {
+                            id: XlsxBuiltInNumberFormat.DateSlash,
+                        },
+                    },
+                };
             },
         },
         // option menu
@@ -241,6 +323,16 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
                 }
                 return {
                     value: PlatformStruct.shared.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`6aeee253-beb2-4548-b60e-30836afcf2f0`),
+                };
+            },
+        },
+        {
+            id: 'group.type',
+            name: $t('Type'),
+            width: 20,
+            getValue: (registration: PlatformRegistration) => {
+                return {
+                    value: getGroupTypeName(registration.group.type),
                 };
             },
         },
