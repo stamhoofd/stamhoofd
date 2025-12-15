@@ -1,13 +1,13 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQLDelete } from './SQLDelete.js';
-import { isSQLExpression, SQLExpression } from './SQLExpression.js';
-import { SQLAssignment, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
-import { SQLInsert } from './SQLInsert.js';
-import { SQLJoin, SQLJoinType } from './SQLJoin.js';
-import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonUnquote, SQLLpad } from './SQLJsonExpressions.js';
-import { parseTable, SQLSelect } from './SQLSelect.js';
-import { SQLUpdate } from './SQLUpdate.js';
-import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere.js';
+import { SQLDelete } from './SQLDelete';
+import { isSQLExpression, SQLExpression } from './SQLExpression';
+import { SQLAssignment, SQLCoalesce, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
+import { SQLInsert } from './SQLInsert';
+import { SQLJoin, SQLJoinType } from './SQLJoin';
+import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLJsonValueType, SQLLpad } from './SQLJsonExpressions';
+import { parseTable, SQLSelect } from './SQLSelect';
+import { SQLUpdate } from './SQLUpdate';
+import { ParseWhereArguments, SQLEmptyWhere, SQLWhere } from './SQLWhere';
 
 class StaticSQL {
     wildcard(namespace?: string) {
