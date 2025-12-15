@@ -25,7 +25,7 @@ describe('$contains', () => {
                 },
             ],
             filters,
-            error: 'Invalid compare value',
+            error: 'Invalid compare value. Expected a string, number, boolean, date or null.',
         });
 
         await testMultipleErrors({
