@@ -9,3 +9,4 @@ export * from './src/filters/SQLSorter';
 export * from './src/SQLOrderBy';
 export * from './src/SQLInsert';
 export * from './src/QueryableModel';
+export * from './src/SQLTranslatedStringHelper';
