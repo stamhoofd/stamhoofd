@@ -215,4 +215,4 @@ The keys of the translations are uuids. A new translation can be added by writin
 
 # License
 
-Stamhoofd is open-source software, licensed under the GNU Affero General Public License Version 3 (AGPLv3). <a href="https://github.com/stamhoofd/stamhoofd/blob/development/LICENSE">View license.</a>
+Stamhoofd may be used freely by non-profits, as outlined in the license in [LICENSE.md](LICENSE.md).
