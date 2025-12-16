@@ -723,6 +723,7 @@ async function addGroup() {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
+                    documentType: editingType.value,
                     addGroup: async (group: DocumentTemplateGroup, actions: NavigationActions) => {
                         await gotoGroupRecordCategory(group, actions, 0);
                     },

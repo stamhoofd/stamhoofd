@@ -1,11 +1,11 @@
 <template>
     <div class="st-view">
-        <STNavigationBar :title="$t(`f52db2d7-c0f5-4f9c-b567-62f657787339`)" />
+        <STNavigationBar :title="title" />
 
         <main>
             <h1>{{ $t('7f721fa4-ed71-42d7-a92d-6a11abc3cb0f') }}</h1>
 
-            <SegmentedControl v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
+            <SegmentedControl v-if="tabs.length > 1" v-model="selectedTab" :items="tabs.map(t => t.id)" :labels="tabs.map(t => t.label)" />
 
             <div v-if="selectedTab === Tab.Activities" class="input-with-buttons">
                 <div>
@@ -92,13 +92,15 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { EventRow, GroupAvatar, InfiniteObjectFetcherEnd, NavigationActions, SegmentedControl, Spinner, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useNavigationActions, useOrganization, usePlatform, usePositionableSheet } from '@stamhoofd/components';
 import { useOrganizationManager, useRequestOwner } from '@stamhoofd/networking';
-import { DocumentTemplateGroup, Event, Group, GroupType, isEmptyFilter, NamedObject, RecordCategory, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { DocumentTemplateGroup, Event, Group, GroupType, isEmptyFilter, NamedObject, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref, watchEffect } from 'vue';
 import { useSwitchablePeriod } from '../../members/useSwitchablePeriod';
+import { fiscal } from './definitions/fiscal';
 type ObjectType = Event;
 
 const props = defineProps<{
+    documentType: string;
     addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => Promise<void> | void;
 }>();
 
@@ -127,13 +129,20 @@ fetcher.setSort([{
     order: SortItemDirection.DESC,
 }]);
 
-const tabs = ref([{
+const groupsTab = {
     id: Tab.Groups,
     label: 'Groepen',
-}, {
+};
+
+const activitiesTab = {
     id: Tab.Activities,
     label: 'Activiteiten',
-}]);
+};
+
+const showOnlyActivities = props.documentType === fiscal.type && STAMHOOFD.userMode === 'platform';
+const tabs = ref(showOnlyActivities ? [activitiesTab] : [groupsTab, activitiesTab]);
+const title = showOnlyActivities ? $t('Activiteit') : $t(`f52db2d7-c0f5-4f9c-b567-62f657787339`);
+
 const selectedTab = ref(tabs.value[0].id);
 
 const archivedGroups = ref([]) as Ref<Group[]>;
