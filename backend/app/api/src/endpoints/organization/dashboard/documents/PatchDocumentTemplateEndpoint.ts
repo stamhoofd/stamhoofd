@@ -1,10 +1,10 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { DocumentTemplate, Token } from '@stamhoofd/models';
+import { DocumentTemplate } from '@stamhoofd/models';
 import { DocumentTemplatePrivate, PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -49,6 +49,7 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             template.status = put.status;
             template.html = put.html;
             template.updatesEnabled = put.updatesEnabled;
+            template.year = put.year;
             template.organizationId = organization.id;
             await template.save();
 
@@ -83,6 +84,10 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
 
             if (patch.html) {
                 template.html = patch.html;
+            }
+
+            if (patch.year) {
+                template.year = patch.year;
             }
 
             await template.save();

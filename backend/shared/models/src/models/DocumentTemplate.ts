@@ -50,6 +50,9 @@ export class DocumentTemplate extends QueryableModel {
     @column({ type: 'json', decoder: DocumentPrivateSettings })
     privateSettings: DocumentPrivateSettings;
 
+    @column({ type: 'integer' })
+    year: number;
+
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
 

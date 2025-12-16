@@ -16,10 +16,14 @@
                         {{ _type.definition.name }}
                     </option>
                 </Dropdown>
+
+                <STInputBox :title="$t('Kalenderjaar')" error-fields="year" :error-box="errors.errorBox">
+                    <NumberInput v-model="year" :title="$t('Kalenderjaar')" :validator="errors.validator" :min="0" :max="currentYear" :stepper="true" />
+                </STInputBox>
             </LoadingButton>
         </STInputBox>
 
-        <template v-if="!isDoubleFiscalDocumentThisYear && (editingType || !isNew)">
+        <template v-if="!isDoubleFiscalDocumentInYear && (editingType || !isNew)">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                 <input v-model="name" class="input" type="text" :placeholder="$t(`2fe38a3a-0041-4724-869e-4a5b55634380`)">
             </STInputBox>
@@ -129,7 +133,7 @@ import { participation } from './definitions/participation';
 
 const props = withDefaults(defineProps<{
     isNew: boolean;
-    hasFiscalDocumentThisYear: boolean;
+    fiscalDocumentYears: Set<number>;
     document: DocumentTemplatePrivate;
     callback?: ((template: DocumentTemplatePrivate) => void) | null;
 }>(), {
@@ -231,9 +235,19 @@ const editingType = computed({
     },
 });
 
-const isDoubleFiscalDocumentThisYear = computed(() => props.isNew && props.hasFiscalDocumentThisYear && editingType.value === fiscal.type);
+const currentYear = new Date().getFullYear();
+const year = computed({
+    get: () => patchedDocument.value?.year ?? currentYear,
+    set: (value: number) => {
+        addPatch({
+            year: value,
+        });
+    },
+});
 
-watch(isDoubleFiscalDocumentThisYear, (value) => {
+const isDoubleFiscalDocumentInYear = computed(() => props.isNew && editingType.value === fiscal.type && props.fiscalDocumentYears.has(year.value));
+
+watch(isDoubleFiscalDocumentInYear, (value) => {
     if (value) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'double_fiscal_document',
@@ -826,7 +840,7 @@ function validate() {
 }
 
 function validateType(): SimpleError | null {
-    if (isDoubleFiscalDocumentThisYear.value) {
+    if (isDoubleFiscalDocumentInYear.value) {
         return new SimpleError({
             code: 'double_fiscal_document',
             field: 'type',

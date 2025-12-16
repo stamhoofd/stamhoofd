@@ -57,8 +57,8 @@ import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 import { fiscal } from './definitions/fiscal';
 
 const templates: Ref<DocumentTemplatePrivate[]> = ref([]);
-const currentYear = new Date().getFullYear();
-const hasFiscalDocumentThisYear = computed(() => templates.value.some(t => t.privateSettings.templateDefinition.type === fiscal.type && t.createdAt.getFullYear() === currentYear));
+const fiscalDocumentYears = computed(() => new Set(templates.value.filter(t => t.privateSettings.templateDefinition.type === fiscal.type).map(t => t.year)));
+
 const loading = ref(true);
 const organization = useRequiredOrganization();
 const requestOwner = useRequestOwner();
@@ -95,7 +95,7 @@ defineRoutes([
 
             return {
                 template,
-                hasFiscalDocumentThisYear: hasFiscalDocumentThisYear.value,
+                fiscalDocumentYears: fiscalDocumentYears.value,
             };
         },
 
@@ -152,7 +152,7 @@ function addDocument() {
         components: [
             new ComponentWithProperties(EditDocumentTemplateView, {
                 isNew: true,
-                hasFiscalDocumentThisYear: hasFiscalDocumentThisYear.value,
+                fiscalDocumentYears: fiscalDocumentYears.value,
                 document: DocumentTemplatePrivate.create({}),
                 callback: (template: DocumentTemplatePrivate) => {
                     templates.value.push(template);
