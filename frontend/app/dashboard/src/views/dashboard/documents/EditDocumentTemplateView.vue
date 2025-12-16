@@ -8,7 +8,7 @@
 
         <STInputBox v-if="isNew" error-fields="type" :error-box="errors.errorBox" :title="$t(`50807c89-d15f-4a2e-b8c7-95932d5aa5c8`)">
             <LoadingButton :loading="loadingHtml || loadingXml">
-                <Dropdown v-model="editingType">
+                <Dropdown v-model="editingType" error-fields="type">
                     <option :value="null" disabled>
                         {{ $t('569d1c4a-9389-47dd-9acb-930419271276') }}
                     </option>
@@ -19,7 +19,7 @@
             </LoadingButton>
         </STInputBox>
 
-        <template v-if="editingType || !isNew">
+        <template v-if="!isDoubleFiscalDocumentThisYear && (editingType || !isNew)">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                 <input v-model="name" class="input" type="text" :placeholder="$t(`2fe38a3a-0041-4724-869e-4a5b55634380`)">
             </STInputBox>
@@ -121,7 +121,7 @@ import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRe
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
 import { fiscal } from './definitions/fiscal';
@@ -129,6 +129,7 @@ import { participation } from './definitions/participation';
 
 const props = withDefaults(defineProps<{
     isNew: boolean;
+    hasFiscalDocumentThisYear: boolean;
     document: DocumentTemplatePrivate;
     callback?: ((template: DocumentTemplatePrivate) => void) | null;
 }>(), {
@@ -228,6 +229,21 @@ const editingType = computed({
             }
         }
     },
+});
+
+const isDoubleFiscalDocumentThisYear = computed(() => props.isNew && props.hasFiscalDocumentThisYear && editingType.value === fiscal.type);
+
+watch(isDoubleFiscalDocumentThisYear, (value) => {
+    if (value) {
+        errors.errorBox = new ErrorBox(new SimpleError({
+            code: 'double_fiscal_document',
+            field: 'type',
+            message: $t('Je kan maximaal 1 fiscaal document per jaar maken.'),
+        }));
+    }
+    else {
+        errors.errorBox = null;
+    }
 });
 
 const maxAge = computed({
@@ -793,6 +809,11 @@ function removeGroup(group: DocumentTemplateGroup) {
 function validate() {
     const errors = new SimpleErrors();
 
+    const typeError = validateType();
+    if (typeError) {
+        errors.addError(typeError);
+    }
+
     if (patchedDocument.value.settings.name.length === 0) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
@@ -802,6 +823,18 @@ function validate() {
     }
 
     errors.throwIfNotEmpty();
+}
+
+function validateType(): SimpleError | null {
+    if (isDoubleFiscalDocumentThisYear.value) {
+        return new SimpleError({
+            code: 'double_fiscal_document',
+            field: 'type',
+            message: $t('Je kan maximaal 1 fiscaal document per jaar maken.'),
+        });
+    }
+
+    return null;
 }
 
 async function save() {

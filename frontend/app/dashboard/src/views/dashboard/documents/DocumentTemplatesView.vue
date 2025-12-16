@@ -46,17 +46,19 @@
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
-import { LoadingViewTransition, STList, STListItem, STNavigationBar, Toast, useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components';
+import { LoadingViewTransition, STList, STListItem, STNavigationBar, Toast, useContext, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { ComponentOptions, computed, onActivated, onMounted, ref, Ref } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
+import { fiscal } from './definitions/fiscal';
 
 const templates: Ref<DocumentTemplatePrivate[]> = ref([]);
+const currentYear = new Date().getFullYear();
+const hasFiscalDocumentThisYear = computed(() => templates.value.some(t => t.privateSettings.templateDefinition.type === fiscal.type && t.createdAt.getFullYear() === currentYear));
 const loading = ref(true);
 const organization = useRequiredOrganization();
 const requestOwner = useRequestOwner();
@@ -93,6 +95,7 @@ defineRoutes([
 
             return {
                 template,
+                hasFiscalDocumentThisYear: hasFiscalDocumentThisYear.value,
             };
         },
 
@@ -149,6 +152,7 @@ function addDocument() {
         components: [
             new ComponentWithProperties(EditDocumentTemplateView, {
                 isNew: true,
+                hasFiscalDocumentThisYear: hasFiscalDocumentThisYear.value,
                 document: DocumentTemplatePrivate.create({}),
                 callback: (template: DocumentTemplatePrivate) => {
                     templates.value.push(template);

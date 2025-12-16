@@ -138,6 +138,7 @@ import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
 const props = defineProps<{
+    hasFiscalDocumentThisYear: boolean;
     template: DocumentTemplatePrivate;
 }>();
 
@@ -171,6 +172,7 @@ defineRoutes([
         paramsToProps() {
             return {
                 isNew: false,
+                hasFiscalDocumentThisYear: props.hasFiscalDocumentThisYear,
                 document: props.template,
             };
         },
