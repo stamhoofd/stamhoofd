@@ -201,7 +201,7 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, RegistrationsTableView, STList, STListItem, STNavigationBar, Toast, useAuth, useFeatureFlag, useOrganization, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, RegistrationsTableView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
 
@@ -236,76 +236,62 @@ enum Routes {
     Responsibility = 'Responsibility',
 }
 
-const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
+defineRoutes([{
+    url: 'inschrijvingen',
+    name: Routes.Members,
+    component: RegistrationsTableView as ComponentOptions,
+    paramsToProps: () => {
+        return {
+            group: props.group,
+            organization: organization.value,
+        };
+    },
+},
+{
+    url: 'wachtlijst',
+    name: Routes.WaitingList,
+    component: MembersTableView as ComponentOptions,
+    paramsToProps: () => {
+        if (!props.group.waitingList) {
+            throw new Error('No waiting list');
+        }
+        return {
+            group: props.group.waitingList,
+        };
+    },
+},
+{
+    url: '/r/@slug',
+    name: Routes.Responsibility,
+    params: {
+        slug: String,
+    },
+    component: MembersTableView as ComponentOptions,
+    paramsToProps(params: { slug: string }) {
+        const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug);
 
-defineRoutes([
-    isRegistrationsTableEnabled
-        ? {
-                url: 'inschrijvingen',
-                name: Routes.Members,
-                component: RegistrationsTableView as ComponentOptions,
-                paramsToProps: () => {
-                    return {
-                        group: props.group,
-                        organization: organization.value,
-                    };
-                },
-            }
-        : {
-                url: 'inschrijvingen',
-                name: Routes.Members,
-                component: MembersTableView as ComponentOptions,
-                paramsToProps: () => {
-                    return {
-                        group: props.group,
-                    };
-                },
+        if (!responsibility) {
+            throw new Error('Responsibility not found');
+        }
+
+        return {
+            responsibility,
+            customTitle: responsibility.name + ' (' + props.group.settings.name + ')',
+            customFilter: getResponsibilityFilter(responsibility),
+        };
+    },
+    propsToParams(props) {
+        if (!('responsibility' in props)) {
+            throw new Error('Missing responsibility');
+        }
+
+        return {
+            params: {
+                slug: Formatter.slug((props.responsibility as MemberResponsibility).name as string),
             },
-    {
-        url: 'wachtlijst',
-        name: Routes.WaitingList,
-        component: MembersTableView as ComponentOptions,
-        paramsToProps: () => {
-            if (!props.group.waitingList) {
-                throw new Error('No waiting list');
-            }
-            return {
-                group: props.group.waitingList,
-            };
-        },
+        };
     },
-    {
-        url: '/r/@slug',
-        name: Routes.Responsibility,
-        params: {
-            slug: String,
-        },
-        component: MembersTableView as ComponentOptions,
-        paramsToProps(params: { slug: string }) {
-            const responsibility = linkedResponsibilities.value.find(r => Formatter.slug(r.name) === params.slug);
-
-            if (!responsibility) {
-                throw new Error('Responsibility not found');
-            }
-
-            return {
-                responsibility,
-                customTitle: responsibility.name + ' (' + props.group.settings.name + ')',
-                customFilter: getResponsibilityFilter(responsibility),
-            };
-        },
-        propsToParams(props) {
-            if (!('responsibility' in props)) {
-                throw new Error('Missing responsibility');
-            }
-
-            return {
-                params: {
-                    slug: Formatter.slug((props.responsibility as MemberResponsibility).name as string),
-                },
-            };
-        },
-    },
+},
 ]);
 
 const navigate = useNavigate();

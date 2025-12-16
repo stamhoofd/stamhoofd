@@ -105,7 +105,7 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, MembersTableView, RegistrationsTableView, STErrorsDefault, STList, STListItem, STNavigationBar, useErrors } from '@stamhoofd/components';
-import { useContext, useFeatureFlag, useRequiredOrganization } from '@stamhoofd/components/src/hooks';
+import { useContext, useRequiredOrganization } from '@stamhoofd/components/src/hooks';
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
@@ -125,10 +125,9 @@ const show = useShow();
 const navigationController = useNavigationController();
 const context = useContext();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
-const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
 
-// show registrations table if enabled and if maximum registrations in category is 1
-const shouldShowRegistrations = computed(() => isRegistrationsTableEnabled && props.category.settings.maximumRegistrations === 1);
+// show registrations if maximum registrations in category is 1
+const shouldShowRegistrations = computed(() => props.category.settings.maximumRegistrations === 1);
 
 const parentCategories = computed(() => [
     ...(!isRoot.value && props.period.settings.rootCategory ? [props.period.settings.rootCategory] : []),

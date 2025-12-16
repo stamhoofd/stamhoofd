@@ -234,26 +234,26 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, appToUri, EmailTemplateType, Event, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, StamhoofdFilter, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, appToUri, EmailTemplateType, Event, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
 import { LoadComponent } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { EditEmailTemplatesView } from '../email';
 import EditGroupView from '../groups/EditGroupView.vue';
-import { useAuth, useContext, useFeatureFlag, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
+import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import IconContainer from '../icons/IconContainer.vue';
 import { MembersTableView, RegistrationCountSpan, useChooseOrganizationMembersForGroup } from '../members';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
+import { useRequiredRegistrationsFilter } from '../registrations';
 import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
 import EventNotificationRow from './components/EventNotificationRow.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
-import { useRequiredRegistrationsFilter } from '../registrations';
 
 const props = defineProps<{
     event: Event;
@@ -395,7 +395,6 @@ enum Routes {
     Webshop = 'webshop',
 }
 
-const isRegistrationsTableEnabled = useFeatureFlag()('table-registrations');
 const { getRequiredRegistrationsFilter } = useRequiredRegistrationsFilter();
 
 function getCountFilter(g: Group) {
@@ -407,139 +406,120 @@ function getCountFilter(g: Group) {
     ]);
 }
 
-defineRoutes([
-    isRegistrationsTableEnabled
-        ? {
-                url: Routes.Registrations,
-                component: RegistrationsTableView as ComponentOptions,
-                paramsToProps: () => {
-                    if (!props.event.group) {
-                        throw new Error('No group found');
-                    }
+defineRoutes([{
+    url: Routes.Registrations,
+    component: RegistrationsTableView as ComponentOptions,
+    paramsToProps: () => {
+        if (!props.event.group) {
+            throw new Error('No group found');
+        }
 
-                    return {
-                        organization: eventOrganization.value,
-                        group: props.event.group,
-                        dateRange: {
-                            start: props.event.startDate,
-                            end: props.event.endDate,
-                        },
-                    };
-                },
-            }
-        : {
-                url: Routes.Registrations,
-                component: MembersTableView as ComponentOptions,
-                paramsToProps: () => {
-                    if (!props.event.group) {
-                        throw new Error('No group found');
-                    }
-
-                    return {
-                        group: props.event.group,
-                        dateRange: {
-                            start: props.event.startDate,
-                            end: props.event.endDate,
-                        },
-                    };
-                },
+        return {
+            organization: eventOrganization.value,
+            group: props.event.group,
+            dateRange: {
+                start: props.event.startDate,
+                end: props.event.endDate,
             },
-    {
-        url: Routes.WaitingList,
-        component: MembersTableView as ComponentOptions,
-        paramsToProps: () => {
-            if (!props.event.group || !props.event.group.waitingList) {
-                throw new Error('No waiting list found');
-            }
-            return {
-                group: props.event.group.waitingList,
-            };
-        },
+        };
     },
-    {
-        url: Routes.Edit,
-        component: EditEventView as ComponentOptions,
-        present: 'popup',
-        paramsToProps: () => {
-            return {
-                event: props.event,
-                isNew: false,
-            };
-        },
+},
+{
+    url: Routes.WaitingList,
+    component: MembersTableView as ComponentOptions,
+    paramsToProps: () => {
+        if (!props.event.group || !props.event.group.waitingList) {
+            throw new Error('No waiting list found');
+        }
+        return {
+            group: props.event.group.waitingList,
+        };
     },
-    {
-        url: Routes.EditGroup,
-        component: EditGroupView as ComponentOptions,
-        present: 'popup',
-        paramsToProps: async () => {
-            if (!props.event.group) {
-                throw new Error('Missing group');
-            }
+},
+{
+    url: Routes.Edit,
+    component: EditEventView as ComponentOptions,
+    present: 'popup',
+    paramsToProps: () => {
+        return {
+            event: props.event,
+            isNew: false,
+        };
+    },
+},
+{
+    url: Routes.EditGroup,
+    component: EditGroupView as ComponentOptions,
+    present: 'popup',
+    paramsToProps: async () => {
+        if (!props.event.group) {
+            throw new Error('Missing group');
+        }
 
-            const group = props.event.group;
-            const period = await prepareOrganizationPeriod(group);
+        const group = props.event.group;
+        const period = await prepareOrganizationPeriod(group);
 
-            return {
-                period,
-                groupId: props.event.group.id,
-                isMultiOrganization: !props.event.organizationId,
-                organizationHint: eventOrganization.value ?? groupOrganization.value,
-                isNew: false,
-                showToasts: true,
-                saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
-                    const updatedPeriod = await patchOrganizationPeriod(patch, {
-                        organizationId: group.organizationId,
-                    });
+        return {
+            period,
+            groupId: props.event.group.id,
+            isMultiOrganization: !props.event.organizationId,
+            organizationHint: eventOrganization.value ?? groupOrganization.value,
+            isNew: false,
+            showToasts: true,
+            saveHandler: async (patch: AutoEncoderPatchType<OrganizationRegistrationPeriod>) => {
+                const updatedPeriod = await patchOrganizationPeriod(patch, {
+                    organizationId: group.organizationId,
+                });
 
-                    const updatedGroup = updatedPeriod.groups.find(g => g.id === group.id);
-                    if (updatedGroup) {
-                        group.deepSet(updatedGroup);
+                const updatedGroup = updatedPeriod.groups.find(g => g.id === group.id);
+                if (updatedGroup) {
+                    group.deepSet(updatedGroup);
 
-                        if (updatedGroup.deletedAt) {
-                            props.event.group = null;
-                        }
-                    }
-                    else {
-                        console.warn('Group not found in updated period', group.id, updatedPeriod.groups);
+                    if (updatedGroup.deletedAt) {
                         props.event.group = null;
                     }
-                },
-            };
-        },
+                }
+                else {
+                    console.warn('Group not found in updated period', group.id, updatedPeriod.groups);
+                    props.event.group = null;
+                }
+            },
+        };
     },
-    {
-        url: Routes.EditEmails,
-        component: EditEmailTemplatesView as ComponentOptions,
-        present: 'popup',
-        paramsToProps: () => {
-            if (!props.event.group) {
-                throw new Error('Missing group');
-            }
+},
+{
+    url: Routes.EditEmails,
+    component: EditEmailTemplatesView as ComponentOptions,
+    present: 'popup',
+    paramsToProps: () => {
+        if (!props.event.group) {
+            throw new Error('Missing group');
+        }
 
-            return {
-                groups: props.event.group.waitingList ? [props.event.group, props.event.group.waitingList] : [props.event.group],
-                allowEditGenerated: false,
-                types: [
-                    EmailTemplateType.RegistrationConfirmation,
-                ],
-            };
-        },
+        return {
+            groups: props.event.group.waitingList ? [props.event.group, props.event.group.waitingList] : [props.event.group],
+            allowEditGenerated: false,
+            types: [
+                EmailTemplateType.RegistrationConfirmation,
+            ],
+        };
     },
-    {
-        url: Routes.Webshop,
-        component: async () => {
-            return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
-        },
-        paramsToProps: ({ slug }: { slug: string }) => {
-            if (!webshop.value) {
-                throw new Error('Webshop not found');
-            }
+},
+{
+    url: Routes.Webshop,
+    component: async () => {
+        return (await import('@stamhoofd/dashboard/src/views/dashboard/webshop/WebshopOverview.vue')).default;
+    },
+    paramsToProps: ({ slug }: { slug: string }) => {
+        if (!webshop.value) {
+            throw new Error('Webshop not found');
+        }
 
-            return {
-                preview: webshop.value,
-            };
-        },
+        return {
+            preview: webshop.value,
+        };
     },
+},
 ]);
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();
