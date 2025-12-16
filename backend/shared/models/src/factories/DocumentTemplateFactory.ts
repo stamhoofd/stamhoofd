@@ -2,6 +2,7 @@ import { Factory } from '@simonbackx/simple-database';
 
 import { DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplateGroup, NamedObject, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { DocumentTemplate, Group } from '../models/index.js';
+import { OrganizationFactory } from './OrganizationFactory.js';
 
 class Options {
     groups: Group[];
@@ -9,11 +10,17 @@ class Options {
     updatesEnabled?: boolean;
     minPricePaid?: number | null;
     maxAge?: number | null;
+    year?: number | null;
 }
 
 export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> {
     async create(): Promise<DocumentTemplate> {
-        const organizationId = this.options.groups[0].organizationId;
+        let organizationId = this.options.groups[0]?.organizationId;
+
+        if (organizationId === undefined) {
+            const organization = await new OrganizationFactory({}).create();
+            organizationId = organization.id;
+        }
 
         const documentTemplate = new DocumentTemplate();
         documentTemplate.organizationId = organizationId;
@@ -31,6 +38,7 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
 
         documentTemplate.status = this.options.status ?? DocumentStatus.Draft;
         documentTemplate.updatesEnabled = this.options.updatesEnabled ?? true;
+        documentTemplate.year = this.options.year ?? 0;
 
         documentTemplate.settings = DocumentSettings.create({
             name: 'Test Document',
