@@ -165,6 +165,6 @@ function addDocument() {
 }
 
 async function openTemplate(template: DocumentTemplatePrivate) {
-    await $navigate(Routes.DocumentTemplate, { properties: { template } });
+    await $navigate(Routes.DocumentTemplate, { properties: { template, fiscalDocumentYears: fiscalDocumentYears.value } });
 }
 </script>
