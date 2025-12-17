@@ -33,7 +33,7 @@
                 <div v-for="category in categoryTree.categories" :key="category.id" class="container">
                     <hr><h2>{{ category.settings.name }}</h2>
                     <STList>
-                        <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" @click="selectGroup(group)">
+                        <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" :disabled="!filterGroup(group)" @click="selectGroup(group)">
                             <template #left>
                                 <GroupAvatar :group="group" />
                             </template>
@@ -80,7 +80,7 @@
 
             <template v-else>
                 <STList>
-                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" @click="selectGroup(event.group!)" />
+                    <EventRow v-for="event of fetcher.objects" :key="event.id" :event="event" :disabled="!filterGroup(event.group!)" @click="selectGroup(event.group!)" />
                 </STList>
                 <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`2a4caf43-3e88-45b6-b337-4c7036130769`)" />
             </template>
@@ -100,6 +100,7 @@ import { fiscal } from './definitions/fiscal';
 type ObjectType = Event;
 
 const props = defineProps<{
+    year: number;
     documentType: string;
     addGroup: (group: DocumentTemplateGroup, component: NavigationActions) => Promise<void> | void;
 }>();
@@ -157,9 +158,35 @@ watchEffect(() => {
     fetcher.setFilter(filter);
 });
 
-const { period, switchPeriod } = useSwitchablePeriod();
+const { period, switchPeriod: switchPeriodHelper } = useSwitchablePeriod();
+
+function switchPeriod(event: MouseEvent) {
+    // disable periods outside of the selected year
+    switchPeriodHelper(event, (p) => {
+        const startYear = p.startDate.getFullYear();
+        const endYear = p.endDate.getFullYear();
+
+        return props.year >= startYear && props.year <= endYear;
+    }).catch(console.error);
+}
+
+function filterGroup(group: Group): boolean {
+    const startYear = group.settings.startDate.getFullYear();
+    const endYear = group.settings.endDate.getFullYear();
+
+    return props.year >= startYear && props.year <= endYear;
+}
 
 async function selectGroup(group: Group) {
+    if (!filterGroup(group)) {
+        if (group.type === GroupType.EventRegistration) {
+            Toast.error($t('Deze activiteit ligt niet in kalenderjaar {year}', { year: props.year })).show();
+            return;
+        }
+        Toast.error($t('Deze groep ligt niet in kalenderjaar {year}', { year: props.year })).show();
+        return;
+    }
+
     try {
         await props.addGroup(DocumentTemplateGroup.create({
             group: NamedObject.create({

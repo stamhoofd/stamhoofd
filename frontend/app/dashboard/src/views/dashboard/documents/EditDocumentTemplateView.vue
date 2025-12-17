@@ -16,12 +16,15 @@
                         {{ _type.definition.name }}
                     </option>
                 </Dropdown>
-
-                <STInputBox :title="$t('Kalenderjaar')" error-fields="year" :error-box="errors.errorBox">
-                    <NumberInput v-model="year" :title="$t('Kalenderjaar')" :validator="errors.validator" :min="0" :max="currentYear" :stepper="true" />
-                </STInputBox>
             </LoadingButton>
         </STInputBox>
+
+        <STInputBox :title="$t('Kalenderjaar')" error-fields="year" :error-box="errors.errorBox">
+            <NumberInput v-model="year" :title="$t('Kalenderjaar')" :validator="errors.validator" :min="0" :max="currentYear" :stepper="!hasGroups" :disabled="hasGroups" />
+        </STInputBox>
+        <p v-if="hasGroups" class="style-description-small">
+            {{ $t('Je kan het kalenderjaar niet wijzigen nadat je inschrijvingen geselecteerd hebt.') }}
+        </p>
 
         <template v-if="!isDoubleFiscalDocumentInYear && (editingType || !isNew)">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
@@ -235,6 +238,8 @@ const editingType = computed({
     },
 });
 
+const hasGroups = computed(() => (patchedDocument.value?.privateSettings?.groups?.length ?? 0) > 0);
+
 const currentYear = new Date().getFullYear();
 const year = computed({
     get: () => patchedDocument.value?.year ?? currentYear,
@@ -245,15 +250,23 @@ const year = computed({
     },
 });
 
-const isDoubleFiscalDocumentInYear = computed(() => props.isNew && editingType.value === fiscal.type && props.fiscalDocumentYears.has(year.value));
+const isDoubleFiscalDocumentInYear = computed(() => {
+    if (props.isNew) {
+        return editingType.value === fiscal.type && props.fiscalDocumentYears.has(year.value);
+    }
+
+    return editingType.value === fiscal.type && props.document.year !== year.value && props.fiscalDocumentYears.has(year.value);
+});
+
+const doubleFiscalYearError = new SimpleError({
+    code: 'double_fiscal_document',
+    field: 'year',
+    message: $t('Je kan maximaal 1 fiscaal document per jaar maken.'),
+});
 
 watch(isDoubleFiscalDocumentInYear, (value) => {
     if (value) {
-        errors.errorBox = new ErrorBox(new SimpleError({
-            code: 'double_fiscal_document',
-            field: 'type',
-            message: $t('Je kan maximaal 1 fiscaal document per jaar maken.'),
-        }));
+        errors.errorBox = new ErrorBox(doubleFiscalYearError);
     }
     else {
         errors.errorBox = null;
@@ -753,6 +766,7 @@ async function addGroup() {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: new ComponentWithProperties(ChooseDocumentTemplateGroup, {
+                    year: year.value,
                     documentType: editingType.value,
                     addGroup: async (group: DocumentTemplateGroup, actions: NavigationActions) => {
                         await gotoGroupRecordCategory(group, actions, 0);
@@ -823,9 +837,8 @@ function removeGroup(group: DocumentTemplateGroup) {
 function validate() {
     const errors = new SimpleErrors();
 
-    const typeError = validateType();
-    if (typeError) {
-        errors.addError(typeError);
+    if (isDoubleFiscalDocumentInYear.value) {
+        errors.addError(doubleFiscalYearError);
     }
 
     if (patchedDocument.value.settings.name.length === 0) {
@@ -837,18 +850,6 @@ function validate() {
     }
 
     errors.throwIfNotEmpty();
-}
-
-function validateType(): SimpleError | null {
-    if (isDoubleFiscalDocumentInYear.value) {
-        return new SimpleError({
-            code: 'double_fiscal_document',
-            field: 'type',
-            message: $t('Je kan maximaal 1 fiscaal document per jaar maken.'),
-        });
-    }
-
-    return null;
 }
 
 async function save() {
