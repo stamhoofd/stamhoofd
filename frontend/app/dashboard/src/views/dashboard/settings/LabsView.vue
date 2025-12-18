@@ -64,7 +64,7 @@
         <hr><h2>{{ $t('ae010586-e7f2-4551-a486-77d4a92ec76b') }}</h2>
 
         <STList>
-            <STListItem v-if="!enableBuckaroo && false" :selectable="true" element-name="label">
+            <STListItem v-if="!enableBuckaroo && ($isStamhoofd || STAMHOOFD.environment === 'development')" :selectable="true" element-name="label">
                 <template #left>
                     <Checkbox v-model="forceMollie" />
                 </template>
