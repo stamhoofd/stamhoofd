@@ -83,8 +83,8 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
         if (organization.value === null) {
             all.push(
                 new GroupUIFilterBuilder({
-                    name: $t('Organisatie'),
-                    description: $t('Filter op organisatie waarvoor is ingeschreven'),
+                    name: $t('7d0a5e21-6573-4e84-89f8-5af81d2d3c8a'),
+                    description: $t('ba255ee3-2907-4f3a-aa16-60cd997fcf15'),
                     builders: getOrganizationUIFilterBuilders(auth.user),
                     wrapper: {
                         organization: {
@@ -118,7 +118,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
                     },
                 }),
                 new MultipleChoiceFilterBuilder({
-                    name: $t('Type'),
+                    name: $t('4fda497f-b2d8-43ef-b08c-a3e4e0b472b4'),
                     options: Object.values(GroupType)
                         .map((type) => {
                             return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(getGroupTypeName(type)), type);
@@ -150,7 +150,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
 
             all.push(
                 new GroupUIFilterBuilder({
-                    name: $t('Inschrijvingsgroep'),
+                    name: $t('877284d7-31b4-4857-a963-405b4139adc2'),
                     builders: groupFilters,
                     wrapper: {
                         group: {
