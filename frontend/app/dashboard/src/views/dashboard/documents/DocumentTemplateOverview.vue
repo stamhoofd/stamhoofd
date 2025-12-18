@@ -128,7 +128,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, FillRecordCategoryView, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, FillRecordCategoryView, GlobalEventBus, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
@@ -281,6 +281,10 @@ async function deleteTemplate() {
             timeout: 60 * 1000,
             owner: requestOwner,
         });
+
+        GlobalEventBus.sendEvent('document-template-deleted', props.template).catch(console.error);
+        Toast.success($t('Het document is verwijderd')).show();
+
         pop({ force: true })?.catch(console.error);
     }
     catch (e) {

@@ -8,3 +8,4 @@ export * from './useOrganizationsObjectFetcher';
 export * from './usePaymentsObjectFetcher';
 export * from './useReceivableBalancesObjectFetcher';
 export * from './useUserEmailsObjectFetcher';
+export * from './useDocumentTemplatesObjectFetcher';

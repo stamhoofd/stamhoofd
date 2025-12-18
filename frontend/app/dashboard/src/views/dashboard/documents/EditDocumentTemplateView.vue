@@ -242,7 +242,7 @@ const hasGroups = computed(() => (patchedDocument.value?.privateSettings?.groups
 
 const currentYear = new Date().getFullYear();
 const year = computed({
-    get: () => patchedDocument.value?.year ?? currentYear,
+    get: () => patchedDocument.value?.year,
     set: (value: number) => {
         addPatch({
             year: value,
