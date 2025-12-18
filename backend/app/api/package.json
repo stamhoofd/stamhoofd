@@ -60,7 +60,7 @@
         "@stamhoofd/structures": "2.108.0",
         "@stamhoofd/utility": "2.108.0",
         "archiver": "^7.0.1",
-        "axios": "^1.8.2",
+        "axios": "^1.13.2",
         "cookie": "^0.7.0",
         "formidable": "3.5.4",
         "handlebars": "^4.7.7",
