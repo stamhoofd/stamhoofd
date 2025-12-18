@@ -16,11 +16,11 @@
         "@simonbackx/simple-errors": "^1.5"
     },
     "devDependencies": {
-        "@types/nodemailer": "6.4.14"
+        "@types/nodemailer": "^7"
     },
     "dependencies": {
         "html-to-text": "^8.1.0",
-        "nodemailer": "6.9.13"
+        "nodemailer": "^7"
     },
     "publishConfig": {
         "access": "public"
