@@ -43,5 +43,12 @@ export async function build(service: Service) {
         });
     }
 
+    if ('frontend' in service) {
+        // Mollie client id is required in the frontend
+        Object.assign(config, {
+            MOLLIE_CLIENT_ID: await read1PasswordCli('op://Localhost/Mollie/MOLLIE_CLIENT_ID', { optional: true }),
+        });
+    }
+
     return config;
 }
