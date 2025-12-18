@@ -98,7 +98,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
         dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
                 id: 'member.continuousMembership',
-                name: $t('Doorlopende aansluiting'),
+                name: $t('24626f0c-5a0f-4ef6-bb66-f76279b64bfc'),
                 getValue: registration => registration.member.getContinuousMembershipStatus(dateRange!),
                 format: (status) => {
                     switch (status) {
@@ -413,7 +413,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date>({
             id: 'member.createdAt',
-            name: $t('Aanmaakdatum lid'),
+            name: $t('63a86cdf-8a76-4e8c-9073-4f0b8970e808'),
             allowSorting: true,
             getValue: registration => registration.member.member.createdAt,
             format: (v, width) => width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true)),
@@ -561,7 +561,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 ? new Column<ObjectType, GroupType>({
                     id: 'group.type',
                     allowSorting: false,
-                    name: $t('Type'),
+                    name: $t('4fda497f-b2d8-43ef-b08c-a3e4e0b472b4'),
                     getValue: (registration) => {
                         return registration.group.type;
                     },
