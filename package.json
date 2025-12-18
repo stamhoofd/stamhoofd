@@ -119,7 +119,6 @@
     "@playwright/test": "^1.56.1"
   },
   "resolutions": {
-    "**/@mollie/api-client/axios": "^0.30.0",
     "vue": "3.5.17",
     "elliptic": "^6.5.4",
     "sortablejs": "1.15.6",
