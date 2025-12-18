@@ -580,6 +580,10 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         }
         const state = Buffer.from(crypto.getRandomValues(new Uint32Array(16))).toString('base64');
         await Storage.keyValue.setItem('mollie-saved-state', state);
+        // Make sure we redirect teh fixed /oauth/mollie to the correct organization url
+        const realRedirectUrl = new URL(window.location.href);
+        realRedirectUrl.pathname = realRedirectUrl.pathname + '/oauth/mollie';
+        await Storage.keyValue.setItem('mollie-saved-redirect-url', realRedirectUrl.pathname);
 
         const scope = 'payments.read payments.write refunds.read refunds.write organizations.read organizations.write onboarding.read onboarding.write profiles.read profiles.write subscriptions.read subscriptions.write mandates.read mandates.write settlements.read orders.read orders.write';
         const url = 'https://www.mollie.com/oauth2/authorize?client_id=' + encodeURIComponent(client_id) + '&state=' + encodeURIComponent(state) + '&scope=' + encodeURIComponent(scope) + '&response_type=code&approval_prompt=force&locale=nl_BE';
@@ -634,6 +638,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             toast.hide();
             new Toast('Mollie is gekoppeld', 'success green').show();
             await Storage.keyValue.removeItem('mollie-saved-state');
+            await Storage.keyValue.removeItem('mollie-saved-redirect-url');
         }
         catch (e) {
             console.error(e);
@@ -647,20 +652,18 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     lastAddedStripeAccount: string | null = null;
 
     mounted() {
-        const parts = UrlHelper.shared.getParts();
         const urlParams = UrlHelper.shared.getSearchParams();
 
-        console.log(urlParams);
-
-        if (parts.length === 2 && parts[0] === 'oauth' && parts[1] === 'mollie') {
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
+        const mollieMatch = this.$url.match('/oauth/mollie');
+        if (mollieMatch) {
+            const code = mollieMatch.query.get('code');
+            const state = mollieMatch.query.get('state');
 
             if (code && state) {
                 this.doLinkMollie(code, state).catch(console.error);
             }
             else {
-                const error = urlParams.get('error') ?? '';
+                const error = mollieMatch.query.get('error') ?? '';
                 if (error) {
                     new Toast('Koppelen mislukt', 'error red').show();
                 }
