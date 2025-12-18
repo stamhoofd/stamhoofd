@@ -5,10 +5,10 @@ backendEnv.load({ service: 'api' }).catch((error) => {
     process.exit(1);
 }).then(async () => {
     if (STAMHOOFD.environment === 'development') {
-        const { run } = await import('./src/migrate');
+        const { run } = await import('./src/migrate.js');
         await run();
     }
-    const { boot } = await import('./src/boot');
+    const { boot } = await import('./src/boot.js');
 
     boot({ killProcess: true }).catch((error) => {
         console.error('unhandledRejection', error);
