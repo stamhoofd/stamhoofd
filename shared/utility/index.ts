@@ -7,3 +7,4 @@ export * from './src/Sorter.js';
 export * from './src/StringCompare.js';
 export * from './src/Throttle.js';
 export * from './src/deepFreeze.js';
+export * from './src/FiscalDocumentHelper.js';

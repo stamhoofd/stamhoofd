@@ -65,10 +65,9 @@
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { InfiniteObjectFetcherEnd, ScrollableSegmentedControl, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useDocumentTemplatesObjectFetcher, useGlobalEventListener, useInfiniteObjectFetcher, usePositionableSheet, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate, isEmptyFilter, StamhoofdFilter } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { FiscalDocumentHelper, Formatter } from '@stamhoofd/utility';
 
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/src/filters/filter-builders/document-templates';
-import { DateTime } from 'luxon';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
@@ -85,10 +84,8 @@ enum TabItem {
     Archive = 'Archive',
 }
 
-const now = getCurrentDateTimeInBelgium();
-const currentYear = now.year;
-const currentMonth = now.month;
-const firstYearToShow = getDefaultYear();
+const fiscalDocumentHelper = new FiscalDocumentHelper();
+const firstYearToShow = fiscalDocumentHelper.defaultCalendarYear;
 
 const organization = useRequiredOrganization();
 const present = usePresent();
@@ -165,20 +162,6 @@ const filterBuilders = getDocumentTemplateUIFilterBuilders();
 const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
 
 const fiscalDocumentYears = computed(() => new Set(templates.value.filter(t => t.privateSettings.templateDefinition.type === fiscal.type).map(t => t.year)));
-
-function getCurrentDateTimeInBelgium() {
-    return DateTime.now()
-        .setZone('Europe/Brussels');
-}
-
-function getDefaultYear() {
-    // Before March we want to show the previous year
-    if (currentMonth < 3) {
-        return currentYear - 1;
-    }
-
-    return currentYear;
-}
 
 watchEffect(() => {
     fetcher.setSearchQuery(searchQuery.value);
