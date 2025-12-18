@@ -11,7 +11,7 @@ import { ComponentWithProperties, HistoryManager, ModalStackComponent, PushOptio
 import { getScopedAdminRootFromUrl } from '@stamhoofd/admin-frontend';
 import { CenteredMessage, CenteredMessageView, ModalStackEventBus, PromiseView, ReplaceRootEventBus, Toast, ToastBox } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { AppManager, LoginHelper, NetworkManager, SessionContext, UrlHelper } from '@stamhoofd/networking';
+import { AppManager, LoginHelper, NetworkManager, SessionContext, Storage, UrlHelper } from '@stamhoofd/networking';
 import { getScopedRegistrationRootFromUrl } from '@stamhoofd/registration';
 import { Country, EmailAddressSettings, Language, Platform, uriToApp } from '@stamhoofd/structures';
 import { nextTick, onMounted, Ref, ref } from 'vue';
@@ -34,7 +34,23 @@ const root = new ComponentWithProperties(PromiseView, {
         try {
             let app: 'dashboard' | 'admin' | 'registration' | 'auto' = 'auto';
 
-            const parts = UrlHelper.shared.getParts();
+            let parts = UrlHelper.shared.getParts();
+
+            // Check mollie oauth redirect replacement
+            // We cannot customize the redirect url for Mollie, but that causes us not to know to which organization url we need to redirect after oauth
+            if (parts[0] === 'oauth' && parts[1] === 'mollie') {
+                const savedRedirectUrl = await Storage.keyValue.getItem('mollie-saved-redirect-url');
+                if (savedRedirectUrl) {
+                    // Redirect to the saved URL (removing /oauth/mollie)
+                    UrlHelper.shared.url.pathname = savedRedirectUrl;
+                    console.log('Redirecting to saved mollie redirect url', savedRedirectUrl);
+                    parts = UrlHelper.shared.getParts();
+                }
+                else {
+                    console.warn('No saved mollie redirect url found');
+                }
+            }
+
             if (parts.length >= 1) {
                 app = uriToApp(parts[0]);
             }
