@@ -1,3 +1,5 @@
+import { fiscal } from '@stamhoofd/dashboard/src/views/dashboard/documents/definitions/fiscal';
+import { participation } from '@stamhoofd/dashboard/src/views/dashboard/documents/definitions/participation';
 import { DocumentStatus, DocumentStatusHelper, FilterWrapperMarker } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -16,6 +18,21 @@ export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
         new NumberFilterBuilder({
             name: $t(`Kalenderjaar`),
             key: 'year',
+        }),
+        new MultipleChoiceFilterBuilder({
+            name: $t(`Type`),
+            options: [fiscal, participation]
+                .map((definition) => {
+                    return new MultipleChoiceUIFilterOption(
+                        definition.name,
+                        definition.type,
+                    );
+                }),
+            wrapper: {
+                type: {
+                    $in: FilterWrapperMarker,
+                },
+            },
         }),
         new DateFilterBuilder({
             name: $t(`52961dd4-be19-47a1-abe6-1e3c34e8157c`),

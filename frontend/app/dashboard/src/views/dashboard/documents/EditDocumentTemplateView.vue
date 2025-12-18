@@ -20,13 +20,13 @@
         </STInputBox>
 
         <STInputBox :title="$t('Kalenderjaar')" error-fields="year" :error-box="errors.errorBox">
-            <NumberInput v-model="year" :title="$t('Kalenderjaar')" :validator="errors.validator" :min="0" :max="currentYear" :stepper="!hasGroups" :disabled="hasGroups" />
+            <NumberInput v-model="year" :title="$t('Kalenderjaar')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
         </STInputBox>
         <p v-if="hasGroups" class="style-description-small">
             {{ $t('Je kan het kalenderjaar niet wijzigen nadat je inschrijvingen geselecteerd hebt.') }}
         </p>
 
-        <template v-if="!isDoubleFiscalDocumentInYear && (editingType || !isNew)">
+        <template v-if="(editingType || !isNew)">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                 <input v-model="name" class="input" type="text" :placeholder="$t(`2fe38a3a-0041-4724-869e-4a5b55634380`)">
             </STInputBox>
@@ -124,10 +124,10 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useAuth, useContext, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useAuth, useContext, useDocumentTemplatesObjectFetcher, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
-import { Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
-import { Formatter, StringCompare } from '@stamhoofd/utility';
+import { CountFilteredRequest, Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
+import { FiscalDocumentHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
@@ -136,7 +136,6 @@ import { participation } from './definitions/participation';
 
 const props = withDefaults(defineProps<{
     isNew: boolean;
-    fiscalDocumentYears: Set<number>;
     document: DocumentTemplatePrivate;
     callback?: ((template: DocumentTemplatePrivate) => void) | null;
 }>(), {
@@ -151,6 +150,7 @@ const loadingXml = ref(false);
 const fieldCategories = computed(() => RecordCategory.flattenCategories(patchedDocument.value.privateSettings.templateDefinition.fieldCategories, patchedDocument.value));
 const documentFieldCategories = computed(() => patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories.filter(c => c.getAllRecords().filter(r => isDocumentFieldEditable(r)).length > 0));
 const auth = useAuth();
+const fiscalDocumentHelper = new FiscalDocumentHelper();
 
 function isDocumentFieldEditable(field: RecordSettings) {
     const supportedFields = getDefaultSupportedIds();
@@ -240,7 +240,6 @@ const editingType = computed({
 
 const hasGroups = computed(() => (patchedDocument.value?.privateSettings?.groups?.length ?? 0) > 0);
 
-const currentYear = new Date().getFullYear();
 const year = computed({
     get: () => patchedDocument.value?.year,
     set: (value: number) => {
@@ -250,23 +249,104 @@ const year = computed({
     },
 });
 
-const isDoubleFiscalDocumentInYear = computed(() => {
-    if (props.isNew) {
-        return editingType.value === fiscal.type && props.fiscalDocumentYears.has(year.value);
+const fetcher = useDocumentTemplatesObjectFetcher();
+const yearsWithFiscalDocumentsCache = ref(new Set<number>());
+
+async function doesYearAlreadyHaveFiscalDocument(year: number) {
+    if (yearsWithFiscalDocumentsCache.value.has(year)) {
+        return true;
     }
 
-    return editingType.value === fiscal.type && props.document.year !== year.value && props.fiscalDocumentYears.has(year.value);
-});
+    const count = await fetcher.fetchCount(
+        new CountFilteredRequest({
+            filter: {
+                $and: [
+                    { year },
+                    { type: fiscal.type },
+                ],
+            },
+        }),
+    );
 
-const doubleFiscalYearError = new SimpleError({
-    code: 'double_fiscal_document',
-    field: 'year',
-    message: $t('Je kan maximaal 1 fiscaal document per jaar maken.'),
-});
+    if (count > 0) {
+        yearsWithFiscalDocumentsCache.value.add(year);
+        return true;
+    }
 
-watch(isDoubleFiscalDocumentInYear, (value) => {
-    if (value) {
-        errors.errorBox = new ErrorBox(doubleFiscalYearError);
+    return false;
+}
+
+function validateYearSync(value: number = year.value): SimpleError | null {
+    const isFiscal = editingType.value === fiscal.type;
+
+    if (isFiscal) {
+        if (value === fiscalDocumentHelper.year && !fiscalDocumentHelper.canCreateFiscalDocumentForCurrentYear) {
+            return new SimpleError({
+                code: 'invalid_year',
+                field: 'year',
+                message: $t('Je kan pas vanaf november een fiscaal attest maken voor het huidige jaar.'),
+            });
+        }
+
+        if (value > fiscalDocumentHelper.year) {
+            return new SimpleError({
+                code: 'invalid_year',
+                field: 'year',
+                message: $t('Je kan geen fiscaal attest maken voor een kalenderjaar dat nog niet is gestart.'),
+            });
+        }
+
+        /**
+         * Throw an error if the fiscal year (= year after calendar year) is over for the calendar year.
+         * Example 1:
+         * current year = 2025
+         * value = 2024
+         * fiscal year = 2025 -> no error (because fiscal year is not over)
+         *
+         * Example 2:
+         * current year = 2025
+         * value = 2023
+         * fiscal year = 2024 -> error (because fiscal year is over)
+         */
+        const fiscalYear = value + 1;
+        if (fiscalYear < fiscalDocumentHelper.year) {
+            return new SimpleError({
+                code: 'invalid_year',
+                field: 'year',
+                message: $t('Je kan geen fiscaal attest meer aanmaken voor dit kalenderjaar, omdat het bijhorende aanslagjaar in de personenbelasting al is afgesloten.'),
+            });
+        }
+    }
+
+    return null;
+}
+
+async function validateYearAsync(value: number = year.value): Promise<SimpleError | null> {
+    // first check synchronous error
+    const error = validateYearSync(value);
+    if (error) {
+        return error;
+    }
+
+    const isFiscal = editingType.value === fiscal.type;
+
+    if (isFiscal) {
+        if (await doesYearAlreadyHaveFiscalDocument(value)) {
+            return new SimpleError({
+                code: 'double_fiscal_document',
+                field: 'year',
+                message: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+            });
+        }
+    }
+
+    return null;
+}
+
+watch(() => [year.value, editingType.value] as [number, string | null], async ([value]) => {
+    const yearError = await validateYearAsync(value);
+    if (yearError) {
+        errors.errorBox = new ErrorBox(yearError);
     }
     else {
         errors.errorBox = null;
@@ -834,11 +914,12 @@ function removeGroup(group: DocumentTemplateGroup) {
     });
 }
 
-function validate() {
+async function validate() {
     const errors = new SimpleErrors();
 
-    if (isDoubleFiscalDocumentInYear.value) {
-        errors.addError(doubleFiscalYearError);
+    const yearError = await validateYearAsync();
+    if (yearError) {
+        errors.addError(yearError);
     }
 
     if (patchedDocument.value.settings.name.length === 0) {
@@ -861,12 +942,13 @@ async function save() {
     errors.errorBox = null;
 
     try {
+        await validate();
+
         if (!await errors.validator.validate()) {
             saving.value = false;
             return;
         }
 
-        validate();
         const patch: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>;
 
         if (props.isNew) {

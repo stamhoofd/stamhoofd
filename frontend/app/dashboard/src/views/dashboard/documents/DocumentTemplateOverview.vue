@@ -138,7 +138,6 @@ import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 
 const props = defineProps<{
-    fiscalDocumentYears: Set<number>;
     template: DocumentTemplatePrivate;
 }>();
 
@@ -172,7 +171,6 @@ defineRoutes([
         paramsToProps() {
             return {
                 isNew: false,
-                fiscalDocumentYears: props.fiscalDocumentYears,
                 document: props.template,
             };
         },

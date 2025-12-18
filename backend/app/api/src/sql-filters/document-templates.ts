@@ -37,4 +37,9 @@ export const documentTemplateFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    type: createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'),
+        type: SQLValueType.JSONString,
+        nullable: false,
+    }),
 };

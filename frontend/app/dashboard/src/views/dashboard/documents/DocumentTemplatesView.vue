@@ -64,14 +64,13 @@
 <script lang="ts" setup>
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { InfiniteObjectFetcherEnd, ScrollableSegmentedControl, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useDocumentTemplatesObjectFetcher, useGlobalEventListener, useInfiniteObjectFetcher, usePositionableSheet, useRequiredOrganization } from '@stamhoofd/components';
-import { DocumentTemplatePrivate, isEmptyFilter, StamhoofdFilter } from '@stamhoofd/structures';
+import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { FiscalDocumentHelper, Formatter } from '@stamhoofd/utility';
 
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/src/filters/filter-builders/document-templates';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
 import DocumentTemplateOverview from './DocumentTemplateOverview.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
-import { fiscal } from './definitions/fiscal';
 
 type ObjectType = DocumentTemplatePrivate;
 
@@ -95,36 +94,48 @@ const { presentPositionableSheet } = usePositionableSheet();
 defineRoutes([
     {
         name: Routes.DocumentTemplate,
-        url: '@slug',
+        url: '@id',
         component: DocumentTemplateOverview as ComponentOptions,
         params: {
-            slug: String,
+            id: String,
         },
-        paramsToProps: async (params: { slug: string }) => {
-            // todo
-            const loadedTemplates = templates.value;
-
-            const template = loadedTemplates.find(t => Formatter.slug(t.settings.name) === params.slug);
+        paramsToProps: async (params: { id: string }) => {
+            let template = templates.value.find(t => t.id === params.id);
             if (!template) {
-                Toast.error('Document niet gevonden').show();
-                throw new Error('Document not found');
+                // Fetch template
+                const templates = await fetcher.objectFetcher.fetch(
+                    new LimitedFilteredRequest({
+                        filter: {
+                            id: params.id,
+                        },
+                        limit: 1,
+                        sort: [],
+                    }),
+                );
+
+                if (templates.results.length === 1) {
+                    template = templates.results[0];
+                }
+                else {
+                    Toast.error('Document niet gevonden').show();
+                    throw new Error('Document not found');
+                }
             }
 
             return {
                 template,
-                fiscalDocumentYears: fiscalDocumentYears.value,
             };
         },
 
         propsToParams(props) {
             if (!('template' in props) || typeof props.template !== 'object' || props.template === null || !(props.template instanceof DocumentTemplatePrivate)) {
-                throw new Error('Missing event');
+                throw new Error('Missing document');
             }
             const template = props.template;
 
             return {
                 params: {
-                    slug: Formatter.slug(template.settings.name),
+                    id: template.id,
                 },
             };
         },
@@ -161,8 +172,6 @@ const yearLabels = tabItems.map((y) => {
 const filterBuilders = getDocumentTemplateUIFilterBuilders();
 const selectedUIFilter = ref(null) as Ref<null | UIFilter>;
 
-const fiscalDocumentYears = computed(() => new Set(templates.value.filter(t => t.privateSettings.templateDefinition.type === fiscal.type).map(t => t.year)));
-
 watchEffect(() => {
     fetcher.setSearchQuery(searchQuery.value);
     const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
@@ -185,7 +194,6 @@ function addDocument() {
         components: [
             new ComponentWithProperties(EditDocumentTemplateView, {
                 isNew: true,
-                fiscalDocumentYears: fiscalDocumentYears.value,
                 document: DocumentTemplatePrivate.create({
                     year: firstYearToShow,
                 }),
@@ -200,7 +208,7 @@ function addDocument() {
 }
 
 async function openTemplate(template: DocumentTemplatePrivate) {
-    await navigate(Routes.DocumentTemplate, { properties: { template, fiscalDocumentYears: fiscalDocumentYears.value } });
+    await navigate(Routes.DocumentTemplate, { properties: { template } });
 }
 
 async function editFilter(event: MouseEvent) {
