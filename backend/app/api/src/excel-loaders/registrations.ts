@@ -80,7 +80,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'registeredAt',
-            name: $t(`Inschrijvingsdatum`),
+            name: $t(`8bec8990-4632-40b0-93f3-f27a3f2ddbdb`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.registeredAt,
@@ -106,7 +106,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'createdAt',
-            name: $t('Aanmaakdatum lid'),
+            name: $t('63a86cdf-8a76-4e8c-9073-4f0b8970e808'),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.member.member.createdAt,
@@ -161,7 +161,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'trialUntil',
-            name: $t(`Proefperiode`),
+            name: $t(`1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0`),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 let value: Date | null = null;
@@ -328,7 +328,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'group.type',
-            name: $t('Type'),
+            name: $t('4fda497f-b2d8-43ef-b08c-a3e4e0b472b4'),
             width: 20,
             getValue: (registration: PlatformRegistration) => {
                 return {

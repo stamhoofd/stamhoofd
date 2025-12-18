@@ -644,7 +644,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`8ce0947e-8681-4abd-b8ef-27d0218fa4a1`);
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
-            case BalanceItemType.Rounding: return $t(`Afrondingscorrectie`);
+            case BalanceItemType.Rounding: return $t(`e50caf1a-fe3d-4b35-8b69-eee76406ecbc`);
         }
     }
 

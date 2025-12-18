@@ -20,10 +20,10 @@ export enum GroupType {
 export function getGroupTypeName(type: GroupType) {
     switch (type) {
         case GroupType.Membership:
-            return $t('Inschrijvingsgroep');
+            return $t('877284d7-31b4-4857-a963-405b4139adc2');
         case GroupType.WaitingList:
-            return $t('Wachtlijst');
+            return $t('565a7968-e547-411e-aaff-6f936c128d5f');
         case GroupType.EventRegistration:
-            return $t('Activiteit');
+            return $t('614dbf30-ddf8-4e85-9da3-cc8d30f7ac77');
     }
 }

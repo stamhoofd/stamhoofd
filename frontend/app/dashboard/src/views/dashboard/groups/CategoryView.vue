@@ -54,7 +54,7 @@
                         </template>
 
                         <h2 class="style-title-list bolder">
-                            {{ shouldShowRegistrations ? $t('Alle inschrijvingen in deze categorie') : $t('33119a7d-4e82-4123-8742-dc7ec6da4a30') }}
+                            {{ shouldShowRegistrations ? $t('f068fe03-0b53-4ee2-bdc2-40dda5f6996c') : $t('33119a7d-4e82-4123-8742-dc7ec6da4a30') }}
                         </h2>
                         <template #right>
                             <span v-if="getMemberCount() !== null" class="style-description-small">{{ getMemberCount() }}</span>
@@ -205,7 +205,7 @@ const name = computed(() => {
 });
 
 const title = computed(() => {
-    return isRoot.value ? $t('Alle inschrijvingsgroepen') : name.value + '';
+    return isRoot.value ? $t('4dbf7584-7fe1-43d1-9bc8-a0d265865716') : name.value + '';
 });
 
 const canCreate = computed(() => {

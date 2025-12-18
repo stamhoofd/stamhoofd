@@ -187,7 +187,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
                         ? new SelectableColumn({
                             id: 'group.type',
-                            name: $t('Type'),
+                            name: $t('4fda497f-b2d8-43ef-b08c-a3e4e0b472b4'),
                             enabled: false,
                         })
                         : null,
@@ -209,7 +209,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'price',
-            name: $t(`Prijs`),
+            name: $t(`1205deb9-498d-435d-a6e1-91ea98371523`),
         }),
         new SelectableColumn({
             id: 'toPay',
@@ -218,7 +218,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'registeredAt',
-            name: $t(`Inschrijvingsdatum`),
+            name: $t(`8bec8990-4632-40b0-93f3-f27a3f2ddbdb`),
             enabled: false,
         }),
         new SelectableColumn({
@@ -228,7 +228,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'createdAt',
-            name: $t('Aanmaakdatum lid'),
+            name: $t('63a86cdf-8a76-4e8c-9073-4f0b8970e808'),
             enabled: false,
         }),
         // id of registration

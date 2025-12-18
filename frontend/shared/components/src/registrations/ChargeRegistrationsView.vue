@@ -23,7 +23,7 @@ function getDescription({ count }: { count: number }) {
         return $t('04606184-d9d9-4cb0-a98a-a4457f1d0293');
     }
 
-    return $t('Reken een bedrag aan de leden voor de {count} geselecteerde inschrijvingen. Als leden meerdere keren ingeschreven zijn dan wordt het bedrag slechts één keer aangerekend per lid.', { count: count.toString() });
+    return $t('0dd37ff6-b713-4ca3-a287-62cea3b6bcc6', { count: count.toString() });
 }
 
 // todo
@@ -32,6 +32,6 @@ function getConfirmationText({ total, count }: { total: string; count: number | 
         return $t('173a325e-049d-4ce1-a220-e75c37e99b01', { total });
     }
 
-    return $t('Weet je zeker dat je {total} wilt aanrekenen aan de leden voor de {count} inschrijvingen?', { total, count: count === null ? '?' : count.toString() });
+    return $t('c380d4e3-10cf-4649-89fb-6fa86aa93f5a', { total, count: count === null ? '?' : count.toString() });
 }
 </script>

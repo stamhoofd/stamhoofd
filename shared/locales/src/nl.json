@@ -5868,5 +5868,21 @@
   "cfd5d1ac-6997-45b5-bba5-3629695f4a8b": "Een terugbetaling van jouw vereniging richting een lid of supporter",
   "b15e330d-589f-4709-b34a-a3c29389650c": "Een terugvordering maakt een eerder gelukte betaling van een lid of supporter ongedaan, zonder enige tussenkomst van jouw vereniging. Bv. bij een laattijdig mislukte betaling of een terugvordering via de creditcard of bank.",
   "01225a70-b108-4f12-ad86-46e7b23a1043": "Positieve en negatieve openstaande bedragen worden samengebracht zodat het totaal op 0 euro uitkomt, zodat die items elkaar opheffen.",
-  "d7b87b55-d76c-420a-a88e-c571edb75e7b": "Deze filter wordt niet ondersteund of er ging iets fout met deze filter"
+  "d7b87b55-d76c-420a-a88e-c571edb75e7b": "Deze filter wordt niet ondersteund of er ging iets fout met deze filter",
+  "63a86cdf-8a76-4e8c-9073-4f0b8970e808": "Aanmaakdatum lid",
+  "4fda497f-b2d8-43ef-b08c-a3e4e0b472b4": "Type",
+  "8bec8990-4632-40b0-93f3-f27a3f2ddbdb": "Inschrijvingsdatum",
+  "1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0": "Proefperiode",
+  "f068fe03-0b53-4ee2-bdc2-40dda5f6996c": "Alle inschrijvingen in deze categorie",
+  "4dbf7584-7fe1-43d1-9bc8-a0d265865716": "Alle inschrijvingsgroepen",
+  "7d0a5e21-6573-4e84-89f8-5af81d2d3c8a": "Organisatie",
+  "ba255ee3-2907-4f3a-aa16-60cd997fcf15": "Filter op organisatie waarvoor is ingeschreven",
+  "877284d7-31b4-4857-a963-405b4139adc2": "Inschrijvingsgroep",
+  "24626f0c-5a0f-4ef6-bb66-f76279b64bfc": "Doorlopende aansluiting",
+  "0dd37ff6-b713-4ca3-a287-62cea3b6bcc6": "Reken een bedrag aan de leden voor de {count} geselecteerde inschrijvingen. Als leden meerdere keren ingeschreven zijn dan wordt het bedrag slechts één keer aangerekend per lid.",
+  "c380d4e3-10cf-4649-89fb-6fa86aa93f5a": "Weet je zeker dat je {total} wilt aanrekenen aan de leden voor de {count} inschrijvingen?",
+  "1205deb9-498d-435d-a6e1-91ea98371523": "Prijs",
+  "e50caf1a-fe3d-4b35-8b69-eee76406ecbc": "Afrondingscorrectie",
+  "565a7968-e547-411e-aaff-6f936c128d5f": "Wachtlijst",
+  "614dbf30-ddf8-4e85-9da3-cc8d30f7ac77": "Activiteit"
 }
