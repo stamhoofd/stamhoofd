@@ -27,7 +27,7 @@ export class FiscalDocumentYearHelper {
     /**
      * Previous year if no fiscal document can be created for the current year. Otherwise the current year.
      */
-    get defaultCalendarYear() {
+    get defaultCalendarYear(): number {
         if (this.month <= this.allowCreationAfterMonth) {
             return this.year - 1;
         }
@@ -38,7 +38,24 @@ export class FiscalDocumentYearHelper {
     /**
      * Returns if a fiscal document for this year can be created.
      */
-    get canCreateFiscalDocumentForCurrentYear() {
+    get canCreateFiscalDocumentForCurrentYear(): boolean {
         return this.month > this.allowCreationAfterMonth;
+    }
+
+    /**
+     * Max publish date is before 1 march of next year.
+     */
+    getPublishDeadlineForYear(calendarYear: number): DateTime {
+        // max publish date is before 1 march of next year
+        return DateTime.fromObject({ year: calendarYear + 1, month: 3, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: 'Europe/Brussels' });
+    }
+
+    /**
+     * Check if the fiscal document XML can be downloaded. It can be downloaded if the fiscal document was created after the max publish date or if now is before the max publish date.
+     */
+    canDownloadFiscalDocumentXML(calendarYear: number, createdAt: Date): boolean {
+        const deadline = this.getPublishDeadlineForYear(calendarYear).toJSDate();
+        // if created after max publish date or if now is before max publish date
+        return createdAt.getTime() >= deadline.getTime() || new Date().getTime() < deadline.getTime();
     }
 }
