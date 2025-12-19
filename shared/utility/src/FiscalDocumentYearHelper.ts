@@ -45,17 +45,17 @@ export class FiscalDocumentYearHelper {
     /**
      * Max publish date is before 1 march of next year.
      */
-    getPublishDeadlineForYear(calendarYear: number): Date {
+    getPublishDeadlineForYear(calendarYear: number): DateTime {
         // max publish date is before 1 march of next year
-        return new Date(DateTime.fromObject({ year: calendarYear + 1, month: 3, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: 'Europe/Brussels' }).toJSDate().getTime() - 1);
+        return DateTime.fromObject({ year: calendarYear + 1, month: 3, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: 'Europe/Brussels' });
     }
 
     /**
      * Check if the fiscal document XML can be downloaded. It can be downloaded if the fiscal document was created after the max publish date or if now is before the max publish date.
      */
     canDownloadFiscalDocumentXML(calendarYear: number, createdAt: Date): boolean {
-        const deadline = this.getPublishDeadlineForYear(calendarYear);
+        const deadline = this.getPublishDeadlineForYear(calendarYear).toJSDate();
         // if created after max publish date or if now is before max publish date
-        return createdAt.getTime() > deadline.getTime() || new Date().getTime() <= deadline.getTime();
+        return createdAt.getTime() >= deadline.getTime() || new Date().getTime() < deadline.getTime();
     }
 }

@@ -298,10 +298,8 @@ function exportXml() {
     // if fiscal document
     if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
         const canDownload = fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year, props.template.createdAt);
-
         if (!canDownload) {
-            const deadline = fiscalDocumentYearHelper.getPublishDeadlineForYear(props.template.year);
-            Toast.error($t('De deadline voor het indienen van het fiscaal attest is verstreken ({deadline}).', { deadline: Formatter.date(deadline) })).show();
+            Toast.error($t('De indiendatum van het fiscaal attest is verstreken. Een fiscaal attest moet ingediend worden voor 1 maart van het jaar volgend op het kalenderjaar van het document.')).show();
             return;
         }
     }
