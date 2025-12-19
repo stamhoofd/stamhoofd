@@ -7,10 +7,8 @@ export async function initPublishedAtForPublishedDocuments() {
     await SQL.update(DocumentTemplate.table)
         .set('publishedAt', SQL.column('createdAt'))
         .where('publishedAt', null)
-        .andWhere(
-            SQL.where('status', DocumentStatus.Published)
-                .or(SQL.where('status', DocumentStatus.MissingData)),
-        ).update();
+        .where('status', DocumentStatus.Published)
+        .update();
 };
 
 export default new Migration(async () => {

@@ -45,7 +45,7 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
             documentTemplate.createdAt = this.options.createdAt;
         }
 
-        if (this.options.publishedAt) {
+        if (this.options.publishedAt !== undefined) {
             documentTemplate.publishedAt = this.options.publishedAt;
         }
 
