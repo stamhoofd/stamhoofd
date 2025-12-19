@@ -56,7 +56,23 @@ export class DocumentTemplate extends QueryableModel {
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
 
-    @column({ type: 'datetime', nullable: true })
+    @column({ type: 'datetime', nullable: true, beforeSave() {
+        if (this.publishedAt === null) {
+            if ((this.status === DocumentStatus.Published || this.status === DocumentStatus.MissingData)) {
+                // set published at if published or missing data
+                return new Date();
+            }
+
+            return null;
+        }
+
+        if (this.status === DocumentStatus.Draft) {
+            // remove published at if draft
+            return null;
+        }
+
+        return this.publishedAt;
+    } })
     publishedAt: Date | null = null;
 
     @column({
