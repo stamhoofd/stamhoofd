@@ -48,9 +48,6 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
         if (this.options.publishedAt) {
             documentTemplate.publishedAt = this.options.publishedAt;
         }
-        else if (this.options.status === DocumentStatus.Published || this.options.status === DocumentStatus.MissingData) {
-            documentTemplate.publishedAt = new Date(documentTemplate.createdAt);
-        }
 
         documentTemplate.updatesEnabled = this.options.updatesEnabled ?? true;
         documentTemplate.year = this.options.year ?? 0;

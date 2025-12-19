@@ -58,8 +58,8 @@ export class DocumentTemplate extends QueryableModel {
 
     @column({ type: 'datetime', nullable: true, beforeSave() {
         if (this.publishedAt === null) {
-            if ((this.status === DocumentStatus.Published || this.status === DocumentStatus.MissingData)) {
-                // set published at if published or missing data
+            if ((this.status === DocumentStatus.Published)) {
+                // set published at if published
                 return new Date();
             }
 

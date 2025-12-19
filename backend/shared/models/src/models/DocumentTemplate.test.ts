@@ -21,25 +21,6 @@ describe('Model.DocumentTemplate', () => {
         expect(documentTemplate.publishedAt?.getTime()).toBe(new Date(2025, 5, 1).getTime());
     });
 
-    it('PublishedAt should be set if status is missing data and publishedAt is null', async () => {
-        const documentTemplate = await new DocumentTemplateFactory({
-            status: DocumentStatus.MissingData,
-            groups: [],
-        }).create();
-
-        expect(documentTemplate.publishedAt).not.toBeNull();
-    });
-
-    it('PublishedAt should not change if status is missing data and publishedAt is already set', async () => {
-        const documentTemplate = await new DocumentTemplateFactory({
-            status: DocumentStatus.MissingData,
-            publishedAt: new Date(2025, 5, 1),
-            groups: [],
-        }).create();
-
-        expect(documentTemplate.publishedAt?.getTime()).toBe(new Date(2025, 5, 1).getTime());
-    });
-
     it('PublishedAt should be set to null if status is draft', async () => {
         const documentTemplate = await new DocumentTemplateFactory({
             status: DocumentStatus.Draft,
@@ -50,7 +31,8 @@ describe('Model.DocumentTemplate', () => {
         expect(documentTemplate.publishedAt).toBeNull();
     });
 
-    it('PublishedAt should be not change if status is deleted', async () => {
+    // should probably never happen
+    it('PublishedAt should be not change if status is not draft or published', async () => {
         const documentTemplate1 = await new DocumentTemplateFactory({
             status: DocumentStatus.Deleted,
             publishedAt: new Date(2025, 5, 1),
@@ -63,7 +45,21 @@ describe('Model.DocumentTemplate', () => {
             groups: [],
         }).create();
 
+        const documentTemplate3 = await new DocumentTemplateFactory({
+            status: DocumentStatus.MissingData,
+            publishedAt: new Date(2025, 5, 1),
+            groups: [],
+        }).create();
+
+        const documentTemplate4 = await new DocumentTemplateFactory({
+            status: DocumentStatus.MissingData,
+            publishedAt: null,
+            groups: [],
+        }).create();
+
         expect(documentTemplate1.publishedAt?.getTime()).toBe(new Date(2025, 5, 1).getTime());
         expect(documentTemplate2.publishedAt).toBeNull();
+        expect(documentTemplate3.publishedAt?.getTime()).toBe(new Date(2025, 5, 1).getTime());
+        expect(documentTemplate4.publishedAt).toBeNull();
     });
 });
