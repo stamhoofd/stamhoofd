@@ -263,6 +263,10 @@ async function doesYearAlreadyHaveFiscalDocument(year: number) {
                 $and: [
                     { year },
                     { type: fiscal.type },
+                    { id: {
+                        $not: patchedDocument.value.id,
+                    },
+                    },
                 ],
             },
         }),
