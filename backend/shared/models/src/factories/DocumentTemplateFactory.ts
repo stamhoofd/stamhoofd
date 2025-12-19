@@ -11,6 +11,9 @@ class Options {
     minPricePaid?: number | null;
     maxAge?: number | null;
     year?: number | null;
+    publishedAt?: Date | null;
+    createdAt?: Date;
+    type?: string;
 }
 
 export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> {
@@ -37,6 +40,18 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
         documentTemplate.html += '\nPrice paid: {{formatPrice registration.pricePaid}}';
 
         documentTemplate.status = this.options.status ?? DocumentStatus.Draft;
+
+        if (this.options.createdAt) {
+            documentTemplate.createdAt = this.options.createdAt;
+        }
+
+        if (this.options.publishedAt) {
+            documentTemplate.publishedAt = this.options.publishedAt;
+        }
+        else if (this.options.status === DocumentStatus.Published || this.options.status === DocumentStatus.MissingData) {
+            documentTemplate.publishedAt = new Date(documentTemplate.createdAt);
+        }
+
         documentTemplate.updatesEnabled = this.options.updatesEnabled ?? true;
         documentTemplate.year = this.options.year ?? 0;
 
@@ -130,6 +145,10 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
                     name: group.settings.name.toString(),
                 }),
             }));
+        }
+
+        if (this.options.type) {
+            documentTemplate.privateSettings.templateDefinition.type = this.options.type;
         }
 
         await documentTemplate.save();

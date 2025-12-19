@@ -49,8 +49,5 @@ describe('migration.document-published-at', () => {
 });
 
 async function createDocument(status: DocumentStatus, createdAt: Date) {
-    const document = await new DocumentTemplateFactory({ groups: [], status }).create();
-    document.createdAt = createdAt;
-    await document.save();
-    return document;
+    return await new DocumentTemplateFactory({ groups: [], status, createdAt }).create();
 };
