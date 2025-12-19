@@ -56,6 +56,9 @@ export class DocumentTemplate extends QueryableModel {
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
 
+    @column({ type: 'datetime', nullable: true })
+    publishedAt: Date | null = null;
+
     @column({
         type: 'datetime', beforeSave() {
             const date = new Date();
