@@ -65,7 +65,7 @@
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePresent } from '@simonbackx/vue-app-navigation';
 import { InfiniteObjectFetcherEnd, ScrollableSegmentedControl, STList, STListItem, STNavigationBar, Toast, UIFilter, UIFilterEditor, useDocumentTemplatesObjectFetcher, useGlobalEventListener, useInfiniteObjectFetcher, usePositionableSheet, useRequiredOrganization } from '@stamhoofd/components';
 import { DocumentTemplatePrivate, isEmptyFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { FiscalDocumentHelper, Formatter } from '@stamhoofd/utility';
+import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 
 import { getDocumentTemplateUIFilterBuilders } from '@stamhoofd/components/src/filters/filter-builders/document-templates';
 import { ComponentOptions, computed, ref, Ref, watch, watchEffect } from 'vue';
@@ -83,8 +83,8 @@ enum TabItem {
     Archive = 'Archive',
 }
 
-const fiscalDocumentHelper = new FiscalDocumentHelper();
-const firstYearToShow = fiscalDocumentHelper.defaultCalendarYear;
+const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
+const firstYearToShow = fiscalDocumentYearHelper.defaultCalendarYear;
 
 const organization = useRequiredOrganization();
 const present = usePresent();

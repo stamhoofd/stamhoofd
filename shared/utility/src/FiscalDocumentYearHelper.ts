@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 
-export class FiscalDocumentHelper {
+export class FiscalDocumentYearHelper {
     /**
      * Current DateTime in Belgium
      */

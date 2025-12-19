@@ -127,7 +127,7 @@ import { ComponentWithProperties, NavigationController, useDismiss, usePresent }
 import { CenteredMessage, Checkbox, CheckboxListItem, Dropdown, ErrorBox, FillRecordCategoryView, LoadingButton, MultiSelectInput, NavigationActions, NumberInput, RecordAnswerInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, Toast, useAuth, useContext, useDocumentTemplatesObjectFetcher, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { CountFilteredRequest, Country, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplateGroup, DocumentTemplatePrivate, PatchAnswers, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
-import { FiscalDocumentHelper, Formatter, StringCompare } from '@stamhoofd/utility';
+import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import ChooseDocumentTemplateGroup from './ChooseDocumentTemplateGroup.vue';
@@ -150,7 +150,7 @@ const loadingXml = ref(false);
 const fieldCategories = computed(() => RecordCategory.flattenCategories(patchedDocument.value.privateSettings.templateDefinition.fieldCategories, patchedDocument.value));
 const documentFieldCategories = computed(() => patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories.filter(c => c.getAllRecords().filter(r => isDocumentFieldEditable(r)).length > 0));
 const auth = useAuth();
-const fiscalDocumentHelper = new FiscalDocumentHelper();
+const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
 
 function isDocumentFieldEditable(field: RecordSettings) {
     const supportedFields = getDefaultSupportedIds();
@@ -284,7 +284,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
     const isFiscal = editingType.value === fiscal.type;
 
     if (isFiscal) {
-        if (value === fiscalDocumentHelper.year && !fiscalDocumentHelper.canCreateFiscalDocumentForCurrentYear) {
+        if (value === fiscalDocumentYearHelper.year && !fiscalDocumentYearHelper.canCreateFiscalDocumentForCurrentYear) {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
@@ -292,7 +292,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             });
         }
 
-        if (value > fiscalDocumentHelper.year) {
+        if (value > fiscalDocumentYearHelper.year) {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
@@ -313,7 +313,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
          * fiscal year = 2024 -> error (because fiscal year is over)
          */
         const fiscalYear = value + 1;
-        if (fiscalYear < fiscalDocumentHelper.year) {
+        if (fiscalYear < fiscalDocumentYearHelper.year) {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
