@@ -227,6 +227,11 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             enabled: false,
         }),
         new SelectableColumn({
+            id: 'endDate',
+            name: $t(`Einddatum`),
+            enabled: false,
+        }),
+        new SelectableColumn({
             id: 'createdAt',
             name: $t('Aanmaakdatum lid'),
             enabled: false,
