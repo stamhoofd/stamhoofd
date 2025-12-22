@@ -414,6 +414,32 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
+            name: $t(`Einddatum`),
+            allowSorting: false,
+            getValue: (v) => {
+                const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
+
+                if (registrations.length === 0) {
+                    return null;
+                }
+
+                const filtered = registrations.filter(r => r.endDate).map(r => r.endDate!.getTime());
+
+                if (filtered.length === 0) {
+                    return null;
+                }
+                return new Date(Math.max(...filtered));
+            },
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+            getStyle: v => v === null ? 'gray' : '',
+            minimumWidth: 80,
+            recommendedWidth: 200,
+            enabled: false,
+        }),
+    );
+
+    allColumns.push(
+        new Column<ObjectType, Date | null>({
             name: waitingList ? $t(`2a96fc1f-3710-4eae-bd01-b95ef8c2622b`) : $t(`8895f354-658f-48bd-9d5d-2e0203ca2a36`),
             allowSorting: false,
             getValue: (v) => {
