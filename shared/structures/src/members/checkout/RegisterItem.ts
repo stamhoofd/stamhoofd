@@ -149,12 +149,16 @@ export class RegisterItem implements ObjectWithRecords {
         calculatedPriceDueLater?: number;
         trial?: boolean;
         customStartDate?: Date | null;
+        customEndDate?: Date | null;
     }) {
         this.id = data.id ?? uuidv4();
         this.member = data.member;
         this.group = data.group;
         if (data.customStartDate !== undefined) {
             this.customStartDate = data.customStartDate;
+        }
+        if (data.customEndDate !== undefined) {
+            this.customEndDate = data.customEndDate;
         }
 
         if (!data.groupPrice) {
@@ -255,6 +259,7 @@ export class RegisterItem implements ObjectWithRecords {
             options: registration.options,
             trial: registration.trialUntil !== null,
             customStartDate: registration.startDate,
+            customEndDate: registration.endDate,
         });
     }
 
@@ -274,6 +279,7 @@ export class RegisterItem implements ObjectWithRecords {
             calculatedPriceDueLater: this.calculatedPriceDueLater,
             trial: this.trial,
             customStartDate: this.customStartDate,
+            customEndDate: this.customEndDate,
         });
     }
 
@@ -286,6 +292,7 @@ export class RegisterItem implements ObjectWithRecords {
         this.calculatedPriceDueLater = item.calculatedPriceDueLater;
         this.trial = item.trial;
         this.customStartDate = item.customStartDate;
+        this.customEndDate = item.customEndDate;
     }
 
     static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
@@ -330,6 +337,7 @@ export class RegisterItem implements ObjectWithRecords {
             replaceRegistrations,
             trial: idRegisterItem.trial,
             customStartDate: idRegisterItem.customStartDate,
+            customEndDate: idRegisterItem.customEndDate,
         });
     }
 
@@ -345,6 +353,7 @@ export class RegisterItem implements ObjectWithRecords {
             recordAnswers: this.recordAnswers,
             trial: this.trial,
             customStartDate: this.customStartDate,
+            customEndDate: this.customEndDate,
         });
     }
 
@@ -913,6 +922,10 @@ export class RegisterItem implements ObjectWithRecords {
         return this.customStartDate ?? this.defaultStartDate;
     }
 
+    get calculatedEndDate() {
+        return this.customEndDate ?? this.defaultEndDate;
+    }
+
     get calculatedTrialUntil() {
         if (!this.trial) {
             return null;
@@ -1050,8 +1063,14 @@ export class RegisterItem implements ObjectWithRecords {
             this.trial = false;
         }
 
-        if (!checkout.isAdminFromSameOrganization && this.customStartDate) {
-            this.customStartDate = null;
+        if (!checkout.isAdminFromSameOrganization) {
+            if (this.customStartDate) {
+                this.customStartDate = null;
+            }
+
+            if (this.customEndDate) {
+                this.customEndDate = null;
+            }
         }
 
         if (this.customEndDate) {
