@@ -66,6 +66,9 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 354 })
     customStartDate: Date | null = null;
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    customEndDate: Date | null = null;
+
     hydrate(context: RegisterContext) {
         return RegisterItem.fromId(this, context);
     }
@@ -83,6 +86,7 @@ export class RegisterItem implements ObjectWithRecords {
     options: RegisterItemOption[] = [];
     recordAnswers: Map<string, RecordAnswer> = new Map();
     customStartDate: Date | null = null;
+    customEndDate: Date | null = null;
 
     /**
      * Price for the new registration
@@ -894,6 +898,17 @@ export class RegisterItem implements ObjectWithRecords {
         return new Date(Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()));
     }
 
+    get defaultEndDate() {
+        if (this.replaceRegistrations.length > 0) {
+            const { registration } = this.replaceRegistrations[0];
+            if (registration.endDate && registration.endDate.getTime() <= this.group.settings.endDate.getTime()) {
+                return registration.endDate;
+            }
+        }
+
+        return this.group.settings.endDate;
+    }
+
     get calculatedStartDate() {
         return this.customStartDate ?? this.defaultStartDate;
     }
@@ -1037,6 +1052,35 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (!checkout.isAdminFromSameOrganization && this.customStartDate) {
             this.customStartDate = null;
+        }
+
+        if (this.customEndDate) {
+            if (this.customEndDate <= this.group.settings.startDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: 'Invalid end date',
+                    human: $t(`De einddatum van de inschrijving moet na de startdatum van de groep zelf zijn`),
+                    field: 'customEndDate',
+                });
+            }
+
+            if (this.customEndDate > this.group.settings.endDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: 'Invalid end date',
+                    human: $t(`De einddatum van de inschrijving moet voor de einddatum van de groep zijn`),
+                    field: 'customEndDate',
+                });
+            }
+
+            if (this.customStartDate && this.customEndDate <= this.customStartDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: 'Invalid end date',
+                    human: $t(`De einddatum van de inschrijving moet na de startdatum zijn`),
+                    field: 'customEndDate',
+                });
+            }
         }
 
         if (this.customStartDate) {
