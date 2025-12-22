@@ -134,7 +134,7 @@ export class DocumentTemplate extends QueryableModel {
                     id: 'registration.endDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: group?.settings?.endDate,
+                dateValue: registration.endDate ?? group?.settings?.endDate,
             }),
             'registration.price':
                 RecordPriceAnswer.create({
