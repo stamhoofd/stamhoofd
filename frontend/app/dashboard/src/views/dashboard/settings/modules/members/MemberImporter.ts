@@ -153,10 +153,8 @@ export class MemberImporter {
         const registrationData: RegistrationData = {
             group,
             groupPrice,
-            customStartDate: member.importRegistrationResult.date,
-            // todo
-            customEndDate: null,
-            // customEndDate: member.importRegistrationResult.endDate
+            customStartDate: member.importRegistrationResult.startDate,
+            customEndDate: member.importRegistrationResult.endDate,
         };
 
         return registrationData;

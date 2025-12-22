@@ -11,6 +11,7 @@ export class ImportRegistrationResult {
     price: number | null = null;
     priceName: string | null = null;
     paymentMethod: PaymentMethod | null = null;
-    date: Date | null = null;
+    startDate: Date | null = null;
+    endDate: Date | null = null;
     recordAnswers = new Map<string, RecordAnswer>();
 }
