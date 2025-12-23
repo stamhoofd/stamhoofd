@@ -11,6 +11,7 @@ interface RegistrationData {
     group: Group;
     groupPrice: GroupPrice | null;
     customStartDate: Date | null;
+    customEndDate: Date | null;
 }
 
 interface MemberImporterContext {
@@ -152,7 +153,8 @@ export class MemberImporter {
         const registrationData: RegistrationData = {
             group,
             groupPrice,
-            customStartDate: member.importRegistrationResult.date,
+            customStartDate: member.importRegistrationResult.startDate,
+            customEndDate: member.importRegistrationResult.endDate,
         };
 
         return registrationData;
@@ -378,6 +380,7 @@ export class MemberImporter {
                 group,
                 organization,
                 customStartDate: regsitrationData?.customStartDate,
+                customEndDate: regsitrationData?.customEndDate,
                 groupPrice: regsitrationData?.groupPrice ?? undefined,
                 recordAnswers: importResult.importRegistrationResult.recordAnswers.size ? importResult.importRegistrationResult.recordAnswers : undefined,
             });

@@ -128,14 +128,15 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, FillRecordCategoryView, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, FillRecordCategoryView, GlobalEventBus, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
 
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
+import { fiscal } from './definitions/fiscal';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;
@@ -279,6 +280,10 @@ async function deleteTemplate() {
             timeout: 60 * 1000,
             owner: requestOwner,
         });
+
+        GlobalEventBus.sendEvent('document-template-deleted', props.template).catch(console.error);
+        Toast.success($t('Het document is verwijderd')).show();
+
         pop({ force: true })?.catch(console.error);
     }
     catch (e) {
@@ -288,6 +293,17 @@ async function deleteTemplate() {
 }
 
 function exportXml() {
+    const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
+
+    // if fiscal document
+    if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
+        const canDownload = fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year, props.template.createdAt);
+        if (!canDownload) {
+            Toast.error($t('De indiendatum van het fiscaal attest is verstreken. Een fiscaal attest moet ingediend worden voor 1 maart van het jaar volgend op het kalenderjaar van het document.')).show();
+            return;
+        }
+    }
+
     // Start firing questions
     const c = gotoRecordCategory(0);
     if (c) {

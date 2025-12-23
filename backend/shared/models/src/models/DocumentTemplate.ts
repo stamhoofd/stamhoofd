@@ -50,8 +50,30 @@ export class DocumentTemplate extends QueryableModel {
     @column({ type: 'json', decoder: DocumentPrivateSettings })
     privateSettings: DocumentPrivateSettings;
 
+    @column({ type: 'integer' })
+    year: number;
+
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
+
+    @column({ type: 'datetime', nullable: true, beforeSave() {
+        if (this.publishedAt === null) {
+            if ((this.status === DocumentStatus.Published)) {
+                // set published at if published
+                return new Date();
+            }
+
+            return null;
+        }
+
+        if (this.status === DocumentStatus.Draft) {
+            // remove published at if draft
+            return null;
+        }
+
+        return this.publishedAt;
+    } })
+    publishedAt: Date | null = null;
 
     @column({
         type: 'datetime', beforeSave() {
@@ -112,7 +134,7 @@ export class DocumentTemplate extends QueryableModel {
                     id: 'registration.endDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
-                dateValue: group?.settings?.endDate,
+                dateValue: registration.endDate ?? group?.settings?.endDate,
             }),
             'registration.price':
                 RecordPriceAnswer.create({

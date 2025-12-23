@@ -8,14 +8,14 @@ import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWi
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
-import { Context } from '../../../helpers/Context';
-import { StripeHelper } from '../../../helpers/StripeHelper';
-import { BalanceItemService } from '../../../services/BalanceItemService';
-import { RegistrationService } from '../../../services/RegistrationService';
-import { PaymentService } from '../../../services/PaymentService';
-import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
+import { Context } from '../../../helpers/Context.js';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
+import { StripeHelper } from '../../../helpers/StripeHelper.js';
+import { BalanceItemService } from '../../../services/BalanceItemService.js';
+import { PaymentService } from '../../../services/PaymentService.js';
+import { RegistrationService } from '../../../services/RegistrationService.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = IDRegisterCheckout;
@@ -381,6 +381,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.options = item.options;
             registration.recordAnswers = item.recordAnswers;
             registration.startDate = startDate;
+            registration.endDate = item.calculatedEndDate;
 
             // Clear if we are reusing an existing registration
             registration.trialUntil = null;

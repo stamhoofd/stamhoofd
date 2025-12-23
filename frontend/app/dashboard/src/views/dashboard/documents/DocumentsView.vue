@@ -1,6 +1,5 @@
 <template>
     <ModernTableView
-        ref="modernTableView"
         :table-object-fetcher="tableObjectFetcher"
         :filter-builders="filterBuilders"
         :title="title"
@@ -17,12 +16,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Column, ComponentExposed, getDocumentsUIFilterBuilders, ModernTableView, UIFilterBuilders, useContext, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, getDocumentsUIFilterBuilders, ModernTableView, UIFilterBuilders, useContext, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { useDocumentsObjectFetcher } from '@stamhoofd/components/src/fetchers/useDocumentsObjectFetcher';
-import { computed, Ref, ref } from 'vue';
+import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
 import DocumentView from './DocumentView.vue';
 
@@ -42,7 +41,6 @@ const objectFetcher = useDocumentsObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<Document>(objectFetcher);
 
 const filterBuilders: UIFilterBuilders = getDocumentsUIFilterBuilders();
-const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 
 const allColumns: Column<Document, any>[] = [
     new Column<Document, string>({

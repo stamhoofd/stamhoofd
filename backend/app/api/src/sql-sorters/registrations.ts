@@ -87,6 +87,17 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = {
             });
         },
     },
+    'endDate': {
+        getValue({ registration }) {
+            return registration.endDate;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('endDate'),
+                direction,
+            });
+        },
+    },
     'memberCachedBalance.amountOpen': {
         getValue({ registration }) {
             return registration.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0);

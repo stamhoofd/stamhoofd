@@ -45,9 +45,18 @@
         <div v-if="admin" class="container">
             <SendConfirmationEmailBox v-if="willStartCheckoutFlow" :checkout="checkout" :group="item.group" :group-organization="item.organization" :validator="errors.validator" />
 
-            <STInputBox :title="$t('a1ae6e8f-dbcd-4a53-a67c-0244d28ccb74')" error-fields="customStartDate" :error-box="errors.errorBox">
-                <DateSelection v-model="customStartDate" :required="false" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
-            </STInputBox>
+            <div class="split-inputs">
+                <div>
+                    <STInputBox :title="$t('a1ae6e8f-dbcd-4a53-a67c-0244d28ccb74')" error-fields="customStartDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="customStartDate" :required="false" :placeholder-date="item.defaultStartDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
+                    </STInputBox>
+                </div>
+                <div>
+                    <STInputBox :title="$t('Einddatum')" error-fields="customEndDate" :error-box="errors.errorBox">
+                        <DateSelection v-model="customEndDate" :required="false" :placeholder-date="item.defaultEndDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
+                    </STInputBox>
+                </div>
+            </div>
             <p v-if="item.group.settings.trialDays > 0" class="style-description-small">
                 {{ $t('914a5499-b6db-4495-91dd-be4e412c9d64') }}
             </p>
@@ -188,7 +197,12 @@ const customStartDate = computed({
     set: (value: Date | null) => props.item.customStartDate = value,
 });
 
-watch(() => [props.item.groupPrice, customStartDate.value], () => {
+const customEndDate = computed({
+    get: () => props.item.customEndDate,
+    set: (value: Date | null) => props.item.customEndDate = value,
+});
+
+watch(() => [props.item.groupPrice, customStartDate.value, customEndDate.value], () => {
     updateErrorAndWarning();
 });
 

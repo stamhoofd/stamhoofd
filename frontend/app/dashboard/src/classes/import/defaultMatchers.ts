@@ -57,12 +57,12 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
         },
     }),
     new DateColumnMatcher({
-        name: 'Datum van inschrijving',
+        name: 'Startdatum van inschrijving',
         category: MemberDetailsMatcherCategory.Member,
         required: false,
         possibleMatch: ['datum', 'date'],
-        negativeMatch: ['geboortedatum', 'verjaardag', 'birth day'],
-        get: (importResult: ImportMemberResult) => importResult.importRegistrationResult.date ?? undefined,
+        negativeMatch: ['geboortedatum', 'verjaardag', 'birth day', 'einddatum', 'end date'],
+        get: (importResult: ImportMemberResult) => importResult.importRegistrationResult.startDate ?? undefined,
         save: (d, importResult: ImportMemberResult) => {
             const period = getPeriod();
 
@@ -73,7 +73,27 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
                 });
             }
 
-            importResult.importRegistrationResult.date = d;
+            importResult.importRegistrationResult.startDate = d;
+        },
+    }),
+    new DateColumnMatcher({
+        name: 'Einddatum van inschrijving',
+        category: MemberDetailsMatcherCategory.Member,
+        required: false,
+        possibleMatch: ['einddatum', 'end date'],
+        negativeMatch: ['geboortedatum', 'verjaardag', 'birth day', 'startdatum', 'start date', 'startdatum'],
+        get: (importResult: ImportMemberResult) => importResult.importRegistrationResult.endDate ?? undefined,
+        save: (d, importResult: ImportMemberResult) => {
+            const period = getPeriod();
+
+            if (d < period.period.startDate || d > period.period.endDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: $t('De einddatum van de inschrijving ligt buiten het geselecteerde werkjaar.'),
+                });
+            }
+
+            importResult.importRegistrationResult.endDate = d;
         },
     }),
     new UitpasNumberColumnMatcher(),
