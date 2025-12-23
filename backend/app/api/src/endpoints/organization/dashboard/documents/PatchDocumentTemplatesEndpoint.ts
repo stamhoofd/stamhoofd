@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { DocumentTemplatePrivate, PermissionLevel } from '@stamhoofd/structures';
 
+import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
@@ -51,6 +52,17 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
             template.updatesEnabled = put.updatesEnabled;
             template.year = put.year;
             template.organizationId = organization.id;
+
+            if (await this.doesYearAlreadyHaveFiscalDocument(template)) {
+                throw new SimpleError({
+                    code: 'double_fiscal_document',
+                    field: 'year',
+                    message: 'This year already has a fiscal document',
+                    human: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+
+                });
+            }
+
             await template.save();
 
             // todo: Generate documents (maybe in background)
@@ -66,7 +78,14 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                 throw Context.auth.notFoundOrNoAccess($t(`148bfab7-ca0e-4fac-8a0a-302ca7855fc8`));
             }
 
+            let shouldCheckIfAlreadyHasFiscalDocument = false;
+
             if (patch.privateSettings) {
+                const patchType = patch.privateSettings.templateDefinition?.type;
+
+                // only check if type has changed and new type is fiscal
+                shouldCheckIfAlreadyHasFiscalDocument = patchType !== undefined && template.privateSettings.templateDefinition.type !== patchType && patchType === 'fiscal';
+
                 template.privateSettings.patchOrPut(patch.privateSettings);
             }
 
@@ -87,7 +106,20 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
             }
 
             if (patch.year) {
+                if (shouldCheckIfAlreadyHasFiscalDocument === false) {
+                    shouldCheckIfAlreadyHasFiscalDocument = template.year !== patch.year;
+                }
+
                 template.year = patch.year;
+            }
+
+            if (shouldCheckIfAlreadyHasFiscalDocument && await this.doesYearAlreadyHaveFiscalDocument(template)) {
+                throw new SimpleError({
+                    code: 'double_fiscal_document',
+                    field: 'year',
+                    message: 'This year already has a fiscal document',
+                    human: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                });
             }
 
             await template.save();
@@ -115,5 +147,21 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         return new Response(
             updatedTemplates,
         );
+    }
+
+    private async doesYearAlreadyHaveFiscalDocument(template: DocumentTemplate) {
+        let query = SQL.select().from(SQL.table(DocumentTemplate.table))
+            .where(SQL.column('organizationId'), template.organizationId)
+            .where(SQL.column('year'), template.year)
+            .where(SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'), 'fiscal');
+
+        // id is not set if put
+        if (template.id) {
+            query = query.where(SQL.column('id'), SQLWhereSign.NotEqual, template.id);
+        }
+
+        const result = await query.limit(1).count();
+
+        return result > 0;
     }
 }

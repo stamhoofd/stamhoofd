@@ -14,11 +14,12 @@ class Options {
     publishedAt?: Date | null;
     createdAt?: Date;
     type?: string;
+    organizationId?: string;
 }
 
 export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> {
-    async create(): Promise<DocumentTemplate> {
-        let organizationId = this.options.groups[0]?.organizationId;
+    async createWithoutSave(): Promise<DocumentTemplate> {
+        let organizationId = this.options.organizationId ?? this.options.groups[0]?.organizationId;
 
         if (organizationId === undefined) {
             const organization = await new OrganizationFactory({}).create();
@@ -148,7 +149,12 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
             documentTemplate.privateSettings.templateDefinition.type = this.options.type;
         }
 
-        await documentTemplate.save();
         return documentTemplate as any;
+    }
+
+    async create(): Promise<DocumentTemplate> {
+        const documentTemplate = await this.createWithoutSave();
+        await documentTemplate.save();
+        return documentTemplate;
     }
 }
