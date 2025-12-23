@@ -4,6 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { DocumentTemplatePrivate, PermissionLevel } from '@stamhoofd/structures';
 
+import { SQL } from '@stamhoofd/sql';
 import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
@@ -51,6 +52,16 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             template.updatesEnabled = put.updatesEnabled;
             template.year = put.year;
             template.organizationId = organization.id;
+
+            if (await this.doesYearAlreadyHaveFiscalDocument(template)) {
+                throw new SimpleError({
+                    code: 'double_fiscal_document',
+                    field: 'year',
+                    message: 'This year already has a fiscal document',
+                    human: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                });
+            }
+
             await template.save();
 
             // todo: Generate documents (maybe in background)
@@ -67,7 +78,21 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
             }
 
             if (patch.privateSettings) {
+                const patchType = patch.privateSettings.templateDefinition?.type;
+
+                // only check if type has changed and new type is fiscal
+                const shouldCheckIfAlreadyHasFiscalDocument = patchType !== undefined && template.privateSettings.templateDefinition.type !== patchType && patchType === 'fiscal';
+
                 template.privateSettings.patchOrPut(patch.privateSettings);
+
+                if (shouldCheckIfAlreadyHasFiscalDocument && await this.doesYearAlreadyHaveFiscalDocument(template)) {
+                    throw new SimpleError({
+                        code: 'double_fiscal_document',
+                        field: 'year',
+                        message: 'This year already has a fiscal document',
+                        human: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                    });
+                }
             }
 
             if (patch.settings) {
@@ -115,5 +140,17 @@ export class PatchDocumentTemplateEndpoint extends Endpoint<Params, Query, Body,
         return new Response(
             updatedTemplates,
         );
+    }
+
+    private async doesYearAlreadyHaveFiscalDocument(template: DocumentTemplate) {
+        const result = await SQL.select().from(SQL.table(DocumentTemplate.table))
+            .where('organizationId', template.organizationId)
+            .where('year', template.year)
+            .where(SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'), 'fiscal')
+            .whereNot('id', template.id)
+            .limit(1)
+            .count();
+
+        return result > 0;
     }
 }
