@@ -112,6 +112,12 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 306 })
     uitpasNumber: string | null = null;
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    socialTariffEndDate: Date | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    socialTariffCheckedWithApiAt: Date | null = null;
+
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date('1970-01-01') })
     birthDay: Date | null = null;

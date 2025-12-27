@@ -132,6 +132,8 @@ export * from './src/endpoints/UitpasOrganizersResponse.js';
 export * from './src/endpoints/UitpasEventsResponse.js';
 export * from './src/endpoints/UitpasClientIdAndSecret.js';
 export * from './src/endpoints/UitpasSetClientCredentialsResponse.js';
+export * from './src/endpoints/UitpasNumbersValidationRequest.js';
+export * from './src/endpoints/UitpasNumbersValidationResponse.js';
 
 // email
 export * from './src/email/EditorSmartButton.js';

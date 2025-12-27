@@ -26,13 +26,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
-import { useErrors } from '../errors/useErrors';
-import { Validator } from '../errors/Validator';
-import { DataValidator } from '@stamhoofd/utility';
-import { ErrorBox } from '../errors/ErrorBox';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { DataValidator } from '@stamhoofd/utility';
+import { computed, ref, watch } from 'vue';
+import { useValidateUitpasNumbers } from '../composables/useValidateUitpasNumbers';
+import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
+import { Validator } from '../errors/Validator';
 
 const props = withDefaults(
     defineProps<{
@@ -63,6 +64,8 @@ const model = defineModel<string | null>({ required: true });
 
 useValidation(errors.validator, validate);
 
+const { validateUitpasNumbers } = useValidateUitpasNumbers();
+
 const uitpasNumberRaw = ref(model.value ?? '');
 const placeholder = computed(() => {
     if (props.placeholder) return props.placeholder;
@@ -88,10 +91,10 @@ const errorBoxes = computed(() => {
 
 function onTyping() {
     // Silently send modelValue to parents, but don't show visible errors yet
-    validate(false, true);
+    validate(false, true).catch(console.error);
 }
 
-function validate(final = true, silent = false) {
+async function validate(final = true, silent = false) {
     uitpasNumberRaw.value = uitpasNumberRaw.value.trim();
 
     const unformatted = uitpasNumberRaw.value.replace(/\s+/g, '');
@@ -129,6 +132,11 @@ function validate(final = true, silent = false) {
         return false;
     }
     else {
+        if (final) {
+            // will throw if invalid
+            await validateUitpasNumbers([unformatted]);
+        }
+
         if (model.value !== unformatted) {
             model.value = unformatted;
         }

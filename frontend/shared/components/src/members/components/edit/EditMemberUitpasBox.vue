@@ -6,7 +6,7 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <UitpasNumberInput v-model="uitpasNumber" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`)" />
+        <UitpasNumberInput v-model="uitpasNumber" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`)" error-fields="uitpasNumbers.0" />
 
         <p v-if="!willMarkReviewed && isAdmin && reviewDate" class="style-description-small">
             {{ $t('ef93c19a-9c97-4598-a11a-95d7a2bf2f02') }} {{ formatDate(reviewDate) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">

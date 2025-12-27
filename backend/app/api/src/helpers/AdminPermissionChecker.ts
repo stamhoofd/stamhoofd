@@ -3,8 +3,8 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, ReceivableBalanceType, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { MemberRecordStore } from '../services/MemberRecordStore';
-import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
+import { MemberRecordStore } from '../services/MemberRecordStore.js';
+import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -1507,7 +1507,7 @@ export class AdminPermissionChecker {
     /**
      * Only for creating new members
      */
-    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob, options: {asUserManager: boolean}) {
+    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob, options: { asUserManager: boolean }) {
         if (options.asUserManager || STAMHOOFD.userMode === 'platform') {
             // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
             data.details.memberNumber = null;
@@ -1515,7 +1515,9 @@ export class AdminPermissionChecker {
 
         // Do not allow setting the security code
         data.details.securityCode = null;
-     }
+        data.details.socialTariffEndDate = null;
+        data.details.socialTariffCheckedWithApiAt = null;
+    }
 
     async filterMemberPatch(member: MemberWithRegistrations, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
         if (!data.details) {
@@ -1536,7 +1538,6 @@ export class AdminPermissionChecker {
                 statusCode: 400,
             });
         }
-
 
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
@@ -1559,6 +1560,16 @@ export class AdminPermissionChecker {
                     data.details.trackingYear = undefined;
                 }
             }
+        }
+
+        if (data.details.socialTariffEndDate !== undefined) {
+            // don not set
+            data.details.socialTariffEndDate = undefined;
+        }
+
+        if (data.details.socialTariffCheckedWithApiAt !== undefined) {
+            // do not set
+            data.details.socialTariffCheckedWithApiAt = undefined;
         }
 
         if (hasRecordAnswers) {
@@ -1594,7 +1605,7 @@ export class AdminPermissionChecker {
             // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
             delete data.details.memberNumber;
         }
-        
+
         if (hasNotes && isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full))) {
             throw new SimpleError({
                 code: 'permission_denied',

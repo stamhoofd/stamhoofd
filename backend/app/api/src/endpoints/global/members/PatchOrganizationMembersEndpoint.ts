@@ -9,15 +9,16 @@ import { Formatter } from '@stamhoofd/utility';
 import { Email } from '@stamhoofd/email';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { MembershipCharger } from '../../../helpers/MembershipCharger';
-import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
-import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
-import { MemberNumberService } from '../../../services/MemberNumberService';
-import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
-import { RegistrationService } from '../../../services/RegistrationService';
-import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
+import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
+import { updateMemberDetailsUitpasNumber } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import { MemberNumberService } from '../../../services/MemberNumberService.js';
+import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
+import { RegistrationService } from '../../../services/RegistrationService.js';
+import { shouldCheckIfMemberIsDuplicateForPatch } from './shouldCheckIfMemberIsDuplicate.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -90,9 +91,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 member.organizationId = organization.id;
             }
             const securityCode = struct.details.securityCode; // will get cleared after the filter
-            Context.auth.filterMemberPut(member, struct, {asUserManager: false});
+            Context.auth.filterMemberPut(member, struct, { asUserManager: false });
             struct.details.cleanData();
             member.details = struct.details;
+
+            await updateMemberDetailsUitpasNumber(member.details);
 
             const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'put');
             if (duplicate) {
@@ -167,6 +170,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(patch, originalDetails);
 
                 const wasReduced = member.details.shouldApplyReducedPrice;
+                await updateMemberDetailsUitpasNumber(patch.details);
                 member.details.patchOrPut(patch.details);
                 member.details.cleanData();
 

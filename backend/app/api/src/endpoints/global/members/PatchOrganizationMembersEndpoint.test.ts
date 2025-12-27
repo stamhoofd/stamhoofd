@@ -4,8 +4,9 @@ import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Address, Country, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { initUitpasApi } from '../../../../tests/init/initUitpasApi.js';
+import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -2825,6 +2826,292 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             expect(member1.details.emergencyContacts).toEqual([expectedContact]);
             expect(member2.details.emergencyContacts).toEqual([expectedContact]);
+        });
+    });
+
+    describe('Put member', () => {
+        test('Invalid uitpas number should throw', async () => {
+            await initUitpasApi();
+
+            const organization = await new OrganizationFactory({ }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const testCases: { uitpasNumber: string; excpectedErrorCode: string }[] = [
+                // status none
+                {
+                    uitpasNumber: '0900000095902',
+                    excpectedErrorCode: 'non_active_social_tariff',
+                },
+                // status expired
+                {
+                    uitpasNumber: '0900000031618',
+                    excpectedErrorCode: 'uitpas_number_issue',
+                },
+                {
+                    // less than 10 digits
+                    uitpasNumber: '123456789',
+                    excpectedErrorCode: 'invalid_uitpas_number',
+                },
+                {
+                    // more than 13 digits
+                    uitpasNumber: '12345678912345',
+                    excpectedErrorCode: 'invalid_uitpas_number',
+                },
+            ];
+
+            for (const { uitpasNumber, excpectedErrorCode } of testCases) {
+                // create member with uitpas number
+                const member = MemberWithRegistrationsBlob.create({
+                    details: MemberDetails.create({
+                        firstName,
+                        lastName,
+                        uitpasNumber,
+                    }),
+                });
+
+                const arr: Body = new PatchableArray();
+
+                arr.addPut(member);
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode(excpectedErrorCode));
+            }
+        });
+
+        test('Put valid uitpas number should succeed', async () => {
+            await initUitpasApi();
+
+            const organization = await new OrganizationFactory({ }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const member = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    // active number
+                    uitpasNumber: '0900011354819',
+                }),
+            });
+
+            const arr: Body = new PatchableArray();
+
+            arr.addPut(member);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const result = await testServer.test(endpoint, request);
+
+            expect(result.status).toBe(200);
+            expect(result.body.members.length).toBe(1);
+            expect(result.body.members[0].details.uitpasNumber).toBe('0900011354819');
+            expect(result.body.members[0].details.socialTariffCheckedWithApiAt).toBeDate();
+            expect(result.body.members[0].details.socialTariffEndDate).toBeDate();
+            expect(result.body.members[0].details.socialTariffEndDate).toEqual(new Date('2026-04-30T21:59:59+00:00'));
+        });
+
+        test('Put should not set socialTariffEndDate or socialTariffCheckedWithApiAt from request', async () => {
+            await initUitpasApi();
+
+            const organization = await new OrganizationFactory({ }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            // patch uitpas number
+            const arr: Body = new PatchableArray();
+
+            const member = MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    socialTariffEndDate: new Date(2050, 0, 1),
+                    socialTariffCheckedWithApiAt: new Date(2040, 0, 1),
+                }),
+            });
+
+            arr.addPut(member);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const result = await testServer.test(endpoint, request);
+
+            expect(result.status).toBe(200);
+            expect(result.body.members.length).toBe(1);
+            expect(result.body.members[0].details.socialTariffEndDate).toBeNull();
+            expect(result.body.members[0].details.socialTariffCheckedWithApiAt).toBeNull();
+        });
+    });
+
+    describe('Patch member', () => {
+        test('Invalid uitpas number should throw', async () => {
+            await initUitpasApi();
+
+            const organization = await new OrganizationFactory({ }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            const testCases: { uitpasNumber: string; excpectedErrorCode: string }[] = [
+                // status none
+                {
+                    uitpasNumber: '0900000095902',
+                    excpectedErrorCode: 'non_active_social_tariff',
+                },
+                // status expired
+                {
+                    uitpasNumber: '0900000031618',
+                    excpectedErrorCode: 'uitpas_number_issue',
+                },
+                {
+                    // less than 10 digits
+                    uitpasNumber: '123456789',
+                    excpectedErrorCode: 'invalid_uitpas_number',
+                },
+                {
+                    // more than 13 digits
+                    uitpasNumber: '12345678912345',
+                    excpectedErrorCode: 'invalid_uitpas_number',
+                },
+            ];
+
+            for (const { uitpasNumber, excpectedErrorCode } of testCases) {
+                // create member
+                const member = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: false,
+                    // Give user access to this member
+                    user,
+                }).create();
+
+                // patch uitpas number
+                const arr: Body = new PatchableArray();
+
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        uitpasNumber,
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode(excpectedErrorCode));
+            }
+        });
+
+        test('Patch valid uitpas number should succeed', async () => {
+            await initUitpasApi();
+
+            const organization = await new OrganizationFactory({ }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            // create member
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            // patch uitpas number
+            const arr: Body = new PatchableArray();
+
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    // active number
+                    uitpasNumber: '0900011354819',
+                }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const result = await testServer.test(endpoint, request);
+
+            expect(result.status).toBe(200);
+            expect(result.body.members.length).toBe(1);
+            expect(result.body.members[0].details.uitpasNumber).toBe('0900011354819');
+            expect(result.body.members[0].details.socialTariffCheckedWithApiAt).toBeDate();
+            expect(result.body.members[0].details.socialTariffEndDate).toBeDate();
+            expect(result.body.members[0].details.socialTariffEndDate).toEqual(new Date('2026-04-30T21:59:59+00:00'));
+        });
+
+        test('Patch should not set socialTariffEndDate or socialTariffCheckedWithApiAt from request', async () => {
+            await initUitpasApi();
+
+            const organization = await new OrganizationFactory({ }).create();
+
+            const user = await new UserFactory({
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+                organization, // since we are in platform mode, this will only set the permissions for this organization
+            }).create();
+
+            const token = await Token.createToken(user);
+
+            // create member
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                // Give user access to this member
+                user,
+            }).create();
+
+            // patch uitpas number
+            const arr: Body = new PatchableArray();
+
+            arr.addPatch(MemberWithRegistrationsBlob.patch({
+                id: member.id,
+                details: MemberDetails.patch({
+                    socialTariffEndDate: new Date(2050, 0, 1),
+                    socialTariffCheckedWithApiAt: new Date(2040, 0, 1),
+                }),
+            }));
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+
+            const result = await testServer.test(endpoint, request);
+
+            expect(result.status).toBe(200);
+            expect(result.body.members.length).toBe(1);
+            expect(result.body.members[0].details.socialTariffEndDate).toBeNull();
+            expect(result.body.members[0].details.socialTariffCheckedWithApiAt).toBeNull();
         });
     });
 });

@@ -3,8 +3,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { UitpasService } from '../../../services/uitpas/UitpasService';
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
+import { UitpasService } from '../../../services/uitpas/UitpasService.js';
+
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = UitpasPriceCheckRequest;

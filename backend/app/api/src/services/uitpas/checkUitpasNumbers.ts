@@ -4,6 +4,7 @@ import { DataValidator } from '@stamhoofd/utility';
 type UitpasNumberSuccessfulResponse = {
     socialTariff: {
         status: 'ACTIVE' | 'EXPIRED' | 'NONE';
+        endDate?: Date;
     };
     messages?: Array<{
         text: string;
@@ -53,7 +54,13 @@ function isUitpasNumberErrorResponse(
         );
 }
 
-async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
+/**
+ * Throws if any uitpasNumber is invalid.
+ * @param access_token
+ * @param uitpasNumber
+ * @returns
+ */
+export async function checkUitpasNumber(access_token: string, uitpasNumber: string): Promise<UitpasNumberSuccessfulResponse> {
     // static check (using regex)
     if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
         throw new SimpleError({
@@ -125,6 +132,7 @@ async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
             ),
         });
     });
+
     assertIsUitpasNumberSuccessfulResponse(json);
     if (json.messages) {
         const humanMessage = json.messages[0].text; // only display the first message
@@ -149,6 +157,7 @@ async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
         });
     }
     // no errors -> the uitpas number is valid and social tariff is applicable
+    return json;
 }
 
 /**
