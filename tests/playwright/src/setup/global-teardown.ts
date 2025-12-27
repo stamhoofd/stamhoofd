@@ -1,5 +1,4 @@
 import { CaddyHelper } from "./helpers/CaddyHelper";
-import { CaddyConfigHelper } from "./helpers/CaddyConfigHelper";
 import { ProcessInfo } from "./helpers/ProcessInfo";
 
 export default async function globalTeardown() {

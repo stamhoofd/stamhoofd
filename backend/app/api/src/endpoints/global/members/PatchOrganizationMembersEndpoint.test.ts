@@ -2,10 +2,11 @@ import { Database } from '@simonbackx/simple-database';
 import { PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
-import { Address, Country, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString } from '@stamhoofd/structures';
+import { Address, Country, EmergencyContact, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, Permissions, PermissionsResourceType, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { initUitpasApi } from '../../../../tests/init/index.js';
+import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
 
 const baseUrl = `/organization/members`;
 const endpoint = new PatchOrganizationMembersEndpoint();
@@ -2825,6 +2826,184 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             expect(member1.details.emergencyContacts).toEqual([expectedContact]);
             expect(member2.details.emergencyContacts).toEqual([expectedContact]);
+        });
+    });
+
+    describe('Member', () => {
+        describe('Uitpas number', () => {
+            describe('PUT', () => {
+                // todo: test to check social tariff is updated correctly
+
+                test('Should not set socialTariff from request', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({
+                        permissions: Permissions.create({ level: PermissionLevel.Full }),
+                        organization, // since we are in platform mode, this will only set the permissions for this organization
+                    }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    const member = MemberWithRegistrationsBlob.create({
+                        details: MemberDetails.create({
+                            firstName,
+                            lastName,
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                                // active number
+                                uitpasNumber: '0900011354819',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.Active,
+                                    endDate: new Date(2050, 0, 1),
+                                    updatedAt: new Date(2040, 0, 1),
+                                }),
+                            }),
+                        }),
+                    });
+
+                    arr.addPut(member);
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    const result = await testServer.test(endpoint, request);
+
+                    expect(result.status).toBe(200);
+                    expect(result.body.members.length).toBe(1);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toBe(UitpasSocialTariffStatus.Active);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toBe(new Date(2050, 0, 1).getTime());
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt?.getTime()).not.toBe(new Date(2040, 0, 1).getTime());
+                });
+            });
+
+            describe('PATCH', () => {
+                // todo: test to check social tariff is updated correctly
+
+                test('Should not set socialTariff from request', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({
+                        permissions: Permissions.create({ level: PermissionLevel.Full }),
+                        organization, // since we are in platform mode, this will only set the permissions for this organization
+                    }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            firstName,
+                            lastName,
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                            // active number
+                                uitpasNumber: '0900011354819',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.Active,
+                                    endDate: new Date(2025, 0, 1),
+                                    updatedAt: new Date(2024, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    endDate: new Date(2050, 0, 1),
+                                    updatedAt: new Date(2040, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    const result = await testServer.test(endpoint, request);
+
+                    expect(result.status).toBe(200);
+                    expect(result.body.members.length).toBe(1);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toBe(UitpasSocialTariffStatus.Active);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toBe(new Date(2050, 0, 1).getTime());
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt?.getTime()).not.toBe(new Date(2040, 0, 1).getTime());
+                });
+
+                test('Should not patch socialTariff from request', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({
+                        permissions: Permissions.create({ level: PermissionLevel.Full }),
+                        organization, // since we are in platform mode, this will only set the permissions for this organization
+                    }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    updatedAt: new Date(2000, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.Active,
+                                    endDate: new Date(2050, 0, 1),
+                                    updatedAt: new Date(2040, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    const result = await testServer.test(endpoint, request);
+
+                    expect(result.status).toBe(200);
+                    expect(result.body.members.length).toBe(1);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.None);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt).toEqual(new Date(2000, 0, 1));
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                });
+            });
         });
     });
 });

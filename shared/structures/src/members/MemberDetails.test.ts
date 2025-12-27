@@ -1,7 +1,9 @@
 import 'jest-extended';
 
+import { ObjectData } from '@simonbackx/simple-encoding';
 import { MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';
+import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
 
 describe('Correctly merge multiple details together', () => {
     test('Merge', () => {
@@ -304,6 +306,80 @@ describe('Correctly merge multiple details together', () => {
             expect(member1.parents[0]).toBe(member3.parents[0]);
             expect(member1.parents[0]).toBe(member4.parents[0]);
             expect(member1.parents[0]).toBe(member5.parents[0]);
+        });
+    });
+
+    describe('uitpasNumber (version 306) upgrade to uitpasNumberDetails', () => {
+        test('should upgrade uitpasNumber to uitpasNumberDetails', () => {
+            const data = {
+                firstName: 'Test',
+                lastName: 'Test',
+                uitpasNumber: '12345678',
+            };
+
+            const objectData = new ObjectData(data, { version: 306 });
+            const decoded = objectData.decode(MemberDetails);
+
+            expect(decoded).toMatchObject({
+                uitpasNumberDetails: {
+                    uitpasNumber: '12345678',
+                    socialTariff: {
+                        status: UitpasSocialTariffStatus.Unknown,
+                        endDate: null,
+                    },
+                },
+            });
+        });
+
+        test('should stay null if null', () => {
+            const data = {
+                firstName: 'Test',
+                lastName: 'Test',
+                uitpasNumber: null,
+            };
+
+            const objectData = new ObjectData(data, { version: 306 });
+            const decoded = objectData.decode(MemberDetails);
+
+            expect(decoded).toMatchObject({
+                uitpasNumberDetails: null,
+            });
+        });
+    });
+
+    describe('uitpasNumberDetails downgrade to uitpasNumber (version 306)', () => {
+        test('should upgrade uitpasNumber to uitpasNumberDetails', () => {
+            const memberDetails = MemberDetails.create({
+                firstName: 'Test',
+                lastName: 'Test',
+                uitpasNumberDetails: UitpasNumberDetails.create({
+                    uitpasNumber: '12345678',
+                    socialTariff: UitpasSocialTariff.create({
+                        status: UitpasSocialTariffStatus.Unknown,
+                        endDate: null,
+                    }),
+                }),
+            });
+
+            const encoded = memberDetails.encode({ version: 306 });
+
+            expect(encoded).toMatchObject({
+                uitpasNumber: '12345678',
+            });
+        });
+
+        test('should stay null if null', () => {
+            const memberDetails = MemberDetails.create({
+                firstName: 'Test',
+                lastName: 'Test',
+                uitpasNumberDetails: null,
+            });
+
+            const encoded = memberDetails.encode({ version: 306 });
+
+            expect(encoded).toMatchObject({
+                uitpasNumber: null,
+            });
         });
     });
 });

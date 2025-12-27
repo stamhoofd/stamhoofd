@@ -13,7 +13,7 @@
             </p>
 
             <p v-if="members.length === 0 && isAcceptingNewMembers" class="style-button-bar">
-                <button class="button primary" type="button" @click="registerMembers">
+                <button class="button primary" type="button" data-testid="register-member-button" @click="registerMembers">
                     <span class="icon edit" />
                     <span>{{ $t('d55c9b50-2f86-4e7a-b6a5-2f03c0fad4fa') }}</span>
                 </button>
@@ -38,7 +38,7 @@
                 </h2>
 
                 <STList class="illustration-list">
-                    <STListItem v-for="member of members" :key="member.id" class="right-stack" :selectable="true" @click="$navigate(Routes.ViewMember, {properties: {member}})">
+                    <STListItem v-for="member of members" :key="member.id" class="right-stack" :selectable="true" data-testid="open-member-button" @click="$navigate(Routes.ViewMember, {properties: {member}})">
                         <template #left>
                             <MemberIcon :member="member" :icon="getRegistrationsForMember(member).length === 0 ? 'canceled' : ''" />
                         </template>
@@ -78,7 +78,7 @@
                 </h2>
 
                 <STList class="illustration-list">
-                    <STListItem class="left-center" :selectable="true" @click="registerMembers">
+                    <STListItem class="left-center" :selectable="true" data-testid="register-member-button" @click="registerMembers">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/edit-data.svg" class="style-illustration-img">
                         </template>

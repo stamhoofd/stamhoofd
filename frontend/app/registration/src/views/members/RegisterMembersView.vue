@@ -6,7 +6,7 @@
             <h1>{{ title }}</h1>
 
             <STList class="illustration-list">
-                <STListItem v-for="member in members" :key="member.member.id" class="right-stack" :selectable="true" @click.stop="selectMember(member)">
+                <STListItem v-for="member in members" :key="member.member.id" class="right-stack" :selectable="true" data-testid="member-button" @click.stop="selectMember(member)">
                     <template #left>
                         <MemberIcon :member="member" />
                     </template>
@@ -24,7 +24,7 @@
                     </template>
                 </STListItem>
 
-                <STListItem v-if="isAcceptingNewMembers" class="right-stack" :selectable="true" @click="addNewMember">
+                <STListItem v-if="isAcceptingNewMembers" class="right-stack" :selectable="true" data-testid="new-member-button" @click="addNewMember">
                     <template #left>
                         <span class="icon add" />
                     </template>

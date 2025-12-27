@@ -122,7 +122,7 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
         name: $t(`87c1a48c-fef5-44c3-ae56-c83463fcfb84`),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
-            value: object.details.uitpasNumber,
+            value: object.details.uitpasNumberDetails?.uitpasNumber ?? null,
         }),
     },
     {

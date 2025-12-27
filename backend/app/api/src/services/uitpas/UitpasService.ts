@@ -1,19 +1,19 @@
 import { Model } from '@simonbackx/simple-database';
-import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
-import { Cart, OrderStatus, Product, ProductPrice, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
-import { v4 as uuidv4 } from 'uuid';
-import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository';
-import { searchUitpasOrganizers } from './searchUitpasOrganizers';
-import { checkPermissionsFor } from './checkPermissionsFor';
-import { checkUitpasNumbers } from './checkUitpasNumbers';
-import { getSocialTariffForEvent } from './getSocialTariffForEvent';
-import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers';
-import { searchUitpasEvents } from './searchUitpasEvents';
-import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSales } from './registerTicketSales';
-import { cancelTicketSales } from './cancelTicketSales';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
+import { Cart, OrderStatus, Product, ProductPrice, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { v4 as uuidv4 } from 'uuid';
+import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository.js';
+import { cancelTicketSales } from './cancelTicketSales.js';
+import { checkPermissionsFor } from './checkPermissionsFor.js';
+import { checkUitpasNumber, checkUitpasNumbers } from './checkUitpasNumbers.js';
+import { getSocialTariffForEvent } from './getSocialTariffForEvent.js';
+import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers.js';
+import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSales } from './registerTicketSales.js';
+import { searchUitpasEvents } from './searchUitpasEvents.js';
+import { searchUitpasOrganizers } from './searchUitpasOrganizers.js';
 
 type UitpasTicketSale = {
     basePrice: number;
@@ -340,6 +340,17 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
         return await checkUitpasNumbers(access_token, uitpasNumbers);
+    }
+
+    /**
+     * Checks uitpas number
+     * If any of the uitpas number is invalid, it will throw a SimpleErrors instance.
+     * @param uitpasNumber The uitpas number to check
+     */
+    static async checkUitpasNumber(uitpasNumber: string) {
+        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
+        const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
+        return await checkUitpasNumber(access_token, uitpasNumber);
     }
 
     /**

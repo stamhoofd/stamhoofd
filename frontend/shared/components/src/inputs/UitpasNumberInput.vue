@@ -26,13 +26,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue';
-import { useErrors } from '../errors/useErrors';
-import { Validator } from '../errors/Validator';
-import { DataValidator } from '@stamhoofd/utility';
-import { ErrorBox } from '../errors/ErrorBox';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { DataValidator } from '@stamhoofd/utility';
+import { computed, ref, watch } from 'vue';
+import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
 import { useValidation } from '../errors/useValidation';
+import { Validator } from '../errors/Validator';
 
 const props = withDefaults(
     defineProps<{
@@ -40,6 +40,7 @@ const props = withDefaults(
         nullable?: boolean;
         title?: string;
         disabled?: boolean;
+
         class?: string | null;
         required?: boolean;
         placeholder?: string | null;
@@ -60,6 +61,7 @@ const props = withDefaults(
 
 const errors = useErrors({ validator: props.validator });
 const model = defineModel<string | null>({ required: true });
+const emits = defineEmits<{ (e: 'update:hasErrors', value: boolean): void }>();
 
 useValidation(errors.validator, validate);
 
@@ -85,6 +87,10 @@ const errorBoxes = computed(() => {
     }
     return arr.length > 0 ? arr : null;
 });
+
+watch(errorBoxes, (value) => {
+    emits('update:hasErrors', value !== null);
+}, { immediate: true });
 
 function onTyping() {
     // Silently send modelValue to parents, but don't show visible errors yet

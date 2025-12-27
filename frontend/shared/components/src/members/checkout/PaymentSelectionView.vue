@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="payment-selection-view">
         <STNavigationBar :title="needsPay ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`84dc69fb-179d-4e25-a5c8-4a6beb57bcdd`)" />
         <main v-if="needsPay" class="center">
             <h1>{{ $t('6f2975aa-d60f-4abb-b597-c30e2382da12') }}</h1>
@@ -19,11 +19,11 @@
 
         <STToolbar>
             <template #left>
-                <span>{{ $t('e67d0122-6f15-46c6-af94-92a79268710a') }}: {{ formatPrice(checkout.totalPrice) }}</span>
+                <span data-testid="total-text">{{ $t('e67d0122-6f15-46c6-af94-92a79268710a') }}: {{ formatPrice(checkout.totalPrice) }}</span>
             </template>
             <template #right>
                 <LoadingButton :loading="loading">
-                    <button class="button primary" type="button" @click="goNext">
+                    <button class="button primary" type="button" data-testid="confirm-payment-method-button" @click="goNext">
                         <span v-if="needsPay && (selectedPaymentMethod === 'Transfer' || selectedPaymentMethod === 'PointOfSale')">{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
                         <span v-else-if="needsPay">{{ $t('e3f37ccd-a27c-4455-96f4-e33b74ae879e') }}</span>
                         <span v-else>{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>

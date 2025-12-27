@@ -13,6 +13,7 @@ import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
 import { Context } from '../../../helpers/Context.js';
 import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
+import { updateMemberDetailsUitpasNumber } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
@@ -178,6 +179,26 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     human: $t(`7b7c4b2b-f30c-4cad-ba13-caad591bafde`),
                     statusCode: 403,
                 });
+            }
+
+            // only update uitpas number if successful social tariff check is required
+            if (member.details.uitpasNumberDetails && member.details.uitpasNumberDetails.socialTariff.isUpdateRequired(member.details.requiresFinancialSupport)) {
+                let isUpdated: boolean;
+
+                try {
+                    isUpdated = await updateMemberDetailsUitpasNumber(member.details);
+                }
+                catch (e) {
+                    // force review of uitpas number
+                    member.details.reviewTimes.removeReview('uitpasNumber');
+                    await member.save();
+                    throw e;
+                }
+
+                if (isUpdated) {
+                    member.details.cleanData();
+                    await member.save();
+                }
             }
         }
 

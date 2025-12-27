@@ -6,7 +6,7 @@
             </div>
             <div class="middle">
                 <template v-if="tabs.length > 1">
-                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" @click="(event) => selectTab(event, item)">
+                    <button v-for="(item, index) in tabs" :key="index" class="button item" :class="{ selected: item.isSelected(selectedItem) }" type="button" data-testid="tab-button" @click="(event) => selectTab(event, item)">
                         <div class="button text" :class="{ selected: item.isSelected(selectedItem) }">
                             <span :class="'icon '+item.icon" />
                             <span>{{ item.name }}</span>
@@ -254,7 +254,8 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
 
     if (item.component.hasHistoryIndex()) {
         item.component.returnToHistoryIndex();
-    } else {
+    }
+    else {
         item.component.deleteHistoryIndex();
         HistoryManager.pushState(undefined, old
             ? async () => {
@@ -263,7 +264,6 @@ async function selectItem(item: TabBarItem, appendHistory: boolean = true) {
             : null, { adjustHistory: appendHistory });
         item.component.assignHistoryIndex();
     }
-
 
     // Switch
     selectedItem.value = item;
@@ -349,7 +349,7 @@ const selectTabById = async (id: string) => {
 };
 
 const show = async (options: PushOptions) => {
-    console.log('Showing manually', options)
+    console.log('Showing manually', options);
     if (options.components.length > 1) {
         throw new Error('Impossible to show more than 1 component from a direct child of the TabBarController');
     }

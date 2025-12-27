@@ -9,19 +9,22 @@ export class ApiService implements ServiceHelper {
         const domain = CaddyConfigHelper.getDomain("api", this.workerId);
 
         // Reload database so we have the right one
-        const {Database} = await import("@simonbackx/simple-database")
+        const { Database } = await import("@simonbackx/simple-database");
         await Database.reload();
 
         // Start api
-        const {run: runMigrations} = await require('@stamhoofd/backend/src/migrate');
+        const { run: runMigrations } =
+            await require("@stamhoofd/backend/src/migrate");
         await runMigrations();
 
         // Clear database before we start
         const databaseHelper = new DatabaseHelper(this.workerId);
+
         await databaseHelper.clear();
+
         console.log(`Database cleared for worker ${this.workerId}.`);
 
-        const {boot} = await require('@stamhoofd/backend/src/boot');
+        const { boot } = await require("@stamhoofd/backend/src/boot");
         const { shutdown } = await boot({ killProcess: false });
 
         return {
@@ -33,7 +36,7 @@ export class ApiService implements ServiceHelper {
                 console.log("Backend server ready");
             },
             kill: async () => {
-                await shutdown()
+                await shutdown();
             },
         };
     }

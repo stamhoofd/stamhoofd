@@ -1,17 +1,18 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { PermissionLevel } from "@stamhoofd/structures";
-import { markRaw } from "vue";
-import { MemberStepView } from "../..";
-import { NavigationActions } from "../../../types/NavigationActions";
-import EditMemberUitpasBox from "../../components/edit/EditMemberUitpasBox.vue";
-import { EditMemberStep, MemberStepManager } from "../MemberStepManager";
-import { MemberSharedStepOptions } from "./MemberSharedStepOptions";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { PermissionLevel, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { markRaw } from 'vue';
+import { MemberStepView } from '../..';
+import { CenteredMessage } from '../../../overlays/CenteredMessage';
+import { NavigationActions } from '../../../types/NavigationActions';
+import EditMemberUitpasBox from '../../components/edit/EditMemberUitpasBox.vue';
+import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
+import { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberUitpasStep implements EditMemberStep {
-    options: MemberSharedStepOptions
+    options: MemberSharedStepOptions;
 
     constructor(options: MemberSharedStepOptions) {
-        this.options = options
+        this.options = options;
     }
 
     getName(_manager: MemberStepManager) {
@@ -19,25 +20,28 @@ export class MemberUitpasStep implements EditMemberStep {
     }
 
     isEnabled(manager: MemberStepManager) {
-        const member = manager.member
+        const member = manager.member;
         const details = member.patchedMember.details;
 
         if (!member.isPropertyEnabled('uitpasNumber', {
-            checkPermissions: manager.context.user ? {
-                level: PermissionLevel.Write,
-                user: manager.context.user
-            } : undefined
+            checkPermissions: manager.context.user
+                ? {
+                        level: PermissionLevel.Write,
+                        user: manager.context.user,
+                    }
+                : undefined,
         })) {
             return false;
         }
 
         if (this.options.outdatedTime) {
-            if (details.reviewTimes.isOutdated("uitpasNumber", this.options.outdatedTime)) {
+            if (details.reviewTimes.isOutdated('uitpasNumber', this.options.outdatedTime)) {
                 return true;
             }
-        } else {
+        }
+        else {
             // Also ask if never answered the question
-            if (details.uitpasNumber === null && !details.reviewTimes.isReviewed("uitpasNumber")) {
+            if (details.uitpasNumberDetails === null && !details.reviewTimes.isReviewed('uitpasNumber')) {
                 return true;
             }
         }
@@ -53,8 +57,21 @@ export class MemberUitpasStep implements EditMemberStep {
             saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
             markReviewed: ['uitpasNumber'],
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                const uitpasNumberDetails = manager.member.patchedMember.details.uitpasNumberDetails;
+
+                if (uitpasNumberDetails && !uitpasNumberDetails.socialTariff.isActive) {
+                    const status = uitpasNumberDetails.socialTariff.status;
+
+                    const text = status === UitpasSocialTariffStatus.Expired ? $t('Het kansentarief van dit UiTPAS-nummer is verlopen.') : $t('Dit UiTPAS-nummer heeft geen kansentarief.');
+
+                    const isConfirm = await CenteredMessage.confirm(`${text} ${$t('Wil je toch verder gaan?')}`, $t('Ja'));
+
+                    if (!isConfirm) {
+                        return;
+                    }
+                }
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }

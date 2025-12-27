@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request, RequestResult } from '@simonbackx/simple-networking';
 import { useAppContext, useContext } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
-import { AppType, MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, Version } from '@stamhoofd/structures';
+import { AppType, MemberDetails, MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, PlatformMember, Registration, UitpasNumberDetails, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';
 import { updateContextFromMembersBlob } from './helpers/updateContextFromMembersBlob';
 
@@ -87,6 +87,37 @@ export class PlatformFamilyManager {
         }
     }
 
+    async forceUpdateUitpasSocialTarrif(members: PlatformMember[]): Promise<boolean> {
+        const patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray();
+
+        const clearAfter: Set<PlatformMember> = new Set();
+
+        for (const member of members) {
+            if (member.isNew || member.member.details.uitpasNumberDetails === null) {
+                continue;
+            }
+
+            const uitpasNumber: string = member.member.details.uitpasNumberDetails.uitpasNumber;
+
+            if (uitpasNumber) {
+                patches.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        uitpasNumberDetails: UitpasNumberDetails.patch({
+                            uitpasNumber,
+                        }),
+                    }),
+                }));
+                clearAfter.add(member);
+            }
+        }
+
+        const hasChanges = patches.changes.length > 0;
+
+        await this.savePatches(members, patches, clearAfter, true);
+        return hasChanges;
+    }
+
     async save(members: PlatformMember[], shouldRetry: boolean = false) {
         // Load all members that have patches
         const patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob> = new PatchableArray();
@@ -113,6 +144,10 @@ export class PlatformFamilyManager {
             }
         }
 
+        await this.savePatches(members, patches, clearAfter, shouldRetry);
+    }
+
+    private async savePatches(members: PlatformMember[], patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, clearAfter: Set<PlatformMember>, shouldRetry: boolean) {
         if (patches.changes.length) {
             for (const c of clearAfter.values()) {
                 c.prepareSave();

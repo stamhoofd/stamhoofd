@@ -367,7 +367,7 @@ export class Member extends QueryableModel {
             return false;
         }
 
-        if (this.details.uitpasNumber) {
+        if (this.details.uitpasNumberDetails) {
             return false;
         }
 

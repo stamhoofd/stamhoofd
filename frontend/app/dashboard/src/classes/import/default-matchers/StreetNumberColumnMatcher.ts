@@ -16,7 +16,7 @@ export class StreetNumberColumnMatcher extends SharedMemberDetailsMatcher implem
     doesMatch(columnName: string, examples: string[]): boolean {
         const cleaned = columnName.trim().toLowerCase();
 
-        for (const word of [...this.negativeMatch, 'telefoon', 'gsm', 'phone', 'tel', 'lidnummer', 'rijksregister', 'bestel']) {
+        for (const word of [...this.negativeMatch, 'telefoon', 'gsm', 'phone', 'tel', 'lidnummer', 'rijksregister', 'bestel', 'uitpas']) {
             if (cleaned.includes(word)) {
                 return false;
             }

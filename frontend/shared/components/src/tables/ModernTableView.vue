@@ -1,5 +1,5 @@
 <template>
-    <div class="modern st-view table-view background">
+    <div class="modern st-view table-view background" data-testid="table">
         <STNavigationBar :add-shadow="wrapColumns" :title="title" :disable-pop="true">
             <template #left>
                 <button v-if="canLeaveSelectionMode && isMobile && showSelection && !isIOS" type="button" class="button icon close" @click="setShowSelection(false)" />
@@ -28,7 +28,7 @@
                 <button v-else-if="!showSelection && isIOS && false" key="iOSSelect" type="button" class="button navigation" @click="setShowSelection(true)">
                     {{ $t('bbc1d7b9-1b97-426f-b8a6-df946bd50d4d') }}
                 </button>
-                <button v-else key="actions" v-long-press="(e: any) => showActions(true, e)" type="button" class="button icon more" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
+                <button v-else key="actions" v-long-press="(e: any) => showActions(true, e)" type="button" class="button icon more" data-testid="more-button" @click.prevent="showActions(true, $event)" @contextmenu.prevent="showActions(true, $event)" />
             </template>
         </STNavigationBar>
 
@@ -61,7 +61,7 @@
 
             <div ref="tableElement" class="table-with-columns" :class="{ wrap: wrapColumns, 'show-checkbox': showSelection, 'show-prefix': showPrefix }">
                 <div class="inner-size" :style="!wrapColumns ? { height: (totalHeight+50)+'px', width: totalRenderWidth+'px'} : {}">
-                    <div class="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
+                    <div class="table-head" data-testid="table-head" @contextmenu.prevent="onTableHeadRightClick($event)">
                         <div v-if="showSelection" class="selection-column">
                             <Checkbox v-model="isAllSelected" :indeterminate="hasSelection && !isAllSelected" />
                         </div>
@@ -85,7 +85,7 @@
                     </div>
 
                     <div ref="tableBody" class="table-body" :style="{ height: totalHeight+'px' }">
-                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e: any) => onRightClickRow(row, e)" class="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
+                        <div v-for="row of visibleRows" :key="row.id" v-long-press="(e: any) => onRightClickRow(row, e)" class="table-row" data-testid="table-row" :class="{focused: isRowFocused(row) }" :style="{ transform: 'translateY('+row.y+'px)', display: row.currentIndex === null ? 'none' : '' }" @click="onClickRow(row, $event)" @contextmenu.prevent="(event) => onRightClickRow(row, event)">
                             <label v-if="showSelection" class="selection-column" @click.exact.stop>
                                 <Checkbox v-if="row.value" :key="row.value.id" :model-value="row.cachedSelectionValue" @update:model-value="toggleRow(row, $event)" />
                                 <Checkbox v-else :model-value="isAllSelected" />
@@ -137,7 +137,7 @@
                 <span :class="'icon '+action.icon" />
             </button>
 
-            <button v-long-press="(e: any) => showActions(false, e)" type="button" class="button text small column selected" @click="showActions(false, $event)">
+            <button v-long-press="(e: any) => showActions(false, e)" type="button" class="button text small column selected" data-testid="more-button" @click="showActions(false, $event)">
                 <span class="icon more" />
             </button>
         </STButtonToolbar>
@@ -153,14 +153,14 @@ import { Storage } from '@stamhoofd/networking';
 import { isEmptyFilter, LimitedFilteredRequest, mergeFilters, SortItemDirection, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
-import { Component, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, shallowRef, watch, watchEffect } from 'vue';
+import { Component, computed, ComputedRef, getCurrentInstance, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, Ref, ref, watch, watchEffect } from 'vue';
 
 import UIFilterEditor from '../filters/UIFilterEditor.vue';
 import { AsyncTableAction, Column, MenuTableAction, TableAction, TableActionSelection, TableObjectFetcher } from './classes';
 import ColumnSelectorContextMenu from './ColumnSelectorContextMenu.vue';
 import ColumnSortingContextMenu from './ColumnSortingContextMenu.vue';
-import TableActionsContextMenu from './TableActionsContextMenu.vue';
 import { useShallowMap } from './hooks/useShallowMap';
+import TableActionsContextMenu from './TableActionsContextMenu.vue';
 
 export interface TableListable {
     id: string;

@@ -1,25 +1,25 @@
 // test should always be imported first
-import { test } from "../setup/fixtures";
+import { test } from "../test-fixtures/base";
 
 // other imports
 import { expect } from "@playwright/test";
 import { TestUtils } from "@stamhoofd/test-utils";
-import { WorkerHelper } from "../setup/helpers/WorkerHelper";
+import { WorkerData } from "../helpers";
 
 /**
  * Onboarding a new organization
  */
-test.describe("Onboarding new organization", () => {
+test.describe("Onboarding", () => {
     test.beforeAll(() => {
         TestUtils.setPermanentEnvironment("userMode", "organization");
     });
 
     test.afterAll(async () => {
-        await WorkerHelper.clearDatabase();
+        await WorkerData.resetDatabase();
     });
 
-    test("happy path", async ({ page, dashboard }) => {
-        await dashboard.goto();
+    test("happy path", async ({ page, pages }) => {
+        await pages.dashboard.goto();
 
         // click signup
         await page.getByTestId("signup-link").click();

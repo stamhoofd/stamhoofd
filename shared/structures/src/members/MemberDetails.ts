@@ -13,6 +13,7 @@ import { NationalRegisterNumberOptOut } from './NationalRegisterNumberOptOut.js'
 import { Parent } from './Parent.js';
 import { RecordAnswer, RecordAnswerDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
+import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
 
 /**
  * Keep track of date nad time of an edited boolean value
@@ -109,8 +110,31 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 301 })
     notes: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, version: 306 })
-    uitpasNumber: string | null = null;
+    @field({ decoder: StringDecoder, nullable: true, version: 306, field: 'uitpasNumber' })
+    @field({
+        decoder: UitpasNumberDetails,
+        nullable: true,
+        version: 391,
+        upgrade: (old: string | null) => {
+            if (old) {
+                return UitpasNumberDetails.create({
+                    uitpasNumber: old,
+                    socialTariff: UitpasSocialTariff.create({
+                        status: UitpasSocialTariffStatus.Unknown,
+                    }),
+                });
+            }
+
+            return null;
+        },
+        downgrade(newer: UitpasNumberDetails | null) {
+            if (newer) {
+                return newer.uitpasNumber;
+            }
+            return null;
+        },
+    })
+    uitpasNumberDetails: UitpasNumberDetails | null = null;
 
     @field({ decoder: DateDecoder })
     @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date('1970-01-01') })
@@ -357,12 +381,6 @@ export class MemberDetails extends AutoEncoder {
             }
         }
 
-        // set requires financial support if uitpasNumber has 'kansentarief'
-        const hasFinancialSupport = !!this.requiresFinancialSupport?.value;
-        if ((hasFinancialSupport === false) && this.uitpasNumber !== null && DataValidator.isUitpasNumberKansenTarief(this.uitpasNumber)) {
-            this.requiresFinancialSupport = BooleanStatus.create({ value: true });
-        }
-
         if (this.trackingYear && this.birthDay) {
             if (this.trackingYear === this.birthDay.getFullYear()) {
                 // tracking year is not needed
@@ -440,8 +458,12 @@ export class MemberDetails extends AutoEncoder {
         return this.unverifiedEmails.length > 0 || this.unverifiedAddresses.length > 0 || this.unverifiedPhones.length > 0;
     }
 
+    get hasFinancialSupportOrActiveUitpas(): boolean {
+        return this.requiresFinancialSupport?.value === true || this.uitpasNumberDetails?.socialTariff.status === UitpasSocialTariffStatus.Active;
+    }
+
     get shouldApplyReducedPrice(): boolean {
-        return this.requiresFinancialSupport?.value ?? false;
+        return this.hasFinancialSupportOrActiveUitpas;
     }
 
     get missingData(): (MemberProperty | 'secondParent')[] {
@@ -632,6 +654,7 @@ export class MemberDetails extends AutoEncoder {
         if (other.firstName.length > 0) {
             this.firstName = other.firstName;
         }
+
         if (other.lastName.length > 0) {
             this.lastName = other.lastName;
         }
@@ -681,6 +704,11 @@ export class MemberDetails extends AutoEncoder {
 
         if (other.requiresFinancialSupport && (!this.requiresFinancialSupport || this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)) {
             this.requiresFinancialSupport = other.requiresFinancialSupport;
+        }
+
+        // todo: test?
+        if (other.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0 >= (this.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0)) {
+            this.uitpasNumberDetails = other.uitpasNumberDetails;
         }
 
         if (other.dataPermissions && (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)) {

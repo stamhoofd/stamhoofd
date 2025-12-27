@@ -28,7 +28,7 @@
 
                 <p class="style-button-bar right-align">
                     <LoadingButton :loading="loading">
-                        <button class="button primary" type="button" @click="goToCheckout">
+                        <button class="button primary" type="button" data-testid="go-to-checkout-button" @click="goToCheckout">
                             <span v-if="checkout.totalPrice">{{ $t('c6b88f05-a46b-40cc-895a-8652cd9857f3') }}</span>
                             <span v-else>{{ $t('7de2e636-dcec-44b1-a681-daeb9cd85316') }}</span>
 

@@ -46,7 +46,7 @@ export default class Checkbox extends VueComponent {
     @Prop({ default: false })
     indeterminate!: boolean;
 
-    @Prop({ default: undefined })
+    @Prop({ default: 'checkbox' })
     dataTestid?: string;
 
     get hasDefaultSlot() {

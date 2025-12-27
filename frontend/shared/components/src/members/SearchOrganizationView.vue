@@ -8,12 +8,12 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <form class="search-box input-icon-container icon search gray" @submit.prevent>
-                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`d510896c-f601-4eb6-973e-5bd494a5c207`)">
+                <input ref="input" v-model="query" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`d510896c-f601-4eb6-973e-5bd494a5c207`)" data-testid="organization-search-input">
             </form>
 
             <Spinner v-if="loadingResults" class="gray center" />
             <STList v-else>
-                <STListItem v-for="organization in results" :key="organization.id" :selectable="true" @click="doSelectOrganization(organization)">
+                <STListItem v-for="organization in results" :key="organization.id" :selectable="true" data-testid="organization-button" @click="doSelectOrganization(organization)">
                     <template #left>
                         <OrganizationAvatar :organization="organization" />
                     </template>
@@ -36,7 +36,7 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox, NavigationActions, OrganizationAvatar, Spinner, Toast, useErrors, useNavigationActions } from '@stamhoofd/components';
-import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
+import { I18nController } from '@stamhoofd/frontend-i18n';
 import { NetworkManager, useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';

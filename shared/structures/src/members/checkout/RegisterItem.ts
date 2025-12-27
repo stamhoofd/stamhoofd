@@ -493,10 +493,6 @@ export class RegisterItem implements ObjectWithRecords {
         return this.group.id;
     }
 
-    get reduced() {
-        return this.member.patchedMember.details.requiresFinancialSupport?.value ?? false;
-    }
-
     get family() {
         return this.member.family;
     }

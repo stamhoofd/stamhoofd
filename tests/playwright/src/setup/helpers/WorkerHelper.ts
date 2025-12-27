@@ -1,25 +1,16 @@
 import { WorkerInfo } from "@playwright/test";
-import { EmailMocker } from "@stamhoofd/email";
 import { TestUtils } from "@stamhoofd/test-utils";
+import { WorkerData } from "../../helpers/worker/WorkerData";
 import { ApiService } from "./ApiService";
 import { CaddyConfigHelper } from "./CaddyConfigHelper";
-import { DatabaseHelper } from "./DatabaseHelper";
 import { FrontendProjectName, FrontendService } from "./FrontendService";
 import { ServiceProcess } from "./ServiceHelper";
-import { WorkerData } from "./WorkerData";
 
 class WorkerHelperInstance {
-    private isInitialized = false;
-    private _databaseHelper: DatabaseHelper | null = null;
+    private _isInitialized = false;
 
-    private get databaseHelper() {
-        if (!this._databaseHelper) {
-            if(!WorkerData.id) {
-                throw new Error("Worker id is not set");
-            }
-            this._databaseHelper = new DatabaseHelper(WorkerData.id);
-        }
-        return this._databaseHelper;
+    get isInitialized() {
+        return this._isInitialized;
     }
 
     /**
@@ -126,10 +117,12 @@ class WorkerHelperInstance {
      * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
      */
     loadEnvironment() {
-        if (this.isInitialized) {
+        if (this._isInitialized) {
             console.log('Environment already loaded')
             return;
         }
+
+        this._isInitialized = true;
 
         if (!WorkerData.isInWorkerProcess) {
             throw new Error('Loading env not possible: not in a worker process')
@@ -139,15 +132,11 @@ class WorkerHelperInstance {
             // set environment variables
             console.log('Loading environment')
             this.overrideDefaultEvironment();
-            EmailMocker.infect();
+            // EmailMocker.infect();
             console.log('Environment has been loaded')
 
-            this.isInitialized = true;
+            
         }
-    }
-
-    async clearDatabase() {
-        await this.databaseHelper.clear();
     }
 }
 

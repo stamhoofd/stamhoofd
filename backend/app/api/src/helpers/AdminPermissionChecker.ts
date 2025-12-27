@@ -1,10 +1,10 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
-import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, ReceivableBalanceType, RecordSettings, ResourcePermissions } from '@stamhoofd/structures';
+import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, ReceivableBalanceType, RecordSettings, ResourcePermissions, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { MemberRecordStore } from '../services/MemberRecordStore';
-import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess';
+import { MemberRecordStore } from '../services/MemberRecordStore.js';
+import { addTemporaryMemberAccess, hasTemporaryMemberAccess } from './TemporaryMemberAccess.js';
 
 /**
  * One class with all the responsabilities of checking permissions to each resource in the system by a given user, possibly in an organization context.
@@ -1478,7 +1478,7 @@ export class AdminPermissionChecker {
         // Has financial read access?
         if (!options?.forAdminCartCalculation && !await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
             cloned.details.requiresFinancialSupport = null;
-            cloned.details.uitpasNumber = null;
+            cloned.details.uitpasNumberDetails = null;
             cloned.outstandingBalance = 0;
 
             for (const registration of cloned.registrations) {
@@ -1507,7 +1507,7 @@ export class AdminPermissionChecker {
     /**
      * Only for creating new members
      */
-    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob, options: {asUserManager: boolean}) {
+    filterMemberPut(member: MemberWithRegistrations, data: MemberWithRegistrationsBlob, options: { asUserManager: boolean }) {
         if (options.asUserManager || STAMHOOFD.userMode === 'platform') {
             // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
             data.details.memberNumber = null;
@@ -1515,7 +1515,12 @@ export class AdminPermissionChecker {
 
         // Do not allow setting the security code
         data.details.securityCode = null;
-     }
+        if (data.details.uitpasNumberDetails) {
+            data.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
+                status: UitpasSocialTariffStatus.Unknown,
+            });
+        }
+    }
 
     async filterMemberPatch(member: MemberWithRegistrations, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
         if (!data.details) {
@@ -1537,7 +1542,6 @@ export class AdminPermissionChecker {
             });
         }
 
-
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
         const isSetFinancialSupportTrue = data.details.shouldApplyReducedPrice;
@@ -1558,6 +1562,19 @@ export class AdminPermissionChecker {
                     // Unset silently
                     data.details.trackingYear = undefined;
                 }
+            }
+        }
+
+        if (data.details.uitpasNumberDetails && data.details.uitpasNumberDetails.socialTariff !== undefined) {
+            if (data.details.uitpasNumberDetails.uitpasNumber !== member.details.uitpasNumberDetails?.uitpasNumber) {
+                // if uitpas number did change -> status should be reset
+                data.details.uitpasNumberDetails = UitpasNumberDetails.create({
+                    uitpasNumber: data.details.uitpasNumberDetails.uitpasNumber,
+                });
+            }
+            else {
+                // if uitpas number did not change
+                data.details.uitpasNumberDetails = undefined;
             }
         }
 
@@ -1594,7 +1611,7 @@ export class AdminPermissionChecker {
             // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
             delete data.details.memberNumber;
         }
-        
+
         if (hasNotes && isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full))) {
             throw new SimpleError({
                 code: 'permission_denied',
@@ -1633,7 +1650,7 @@ export class AdminPermissionChecker {
             }
 
             if (!isUserManager) {
-                if (data.details.uitpasNumber) {
+                if (data.details.uitpasNumberDetails) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',

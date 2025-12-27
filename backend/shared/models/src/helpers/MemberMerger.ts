@@ -7,6 +7,7 @@ import {
     Parent,
     ParentType,
     RecordAnswer,
+    UitpasNumberDetails,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import {
@@ -228,7 +229,9 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     mergeStringIfBaseNotSet(baseDetails, otherDetails, 'lastName');
 
     mergeStringIfBaseNotSet(baseDetails, otherDetails, 'memberNumber');
-    mergeString(baseDetails, otherDetails, 'uitpasNumber');
+
+    // uitpas number
+    mergeUitpasNumberDetails(baseDetails, otherDetails, baseDetails);
 
     // email
     mergeEmail(baseDetails, otherDetails);
@@ -447,6 +450,22 @@ function mergeAddress(
             baseDetails.unverifiedAddresses.push(baseAddress);
         }
     }
+}
+
+// todo: test
+function mergeUitpasNumberDetails(base: { uitpasNumberDetails: UitpasNumberDetails | null }, other: { uitpasNumberDetails: UitpasNumberDetails | null }, baseDetails: MemberDetails) {
+    const baseUitpasNumberDetails = base.uitpasNumberDetails;
+    const otherUitpasNumberDetails = other.uitpasNumberDetails;
+
+    if (!otherUitpasNumberDetails) {
+        return;
+    }
+
+    if ((baseUitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0) >= (otherUitpasNumberDetails.socialTariff?.updatedAt.getTime() ?? 0)) {
+        return;
+    }
+
+    baseDetails.uitpasNumberDetails = otherUitpasNumberDetails;
 }
 
 function mergeString<T, K extends keyof T>(

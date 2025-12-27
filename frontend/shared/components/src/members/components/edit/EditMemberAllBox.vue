@@ -17,7 +17,7 @@
             <hr><EditEmergencyContactsBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 
-        <div v-if="member.patchedMember.details.uitpasNumber || isPropertyEnabled('uitpasNumber')" class="container">
+        <div v-if="member.patchedMember.details.uitpasNumberDetails || isPropertyEnabled('uitpasNumber')" class="container">
             <hr><EditMemberUitpasBox v-bind="$attrs" :member="member" :level="level + 1" :validator="validator" />
         </div>
 

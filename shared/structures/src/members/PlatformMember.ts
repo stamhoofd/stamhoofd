@@ -14,6 +14,7 @@ import { UserWithMembers } from '../UserWithMembers.js';
 import { Address } from '../addresses/Address.js';
 import { type PropertyFilter } from '../filters/PropertyFilter.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
 import { EmergencyContact } from './EmergencyContact.js';
 import { Member } from './Member.js';
@@ -31,7 +32,6 @@ import { RegisterItem } from './checkout/RegisterItem.js';
 import { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { RecordSettings } from './records/RecordSettings.js';
-import { getActivePeriodIds } from '../getActivePeriods.js';
 
 export class PlatformFamily {
     members: PlatformMember[] = [];

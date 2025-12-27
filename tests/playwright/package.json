@@ -4,10 +4,12 @@
     "private": true,
     "scripts": {
         "test": "NODE_OPTIONS=--use-system-ca NODE_ENV=test STAMHOOFD_ENV=playwright DEBUG=pw:browser* yarn playwright test",
-        "test:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true yarn -s test:playwright",
-        "test:trace": "yarn -s test:playwright --trace on"
+        "test:skip": "STAMHOOFD_SKIP_FRONTEND_BUILD=true yarn -s test",
+        "test:trace": "yarn -s test --trace on",
+        "test:skip:trace": "yarn -s test:skip --trace on"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.34.0"
+        "@simonbackx/simple-database": "1.34.0",
+        "pino": "^10.1.1"
     }
 }

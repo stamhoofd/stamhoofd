@@ -11,6 +11,9 @@
         },
         "./src/boot": {
             "require": "./dist/src/boot.js"
+        },
+        "./tests/helpers": {
+            "require": "./dist/tests/helpers/index.js"
         }
     },
     "license": "UNLICENCED",
@@ -35,7 +38,7 @@
         "@types/mailparser": "^3",
         "@types/mysql": "^2.15.20",
         "@types/node": "^22",
-        "nock": "^13.5.1",
+        "nock": "^14.0.10",
         "qs": "^6.11.2",
         "sinon": "^18.0.0"
     },

@@ -36,7 +36,7 @@
                     </div>
                 </h2>
                 <STList class="illustration-list">
-                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" @click="openGroup(group)" />
+                    <RegisterMemberGroupRow v-for="group in category.groups" :key="group.id" :group="group" :member="member" :organization="selectedOrganization" data-testid="group-button" @click="openGroup(group)" />
                 </STList>
             </div>
         </main>
@@ -47,8 +47,8 @@
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { NavigationActions, ScrollableSegmentedControl, Toast, useAppContext, useNavigationActions, useOrganization, useUninheritedPermissions } from '@stamhoofd/components';
 import { Group, GroupCategoryTree, GroupType, Organization, PlatformMember } from '@stamhoofd/structures';
-import { computed, onMounted, Ref, ref, watch } from 'vue';
 import { Formatter } from '@stamhoofd/utility';
+import { computed, onMounted, Ref, ref, watch } from 'vue';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
 import SearchOrganizationView from './SearchOrganizationView.vue';
 
