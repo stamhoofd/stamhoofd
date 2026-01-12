@@ -2,6 +2,7 @@ import { Factory } from '@simonbackx/simple-database';
 
 import { DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplateGroup, NamedObject, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
 import { DocumentTemplate, Group } from '../models/index.js';
+import { OrganizationFactory } from './OrganizationFactory.js';
 
 class Options {
     groups: Group[];
@@ -9,11 +10,21 @@ class Options {
     updatesEnabled?: boolean;
     minPricePaid?: number | null;
     maxAge?: number | null;
+    year?: number | null;
+    publishedAt?: Date | null;
+    createdAt?: Date;
+    type?: string;
+    organizationId?: string;
 }
 
 export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> {
-    async create(): Promise<DocumentTemplate> {
-        const organizationId = this.options.groups[0].organizationId;
+    async createWithoutSave(): Promise<DocumentTemplate> {
+        let organizationId = this.options.organizationId ?? this.options.groups[0]?.organizationId;
+
+        if (organizationId === undefined) {
+            const organization = await new OrganizationFactory({}).create();
+            organizationId = organization.id;
+        }
 
         const documentTemplate = new DocumentTemplate();
         documentTemplate.organizationId = organizationId;
@@ -30,7 +41,17 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
         documentTemplate.html += '\nPrice paid: {{formatPrice registration.pricePaid}}';
 
         documentTemplate.status = this.options.status ?? DocumentStatus.Draft;
+
+        if (this.options.createdAt) {
+            documentTemplate.createdAt = this.options.createdAt;
+        }
+
+        if (this.options.publishedAt !== undefined) {
+            documentTemplate.publishedAt = this.options.publishedAt;
+        }
+
         documentTemplate.updatesEnabled = this.options.updatesEnabled ?? true;
+        documentTemplate.year = this.options.year ?? 0;
 
         documentTemplate.settings = DocumentSettings.create({
             name: 'Test Document',
@@ -124,7 +145,16 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
             }));
         }
 
-        await documentTemplate.save();
+        if (this.options.type) {
+            documentTemplate.privateSettings.templateDefinition.type = this.options.type;
+        }
+
         return documentTemplate as any;
+    }
+
+    async create(): Promise<DocumentTemplate> {
+        const documentTemplate = await this.createWithoutSave();
+        await documentTemplate.save();
+        return documentTemplate;
     }
 }

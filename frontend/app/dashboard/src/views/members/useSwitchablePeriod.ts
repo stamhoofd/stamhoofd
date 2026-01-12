@@ -65,7 +65,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
         return true;
     }
 
-    async function switchPeriod(event: MouseEvent) {
+    async function switchPeriod(event: MouseEvent, periodFilter: (period: RegistrationPeriod) => boolean = () => true) {
         const button = event.currentTarget as HTMLElement;
 
         // Load groups
@@ -77,6 +77,7 @@ export function useSwitchablePeriod(options?: { onSwitch?: () => void | Promise<
                     name: p.name,
                     selected: p.id === period.value.period.id,
                     icon: p.id === platform.value.period.id && p.id !== period.value.period.id ? 'dot' : '',
+                    disabled: !periodFilter(p),
                     action: async () => {
                         await openPeriod(p);
                         return true;

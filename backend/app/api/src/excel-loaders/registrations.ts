@@ -105,6 +105,19 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
             }),
         },
         {
+            id: 'endDate',
+            name: $t(`EindDatum`),
+            width: 20,
+            getValue: (registration: PlatformRegistration) => ({
+                value: registration.endDate,
+                style: {
+                    numberFormat: {
+                        id: XlsxBuiltInNumberFormat.DateSlash,
+                    },
+                },
+            }),
+        },
+        {
             id: 'createdAt',
             name: $t('63a86cdf-8a76-4e8c-9073-4f0b8970e808'),
             width: 20,
