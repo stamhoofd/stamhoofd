@@ -107,6 +107,7 @@ export class Formatter {
     }
 
     /**
+     * Year in Brussels timezone - not UTC
      * 2020
      */
     static year(date: Date): number {
@@ -116,6 +117,19 @@ export class Formatter {
         }
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         return datetime.year;
+    }
+
+    /**
+     * Day in Brussels timezone - not UTC
+     * 31
+     */
+    static day(date: Date): number {
+        if (!date) {
+            // Crash protection in case undefined get passed
+            return 0;
+        }
+        const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
+        return datetime.day;
     }
 
     /**
