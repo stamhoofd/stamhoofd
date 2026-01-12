@@ -66,6 +66,9 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 354 })
     customStartDate: Date | null = null;
 
+    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    customEndDate: Date | null = null;
+
     hydrate(context: RegisterContext) {
         return RegisterItem.fromId(this, context);
     }
@@ -83,6 +86,7 @@ export class RegisterItem implements ObjectWithRecords {
     options: RegisterItemOption[] = [];
     recordAnswers: Map<string, RecordAnswer> = new Map();
     customStartDate: Date | null = null;
+    customEndDate: Date | null = null;
 
     /**
      * Price for the new registration
@@ -145,12 +149,16 @@ export class RegisterItem implements ObjectWithRecords {
         calculatedPriceDueLater?: number;
         trial?: boolean;
         customStartDate?: Date | null;
+        customEndDate?: Date | null;
     }) {
         this.id = data.id ?? uuidv4();
         this.member = data.member;
         this.group = data.group;
         if (data.customStartDate !== undefined) {
             this.customStartDate = data.customStartDate;
+        }
+        if (data.customEndDate !== undefined) {
+            this.customEndDate = data.customEndDate;
         }
 
         if (!data.groupPrice) {
@@ -251,6 +259,7 @@ export class RegisterItem implements ObjectWithRecords {
             options: registration.options,
             trial: registration.trialUntil !== null,
             customStartDate: registration.startDate,
+            customEndDate: registration.endDate,
         });
     }
 
@@ -270,6 +279,7 @@ export class RegisterItem implements ObjectWithRecords {
             calculatedPriceDueLater: this.calculatedPriceDueLater,
             trial: this.trial,
             customStartDate: this.customStartDate,
+            customEndDate: this.customEndDate,
         });
     }
 
@@ -282,6 +292,7 @@ export class RegisterItem implements ObjectWithRecords {
         this.calculatedPriceDueLater = item.calculatedPriceDueLater;
         this.trial = item.trial;
         this.customStartDate = item.customStartDate;
+        this.customEndDate = item.customEndDate;
     }
 
     static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
@@ -326,6 +337,7 @@ export class RegisterItem implements ObjectWithRecords {
             replaceRegistrations,
             trial: idRegisterItem.trial,
             customStartDate: idRegisterItem.customStartDate,
+            customEndDate: idRegisterItem.customEndDate,
         });
     }
 
@@ -341,6 +353,7 @@ export class RegisterItem implements ObjectWithRecords {
             recordAnswers: this.recordAnswers,
             trial: this.trial,
             customStartDate: this.customStartDate,
+            customEndDate: this.customEndDate,
         });
     }
 
@@ -894,8 +907,23 @@ export class RegisterItem implements ObjectWithRecords {
         return new Date(Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()));
     }
 
+    get defaultEndDate() {
+        if (this.replaceRegistrations.length > 0) {
+            const { registration } = this.replaceRegistrations[0];
+            if (registration.endDate && registration.endDate.getTime() <= this.group.settings.endDate.getTime()) {
+                return registration.endDate;
+            }
+        }
+
+        return this.group.settings.endDate;
+    }
+
     get calculatedStartDate() {
         return this.customStartDate ?? this.defaultStartDate;
+    }
+
+    get calculatedEndDate() {
+        return this.customEndDate ?? this.defaultEndDate;
     }
 
     get calculatedTrialUntil() {
@@ -1035,8 +1063,43 @@ export class RegisterItem implements ObjectWithRecords {
             this.trial = false;
         }
 
-        if (!checkout.isAdminFromSameOrganization && this.customStartDate) {
-            this.customStartDate = null;
+        if (!checkout.isAdminFromSameOrganization) {
+            if (this.customStartDate) {
+                this.customStartDate = null;
+            }
+
+            if (this.customEndDate) {
+                this.customEndDate = null;
+            }
+        }
+
+        if (this.customEndDate) {
+            if (this.customEndDate <= this.group.settings.startDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: 'Invalid end date',
+                    human: $t(`De einddatum van de inschrijving moet na de startdatum van de groep zelf zijn`),
+                    field: 'customEndDate',
+                });
+            }
+
+            if (this.customEndDate > this.group.settings.endDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: 'Invalid end date',
+                    human: $t(`De einddatum van de inschrijving moet voor de einddatum van de groep zijn`),
+                    field: 'customEndDate',
+                });
+            }
+
+            if (this.customStartDate && this.customEndDate <= this.customStartDate) {
+                throw new SimpleError({
+                    code: 'invalid_end_date',
+                    message: 'Invalid end date',
+                    human: $t(`De einddatum van de inschrijving moet na de startdatum zijn`),
+                    field: 'customEndDate',
+                });
+            }
         }
 
         if (this.customStartDate) {

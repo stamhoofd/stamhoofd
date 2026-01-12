@@ -216,6 +216,9 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
     @field({ decoder: DocumentPrivateSettings })
     privateSettings = DocumentPrivateSettings.create({});
 
+    @field({ decoder: NumberDecoder, ...NextVersion })
+    year: number;
+
     @field({ decoder: DateDecoder })
     createdAt = new Date();
 

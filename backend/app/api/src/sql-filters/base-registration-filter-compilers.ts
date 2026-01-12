@@ -127,6 +127,11 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
+    endDate: createColumnFilter({
+        expression: SQL.column('registrations', 'endDate'),
+        type: SQLValueType.Datetime,
+        nullable: true,
+    }),
     group: {
         ...baseSQLFilterCompilers,
         id: createColumnFilter({
