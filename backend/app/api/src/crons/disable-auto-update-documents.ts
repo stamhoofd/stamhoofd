@@ -2,7 +2,7 @@ import { registerCron } from '@stamhoofd/crons';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 
-const lastRunDate: number | null = null;
+let lastRunDate: number | null = null;
 
 registerCron('disableAutoUpdateDocuments', disableAutoUpdateDocuments);
 
@@ -31,6 +31,8 @@ async function disableAutoUpdateDocuments() {
     const now = new Date();
     await disableAutoUpdateForFiscalDocuments(now);
     await disableAutoUpdateForOtherDocuments(now);
+
+    lastRunDate = now.getDate();
 }
 
 /**
