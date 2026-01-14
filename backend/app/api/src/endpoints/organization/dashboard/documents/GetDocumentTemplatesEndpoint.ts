@@ -72,8 +72,6 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
         const query = await this.buildQuery(requestQuery);
         const data = await query.fetch();
 
-        console.log(JSON.stringify(query.getSQL()));
-
         const templates: DocumentTemplate[] = DocumentTemplate.fromRows(data, DocumentTemplate.table);
 
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
