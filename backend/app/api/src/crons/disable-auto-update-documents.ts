@@ -29,10 +29,10 @@ async function disableAutoUpdateDocuments() {
     }
 
     const now = new Date();
+    lastRunDate = now.getDate();
+
     await disableAutoUpdateForFiscalDocuments(now);
     await disableAutoUpdateForOtherDocuments(now);
-
-    lastRunDate = now.getDate();
 }
 
 /**
