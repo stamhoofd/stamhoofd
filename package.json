@@ -87,7 +87,7 @@
     "@testing-library/dom": "^10.4.0",
     "@types/eslint__js": "^8.42.3",
     "@types/file-saver": "^2.0.5",
-    "@types/jest": "^29.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22",
     "@types/pdfkit": "0.13.4",
     "@types/qrcode": "^1.5.3",
@@ -98,11 +98,11 @@
     "concurrently": "^9.2.0",
     "favicons": "^7.2.0",
     "husky": "^9.1.7",
-    "jest": "29.7.0",
-    "jest-cli": "^29.7.0",
+    "jest": "^30",
+    "jest-cli": "^30",
     "jest-console-group-reporter": "^1.1.1",
-    "jest-extended": "4.0.2",
-    "lerna": "^8.2.3",
+    "jest-extended": "^6",
+    "lerna": "^9",
     "maildev": "^2.2.1",
     "nodemon": "^3.1.0",
     "postcss-discard-duplicates": "^7.0.2",
@@ -131,6 +131,7 @@
     "@types/node": "^22",
     "@types/jest": "^29.0.0",
     "semver": "^7.7.2",
-    "cookie": "^0.7.1"
+    "cookie": "^0.7.1",
+    "pacote": "^21.0.1"
   }
 }

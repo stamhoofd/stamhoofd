@@ -1,5 +1,5 @@
 import { OrganizationTag } from '@stamhoofd/structures';
-import { TagHelper } from './TagHelper';
+import { TagHelper } from './TagHelper.js';
 
 // todo: move tests for methods of shared package to shared package
 describe('TagHelper', () => {
@@ -123,13 +123,13 @@ describe('TagHelper', () => {
 
             // assert
             expect(result).toHaveLength(6);
-            expect(result).toInclude('id5');
-            expect(result).toInclude('id3');
-            expect(result).toInclude('id4');
-            expect(result).toInclude('id6');
-            expect(result).toInclude('id7');
-            expect(result).toInclude('id0');
-            expect(result).not.toInclude('unknownTagId');
+            expect(result).toContain('id5');
+            expect(result).toContain('id3');
+            expect(result).toContain('id4');
+            expect(result).toContain('id6');
+            expect(result).toContain('id7');
+            expect(result).toContain('id0');
+            expect(result).not.toContain('unknownTagId');
         });
     });
 
@@ -199,7 +199,7 @@ describe('TagHelper', () => {
             // assert
             expect(tag5.childTags).toHaveLength(0);
             expect(tag7.childTags).toHaveLength(3);
-            expect(tag7.childTags).not.toInclude('doesNotExist1');
+            expect(tag7.childTags).not.toContain('doesNotExist1');
         });
 
         it('should return array of tags in the correct order', () => {
