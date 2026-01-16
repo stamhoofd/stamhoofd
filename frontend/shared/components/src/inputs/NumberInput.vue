@@ -1,6 +1,6 @@
 <template>
     <div class="number-container">
-        <label class="number-input input" :class="{ error: !valid }">
+        <label class="number-input input" :class="{ error: !valid, disabled: disabled }">
             <!--
                 We use type = text here because the specs of number inputs ensure that we can't get
                 the raw string value, but we need this for our placeholder logic.
