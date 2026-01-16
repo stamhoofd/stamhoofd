@@ -628,7 +628,9 @@ function getLinkedFields(linkedField: RecordSettings) {
 function autoLink() {
     const linkedInside: Set<string> = new Set();
     const globalData = getDefaultGlobalData();
+    const allowedIds = new Set<string>();
     for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
+        allowedIds.add(field.id);
         if (isDocumentFieldEditable(field)) {
             if (recordAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
                 continue;
@@ -690,6 +692,16 @@ function autoLink() {
                     }
                 }
             }
+        }
+    }
+
+    // Delete all answers that are not supported any longer
+    for (const [key, answer] of recordAnswers.value.entries()) {
+        if (!allowedIds.has(key) || !allowedIds.has(answer.settings.id)) {
+            const newAnswers = new PatchMap() as PatchAnswers;
+            newAnswers.set(key, null);
+            patchAnswers(newAnswers);
+            console.warn('Removed unsupported answer for key', key, answer.settings.id);
         }
     }
 }
