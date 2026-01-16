@@ -218,8 +218,19 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder })
     description = '';
 
+    /**
+     * quantity, should be renamed to quantity in the future
+     */
     @field({ decoder: IntegerDecoder, version: 307 })
     amount = 1;
+
+    get quantity() {
+        return this.amount;
+    }
+
+    set quantity(value: number) {
+        this.amount = value;
+    }
 
     /**
      * Price per piece
