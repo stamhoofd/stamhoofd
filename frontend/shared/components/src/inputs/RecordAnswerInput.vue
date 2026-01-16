@@ -46,7 +46,7 @@
             <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
         <STInputBox v-else-if="answer.settings.type === RecordType.Price" :title="label" error-fields="input" :error-box="errors.errorBox">
-            <PriceInput v-model="integerValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
+            <PriceInput v-model="priceValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
         </STInputBox>
         <ImageInput v-else-if="answer.settings.type === RecordType.Image" v-model="imageValue" :title="label" :required="required" :validator="errors.validator" :resolutions="record.resolutions" :is-private="true" />
         <FileInput v-else-if="answer.settings.type === RecordType.File" v-model="fileValue" :accept="accept" :title="label" :required="required" :validator="errors.validator" :is-private="true" />
@@ -214,6 +214,17 @@ const integerValue = computed({
     },
     set: (value: number | null) => {
         patchAnswer(RecordIntegerAnswer.patch({
+            value,
+        }));
+    },
+});
+
+const priceValue = computed({
+    get: () => {
+        return casted.RecordPriceAnswer.value?.value ?? null;
+    },
+    set: (value: number | null) => {
+        patchAnswer(RecordPriceAnswer.patch({
             value,
         }));
     },
