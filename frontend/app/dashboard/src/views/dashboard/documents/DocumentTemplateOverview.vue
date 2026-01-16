@@ -282,7 +282,7 @@ async function deleteTemplate() {
         });
 
         GlobalEventBus.sendEvent('document-template-deleted', props.template).catch(console.error);
-        Toast.success($t('Het document is verwijderd')).show();
+        Toast.success($t('c80ffc1b-bef9-47f8-905f-f8d917365d05')).show();
 
         pop({ force: true })?.catch(console.error);
     }
@@ -299,7 +299,7 @@ function exportXml() {
     if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
         const canDownload = fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year, props.template.createdAt);
         if (!canDownload) {
-            Toast.error($t('De indiendatum van het fiscaal attest is verstreken. Een fiscaal attest moet ingediend worden voor 1 maart van het jaar volgend op het kalenderjaar van het document.')).show();
+            Toast.error($t('4988e582-50f7-4922-8ecb-5939db9de3dd')).show();
             return;
         }
     }

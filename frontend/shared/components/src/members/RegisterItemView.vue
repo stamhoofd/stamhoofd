@@ -52,7 +52,7 @@
                     </STInputBox>
                 </div>
                 <div>
-                    <STInputBox :title="$t('Einddatum')" error-fields="customEndDate" :error-box="errors.errorBox">
+                    <STInputBox :title="$t('aef10d71-39c4-4cdb-8252-5fd31781abd8')" error-fields="customEndDate" :error-box="errors.errorBox">
                         <DateSelection v-model="customEndDate" :required="false" :placeholder-date="item.defaultEndDate" :min="item.group.settings.startDate" :max="item.group.settings.endDate" />
                     </STInputBox>
                 </div>

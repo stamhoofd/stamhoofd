@@ -12,15 +12,15 @@ import { UIFilter, UIFilterBuilder } from '../UIFilter';
 export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>[] {
     const all: UIFilterBuilder<UIFilter>[] = [
         new StringFilterBuilder({
-            name: $t(`Naam`),
+            name: $t(`274b2697-e44a-43bb-a635-79d9721e8581`),
             key: 'name',
         }),
         new NumberFilterBuilder({
-            name: $t(`Kalenderjaar`),
+            name: $t(`ab2e45a8-4c85-4c10-95b3-cc8da7d40e34`),
             key: 'year',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`Type`),
+            name: $t(`45d95ed4-349b-4f6d-8b4b-417467099f3e`),
             options: [fiscal, participation]
                 .map((definition) => {
                     return new MultipleChoiceUIFilterOption(

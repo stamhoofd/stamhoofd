@@ -58,7 +58,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                     code: 'double_fiscal_document',
                     field: 'year',
                     message: 'This year already has a fiscal document',
-                    human: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                    human: $t('475f5f96-86bf-4124-a005-9904aaf72b37'),
 
                 });
             }
@@ -118,7 +118,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                     code: 'double_fiscal_document',
                     field: 'year',
                     message: 'This year already has a fiscal document',
-                    human: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                    human: $t('475f5f96-86bf-4124-a005-9904aaf72b37'),
                 });
             }
 

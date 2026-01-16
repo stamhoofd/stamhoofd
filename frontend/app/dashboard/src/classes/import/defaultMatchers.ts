@@ -89,7 +89,7 @@ export const getMemberMatchers = (getGroups: () => Group[], getPeriod: () => Org
             if (d < period.period.startDate || d > period.period.endDate) {
                 throw new SimpleError({
                     code: 'invalid_end_date',
-                    message: $t('De einddatum van de inschrijving ligt buiten het geselecteerde werkjaar.'),
+                    message: $t('908caec1-3ce7-478d-aba8-e8daac08beab'),
                 });
             }
 
