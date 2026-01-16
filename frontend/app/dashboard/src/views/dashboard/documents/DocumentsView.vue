@@ -129,6 +129,9 @@ const context = useContext();
 const navigationActions = useNavigationActions();
 
 function addDocument(_document: Document) {
+    // Make sure that we deepSet the document after the table had been reloaded, so possible edits appear in the table
+    tableObjectFetcher.cacheBeforeReset(_document);
+
     // reset the table
     tableObjectFetcher.reset(true, true);
 }
