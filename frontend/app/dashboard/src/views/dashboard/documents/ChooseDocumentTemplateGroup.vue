@@ -172,9 +172,8 @@ function switchPeriod(event: MouseEvent) {
 
 function filterGroup(group: Group): boolean {
     const startYear = group.settings.startDate.getFullYear();
-    const endYear = group.settings.endDate.getFullYear();
 
-    return props.year >= startYear && props.year <= endYear;
+    return props.year === startYear;
 }
 
 async function selectGroup(group: Group) {
