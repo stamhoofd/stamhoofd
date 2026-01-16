@@ -25,6 +25,9 @@
         <p v-if="hasGroups" class="style-description-small">
             {{ $t('Je kan het kalenderjaar niet wijzigen nadat je inschrijvingen geselecteerd hebt.') }}
         </p>
+        <p v-else class="style-description-small">
+            {{ $t('Het jaar waarin inschrijving valt waarvoor je documenten wil aanmaken (startdatum).') }}
+        </p>
 
         <template v-if="(editingType || !isNew)">
             <STInputBox error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
@@ -339,7 +342,7 @@ async function validateYearAsync(value: number = year.value): Promise<SimpleErro
             return new SimpleError({
                 code: 'double_fiscal_document',
                 field: 'year',
-                message: $t('Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                message: $t('Je kan maximaal één fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
             });
         }
     }
