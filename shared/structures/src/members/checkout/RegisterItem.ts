@@ -1078,7 +1078,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`De einddatum van de inschrijving moet na de startdatum van de groep zelf zijn`),
+                    human: $t(`ff3fd880-a223-46f6-aa02-bcd1ae8697cc`),
                     field: 'customEndDate',
                 });
             }
@@ -1087,7 +1087,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`De einddatum van de inschrijving moet voor de einddatum van de groep zijn`),
+                    human: $t(`38d52178-351c-433d-a767-2ca2b5efbfdc`),
                     field: 'customEndDate',
                 });
             }
@@ -1096,7 +1096,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`De einddatum van de inschrijving moet na de startdatum zijn`),
+                    human: $t(`a9a35ed9-de40-40b7-81aa-c1a6c22c17b7`),
                     field: 'customEndDate',
                 });
             }

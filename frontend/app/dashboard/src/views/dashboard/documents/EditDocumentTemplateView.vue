@@ -19,14 +19,14 @@
             </LoadingButton>
         </STInputBox>
 
-        <STInputBox :title="$t('Kalenderjaar')" error-fields="year" :error-box="errors.errorBox">
-            <NumberInput v-model="year" :title="$t('Kalenderjaar')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
+        <STInputBox :title="$t('ab2e45a8-4c85-4c10-95b3-cc8da7d40e34')" error-fields="year" :error-box="errors.errorBox">
+            <NumberInput v-model="year" :title="$t('ab2e45a8-4c85-4c10-95b3-cc8da7d40e34')" :validator="errors.validator" :min="0" :stepper="!hasGroups" :disabled="hasGroups" />
         </STInputBox>
         <p v-if="hasGroups" class="style-description-small">
-            {{ $t('Je kan het kalenderjaar niet wijzigen nadat je inschrijvingen geselecteerd hebt.') }}
+            {{ $t('acf43cfe-2f1c-4f9a-89cb-9b9bf6c23345') }}
         </p>
         <p v-else class="style-description-small">
-            {{ $t('Het jaar waarin inschrijving valt waarvoor je documenten wil aanmaken (startdatum).') }}
+            {{ $t('fc5f6473-fd60-4986-b072-cadaa70a10b3') }}
         </p>
 
         <template v-if="(editingType || !isNew)">
@@ -291,7 +291,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
-                message: $t('Je kan pas vanaf november een fiscaal attest maken voor het huidige jaar.'),
+                message: $t('83d28308-84b3-45b6-b23a-d55199979d34'),
             });
         }
 
@@ -299,7 +299,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
-                message: $t('Je kan geen fiscaal attest maken voor een kalenderjaar dat nog niet is gestart.'),
+                message: $t('eb170b9c-b071-411b-94cf-3458d5660cce'),
             });
         }
 
@@ -320,7 +320,7 @@ function validateYearSync(value: number = year.value): SimpleError | null {
             return new SimpleError({
                 code: 'invalid_year',
                 field: 'year',
-                message: $t('Je kan geen fiscaal attest meer aanmaken voor dit kalenderjaar, omdat het bijhorende aanslagjaar in de personenbelasting al is afgesloten.'),
+                message: $t('caf2ba0e-cc34-4539-9dce-4c03adec0aaa'),
             });
         }
     }
@@ -342,7 +342,7 @@ async function validateYearAsync(value: number = year.value): Promise<SimpleErro
             return new SimpleError({
                 code: 'double_fiscal_document',
                 field: 'year',
-                message: $t('Je kan maximaal één fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.'),
+                message: $t('44828efb-73b4-47d8-af6a-41d4857759f1'),
             });
         }
     }

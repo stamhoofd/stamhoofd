@@ -142,7 +142,7 @@ const activitiesTab = {
 
 const showOnlyActivities = props.documentType === fiscal.type && STAMHOOFD.userMode === 'platform';
 const tabs = ref(showOnlyActivities ? [activitiesTab] : [groupsTab, activitiesTab]);
-const title = showOnlyActivities ? $t('Activiteit') : $t(`f52db2d7-c0f5-4f9c-b567-62f657787339`);
+const title = showOnlyActivities ? $t('dce02131-5547-4723-adfe-983f8792d082') : $t(`f52db2d7-c0f5-4f9c-b567-62f657787339`);
 
 const selectedTab = ref(tabs.value[0].id);
 
@@ -179,10 +179,10 @@ function filterGroup(group: Group): boolean {
 async function selectGroup(group: Group) {
     if (!filterGroup(group)) {
         if (group.type === GroupType.EventRegistration) {
-            Toast.error($t('Deze activiteit ligt niet in kalenderjaar {year}', { year: props.year })).show();
+            Toast.error($t('4aba33e2-15a7-4795-a462-1ec23b894a6b', { year: props.year })).show();
             return;
         }
-        Toast.error($t('Deze groep ligt niet in kalenderjaar {year}', { year: props.year })).show();
+        Toast.error($t('f632fd38-97c3-4753-996b-5ff7edf019bf', { year: props.year })).show();
         return;
     }
 

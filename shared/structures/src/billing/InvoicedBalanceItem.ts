@@ -81,7 +81,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
         if (balanceItem.VATPercentage === null) {
             throw new SimpleError({
                 message: 'Cannot create InvoicedBalanceItem for balance item without VAT percentage',
-                human: $t('Het is niet mogelijk om een factuur aan te maken omdat een BTW-tarief ontbreekt'),
+                human: $t('3c6a76c8-1fc4-4fc3-b1b0-9eca083a0c64'),
                 code: 'balance_item_without_vat_percentage',
             });
         }
@@ -99,7 +99,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
         if (quantity <= 0) {
             throw new SimpleError({
                 message: 'Invoiced amount is too low to create an invoiced balance item',
-                human: $t('Het is niet mogelijk om een factuur aan te maken omdat het gefactureerde bedrag te laag is'),
+                human: $t('551f6cc0-0b1a-4a62-8e09-cef159f5f7d5'),
                 code: 'invoiced_amount_too_low',
             });
         }

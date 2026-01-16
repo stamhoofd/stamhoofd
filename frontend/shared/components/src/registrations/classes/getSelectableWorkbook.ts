@@ -228,7 +228,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'endDate',
-            name: $t(`Einddatum`),
+            name: $t(`aef10d71-39c4-4cdb-8252-5fd31781abd8`),
             enabled: false,
         }),
         new SelectableColumn({

@@ -4,7 +4,7 @@
             <template #right>
                 <button type="button" class="button text navigation" @click="addDocument()">
                     <span class="icon add" />
-                    <span>{{ $t('Nieuw') }}</span>
+                    <span>{{ $t('38d60a73-e301-4ab2-87ff-6eda04117f2f') }}</span>
                 </button>
             </template>
         </STNavigationBar>
@@ -56,7 +56,7 @@
                 </STList>
             </div>
 
-            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`Geen documenten gevonden`)" />
+            <InfiniteObjectFetcherEnd :fetcher="fetcher" :empty-message="$t(`b18dedb2-a224-4c25-996e-53a52f1e3c01`)" />
         </main>
     </div>
 </template>
@@ -162,9 +162,9 @@ const tabItems = [firstYearToShow, firstYearToShow - 1, TabItem.Archive];
 
 const yearLabels = tabItems.map((y) => {
     switch (y) {
-        case TabItem.Recent: return $t('Recent');
-        case TabItem.Archive: return $t('Archief');
-        default: return $t(`Kalenderjaar {year}`, { year: y.toString() });
+        case TabItem.Recent: return $t('07958263-0cd9-4663-9932-09bc76de4987');
+        case TabItem.Archive: return $t('18337b9f-03a1-4b85-a012-1c1ba16739d0');
+        default: return $t(`051d6df8-2c40-4dc6-9dd5-10579a8423a2`, { year: y.toString() });
     }
 },
 );
@@ -273,7 +273,7 @@ function groupTemplates(templates: DocumentTemplatePrivate[]): GroupedTemplates[
 
     return Array.from(map.entries())
         .sort(([a], [b]) => b - a)
-        .map(([year, templates]) => ({ title: $t(`Kalenderjaar {year}`, { year: year.toString() }), templates }));
+        .map(([year, templates]) => ({ title: $t(`051d6df8-2c40-4dc6-9dd5-10579a8423a2`, { year: year.toString() }), templates }));
 }
 
 useGlobalEventListener('document-template-deleted', async () => {

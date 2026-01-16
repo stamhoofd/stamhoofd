@@ -414,7 +414,7 @@ export function getMemberColumns({ organization, dateRange, group, groups, filte
 
     allColumns.push(
         new Column<ObjectType, Date | null>({
-            name: $t(`Einddatum`),
+            name: $t(`aef10d71-39c4-4cdb-8252-5fd31781abd8`),
             allowSorting: false,
             getValue: (v) => {
                 const registrations = v.filterRegistrations({ groups, periodId: filterPeriodId });
