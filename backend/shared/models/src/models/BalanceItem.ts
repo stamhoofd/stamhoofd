@@ -232,11 +232,10 @@ export class BalanceItem extends QueryableModel {
     }
 
     /**
-     * Note, this is not 100% accurate.
-     * Legally we most often need to calculate the VAT on invoice level and round it there.
-     * Technically we cannot pass infinite accurate numbers around in a system to avoid rounding. The returned number is
-     * therefore rounded up to 4 digits after the comma. On normal amounts, with only 2 digits after the comma, this won't lose accuracy.
-     * So the VAT calculation needs to happen at the end again before payment.
+     * Note: This is not 100% accurate due to rounding
+     * Legally, VAT must be calculated at the invoice level and rounded there, so calculating VAT at the line level will always contain errors - unless we work with prices that already include VAT.
+     * Technically, we cannot pass infinitely precise numbers through the system to avoid rounding. Therefore, the returned number is rounded to 4 decimal places. For typical amounts with only 2 decimal places, this does not result in a loss of accuracy.
+     * As a result, VAT calculation must be performed again at the end, just before payment.
      */
     get VAT() {
         if (this.VATExcempt) {
