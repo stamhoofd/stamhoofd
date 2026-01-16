@@ -400,7 +400,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'endDate',
-            name: $t(`EindDatum`),
+            name: $t(`Einddatum`),
             allowSorting: true,
             getValue: (registration) => {
                 const endDate = registration.endDate;

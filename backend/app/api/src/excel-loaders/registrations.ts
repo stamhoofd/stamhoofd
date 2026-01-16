@@ -106,7 +106,7 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformRegistration> = {
         },
         {
             id: 'endDate',
-            name: $t(`EindDatum`),
+            name: $t(`Einddatum`),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.endDate,
