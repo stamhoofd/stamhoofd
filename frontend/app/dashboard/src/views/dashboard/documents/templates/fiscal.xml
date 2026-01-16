@@ -112,11 +112,11 @@
 							<f86_2056_enddate1>{{ formatDate registration.endDate format="DD-MM-YYYY"  }}</f86_2056_enddate1>
 							
 							<!-- controletotaal (totaal van de zones 2.060 tot en met 2.088). -->
-							<f86_2059_totaalcontrole>{{ sum registration.price registration.price }}</f86_2059_totaalcontrole>
-                            <f86_2060_amount1>{{ registration.price }}</f86_2060_amount1> <!-- Bedrag in centen -->
+							<f86_2059_totaalcontrole>{{ div (sum registration.price registration.price) 100 round=true }}</f86_2059_totaalcontrole>
+                            <f86_2060_amount1>{{ div registration.price 100 round=true }}</f86_2060_amount1> <!-- Bedrag in centen -->
 
                             <!-- Totaal bedrag -->
-							<f86_2064_totalamount>{{ registration.price }}</f86_2064_totalamount>
+							<f86_2064_totalamount>{{ div registration.price 100 round=true }}</f86_2064_totalamount>
 
 
                             {{#if (neq certification.type 'exception')}}
@@ -136,7 +136,7 @@
                             {{/if}}
 
 							<f86_2110_numberofday1>{{ coalesce registration.days (days registration.startDate registration.endDate) }}</f86_2110_numberofday1> <!-- Dagen -->
-							<f86_2111_dailytariff1>{{ div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true }}</f86_2111_dailytariff1> <!-- Dagtarief -->
+							<f86_2111_dailytariff1>{{ div (div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true) 100 round=true }}</f86_2111_dailytariff1> <!-- Dagtarief -->
 
 							<f86_2139_childpostnr>{{filterString member.address.postalCode}}</f86_2139_childpostnr>
 							<f86_2140_childmunicipality>{{member.address.city}}</f86_2140_childmunicipality>
@@ -160,7 +160,7 @@
 				<r8007_division/>
 				<r8010_aantalrecords>{{ sum documents.length 2 }}</r8010_aantalrecords> <!-- aantal fiches in de aangifte +2 -->
 				<r8011_controletotaal>{{ arraySum documents "number" }}</r8011_controletotaal> <!-- = som van de volgnummers van de fiches (zones 2.009) in de aangifte -->
-				<r8012_controletotaal>{{ mul (arraySum documents "registration.price") 2 }}</r8012_controletotaal> <!-- Som van de zones 2.059 van het gegevensbestand -->
+				<r8012_controletotaal>{{ div (mul (arraySum documents "registration.price") 2) 100 round=true }}</r8012_controletotaal> <!-- Som van de zones 2.059 van het gegevensbestand -->
 				<r8013_totaalvoorheffingen>0</r8013_totaalvoorheffingen>
 			</Aangifte>
 		</Aangiften>
@@ -168,7 +168,7 @@
 		<r9010_aantallogbestanden>3</r9010_aantallogbestanden> <!-- Aantal aangiftes + 2 -->
 		<r9011_totaalaantalrecords>{{ sum documents.length 4 }}</r9011_totaalaantalrecords> <!-- = (som velden 8.010) + 2 -->
 		<r9012_controletotaal>{{ arraySum documents "number" }}</r9012_controletotaal> <!-- Controletotaal (totaal van de zones 8.011) -->
-		<r9013_controletotaal>{{ mul (arraySum documents "registration.price") 2 }}</r9013_controletotaal> <!-- Controletotaal (totaal van de zones 8.012) -->
+		<r9013_controletotaal>{{ div (mul (arraySum documents "registration.price") 2) 100 round=true }}</r9013_controletotaal> <!-- Controletotaal (totaal van de zones 8.012) -->
 		<r9014_controletotaal>0</r9014_controletotaal> <!-- Controletotaal (totaal van de zones 8.013) -->
 	</Verzending>
 </Verzendingen>
