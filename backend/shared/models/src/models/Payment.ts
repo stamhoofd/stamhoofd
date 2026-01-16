@@ -79,6 +79,17 @@ export class Payment extends QueryableModel {
     price: number;
 
     /**
+     * The difference between the sum of the balance item payments price and the price of the payment, caused by rounding to 1 cent.
+     * This cannot be >= 100 (= 0,01 euro) or <= -100 (=-0,01 euro)
+     *
+     * Just like all prices, this price is stored per ten thousand (1 = 0,0001 ). Storing smaller units is not possible because even in balance items, the price to pay cannot be smaller than 0,0001 euro
+     *
+     * E.g. total price to pay is 0,242 because of VAT, then we round this to 0,24. The roundingAmount will be -0,002 in this case.
+     */
+    // @column({ type: 'integer' })
+    // roundingAmount = 0;
+
+    /**
      * Fee paid to the payment provider (if available, otherwise set to 0)
      * Note: only set when we substract it from the payouts and need to invoice it (if using Stripe Express)
      */
