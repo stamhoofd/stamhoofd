@@ -110,6 +110,12 @@ export class TableObjectFetcher<O extends { id: string }> {
         }, waitTime);
     }
 
+    cacheBeforeReset(objet: O) {
+        if (objet instanceof AutoEncoder) {
+            this._objectReferenceCache.set(objet.id, objet);
+        }
+    }
+
     reset(total = false, filteredCount = false) {
         console.info('Reset');
 
