@@ -654,6 +654,13 @@ export class DocumentTemplate extends QueryableModel {
             id: this.id,
             created_at: this.createdAt,
             documents: documents.map(d => d.buildContext(organization)),
+            organization: {
+                name: organization.name,
+                companyName: organization.meta.companies[0]?.name || organization.name,
+                companyNumber: organization.meta.companies[0]?.companyNumber || null,
+                address: organization.address,
+                companyAddress: organization.meta.companies[0]?.address ?? organization.address,
+            },
         };
 
         for (const field of this.settings.fieldAnswers.values()) {
