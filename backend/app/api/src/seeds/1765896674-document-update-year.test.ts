@@ -150,10 +150,10 @@ describe('migration.document-update-year', () => {
             const updatedDocument3 = await DocumentTemplate.getByID(document3.id);
 
             // take most frequent year and prefer date of document creation
-            expect(updatedDocument1?.year).toBe(2021);
+            expect(updatedDocument1?.year).toBe(2020);
             // should take 2020 because document was created in 2020
             expect(updatedDocument2?.year).toBe(2020);
-            expect(updatedDocument3?.year).toBe(2021);
+            expect(updatedDocument3?.year).toBe(2020);
         });
     });
 

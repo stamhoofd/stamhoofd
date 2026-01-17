@@ -28,27 +28,18 @@ export async function migrateDocumentYears() {
                 const yearMap = new Map<number, number>();
 
                 for (const group of groupModels) {
-                    const startYear = group.settings.startDate.getFullYear();
-                    const endYear = group.settings.endDate.getFullYear();
+                    const y = group.settings.startDate.getFullYear();
 
-                    for (let y = startYear; y <= endYear; y++) {
-                        const count = yearMap.get(y) ?? 0;
-                        yearMap.set(y, count + 1);
-                    }
+                    const count = yearMap.get(y) ?? 0;
+                    yearMap.set(y, count + 1);
                 }
 
                 // find the year with the highest count
                 let topYear = 0;
                 let topCount = 0;
-                const yearBeforeCreation = document.createdAt.getFullYear() - 1;
 
                 for (const [year, count] of yearMap) {
-                    if (count > topCount
-                        // prefer the year before creation
-                        || (count === topCount && year === yearBeforeCreation)
-                        // next prefer the most recent year
-                        || (topYear !== yearBeforeCreation && year > topYear)
-                    ) {
+                    if (count > topCount) {
                         topYear = year;
                         topCount = count;
                     }
