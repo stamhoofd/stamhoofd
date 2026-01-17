@@ -26,10 +26,19 @@
 
             <p v-if="property.value.configuration" class="style-title-prefix-list">
                 {{ propertyFilterToString(property.value.configuration, filterBuilder) }}
+
+                <template v-if="property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)">
+                    (aangepast vanaf standaardinstelling)
+                </template>
             </p>
 
             <p class="style-title-list">
                 {{ property.value.title }}
+
+                <span
+                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('Aangepast vanaf standaardinstelling')"
+                    class="icon dot primary small"
+                />
             </p>
             <p v-if="property.value.description" class="style-description-small">
                 {{ property.value.description }}
@@ -39,7 +48,7 @@
                 {{ property.value.options?.warning ?? $t('cfbb0a9e-e6ce-4e40-ae55-bd7388f98eb9') }}
             </p>
 
-            <template v-if="!property.value.locked && property.value.enabled" #right>
+            <template v-if="property.value.enabled" #right>
                 <button class="button gray icon settings" type="button" @click.stop="property.value.edit" />
             </template>
         </STListItem>
@@ -162,15 +171,6 @@ const properties = [
     }),
 ];
 
-watchEffect(() => {
-    // Clear locked properties
-    for (const property of properties) {
-        if (property.value.locked && patched.value[property.value.name]) {
-            addPatch({ [property.value.name]: null });
-        }
-    }
-});
-
 const dataPermissions = {
     locked: computed(() => !!props.inheritedRecordsConfiguration?.dataPermission && !patched.value.dataPermission),
     enabled: computed({
@@ -208,7 +208,7 @@ const financialSupport = {
 
 // Methods
 function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string; preventAlways?: boolean }) {
-    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property] && !patched.value[property]);
+    const locked = computed(() => !!props.inheritedRecordsConfiguration?.[property]);
     const enabled = computed({
         get: () => !!getFilterConfiguration(property),
         set: (value: boolean) => {
@@ -231,11 +231,16 @@ function buildPropertyRefs(property: MemberPropertyWithFilter, title: string, op
         enabled,
         locked,
         configuration,
+        parentConfiguration: computed(() => props.inheritedRecordsConfiguration?.[property]),
         edit: () => editPropertyFilterConfiguration(property, title, options),
     });
 }
 
 function getFilterConfiguration(property: MemberPropertyWithFilter): PropertyFilter | null {
+    if (props.inheritedRecordsConfiguration?.[property] && patched.value[property]) {
+        // Merge
+        return props.inheritedRecordsConfiguration?.[property].merge(patched.value[property]);
+    }
     return props.inheritedRecordsConfiguration?.[property] ?? patched.value[property];
 }
 
@@ -259,14 +264,19 @@ function setEnableProperty(property: MemberPropertyWithFilter, enable: boolean) 
 }
 
 async function editPropertyFilterConfiguration(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string }) {
+    if (props.inheritedRecordsConfiguration?.[property] && props.inheritedRecordsConfiguration?.[property].isAlwaysEnabledAndRequired) {
+        return Toast.info($t('Je kan deze standaardinstelling niet wijzigen')).show();
+    }
+
     await present({
         components: [
             new ComponentWithProperties(PropertyFilterView, {
-                configuration: getFilterConfiguration(property) ?? PropertyFilter.createDefault(),
+                parentConfiguration: props.inheritedRecordsConfiguration?.[property],
+                configuration: patched.value[property] ?? (props.inheritedRecordsConfiguration?.[property] ? null : PropertyFilter.createDefault()), // do not use inherits when editing a configuration
                 title,
                 options,
                 builder: settings.filterBuilder([]),
-                setConfiguration: (configuration: PropertyFilter) => {
+                setConfiguration: (configuration: PropertyFilter | null) => {
                     addPatch({
                         [property]: configuration,
                     });

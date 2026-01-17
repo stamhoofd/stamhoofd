@@ -2,9 +2,21 @@
     <div class="property-filter-value-input">
         <STInputBox v-if="!isAlwaysEnabled() || hasFilters" class="max" :title="$t(`f193133e-143e-48fa-8d13-afcc01031343`)">
             <STList>
+                <STListItem v-if="!required" :selectable="true" element-name="label">
+                    <template #left>
+                        <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="null" @update:model-value="setDisabled()" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ disabledText || $t('Nooit') }}
+                    </h3>
+                    <p v-if="disabledDescription" class="style-description-small">
+                        {{ disabledDescription }}
+                    </p>
+                </STListItem>
+
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio :model-value="isAlwaysEnabled()" :value="true" @update:model-value="setAlwaysEnabled()" />
+                        <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="true" @update:model-value="setAlwaysEnabled()" />
                     </template>
                     <h3 class="style-title-list">
                         {{ $t('8a4842b5-6304-4b02-a8c5-4b837edcd77d') }}
@@ -13,7 +25,7 @@
 
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
-                        <Radio :model-value="isAlwaysEnabled()" :value="false" @update:model-value="setEnabledWhen(true)" />
+                        <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="false" @update:model-value="setEnabledWhen(true)" />
                     </template>
                     <h3 class="style-title-list">
                         {{ $t('a606fec7-273d-4642-b871-002d3f702a21') }}
@@ -31,14 +43,14 @@
             </STList>
         </STInputBox>
 
-        <STInputBox v-if="allowOptional" class="max" :title="$t(`879e4842-92f2-4e15-8a47-0f8e9d79770f`) + '*'">
+        <STInputBox v-if="modelValue && allowOptional" class="max" :title="$t(`879e4842-92f2-4e15-8a47-0f8e9d79770f`) + '*'">
             <STList>
                 <STListItem :selectable="true" element-name="label">
                     <template #left>
                         <Radio :model-value="isAlwaysRequired()" :value="true" @update:model-value="setAlwaysRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('bb7446b4-b23b-4455-861f-d7c70514b3eb') }}
+                        {{ $t('Altijd verplicht') }}
                     </h3>
                 </STListItem>
 
@@ -47,7 +59,7 @@
                         <Radio :model-value="isNeverRequired()" :value="true" @update:model-value="setNeverRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('c319b21a-5f49-4557-8735-5240dc722c26') }}
+                        {{ $t('Altijd optioneel') }}
                     </h3>
                 </STListItem>
 
@@ -105,7 +117,16 @@ import UIFilterEditor from './UIFilterEditor.vue';
 })
 export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     @Prop({ required: true })
-    modelValue!: PropertyFilter;
+    modelValue!: PropertyFilter | null;
+
+    @Prop({ default: true })
+    required!: boolean;
+
+    @Prop({ default: '' })
+    disabledText!: string;
+
+    @Prop({ default: '' })
+    disabledDescription!: string;
 
     @Prop({ default: true })
     allowOptional!: boolean;
@@ -117,14 +138,23 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     cachedEnabledFilter: StamhoofdFilter | null = null;
 
     isAlwaysEnabled() {
+        if (this.modelValue === null) {
+            return false;
+        }
         return this.modelValue.enabledWhen === null || isEmptyFilter(this.modelValue.enabledWhen);
     }
 
     isAlwaysRequired() {
+        if (this.modelValue === null) {
+            return false;
+        }
         return this.modelValue.requiredWhen !== null && isEmptyFilter(this.modelValue.requiredWhen);
     }
 
     isNeverRequired() {
+        if (this.modelValue === null) {
+            return true;
+        }
         return this.modelValue.requiredWhen === null;
     }
 
@@ -141,6 +171,10 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     get encodedJson() {
+        if (this.modelValue === null) {
+            return 'null';
+        }
+
         return JSON.stringify(
             this.modelValue.encode({ version: Version }),
             null,
@@ -149,6 +183,9 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     cacheIfNeeded() {
+        if (!this.modelValue) {
+            return;
+        }
         if (this.modelValue.requiredWhen && !isEmptyFilter(this.modelValue.requiredWhen)) {
             this.cachedRequiredFilter = this.modelValue.requiredWhen;
         }
@@ -161,8 +198,18 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         this.$emit('update:modelValue',
             new PropertyFilter(
                 null,
-                this.modelValue.requiredWhen,
+                this.modelValue?.requiredWhen ?? {},
             ),
+        );
+    }
+
+    isDisabled() {
+        return this.modelValue === null;
+    }
+
+    setDisabled() {
+        this.$emit('update:modelValue',
+            null,
         );
     }
 
@@ -171,13 +218,13 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
             this.$emit('update:modelValue',
                 new PropertyFilter(
                     this.cachedEnabledFilter,
-                    this.modelValue.requiredWhen,
+                    this.modelValue?.requiredWhen ?? {},
                 ),
             );
             return;
         }
 
-        const filter = this.modelValue.enabledWhen ? this.builder.fromFilter(this.modelValue.enabledWhen) : this.builder.create();
+        const filter = this.modelValue?.enabledWhen ? this.builder.fromFilter(this.modelValue.enabledWhen) : this.builder.create();
 
         this.present({
             components: [
@@ -190,7 +237,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
                             this.$emit('update:modelValue',
                                 new PropertyFilter(
                                     this.cachedEnabledFilter,
-                                    this.modelValue.requiredWhen,
+                                    this.modelValue?.requiredWhen ?? {},
                                 ),
                             );
                         },
@@ -204,7 +251,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     setAlwaysRequired() {
         this.$emit('update:modelValue',
             new PropertyFilter(
-                this.modelValue.enabledWhen,
+                this.modelValue?.enabledWhen ?? null,
                 {},
             ),
         );
@@ -213,7 +260,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     setNeverRequired() {
         this.$emit('update:modelValue',
             new PropertyFilter(
-                this.modelValue.enabledWhen,
+                this.modelValue?.enabledWhen ?? null,
                 null,
             ),
         );
@@ -223,14 +270,14 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
         if (useCache && this.cachedRequiredFilter && !isEmptyFilter(this.cachedRequiredFilter)) {
             this.$emit('update:modelValue',
                 new PropertyFilter(
-                    this.modelValue.enabledWhen,
+                    this.modelValue?.enabledWhen ?? null,
                     this.cachedRequiredFilter,
                 ),
             );
             return;
         }
 
-        const filter = isEmptyFilter(this.modelValue.requiredWhen) ? this.builder.create() : this.builder.fromFilter(this.modelValue.requiredWhen);
+        const filter = !this.modelValue ? (this.builder.create()) : (isEmptyFilter(this.modelValue.requiredWhen) ? this.builder.create() : this.builder.fromFilter(this.modelValue.requiredWhen));
 
         this.present({
             components: [
@@ -242,7 +289,7 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
 
                             this.$emit('update:modelValue',
                                 new PropertyFilter(
-                                    this.modelValue.enabledWhen,
+                                    this.modelValue?.enabledWhen ?? null,
                                     this.cachedRequiredFilter,
                                 ),
                             );
@@ -255,10 +302,17 @@ export default class PropertyFilterInput extends Mixins(NavigationMixin) {
     }
 
     get enabledText() {
+        if (!this.modelValue) {
+            return '';
+        }
         return this.modelValue.enabledWhen ? filterToString(this.modelValue.enabledWhen, this.builder) : '';
     }
 
     get requiredText() {
+        if (!this.modelValue) {
+            return '';
+        }
+
         if (isEmptyFilter(this.modelValue.requiredWhen)) {
             return '';
         }
