@@ -66,7 +66,7 @@ export class IDRegisterItem extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, version: 354 })
     customStartDate: Date | null = null;
 
-    @field({ decoder: DateDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: DateDecoder, nullable: true, version: 391 })
     customEndDate: Date | null = null;
 
     hydrate(context: RegisterContext) {
