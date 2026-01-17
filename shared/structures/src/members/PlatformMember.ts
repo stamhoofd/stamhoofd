@@ -758,7 +758,13 @@ export class PlatformMember implements ObjectWithRecords {
             return true;
         }
 
-        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups });
+        const recordsConfigurations = this.filterRecordsConfigurations({
+            currentPeriod: options?.scopeGroups ? undefined : true,
+            // When asking for what properties are enabled, we also enable properties that were enabled by registrations in the previous period
+            // Note that they aren't required
+            previousPeriod: options?.scopeGroups ? undefined : true,
+            groups: options?.scopeGroups,
+        });
 
         for (const recordsConfiguration of recordsConfigurations) {
             if (property === 'dataPermission' || property === 'financialSupport') {
@@ -877,6 +883,7 @@ export class PlatformMember implements ObjectWithRecords {
      * @param filters.periodId - Only show registrations for this period
      * @param filters.periodIds - Only show registrations for these periods
      * @param filters.currentPeriod - Only show registrations for the current period
+     * @param filters.previousPeriod - Also who registrations for previous period, can be combined with currentPeriod
      * @param filters.includeFuture - Used in combination with currentPeriod. If true, also show registrations that start in the future. Defaults to true.
      * @param filters.types - Only show registrations for these group types
      * @param filters.organizationId - Only show registrations for this organization
@@ -891,6 +898,7 @@ export class PlatformMember implements ObjectWithRecords {
         periodIds?: string[];
         includeFuture?: boolean;
         currentPeriod?: boolean;
+        previousPeriod?: boolean;
         types?: GroupType[];
         organizationId?: string;
     }) {
@@ -927,8 +935,26 @@ export class PlatformMember implements ObjectWithRecords {
 
                 if (isCurrentPeriod !== filters.currentPeriod) {
                     if (!(filters.includeFuture ?? true) || r.group.settings.endDate < new Date()) {
-                        return false;
+                        if (filters.previousPeriod) {
+                            // Previous period is also fine
+                            const isPreviousPeriod = !!organization && r.group.periodId === organization.period.period.previousPeriodId;
+                            if (!isPreviousPeriod) {
+                                return false;
+                            }
+                        }
+                        else {
+                            return false;
+                        }
                     }
+                }
+            }
+            else if (filters.previousPeriod) {
+                const organization = this.family.getOrganization(r.organizationId);
+
+                // Previous period is also fine
+                const isPreviousPeriod = !!organization && r.group.periodId === organization.period.period.previousPeriodId;
+                if (!isPreviousPeriod) {
+                    return false;
                 }
             }
 
@@ -954,6 +980,7 @@ export class PlatformMember implements ObjectWithRecords {
         periodId?: string;
         periodIds?: string[];
         currentPeriod?: boolean;
+        previousPeriod?: boolean;
         includeFuture?: boolean;
         includePending?: boolean;
         types?: GroupType[];
@@ -1006,7 +1033,15 @@ export class PlatformMember implements ObjectWithRecords {
         return base;
     }
 
-    filterRecordsConfigurations(filters: { groups?: Group[] | null; canRegister?: boolean; periodId?: string; currentPeriod?: boolean; types?: GroupType[]; organizationId?: string }) {
+    filterRecordsConfigurations(filters: {
+        groups?: Group[] | null;
+        canRegister?: boolean;
+        periodId?: string;
+        currentPeriod?: boolean;
+        previousPeriod?: boolean;
+        types?: GroupType[];
+        organizationId?: string;
+    }) {
         const groups = this.filterGroups({ ...filters, includePending: true });
         const configurations: OrganizationRecordsConfiguration[] = [];
 
