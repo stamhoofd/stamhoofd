@@ -12,11 +12,11 @@
         </p>
 
         <p v-if="parentConfiguration && editingConfiguration" class="warning-box">
-            {{ $t('Opgelet, je voegt een uitbreiding toe op de standaardinstelling. Wat je instelt komt bovenop de standaardinstelling. ') }}
+            {{ $t('06c16aae-9114-4416-a09d-b48998492011') }}
         </p>
 
         <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
-        <PropertyFilterInput v-model="editingConfiguration" :builder="builder" :required="!parentConfiguration" :disabled-text="$t('Standaardinstelling')" :disabled-description="parentConfiguration ? propertyFilterToString(parentConfiguration, builder) : ''" />
+        <PropertyFilterInput v-model="editingConfiguration" :builder="builder" :required="!parentConfiguration" :disabled-text="$t('12248557-53af-4849-9798-68a82800cac4')" :disabled-description="parentConfiguration ? propertyFilterToString(parentConfiguration, builder) : ''" />
     </SaveView>
 </template>
 

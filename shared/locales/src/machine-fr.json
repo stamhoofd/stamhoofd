@@ -659,6 +659,10 @@
     "original": "jongens",
     "translation": "garçons"
   },
+  "06c16aae-9114-4416-a09d-b48998492011": {
+    "original": "Opgelet, je voegt een uitbreiding toe op de standaardinstelling. Wat je instelt komt bovenop de standaardinstelling. ",
+    "translation": "Attention, vous ajoutez une extension aux paramètres par défaut. Ce que vous configurez s'ajoute aux paramètres par défaut."
+  },
   "06c25477-62cb-45d0-b00d-dbe55af9947c": {
     "original": "Let op: het logo van de app in de AppStores moet via een app-update aangepast worden.",
     "translation": "Remarque : le logo de l'application dans les App Stores doit être modifié via une mise à jour de l'application."
@@ -1674,6 +1678,10 @@
   "121c350e-012c-4bf7-a2bc-2c07b7c433c8": {
     "original": "Statistieken",
     "translation": "Statistiques"
+  },
+  "12248557-53af-4849-9798-68a82800cac4": {
+    "original": "Standaardinstelling",
+    "translation": "Paramètre par défaut"
   },
   "1229e816-6508-417c-9523-f440e540de5e": {
     "original": "Sport, spel en sociale omgang",
@@ -3378,6 +3386,10 @@
   "24c3fee7-0709-4e61-91ec-a77010e6cee5": {
     "original": "Weet je zeker dat je dit emailadres wilt deblokkeren?",
     "translation": "Êtes-vous sûr de vouloir débloquer cette adresse e-mail ?"
+  },
+  "24cdc0fe-a863-4f1b-a89c-ed8b59fe5e3d": {
+    "original": "Altijd optioneel",
+    "translation": "Toujours facultatif"
   },
   "24cdd0db-df35-4ef2-8230-7cade040fcfc": {
     "original": "Ben je zeker dat je deze soort activiteit wilt verwijderen?",
@@ -5887,6 +5899,10 @@
     "original": "Webshopbestelling",
     "translation": "Commande de la boutique en ligne"
   },
+  "410b8deb-32fc-40a2-896a-927922fbf7e0": {
+    "original": "Altijd verplicht",
+    "translation": "Toujours obligatoire"
+  },
   "410f13a0-286d-4f7a-b6f6-aef22327056b": {
     "original": "Instellen als huidig werkjaar",
     "translation": "Définir comme année associative en cours"
@@ -6606,6 +6622,10 @@
   "49238d23-bcfc-4470-85bb-4249e618e752": {
     "original": "Heractiveer",
     "translation": "Réactiver"
+  },
+  "4929b81e-6f1d-4859-889b-3fb016e97286": {
+    "original": "Nooit",
+    "translation": "Jamais"
   },
   "492cd771-4145-4249-a009-147e11a6904f": {
     "original": "Je moet nog {price} betalen aan {name}, via het tabblad Boekhouding.",
@@ -18199,6 +18219,10 @@
     "original": "Scannen",
     "translation": "Scanner"
   },
+  "ca9b48ce-2fee-4691-a6f9-494ddde94a1c": {
+    "original": "Aangepast vanaf standaardinstelling",
+    "translation": "Modifié à partir du paramètre par défaut"
+  },
   "ca9fbe8b-0857-4b86-ba53-77b5bb14ee5d": {
     "original": "Er zullen ook nieuwe inschrijvingen bij deze bestaande leden worden toegevoegd.",
     "translation": "De nouvelles inscriptions seront également ajoutées pour ces membres existants."
@@ -18372,8 +18396,8 @@
     "translation": "dans lequel vous partez du principe que le payeur peut manuellement compléter et modifier le message. Utilisez plutôt le \"message fixe\" avec les remplacements automatiques disponibles."
   },
   "cc347bb2-99d1-4320-85d4-943117eb2271": {
-    "original": "Verplicht op een hoger niveau",
-    "translation": "Obligatoire à un niveau supérieur"
+    "original": "Ingeschakeld op een hoger niveau",
+    "translation": "Activé à un niveau supérieur"
   },
   "cc3d3da6-27ce-4f32-a696-4e08d649a7bc": {
     "original": "Proefperiodes",
@@ -19422,6 +19446,10 @@
   "d77cf693-37ae-4377-9aed-fffb30b6ae4d": {
     "original": "Geen tetanusvaccinatie in de afgelopen 10 jaar",
     "translation": "Pas de vaccination antitétanique au cours des 10 dernières années"
+  },
+  "d787080f-6133-4f81-bb73-891e68d48029": {
+    "original": "Je kan deze standaardinstelling niet wijzigen",
+    "translation": "Vous ne pouvez pas modifier ce paramètre par défaut"
   },
   "d799bffc-fd09-4444-abfa-3552b3c46cb9": {
     "original": "Bedrag aanrekenen",

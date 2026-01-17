@@ -7,7 +7,7 @@
                         <Radio :model-value="isDisabled() === true ? null : isAlwaysEnabled()" :value="null" @update:model-value="setDisabled()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ disabledText || $t('Nooit') }}
+                        {{ disabledText || $t('4929b81e-6f1d-4859-889b-3fb016e97286') }}
                     </h3>
                     <p v-if="disabledDescription" class="style-description-small">
                         {{ disabledDescription }}
@@ -50,7 +50,7 @@
                         <Radio :model-value="isAlwaysRequired()" :value="true" @update:model-value="setAlwaysRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Altijd verplicht') }}
+                        {{ $t('410b8deb-32fc-40a2-896a-927922fbf7e0') }}
                     </h3>
                 </STListItem>
 
@@ -59,7 +59,7 @@
                         <Radio :model-value="isNeverRequired()" :value="true" @update:model-value="setNeverRequired()" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Altijd optioneel') }}
+                        {{ $t('24cdc0fe-a863-4f1b-a89c-ed8b59fe5e3d') }}
                     </h3>
                 </STListItem>
 
