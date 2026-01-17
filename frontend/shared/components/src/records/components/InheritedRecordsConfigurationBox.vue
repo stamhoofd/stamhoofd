@@ -36,7 +36,7 @@
                 {{ property.value.title }}
 
                 <span
-                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('Aangepast vanaf standaardinstelling')"
+                    v-if="property.value.configuration && property.value.parentConfiguration && propertyFilterToString(property.value.parentConfiguration, filterBuilder) !== propertyFilterToString(property.value.configuration, filterBuilder)" v-tooltip="$t('ca9b48ce-2fee-4691-a6f9-494ddde94a1c')"
                     class="icon dot primary small"
                 />
             </p>
@@ -265,7 +265,7 @@ function setEnableProperty(property: MemberPropertyWithFilter, enable: boolean) 
 
 async function editPropertyFilterConfiguration(property: MemberPropertyWithFilter, title: string, options?: { warning?: string; description?: string }) {
     if (props.inheritedRecordsConfiguration?.[property] && props.inheritedRecordsConfiguration?.[property].isAlwaysEnabledAndRequired) {
-        return Toast.info($t('Je kan deze standaardinstelling niet wijzigen')).show();
+        return Toast.info($t('d787080f-6133-4f81-bb73-891e68d48029')).show();
     }
 
     await present({

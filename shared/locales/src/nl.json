@@ -5911,5 +5911,12 @@
   "551f6cc0-0b1a-4a62-8e09-cef159f5f7d5": "Het is niet mogelijk om een factuur aan te maken omdat het gefactureerde bedrag te laag is",
   "ff3fd880-a223-46f6-aa02-bcd1ae8697cc": "De einddatum van de inschrijving moet na de startdatum van de groep zelf zijn",
   "38d52178-351c-433d-a767-2ca2b5efbfdc": "De einddatum van de inschrijving moet voor de einddatum van de groep zijn",
-  "a9a35ed9-de40-40b7-81aa-c1a6c22c17b7": "De einddatum van de inschrijving moet na de startdatum zijn"
+  "a9a35ed9-de40-40b7-81aa-c1a6c22c17b7": "De einddatum van de inschrijving moet na de startdatum zijn",
+  "4929b81e-6f1d-4859-889b-3fb016e97286": "Nooit",
+  "410b8deb-32fc-40a2-896a-927922fbf7e0": "Altijd verplicht",
+  "24cdc0fe-a863-4f1b-a89c-ed8b59fe5e3d": "Altijd optioneel",
+  "06c16aae-9114-4416-a09d-b48998492011": "Opgelet, je voegt een uitbreiding toe op de standaardinstelling. Wat je instelt komt bovenop de standaardinstelling. ",
+  "12248557-53af-4849-9798-68a82800cac4": "Standaardinstelling",
+  "ca9b48ce-2fee-4691-a6f9-494ddde94a1c": "Aangepast vanaf standaardinstelling",
+  "d787080f-6133-4f81-bb73-891e68d48029": "Je kan deze standaardinstelling niet wijzigen"
 }
