@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`$eq JSON Can check JSON booleans: SQL Query for filter: {"settings.enabled":0} 1`] = `
 {
