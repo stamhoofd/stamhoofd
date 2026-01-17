@@ -420,7 +420,7 @@
     "translation": "You can order a maximum of"
   },
   "04606184-d9d9-4cb0-a98a-a4457f1d0293": {
-    "original": "Reken een bedrag aan aan het geselecteerde lid.",
+    "original": "Breng een bedrag in rekening bij het geselecteerde lid.",
     "translation": "Charge an amount to the selected member."
   },
   "04626342-7da4-4fb8-ba4a-9e9d2a6b1197": {
@@ -510,6 +510,10 @@
   "0502b517-9f29-4b4a-ba02-f11a430edeb5": {
     "original": "Geen adres? Vul dan een adres in dat in de buurt ligt",
     "translation": "No address? Then enter an address nearby"
+  },
+  "051d6df8-2c40-4dc6-9dd5-10579a8423a2": {
+    "original": "Kalenderjaar {year}",
+    "translation": "Calendar year {year}"
   },
   "051f713e-dd20-44c3-9d68-d3c875641bb6": {
     "original": "Bedwateren",
@@ -722,6 +726,10 @@
   "07956e16-efc0-4ce6-b5ba-57342ef567b9": {
     "original": "Open de webshop opnieuw.",
     "translation": "Reopen the webshop."
+  },
+  "07958263-0cd9-4663-9932-09bc76de4987": {
+    "original": "Recent",
+    "translation": "Recent"
   },
   "07963171-3e53-4aa7-b5f1-bce9470a62e9": {
     "original": "Indien aangevinkt kan deze soort activiteit niet aangemaakt worden zonder dat de locatie is ingevuld.",
@@ -1267,6 +1275,10 @@
     "original": "Wijzig keuze",
     "translation": "Change choice"
   },
+  "0dd37ff6-b713-4ca3-a287-62cea3b6bcc6": {
+    "original": "Reken een bedrag aan de leden voor de {count} geselecteerde inschrijvingen. Als leden meerdere keren ingeschreven zijn dan wordt het bedrag slechts één keer aangerekend per lid.",
+    "translation": "Charge an amount to the members for the {count} selected registrations. If members are registered multiple times, the amount will only be charged once per member."
+  },
   "0dd837cf-6c0d-47eb-8e03-c0fc33fed753": {
     "original": "Laatste korting herhalen",
     "translation": "Repeat last discount"
@@ -1610,6 +1622,10 @@
   "120012bf-f877-46de-b6d9-55ea46f3f2ce": {
     "original": "Gegevens",
     "translation": "Data"
+  },
+  "1205deb9-498d-435d-a6e1-91ea98371523": {
+    "original": "Prijs",
+    "translation": "Price"
   },
   "121a5916-44ab-4870-9182-ffc53be0ceb2": {
     "original": "{firstName} is te jong. Inschrijvingen is beperkt tot leden {born-in-after-1995}",
@@ -2231,6 +2247,10 @@
     "original": "Gezondheid, hygiëne & slapen",
     "translation": "Health, hygiene & sleeping"
   },
+  "18337b9f-03a1-4b85-a012-1c1ba16739d0": {
+    "original": "Archief",
+    "translation": "Archive"
+  },
   "1835623d-0a29-430a-a4ca-81a95eb8666e": {
     "original": "Algemene instellingen",
     "translation": "General settings"
@@ -2839,6 +2859,10 @@
     "original": "Deze vragenlijst bevat gegevens waar je toestemming voor moet vragen. Schakel de toestemming voor gegevevensverzameling in om deze vragenlijst te activeren.",
     "translation": "This form contains data for which you must request permission. Enable permission for data collection to activate this form."
   },
+  "1f2e9d09-717b-4c17-9bbe-dce3f3dcbff0": {
+    "original": "Proefperiode",
+    "translation": "Trial period"
+  },
   "1f618c07-ec09-4465-b7af-59e30b0c7585": {
     "original": "Tijdzone",
     "translation": "Time zone"
@@ -3263,6 +3287,10 @@
     "original": "voorbeeld@gmail.com",
     "translation": "example@gmail.com"
   },
+  "24626f0c-5a0f-4ef6-bb66-f76279b64bfc": {
+    "original": "Doorlopende aansluiting",
+    "translation": "Ongoing affiliation"
+  },
   "24682ea8-b3c6-4372-9a63-5385520888ff": {
     "original": "Standaard leeftijdsgroepen",
     "translation": "Default age groups"
@@ -3550,6 +3578,10 @@
   "273ea198-4956-4645-a4a5-fb0566b871c5": {
     "original": "Je kan kiezen wanneer deze vragen van toepassing zijn.",
     "translation": "You can choose when these questions apply."
+  },
+  "274b2697-e44a-43bb-a635-79d9721e8581": {
+    "original": "Naam",
+    "translation": "Name"
   },
   "274d0a26-49b8-4dfa-a8bf-21368b12dca7": {
     "original": "Lies en Jan Janssens",
@@ -5095,6 +5127,14 @@
     "original": "Jouw gegevens",
     "translation": "Your data"
   },
+  "38d52178-351c-433d-a767-2ca2b5efbfdc": {
+    "original": "De einddatum van de inschrijving moet voor de einddatum van de groep zijn",
+    "translation": "The end date of the registration must be before the group's end date."
+  },
+  "38d60a73-e301-4ab2-87ff-6eda04117f2f": {
+    "original": "Nieuw",
+    "translation": "New"
+  },
   "38ddccb2-7cf6-4b47-aa71-d11ad73386d8": {
     "original": "Oeps, het bedrag dat je probeert te betalen is ongeldig (het bedrag is hoger dan het bedrag dat je moet betalen). Herlaad de pagina en probeer opnieuw.",
     "translation": "Oops, the amount you are trying to pay is invalid (the amount is higher than the amount you have to pay). Reload the page and try again."
@@ -5346,6 +5386,10 @@
   "3c6084da-ce6f-4d03-b213-42def4eabbb7": {
     "original": "Locatienaam",
     "translation": "Location name"
+  },
+  "3c6a76c8-1fc4-4fc3-b1b0-9eca083a0c64": {
+    "original": "Het is niet mogelijk om een factuur aan te maken omdat een BTW-tarief ontbreekt",
+    "translation": "You cannot create an invoice because a VAT rate is missing."
   },
   "3c710008-5f1f-477b-9ba3-b355d47bf858": {
     "original": "Je kan op het ledenportaal een nieuw account aanmaken met het e-mailadres",
@@ -5995,6 +6039,10 @@
     "original": "Terugbetaling via overschrijving",
     "translation": "Refund via bank transfer"
   },
+  "44828efb-73b4-47d8-af6a-41d4857759f1": {
+    "original": "Je kan maximaal één fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.",
+    "translation": "You can only create one tax certificate per calendar year. There is already a tax certificate for this year."
+  },
   "4493ecc0-2b42-43c0-a978-73e6666350bc": {
     "original": "Geen tekst in deze cel",
     "translation": "No text in this cell"
@@ -6110,6 +6158,10 @@
   "45c039cd-e937-42cd-934b-a2bb4ee0abdd": {
     "original": "Deze webshop bestaat niet (meer)",
     "translation": "This webshop no longer exists"
+  },
+  "45d95ed4-349b-4f6d-8b4b-417467099f3e": {
+    "original": "Type",
+    "translation": "Type"
   },
   "45d9b6c1-1af8-4590-88ff-091a2a93c71a": {
     "original": "Later te betalen",
@@ -6270,6 +6322,10 @@
   "475a6b09-e71d-4160-a87e-d4a3844116c3": {
     "original": "Rekeningnummer:",
     "translation": "Account number:"
+  },
+  "475f5f96-86bf-4124-a005-9904aaf72b37": {
+    "original": "Je kan maximaal 1 fiscaal attest per kalenderjaar maken. Er is al een fiscaal attest voor dit jaar.",
+    "translation": "You can only create one tax certificate per calendar year. There is already a tax certificate for this year."
   },
   "4760e3ab-3cb5-4045-b252-ef923dc2bc9d": {
     "original": "Alles",
@@ -6491,6 +6547,10 @@
     "original": "Toevoegen",
     "translation": "Add"
   },
+  "4988e582-50f7-4922-8ecb-5939db9de3dd": {
+    "original": "De indiendatum van het fiscaal attest is verstreken. Een fiscaal attest moet ingediend worden voor 1 maart van het jaar volgend op het kalenderjaar van het document.",
+    "translation": "The submission date for the tax certificate has expired. A tax certificate must be submitted before March 1 of the year following the calendar year of the document."
+  },
   "49952c7d-05e9-46a2-b5ec-7411ed71be32": {
     "original": "bv. Ruimtereis vereniging",
     "translation": "e.g. Space Travel association"
@@ -6595,6 +6655,10 @@
     "original": "Ben je zeker dat je deze aansluiting wilt verwijderen?",
     "translation": "Are you sure you want to remove this affiliation?"
   },
+  "4aba33e2-15a7-4795-a462-1ec23b894a6b": {
+    "original": "Deze activiteit ligt niet in kalenderjaar {year}",
+    "translation": "This activity does not take place in calendar year {year}"
+  },
   "4abf9650-55e0-45ad-8412-7570ac42117f": {
     "original": "Stuur automatisch e-mails naar leden als hun openstaand bedrag stijgt of als betaalherinnering.",
     "translation": "Automatically send emails to members if their outstanding amount increases or as a payment reminder."
@@ -6608,8 +6672,8 @@
     "translation": "Ticket already scanned"
   },
   "4ad9864f-c191-4f00-8321-d3ba67e5adab": {
-    "original": "Als beheerder kan je zelf een andere start- en einddatum kiezen voor deze inschrijving. Bijvoorbeeld om een late inschrijving vroeger te laten starten.",
-    "translation": "As an administrator, you can choose a different start date for this registration. For example, to have a late registration start earlier."
+    "original": "Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een late inschrijving vroeger te laten starten.",
+    "translation": "As an administrator, you can choose a different start date for this registration. For example, you could have a late registration start earlier."
   },
   "4ae26268-586e-41f7-875d-90137f9ed836": {
     "original": "Manueel gesloten",
@@ -6859,6 +6923,10 @@
     "original": "De prullenmand is leeg.",
     "translation": "The bin is empty."
   },
+  "4dbf7584-7fe1-43d1-9bc8-a0d265865716": {
+    "original": "Alle inschrijvingsgroepen",
+    "translation": "All registration groups"
+  },
   "4dccea53-5191-48bf-b227-b59b8e41d8f0": {
     "original": "verwijderd",
     "translation": "deleted"
@@ -7067,6 +7135,10 @@
     "original": "Ander land",
     "translation": "Other country"
   },
+  "4fda497f-b2d8-43ef-b08c-a3e4e0b472b4": {
+    "original": "Type",
+    "translation": "Type"
+  },
   "4fdfb042-ccbb-465e-b56c-e1686473e4cc": {
     "original": "Lidnummer",
     "translation": "Member number"
@@ -7264,7 +7336,7 @@
     "translation": "Order confirmation: bank transfer"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
-    "original": "Reken een bedrag aan aan de geselecteerde vereniging.",
+    "original": "Breng een bedrag in rekening bij de geselecteerde vereniging.",
     "translation": "Charge an amount to the selected association."
   },
   "51f9909d-c91f-455d-8cd4-ee0a1897e59d": {
@@ -7567,6 +7639,10 @@
     "original": "Gebruik de boekhoudmodule van deze vereniging om een zicht te krijgen op alle betalingen.",
     "translation": "Use this association's bookkeeping module to get an overview of all payments."
   },
+  "551f6cc0-0b1a-4a62-8e09-cef159f5f7d5": {
+    "original": "Het is niet mogelijk om een factuur aan te maken omdat het gefactureerde bedrag te laag is",
+    "translation": "You cannot create an invoice because the invoiced amount is too low."
+  },
   "5562135d-197d-4251-ada8-ffe747622e7b": {
     "original": "Leveringsmethode",
     "translation": "Delivery method"
@@ -7638,6 +7714,10 @@
   "5658edc2-ca76-4463-8729-6b7438249d91": {
     "original": ".",
     "translation": "."
+  },
+  "565a7968-e547-411e-aaff-6f936c128d5f": {
+    "original": "Wachtlijst",
+    "translation": "Waiting list"
   },
   "566df267-1215-4b90-b893-0344c1f1f3d3": {
     "original": "Openstaand bedrag stijgt met",
@@ -8675,6 +8755,10 @@
     "original": "Groepsnaam",
     "translation": "Group name"
   },
+  "614dbf30-ddf8-4e85-9da3-cc8d30f7ac77": {
+    "original": "Activiteit",
+    "translation": "Activity"
+  },
   "616292aa-dda9-4a7c-8e02-d35582bf3519": {
     "original": "De besteller ontvangt een automatische e-mail.",
     "translation": "The customer will receive an automatic email."
@@ -8882,6 +8966,10 @@
   "639bca94-1e40-4176-99b0-f1a3a9b62165": {
     "original": "Het type van de betaling is gewijzigd in een gewone betaling omdat het totaalbedrag positief is. Kijk alles nog even na.",
     "translation": "The payment type was changed to a regular payment because the total amount is positive. Please double-check everything."
+  },
+  "63a86cdf-8a76-4e8c-9073-4f0b8970e808": {
+    "original": "Aanmaakdatum lid",
+    "translation": "Member creation date"
   },
   "63af45b3-7fc7-4c32-b299-2fab446d4f13": {
     "original": "Nieuwe functionaliteiten in elkaar timmeren...",
@@ -11067,6 +11155,10 @@
     "original": "De beheerder is aangepast",
     "translation": "The administrator has been adjusted"
   },
+  "7d0a5e21-6573-4e84-89f8-5af81d2d3c8a": {
+    "original": "Vereniging",
+    "translation": "Association"
+  },
   "7d1fc34a-2cbc-4114-8554-f1c0dc5e1b89": {
     "original": "Deze bestelling werd nog niet betaald",
     "translation": "This order has not yet been paid"
@@ -11595,6 +11687,10 @@
     "original": "Rollen",
     "translation": "Roles"
   },
+  "83d28308-84b3-45b6-b23a-d55199979d34": {
+    "original": "Je kan pas vanaf november een fiscaal attest maken voor het huidige jaar.",
+    "translation": "You can only create a tax certificate for the current year starting from November."
+  },
   "83db2c73-38a3-4d13-9984-2f19f95e1329": {
     "original": "Sluiten",
     "translation": "Close"
@@ -11923,6 +12019,10 @@
     "original": "Leden kunnen zelf inschrijven via het ledenportaal als je deze optie open zet. Ze betalen het opgegeven tarief dan zelf via de betaalmethodes die je hebt ingesteld bij de instellingen van jouw groep.",
     "translation": "Members can register themselves via the member portal if you open this option. They then pay the specified tariff themselves via the payment methods you have set up in the settings of your group."
   },
+  "877284d7-31b4-4857-a963-405b4139adc2": {
+    "original": "Inschrijvingsgroep",
+    "translation": "Registration group"
+  },
   "877afa7e-d709-4d7b-bc4f-5384a2da8495": {
     "original": "Meerdere kortingen op hetzelfde stuk toestaan",
     "translation": "Allow multiple discounts on the same item"
@@ -11980,7 +12080,7 @@
     "translation": "The next affiliation of this member starts on {date}. Today this member is not affiliated with KSA Nationaal and therefore not insured."
   },
   "88119ffc-b692-4222-8217-75a9fa64f675": {
-    "original": "Reken een bedrag aan aan de {count} geselecteerde verenigingen.",
+    "original": "Breng een bedrag in rekening bij de {count} geselecteerde verenigingen.",
     "translation": "Charge an amount to the {count} selected associations."
   },
   "88136719-d85f-499f-8c5f-252519947c03": {
@@ -12350,6 +12450,10 @@
   "8bdc9bf1-1d05-4579-9cc4-7fe11c1f031b": {
     "original": "De datum kan niet in de toekomst liggen",
     "translation": "The date cannot be in the future"
+  },
+  "8bec8990-4632-40b0-93f3-f27a3f2ddbdb": {
+    "original": "Inschrijvingsdatum",
+    "translation": "Registration date"
   },
   "8bec9f71-c41d-485f-b0f5-95a40b695884": {
     "original": "Niet beschikbaar voor particulieren",
@@ -12787,6 +12891,10 @@
     "original": "Kunstvereniging",
     "translation": "Art association"
   },
+  "908caec1-3ce7-478d-aba8-e8daac08beab": {
+    "original": "De einddatum van de inschrijving ligt buiten het geselecteerde werkjaar.",
+    "translation": "The end date of the registration is outside the selected work year."
+  },
   "90a3142d-c6a4-4e52-a4d7-db2e78fabacc": {
     "original": "Ticket toch bekijken",
     "translation": "View ticket anyway"
@@ -12860,8 +12968,8 @@
     "translation": "a code must be unique."
   },
   "914a5499-b6db-4495-91dd-be4e412c9d64": {
-    "original": "Als beheerder kan je zelf een andere start- en einddatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een late inschrijving vroeger te laten starten.",
-    "translation": "As an administrator, you can choose a different start date for this registration. For example, to have a trial period start later, or to have a late registration start earlier."
+    "original": "Als beheerder kan je zelf een andere startdatum kiezen voor deze inschrijving. Bijvoorbeeld om een proefperiode later te laten beginnen, of een late inschrijving vroeger te laten starten.",
+    "translation": "As an administrator, you can choose a different start date for this registration. For example, to begin a trial period later or start a late registration earlier."
   },
   "915b1b4a-3115-4cee-b180-506213cd0ae0": {
     "original": "Za",
@@ -14879,6 +14987,10 @@
     "original": "Onbekend document",
     "translation": "Unknown document"
   },
+  "a9a35ed9-de40-40b7-81aa-c1a6c22c17b7": {
+    "original": "De einddatum van de inschrijving moet na de startdatum zijn",
+    "translation": "The end date of the registration must be after the start date."
+  },
   "a9a8348c-369e-4a06-8fcd-00da473238bc": {
     "original": "De QR-code kan je enkel scannen met een beperkt aantal bankapps, niet met je ingebouwde QR-scanner en ook niet met Payconiq/Bancontact. De QR-code scannen is optioneel, voer de overschrijving gewoon uit zonder QR-code als het niet lukt (dat is net hetzelfde). Dit is een overschrijving, niet te verwarren met een online betaling.",
     "translation": "The QR code can only be scanned with a limited number of banking apps, not with your built-in QR scanner and not with Payconiq/Bancontact. Scanning the QR code is optional, simply make the transfer without the QR code if it doesn't work (it's exactly the same). This is a bank transfer, not to be confused with an online payment."
@@ -15034,6 +15146,10 @@
   "ab2559af-f877-4ee0-bc40-ba563314cded": {
     "original": "Voorbeeldstad",
     "translation": "Example City"
+  },
+  "ab2e45a8-4c85-4c10-95b3-cc8da7d40e34": {
+    "original": "Kalenderjaar",
+    "translation": "Calendar year"
   },
   "ab3872b4-6ef5-4584-af47-89e6a17e04b3": {
     "original": "bv. privacyvoorwaarden",
@@ -15199,6 +15315,10 @@
     "original": "is ook het adres van",
     "translation": "is also the address of"
   },
+  "acf43cfe-2f1c-4f9a-89cb-9b9bf6c23345": {
+    "original": "Je kan het kalenderjaar niet wijzigen nadat je inschrijvingen geselecteerd hebt.",
+    "translation": "You can’t change the calendar year after selecting registrations."
+  },
   "ad0d3d8a-67b1-4eb1-bce3-159acfecbaa0": {
     "original": "Bij meerkeuze kunnen bestellers geen, één of meerdere keuzes aanduiden. In het andere geval moet er exact één keuze gemaakt worden (of je voegt nog een extra optie 'geen' toe).",
     "translation": "With multiple choice, orderers can select none, one or more choices. Otherwise, exactly one choice must be made (or you add an extra 'none' option)."
@@ -15318,6 +15438,10 @@
   "aeeeb5ba-7576-497c-a40e-8bc48338b2a7": {
     "original": "De ouders behouden toegang als dit lid 18 jaar wordt",
     "translation": "Parents keep access when this member turns 18"
+  },
+  "aef10d71-39c4-4cdb-8252-5fd31781abd8": {
+    "original": "Einddatum",
+    "translation": "End date"
   },
   "aef8493c-6d75-4270-ba4c-f9f09b65caf7": {
     "original": "Gele achtergrond",
@@ -15566,6 +15690,10 @@
   "b183b823-481c-46b1-951d-8a68dccc2517": {
     "original": "Selecteer alles",
     "translation": "Select all"
+  },
+  "b18dedb2-a224-4c25-996e-53a52f1e3c01": {
+    "original": "Geen documenten gevonden",
+    "translation": "No documents found"
   },
   "b19c1fb0-f1a7-4435-9150-01bb2bb0799c": {
     "original": "Dit aansluitingstype is (nog) niet beschikbaar voor dit werkjaar",
@@ -16358,6 +16486,10 @@
   "ba246326-994d-4133-9f85-5f693cdd2007": {
     "original": "Ja, verwijderen",
     "translation": "Yes, delete"
+  },
+  "ba255ee3-2907-4f3a-aa16-60cd997fcf15": {
+    "original": "Filter op vereniging waarvoor is ingeschreven",
+    "translation": "Filter by association for which was registered"
   },
   "ba261762-9151-487c-a3a1-deb1c59e2a14": {
     "original": "Hoofdvragenlijst",
@@ -17235,6 +17367,10 @@
     "original": "vorige week",
     "translation": "last week"
   },
+  "c380d4e3-10cf-4649-89fb-6fa86aa93f5a": {
+    "original": "Weet je zeker dat je {total} wilt aanrekenen aan de leden voor de {count} inschrijvingen?",
+    "translation": "Are you sure you want to charge {total} to members for the {count} registrations?"
+  },
   "c3834052-ea84-4d95-bc67-194e233cb11a": {
     "original": "Een categorie kan niet zowel groepen als subcategorieën bevatten. Mogelijks zijn meerdere mensen tegelijk aanpassingen aan het maken aan de categorieën. Herlaadt de pagina en probeer opnieuw.",
     "translation": "A category cannot contain both groups and subcategories. Several people may be making changes to the categories at the same time. Please reload the page and try again."
@@ -17599,6 +17735,10 @@
     "original": "Rij",
     "translation": "Row"
   },
+  "c80ffc1b-bef9-47f8-905f-f8d917365d05": {
+    "original": "Het document is verwijderd",
+    "translation": "The document has been deleted"
+  },
   "c8217f03-4005-47e7-b032-69f59dd05499": {
     "original": "Ben je zeker?",
     "translation": "Are you sure?"
@@ -17838,6 +17978,10 @@
   "cad17893-df84-445c-b85b-b48e2eccfdaf": {
     "original": "Ik ga akkoord met",
     "translation": "I agree to"
+  },
+  "caf2ba0e-cc34-4539-9dce-4c03adec0aaa": {
+    "original": "Je kan geen fiscaal attest meer aanmaken voor dit kalenderjaar, omdat het bijhorende aanslagjaar in de personenbelasting al is afgesloten.",
+    "translation": "You can no longer create a tax certificate for this calendar year, because the corresponding tax year has already been closed in the personal income tax."
   },
   "caf486c6-818a-4d2b-9fdb-728c6af71481": {
     "original": "Kampmeldingen",
@@ -19444,8 +19588,8 @@
     "translation": "If the required items are present multiple times, the discount is applied multiple times. For example, if you give a discount on one item on condition that you first order another item."
   },
   "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
-    "original": "De datum van inschrijving ligt buiten het geselecteerde werkjaar.",
-    "translation": "The registration date is outside the selected work year."
+    "original": "De startdatum van de inschrijving ligt buiten het geselecteerde werkjaar.",
+    "translation": "The start date of the registration is outside the selected work year."
   },
   "dbf164b2-e1d2-4c80-8011-a5d5ce3b2221": {
     "original": "Je kan groepen niet combineren met categorieën op hetzelfde niveau. Verplaats deze groepen naar een categorie of verwijder ze.",
@@ -19538,6 +19682,10 @@
   "dcddc3ae-d5cb-4e28-b7bd-a38020ce64ba": {
     "original": "Verkoop",
     "translation": "Sales"
+  },
+  "dce02131-5547-4723-adfe-983f8792d082": {
+    "original": "Activiteit",
+    "translation": "Activity"
   },
   "dce292b4-9edd-4e20-a2e3-e3be80d42eb4": {
     "original": "Ongeldig tijdstip. Voer in zoals bv. '12:30'",
@@ -20311,6 +20459,10 @@
     "original": "(optioneel)",
     "translation": "(optional)"
   },
+  "e50caf1a-fe3d-4b35-8b69-eee76406ecbc": {
+    "original": "Afrondingscorrectie",
+    "translation": "Rounding adjustment"
+  },
   "e50edeb1-0376-4175-8e23-6b1409ba095d": {
     "original": "functie van een vertegenwoordiger",
     "translation": "role of a representative"
@@ -20855,6 +21007,10 @@
     "original": "De toegepaste kortingen worden niet automatisch geregistreerd en doorgestuurd naar UiTPAS. Je ontvangt geen terugbetalingen van UiTPAS.",
     "translation": "The applied discounts are not automatically registered or forwarded to UiTPAS. You will not receive any refunds from UiTPAS."
   },
+  "eb170b9c-b071-411b-94cf-3458d5660cce": {
+    "original": "Je kan geen fiscaal attest maken voor een kalenderjaar dat nog niet is gestart.",
+    "translation": "You can’t create a tax certificate for a calendar year that hasn’t started yet."
+  },
   "eb1bf015-9263-4f25-a7e4-f57b07342fb8": {
     "original": "Ouder toevoegen",
     "translation": "Add parent"
@@ -21294,6 +21450,10 @@
   "f05a29d6-2df3-45f7-a185-e4a0357fcfae": {
     "original": "Verplaats naar boven",
     "translation": "Move up"
+  },
+  "f068fe03-0b53-4ee2-bdc2-40dda5f6996c": {
+    "original": "Alle inschrijvingen in deze categorie",
+    "translation": "All registrations in this category"
   },
   "f06acd8c-4cec-42ff-b4b4-5da57ef7db09": {
     "original": "Het GSM-nummer van de ouders wordt al verzameld via de oudergegevens. Activeer dit enkel voor leden die ook echt een eigen GSM-nummer kunnen hebben, en maak het enkel verplicht als je zeker weet dat iedereen een GSM-nummer heeft.",
@@ -21854,6 +22014,10 @@
   "f6291892-674b-4c66-8855-4937f4d15b86": {
     "original": "Er zijn geen prijzen beschikbaar om een apart UiTPAS kansentarief aan toe te voegen.",
     "translation": "There are no prices available to add a separate UiTPAS opportunity rate."
+  },
+  "f632fd38-97c3-4753-996b-5ff7edf019bf": {
+    "original": "Deze groep ligt niet in kalenderjaar {year}",
+    "translation": "This group does not take place in calendar year {year}"
   },
   "f6360ada-86e7-4ec8-86fb-fe9e750c4926": {
     "original": "Je kan niet inschrijven voor {group} omdat dit werkjaar is afgesloten.",
@@ -22507,6 +22671,10 @@
     "original": "Koptekst",
     "translation": "Heading"
   },
+  "fc5f6473-fd60-4986-b072-cadaa70a10b3": {
+    "original": "Het jaar waarin inschrijving valt waarvoor je documenten wil aanmaken (startdatum).",
+    "translation": "The year in which the registration falls for which you want to create documents (start date)."
+  },
   "fc883ab4-2743-4f39-9048-4afbf548ba76": {
     "original": "Vul een beschrijving in",
     "translation": "Enter a description"
@@ -22528,7 +22696,7 @@
     "translation": "Ensure that users can log in via your own account system, separate from Stamhoofd. For Microsoft you can"
   },
   "fce1ee6b-8dfc-43f6-b34a-5f9037326e76": {
-    "original": "Reken een bedrag aan aan de {count} geselecteerde leden.",
+    "original": "Breng een bedrag in rekening bij de {count} geselecteerde leden.",
     "translation": "Charge an amount to the {count} selected members."
   },
   "fce84097-5cb4-4c49-bbcd-6a13b954cd72": {
@@ -22718,6 +22886,10 @@
   "ff2beaea-cb8f-4de8-ba1c-039b7ba20bc0": {
     "original": "Kampmelding ingediend",
     "translation": "Camp notification submitted"
+  },
+  "ff3fd880-a223-46f6-aa02-bcd1ae8697cc": {
+    "original": "De einddatum van de inschrijving moet na de startdatum van de groep zelf zijn",
+    "translation": "The end date of the registration must be after the group's start date."
   },
   "ff789452-b123-437a-a77b-34f3e0dd3e5c": {
     "original": "Optioneel. Bv. Inschrijving",

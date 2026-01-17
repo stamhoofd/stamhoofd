@@ -428,7 +428,7 @@
     "translation": "Unit"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
-    "original": "Reken een bedrag aan aan de geselecteerde eenheid.",
+    "original": "Breng een bedrag in rekening bij de geselecteerde eenheid.",
     "translation": "Charge an amount to the selected unit."
   },
   "525747e4-48df-4f20-979e-3c18142e64a5": {
@@ -723,6 +723,10 @@
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat scoutsjaar niet actief is.",
     "translation": "You cannot change registrations for {group} because that scout year is not active."
   },
+  "7d0a5e21-6573-4e84-89f8-5af81d2d3c8a": {
+    "original": "Eenheid",
+    "translation": "Unit"
+  },
   "7dd9a44e-8a47-4b74-9d57-d20b1efb706f": {
     "original": "Dit scoutsjaar is vergrendeld. Je kan geen wijzigingen meer aanbrengen aan inschrijvingen.",
     "translation": "This scout year is locked. You can no longer make changes to registrations."
@@ -776,7 +780,7 @@
     "translation": "The next affiliation of this member starts on {date}. Today this member is not affiliated with GSB and therefore not insured."
   },
   "88119ffc-b692-4222-8217-75a9fa64f675": {
-    "original": "Reken een bedrag aan aan de {count} geselecteerde eenheden.",
+    "original": "Breng een bedrag in rekening bij de {count} geselecteerde eenheden.",
     "translation": "Charge an amount to the {count} selected units."
   },
   "89a760d7-8995-458c-9635-da104971e95c": {
@@ -822,6 +826,10 @@
   "9086aa79-923c-4b8a-8926-45aeee3a8676": {
     "original": "Kunsteenheid",
     "translation": "Art unit"
+  },
+  "908caec1-3ce7-478d-aba8-e8daac08beab": {
+    "original": "De einddatum van de inschrijving ligt buiten het geselecteerde scoutsjaar.",
+    "translation": "The end date of the registration is outside the selected scouts year."
   },
   "919139ab-1103-4e1b-aaf7-94cfec03a9e3": {
     "original": "Alle eenheden in {name}",
@@ -1083,6 +1091,10 @@
     "original": "Een wachtlijst kan momenteel niet gedeeld worden tussen verschillende scoutsjaren",
     "translation": "A waiting list cannot currently be shared between different scout years"
   },
+  "ba255ee3-2907-4f3a-aa16-60cd997fcf15": {
+    "original": "Filter op eenheid waarvoor is ingeschreven",
+    "translation": "Filter by unit for which was registered"
+  },
   "bb17dafc-4305-4213-90c9-2bb2701d777f": {
     "original": "Deze functie is niet beschikbaar omdat jouw eenheid nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
     "translation": "This function is not available because your unit still uses the old free member administration package. In settings, super administrators can upgrade to the paid version with more features."
@@ -1288,8 +1300,8 @@
     "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Jamboree can apply the discount on the same item if that would be more advantageous."
   },
   "dbcf7fbb-376c-4712-a854-1781ca8f6c82": {
-    "original": "De datum van inschrijving ligt buiten het geselecteerde scoutsjaar.",
-    "translation": "The registration date is outside the selected scouts year."
+    "original": "De startdatum van de inschrijving ligt buiten het geselecteerde scoutsjaar.",
+    "translation": "The start date of the registration is outside the selected scouts year."
   },
   "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": {
     "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",

@@ -368,7 +368,7 @@
     "translation": "Group"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
-    "original": "Reken een bedrag aan aan de geselecteerde groep.",
+    "original": "Breng een bedrag in rekening bij de geselecteerde groep.",
     "translation": "Charge an amount to the selected group."
   },
   "528545c4-028b-4711-9b16-f6fa990c3130": {
@@ -615,6 +615,10 @@
     "original": "Portaal voor beroepsmedewerkers",
     "translation": "Portal for staff members"
   },
+  "7d0a5e21-6573-4e84-89f8-5af81d2d3c8a": {
+    "original": "Groep",
+    "translation": "Group"
+  },
   "8012abfe-4a7e-4864-88e5-fcf02f851705": {
     "original": "De link naar de website van jouw groep.",
     "translation": "The link to your group's website."
@@ -652,7 +656,7 @@
     "translation": "Find your group in the UiTPAS organizers list."
   },
   "88119ffc-b692-4222-8217-75a9fa64f675": {
-    "original": "Reken een bedrag aan aan de {count} geselecteerde groepen.",
+    "original": "Breng een bedrag in rekening bij de {count} geselecteerde groepen.",
     "translation": "Charge an amount to the {count} selected groups."
   },
   "890739a4-277c-4757-b6e6-c9f535d138a3": {
@@ -926,6 +930,10 @@
   "b78d9c9e-9099-4fb6-93e1-6bf58e39165f": {
     "original": "De categorieën en leeftijdsgroepen van de groepen worden gedupliceerd naar het nieuwe werkjaar.",
     "translation": "The categories and age groups of the groups will be copied to the new work year."
+  },
+  "ba255ee3-2907-4f3a-aa16-60cd997fcf15": {
+    "original": "Filter op groep waarvoor is ingeschreven",
+    "translation": "Filter by group you are registered for"
   },
   "bb17dafc-4305-4213-90c9-2bb2701d777f": {
     "original": "Deze functie is niet beschikbaar omdat jouw groep nog het oude gratis ledenadministratie pakket gebruikt. Via instellingen kunnen hoofdbeheerders overschakelen op de betaalde versie met meer functionaliteiten.",
