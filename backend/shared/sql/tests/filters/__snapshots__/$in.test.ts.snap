@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`$in JSON Can check if a JSON string equals values, case insensitive: SQL Query for filter: {"settings.name":{"$in":["Apple","other"]}} 1`] = `
 {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`$contains MySQL behaviour JSON arrays Can search for % in the array: SQL Query for filter: {"settings.names":{"$contains":"%"}} 1`] = `
 {

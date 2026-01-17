@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`$lte MySQL Behaviour Comparing JSON numbers values is numberic: SQL Query for filter: {"settings.age":{"$lte":10.1}} 1`] = `
 {
