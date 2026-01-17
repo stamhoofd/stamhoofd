@@ -326,39 +326,84 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
         }
 
         if (parent.uitpasNumber !== null) {
-            clone.uitpasNumber = parent.uitpasNumber;
+            if (clone.uitpasNumber) {
+                clone.uitpasNumber = clone.uitpasNumber.merge(parent.uitpasNumber);
+            }
+            else {
+                clone.uitpasNumber = parent.uitpasNumber;
+            }
         }
 
         if (parent.nationalRegisterNumber !== null) {
-            clone.nationalRegisterNumber = parent.nationalRegisterNumber;
+            if (clone.nationalRegisterNumber) {
+                clone.nationalRegisterNumber = clone.nationalRegisterNumber.merge(parent.nationalRegisterNumber);
+            }
+            else {
+                clone.nationalRegisterNumber = parent.nationalRegisterNumber;
+            }
         }
 
         if (parent.emailAddress !== null) {
-            clone.emailAddress = parent.emailAddress;
+            if (clone.emailAddress) {
+                clone.emailAddress = clone.emailAddress.merge(parent.emailAddress);
+            }
+            else {
+                clone.emailAddress = parent.emailAddress;
+            }
         }
 
         if (parent.phone !== null) {
-            clone.phone = parent.phone;
+            if (clone.phone) {
+                clone.phone = clone.phone.merge(parent.phone);
+            }
+            else {
+                clone.phone = parent.phone;
+            }
         }
 
         if (parent.gender !== null) {
-            clone.gender = parent.gender;
+            if (clone.gender) {
+                clone.gender = clone.gender.merge(parent.gender);
+            }
+            else {
+                clone.gender = parent.gender;
+            }
         }
 
         if (parent.birthDay !== null) {
-            clone.birthDay = parent.birthDay;
+            if (clone.birthDay) {
+                clone.birthDay = clone.birthDay.merge(parent.birthDay);
+            }
+            else {
+                clone.birthDay = parent.birthDay;
+            }
         }
 
         if (parent.address !== null) {
-            clone.address = parent.address;
+            if (clone.address) {
+                clone.address = clone.address.merge(parent.address);
+            }
+            else {
+                clone.address = parent.address;
+            }
         }
 
         if (parent.parents !== null) {
-            clone.parents = parent.parents;
+            if (clone.parents) {
+                clone.parents = clone.parents.merge(parent.parents);
+            }
+            else {
+                clone.parents = parent.parents;
+            }
         }
 
         if (parent.emergencyContacts !== null) {
-            clone.emergencyContacts = parent.emergencyContacts;
+            if (clone.emergencyContacts) {
+                clone.emergencyContacts = clone.emergencyContacts.merge(parent.emergencyContacts);
+            }
+            else {
+                clone.emergencyContacts = parent.emergencyContacts;
+            }
         }
 
         if (parent.freeContribution !== null) {

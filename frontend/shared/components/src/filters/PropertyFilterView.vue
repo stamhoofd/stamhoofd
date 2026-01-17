@@ -1,34 +1,23 @@
 <template>
-    <form class="st-view filter-editor" @submit.prevent="save">
-        <STNavigationBar :title="title" />
+    <SaveView :title="title" @save="save">
+        <h1>
+            {{ title }}
+        </h1>
+        <p v-if="options?.description">
+            {{ options.description }}
+        </p>
 
-        <main>
-            <h1>
-                {{ title }}
-            </h1>
-            <p v-if="options?.description">
-                {{ options.description }}
-            </p>
+        <p v-if="options?.warning" class="warning-box">
+            {{ options.warning }}
+        </p>
 
-            <p v-if="options?.warning" class="warning-box">
-                {{ options.warning }}
-            </p>
+        <p v-if="parentConfiguration && editingConfiguration" class="warning-box">
+            {{ $t('Opgelet, je voegt een uitbreiding toe op de standaardinstelling. Wat je instelt komt bovenop de standaardinstelling. ') }}
+        </p>
 
-            <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
-            <PropertyFilterInput v-model="editingConfiguration" :builder="builder" />
-        </main>
-
-        <STToolbar>
-            <template #right>
-                <button class="button secundary" type="button" @click="cancel">
-                    {{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}
-                </button>
-                <button class="button primary" type="button" @click="save">
-                    {{ $t('a103aa7c-4693-4bd2-b903-d14b70bfd602') }}
-                </button>
-            </template>
-        </STToolbar>
-    </form>
+        <!-- Todo: hier selector: nieuwe filter maken of bestaande filter bewerken, of opslaan als niewue filter -->
+        <PropertyFilterInput v-model="editingConfiguration" :builder="builder" :required="!parentConfiguration" :disabled-text="$t('Standaardinstelling')" :disabled-description="parentConfiguration ? propertyFilterToString(parentConfiguration, builder) : ''" />
+    </SaveView>
 </template>
 
 <script lang="ts">
@@ -37,16 +26,14 @@ import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes'
 import { PropertyFilter, Version } from '@stamhoofd/structures';
 
 import STNavigationBar from '../navigation/STNavigationBar.vue';
-import STToolbar from '../navigation/STToolbar.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import PropertyFilterInput from './PropertyFilterInput.vue';
-import { UIFilterBuilder } from './UIFilter';
+import { propertyFilterToString, UIFilterBuilder } from './UIFilter';
 
 @Component({
     components: {
         STNavigationBar,
         PropertyFilterInput,
-        STToolbar,
     },
 })
 export default class PropertyFilterView extends Mixins(NavigationMixin) {
@@ -59,13 +46,20 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
     @Prop({ required: true })
     builder!: UIFilterBuilder;
 
-    @Prop({ required: true })
-    configuration!: PropertyFilter;
+    @Prop({ required: false, default: null })
+    parentConfiguration!: PropertyFilter | null;
 
     @Prop({ required: true })
-    setConfiguration!: (configuration: PropertyFilter) => void;
+    configuration!: PropertyFilter | null;
 
-    editingConfiguration: PropertyFilter = this.configuration;
+    @Prop({ required: true })
+    setConfiguration!: (configuration: PropertyFilter | null) => void;
+
+    editingConfiguration: PropertyFilter | null = this.configuration;
+
+    propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
+        return propertyFilterToString(filter, builder);
+    }
 
     cancel() {
         this.dismiss({ force: true });
@@ -77,6 +71,9 @@ export default class PropertyFilterView extends Mixins(NavigationMixin) {
     }
 
     isChanged() {
+        if (this.editingConfiguration === null || this.configuration === null) {
+            return this.editingConfiguration !== this.configuration;
+        }
         return JSON.stringify(this.editingConfiguration.encode({ version: Version })) !== JSON.stringify(this.configuration.encode({ version: Version }));
     }
 
