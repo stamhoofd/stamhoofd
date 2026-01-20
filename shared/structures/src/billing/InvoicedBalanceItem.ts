@@ -8,6 +8,9 @@ export class InvoicedBalanceItem extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
+    balanceItemId = '';
+
+    @field({ decoder: StringDecoder })
     name = '';
 
     @field({ decoder: StringDecoder })
@@ -28,9 +31,9 @@ export class InvoicedBalanceItem extends AutoEncoder {
     balanceInvoicedAmount = 1;
 
     /**
-     * quantity per ten thousand.
+     * quantity per ten thousand
      * We need to support 4 decimals in case of partial payments.
-     * E.g. 3.33 euro of 10 euro was paid and is invoiced, then the amount would be 0.3333, stored as 3333
+     * E.g. 10 euro of 30 euro was paid and is invoiced, then the amount would be 0.3333, stored as 3333
      * Mostly for legal reasons, to be able to say wat was actually bought without faking an amount
      */
     @field({ decoder: IntegerDecoder })
@@ -86,6 +89,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
             });
         }
         const item = new InvoicedBalanceItem();
+        item.balanceItemId = balanceItem.id;
         item.name = balanceItem.itemTitle;
         item.description = balanceItem.itemDescription ?? '';
         item.balanceInvoicedAmount = amount;
@@ -110,8 +114,12 @@ export class InvoicedBalanceItem extends AutoEncoder {
         if (!balanceItem.VATExcempt) {
             item.unitPrice = item.unitPrice * 100 / (100 + balanceItem.VATPercentage);
         }
-        // Round unitPrice to 1 cent (= PEPPOL requirement)
-        item.unitPrice = Math.round(item.unitPrice / 100) * 100;
+
+        // Rounding the unit price is not a peppol requirement normally,
+        // so this is disabled for now. Rounding will happen on line level though
+        // item.unitPrice = Math.round(item.unitPrice / 100) * 100;
+        // round as integer instead (0.0001):
+        item.unitPrice = Math.round(item.unitPrice);
 
         return item;
     }

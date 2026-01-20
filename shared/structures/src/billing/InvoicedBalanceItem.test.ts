@@ -20,11 +20,11 @@ describe('InvoicedBalanceItem', () => {
 
             expect(invoicedItem.balanceInvoicedAmount).toBe(5_00_00);
             expect(invoicedItem.quantity).toBe(1_00_00);
-            expect(invoicedItem.unitPrice).toBe(4_13_00); // should be rounded to 1 cent
+            expect(invoicedItem.unitPrice).toBe(4_13_22); // should not be rounded to 1 cent
             expect(invoicedItem.VATPercentage).toBe(21);
             expect(invoicedItem.VATIncluded).toBe(true);
             expect(invoicedItem.VATExcempt).toBeNull();
-            expect(invoicedItem.totalWithoutVAT).toBe(4_13_00);
+            expect(invoicedItem.totalWithoutVAT).toBe(4_13_00); // rounded
         });
 
         test('Create an invoice item for a balance item including VAT with quantity of 3', () => {
@@ -45,11 +45,11 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(5_00_00);
                 expect(invoicedItem.quantity).toBe(1_00_00);
-                expect(invoicedItem.unitPrice).toBe(4_13_00); // should be rounded to 1 cent
+                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
-                expect(invoicedItem.totalWithoutVAT).toBe(4_13_00);
+                expect(invoicedItem.totalWithoutVAT).toBe(4_13_00); // rounded
             }
 
             // Create an invoiced balance item for two items
@@ -58,11 +58,11 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(10_00_00);
                 expect(invoicedItem.quantity).toBe(2_00_00);
-                expect(invoicedItem.unitPrice).toBe(4_13_00); // should be rounded to 1 cent
+                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
-                expect(invoicedItem.totalWithoutVAT).toBe(8_26_00);
+                expect(invoicedItem.totalWithoutVAT).toBe(8_26_00); // rounded
             }
 
             // Create an invoiced balance item for three items
@@ -71,11 +71,11 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(15_00_00);
                 expect(invoicedItem.quantity).toBe(3_00_00);
-                expect(invoicedItem.unitPrice).toBe(4_13_00); // should be rounded to 1 cent
+                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
-                expect(invoicedItem.totalWithoutVAT).toBe(12_39_00);
+                expect(invoicedItem.totalWithoutVAT).toBe(12_40_00); // rounded
             }
 
             // Create an invoiced balance item for half an item
@@ -84,11 +84,11 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(2_50_00);
                 expect(invoicedItem.quantity).toBe(50_00); // 50% of an item
-                expect(invoicedItem.unitPrice).toBe(4_13_00); // should be rounded to 1 cent
+                expect(invoicedItem.unitPrice).toBe(4_13_22); // not rounded
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
-                expect(invoicedItem.totalWithoutVAT).toBe(2_07_00);
+                expect(invoicedItem.totalWithoutVAT).toBe(2_07_00); // rounded
             }
 
             // Create an invoiced balance item for 1/3 of an item
@@ -97,11 +97,11 @@ describe('InvoicedBalanceItem', () => {
 
                 expect(invoicedItem.balanceInvoicedAmount).toBe(1_66_66);
                 expect(invoicedItem.quantity).toBe(33_33); // 33.33% of an item
-                expect(invoicedItem.unitPrice).toBe(4_13_00); // should be rounded to 1 cent
+                expect(invoicedItem.unitPrice).toBe(4_13_25); // difference caused by rounding of quantity
                 expect(invoicedItem.VATPercentage).toBe(21);
                 expect(invoicedItem.VATIncluded).toBe(true);
                 expect(invoicedItem.VATExcempt).toBeNull();
-                expect(invoicedItem.totalWithoutVAT).toBe(1_38_00);
+                expect(invoicedItem.totalWithoutVAT).toBe(1_38_00); // rounded
             }
         });
 
@@ -223,6 +223,29 @@ describe('InvoicedBalanceItem', () => {
             expect(invoicedItem.VATIncluded).toBe(true);
             expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunity);
             expect(invoicedItem.totalWithoutVAT).toBe(20_00);
+        });
+
+        test('Paying 1/3 of a balance item causes 33.33% quantity', () => {
+            const balanceItem = new BalanceItem();
+            balanceItem.description = 'Test Item';
+            balanceItem.unitPrice = 30_00; // = 0,30 euro
+            balanceItem.quantity = 1;
+            balanceItem.VATPercentage = 21;
+            balanceItem.VATIncluded = false;
+            balanceItem.VATExcempt = VATExcemptReason.IntraCommunity;
+
+            expect(balanceItem.priceWithVAT).toBe(30_00);
+            expect(balanceItem.priceWithoutVAT).toBe(30_00);
+
+            const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 10_00);
+
+            expect(invoicedItem.balanceInvoicedAmount).toBe(10_00);
+            expect(invoicedItem.quantity).toBe(33_33);
+            expect(invoicedItem.unitPrice).toBe(30_00); // = 0,30 euro
+            expect(invoicedItem.VATPercentage).toBe(21);
+            expect(invoicedItem.VATIncluded).toBe(false);
+            expect(invoicedItem.VATExcempt).toBe(VATExcemptReason.IntraCommunity);
+            expect(invoicedItem.totalWithoutVAT).toBe(10_00); // rounded
         });
     });
 });
