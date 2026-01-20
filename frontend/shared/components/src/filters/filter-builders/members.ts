@@ -591,7 +591,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         );
     }
 
-    if (auth.hasFullAccess()) {
+    if (auth.hasFullAccess() || auth.hasAccessForSomeResourceOfType(PermissionsResourceType.OrganizationTags, PermissionLevel.Full)) {
+        // If you have full access for an organization, or full access to an organization tag, you can filter on historical registrations
         all.push(
             new GroupUIFilterBuilder({
                 name: $t('9bebe05c-cc6b-4f78-8704-80143df8e010'),
