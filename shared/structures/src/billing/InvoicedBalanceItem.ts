@@ -78,7 +78,8 @@ export class InvoicedBalanceItem extends AutoEncoder {
      * Creates a default configuration for a balance item that needs to be invoiced. The result can still be adjusted to correct rounding issues, because
      * a balanace item cannot always be perfectly represented on an invoice (on an invoice rounding happens on invoice level, while balance items can have any price that is not really rounded at any time unless when paid).
      *
-     * amount = paid (or to be paid) price, including VAT if there is VAT
+     * @param balanceItem
+     * @param amount paid (or to be paid) price, should always include VAT if there is VAT
      */
     static createFor(balanceItem: BalanceItem, amount: number) {
         if (balanceItem.VATPercentage === null) {

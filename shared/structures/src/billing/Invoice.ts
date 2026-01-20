@@ -8,10 +8,10 @@ import { VATExcemptReason } from '../BalanceItem.js';
 
 export class VATSubtotal extends AutoEncoder {
     /**
-     * In case this is null, VATExcempt should be set to explain why there is no VAT
+     * For tax ecempt items, this should be zero but it is ignored anyway
      */
-    @field({ decoder: IntegerDecoder, nullable: true })
-    VATPercentage: number | null = null;
+    @field({ decoder: IntegerDecoder })
+    VATPercentage: number = 0;
 
     @field({ decoder: new EnumDecoder(VATExcemptReason), nullable: true })
     VATExcempt: VATExcemptReason | null = null;
@@ -33,11 +33,13 @@ export class Invoice extends AutoEncoder {
     /**
      * Set if the invoice number is official. This number is unique per seller
      */
-    number: string | null;
+    @field({ decoder: StringDecoder, nullable: true })
+    number: string | null = null;
 
     /**
      * Seller
      */
+    @field({ decoder: StringDecoder })
     organizationId: string;
 
     /**
@@ -46,19 +48,20 @@ export class Invoice extends AutoEncoder {
      *
      * In the future we could expand this with members, users, and/or orders
      */
-    payingOrganizationId: string | null;
+    @field({ decoder: StringDecoder, nullable: true })
+    payingOrganizationId: string | null = null;
 
     /**
      * A point-in-time snapshot of the seller.
      * In case the address changes over time, or when an organization has multiple companies and some invoices
      */
-    @field({ decoder: Company })
+    @field({ decoder: Company, defaultValue: () => Company.create({}) })
     seller: Company;
 
     /**
      * Payer
      */
-    @field({ decoder: PaymentCustomer })
+    @field({ decoder: PaymentCustomer, defaultValue: () => PaymentCustomer.create({}) })
     customer: PaymentCustomer;
 
     /**
@@ -96,6 +99,9 @@ export class Invoice extends AutoEncoder {
     /**
      * The difference between the totalWithVAT of the invoice and the sum of all balanceInvoicedAmount of the invoiced balance items.
      * totalBalanceInvoicedAmount + balanceRoundingAmount = totalWithVAT
+     *
+     * Best viewed as a virtual extra balance item linked to the invoice to compensate.
+     *
      * This is used to explain and report why there is a difference between the sum of the balance item's prices and the actually invoiced price, comparable with roundingAmount on payments.
      * - Say we invoice 3 items of 0,242 euro. The sum would be 0,726. The invoice total price might be 0,73 because of rounding rules. Then the balanceRoundingAmount would be -0,004.
      */
@@ -150,17 +156,17 @@ export class Invoice extends AutoEncoder {
         const categories = new Map<string, VATSubtotal>();
         for (const item of this.items) {
             let key: string;
-            if (item.VATPercentage !== null) {
+            if (item.VATExcempt === null) {
                 key = `vat_${item.VATPercentage}`;
             }
             else {
-                key = `excempt_${item.VATExcempt}`;
+                key = `excempt_${item.VATExcempt}_${item.VATExcempt}`;
             }
 
             let category = categories.get(key);
             if (!category) {
                 category = new VATSubtotal();
-                category.VATPercentage = item.VATPercentage;
+                category.VATPercentage = item.VATExcempt === null ? item.VATPercentage : 0;
                 category.VATExcempt = item.VATExcempt;
                 categories.set(key, category);
             }
@@ -170,7 +176,7 @@ export class Invoice extends AutoEncoder {
 
         // Calculate VAT amount for each category and round to 1 cent
         for (const category of categories.values()) {
-            if (category.VATPercentage !== null) {
+            if (!category.VATExcempt) {
                 category.VAT = Math.round(category.taxablePrice * category.VATPercentage / 100_00) * 100;
             }
             else {
@@ -179,5 +185,10 @@ export class Invoice extends AutoEncoder {
         }
 
         this.VATTotal = Array.from(categories.values());
+    }
+
+    addItem(item: InvoicedBalanceItem) {
+        this.items.push(item);
+        this.calculateVAT();
     }
 }
