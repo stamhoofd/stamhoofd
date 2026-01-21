@@ -138,8 +138,11 @@ export async function getScopedAdminRoot(reactiveSession: SessionContext, $t: Re
                         const tabs: (TabBarItem | TabBarItemGroup)[] = [
                             startTab,
                             membersTab,
-                            groupsTab,
                         ];
+
+                        if (!STAMHOOFD.singleOrganization) {
+                            tabs.push(groupsTab);
+                        }
 
                         if (platformManager.$platform.config.eventTypes.length > 0 && !manualFeatureFlag('disable-events', reactiveSession)) {
                             tabs.push(calendarTab);
