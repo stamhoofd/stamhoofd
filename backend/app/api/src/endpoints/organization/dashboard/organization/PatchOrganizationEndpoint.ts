@@ -5,14 +5,14 @@ import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform
 import { BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionLevel, PermissionRoleDetailed, PermissionRoleForResponsibility, PermissionsResourceType, ResourcePermissions, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { BuckarooHelper } from '../../../../helpers/BuckarooHelper';
-import { Context } from '../../../../helpers/Context';
-import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer';
-import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
-import { TagHelper } from '../../../../helpers/TagHelper';
-import { ViesHelper } from '../../../../helpers/ViesHelper';
-import { UitpasService } from '../../../../services/uitpas/UitpasService';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { BuckarooHelper } from '../../../../helpers/BuckarooHelper.js';
+import { Context } from '../../../../helpers/Context.js';
+import { MemberUserSyncer } from '../../../../helpers/MemberUserSyncer.js';
+import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
+import { TagHelper } from '../../../../helpers/TagHelper.js';
+import { ViesHelper } from '../../../../helpers/ViesHelper.js';
+import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -587,7 +587,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         return new Response(struct);
     }
 
-    async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company> | Company[]) {
+    async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company>) {
         if (isPatchableArray(companies)) {
             for (const patch of companies.getPatches()) {
                 // Changed VAT number
