@@ -167,9 +167,8 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, DefaultAgeGroupIdsInput, EditRoleView, ErrorBox, JumpToContainer, NumberInput, SaveView, TagIdsInput, useAppContext, useErrors, usePatch } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { MemberResponsibility, PermissionLevel, PermissionRoleForResponsibility } from '@stamhoofd/structures';
-import { computed, ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 
 const errors = useErrors();
 const saving = ref(false);
@@ -188,6 +187,14 @@ const pop = usePop();
 const app = useAppContext();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.responsibility);
+
+watchEffect(() => {
+    if (patched.value.permissions && patched.value.permissions.name !== patched.value.name) {
+        addPatch({
+            permissions: PermissionRoleForResponsibility.patch({ name: patched.value.name }),
+        });
+    }
+});
 
 const save = async () => {
     if (saving.value || deleting.value) {
