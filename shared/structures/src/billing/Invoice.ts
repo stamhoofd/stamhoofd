@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
@@ -150,6 +150,12 @@ export class Invoice extends AutoEncoder {
 
     @field({ decoder: File, nullable: true })
     xml: File | null = null;
+
+    @field({ decoder: StringDecoder, nullable: true })
+    negativeInvoiceId: string | null = null;
+
+    @field({ decoder: BooleanDecoder, optional: true })
+    didSendPeppol = false;
 
     calculateVAT() {
         // For every VAT category, calculate the taxable amount and VAT amount
