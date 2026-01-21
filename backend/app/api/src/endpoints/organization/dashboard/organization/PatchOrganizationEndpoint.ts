@@ -587,7 +587,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         return new Response(struct);
     }
 
-    async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company>) {
+    async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company> | Company[]) {
         if (isPatchableArray(companies)) {
             for (const patch of companies.getPatches()) {
                 // Changed VAT number
