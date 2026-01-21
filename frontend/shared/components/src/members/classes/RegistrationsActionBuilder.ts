@@ -254,7 +254,7 @@ export class RegistrationsActionBuilder {
                 icon: 'external',
                 enabled: this.hasWrite,
                 handler: async () => {
-                    const href = '/' + appToUri('dashboard') + '/' + organization.uri;
+                    const href = '/' + appToUri('dashboard') + (STAMHOOFD.singleOrganization ? '' : ('/' + organization.uri));
                     window.open(href, '_blank');
                 },
             }),

@@ -213,14 +213,14 @@ export function useContextOptions() {
         // Try to maintain the same URL for the new scope, to improve switching behaviour per tab
         let href = window.location.href;
         let oldPrefix = '';
-        if ($organization.value) {
+        if ($organization.value && !STAMHOOFD.singleOrganization) {
             oldPrefix = '/' + appToUri(app) + '/' + $organization.value.uri;
         }
         else {
             oldPrefix = '/' + appToUri(app);
         }
         let newPrefix = '';
-        if (option.organization) {
+        if (option.organization && !STAMHOOFD.singleOrganization) {
             newPrefix = '/' + appToUri(option.app) + '/' + option.organization.uri;
         }
         else {
