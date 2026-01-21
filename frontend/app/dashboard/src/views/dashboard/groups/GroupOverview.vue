@@ -410,7 +410,7 @@ async function editPermissions(animated = true) {
                 description: $t('e83fded1-6903-4459-9ef0-4fe9d7238bab'),
                 resource: {
                     id: props.group.id,
-                    name: props.group.settings.name,
+                    name: props.group.settings.name.toString(),
                     type: PermissionsResourceType.Groups,
                 },
                 configurableAccessRights: [],
