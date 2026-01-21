@@ -58,3 +58,6 @@ export * from './AuditLog.js';
 export * from './MemberUser.js';
 
 export * from './UitpasClientCredential.js';
+
+export * from './Invoice.js';
+export * from './InvoicedBalanceItem.js';
