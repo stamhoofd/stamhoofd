@@ -34,7 +34,7 @@ import { isReactive } from 'vue';
             }
             else {
                 // Build reactive url
-                this.context.reactive_navigation_url = appToUri(this.context.stamhoofd_app) + (this.context.$context.organization ? '/' + this.context.$context.organization!.uri : '');
+                this.context.reactive_navigation_url = appToUri(this.context.stamhoofd_app) + (this.context.$context.organization && !STAMHOOFD.singleOrganization ? '/' + this.context.$context.organization!.uri : '');
             }
         }
 
