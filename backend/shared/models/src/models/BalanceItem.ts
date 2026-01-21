@@ -66,10 +66,18 @@ export class BalanceItem extends QueryableModel {
     description = '';
 
     /**
-     * Total prices
+     * @deprecated Use quantity
      */
     @column({ type: 'integer' })
     amount = 1;
+
+    get quantity() {
+        return this.amount;
+    }
+
+    set quantity(quantity: number) {
+        this.amount = this.quantity;
+    }
 
     /**
      * Price per piece
