@@ -28,7 +28,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
      * Any rounding issues are fixed on the invoice level.
      */
     @field({ decoder: IntegerDecoder })
-    balanceInvoicedAmount = 1;
+    balanceInvoicedAmount = 0;
 
     /**
      * quantity per ten thousand
