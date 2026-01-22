@@ -68,11 +68,13 @@ function hasType<T>(json: unknown): json is T & { type: string } {
  * @returns
  */
 export async function throwIfInvalidUitpasNumber(access_token: string, uitpasNumber: string): Promise<UitpasNumberSuccessfulResponse> {
-    const test = await checkUitpasNumber(access_token, uitpasNumber);
-    if (test.error) {
-        throw test.error;
+    const result = await checkUitpasNumber(access_token, uitpasNumber);
+
+    if (result.error) {
+        throw result.error;
     }
-    return test.response!;
+
+    return result.response;
 }
 
 /**
@@ -81,7 +83,7 @@ export async function throwIfInvalidUitpasNumber(access_token: string, uitpasNum
  * @param uitpasNumber
  * @returns
  */
-export async function checkUitpasNumber(access_token: string, uitpasNumber: string): Promise<{ error?: Error; response?: UitpasNumberSuccessfulResponse }> {
+export async function checkUitpasNumber(access_token: string, uitpasNumber: string): Promise<{ error: Error; response?: UitpasNumberSuccessfulResponse } | { response: UitpasNumberSuccessfulResponse; error?: undefined }> {
     // static check (using regex)
     if (!DataValidator.isUitpasNumberValid(uitpasNumber)) {
         return {

@@ -175,7 +175,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 member.details.patchOrPut(patch.details);
 
                 if (patch.details.uitpasNumberDetails || patch.details.reviewTimes?.times.some(t => t.name === 'uitpasNumber')) {
-                    await updateMemberDetailsUitpasNumberForPatch(member.details, previousUitpasNumber);
+                    await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
                 }
 
                 member.details.cleanData();

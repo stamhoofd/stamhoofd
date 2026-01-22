@@ -168,6 +168,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        const isBulkUpdate = members.length > 5;
+
         for (const member of members) {
             if (!await Context.auth.canAccessMember(
                 member,
@@ -181,18 +183,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
-            // only update uitpas number if successful social tariff check is required
-            if (member.details.uitpasNumberDetails && member.details.uitpasNumberDetails.socialTariff.isUpdateRequired(member.details.requiresFinancialSupport)) {
-                let isUpdated: boolean;
+            // update uitpas social tariff
+            if (!isBulkUpdate && member.details.uitpasNumberDetails
+                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegsitration(member.details.requiresFinancialSupport)
+            ) {
+                let isUpdated: boolean = false;
 
                 try {
                     isUpdated = await updateMemberDetailsUitpasNumber(member.details);
                 }
                 catch (e) {
-                    // force review of uitpas number
-                    member.details.reviewTimes.removeReview('uitpasNumber');
-                    await member.save();
-                    throw e;
+                    // catch all errors
                 }
 
                 if (isUpdated) {

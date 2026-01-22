@@ -29,31 +29,8 @@ export class UitpasSocialTariff extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true })
     endDate: Date | null = null;
 
-    // todo: use for performance and set (only check if not updated recently)
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
-
-    /**
-     * Whether the social tariff should be updated
-     */
-    get shouldUpdate(): boolean {
-        // always check if status is unknown
-        if (this.status === UitpasSocialTariffStatus.Unknown) {
-            return true;
-        }
-
-        const now = new Date();
-
-        // always check if endDate is expired
-        if (this.endDate !== null && this.endDate.getTime() < now.getTime()) {
-            return true;
-        }
-
-        // todo -> change to 1 day
-        // should check if updated more than 30 minutes ago
-        const halfHourInMs = 1800000;
-        return now.getTime() - this.updatedAt.getTime() > halfHourInMs;
-    }
 
     get isActive(): boolean {
         return this.status === UitpasSocialTariffStatus.Active;
@@ -64,30 +41,21 @@ export class UitpasSocialTariff extends AutoEncoder {
      * @param requiresFinancialSupport
      * @returns
      */
-    isUpdateRequired(requiresFinancialSupport: BooleanStatus | null): boolean {
-        const status = this.status;
-
-        // a successfull check is always required if we never received a response from uitpas api before
-        if (status === UitpasSocialTariffStatus.Unknown) {
-            return true;
-        }
-
+    shouldUpdateForRegsitration(requiresFinancialSupport: BooleanStatus | null): boolean {
         // does not matter if financial support is required
         if (requiresFinancialSupport?.value === true) {
             return false;
         }
 
-        // a successfull check is always required if the status is active but the endDate is expired (we don't know the new status)
-        if (status === UitpasSocialTariffStatus.Active) {
-            const now = new Date();
-
-            // should check if expired
-            if (this.endDate !== null && this.endDate.getTime() < now.getTime()) {
-                return true;
-            }
+        if (this.status === UitpasSocialTariffStatus.Unknown) {
+            return true;
         }
 
-        return false;
+        const now = new Date();
+
+        // should check if updated more than 1 week ago
+        const weekInMs = 604800000;
+        return now.getTime() - this.updatedAt.getTime() > weekInMs;
     }
 }
 

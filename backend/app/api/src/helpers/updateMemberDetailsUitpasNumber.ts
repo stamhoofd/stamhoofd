@@ -14,26 +14,21 @@ export async function updateMemberDetailsUitpasNumber(details: MemberDetails): P
         return false;
     }
 
-    if (!details.uitpasNumberDetails.socialTariff.shouldUpdate) {
-        return false;
-    }
-
     const result = await UitpasService.checkUitpasNumber(details.uitpasNumberDetails.uitpasNumber);
-    const response: UitpasNumberSuccessfulResponse | undefined = result.response;
 
-    if (response) {
-        const socialTariff = uitpasApiResponseToSocialTariff(response);
+    // never thrown an error if a succesful response was received
+    if (result.response) {
+        const socialTariff = uitpasApiResponseToSocialTariff(result.response);
 
         details.uitpasNumberDetails.socialTariff = socialTariff;
         return true;
     }
-    else if (result.error) {
-        // only throw if active or unknown
-        if (details.uitpasNumberDetails.socialTariff.isUpdateRequired(details.requiresFinancialSupport)) {
-            throw result.error;
-        }
+
+    if (result.error) {
+        throw result.error;
     }
 
+    // should never happen
     return false;
 }
 
@@ -56,19 +51,31 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
         isUpdated = await updateMemberDetailsUitpasNumber(details);
     }
     catch (error: any) {
-        // set the status
         const isUitpasEqual = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
 
-        if (isUitpasEqual && isSimpleError(error) && error.code === 'unknown_uitpas_number') {
-            // set the status of the social tariff to unknown if the uitpas number did not change and the number is unknown
-            const member = await Member.getByID(memberId);
-            if (member && member.details.uitpasNumberDetails) {
-                member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
-                    status: UitpasSocialTariffStatus.Unknown,
-                });
+        if (isSimpleError(error)) {
+            if (error.code === 'unknown_uitpas_number') {
+                if (isUitpasEqual) {
+                    // set the status of the social tariff to unknown if the uitpas number did not change and the number is unknown
+                    const member = await Member.getByID(memberId);
+                    if (member && member.details.uitpasNumberDetails) {
+                        member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
+                            status: UitpasSocialTariffStatus.Unknown,
+                        });
 
-                await member.save();
+                        await member.save();
+                    }
+                }
+
+                // always throw an error if the number is unknown by the uitpas api
+                throw error;
             }
+        }
+
+        // do not throw if the number did not change
+        if (isUitpasEqual) {
+            console.error(`Catched error while updating social tariff for member (uitpas number did not change) ${memberId}:`, error.message);
+            return false;
         }
 
         throw error;

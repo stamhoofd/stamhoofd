@@ -320,6 +320,7 @@ test.describe("Registration", () => {
                 await registrationFlow.expectUitpasInput();
             });
 
+            // todo: duplicate test?
             test("Should show the uitpas step if the social tariff was active but not anymore", async ({
                 page,
                 pages,
