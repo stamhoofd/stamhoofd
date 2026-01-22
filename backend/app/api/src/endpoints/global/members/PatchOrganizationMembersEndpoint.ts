@@ -14,7 +14,7 @@ import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
-import { updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { MemberNumberService } from '../../../services/MemberNumberService.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
@@ -171,10 +171,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 const wasReduced = member.details.shouldApplyReducedPrice;
 
+                const originalReviewTimes = member.details.reviewTimes;
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
                 member.details.patchOrPut(patch.details);
 
-                if (patch.details.uitpasNumberDetails || patch.details.reviewTimes?.times.some(t => t.name === 'uitpasNumber')) {
+                if (patch.details.uitpasNumberDetails || didUitpasReviewChange(patch.details.reviewTimes, originalReviewTimes)) {
                     await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
                 }
 

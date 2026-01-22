@@ -1,6 +1,7 @@
+import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
-import { MemberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { MemberDetails, ReviewTimes, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { UitpasService } from '../services/uitpas/UitpasService.js';
 import { UitpasNumberSuccessfulResponse } from '../services/uitpas/checkUitpasNumbers.js';
 
@@ -121,6 +122,20 @@ export function uitpasApiResponseToSocialTariff(response: UitpasNumberSuccessful
         endDate,
         updatedAt: new Date(),
     });
+}
+
+export function didUitpasReviewChange(reviewTimesPatch: ReviewTimes | AutoEncoderPatchType<ReviewTimes> | undefined, originalReviewTimes: ReviewTimes): boolean {
+    const newReview = reviewTimesPatch?.times.find(t => t.name === 'uitpasNumber');
+    if (!newReview) {
+        return false;
+    }
+
+    const lastReviewTime = originalReviewTimes.getLastReview('uitpasNumber');
+    if (!lastReviewTime) {
+        return true;
+    }
+
+    return newReview.reviewedAt.getTime() !== lastReviewTime.getTime();
 }
 
 /**

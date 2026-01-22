@@ -8,7 +8,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
-import { updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate.js';
 type Params = Record<string, never>;
@@ -106,9 +106,11 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
 
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
+
+                const originalReviewTimes = member.details.reviewTimes;
                 member.details.patchOrPut(struct.details);
 
-                if (struct.details.uitpasNumberDetails || struct.details.reviewTimes?.times.some(t => t.name === 'uitpasNumber')) {
+                if (struct.details.uitpasNumberDetails || didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)) {
                     await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
                 }
 
