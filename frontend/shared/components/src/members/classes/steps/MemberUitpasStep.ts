@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { PermissionLevel } from '@stamhoofd/structures';
+import { PermissionLevel, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { MemberStepView } from '../..';
 import { NavigationActions } from '../../../types/NavigationActions';
@@ -31,6 +31,11 @@ export class MemberUitpasStep implements EditMemberStep {
                 : undefined,
         })) {
             return false;
+        }
+
+        // The step should be shown if the status of the uitpas social tariff is unknown
+        if (details.uitpasNumberDetails !== null && details.uitpasNumberDetails.socialTariff.status === UitpasSocialTariffStatus.Unknown) {
+            return true;
         }
 
         if (this.options.outdatedTime) {
