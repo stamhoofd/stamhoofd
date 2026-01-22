@@ -126,7 +126,7 @@ async function checkUitpasNumber(access_token: string, uitpasNumber: string) {
         });
     });
     assertIsUitpasNumberSuccessfulResponse(json);
-    if (json.messages) {
+    if (json.messages && json.messages.length > 0) {
         const humanMessage = json.messages[0].text; // only display the first message
 
         // alternatively, join all messages
