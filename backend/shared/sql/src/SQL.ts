@@ -26,7 +26,7 @@ class StaticSQL {
         return new SQLJsonExtract(column, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
     }
 
-    jsonValue(column: SQLExpression, path: string, type?: SQLJsonValueType, asScalar = false): SQLJsonExtract {
+    jsonValue(column: SQLExpression, path: string, type?: SQLJsonValueType, asScalar = false): SQLJsonValue {
         return new SQLJsonValue(column, type, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
     }
 

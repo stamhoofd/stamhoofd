@@ -154,6 +154,17 @@ export async function checkUitpasNumber(access_token: string, uitpasNumber: stri
                         }),
                     };
                 }
+
+                if (type.endsWith('rate-limited')) {
+                    return {
+                        error: new SimpleError({
+                            statusCode: 429,
+                            code: 'uitpas-rate-limited',
+                            message: `UiTPAS rate limited when retrieving pass by UiTPAS number`,
+                            human: endUserMessage,
+                        }),
+                    };
+                }
             }
         }
 
