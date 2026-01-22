@@ -2,7 +2,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { Group, GroupType, Organization, PlatformFamily, PlatformMember, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember } from '@stamhoofd/structures';
-import { ChooseGroupForMemberView, loadFamilyIfNeeded, usePlatformFamilyManager } from '..';
+import { ChooseGroupForMemberView, loadFamilyIfNeeded } from '..';
 import { useAppContext } from '../../context/appContext';
 import { GlobalEventBus } from '../../EventBus';
 import { useContext } from '../../hooks';
@@ -253,16 +253,12 @@ export function useCheckoutRegisterItem() {
 export function useGetDefaultItem() {
     const context = useContext();
     const owner = useRequestOwner();
-    const forceUpdateUitpasSocialTarrifForMemberRegistration = useForceUpdateUitpasSocialTarrifForMemberRegistration();
 
     return async ({ group, member, groupOrganization }: {
         group: Group;
         member: PlatformMember;
         groupOrganization?: Organization;
     }) => {
-        // Update social tariff on member
-        await forceUpdateUitpasSocialTarrifForMemberRegistration([member]);
-
         return await getDefaultItem({
             group,
             member,
@@ -454,15 +450,11 @@ export function useChooseGroupForMember() {
     const navigate = useNavigationActions();
     const context = useContext();
     const app = useAppContext();
-    const forceUpdateUitpasSocialTarrifForMemberRegistration = useForceUpdateUitpasSocialTarrifForMemberRegistration();
 
     return async ({ member, displayOptions, customNavigate, startCheckoutFlow }: { member: PlatformMember; displayOptions?: DisplayOptions; customNavigate?: NavigationActions; startCheckoutFlow?: boolean }) => {
         if (app !== 'registration') {
             member.family.checkout.clear();
         }
-
-        // Update social tariff on member
-        await forceUpdateUitpasSocialTarrifForMemberRegistration([member]);
 
         await chooseGroupForMember({
             admin: app === 'dashboard' || app === 'admin',
@@ -472,38 +464,5 @@ export function useChooseGroupForMember() {
             displayOptions,
             startCheckoutFlow: startCheckoutFlow ?? (app !== 'registration'),
         });
-    };
-}
-
-function useForceUpdateUitpasSocialTarrifForMemberRegistration() {
-    const platformFamilyManager = usePlatformFamilyManager();
-
-    return async (members: PlatformMember[]) => {
-        const filteredMembers = members.filter((m) => {
-            const details = m.member.details;
-            // should not update if already has financial support
-            if (details.requiresFinancialSupport?.value === true) {
-                return false;
-            }
-
-            // should not update if no uitpas number
-            if (!details.uitpasNumberDetails) {
-                return false;
-            }
-
-            return details.uitpasNumberDetails.socialTariff.shouldUpdate;
-        });
-
-        try {
-            await platformFamilyManager.forceUpdateUitpasSocialTarrif(filteredMembers);
-        }
-        catch (error) {
-            // force review
-            filteredMembers.forEach((m) => {
-                m.member.details.reviewTimes.removeReview('uitpasNumber');
-            });
-            // an endpoint fail should not stop the checkout (for example if the uitpas api is down)
-            console.error(error);
-        }
     };
 }
