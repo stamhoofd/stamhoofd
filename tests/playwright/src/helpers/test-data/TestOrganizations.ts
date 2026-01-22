@@ -4,16 +4,16 @@ import {
     OrganizationRegistrationPeriod,
     OrganizationRegistrationPeriodFactory,
     RegistrationPeriod,
-    RegistrationPeriodFactory
-} from "@stamhoofd/models";
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
 import {
     GroupCategory,
     GroupCategorySettings,
     OrganizationMetaData,
     OrganizationRecordsConfiguration,
     PropertyFilter,
-} from "@stamhoofd/structures";
-import { TestGroups } from "./TestGroups";
+} from '@stamhoofd/structures';
+import { TestGroups } from './TestGroups';
 
 export type OrganizationContext = {
     organization: Organization;
@@ -43,30 +43,29 @@ export type YouthOrganization1Context = OrganizationContext & {
  * Modify the data to fit your needs after initialization.
  */
 export class TestOrganizations {
-
     /**
-     * 
+     *
      * @param organization default organization for worker
-     * @returns 
+     * @returns
      */
     static async youthOrganization1(organization: Organization): Promise<YouthOrganization1Context> {
         // organization
         organization.meta = OrganizationMetaData.create({
-                recordsConfiguration: OrganizationRecordsConfiguration.create({
-                    financialSupport: true,
-                    uitpasNumber: new PropertyFilter(null, null),
-                }),
-            });
+            recordsConfiguration: OrganizationRecordsConfiguration.create({
+                financialSupport: true,
+                uitpasNumber: new PropertyFilter(null, null),
+            }),
+        });
 
         // period
         const period = await new RegistrationPeriodFactory({
-            startDate: new Date("2000-01-01"),
-            endDate: new Date("2001-01-01"),
+            startDate: new Date('2000-01-01'),
+            endDate: new Date('2001-01-01'),
             organization,
         }).create();
 
-        const organizationPeriod =
-            await new OrganizationRegistrationPeriodFactory({
+        const organizationPeriod
+            = await new OrganizationRegistrationPeriodFactory({
                 period,
                 organization,
             }).create();
@@ -75,23 +74,23 @@ export class TestOrganizations {
 
         // categories
         const takken = GroupCategory.create({
-            settings: GroupCategorySettings.create({ name: "Takken" }),
+            settings: GroupCategorySettings.create({ name: 'Takken' }),
             groupIds: [],
         });
 
         const vrijwilligers = GroupCategory.create({
-            settings: GroupCategorySettings.create({ name: "Leiding" }),
+            settings: GroupCategorySettings.create({ name: 'Leiding' }),
             groupIds: [],
         });
 
         organizationPeriod.settings.categories.push(takken, vrijwilligers);
 
         // groups
-        const bevers = await TestGroups.defaultGroup("Bevers")(organization);
-        const welpen = await TestGroups.defaultGroup("Welpen")(organization);
+        const bevers = await TestGroups.defaultGroup('Bevers')(organization);
+        const welpen = await TestGroups.defaultGroup('Welpen')(organization);
         takken.groupIds.push(bevers.id, welpen.id);
 
-        const leiding = await TestGroups.defaultGroup("Leiding")(organization);
+        const leiding = await TestGroups.defaultGroup('Leiding')(organization);
         vrijwilligers.groupIds.push(leiding.id);
 
         organizationPeriod.settings.rootCategory?.categoryIds.push(

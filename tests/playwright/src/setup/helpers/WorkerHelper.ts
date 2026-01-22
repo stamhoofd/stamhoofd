@@ -1,10 +1,10 @@
-import { WorkerInfo } from "@playwright/test";
-import { TestUtils } from "@stamhoofd/test-utils";
-import { WorkerData } from "../../helpers/worker/WorkerData";
-import { ApiService } from "./ApiService";
-import { CaddyConfigHelper } from "./CaddyConfigHelper";
-import { FrontendProjectName, FrontendService } from "./FrontendService";
-import { ServiceProcess } from "./ServiceHelper";
+import { WorkerInfo } from '@playwright/test';
+import { TestUtils } from '@stamhoofd/test-utils';
+import { WorkerData } from '../../helpers/worker/WorkerData';
+import { ApiService } from './ApiService';
+import { CaddyConfigHelper } from './CaddyConfigHelper';
+import { FrontendProjectName, FrontendService } from './FrontendService';
+import { ServiceProcess } from './ServiceHelper';
 
 class WorkerHelperInstance {
     private _isInitialized = false;
@@ -29,14 +29,14 @@ class WorkerHelperInstance {
 
         // start frontend services
         const frontendServiceNames: FrontendProjectName[] = [
-            "dashboard",
-            "registration",
-            "webshop",
+            'dashboard',
+            'registration',
+            'webshop',
         ];
 
         const frontendProcesses: ServiceProcess[] = [];
 
-        for(const name of frontendServiceNames) {
+        for (const name of frontendServiceNames) {
             const service = new FrontendService(name, workerId);
             const process = await service.start();
             frontendProcesses.push(process);
@@ -52,13 +52,13 @@ class WorkerHelperInstance {
         await apiProcess.wait();
         console.log(`API ready for worker ${workerId}.`);
 
-        await Promise.all(frontendProcesses.map((p) => p.wait()));
+        await Promise.all(frontendProcesses.map(p => p.wait()));
         console.log(`Frontend processes ready for worker ${workerId}.`);
 
         return {
             teardown: async () => {
                 // kill processes
-                await Promise.all(allProcesses.map((p) => p.kill?.()));
+                await Promise.all(allProcesses.map(p => p.kill?.()));
             },
         };
     }
@@ -111,7 +111,7 @@ class WorkerHelperInstance {
         };
 
         for (const key in config) {
-            TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment])
+            TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment]);
         }
     }
 
@@ -120,24 +120,22 @@ class WorkerHelperInstance {
      */
     loadEnvironment() {
         if (this._isInitialized) {
-            console.log('Environment already loaded')
+            console.log('Environment already loaded');
             return;
         }
 
         this._isInitialized = true;
 
         if (!WorkerData.isInWorkerProcess) {
-            throw new Error('Loading env not possible: not in a worker process')
+            throw new Error('Loading env not possible: not in a worker process');
         }
 
         if (WorkerData.isInWorkerProcess) {
             // set environment variables
-            console.log('Loading environment')
+            console.log('Loading environment');
             this.overrideDefaultEvironment();
             // EmailMocker.infect();
-            console.log('Environment has been loaded')
-
-            
+            console.log('Environment has been loaded');
         }
     }
 }

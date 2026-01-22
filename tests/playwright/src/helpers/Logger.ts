@@ -2,15 +2,15 @@ import pino from 'pino';
 import { WorkerData } from './worker/WorkerData';
 
 const loggerBase = pino(
-  {
-    level: process.env.LOG_LEVEL ?? 'debug',
-    timestamp: pino.stdTimeFunctions.isoTime,
-    base: { pid: process.pid },
-  },
-  pino.destination({
-    dest: 'playwright.log',
-    sync: false, // async = faster, safe for Playwright
-  })
+    {
+        level: process.env.LOG_LEVEL ?? 'debug',
+        timestamp: pino.stdTimeFunctions.isoTime,
+        base: { pid: process.pid },
+    },
+    pino.destination({
+        dest: 'playwright.log',
+        sync: false, // async = faster, safe for Playwright
+    }),
 );
 
 /**
@@ -20,8 +20,8 @@ const loggerBase = pino(
  */
 export class Logger {
     private static workerLogger = loggerBase.child({
-        worker: WorkerData.id
-    })
+        worker: WorkerData.id,
+    });
 
     static info(text: string) {
         this.workerLogger.info(text);

@@ -3,8 +3,8 @@ import {
     MemberFactory,
     Organization,
     RegistrationFactory,
-} from "@stamhoofd/models";
-import { GroupPrice } from "@stamhoofd/structures";
+} from '@stamhoofd/models';
+import { GroupPrice } from '@stamhoofd/structures';
 
 export class TestMembers {
     static async defaultMember({

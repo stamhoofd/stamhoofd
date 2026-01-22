@@ -1,7 +1,7 @@
-import { User } from "@stamhoofd/models";
-import { CaddyConfigHelper } from "../../setup/helpers/CaddyConfigHelper";
-import { DatabaseHelper } from "../../setup/helpers/DatabaseHelper";
-import { UserConfigurator } from "./UserConfigurator";
+import { User } from '@stamhoofd/models';
+import { CaddyConfigHelper } from '../../setup/helpers/CaddyConfigHelper';
+import { DatabaseHelper } from '../../setup/helpers/DatabaseHelper';
+import { UserConfigurator } from './UserConfigurator';
 
 export type StamhoofdUrls = {
     readonly api: string;
@@ -40,7 +40,7 @@ class WorkerDataInstance {
 
     get user() {
         if (this._user === null) {
-            throw new Error("User is not set");
+            throw new Error('User is not set');
         }
         return this._user;
     }
@@ -48,7 +48,7 @@ class WorkerDataInstance {
     get databaseHelper() {
         if (!this._databaseHelper) {
             if (!WorkerData.id) {
-                throw new Error("Worker id is not set");
+                throw new Error('Worker id is not set');
             }
             this._databaseHelper = new DatabaseHelper(WorkerData.id);
         }
@@ -64,18 +64,18 @@ class WorkerDataInstance {
 
         if (workerId === undefined) {
             return {
-                api: "",
-                dashboard: "",
-                webshop: "",
-                registration: "",
+                api: '',
+                dashboard: '',
+                webshop: '',
+                registration: '',
             };
         }
 
         return {
-            api: CaddyConfigHelper.getUrl("api", workerId),
-            dashboard: CaddyConfigHelper.getUrl("dashboard", workerId),
-            webshop: CaddyConfigHelper.getUrl("webshop", workerId),
-            registration: CaddyConfigHelper.getUrl("registration", workerId),
+            api: CaddyConfigHelper.getUrl('api', workerId),
+            dashboard: CaddyConfigHelper.getUrl('dashboard', workerId),
+            webshop: CaddyConfigHelper.getUrl('webshop', workerId),
+            registration: CaddyConfigHelper.getUrl('registration', workerId),
         };
     }
 
@@ -86,13 +86,13 @@ class WorkerDataInstance {
      */
     async _initLoginState({ user }: { user: User }) {
         if (this._user !== null) {
-            throw new Error("User is already set");
+            throw new Error('User is already set');
         }
         this._user = user;
 
         const userCopy = await User.getByID(user.id);
         if (!userCopy) {
-            throw new Error("User not found");
+            throw new Error('User not found');
         }
         this._initialUser = userCopy;
     }
@@ -102,7 +102,7 @@ class WorkerDataInstance {
             // restore user
             const initialUser = this._initialUser;
             if (!initialUser) {
-                throw new Error("Initial user is not set");
+                throw new Error('Initial user is not set');
             }
             await initialUser.save();
             this._user = initialUser;

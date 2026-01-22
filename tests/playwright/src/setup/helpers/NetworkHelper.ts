@@ -1,7 +1,4 @@
-
-
 export class NetworkHelper {
-
     /**
      * Try to fetch the url until it is reachable
      * @param url url to fetch
@@ -11,7 +8,6 @@ export class NetworkHelper {
         { timeoutMs = 60000, intervalMs = 250 } = {},
     ): Promise<void> {
         const start = Date.now();
-        
 
         while (true) {
             try {
@@ -19,10 +15,11 @@ export class NetworkHelper {
                 if (res.status === 200) {
                     return;
                 }
-            } catch (error: any) {
+            }
+            catch (error: any) {
                 console.log('Failed to waitForUrl: ', url);
-                console.error("name:", error.name);      // e.g., TypeError
-                console.error("message:", error.message);
+                console.error('name:', error.name); // e.g., TypeError
+                console.error('message:', error.message);
                 console.error('cause: ', error.cause);
                 // ignore connection errors
             }
@@ -31,7 +28,7 @@ export class NetworkHelper {
                 throw new Error(`Timed out waiting for ${url} to be reachable`);
             }
 
-            await new Promise((r) => setTimeout(r, intervalMs));
+            await new Promise(r => setTimeout(r, intervalMs));
         }
     }
 }

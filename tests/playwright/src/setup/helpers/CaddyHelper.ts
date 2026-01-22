@@ -1,33 +1,33 @@
-import { exec as execCallback } from "node:child_process";
-import { promisify } from "node:util";
-import { CaddyConfigHelper } from "./CaddyConfigHelper";
-import { ProcessInfo } from "./ProcessInfo";
-import { STChildProcess } from "./STChildProcess";
+import { exec as execCallback } from 'node:child_process';
+import { promisify } from 'node:util';
+import { CaddyConfigHelper } from './CaddyConfigHelper';
+import { ProcessInfo } from './ProcessInfo';
+import { STChildProcess } from './STChildProcess';
 
 const exec = promisify(execCallback);
 
 export class CaddyHelper {
-    private cadyUrl = "http://localhost:2019";
-    private serverName = "stamhoofd";
+    private cadyUrl = 'http://localhost:2019';
+    private serverName = 'stamhoofd';
 
     async isRunning() {
         const result = await exec(
             'pgrep -x caddy > /dev/null && echo "true" || echo "false"',
         );
-        return result.stdout.trim() === "true";
+        return result.stdout.trim() === 'true';
     }
 
     async configure() {
         // post the initial config
-        console.log("Start posting caddy config...");
+        console.log('Start posting caddy config...');
         await this.postConfig(CaddyConfigHelper.createDefault());
-        console.log("Done posting caddy config.");
+        console.log('Done posting caddy config.');
     }
 
     async start() {
         // Run caddy
-        const childProcess = new STChildProcess("caddy", [
-            "run",
+        const childProcess = new STChildProcess('caddy', [
+            'run',
         ]);
 
         ProcessInfo.flagCaddyStarted();
@@ -40,15 +40,15 @@ export class CaddyHelper {
                     return;
                 }
                 const line = data.toString();
-                console.log("[Caddy]", line);
+                console.log('[Caddy]', line);
 
                 // Detect successful startup
-                if (line.includes("admin endpoint started")) {
+                if (line.includes('admin endpoint started')) {
                     isStarted = true;
                     resolve();
 
                     // Remove listeners
-                    childProcess.offData(onData)
+                    childProcess.offData(onData);
                 }
             };
 
@@ -60,17 +60,19 @@ export class CaddyHelper {
     async stop() {
         // Make sure to kill any running caddy processes
         try {
-            const cmd = "brew services stop caddy";
+            const cmd = 'brew services stop caddy';
             await exec(cmd);
-        } catch (error) {
+        }
+        catch (error) {
             // ignore
         }
 
         // Make sure to kill any running caddy processes
         try {
-            const cmd = "caddy stop";
+            const cmd = 'caddy stop';
             await exec(cmd);
-        } catch (error) {
+        }
+        catch (error) {
             // ignore
         }
     }
@@ -82,7 +84,8 @@ export class CaddyHelper {
             await exec(
                 `curl -v -X PUT ${url} -d '${JSON.stringify(route)}' -H "Content-Type: application/json"`,
             );
-        } catch (error) {
+        }
+        catch (error) {
             console.error(`Failed to put route at index ${index}. Url: ${url}`);
             throw error;
         }
@@ -92,8 +95,8 @@ export class CaddyHelper {
         const url = `${this.cadyUrl}/load`;
 
         const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(caddyConfig),
         });
 
@@ -112,7 +115,8 @@ export class CaddyHelper {
             await exec(
                 `curl -v POST ${url} -d '${JSON.stringify(policySubjects)}' -H "Content-Type: application/json"`,
             );
-        } catch (error) {
+        }
+        catch (error) {
             console.error(`Failed to post policySubjects. Url: ${url}`);
             throw error;
         }
@@ -145,13 +149,13 @@ export class CaddyHelper {
 
     async deleteRoutesWhere(predicate: (route: { group?: string }) => boolean) {
         const routes = await this.getRoutes();
-        const routesToKeep = routes.filter((r) => !predicate(r));
+        const routesToKeep = routes.filter(r => !predicate(r));
 
         const url = `${this.cadyUrl}/config/apps/http/servers/${this.serverName}/routes`;
 
         const res = await fetch(url, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(routesToKeep),
         });
 
@@ -165,13 +169,13 @@ export class CaddyHelper {
 
     async deletePolicySubjectsWhere(predicate: (subject: string) => boolean) {
         const subjects = await this.getPolicySubjects();
-        const subjectsToKeep = subjects.filter((s) => !predicate(s));
+        const subjectsToKeep = subjects.filter(s => !predicate(s));
 
         const url = `${this.cadyUrl}/config/apps/tls/automation/policies/0/subjects`;
 
         const res = await fetch(url, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(subjectsToKeep),
         });
 

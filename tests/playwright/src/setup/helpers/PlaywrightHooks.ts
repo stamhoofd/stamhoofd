@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { TestHooks } from "@stamhoofd/test-utils";
+import { TestHooks } from '@stamhoofd/test-utils';
 
 export class PlaywrightHooks implements TestHooks {
     beforeAll(callback: () => Promise<any> | any, timeout?: number) {

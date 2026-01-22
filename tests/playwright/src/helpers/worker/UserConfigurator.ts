@@ -1,8 +1,8 @@
-import { Organization, User } from "@stamhoofd/models";
+import { Organization, User } from '@stamhoofd/models';
 import {
     Permissions,
-    UserPermissions
-} from "@stamhoofd/structures";
+    UserPermissions,
+} from '@stamhoofd/structures';
 
 /**
  * Helper class with methods to configure the state of the user.

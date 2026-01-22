@@ -1,8 +1,8 @@
-import type { Page } from "@playwright/test";
-import { Group, Organization } from "@stamhoofd/models";
-import { DashboardPage } from "./DashboardPage";
-import { GroupOverviewPage } from "./GroupOverviewPage";
-import { MemberPortalPage } from "./MemberPortalPage";
+import type { Page } from '@playwright/test';
+import { Group, Organization } from '@stamhoofd/models';
+import { DashboardPage } from './DashboardPage';
+import { GroupOverviewPage } from './GroupOverviewPage';
+import { MemberPortalPage } from './MemberPortalPage';
 
 /**
  * Helper to easily select a page.

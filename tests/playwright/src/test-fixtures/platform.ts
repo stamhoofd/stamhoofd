@@ -1,20 +1,19 @@
 // First import base
-import { test as base } from "./base";
+import { test as base } from './base';
 
 // All other imports perferably later
-import { Token, UserFactory } from "@stamhoofd/models";
-import { Token as TokenStruct, Version } from "@stamhoofd/structures";
-import { TestUtils } from "@stamhoofd/test-utils";
+import { Token, UserFactory } from '@stamhoofd/models';
+import { Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { TestUtils } from '@stamhoofd/test-utils';
 import fs from 'fs';
-import path from "path";
-import { WorkerData } from "../helpers";
+import path from 'path';
+import { WorkerData } from '../helpers';
 
 /**
  * Base test fixture (unauthenticated)
  */
 export const test = base.extend<
-    {
-    },
+    object,
     {
         workerStorageState: string;
     }
@@ -24,7 +23,6 @@ export const test = base.extend<
     // Authenticate once per worker with a worker-scoped fixture.
     workerStorageState: [
         async ({ browser }, use) => {
-
             // todo: this is authentication for userMode platform
             // maybe create new fixture for userMode organization?
 
@@ -40,9 +38,9 @@ export const test = base.extend<
             }
 
             const email = `email-${WorkerData.id}@domain.com`;
-            const password = "testAbc123456";
+            const password = 'testAbc123456';
 
-            TestUtils.setPermanentEnvironment("userMode", "platform");
+            TestUtils.setPermanentEnvironment('userMode', 'platform');
 
             // const organization = await new OrganizationFactory({
             //     name: `Vereniging${WorkerData.id}`,
@@ -73,7 +71,7 @@ export const test = base.extend<
                             origin: WorkerData.urls.dashboard,
                             localStorage: [
                                 {
-                                    name: "token-platform",
+                                    name: 'token-platform',
                                     value: tokenString,
                                 },
                             ],
@@ -87,6 +85,6 @@ export const test = base.extend<
             await context.close();
             await use(fileName);
         },
-        { scope: "worker" },
+        { scope: 'worker' },
     ],
 });

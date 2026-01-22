@@ -1,5 +1,5 @@
-import { Group, GroupFactory, Organization, RegistrationPeriod } from "@stamhoofd/models";
-import { TranslatedString } from "@stamhoofd/structures";
+import { Group, GroupFactory, Organization, RegistrationPeriod } from '@stamhoofd/models';
+import { TranslatedString } from '@stamhoofd/structures';
 
 export type GroupCreator = (organization: Organization) => Promise<Group>;
 

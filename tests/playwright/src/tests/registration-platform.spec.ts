@@ -1,8 +1,8 @@
 // test should always be imported first
-import { test } from "../test-fixtures/platform";
+import { test } from '../test-fixtures/platform';
 
 // other imports
-import { UitpasMocker } from "@stamhoofd/backend/tests/helpers";
+import { UitpasMocker } from '@stamhoofd/backend/tests/helpers';
 import {
     GroupFactory,
     Member,
@@ -14,7 +14,7 @@ import {
     RegistrationPeriod,
     RegistrationPeriodFactory,
     User,
-} from "@stamhoofd/models";
+} from '@stamhoofd/models';
 import {
     MemberDetails,
     PermissionLevel,
@@ -22,23 +22,23 @@ import {
     PropertyFilter,
     UitpasNumberDetails,
     UitpasSocialTariff,
-    UitpasSocialTariffStatus
-} from "@stamhoofd/structures";
-import { MemberPortalRegistrationFlow } from "../flows/MemberPortalRegistrationFlow";
+    UitpasSocialTariffStatus,
+} from '@stamhoofd/structures';
+import { MemberPortalRegistrationFlow } from '../flows/MemberPortalRegistrationFlow';
 import {
     TableHelper,
     TestMembers,
     TestOrganizations,
     WorkerData,
     YouthOrganization1Context,
-} from "../helpers";
+} from '../helpers';
 
 /**
  * todo:
  * - add tests to check if uitpas step is not shown anymore if not necessary
  */
 
-test.describe("Registration", () => {
+test.describe('Registration', () => {
     const uitpasMocker = new UitpasMocker();
 
     test.beforeEach(() => {
@@ -52,7 +52,7 @@ test.describe("Registration", () => {
     /**
      * Register a member as a platform user without permissions in the member portal.
      */
-    test.describe("member portal", () => {
+    test.describe('member portal', () => {
         let organization: Organization;
         let period: RegistrationPeriod;
         let user: User;
@@ -67,21 +67,21 @@ test.describe("Registration", () => {
             organizationName = organization.name;
 
             organization.meta.recordsConfiguration.financialSupport = true;
-            organization.meta.recordsConfiguration.uitpasNumber =
-                new PropertyFilter(null, null);
+            organization.meta.recordsConfiguration.uitpasNumber
+                = new PropertyFilter(null, null);
             await organization.save();
 
             period = await new RegistrationPeriodFactory({
-                startDate: new Date("2000-01-01"),
-                endDate: new Date("2001-01-01"),
+                startDate: new Date('2000-01-01'),
+                endDate: new Date('2001-01-01'),
                 organization,
             }).create();
 
             organization.periodId = period.id;
             await organization.save();
 
-            organizationPeriod =
-                await new OrganizationRegistrationPeriodFactory({
+            organizationPeriod
+                = await new OrganizationRegistrationPeriodFactory({
                     period,
                     organization,
                 }).create();
@@ -94,14 +94,14 @@ test.describe("Registration", () => {
         /**
          * Test registration with uitpas number.
          */
-        test.describe("Uitpas number", () => {
+        test.describe('Uitpas number', () => {
             test.afterEach(async () => {
                 await WorkerData.databaseHelper.clearRegistrations();
                 await WorkerData.databaseHelper.clearMembers();
                 await WorkerData.databaseHelper.clearGroups();
             });
 
-            test("Happy flow - active number", async ({ page, pages }) => {
+            test('Happy flow - active number', async ({ page, pages }) => {
                 // create group with reduced price
                 const group = await new GroupFactory({
                     organization,
@@ -113,8 +113,8 @@ test.describe("Registration", () => {
                 group.settings.registrationEndDate = new Date(
                     (
                         group.settings.registrationEndDate ?? new Date()
-                    ).getTime() +
-                        60 * 1000,
+                    ).getTime()
+                    + 60 * 1000,
                 );
 
                 await group.save();
@@ -127,8 +127,8 @@ test.describe("Registration", () => {
 
                 // create member for user
                 await new MemberFactory({
-                    firstName: "John",
-                    lastName: "Doe",
+                    firstName: 'John',
+                    lastName: 'Doe',
                     user,
                 }).create();
 
@@ -140,22 +140,22 @@ test.describe("Registration", () => {
                 await registrationFlow.startRegister({
                     organizationName,
                     groupName: group.settings.name.toString(),
-                    memberName: "John Doe",
+                    memberName: 'John Doe',
                 });
 
                 await registrationFlow.continueMemberStep();
 
-                await registrationFlow.completeUitpasStep("0900011354819");
+                await registrationFlow.completeUitpasStep('0900011354819');
 
-                await test.step("should go to checkout", async () => {
+                await test.step('should go to checkout', async () => {
                     await registrationFlow.goToCheckout();
                 });
 
-                await test.step("should apply reduced price", async () => {
-                    await registrationFlow.expectTotalText("Totaal: € 40");
+                await test.step('should apply reduced price', async () => {
+                    await registrationFlow.expectTotalText('Totaal: € 40');
                 });
 
-                await test.step("should show success", async () => {
+                await test.step('should show success', async () => {
                     await registrationFlow.confirmPaymentMethod();
                     await registrationFlow.expectSuccessView();
                 });
@@ -167,15 +167,15 @@ test.describe("Registration", () => {
                 expectMessage: string;
             }[] = [
                 {
-                    number: "0900000095902",
+                    number: '0900000095902',
                     status: UitpasSocialTariffStatus.None,
-                    expectMessage: "Dit UiTPAS-nummer heeft geen kansentarief.",
+                    expectMessage: 'Dit UiTPAS-nummer heeft geen kansentarief.',
                 },
                 {
-                    number: "0900000031618",
+                    number: '0900000031618',
                     status: UitpasSocialTariffStatus.Expired,
                     expectMessage:
-                        "Het kansentarief van dit UiTPAS-nummer is verlopen.",
+                        'Het kansentarief van dit UiTPAS-nummer is verlopen.',
                 },
             ];
 
@@ -195,8 +195,8 @@ test.describe("Registration", () => {
                     group.settings.registrationEndDate = new Date(
                         (
                             group.settings.registrationEndDate ?? new Date()
-                        ).getTime() +
-                            60 * 1000,
+                        ).getTime()
+                        + 60 * 1000,
                     );
 
                     await group.save();
@@ -209,8 +209,8 @@ test.describe("Registration", () => {
 
                     // create member for user
                     await new MemberFactory({
-                        firstName: "John",
-                        lastName: "Doe",
+                        firstName: 'John',
+                        lastName: 'Doe',
                         user,
                     }).create();
 
@@ -222,40 +222,40 @@ test.describe("Registration", () => {
                     await registrationFlow.startRegister({
                         organizationName,
                         groupName: group.settings.name.toString(),
-                        memberName: "John Doe",
+                        memberName: 'John Doe',
                     });
 
                     await registrationFlow.continueMemberStep();
 
-                    await test.step("should show uitpas step", async () => {
+                    await test.step('should show uitpas step', async () => {
                         await registrationFlow.completeUitpasStep(
                             scenario.number,
-                            scenario.expectMessage
+                            scenario.expectMessage,
                         );
                     });
 
-                    await test.step("Should show requires financial support step next with checkbox that is not disabled", async () => {
+                    await test.step('Should show requires financial support step next with checkbox that is not disabled', async () => {
                         await registrationFlow.expectFinancialSupportStep();
                         await registrationFlow.expectFinancialSupportNotToBeDisabled();
                         await registrationFlow.continueFinancialSupportStep();
                     });
 
-                    await test.step("Should go to checkout", async () => {
+                    await test.step('Should go to checkout', async () => {
                         await registrationFlow.goToCheckout();
                     });
 
-                    await test.step("should not apply reduced price", async () => {
-                        await registrationFlow.expectTotalText("Totaal: € 50");
+                    await test.step('should not apply reduced price', async () => {
+                        await registrationFlow.expectTotalText('Totaal: € 50');
                     });
 
-                    await test.step("should show success", async () => {
+                    await test.step('should show success', async () => {
                         await registrationFlow.confirmPaymentMethod();
                         await registrationFlow.expectSuccessView();
                     });
                 });
             });
 
-            test("Should show uitpas step if status changed from active to not active", async ({
+            test('Should show uitpas step if status changed from active to not active', async ({
                 page,
                 pages,
             }) => {
@@ -270,8 +270,8 @@ test.describe("Registration", () => {
                 group.settings.registrationEndDate = new Date(
                     (
                         group.settings.registrationEndDate ?? new Date()
-                    ).getTime() +
-                        60 * 1000,
+                    ).getTime()
+                    + 60 * 1000,
                 );
 
                 await group.save();
@@ -284,24 +284,24 @@ test.describe("Registration", () => {
 
                 // create member for user
                 const member = await new MemberFactory({
-                    firstName: "John",
-                    lastName: "Doe",
+                    firstName: 'John',
+                    lastName: 'Doe',
                     user,
                     details: MemberDetails.create({
                         uitpasNumberDetails: UitpasNumberDetails.create({
                             // expired
-                            uitpasNumber: "0900000031618",
+                            uitpasNumber: '0900000031618',
                             socialTariff: UitpasSocialTariff.create({
                                 // but active in the past
                                 status: UitpasSocialTariffStatus.Active,
                                 endDate: new Date(2020, 1, 1),
                             }),
-                        })
-                    })
+                        }),
+                    }),
                 }).create();
 
                 // should already be reviewed
-                member.details.reviewTimes.markReviewed("uitpasNumber");
+                member.details.reviewTimes.markReviewed('uitpasNumber');
                 await member.save();
 
                 const registrationFlow = new MemberPortalRegistrationFlow({
@@ -312,7 +312,7 @@ test.describe("Registration", () => {
                 await registrationFlow.startRegister({
                     organizationName,
                     groupName: group.settings.name.toString(),
-                    memberName: "John Doe",
+                    memberName: 'John Doe',
                 });
 
                 await registrationFlow.continueMemberStep();
@@ -321,7 +321,7 @@ test.describe("Registration", () => {
             });
 
             // todo: duplicate test?
-            test("Should show the uitpas step if the social tariff was active but not anymore", async ({
+            test('Should show the uitpas step if the social tariff was active but not anymore', async ({
                 page,
                 pages,
             }) => {
@@ -336,8 +336,8 @@ test.describe("Registration", () => {
                 group.settings.registrationEndDate = new Date(
                     (
                         group.settings.registrationEndDate ?? new Date()
-                    ).getTime() +
-                        60 * 1000,
+                    ).getTime()
+                    + 60 * 1000,
                 );
 
                 await group.save();
@@ -350,13 +350,13 @@ test.describe("Registration", () => {
 
                 // create member for user
                 const member = await new MemberFactory({
-                    firstName: "John",
-                    lastName: "Doe",
+                    firstName: 'John',
+                    lastName: 'Doe',
                     user,
                     details: MemberDetails.create({
                         uitpasNumberDetails: UitpasNumberDetails.create({
                             // expired
-                            uitpasNumber: "0900000031618",
+                            uitpasNumber: '0900000031618',
                             socialTariff: UitpasSocialTariff.create({
                                 // but active in the past
                                 status: UitpasSocialTariffStatus.Active,
@@ -367,7 +367,7 @@ test.describe("Registration", () => {
                     }),
                 }).create();
 
-                member.details.reviewTimes.markReviewed("uitpasNumber");
+                member.details.reviewTimes.markReviewed('uitpasNumber');
                 await member.save();
 
                 const registrationFlow = new MemberPortalRegistrationFlow({
@@ -378,7 +378,7 @@ test.describe("Registration", () => {
                 await registrationFlow.startRegister({
                     organizationName,
                     groupName: group.settings.name.toString(),
-                    memberName: "John Doe",
+                    memberName: 'John Doe',
                 });
 
                 await registrationFlow.continueMemberStep();
@@ -391,17 +391,17 @@ test.describe("Registration", () => {
                 getMember: () => Promise<Member>;
             }[] = [
                 {
-                    title: "social tariff endDate is in the past",
+                    title: 'social tariff endDate is in the past',
                     getMember: () =>
                         new MemberFactory({
-                            firstName: "John",
-                            lastName: "Doe",
+                            firstName: 'John',
+                            lastName: 'Doe',
                             user,
                             details: MemberDetails.create({
                                 uitpasNumberDetails: UitpasNumberDetails.create(
                                     {
                                         // active
-                                        uitpasNumber: "0900011354819",
+                                        uitpasNumber: '0900011354819',
                                         socialTariff: UitpasSocialTariff.create(
                                             {
                                                 status: UitpasSocialTariffStatus.Active,
@@ -415,17 +415,17 @@ test.describe("Registration", () => {
                         }).create(),
                 },
                 {
-                    title: "social tariff is unknown",
+                    title: 'social tariff is unknown',
                     getMember: () =>
                         new MemberFactory({
-                            firstName: "John",
-                            lastName: "Doe",
+                            firstName: 'John',
+                            lastName: 'Doe',
                             user,
                             details: MemberDetails.create({
                                 uitpasNumberDetails: UitpasNumberDetails.create(
                                     {
                                         // active
-                                        uitpasNumber: "0900011354819",
+                                        uitpasNumber: '0900011354819',
                                         socialTariff: UitpasSocialTariff.create(
                                             {
                                                 status: UitpasSocialTariffStatus.Unknown,
@@ -456,8 +456,8 @@ test.describe("Registration", () => {
                     group.settings.registrationEndDate = new Date(
                         (
                             group.settings.registrationEndDate ?? new Date()
-                        ).getTime() +
-                            60 * 1000,
+                        ).getTime()
+                        + 60 * 1000,
                     );
 
                     await group.save();
@@ -484,14 +484,14 @@ test.describe("Registration", () => {
 
                     await registrationFlow.continueMemberStep();
 
-                    const uitpasStep =
-                        await registrationFlow.completeUitpasStep();
+                    const uitpasStep
+                        = await registrationFlow.completeUitpasStep();
 
                     // todo: error message should state that the api is down
                     await test
                         .expect(uitpasStep)
                         .toContainText(
-                            "Er is een fout opgetreden bij het ophalen van je UiTPAS",
+                            'Er is een fout opgetreden bij het ophalen van je UiTPAS',
                         );
                 });
             });
@@ -502,15 +502,15 @@ test.describe("Registration", () => {
                 errorMessage: string;
             }[] = [
                 {
-                    title: "does not exist",
-                    number: "0900011354999",
+                    title: 'does not exist',
+                    number: '0900011354999',
                     errorMessage:
-                        "Het UiTPAS-nummer dat je invulde konden we niet terugvinden",
+                        'Het UiTPAS-nummer dat je invulde konden we niet terugvinden',
                 },
                 {
-                    title: "is invalid",
-                    number: "99",
-                    errorMessage: "Ongeldige UiTPAS-nummer",
+                    title: 'is invalid',
+                    number: '99',
+                    errorMessage: 'Ongeldige UiTPAS-nummer',
                 },
             ];
 
@@ -530,8 +530,8 @@ test.describe("Registration", () => {
                     group.settings.registrationEndDate = new Date(
                         (
                             group.settings.registrationEndDate ?? new Date()
-                        ).getTime() +
-                            60 * 1000,
+                        ).getTime()
+                        + 60 * 1000,
                     );
 
                     await group.save();
@@ -544,8 +544,8 @@ test.describe("Registration", () => {
 
                     // create member
                     const member = await new MemberFactory({
-                        firstName: "John",
-                        lastName: "Doe",
+                        firstName: 'John',
+                        lastName: 'Doe',
                         user,
                     }).create();
 
@@ -563,8 +563,8 @@ test.describe("Registration", () => {
                     await registrationFlow.continueMemberStep();
 
                     // number that does not exist
-                    const uitpasStep =
-                        await registrationFlow.completeUitpasStep(
+                    const uitpasStep
+                        = await registrationFlow.completeUitpasStep(
                             scenario.number,
                         );
 
@@ -581,7 +581,7 @@ test.describe("Registration", () => {
              * Expect:
              * The member should be able to register because the socialTariff was checked recently.
              */
-            test("Should be able to register if uitpas number was updated recently and uitpas api is unavailable on register", async ({
+            test('Should be able to register if uitpas number was updated recently and uitpas api is unavailable on register', async ({
                 page,
                 pages,
             }) => {
@@ -596,8 +596,8 @@ test.describe("Registration", () => {
                 group.settings.registrationEndDate = new Date(
                     (
                         group.settings.registrationEndDate ?? new Date()
-                    ).getTime() +
-                        60 * 1000,
+                    ).getTime()
+                    + 60 * 1000,
                 );
 
                 await group.save();
@@ -610,8 +610,8 @@ test.describe("Registration", () => {
 
                 // create member for user
                 await new MemberFactory({
-                    firstName: "John",
-                    lastName: "Doe",
+                    firstName: 'John',
+                    lastName: 'Doe',
                     user,
                 }).create();
 
@@ -623,13 +623,13 @@ test.describe("Registration", () => {
                 await registrationFlow.startRegister({
                     organizationName,
                     groupName: group.settings.name.toString(),
-                    memberName: "John Doe",
+                    memberName: 'John Doe',
                 });
 
                 await registrationFlow.continueMemberStep();
 
                 // fill in active uitpas number
-                await registrationFlow.completeUitpasStep("0900011354819");
+                await registrationFlow.completeUitpasStep('0900011354819');
 
                 await registrationFlow.goToCheckout();
 
@@ -648,11 +648,11 @@ test.describe("Registration", () => {
     /**
      * Register members as an organization admin.
      */
-    test.describe("admin", () => {
+    test.describe('admin', () => {
         /**
          * Test registration with uitpas number.
          */
-        test.describe("Uitpas number", () => {
+        test.describe('Uitpas number', () => {
             let organizationContext: YouthOrganization1Context;
             let organization: Organization;
 
@@ -661,13 +661,13 @@ test.describe("Registration", () => {
                     name: `Vereniging${WorkerData.id}`,
                 }).create();
 
-                organizationContext =
-                    await TestOrganizations.youthOrganization1(organization);
+                organizationContext
+                    = await TestOrganizations.youthOrganization1(organization);
 
                 // configure uitpas number and financial support
                 organization.meta.recordsConfiguration.financialSupport = true;
-                organization.meta.recordsConfiguration.uitpasNumber =
-                    new PropertyFilter(null, null);
+                organization.meta.recordsConfiguration.uitpasNumber
+                    = new PropertyFilter(null, null);
                 await organization.save();
 
                 await WorkerData.configureUser
@@ -689,7 +689,7 @@ test.describe("Registration", () => {
                 await WorkerData.databaseHelper.clearMembers();
             });
 
-            test("Happy flow - register multiple members with uitpas should succeed", async ({
+            test('Happy flow - register multiple members with uitpas should succeed', async ({
                 pages,
                 page,
             }) => {
@@ -702,10 +702,10 @@ test.describe("Registration", () => {
                     group,
                 });
 
-                member1.details.uitpasNumberDetails =
-                    UitpasNumberDetails.create({
+                member1.details.uitpasNumberDetails
+                    = UitpasNumberDetails.create({
                         // active
-                        uitpasNumber: "0900011354819",
+                        uitpasNumber: '0900011354819',
                         socialTariff: UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.Active,
                             endDate: new Date(2050, 1, 1),
@@ -718,10 +718,10 @@ test.describe("Registration", () => {
                     group,
                 });
 
-                member2.details.uitpasNumberDetails =
-                    UitpasNumberDetails.create({
+                member2.details.uitpasNumberDetails
+                    = UitpasNumberDetails.create({
                         // expired
-                        uitpasNumber: "0900000031618",
+                        uitpasNumber: '0900000031618',
                         socialTariff: UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.Expired,
                             endDate: new Date(2001, 1, 1),
@@ -734,10 +734,10 @@ test.describe("Registration", () => {
                     group,
                 });
 
-                member3.details.uitpasNumberDetails =
-                    UitpasNumberDetails.create({
+                member3.details.uitpasNumberDetails
+                    = UitpasNumberDetails.create({
                         // none
-                        uitpasNumber: "0900000095902",
+                        uitpasNumber: '0900000095902',
                         socialTariff: UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.None,
                         }),
@@ -768,19 +768,19 @@ test.describe("Registration", () => {
 
                 // register members for other group
                 await table.clickActions([
-                    "Inschrijven voor",
-                    "Takken",
-                    "Welpen",
+                    'Inschrijven voor',
+                    'Takken',
+                    'Welpen',
                 ]);
 
                 // go to checkout
-                await page.getByTestId("save-button").click();
+                await page.getByTestId('save-button').click();
             });
 
             // todo: add test if uitpas api is unavailable
 
             // todo: add test if uitpas number was valid but not anymore on register
-            test("Test - todo add description", async ({ page, pages }) => {
+            test('Test - todo add description', async ({ page, pages }) => {
                 const group = organizationContext.groups.bevers;
 
                 // init members
@@ -790,10 +790,10 @@ test.describe("Registration", () => {
                     group,
                 });
 
-                member1.details.uitpasNumberDetails =
-                    UitpasNumberDetails.create({
+                member1.details.uitpasNumberDetails
+                    = UitpasNumberDetails.create({
                         // active
-                        uitpasNumber: "0900011354819",
+                        uitpasNumber: '0900011354819',
                         socialTariff: UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.Active,
                             endDate: new Date(2050, 1, 1),
@@ -806,10 +806,10 @@ test.describe("Registration", () => {
                     group,
                 });
 
-                member2.details.uitpasNumberDetails =
-                    UitpasNumberDetails.create({
+                member2.details.uitpasNumberDetails
+                    = UitpasNumberDetails.create({
                         // expired
-                        uitpasNumber: "0900000031618",
+                        uitpasNumber: '0900000031618',
                         // but before it was active (but never updated)
                         socialTariff: UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.Active,
@@ -823,10 +823,10 @@ test.describe("Registration", () => {
                     group,
                 });
 
-                member3.details.uitpasNumberDetails =
-                    UitpasNumberDetails.create({
+                member3.details.uitpasNumberDetails
+                    = UitpasNumberDetails.create({
                         // none
-                        uitpasNumber: "0900000095902",
+                        uitpasNumber: '0900000095902',
                         socialTariff: UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.None,
                         }),
@@ -857,47 +857,47 @@ test.describe("Registration", () => {
 
                 // register members for other group
                 await table.clickActions([
-                    "Inschrijven voor",
-                    "Takken",
-                    "Welpen",
+                    'Inschrijven voor',
+                    'Takken',
+                    'Welpen',
                 ]);
 
                 // check if correct price is shown
                 const testCases: { member: Member; expected: string }[] = [
                     {
                         member: member1,
-                        expected: "40",
+                        expected: '40',
                     },
                     // should be 50 because the social tariff expired
                     {
                         member: member2,
-                        expected: "50",
+                        expected: '50',
                     },
                     {
                         member: member3,
-                        expected: "50",
+                        expected: '50',
                     },
                     {
                         member: member4,
-                        expected: "50",
+                        expected: '50',
                     },
                 ];
 
                 for (const { member, expected } of testCases) {
                     // get price paragraph
                     const price = page
-                        .getByTestId("register-item-row")
+                        .getByTestId('register-item-row')
                         .filter({
                             hasText: member.details.name,
                         })
-                        .getByTestId("register-item-price");
+                        .getByTestId('register-item-price');
 
                     // check if price is correct
                     await test.expect(price).toContainText(expected);
                 }
 
                 // go to checkout
-                await page.getByTestId("save-button").click();
+                await page.getByTestId('save-button').click();
             });
         });
     });

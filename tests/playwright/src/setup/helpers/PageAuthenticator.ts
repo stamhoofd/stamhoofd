@@ -1,4 +1,4 @@
-import { BrowserContext, Page } from "@playwright/test";
+import { BrowserContext, Page } from '@playwright/test';
 
 export class PageAuthenticator {
     private _page: Page;
@@ -16,7 +16,7 @@ export class PageAuthenticator {
         const browser = this._page.context().browser();
 
         if (!browser) {
-            throw new Error("No browser found");
+            throw new Error('No browser found');
         }
 
         const context = await browser.newContext({
@@ -33,7 +33,7 @@ export class PageAuthenticator {
     }
 
     async teardown() {
-        if(this._context) {
+        if (this._context) {
             await this._context.close();
         }
     }
