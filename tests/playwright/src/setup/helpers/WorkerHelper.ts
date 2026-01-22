@@ -106,6 +106,8 @@ class WorkerHelperInstance {
             translationNamespace: 'stamhoofd',
             platformName: 'stamhoofd',
             DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
+            UITPAS_API_CLIENT_SECRET: 'sk_test_test',
+            UITPAS_API_CLIENT_ID: 'sk_test_test',
         };
 
         for (const key in config) {
