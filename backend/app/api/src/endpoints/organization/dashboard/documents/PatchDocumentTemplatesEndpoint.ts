@@ -53,15 +53,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
             template.year = put.year;
             template.organizationId = organization.id;
 
-            if (await this.doesYearAlreadyHaveFiscalDocument(template)) {
-                throw new SimpleError({
-                    code: 'double_fiscal_document',
-                    field: 'year',
-                    message: 'This year already has a fiscal document',
-                    human: $t('475f5f96-86bf-4124-a005-9904aaf72b37'),
-
-                });
-            }
+            await this.throwErrorIfAddMoreThanOneFiscalDocumentInYear(template);
 
             await template.save();
 
@@ -113,13 +105,8 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                 template.year = patch.year;
             }
 
-            if (shouldCheckIfAlreadyHasFiscalDocument && await this.doesYearAlreadyHaveFiscalDocument(template)) {
-                throw new SimpleError({
-                    code: 'double_fiscal_document',
-                    field: 'year',
-                    message: 'This year already has a fiscal document',
-                    human: $t('475f5f96-86bf-4124-a005-9904aaf72b37'),
-                });
+            if (shouldCheckIfAlreadyHasFiscalDocument) {
+                await this.throwErrorIfAddMoreThanOneFiscalDocumentInYear(template);
             }
 
             await template.save();
@@ -149,7 +136,11 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         );
     }
 
-    private async doesYearAlreadyHaveFiscalDocument(template: DocumentTemplate) {
+    private async throwErrorIfAddMoreThanOneFiscalDocumentInYear(template: DocumentTemplate): Promise<void> {
+        if (template.privateSettings.templateDefinition.type !== 'fiscal') {
+            return;
+        }
+
         let query = SQL.select().from(SQL.table(DocumentTemplate.table))
             .where(SQL.column('organizationId'), template.organizationId)
             .where(SQL.column('year'), template.year)
@@ -162,6 +153,13 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
 
         const result = await query.limit(1).count();
 
-        return result > 0;
+        if (result > 0) {
+            throw new SimpleError({
+                code: 'double_fiscal_document',
+                field: 'year',
+                message: 'This year already has a fiscal document',
+                human: $t('475f5f96-86bf-4124-a005-9904aaf72b37'),
+            });
+        }
     }
 }
