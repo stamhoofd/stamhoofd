@@ -11,7 +11,7 @@
             {{ $t('Kansentarief aan het ophalen...') }}
         </p>
 
-        <p v-else-if="socialTariffStatus !== null" :class="socialTariffStatus.class">
+        <p v-else-if="socialTariffStatus !== null" :class="socialTariffStatus.class" data-testid="social-tariff-status">
             {{ socialTariffStatus.text }}
         </p>
     </template>

@@ -16,6 +16,7 @@
             type="text"
             :disabled="disabled"
             v-bind="$attrs"
+            data-testid="uitpas-input"
             @change="validate(false)"
             @input="onTyping"
         >

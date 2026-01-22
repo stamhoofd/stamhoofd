@@ -1,8 +1,7 @@
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
-import { PermissionLevel, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { PermissionLevel } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import { MemberStepView } from '../..';
-import { CenteredMessage } from '../../../overlays/CenteredMessage';
 import { NavigationActions } from '../../../types/NavigationActions';
 import EditMemberUitpasBox from '../../components/edit/EditMemberUitpasBox.vue';
 import { EditMemberStep, MemberStepManager } from '../MemberStepManager';
@@ -57,19 +56,6 @@ export class MemberUitpasStep implements EditMemberStep {
             saveText: $t(`c72a9ab2-98a0-4176-ba9b-86fe009fa755`),
             markReviewed: ['uitpasNumber'],
             saveHandler: async (navigate: NavigationActions) => {
-                const uitpasNumberDetails = manager.member.patchedMember.details.uitpasNumberDetails;
-
-                if (uitpasNumberDetails && !uitpasNumberDetails.socialTariff.isActive) {
-                    const status = uitpasNumberDetails.socialTariff.status;
-
-                    const text = status === UitpasSocialTariffStatus.Expired ? $t('Het kansentarief van dit UiTPAS-nummer is verlopen.') : $t('Dit UiTPAS-nummer heeft geen kansentarief.');
-
-                    const isConfirm = await CenteredMessage.confirm(`${text} ${$t('Wil je toch verder gaan?')}`, $t('Ja'));
-
-                    if (!isConfirm) {
-                        return;
-                    }
-                }
                 await manager.saveHandler(this, navigate);
             },
         });

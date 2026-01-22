@@ -72,11 +72,16 @@ export class MemberPortalRegistrationFlow {
         return uitpasInput;
     }
 
-    async completeUitpasStep(uitpasNumber?: string) {
+    async completeUitpasStep(uitpasNumber?: string, expectSocialTariffStatus?: string) {
         const uitpasInput = await this.expectUitpasInput();
 
         if (uitpasNumber) {
             await uitpasInput.fill(uitpasNumber);
+        }
+
+        if(expectSocialTariffStatus) {
+            const statusDiv = this.page.getByTestId("social-tariff-status");
+            await test.expect(statusDiv).toContainText(expectSocialTariffStatus);
         }
 
         // click next
@@ -85,23 +90,6 @@ export class MemberPortalRegistrationFlow {
             .filter({ has: uitpasInput });
         await uitpasStep.getByTestId("save-button").click();
         return uitpasStep;
-    }
-
-    async expectCenteredMessage(text: string) {
-        const centeredMessage = this.page.getByTestId("centered-message");
-
-        await test.expect(centeredMessage).toContainText(text);
-    }
-
-    async acceptCenteredMessage() {
-        const centeredMessage = this.page.getByTestId("centered-message");
-        const confirmButton = centeredMessage
-            .getByTestId("centered-message-button")
-            .filter({
-                hasText: "Ja",
-            });
-
-        await confirmButton.click();
     }
 
     async goToCheckout() {

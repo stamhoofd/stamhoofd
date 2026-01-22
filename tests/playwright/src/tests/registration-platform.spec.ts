@@ -34,8 +34,8 @@ import {
 } from "../helpers";
 
 /**
- * todo: update tests
- * - add tests to check if centered message only is shown if social tariff changed from active to not active
+ * todo:
+ * - add tests to check if uitpas step is not shown anymore if not necessary
  */
 
 test.describe("Registration", () => {
@@ -230,14 +230,8 @@ test.describe("Registration", () => {
                     await test.step("should show uitpas step", async () => {
                         await registrationFlow.completeUitpasStep(
                             scenario.number,
+                            scenario.expectMessage
                         );
-                    });
-
-                    await test.step("Should show confirm inactive social tariff message", async () => {
-                        await registrationFlow.expectCenteredMessage(
-                            scenario.expectMessage,
-                        );
-                        await registrationFlow.acceptCenteredMessage();
                     });
 
                     await test.step("Should show requires financial support step next with checkbox that is not disabled", async () => {
@@ -323,16 +317,7 @@ test.describe("Registration", () => {
 
                 await registrationFlow.continueMemberStep();
 
-                await test.step("should show uitpas step", async () => {
-                    // do not change uitpas number
-                    await registrationFlow.completeUitpasStep();
-                });
-
-                await test.step("Should show message that social tariff is expired", async () => {
-                    await registrationFlow.expectCenteredMessage(
-                        "Het kansentarief van dit UiTPAS-nummer is verlopen."
-                    );
-                });
+                await registrationFlow.expectUitpasInput();
             });
 
             test("Should show the uitpas step if the social tariff was active but not anymore", async ({

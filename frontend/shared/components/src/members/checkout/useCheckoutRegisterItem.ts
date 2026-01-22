@@ -494,6 +494,16 @@ function useForceUpdateUitpasSocialTarrifForMemberRegistration() {
             return details.uitpasNumberDetails.socialTariff.shouldUpdate;
         });
 
-        await platformFamilyManager.forceUpdateUitpasSocialTarrif(filteredMembers);
+        try {
+            await platformFamilyManager.forceUpdateUitpasSocialTarrif(filteredMembers);
+        }
+        catch (error) {
+            // force review
+            filteredMembers.forEach((m) => {
+                m.member.details.reviewTimes.removeReview('uitpasNumber');
+            });
+            // an endpoint fail should not stop the checkout (for example if the uitpas api is down)
+            console.error(error);
+        }
     };
 }

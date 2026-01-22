@@ -48,39 +48,19 @@ export async function updateMemberDetailsUitpasNumberForPatch(details: MemberDet
     }
 
     const wasActive = details.uitpasNumberDetails.socialTariff.isActive;
+    const isUpdated = await updateMemberDetailsUitpasNumber(details);
 
-    // An update is forced if the number did not change
-    const isForcedUpdate = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
-
-    try {
-        const isUpdated = await updateMemberDetailsUitpasNumber(details);
-
-        // force a review the social tariff changed from active to not active (and the number did not change)
-        if (isForcedUpdate && wasActive && isUpdated) {
-            const isActiveNow = details.uitpasNumberDetails.socialTariff.isActive;
-            if (!isActiveNow) {
-                // force a review
-                details.reviewTimes.removeReview('uitpasNumber');
-            }
-        }
-
-        return isUpdated;
+    // force a review if the social tariff changed from active to not active (and the number did not change)
+    if (isUpdated
+        // is uitpas equal
+        && previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber
+        // did change from active to not active
+        && wasActive && !details.uitpasNumberDetails.socialTariff.isActive) {
+        // force a review
+        details.reviewTimes.removeReview('uitpasNumber');
     }
-    catch (e) {
-        /**
-        * Should not throw an error if the number did not change
-        * to prevent a forced update of the social tariff from failing if the
-        * uitpas api is down.
-        */
-        if (isForcedUpdate) {
-            // force a review
-            details.reviewTimes.removeReview('uitpasNumber');
 
-            return false;
-        }
-
-        throw e;
-    }
+    return isUpdated;
 }
 
 export function uitpasApiResponseToSocialTariff(response: UitpasNumberSuccessfulResponse): UitpasSocialTariff {

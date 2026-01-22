@@ -108,7 +108,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
                 member.details.patchOrPut(struct.details);
 
-                if (struct.details.uitpasNumberDetails) {
+                if (struct.details.uitpasNumberDetails || struct.details.reviewTimes?.times.some(t => t.name === 'uitpasNumber')) {
                     await updateMemberDetailsUitpasNumberForPatch(member.details, previousUitpasNumber);
                 }
 

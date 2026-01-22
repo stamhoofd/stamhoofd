@@ -49,6 +49,7 @@ export class UitpasSocialTariff extends AutoEncoder {
             return true;
         }
 
+        // todo -> change to 1 day
         // should check if updated more than 30 minutes ago
         const halfHourInMs = 1800000;
         return now.getTime() - this.updatedAt.getTime() > halfHourInMs;

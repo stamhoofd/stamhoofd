@@ -3,7 +3,7 @@ import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPat
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, SetupStepType, UitpasNumberDetails } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -174,7 +174,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
                 member.details.patchOrPut(patch.details);
 
-                if (patch.details.uitpasNumberDetails) {
+                if (patch.details.uitpasNumberDetails || patch.details.reviewTimes?.times.some(t => t.name === 'uitpasNumber')) {
                     await updateMemberDetailsUitpasNumberForPatch(member.details, previousUitpasNumber);
                 }
 
