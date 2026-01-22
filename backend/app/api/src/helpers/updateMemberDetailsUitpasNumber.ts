@@ -1,4 +1,5 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
+import { Member } from '@stamhoofd/models';
 import { MemberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { UitpasService } from '../services/uitpas/UitpasService.js';
 import { UitpasNumberSuccessfulResponse } from '../services/uitpas/checkUitpasNumbers.js';
@@ -42,13 +43,36 @@ export async function updateMemberDetailsUitpasNumber(details: MemberDetails): P
  * @param details
  * @returns whether the social tariff was updated
  */
-export async function updateMemberDetailsUitpasNumberForPatch(details: MemberDetails, previousUitpasNumber: string | null): Promise<boolean> {
+export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, details: MemberDetails, previousUitpasNumber: string | null): Promise<boolean> {
     if (!details.uitpasNumberDetails) {
         return false;
     }
 
     const wasActive = details.uitpasNumberDetails.socialTariff.isActive;
-    const isUpdated = await updateMemberDetailsUitpasNumber(details);
+
+    let isUpdated = false;
+
+    try {
+        isUpdated = await updateMemberDetailsUitpasNumber(details);
+    }
+    catch (error: any) {
+        // set the status
+        const isUitpasEqual = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
+
+        if (isUitpasEqual && isSimpleError(error) && error.code === 'unknown_uitpas_number') {
+            // set the status of the social tariff to unknown if the uitpas number did not change and the number is unknown
+            const member = await Member.getByID(memberId);
+            if (member && member.details.uitpasNumberDetails) {
+                member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
+                    status: UitpasSocialTariffStatus.Unknown,
+                });
+
+                await member.save();
+            }
+        }
+
+        throw error;
+    }
 
     // force a review if the social tariff changed from active to not active (and the number did not change)
     if (isUpdated

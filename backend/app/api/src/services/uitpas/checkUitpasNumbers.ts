@@ -54,6 +54,13 @@ function isUitpasNumberErrorResponse(
         );
 }
 
+function hasType<T>(json: unknown): json is T & { type: string } {
+    if (json && typeof json['type'] === 'string') {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Throws if any uitpasNumber is invalid.
  * @param access_token
@@ -128,6 +135,24 @@ export async function checkUitpasNumber(access_token: string, uitpasNumber: stri
 
         if (isUitpasNumberErrorResponse(json)) {
             endUserMessage = json.endUserMessage ? json.endUserMessage.nl : '';
+
+            // handle specific errors
+            if (hasType(json)) {
+                // all possible error types:
+                // https://docs.publiq.be/docs/uitpas/errors
+
+                const type = json.type;
+                if (type.endsWith('invalid-uitpas-number')) {
+                    return {
+                        error: new SimpleError({
+                            statusCode: 404,
+                            code: 'unknown_uitpas_number',
+                            message: `Unknown UiTPAS number: ${uitpasNumber}`,
+                            human: endUserMessage,
+                        }),
+                    };
+                }
+            }
         }
 
         return {
