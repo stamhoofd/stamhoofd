@@ -57,7 +57,7 @@
             Mollie (betaalprovider)
         </Checkbox>
         <p class="style-description-small">
-            Hou er rekening mee dat de tarieven van Mollie hoger liggen dan degene die Stamhoofd bij Stripe aanbiedt. <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/transactiekosten/'" class="inline-link" target="_blank">Meer info</a>
+            Lees de gids door voor meer informatie hoe je aansluit via Mollie: <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/mollie/'" class="inline-link" target="_blank">Mollie</a>
         </p>
 
         <Checkbox :checked="getFeatureFlag('webshop-advanced-settings')" @change="setFeatureFlag('webshop-advanced-settings', !!$event)">

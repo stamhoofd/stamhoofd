@@ -4,7 +4,7 @@
             Betaalaccounts
         </h1>
 
-        <p>Koppel betaalaccounts via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Stripe</a> of <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">Meer info</a>.</p>
+        <p>Koppel betaalaccounts via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Stripe</a>, <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/mollie/'" target="_blank">Mollie</a> of <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">Meer info</a>.</p>
         
         <LoadingView v-if="loadingStripeAccounts" />
         <STErrorsDefault :error-box="errorBox" />
@@ -139,10 +139,10 @@
                 Stripe
             </aside>
             <h2 v-if="isBelgium">
-                Bancontact, kredietkaart en iDEAL  <span class="style-tag">Snelst + Meest gebruikt</span>
+                Bancontact of kredietkaart via Stripe  <span class="style-tag">Snelst + Meest gebruikt</span>
             </h2>
             <h2 v-else>
-                iDEAL en kredietkaart
+                iDEAL en kredietkaart via Stripe <span class="style-tag">Snelst + Meest gebruikt</span>
             </h2>
             <p v-if="isBelgium">
                 Via Stripe kan je snel en eenvoudig online betalingen accepteren via Bancontact, kredietkaart, iDEAL en meer. <a href="https://www.stamhoofd.be/docs/stripe/" target="_blank" class="inline-link">Meer info</a>. Als je alles zorgvuldig invult en eerst de documentatie naleest, kan je dit in minder dan een half uur activeren.
@@ -168,7 +168,97 @@
                 </a>
             </div>
         </div>
-        
+    
+        <template v-if="!enableBuckaroo">
+            <hr>
+            <aside class="style-title-prefix">
+                Mollie
+            </aside>
+            <h2 v-if="isBelgium">
+                Bancontact of kredietkaart via Mollie  <span class="style-tag">Europees</span> <span class="style-tag discount">Soms goedkoper</span>
+            </h2>
+            <h2 v-else>
+                iDEAL en kredietkaart via Mollie <span class="style-tag">Europees</span> <span class="style-tag discount">Soms goedkoper</span>
+            </h2>
+
+            <template v-if="!organization.privateMeta.mollieOnboarding">
+                <p class="style-description">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
+                </p>
+
+                <p class="info-box">
+                    Lees eerst onze gids voor je begint! Neem je tijd om alles netjes en volledig in te vullen. Maak je fouten, dan riskeer je dat de aansluiting veel langer duurt. 
+                </p>
+
+                <div class="style-button-bar">
+                    <button type="button" class="button primary" @click="linkMollie">
+                        <span>Aansluiten bij Mollie</span>
+                    </button>
+
+                    <a class="button secundary" :href="'https://'+$t('shared.domains.marketing')+'/docs/mollie/'" target="_blank">
+                        <span class="icon book" />
+                        <span>Lees gids</span>
+                    </a>
+                </div>
+            </template>
+            <template v-else>
+                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
+                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
+                </p>
+                <p v-else class="warning-box">
+                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
+                </p>
+                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
+                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
+                </p>
+
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="style-description">
+                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
+                </p>
+                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="style-description">
+                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
+                </p>
+                
+                <div class="style-button-bar">
+                    <LoadingButton :loading="loadingMollie">
+                        <button type="button" class="button secundary" :disabled="loadingMollie" @click="mollieDashboard">
+                            <span class="icon external" />
+                            <span>Ga naar het Mollie dashboard</span>
+                        </button>
+                    </LoadingButton>
+
+                    <a class="button text" :href="'https://'+$t('shared.domains.marketing')+'/docs/mollie/'" target="_blank">
+                        <span class="icon book" />
+                        <span>Mollie Documentatie</span>
+                    </a>
+                </div>
+
+                <p class="style-description">
+                    <button class="button text" type="button" @click="disconnectMollie">
+                        <span class="icon trash" />
+                        <span>Account loskoppelen van Stamhoofd</span>
+                    </button>
+                </p>
+
+                <STInputBox v-if="mollieProfiles.length > 1" title="Standaardprofiel" error-fields="mollieProfile" :error-box="errorBox" class="max">
+                    <STList>
+                        <STListItem v-for="profile in mollieProfiles" :key="profile.id" element-name="label" :selectable="true">
+                            <Radio slot="left" v-model="selectedMollieProfile" :value="profile.id" />
+                            <h3 class="style-title-list">
+                                {{ profile.name }}
+                            </h3>
+                            <p class="style-description-small">
+                                {{ profile.website }}
+                            </p>
+
+                            <span v-if="profile.status === 'verified'" slot="right" v-tooltip="'Geverifieerd'" class="icon success green" />
+                            <span v-else-if="profile.status === 'unverified'" slot="right" v-tooltip="'Wacht op verificatie'" class="icon clock gray" />
+                            <span v-else slot="right" v-tooltip="'Geblokkeerd'" class="icon canceled red" />
+                        </STListItem>
+                    </STList>
+                </STInputBox>
+            </template>
+        </template>
 
         <template v-if="payconiqApiKey || forcePayconiq">
             <hr>
@@ -199,83 +289,6 @@
             <p v-if="payconiqAccount && payconiqAccount.name" class="style-description-small">
                 Op naam van {{ payconiqAccount.name }}, {{ payconiqAccount.iban }}
             </p>
-        </template>
-
-        <template v-if="!enableBuckaroo && (organization.privateMeta.mollieOnboarding || forceMollie)">
-            <hr>
-            <aside class="style-title-prefix">
-                Mollie
-            </aside>
-            <h2>
-                Online betalingen via Mollie
-            </h2>
-
-            <template v-if="!organization.privateMeta.mollieOnboarding">
-                <p class="style-description">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.description') }}
-                </p>
-                <p v-if="isBelgium" class="info-box">
-                    Voor Mollie heb je een VZW nodig. Een feitelijke vereniging is niet voldoende (wordt niet geaccepteerd)
-                </p>
-
-                <p class="style-description">
-                    <button class="button text" type="button" @click="linkMollie">
-                        <span class="icon link" />
-                        <span>Mollie koppelen</span>
-                    </button>
-                </p>
-            </template>
-            <template v-else>
-                <p v-if="organization.privateMeta.mollieOnboarding.canReceivePayments" class="success-box">
-                    {{ $t('dashboard.settings.paymentMethods.mollie.activeDescription') }}
-                </p>
-                <p v-else class="warning-box">
-                    Je kan nog geen betalingen verwerken omdat je eerst meer gegevens moet aanvullen.
-                </p>
-                <p v-if="!organization.privateMeta.mollieOnboarding.canReceiveSettlements" class="warning-box">
-                    Als je uitbetalingen wil ontvangen moet je eerst jouw gegevens verder aanvullen
-                </p>
-
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'NeedsData'" class="style-description">
-                    Mollie is gekoppeld, maar je moet nog enkele gegevens aanvullen.
-                </p>
-                <p v-if="organization.privateMeta.mollieOnboarding.status == 'InReview'" class="style-description">
-                    Jouw gegevens worden nagekeken door onze betaalpartner (Mollie).
-                </p>
-
-                <p class="style-description">
-                    <LoadingButton :loading="loadingMollie">
-                        <button class="button text" type="button" @click="mollieDashboard">
-                            <span class="icon external" />
-                            <span>Ga naar het Mollie dashboard</span>
-                        </button>
-                    </loadingbutton>
-                </p>
-                <p class="style-description">
-                    <button class="button text" type="button" @click="disconnectMollie">
-                        <span class="icon trash" />
-                        <span>Account loskoppelen van Stamhoofd</span>
-                    </button>
-                </p>
-
-                <STInputBox v-if="mollieProfiles.length > 1" title="Standaardprofiel" error-fields="mollieProfile" :error-box="errorBox" class="max">
-                    <STList>
-                        <STListItem v-for="profile in mollieProfiles" :key="profile.id" element-name="label" :selectable="true">
-                            <Radio slot="left" v-model="selectedMollieProfile" :value="profile.id" />
-                            <h3 class="style-title-list">
-                                {{ profile.name }}
-                            </h3>
-                            <p class="style-description-small">
-                                {{ profile.website }}
-                            </p>
-
-                            <span v-if="profile.status === 'verified'" slot="right" v-tooltip="'Geverifieerd'" class="icon success green" />
-                            <span v-else-if="profile.status === 'unverified'" slot="right" v-tooltip="'Wacht op verificatie'" class="icon clock gray" />
-                            <span v-else slot="right" v-tooltip="'Geblokkeerd'" class="icon canceled red" />
-                        </STListItem>
-                    </STList>
-                </STInputBox>
-            </template>
         </template>
 
         <template v-if="isStamhoofd">
@@ -617,8 +630,22 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
         return await CenteredMessage.confirm("Ben je zeker dat je wilt sluiten zonder op te slaan?", "Niet opslaan")
     }
 
+    didReadMollie = false;
+
 
     async linkMollie() {
+        const time = new Date();
+        if (!await CenteredMessage.confirm('Let op met wat je invult', 'Ja, gelezen', 'Je moet soms documenten uploaden in Mollie die enkel in onze documentatie te vinden zijn. Zonder een nieuw account kunnen ook hogere transactiekosten gelden.\n\nLees daarom eerst de documentatie: fouten kunnen leiden tot afkeuring van je aansluiting en een aanzienlijk langere doorlooptijd.')) {
+            return;
+        }
+        const end = new Date();
+
+        if (!this.didReadMollie && end.getTime() - time.getTime() < 5_000) {
+            new Toast('Koppel Mollie niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen. We doen dit voor je eigen bestwil.', 'error red').setHide(10_000).show()
+            return;
+        }
+        this.didReadMollie = true;
+
         // Start oauth flow
         const client_id = STAMHOOFD.MOLLIE_CLIENT_ID
         if (!client_id) {
@@ -797,10 +824,22 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
             .addCloseButton()
             .show()
     }
+    didReadStripe = false;
 
     async createStripeAccount() {
-        if (this.isBelgium && (!await CenteredMessage.confirm('Let op met wat je invult', 'Ja, gelezen', '- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.'))) {
-            return;
+        if (this.isBelgium) {
+            const time = new Date()
+            if ((!await CenteredMessage.confirm('Let op met wat je invult', 'Ja, gelezen', '- Selecteer de juiste bedrijfsvorm in Stripe\n- Heb je geen VZW maar een feitelijke vereniging? Selecteer dan \'Vereniging ZONDER rechtspersoonlijkheid\'. Je kan dit later niet meer wijzigen.\n- Vul alles correct en volledig in zoals gevraagd, neem je tijd\n- Vul zeker een websiteadres in.\n- Je vindt templates en info in de documentatie, ga eerst daarheen als je twijfelt.\n- Upload enkel documenten die in de lijst staan van toegestane documenten.'))) {
+                return;
+            }
+
+            const end = new Date();
+
+            if (!this.didReadStripe && end.getTime() - time.getTime() < 5_000) {
+                new Toast('Koppel Stripe niet als je gehaast bent. Je hebt in minder dan 5 seconden doorgeklikt, je had nooit alle waarschuwingen kunnen lezen. We doen dit voor je eigen bestwil.', 'error red').setHide(10_000).show()
+                return;
+            }
+            this.didReadStripe = true;
         }
 
         let tab: Window | null = null;

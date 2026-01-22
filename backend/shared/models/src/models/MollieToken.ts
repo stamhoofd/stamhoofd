@@ -274,7 +274,7 @@ export class MollieToken extends Model {
             this.knownTokens.set(organization.id, token)
 
             organization.privateMeta.mollieOnboarding = await token.getOnboardingStatus()
-            await token.setup(organization)
+            //await token.setup(organization)
 
             await organization.save()
             return token

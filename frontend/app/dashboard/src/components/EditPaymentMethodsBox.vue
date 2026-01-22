@@ -22,7 +22,6 @@
             </a>
         </p>
 
-
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(showPrices && getPaymentMethod(method) && getDescription(method))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                 <Checkbox slot="left" :checked="getPaymentMethod(method)" :disabled="!canEnablePaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
@@ -252,6 +251,10 @@ export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
 
             if (!this.hasMollieOrBuckaroo && !this.stripeAccountObject) {
                 this.stripeAccountId = this.stripeAccounts[0]?.id ?? null
+            } else {
+                if (this.stripeAccountId && this.stripeAccounts.length === 0) {
+                    this.stripeAccountId = null;
+                }
             }
 
             this.$nextTick(() => {
