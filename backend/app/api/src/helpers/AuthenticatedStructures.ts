@@ -1,12 +1,12 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, MemberPlatformMembership as MemberPlatformMembershipStruct, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { BalanceItemService } from '../services/BalanceItemService';
-import { Context } from './Context';
+import { BalanceItemService } from '../services/BalanceItemService.js';
+import { Context } from './Context.js';
 
 /**
  * Builds authenticated structures for the current user
@@ -52,6 +52,24 @@ export class AuthenticatedStructures {
             balanceItems,
             payingOrganizations,
         }, includeSettlements);
+    }
+
+    static async invoices(invoices: Invoice[]): Promise<InvoiceStruct[]> {
+        if (invoices.length === 0) {
+            return [];
+        }
+
+        const { invoicedBalanceItems } = await Invoice.loadBalanceItems(invoices);
+
+        return invoices.map((invoice) => {
+            const items = invoicedBalanceItems.filter(i => i.invoiceId === invoice.id);
+            return InvoiceStruct.create({
+                ...invoice,
+                items: items.map((item) => {
+                    return InvoicedBalanceItem.create(item);
+                }),
+            });
+        });
     }
 
     static async group(group: Group) {
