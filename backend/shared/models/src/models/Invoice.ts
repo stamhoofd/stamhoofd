@@ -103,6 +103,29 @@ export class Invoice extends QueryableModel {
     @column({ type: 'boolean' })
     didSendPeppol = false;
 
+    /**
+     * Official invoice date. Set when a number has been generated.
+     */
+    @column({
+        type: 'datetime',
+        nullable: true,
+        beforeSave(old?: any) {
+            if (old !== undefined || !this.number) {
+                return old;
+            }
+            const date = new Date();
+            date.setMilliseconds(0);
+            return date;
+        },
+    })
+    invoicedAt: Date | null = null;
+
+    /**
+     * If null, invoicedAt is used
+     */
+    @column({ type: 'datetime', nullable: true })
+    dueAt: Date | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {
@@ -185,5 +208,14 @@ export class Invoice extends QueryableModel {
             }
             throw e;
         }
+    }
+
+    static async loadBalanceItems(invoices: Invoice[]) {
+        if (invoices.length === 0) {
+            return { invoicedBalanceItems: [] };
+        }
+        // Load all the related models from the database so we can build the structures
+        const invoicedBalanceItems = await InvoicedBalanceItem.select().where('invoiceId', invoices.map(i => i.id)).fetch();
+        return { invoicedBalanceItems };
     }
 }
