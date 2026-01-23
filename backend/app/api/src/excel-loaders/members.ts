@@ -160,6 +160,32 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
             };
         },
     },
+    {
+        id: 'organization',
+        name: $t(`afd7843d-f355-445b-a158-ddacf469a5b1`),
+        width: 40,
+        getValue: (member: PlatformMember) => {
+            const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
+            const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+            return {
+                value: str,
+            };
+        },
+    },
+    {
+        id: 'uri',
+        name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
+        width: 30,
+        getValue: (member: PlatformMember) => {
+            const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
+            const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
+
+            return {
+                value: str,
+            };
+        },
+    },
 
     ...XlsxTransformerColumnHelper.creatColumnsForParents(),
 
@@ -216,32 +242,6 @@ const sheet: XlsxTransformerSheet<PlatformMember, PlatformMember> = {
     name: $t(`fb35c140-e936-4e91-aa92-ef4dfc59fb51`),
     columns: [
         ...baseMemberColumns,
-        {
-            id: 'organization',
-            name: $t(`afd7843d-f355-445b-a158-ddacf469a5b1`),
-            width: 40,
-            getValue: (member: PlatformMember) => {
-                const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-                const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
-
-                return {
-                    value: str,
-                };
-            },
-        },
-        {
-            id: 'uri',
-            name: $t(`27cfaf26-6b88-4ebc-a50a-627a9f0f9e64`),
-            width: 30,
-            getValue: (member: PlatformMember) => {
-                const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-                const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || Context.i18n.$t('1a16a32a-7ee4-455d-af3d-6073821efa8f');
-
-                return {
-                    value: str,
-                };
-            },
-        },
         {
             id: 'group',
             name: $t(`0c230001-c3be-4a8e-8eab-23dc3fd96e52`),
