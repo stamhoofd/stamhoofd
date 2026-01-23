@@ -34,7 +34,7 @@ import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
-const title = 'Bestellingen';
+const title = $t('Bestellingen');
 const configurationId = 'orders';
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
