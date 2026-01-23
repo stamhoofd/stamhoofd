@@ -11,7 +11,7 @@ import { VATExcemptReason } from '@stamhoofd/structures';
  * and also how it was invoiced (since the unit price, quantity etc can't always match the balance items invoiced price due to rounding)
  */
 export class InvoicedBalanceItem extends QueryableModel {
-    static table = 'balance_item_invoices';
+    static table = 'invoiced_balance_items';
 
     @column({
         primary: true, type: 'string', beforeSave(value) {
