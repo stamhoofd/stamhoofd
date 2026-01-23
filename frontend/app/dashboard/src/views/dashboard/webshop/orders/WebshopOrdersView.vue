@@ -62,7 +62,7 @@ const actions = computed(() => {
 
     return [
         new InMemoryTableAction({
-            name: 'Openen',
+            name: $t('Openen'),
             icon: 'eye',
             priority: 0,
             groupIndex: 1,
