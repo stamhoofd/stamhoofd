@@ -25,6 +25,7 @@ export enum EmailRecipientFilterType {
     MemberUnverified = 'MemberUnverified',
     Orders = 'Orders',
     ReceivableBalances = 'ReceivableBalances',
+    Documents = 'Documents',
 }
 
 export function getExampleRecipient(type: EmailRecipientFilterType | null = null) {
@@ -86,7 +87,7 @@ export class EmailRecipientFilter extends AutoEncoder {
 
     get canShowInMemberPortal() {
         for (const filter of this.filters) {
-            if (filter.type === EmailRecipientFilterType.Members || filter.type === EmailRecipientFilterType.MemberParents || filter.type === EmailRecipientFilterType.MemberUnverified || filter.type === EmailRecipientFilterType.RegistrationMembers || filter.type === EmailRecipientFilterType.RegistrationParents || filter.type === EmailRecipientFilterType.RegistrationUnverified) {
+            if (filter.type === EmailRecipientFilterType.Members || filter.type === EmailRecipientFilterType.MemberParents || filter.type === EmailRecipientFilterType.MemberUnverified || filter.type === EmailRecipientFilterType.RegistrationMembers || filter.type === EmailRecipientFilterType.RegistrationParents || filter.type === EmailRecipientFilterType.RegistrationUnverified || filter.type === EmailRecipientFilterType.Documents) {
                 return true;
             }
         }
