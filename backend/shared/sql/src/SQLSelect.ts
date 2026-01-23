@@ -239,14 +239,14 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         return rows[0];
     }
 
-    async count(): Promise<number> {
+    async count(expression?: SQLExpression): Promise<number> {
         if (this._where && this._where.isAlways === false) {
             return 0;
         }
 
         this._columns = [
             new SQLSelectAs(
-                new SQLCount(),
+                new SQLCount(expression ?? null),
                 new SQLAlias('c'),
             ),
         ];
