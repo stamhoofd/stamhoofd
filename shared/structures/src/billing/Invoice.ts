@@ -1,10 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { File } from '../files/File.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 import { VATExcemptReason } from '../BalanceItem.js';
+import { PriceBreakdown } from '../PriceBreakdown.js';
 
 export class VATSubtotal extends AutoEncoder {
     /**
@@ -24,6 +25,20 @@ export class VATSubtotal extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     VAT: number = 0;
+}
+
+export enum InvoiceType {
+    Invoice = 'Invoice',
+    CreditNote = 'CreditNote',
+}
+
+export class InvoiceTypeHelper {
+    static getName(type: InvoiceType): string {
+        switch (type) {
+            case InvoiceType.Invoice: return $t('factuur');
+            case InvoiceType.CreditNote: return $t('creditnota');
+        }
+    }
 }
 
 export class Invoice extends AutoEncoder {
@@ -157,6 +172,18 @@ export class Invoice extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     didSendPeppol = false;
 
+    @field({ decoder: DateDecoder, nullable: true })
+    invoicedAt: Date | null = null;
+
+    @field({ decoder: DateDecoder, nullable: true })
+    dueAt: Date | null = null;
+
+    @field({ decoder: DateDecoder })
+    createdAt: Date = new Date();
+
+    @field({ decoder: DateDecoder })
+    updatedAt: Date = new Date();
+
     calculateVAT() {
         // For every VAT category, calculate the taxable amount and VAT amount
         const categories = new Map<string, VATSubtotal>();
@@ -196,5 +223,43 @@ export class Invoice extends AutoEncoder {
     addItem(item: InvoicedBalanceItem) {
         this.items.push(item);
         this.calculateVAT();
+    }
+
+    get type() {
+        if (this.totalWithVAT < 0) {
+            return InvoiceType.CreditNote;
+        }
+        return InvoiceType.Invoice;
+    }
+
+    get theme() {
+        if (this.type === InvoiceType.CreditNote) {
+            return 'theme-error';
+        }
+    }
+
+    get priceBreakdown(): PriceBreakdown {
+        return [
+            {
+                name: $t(`Totaal excl. BTW`),
+                price: this.totalWithoutVAT,
+            },
+            {
+                name: $t(`BTW`),
+                price: this.VATTotalAmount,
+            },
+            ...(this.balanceRoundingAmount !== 0
+                ? [
+                        {
+                            name: $t(`Afrondingscorrectie`),
+                            price: this.balanceRoundingAmount,
+                        },
+                    ]
+                : []),
+            {
+                name: $t(`Totaal incl. BTW`),
+                price: this.totalWithVAT,
+            },
+        ];
     }
 }

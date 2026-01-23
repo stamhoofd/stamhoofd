@@ -26,7 +26,7 @@
 
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Transfers)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/check-transfer.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/bank.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('bf002215-26cc-4f43-9bf7-3cca60d50a10') }}
@@ -39,7 +39,7 @@
                         </template>
                     </STListItem>
 
-                    <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Payments)">
+                    <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Payments)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/creditcards.svg">
                         </template>
@@ -69,6 +69,28 @@
                         </template>
                     </STListItem>
                 </STList>
+
+                <div v-if="$feature('vat') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" class="container">
+                    <hr>
+                    <h2>{{ $t('Facturen') }}</h2>
+
+                    <STList class="illustration-list">
+                        <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Invoices)">
+                            <template #left>
+                                <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('Alle facturen') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('Lijst met alle facturen die werden aangemaakt en verstuurd naar leden, deelnemers, organisaties en klanten.') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+                    </STList>
+                </div>
 
                 <div v-for="item of outstandingBalance.organizations" :key="item.organization.id" class="container">
                     <hr><h2>{{ $t('027d88ac-a3a4-4193-bc1b-8e671bbc6637', {organization: item.organization.name}) }}</h2>
@@ -129,11 +151,13 @@ import { ComponentOptions, ref, Ref } from 'vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
+import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
     Export = 'Export',
     Payments = 'Payments',
+    Invoices = 'Invoices',
     PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
 }
@@ -176,6 +200,14 @@ defineRoutes([
                     },
                 },
             };
+        },
+    },
+    {
+        name: Routes.Invoices,
+        url: 'facturen',
+        component: InvoicesTableView as ComponentOptions,
+        paramsToProps() {
+            return {};
         },
     },
     {

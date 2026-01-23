@@ -12,4 +12,7 @@ export * from './OrganizationPackagesStatus.js';
 export * from './STPendingInvoice.js';
 
 export * from './Invoice.js';
+// Alias
+export { Invoice as InvoiceStruct } from './Invoice.js';
+
 export * from './InvoicedBalanceItem.js';
