@@ -12,9 +12,10 @@ import {
     OrganizationRegistrationPeriodFactory,
     RegistrationPeriod,
     RegistrationPeriodFactory,
-    User
+    User,
 } from '@stamhoofd/models';
 import {
+    MemberDetails,
     PermissionLevel,
     Permissions,
     PropertyFilter,
@@ -398,6 +399,66 @@ test.describe('Registration', () => {
 
                 // await registration success to be shown
                 await registrationFlow.expectSuccessView();
+            });
+
+            test('Step should always be shown if status is unknown', async ({ page, pages }) => {
+                // create group with reduced price
+                const group = await new GroupFactory({
+                    organization,
+                    price: 500000,
+                    reducedPrice: 400000,
+                }).create();
+
+                // set longer registration end date (else an error is thrown )
+                group.settings.registrationEndDate = new Date(
+                    (
+                        group.settings.registrationEndDate ?? new Date()
+                    ).getTime()
+                    + 60 * 1000,
+                );
+
+                await group.save();
+
+                // add group to root category
+                organizationPeriod.settings.rootCategory?.groupIds.push(
+                    group.id,
+                );
+                await organizationPeriod.save();
+
+                // create member for user
+                const member = await new MemberFactory({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    user,
+                    details: MemberDetails.create({
+                        uitpasNumberDetails: UitpasNumberDetails.create({
+                            // active (but status is still unknown)
+                            uitpasNumber: '0900011354819',
+                            socialTariff: UitpasSocialTariff.create({
+                                status: UitpasSocialTariffStatus.Unknown,
+                            }),
+                        }) }),
+                }).create();
+
+                member.details.reviewTimes.markReviewed('uitpasNumber');
+                await member.save();
+
+                const registrationFlow = new MemberPortalRegistrationFlow({
+                    page,
+                    pages,
+                });
+
+                await registrationFlow.startRegister({
+                    organizationName,
+                    groupName: group.settings.name.toString(),
+                    memberName: 'John Doe',
+                });
+
+                await registrationFlow.continueMemberStep();
+
+                await test.step('should show uitpas step', async () => {
+                    await registrationFlow.expectUitpasInput();
+                });
             });
         });
     });

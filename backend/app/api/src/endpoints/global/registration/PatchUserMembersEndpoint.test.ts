@@ -1,7 +1,7 @@
 import { Database } from '@simonbackx/simple-database';
 import { PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
 import { Endpoint, Request } from '@simonbackx/simple-endpoints';
-import { GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
+import { GroupFactory, Member, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, PatchAnswers, PermissionLevel, RecordCategory, RecordSettings, RecordTextAnswer, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -444,8 +444,6 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
     describe('Uitpas number', () => {
         describe('PUT', () => {
-            // todo: test to check social tariff is updated correctly
-
             test('Should not set socialTariff from request', async () => {
                 initUitpasApi();
 
@@ -490,65 +488,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         });
 
         describe('PATCH', () => {
-            // todo: test to check social tariff is updated correctly
-
-            test('Should always update socialTariff if uitpasNumber changes', async () => {
-                throw new Error('Not implemented');
-            });
-
-            test('Should not set socialTariff from request', async () => {
-                initUitpasApi();
-
-                const organization = await new OrganizationFactory({ }).create();
-
-                const user = await new UserFactory({ }).create();
-
-                const token = await Token.createToken(user);
-
-                // create member
-                const member = await new MemberFactory({
-                    firstName,
-                    lastName,
-                    birthDay,
-                    generateData: false,
-                    // Give user access to this member
-                    user,
-                }).create();
-
-                // patch uitpas number
-                const arr: Body = new PatchableArray();
-
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        uitpasNumberDetails: UitpasNumberDetails.patch({
-                            uitpasNumber: '0900000095902',
-                            socialTariff: UitpasSocialTariff.create({
-                                status: UitpasSocialTariffStatus.Active,
-                                endDate: new Date(2050, 0, 1),
-                                // set in future to prevent update
-                                updatedAt: new Date(2040, 0, 1),
-                            }),
-                        }),
-                    }),
-                }));
-
-                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
-                request.headers.authorization = 'Bearer ' + token.accessToken;
-
-                const result = await testServer.test(endpoint, request);
-
-                expect(result.status).toBe(200);
-                expect(result.body.members.length).toBe(1);
-
-                const socialTariff = result.body.members[0].details.uitpasNumberDetails?.socialTariff;
-                expect(socialTariff).not.toBeNull();
-                expect(socialTariff?.status).not.toBe(UitpasSocialTariffStatus.Active);
-                expect(socialTariff?.endDate?.getTime()).not.toBe(new Date(2050, 0, 1).getTime());
-                expect(socialTariff?.updatedAt?.getTime()).not.toBe(new Date(2040, 0, 1).getTime());
-            });
-
-            test('Should not patch socialTariff from request', async () => {
+            test('Should update socialTariff if uitpasNumber changes', async () => {
                 initUitpasApi();
 
                 const organization = await new OrganizationFactory({ }).create();
@@ -567,9 +507,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     user,
                     details: MemberDetails.create({
                         uitpasNumberDetails: UitpasNumberDetails.create({
+                            // expired
+                            uitpasNumber: '0900000095902',
                             socialTariff: UitpasSocialTariff.create({
                                 status: UitpasSocialTariffStatus.None,
-                                updatedAt: new Date(2000, 0, 1),
+                                updatedAt: new Date(2030, 0, 1),
                             }),
                         }),
                     }),
@@ -582,11 +524,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     id: member.id,
                     details: MemberDetails.patch({
                         uitpasNumberDetails: UitpasNumberDetails.patch({
-                            socialTariff: UitpasSocialTariff.create({
-                                status: UitpasSocialTariffStatus.Active,
-                                endDate: new Date(2050, 0, 1),
-                                updatedAt: new Date(2040, 0, 1),
-                            }),
+                            // active
+                            uitpasNumber: '0900011354819',
                         }),
                     }),
                 }));
@@ -598,9 +537,563 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 expect(result.status).toBe(200);
                 expect(result.body.members.length).toBe(1);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.None);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt).toEqual(new Date(2000, 0, 1));
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeDate();
+            });
+
+            test('Should throw if invalid uitpas number', async () => {
+                initUitpasApi();
+
+                const organization = await new OrganizationFactory({ }).create();
+
+                const user = await new UserFactory({ }).create();
+
+                const token = await Token.createToken(user);
+
+                // create member
+                const member = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: false,
+                    // Give user access to this member
+                    user,
+                    details: MemberDetails.create({
+                        uitpasNumberDetails: UitpasNumberDetails.create({
+                            // expired
+                            uitpasNumber: '0900000095902',
+                            socialTariff: UitpasSocialTariff.create({
+                                status: UitpasSocialTariffStatus.None,
+                                updatedAt: new Date(2030, 0, 1),
+                            }),
+                        }),
+                    }),
+                }).create();
+
+                // patch uitpas number
+                const arr: Body = new PatchableArray();
+
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        uitpasNumberDetails: UitpasNumberDetails.patch({
+                            // invalid (too short)
+                            uitpasNumber: '094',
+                        }),
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                await expect(testServer.test(endpoint, request))
+                    .rejects
+                    .toThrow(STExpect.errorWithCode('invalid_uitpas_number'));
+            });
+
+            describe('unknown uitpas number', () => {
+                test('Should throw if number changed', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({ }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                            // expired
+                                uitpasNumber: '0900000095902',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    updatedAt: new Date(2030, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                            // unknown number
+                                uitpasNumber: '0900000095999',
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    await expect(testServer.test(endpoint, request))
+                        .rejects
+                        .toThrow(STExpect.errorWithCode('unknown_uitpas_number'));
+                });
+
+                test('Should throw and set status to unknown if number did not change', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({ }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                            // unknown number
+                                uitpasNumber: '0900000095999',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    updatedAt: new Date(2030, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                            // same unknown number
+                                uitpasNumber: '0900000095999',
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    await expect(testServer.test(endpoint, request))
+                        .rejects
+                        .toThrow(STExpect.errorWithCode('unknown_uitpas_number'));
+
+                    const updatedMember = await Member.getByID(member.id);
+                    expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000095999');
+                    expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+                    expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
+                    expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                });
+            });
+
+            describe('Should not set socialTariff from request', () => {
+                test('Only patch social tariff', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({ }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                                uitpasNumber: '0900000095902',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    updatedAt: new Date(2000, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.Active,
+                                    endDate: new Date(2050, 0, 1),
+                                    updatedAt: new Date(2040, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    const result = await testServer.test(endpoint, request);
+
+                    expect(result.status).toBe(200);
+                    expect(result.body.members.length).toBe(1);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.None);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).toEqual(new Date(2000, 0, 1).getTime());
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                });
+
+                test('New uitpas number', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({ }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    updatedAt: new Date(2000, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                // expired
+                                uitpasNumber: '0900000031618',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.Active,
+                                    endDate: new Date(2050, 0, 1),
+                                    updatedAt: new Date(2040, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    const result = await testServer.test(endpoint, request);
+
+                    expect(result.status).toBe(200);
+                    expect(result.body.members.length).toBe(1);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2040, 0, 1).getTime());
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                });
+
+                test('Same uitpas number', async () => {
+                    initUitpasApi();
+
+                    const organization = await new OrganizationFactory({ }).create();
+
+                    const user = await new UserFactory({ }).create();
+
+                    const token = await Token.createToken(user);
+
+                    // create member
+                    const member = await new MemberFactory({
+                        firstName,
+                        lastName,
+                        birthDay,
+                        generateData: false,
+                        // Give user access to this member
+                        user,
+                        details: MemberDetails.create({
+                            uitpasNumberDetails: UitpasNumberDetails.create({
+                                // expired
+                                uitpasNumber: '0900000031618',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.None,
+                                    updatedAt: new Date(2000, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }).create();
+
+                    // patch uitpas number
+                    const arr: Body = new PatchableArray();
+
+                    arr.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                // expired
+                                uitpasNumber: '0900000031618',
+                                socialTariff: UitpasSocialTariff.create({
+                                    status: UitpasSocialTariffStatus.Active,
+                                    endDate: new Date(2050, 0, 1),
+                                    updatedAt: new Date(2040, 0, 1),
+                                }),
+                            }),
+                        }),
+                    }));
+
+                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                    const result = await testServer.test(endpoint, request);
+
+                    expect(result.status).toBe(200);
+                    expect(result.body.members.length).toBe(1);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2040, 0, 1).getTime());
+                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                });
+            });
+
+            test('Should not fail if uitpas api is down and number did not change', async () => {
+                const mocker = initUitpasApi();
+                mocker.forceFailure();
+
+                const organization = await new OrganizationFactory({ }).create();
+
+                const user = await new UserFactory({ }).create();
+
+                const token = await Token.createToken(user);
+
+                // create member
+                const member = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: false,
+                    // Give user access to this member
+                    user,
+                    details: MemberDetails.create({
+                        uitpasNumberDetails: UitpasNumberDetails.create({
+                            // active
+                            uitpasNumber: '0900011354819',
+                            socialTariff: UitpasSocialTariff.create({
+                                status: UitpasSocialTariffStatus.Active,
+                                updatedAt: new Date(2000, 0, 1),
+                                endDate: new Date(2050, 0, 1),
+                            }),
+                        }),
+                    }),
+                }).create();
+
+                // patch uitpas number
+                const arr: Body = new PatchableArray();
+
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        uitpasNumberDetails: UitpasNumberDetails.patch({
+                            // same number
+                            uitpasNumber: '0900011354819',
+                        }),
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                const result = await testServer.test(endpoint, request);
+
+                expect(result.status).toBe(200);
+                expect(result.body.members.length).toBe(1);
+                expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).toEqual(new Date(2000, 0, 1).getTime());
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).toEqual(new Date(2050, 0, 1).getTime());
+            });
+
+            test('Should remove memberDetails if member details null', async () => {
+                const organization = await new OrganizationFactory({ }).create();
+
+                const user = await new UserFactory({ }).create();
+
+                const token = await Token.createToken(user);
+
+                // create member
+                const member = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: false,
+                    // Give user access to this member
+                    user,
+                    details: MemberDetails.create({
+                        uitpasNumberDetails: UitpasNumberDetails.create({
+                            // expired
+                            uitpasNumber: '0900000095902',
+                            socialTariff: UitpasSocialTariff.create({
+                                status: UitpasSocialTariffStatus.None,
+                                updatedAt: new Date(2030, 0, 1),
+                            }),
+                        }),
+                    }),
+                }).create();
+
+                // patch uitpas number
+                const arr: Body = new PatchableArray();
+
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        uitpasNumberDetails: null,
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                const result = await testServer.test(endpoint, request);
+
+                expect(result.status).toBe(200);
+                expect(result.body.members.length).toBe(1);
+                expect(result.body.members[0].details.uitpasNumberDetails).toBeNull();
+            });
+
+            test('Should update social tariff if uitpas review changed', async () => {
+                initUitpasApi();
+                const organization = await new OrganizationFactory({ }).create();
+
+                const user = await new UserFactory({ }).create();
+
+                const token = await Token.createToken(user);
+
+                // create member
+                const member = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: false,
+                    // Give user access to this member
+                    user,
+                    details: MemberDetails.create({
+                        uitpasNumberDetails: UitpasNumberDetails.create({
+                            // expired (but active on last check)
+                            uitpasNumber: '0900000031618',
+                            socialTariff: UitpasSocialTariff.create({
+                                status: UitpasSocialTariffStatus.Active,
+                                updatedAt: new Date(2020, 0, 1),
+                                endDate: new Date(2050, 0, 1),
+                            }),
+                        }),
+                    }),
+                }).create();
+
+                // set uitpas review
+                member.details.reviewTimes.markReviewed('uitpasNumber', new Date(2020, 0, 1));
+                await member.save();
+
+                // patch uitpas number review
+                const arr: Body = new PatchableArray();
+
+                const timesClone = member.details.reviewTimes.clone();
+                timesClone.markReviewed('uitpasNumber', new Date(2020, 0, 2));
+
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        reviewTimes: timesClone,
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                const result = await testServer.test(endpoint, request);
+
+                expect(result.status).toBe(200);
+                expect(result.body.members.length).toBe(1);
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2020, 0, 1).getTime());
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+            });
+
+            test('Should update social tariff if uitpas review patched with same date', async () => {
+                initUitpasApi();
+                const organization = await new OrganizationFactory({ }).create();
+
+                const user = await new UserFactory({ }).create();
+
+                const token = await Token.createToken(user);
+
+                // create member
+                const member = await new MemberFactory({
+                    firstName,
+                    lastName,
+                    birthDay,
+                    generateData: false,
+                    // Give user access to this member
+                    user,
+                    details: MemberDetails.create({
+                        uitpasNumberDetails: UitpasNumberDetails.create({
+                            // expired (but active on last check)
+                            uitpasNumber: '0900000031618',
+                            socialTariff: UitpasSocialTariff.create({
+                                status: UitpasSocialTariffStatus.Active,
+                                updatedAt: new Date(2020, 0, 1),
+                                endDate: new Date(2050, 0, 1),
+                            }),
+                        }),
+                    }),
+                }).create();
+
+                // set uitpas review
+                member.details.reviewTimes.markReviewed('uitpasNumber', new Date(2020, 0, 1));
+                await member.save();
+
+                // patch uitpas number review
+                const arr: Body = new PatchableArray();
+
+                const timesClone = member.details.reviewTimes.clone();
+                timesClone.markReviewed('uitpasNumber', new Date(2020, 0, 1));
+
+                arr.addPatch(MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({
+                        reviewTimes: timesClone,
+                    }),
+                }));
+
+                const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                const result = await testServer.test(endpoint, request);
+
+                expect(result.status).toBe(200);
+                expect(result.body.members.length).toBe(1);
+                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
             });
         });
     });

@@ -1566,7 +1566,10 @@ export class AdminPermissionChecker {
         }
 
         if (data.details.uitpasNumberDetails && data.details.uitpasNumberDetails.socialTariff !== undefined) {
-            if (data.details.uitpasNumberDetails.uitpasNumber !== member.details.uitpasNumberDetails?.uitpasNumber) {
+            if (data.details.uitpasNumberDetails.uitpasNumber === undefined) {
+                data.details.uitpasNumberDetails = undefined;
+            }
+            else if (data.details.uitpasNumberDetails.uitpasNumber !== member.details.uitpasNumberDetails?.uitpasNumber) {
                 // if uitpas number did change -> status should be reset
                 data.details.uitpasNumberDetails = UitpasNumberDetails.create({
                     uitpasNumber: data.details.uitpasNumberDetails.uitpasNumber,
@@ -1574,7 +1577,7 @@ export class AdminPermissionChecker {
             }
             else {
                 // if uitpas number did not change
-                data.details.uitpasNumberDetails = undefined;
+                data.details.uitpasNumberDetails.socialTariff = member.details.uitpasNumberDetails?.socialTariff;
             }
         }
 
