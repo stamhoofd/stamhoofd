@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { PriceInput, STErrorsDefault, useErrors, useOrganization, usePlatform, useValidation, Validator } from '@stamhoofd/components';
-import { Group, ReduceablePrice } from '@stamhoofd/structures';
+import { Group, Organization, ReduceablePrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
@@ -41,6 +41,7 @@ const props = withDefaults(
         title?: string;
         defaultMembershipTypeId?: string | null;
         startDate?: Date;
+        externalOrganization?: Organization | null;
     }>(),
     {
         errorBox: null,
@@ -49,15 +50,20 @@ const props = withDefaults(
         group: null,
         defaultMembershipTypeId: null,
         startDate: () => new Date(0),
+        externalOrganization: null,
     },
 );
 const model = defineModel<ReduceablePrice>({ required: true });
 const ownErrors = useErrors();
+
+const platform = usePlatform();
+const organzationFromContext = useOrganization();
+const organization = computed(() => props.externalOrganization ?? organzationFromContext.value);
+
 const { enabled, financialSupportSettings } = useFinancialSupportSettings({
     group: computed(() => props.group),
+    externalOrganization: organization,
 });
-const platform = usePlatform();
-const organization = useOrganization();
 
 const showReducedPrice = computed(() => enabled || reducedPrice.value !== null);
 

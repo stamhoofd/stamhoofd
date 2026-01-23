@@ -154,7 +154,7 @@
                         </STListItem>
                     </template>
                 </STList>
-                <GroupPriceBox v-else :period="patchedPeriod" :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :validator="errors.validator" @patch:period="addPatch" @patch:price="addPricePatch" />
+                <GroupPriceBox v-else :period="patchedPeriod" :price="patchedGroup.settings.prices[0]" :group="patchedGroup" :errors="errors" :default-membership-type-id="defaultMembershipTypeId" :validator="errors.validator" :external-organization="externalOrganization" @patch:period="addPatch" @patch:price="addPricePatch" />
             </div>
 
             <div v-for="optionMenu of patchedGroup.settings.optionMenus" :key="optionMenu.id" class="container">

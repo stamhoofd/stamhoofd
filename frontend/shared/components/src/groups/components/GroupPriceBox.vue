@@ -4,7 +4,7 @@
 
         <TInput v-if="!isSingle" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)" :placeholder="$t(`8435ecfa-0baa-486d-a3fd-b9dafded1cab`)" />
 
-        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" />
+        <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" :external-organization="externalOrganization" />
 
         <template v-if="!isSingle">
             <hr><h2>{{ $t("6ada0ff0-3976-41f7-aa65-7af870964ebc") }}</h2>
@@ -126,12 +126,12 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { BundleDiscountSettingsView, DateSelection, ErrorBox, GroupPriceDiscountsInput, NumberInput, STInputBox, TimeInput, useValidation, Validator } from '@stamhoofd/components';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, Group, GroupPrice, GroupPriceDiscount, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, Group, GroupPrice, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { ReduceablePriceInput } from '..';
 import { useErrors } from '../../errors/useErrors';
 import { useEmitPatch } from '../../hooks';
-import { Formatter } from '@stamhoofd/utility';
 
 const props = withDefaults(defineProps<{
     price: GroupPrice;
@@ -141,10 +141,12 @@ const props = withDefaults(defineProps<{
     defaultMembershipTypeId?: string | null;
     showNameAlways?: boolean;
     validator?: Validator | null;
+    externalOrganization?: Organization | null;
 }>(), {
     defaultMembershipTypeId: null,
     showNameAlways: false,
     validator: null,
+    externalOrganization: null,
 });
 
 const emit = defineEmits(['patch:price']);
