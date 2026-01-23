@@ -40,7 +40,7 @@ const title = computed(() => {
         return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);
     }
 
-    return 'Betalingen';
+    return $t('Betalingen');
 });
 
 const markPaid = useMarkPaymentsPaid();
