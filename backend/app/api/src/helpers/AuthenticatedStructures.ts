@@ -28,9 +28,10 @@ export class AuthenticatedStructures {
         }
 
         const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
-        const { registrations, orders } = await Payment.loadBalanceItemRelations(balanceItems);
 
         if (checkPermissions) {
+            const { registrations, orders } = await Payment.loadBalanceItemRelations(balanceItems);
+
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
             if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Read, { registrations, orders }))) {
                 throw new SimpleError({
