@@ -74,7 +74,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.name',
-        name: 'Naam',
+        name: $t('Naam'),
         getValue: object => object.customer?.name ?? '',
         format: value => value || 'Onbekend',
         getStyle: value => !value ? 'gray' : '',
@@ -85,9 +85,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.company.name',
-        name: 'Bedrijfsnaam',
-        getValue: object => object.customer?.company ? (object.customer?.company?.name || 'Naamloos') : '',
-        format: value => value || 'Particulier',
+        name: $t('Bedrijfsnaam'),
+        getValue: object => object.customer?.company ? (object.customer?.company?.name || $t('Naamloos')) : '',
+        format: value => value || $t('Particulier'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -96,7 +96,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string | null>({
         id: 'transferDescription',
-        name: 'Mededeling',
+        name: $t('Mededeling'),
         getValue: object => object.transferDescription,
         format: value => value || 'Geen',
         getStyle: value => !value ? 'gray' : '',
@@ -108,7 +108,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: 'Aangemaakt op',
+        name: $t('Aangemaakt op'),
         getValue: object => object.createdAt,
         format: (value, width) => width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true),
         minimumWidth: 120,
@@ -117,12 +117,12 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, PaymentGeneral>({
         id: 'paidAt',
-        name: 'Betaald op',
+        name: $t('Betaald op'),
         getValue: object => object,
         format: (value, width) => value.paidAt
             ? (width < 150 ? Formatter.dateNumber(value.paidAt) : Formatter.date(value.paidAt, true))
             : (
-                    value.status === PaymentStatus.Failed ? 'Geannuleerd' : 'Niet betaald'
+                    value.status === PaymentStatus.Failed ? $t('Geannuleerd') : $t('Niet betaald')
                 ),
         getStyle: value => !value.paidAt ? (value.status === PaymentStatus.Failed ? 'gray' : 'error') : '',
         minimumWidth: 120,
@@ -132,7 +132,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, PaymentMethod>({
         id: 'method',
-        name: 'Betaalmethode',
+        name: $t('Betaalmethode'),
         getValue: object => object.method,
         format: value => PaymentMethodHelper.getNameCapitalized(value),
         minimumWidth: 120,
@@ -143,7 +143,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'price',
-        name: 'Bedrag',
+        name: $t('Bedrag'),
         getValue: object => object.price,
         format: value => Formatter.price(value),
         getStyle: value => !value ? 'gray' : '',
@@ -153,7 +153,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, PaymentStatus>({
         id: 'status',
-        name: 'Status',
+        name: $t('Status'),
         getValue: object => object.status,
         format: value => PaymentStatusHelper.getNameCapitalized(value),
         getStyle: (value) => {
@@ -184,20 +184,19 @@ const { getSelectableWorkbook } = useSelectableWorkbook();
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: 'Markeer als betaald',
+        name: $t('Markeer als betaald'),
         icon: 'success',
         priority: 2,
         groupIndex: 1,
         needsSelection: true,
         allowAutoSelectAll: false,
         handler: async (payments: PaymentGeneral[]) => {
-            console.log('mark as paid', payments);
             // Mark paid
             await markPaid(payments, true);
         },
     }),
     new InMemoryTableAction({
-        name: 'Markeer als niet betaald',
+        name: $t('Markeer als niet betaald'),
         icon: 'canceled',
         priority: 1,
         groupIndex: 1,
@@ -210,7 +209,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 
     new AsyncTableAction({
-        name: 'Exporteer naar Excel',
+        name: $t('Exporteer naar Excel'),
         icon: 'download',
         priority: 0,
         groupIndex: 2,
