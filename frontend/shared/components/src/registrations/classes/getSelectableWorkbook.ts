@@ -174,14 +174,14 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     }),
                     new SelectableColumn({
                         id: 'member.organization',
-                        name: $t(`Eenheden`),
+                        name: $t(`Groepen`),
                         description: $t('Alle eenheden waarvoor het lid is ingeschreven'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.uri',
-                        name: $t(`Eenheidsnummers`),
-                        description: $t('Alle nummers van de eenheden waarvoor het lid is ingeschreven'),
+                        name: $t(`Groepsnummers`),
+                        description: $t('Alle nummers van de groepen waarvoor het lid is ingeschreven'),
                         enabled: false,
                     }),
                 ]
