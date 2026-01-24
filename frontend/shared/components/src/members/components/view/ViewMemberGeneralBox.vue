@@ -66,12 +66,6 @@
                 <dd v-copyable>
                     {{ member.patchedMember.details.uitpasNumberDetails.uitpasNumber }}
                 </dd>
-                <dt v-if="socialTariffStatusText">
-                    {{ $t('UiTPAS kansentarief') }}
-                </dt>
-                <dd v-if="socialTariffStatusText" v-copyable>
-                    {{ socialTariffStatusText }}
-                </dd>
             </template>
 
             <template v-if="member.patchedMember.details.nationalRegisterNumber && member.patchedMember.details.nationalRegisterNumber !== NationalRegisterNumberOptOut">
@@ -92,46 +86,16 @@
 </template>
 
 <script setup lang="ts">
-import { NationalRegisterNumberOptOut, PlatformMember, UitpasSocialTariffStatus } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import { NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
 
 defineOptions({
     inheritAttrs: false,
 });
 
-const props = defineProps<{
+defineProps<{
     member: PlatformMember;
 }>();
 
 const currentCountry = useCountry();
-
-const socialTariffStatusText = computed(() => {
-    const socialTariff = props.member.patchedMember.details.uitpasNumberDetails?.socialTariff ?? null;
-    if (socialTariff === null) {
-        return null;
-    }
-
-    switch (socialTariff.status) {
-        case UitpasSocialTariffStatus.Active: {
-            if (socialTariff.endDate) {
-                return $t('Actief tot {date}', { date: Formatter.date(socialTariff.endDate) });
-            }
-            return $t('Actief');
-        }
-        case UitpasSocialTariffStatus.Expired: {
-            return $t('Verlopen');
-        }
-        case UitpasSocialTariffStatus.None: {
-            return $t('Geen kansentarief');
-        }
-        case UitpasSocialTariffStatus.Unknown: {
-            return null;
-        }
-        default: {
-            return null;
-        }
-    }
-});
 </script>
