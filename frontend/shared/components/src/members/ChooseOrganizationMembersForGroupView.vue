@@ -71,8 +71,8 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, PermyriadInput, PriceBreakdownBox, STErrorsDefault, Toast, useErrors } from '@stamhoofd/components';
 import { Group, Organization, PlatformFamily, PlatformMember, RegisterCheckout } from '@stamhoofd/structures';
-import { computed, onBeforeMount, onMounted, ref } from 'vue';
-import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem, usePlatformFamilyManager } from '.';
+import { computed, onMounted, ref } from 'vue';
+import { startCheckout, useAddMember, useCheckoutRegisterItem, useChooseGroupForMember, useEditMember, useGetDefaultItem } from '.';
 import { useContext, useOrganization, usePlatform } from '../hooks';
 import { NavigationActions, useNavigationActions } from '../types/NavigationActions';
 import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
@@ -90,7 +90,13 @@ const props = defineProps<{
 
 onMounted(() => {
     // Initially show errors as soon as it is possible
-    updateCheckout();
+    try {
+        props.checkout.validate({});
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    props.checkout.cart.calculatePrices();
 });
 
 const context = useContext();
@@ -106,26 +112,6 @@ const editMember = useEditMember();
 const checkoutRegisterItem = useCheckoutRegisterItem();
 const getDefaultItem = useGetDefaultItem();
 const chooseGroupForMember = useChooseGroupForMember();
-const platformFamilyManager = usePlatformFamilyManager();
-
-function updateCheckout() {
-    // Initially show errors as soon as it is possible
-    try {
-        props.checkout.validate({});
-    }
-    catch (e) {
-        errors.errorBox = new ErrorBox(e);
-    }
-    props.checkout.cart.calculatePrices();
-}
-
-onBeforeMount(async () => {
-    console.error('start save...');
-    if (await platformFamilyManager.forceUpdateUitpasSocialTarrif(props.members ?? [])) {
-        console.error('start update checkout...');
-        updateCheckout();
-    }
-});
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
