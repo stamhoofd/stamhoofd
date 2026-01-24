@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
+import { UitpasNumberDetails } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
-import { UitpasNumberDetails } from '../../../../../../../shared/structures/esm/dist/src/members/UitpasNumberDetails';
 import { ColumnMatcher } from '../ColumnMatcher';
 import { ImportMemberResult } from '../ImportMemberResult';
 import { MemberDetailsMatcherCategory } from '../MemberDetailsMatcherCategory';
