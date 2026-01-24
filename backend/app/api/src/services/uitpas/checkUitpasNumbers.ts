@@ -102,9 +102,10 @@ export async function checkUitpasNumber(access_token: string, uitpasNumber: stri
     const url = `${baseUrl}/passes/${uitpasNumber}`;
     const myHeaders = new Headers();
     myHeaders.append('Authorization', 'Bearer ' + access_token);
-    const requestOptions = {
+    const requestOptions: RequestInit = {
         method: 'GET',
         headers: myHeaders,
+        signal: AbortSignal.timeout(10000),
     };
 
     let response: Response;
@@ -112,7 +113,20 @@ export async function checkUitpasNumber(access_token: string, uitpasNumber: stri
     try {
         response = await fetch(url, requestOptions);
     }
-    catch {
+    catch (error: any) {
+        console.error(error);
+        if (error.name === 'TimeoutError') {
+            return {
+                error: new SimpleError({
+                    code: 'uitpas_timeout',
+                    message: `Timeout when retrieving pass by UiTPAS number`,
+                    human: $t(
+                        `We konden UiTPAS niet bereiken om jouw UiTPAS-nummer te valideren. Probeer het later opnieuw.`,
+                    ),
+                }),
+            };
+        }
+
         return {
             error: new SimpleError({
                 code: 'uitpas_unreachable_retrieving_pass_by_uitpas_number',

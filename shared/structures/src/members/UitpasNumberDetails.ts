@@ -37,6 +37,17 @@ export class UitpasSocialTariff extends AutoEncoder {
     }
 
     /**
+     * @returns true if updated more than 1 week ago
+     */
+    isUpdateOutdated(): boolean {
+        const now = new Date();
+
+        // should check if updated more than 1 week ago
+        const weekInMs = 604800000;
+        return now.getTime() - this.updatedAt.getTime() > weekInMs;
+    }
+
+    /**
      * Whether a social tariff update is required for saving or registering the member.
      * @param requiresFinancialSupport
      * @returns
@@ -51,11 +62,7 @@ export class UitpasSocialTariff extends AutoEncoder {
             return true;
         }
 
-        const now = new Date();
-
-        // should check if updated more than 1 week ago
-        const weekInMs = 604800000;
-        return now.getTime() - this.updatedAt.getTime() > weekInMs;
+        return this.isUpdateOutdated();
     }
 }
 

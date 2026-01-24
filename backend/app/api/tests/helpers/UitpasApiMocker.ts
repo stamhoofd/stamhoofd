@@ -1,3 +1,4 @@
+import { sleep } from '@stamhoofd/utility';
 import nock from 'nock';
 
 export type UitpasSocialTariff = {
@@ -74,13 +75,19 @@ export class UitpasMocker {
     ]);
 
     #forceFailure = false;
+    #requestTimeoutInMs = 0;
 
     reset() {
         this.#forceFailure = false;
+        this.#requestTimeoutInMs = 0;
     }
 
     forceFailure() {
         this.#forceFailure = true;
+    }
+
+    setRequestTimeout(ms: number) {
+        this.#requestTimeoutInMs = ms;
     }
 
     start() {
@@ -107,8 +114,12 @@ export class UitpasMocker {
         nock('https://api-test.uitpas.be')
             .persist()
             .get(/\/passes\/(\d+)/)
-            .reply((uri: string) => {
+            .reply(async (uri: string) => {
                 const matchArray = uri.match(/\/passes\/(\d+)/);
+
+                if (this.#requestTimeoutInMs) {
+                    await sleep(this.#requestTimeoutInMs);
+                }
 
                 if (!matchArray) {
                     return [500];
