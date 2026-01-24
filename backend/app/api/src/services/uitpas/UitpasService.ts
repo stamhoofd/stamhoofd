@@ -8,9 +8,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { UitpasTokenRepository } from '../../helpers/UitpasTokenRepository.js';
 import { cancelTicketSales } from './cancelTicketSales.js';
 import { checkPermissionsFor } from './checkPermissionsFor.js';
-import { checkUitpasNumber, checkUitpasNumbers } from './checkUitpasNumbers.js';
+import { checkUitpasNumbers } from './checkUitpasNumbers.js';
 import { getSocialTariffForEvent } from './getSocialTariffForEvent.js';
 import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers.js';
+import { PassholderEndpoints } from './PassholderEndpoints.js';
 import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSales } from './registerTicketSales.js';
 import { searchUitpasEvents } from './searchUitpasEvents.js';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers.js';
@@ -343,14 +344,11 @@ export class UitpasService {
     }
 
     /**
-     * Checks uitpas number
-     * If any of the uitpas number is invalid, it will throw a SimpleErrors instance.
-     * @param uitpasNumber The uitpas number to check
+     * @returns the passholder endpoints
      */
-    static async checkUitpasNumber(uitpasNumber: string) {
-        // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
+    static async getPassByUitpasNumber(uitpasNumber: string) {
         const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
-        return await checkUitpasNumber(access_token, uitpasNumber);
+        return new PassholderEndpoints(access_token).getPassByUitpasNumber(uitpasNumber);
     }
 
     /**

@@ -5,7 +5,6 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
 import { uitpasApiResponseToSocialTariff } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { UitpasService } from '../../../services/uitpas/UitpasService.js';
-import { UitpasNumberSuccessfulResponse } from '../../../services/uitpas/checkUitpasNumbers.js';
 
 type Params = Record<string, never>;
 type Query = UitpasNumbersGetDetailsRequest;
@@ -40,25 +39,22 @@ export class GetUitpasNumberDetailsEndpoint extends Endpoint<Params, Query, Body
         for (let i = 0; i < uitpasNumbers.length; i++) {
             const uitpasNumber = uitpasNumbers[i];
 
-            const result = await UitpasService.checkUitpasNumber(uitpasNumber);
-            const response: UitpasNumberSuccessfulResponse | undefined = result.response;
-
-            if (response) {
-                const socialTariff = uitpasApiResponseToSocialTariff(response);
+            try {
+                const result = await UitpasService.getPassByUitpasNumber(uitpasNumber);
+                const socialTariff = uitpasApiResponseToSocialTariff(result);
                 results.push(UitpasNumberDetails.create({
                     uitpasNumber,
                     socialTariff,
                 }));
             }
-            else {
-                const e = result.error!;
-                if (isSimpleError(e) || isSimpleErrors(e)) {
-                    e.addNamespace(i.toString());
-                    e.addNamespace('uitpasNumbers');
-                    simpleErrors.addError(e);
+            catch (error) {
+                if (isSimpleError(error) || isSimpleErrors(error)) {
+                    error.addNamespace(i.toString());
+                    error.addNamespace('uitpasNumbers');
+                    simpleErrors.addError(error);
                 }
                 else {
-                    throw e;
+                    throw error;
                 }
             }
         }

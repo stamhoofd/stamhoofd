@@ -2,8 +2,9 @@ import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { Member } from '@stamhoofd/models';
 import { MemberDetails, ReviewTimes, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { GetPassResponse } from '../services/uitpas/PassholderEndpoints.js';
 import { UitpasService } from '../services/uitpas/UitpasService.js';
-import { UitpasNumberSuccessfulResponse } from '../services/uitpas/checkUitpasNumbers.js';
+import { throwIfInvalidUitpasNumber } from '../services/uitpas/checkUitpasNumbers.js';
 
 /**
  * Updates the social tariff if an uitpas number is set.
@@ -15,22 +16,12 @@ export async function updateMemberDetailsUitpasNumber(details: MemberDetails): P
         return false;
     }
 
-    const result = await UitpasService.checkUitpasNumber(details.uitpasNumberDetails.uitpasNumber);
-
-    // never thrown an error if a succesful response was received
-    if (result.response) {
-        const socialTariff = uitpasApiResponseToSocialTariff(result.response);
-
-        details.uitpasNumberDetails.socialTariff = socialTariff;
-        return true;
-    }
-
-    if (result.error) {
-        throw result.error;
-    }
-
-    // should never happen
-    return false;
+    const uitpasNumber = details.uitpasNumberDetails.uitpasNumber;
+    throwIfInvalidUitpasNumber(uitpasNumber);
+    const result = await UitpasService.getPassByUitpasNumber(uitpasNumber);
+    const socialTariff = uitpasApiResponseToSocialTariff(result);
+    details.uitpasNumberDetails.socialTariff = socialTariff;
+    return true;
 }
 
 /**
@@ -55,7 +46,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
         const isUitpasEqual = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
 
         if (isSimpleError(error)) {
-            if (error.code === 'unknown_uitpas_number') {
+            if (error.statusCode === 404) {
                 if (isUitpasEqual) {
                     // set the status of the social tariff to unknown if the uitpas number did not change and the number is unknown
                     const member = await Member.getByID(memberId);
@@ -95,7 +86,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
     return isUpdated;
 }
 
-export function uitpasApiResponseToSocialTariff(response: UitpasNumberSuccessfulResponse): UitpasSocialTariff {
+export function uitpasApiResponseToSocialTariff(response: GetPassResponse): UitpasSocialTariff {
     let endDate: Date | null = null;
 
     if (response.socialTariff.endDate) {

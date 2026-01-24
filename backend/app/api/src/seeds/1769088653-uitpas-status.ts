@@ -90,7 +90,7 @@ async function migrateMember(member: Member) {
             }
 
             // if the uitpas number is not known by the uitpas api
-            if (error.code === 'unknown_uitpas_number') {
+            if (error.statusCode === 404) {
                 console.log(`Uitpas number ${member.details.uitpasNumberDetails?.uitpasNumber} is not known by the uitpas api for member with id ${member.id}.`);
 
                 // set updated at
