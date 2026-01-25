@@ -10,7 +10,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders, InMemoryTableAction, ModernTableView, PaymentView, TableAction, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, StamhoofdFilter } from '@stamhoofd/structures';
+import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
@@ -83,6 +83,24 @@ const allColumns: Column<ObjectType, any>[] = [
         allowSorting: false,
     }),
 
+    new Column<ObjectType, PaymentType>({
+        id: 'customer.name',
+        name: $t('Type'),
+        getValue: object => object.type,
+        format: value => Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(value)),
+        getStyle: (value) => {
+            switch (value) {
+                case PaymentType.Payment: return '';
+                case PaymentType.Refund: return 'error';
+                case PaymentType.Chargeback: return 'error';
+                case PaymentType.Reallocation: return 'secundary';
+            }
+        },
+        minimumWidth: 100,
+        recommendedWidth: 150,
+        allowSorting: false,
+    }),
+
     new Column<ObjectType, string>({
         id: 'customer.company.name',
         name: $t('Bedrijfsnaam'),
@@ -130,11 +148,17 @@ const allColumns: Column<ObjectType, any>[] = [
         enabled: !(props.methods?.includes(PaymentMethod.Transfer) ?? false),
     }),
 
-    new Column<ObjectType, PaymentMethod>({
+    new Column<ObjectType, PaymentGeneral>({
         id: 'method',
         name: $t('Betaalmethode'),
-        getValue: object => object.method,
-        format: value => PaymentMethodHelper.getNameCapitalized(value),
+        getValue: object => object,
+        format: (object) => {
+            if (object.method === PaymentMethod.Unknown && object.price === 0) {
+                return $t('Niet van toepassing');
+            }
+            return PaymentMethodHelper.getNameCapitalized(object.method);
+        },
+        getStyle: value => (value.method === PaymentMethod.Unknown ? 'gray' : ''),
         minimumWidth: 120,
         recommendedWidth: 100,
         allowSorting: false,
