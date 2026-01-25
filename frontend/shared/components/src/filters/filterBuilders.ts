@@ -1,4 +1,4 @@
-import { AppType, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, Platform, PrivateWebshop, RecordCategory, RecordType, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { AppType, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, Platform, PrivateWebshop, RecordCategory, RecordType, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -10,6 +10,51 @@ import { NumberFilterBuilder, NumberFilterFormat } from './NumberUIFilter';
 import { SimpleNumberFilterBuilder } from './SimpleNumberUIFilter';
 import { StringFilterBuilder } from './StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
+
+export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new StringFilterBuilder({
+            name: $t(`Naam (particulier)`),
+            key: 'name',
+        }),
+        new StringFilterBuilder({
+            name: $t(`E-mailadres`),
+            key: 'email',
+        }),
+        new GroupUIFilterBuilder({
+            name: $t(`Bedrijfsgegevens`),
+            builders: [
+                new StringFilterBuilder({
+                    name: $t(`Bedrijfsnaam`),
+                    key: 'name',
+                }),
+                new StringFilterBuilder({
+                    name: $t(`BTW-nummer`),
+                    key: 'VATNumber',
+                }),
+                new StringFilterBuilder({
+                    name: $t(`Ondernemingsnummer`),
+                    key: 'companyNumber',
+                }),
+            ],
+            wrapper: {
+                company: FilterWrapperMarker,
+            },
+        }),
+    ];
+
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            name: $t('Klantgegevens'),
+            builders,
+            wrapper: {
+                customer: FilterWrapperMarker,
+            },
+        }),
+    );
+
+    return builders;
+};
 
 export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
@@ -36,6 +81,36 @@ export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
                 },
             },
         }),
+
+        new MultipleChoiceFilterBuilder({
+            name: $t(`Type`),
+            options: Object.values(PaymentType).map((method) => {
+                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(method)), method);
+            }),
+            wrapper: {
+                type: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }),
+
+        new NumberFilterBuilder({
+            name: $t(`Prijs`),
+            type: NumberFilterFormat.Currency,
+            key: 'price',
+        }),
+
+        new DateFilterBuilder({
+            name: $t(`Betaaldatum`),
+            key: 'paidAt',
+        }),
+
+        new DateFilterBuilder({
+            name: $t(`Aanmaakdatum`),
+            key: 'createdAt',
+        }),
+
+        getCustomerUIFilterBuilders()[0],
     ];
 
     builders.unshift(

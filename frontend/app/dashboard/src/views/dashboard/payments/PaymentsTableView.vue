@@ -83,8 +83,19 @@ const allColumns: Column<ObjectType, any>[] = [
         allowSorting: false,
     }),
 
+    new Column<ObjectType, string>({
+        id: 'description',
+        name: $t('Beschrijving'),
+        getValue: object => object.getShortDescription(),
+        format: value => value || 'Onbekend',
+        getStyle: value => !value ? 'gray' : '',
+        minimumWidth: 100,
+        recommendedWidth: 350,
+        allowSorting: false,
+    }),
+
     new Column<ObjectType, PaymentType>({
-        id: 'customer.name',
+        id: 'type',
         name: $t('Type'),
         getValue: object => object.type,
         format: value => Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(value)),
