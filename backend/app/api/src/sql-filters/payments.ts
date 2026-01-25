@@ -1,5 +1,5 @@
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
-import { balanceItemPaymentsCompilers } from './balance-item-payments';
+import { balanceItemPaymentsCompilers } from './balance-item-payments.js';
 
 /**
  * Defines how to filter payments in the database from StamhoofdFilter objects
@@ -13,6 +13,11 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
     }),
     method: createColumnFilter({
         expression: SQL.column('method'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+    type: createColumnFilter({
+        expression: SQL.column('type'),
         type: SQLValueType.String,
         nullable: false,
     }),
