@@ -1,5 +1,5 @@
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, SortList } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, PaymentGeneral, SortItemDirection, SortList } from '@stamhoofd/structures';
 import { useContext } from '../hooks';
 import { ObjectFetcher } from '../tables';
 import { SessionContext } from '@stamhoofd/networking';
@@ -8,7 +8,7 @@ import { Ref } from 'vue';
 type ObjectType = PaymentGeneral;
 
 function extendSort(list: SortList): SortList {
-    return assertSort(list, [{ key: 'id' }]);
+    return assertSort(list, [{ key: 'createdAt', order: SortItemDirection.DESC }, { key: 'id' }]);
 }
 
 export function getPaymentsObjectFetcher(context: Ref<SessionContext>, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
