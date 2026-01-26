@@ -1,6 +1,7 @@
 import { Order, Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
 import { Settlement } from '@stamhoofd/structures';
 import Stripe from 'stripe';
+import { passthroughFetch } from './passthroughFetch.js';
 
 export class StripePayoutChecker {
     private stripe: Stripe;
@@ -14,6 +15,9 @@ export class StripePayoutChecker {
                 maxNetworkRetries: 1,
                 timeout: 10000,
                 stripeAccount,
+                httpClient: STAMHOOFD.environment === 'test'
+                    ? Stripe.createFetchHttpClient(passthroughFetch)
+                    : undefined,
             });
 
         this.stripePlatform = new Stripe(
@@ -22,6 +26,9 @@ export class StripePayoutChecker {
                 typescript: true,
                 maxNetworkRetries: 1,
                 timeout: 10000,
+                httpClient: STAMHOOFD.environment === 'test'
+                    ? Stripe.createFetchHttpClient(passthroughFetch)
+                    : undefined,
             });
     }
 
