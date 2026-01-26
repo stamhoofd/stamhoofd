@@ -1,5 +1,5 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :default-sort-column="allColumns.find(c => c.id === 'createdAt')" :default-sort-direction="SortItemDirection.DESC" :default-filter="defaultFilter" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :Route="Route">
         <template #empty>
             {{ $t('763f791b-dd8d-4cb2-aa57-3d93f33a7c8e') }}
         </template>
@@ -10,7 +10,7 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders, InMemoryTableAction, ModernTableView, PaymentView, TableAction, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, StamhoofdFilter } from '@stamhoofd/structures';
+import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
@@ -70,6 +70,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: () => 'code',
         minimumWidth: 50,
         recommendedWidth: 50,
+        enabled: false,
     }),
 
     new Column<ObjectType, string>({
@@ -79,7 +80,7 @@ const allColumns: Column<ObjectType, any>[] = [
         format: value => value || $t('Onbekend'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
-        recommendedWidth: 250,
+        recommendedWidth: 200,
         allowSorting: false,
     }),
 
@@ -122,6 +123,7 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 150,
         allowSorting: false,
+        enabled: !(props.methods?.includes(PaymentMethod.Transfer) ?? false),
     }),
 
     new Column<ObjectType, string>({
