@@ -225,6 +225,14 @@
 
                 <STList>
                     <STListItem v-if="payment.isFailed && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
+                        <template #left>
+                            <IconContainer icon="bank" class="primary">
+                                <template #aside>
+                                    <span class="icon clock small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
                         <h2 class="style-title-list">
                             {{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}
                         </h2>
@@ -232,15 +240,19 @@
                             {{ $t("e93f8565-8fc6-4073-94f3-95d42c19d9a0") }}
                         </p>
                         <template #right>
-                            <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon clock" />
-                                <span>{{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}</span>
-                            </button>
-                            <button type="button" class="button icon success only-smartphone" />
+                            <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
                     <STListItem v-if="(payment.isPending && payment.type === PaymentType.Payment) || (payment.isFailed && payment.type !== PaymentType.Payment)" :selectable="true" @click="markPaid">
+                        <template #left>
+                            <IconContainer icon="bank" class="success">
+                                <template #aside>
+                                    <span class="icon success small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
                         <h2 class="style-title-list">
                             {{ $t('aca879f0-55d3-4964-a8ad-0eedf18228fb') }}
                         </h2>
@@ -248,15 +260,19 @@
                             {{ $t('9e211b50-4422-411f-9c77-8e036e2a2416') }}
                         </p>
                         <template #right>
-                            <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon success" />
-                                <span>{{ $t('1c1933f1-fee4-4e7d-9c89-57593fd5bed3') }}</span>
-                            </button>
-                            <button type="button" class="button icon success only-smartphone" />
+                            <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
                     <STListItem v-if="payment.isSucceeded && payment.type === PaymentType.Payment" :selectable="true" @click="markPending">
+                        <template #left>
+                            <IconContainer icon="bank" class="primary">
+                                <template #aside>
+                                    <span class="icon clock small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
                         <h2 class="style-title-list">
                             {{ $t('3a66a01a-b0be-4696-b8ac-47c2e5532571') }}
                         </h2>
@@ -267,14 +283,19 @@
                             {{ $t('4ac815c1-b06d-4fdb-a88a-2e4222ca535b') }}
                         </p>
                         <template #right>
-                            <button type="button" class="button secundary hide-smartphone">
-                                <span class="icon undo" />
-                                <span>{{ $t('8e65de81-dc74-4bc0-8d73-6440d754b6a4') }}</span>
-                            </button><button type="button" class="button icon undo only-smartphone" />
+                            <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment)" :selectable="true" @click="markFailed">
+                    <STListItem v-if="payment.isPending || (payment.isSucceeded && payment.type !== PaymentType.Payment && payment.type !== PaymentType.Reallocation)" :selectable="true" @click="markFailed">
+                        <template #left>
+                            <IconContainer icon="bank" class="error">
+                                <template #aside>
+                                    <span class="icon canceled small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
                         <h2 class="style-title-list">
                             {{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}
                         </h2>
@@ -282,16 +303,13 @@
                             {{ $t('5c940c27-7609-443e-941c-52cd29067f9b') }}
                         </p>
                         <p v-else-if="payment.method === 'Transfer'" class="style-description">
-                            {{ $t('0eb27185-1a20-4862-84e4-e0e12a7f5c9d') }}
+                            {{ $t('Annuleer de overschrijving als je die na enkele dagen nog niet hebt ontvangen. De schuld komt dan opnieuw open te staan, de status ‘in verwerking’ vervalt en er kan een nieuwe betaalpoging worden ondernomen. Automatische herinneringsmails worden indien nodig opnieuw geactiveerd.') }}
                         </p>
                         <p v-else class="style-description">
-                            {{ $t('27c58a31-738e-42a2-926f-97d83c0dd2a3') }}
+                            {{ $t('Annuleer de betaling als je die na enkele dagen nog niet hebt ontvangen. De schuld komt dan opnieuw open te staan, de status ‘in verwerking’ vervalt en er kan een nieuwe betaalpoging worden ondernomen. Automatische herinneringsmails worden indien nodig opnieuw geactiveerd.') }}
                         </p>
                         <template #right>
-                            <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon canceled" />
-                                <span>{{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}</span>
-                            </button><button type="button" class="button icon canceled only-smartphone" />
+                            <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
                 </STList>
@@ -321,7 +339,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { EditBalanceItemView, GlobalEventBus, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemWithPayments, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
@@ -383,14 +401,23 @@ async function reload() {
 }
 
 async function markPaid() {
+    if (!await CenteredMessage.confirm($t('Betaling als betaald markeren?'), $t('Ja, betaald'))) {
+        return;
+    }
     await mark(PaymentStatus.Succeeded);
 }
 
 async function markPending() {
+    if (!await CenteredMessage.confirm($t('Betaling toch niet ontvangen?'), $t('Ja, niet ontvangen'), $t('De betaling blijft in verwerking waardoor je deze later terug als betaald kan markeren als je het zou ontvangen.'))) {
+        return;
+    }
     await mark(PaymentStatus.Pending);
 }
 
 async function markFailed() {
+    if (!await CenteredMessage.confirm($t('Betaling annuleren?'), $t('Ja, annuleren'), $t('Een geannuleerde betaling zorgt ervoor dat een nieuwe poging tot betaling ondernomen kan worden - eventueel via een andere betaalmethode. Gebruik het om een betaling definitief als niet-betaald te markeren. De openstaande schuld van de schuldenaar stijgt dan opnieuw en het deel ‘in verwerking’ daalt terug.'))) {
+        return;
+    }
     await mark(PaymentStatus.Failed);
 }
 
@@ -418,7 +445,7 @@ async function mark(status: PaymentStatus) {
         });
         props.payment.deepSet(response.data[0]);
         GlobalEventBus.sendEvent('paymentPatch', props.payment).catch(console.error);
-        new Toast($t(`f7fab124-62ac-432c-80a7-5d594058f3f1`), 'success').setHide(1000).show();
+        Toast.success($t(`f7fab124-62ac-432c-80a7-5d594058f3f1`)).setHide(1000).show();
     }
     catch (e) {
         Toast.fromError(e).show();
