@@ -408,8 +408,14 @@ async function markPaid() {
 }
 
 async function markPending() {
-    if (!await CenteredMessage.confirm($t('Betaling toch niet ontvangen?'), $t('Ja, niet ontvangen'), $t('De betaling blijft in verwerking waardoor je deze later terug als betaald kan markeren als je het zou ontvangen.'))) {
-        return;
+    if (props.payment.status === PaymentStatus.Succeeded) {
+        if (!await CenteredMessage.confirm($t('Betaling toch niet ontvangen?'), $t('Ja, niet ontvangen'), $t('De betaling blijft in verwerking waardoor je deze later terug als betaald kan markeren als je het zou ontvangen.'))) {
+            return;
+        }
+    } else {
+        if (!await CenteredMessage.confirm($t('Betaling heractiveren'), $t('Ja, heractiveer'), $t('De betaling komt hierna terug in de status ‘in verwerking’ en kan daarna als betaald worden gemarkeerd.'))) {
+            return;
+        }
     }
     await mark(PaymentStatus.Pending);
 }
