@@ -8,7 +8,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders, InMemoryTableAction, ModernTableView, PaymentView, TableAction, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders, InMemoryTableAction, ModernTableView, PaymentView, TableAction, useFeatureFlag, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
@@ -35,6 +35,7 @@ const configurationId = computed(() => {
 const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getPaymentsUIFilterBuilders();
+const $feature = useFeatureFlag();
 const title = computed(() => {
     if (props.methods?.length === 1) {
         return PaymentMethodHelper.getPluralNameCapitalized(props.methods[0]);
@@ -122,7 +123,6 @@ const allColumns: Column<ObjectType, any>[] = [
         },
         minimumWidth: 100,
         recommendedWidth: 150,
-        allowSorting: false,
         enabled: !(props.methods?.includes(PaymentMethod.Transfer) ?? false),
     }),
 
@@ -171,7 +171,7 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: value => !value.paidAt ? (value.status === PaymentStatus.Failed ? 'gray' : 'error') : '',
         minimumWidth: 120,
         recommendedWidth: 150,
-        enabled: !(props.methods?.includes(PaymentMethod.Transfer) ?? false),
+        enabled: (props.methods?.includes(PaymentMethod.Transfer) ?? false),
     }),
 
     new Column<ObjectType, PaymentGeneral>({
@@ -187,7 +187,6 @@ const allColumns: Column<ObjectType, any>[] = [
         getStyle: value => (value.method === PaymentMethod.Unknown ? 'gray' : ''),
         minimumWidth: 120,
         recommendedWidth: 100,
-        allowSorting: false,
         enabled: !props.methods || props.methods.length > 1,
     }),
 
@@ -213,7 +212,7 @@ const allColumns: Column<ObjectType, any>[] = [
                 case PaymentStatus.Created:
                     return 'warn';
                 case PaymentStatus.Succeeded:
-                    return 'gray';
+                    return 'success';
                 case PaymentStatus.Failed:
                     return 'error';
             }
@@ -221,7 +220,29 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 50,
         recommendedWidth: 100,
         allowSorting: false,
+        enabled: !!props.methods,
     }),
+
+    ...(
+        $feature('vat')
+            ? [
+                    new Column<ObjectType, boolean>({
+                        id: 'hasInvoice',
+                        name: $t('Facturatiestatus'),
+                        getValue: object => !!object.invoiceId,
+                        format: (value) => {
+                            if (value) {
+                                return $t('Gefactureerd');
+                            }
+                            return $t('Niet gefactureerd');
+                        },
+                        getStyle: value => !value ? 'gray' : '',
+                        minimumWidth: 100,
+                        recommendedWidth: 100,
+                    }),
+                ]
+            : []
+    ),
 
 ];
 

@@ -131,6 +131,9 @@ export class Payment extends QueryableModel {
     @column({ type: 'json', nullable: true, decoder: TransferSettings })
     transferSettings: TransferSettings | null = null;
 
+    @column({ type: 'string', nullable: true })
+    invoiceId: string | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {

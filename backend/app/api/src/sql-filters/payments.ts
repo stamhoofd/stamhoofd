@@ -61,6 +61,11 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    hasInvoice: createColumnFilter({
+        expression: SQL.isNull(SQL.column('invoiceId')),
+        type: SQLValueType.Boolean,
+        nullable: false,
+    }),
     customer: {
         ...baseSQLFilterCompilers,
         email: createColumnFilter({

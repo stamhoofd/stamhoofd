@@ -55,4 +55,37 @@ export const paymentSorters: SQLSortDefinitions<Payment> = {
             });
         },
     },
+    hasInvoice: {
+        getValue(a) {
+            return a.invoiceId ? 1 : 0;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.isNull(SQL.column('invoiceId')),
+                direction,
+            });
+        },
+    },
+    method: {
+        getValue(a) {
+            return a.method;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('method'),
+                direction,
+            });
+        },
+    },
+    type: {
+        getValue(a) {
+            return a.type;
+        },
+        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+            return new SQLOrderBy({
+                column: SQL.column('type'),
+                direction,
+            });
+        },
+    },
 };
