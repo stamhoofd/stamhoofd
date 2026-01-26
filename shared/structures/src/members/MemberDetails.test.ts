@@ -309,6 +309,89 @@ describe('Correctly merge multiple details together', () => {
         });
     });
 
+    describe('Should correctly merge UitpasNumberDetails', () => {
+        const cases: { details1: MemberDetails; details2: MemberDetails; expectedUitpasNumber: string }[] = [
+            {
+                details1: MemberDetails.create({
+                    firstName: 'Member 1',
+                    uitpasNumberDetails: UitpasNumberDetails.create({
+                        uitpasNumber: '12345678',
+                        socialTariff: UitpasSocialTariff.create({
+                            status: UitpasSocialTariffStatus.Unknown,
+                            endDate: null,
+                            updatedAt: new Date(2000, 0, 1),
+                        }),
+                    }),
+                }),
+                details2: MemberDetails.create({
+                    firstName: 'Member 2',
+                    uitpasNumberDetails: UitpasNumberDetails.create({
+                        uitpasNumber: '87654321',
+                        socialTariff: UitpasSocialTariff.create({
+                            status: UitpasSocialTariffStatus.Active,
+                            endDate: new Date(2023, 0, 1),
+                            updatedAt: new Date(2000, 0, 2),
+                        }),
+                    }),
+                }),
+                expectedUitpasNumber: '87654321',
+            },
+            {
+                details1: MemberDetails.create({
+                    firstName: 'Member 1',
+                    uitpasNumberDetails: UitpasNumberDetails.create({
+                        uitpasNumber: '12345678',
+                        socialTariff: UitpasSocialTariff.create({
+                            status: UitpasSocialTariffStatus.Unknown,
+                            endDate: null,
+                            updatedAt: new Date(2000, 0, 1),
+                        }),
+                    }),
+                }),
+                details2: MemberDetails.create({
+                    firstName: 'Member 2',
+                    uitpasNumberDetails: UitpasNumberDetails.create({
+                        uitpasNumber: '87654321',
+                        socialTariff: UitpasSocialTariff.create({
+                            status: UitpasSocialTariffStatus.Active,
+                            endDate: new Date(2023, 0, 1),
+                            updatedAt: new Date(1999, 11, 31),
+                        }),
+                    }),
+                }),
+                expectedUitpasNumber: '12345678',
+            },
+            {
+                details1: MemberDetails.create({
+                    firstName: 'Member 1',
+
+                }),
+                details2: MemberDetails.create({
+                    firstName: 'Member 2',
+                    uitpasNumberDetails: UitpasNumberDetails.create({
+                        uitpasNumber: '87654321',
+                        socialTariff: UitpasSocialTariff.create({
+                            status: UitpasSocialTariffStatus.Active,
+                            endDate: new Date(2023, 0, 1),
+                            updatedAt: new Date(1999, 11, 31),
+                        }),
+                    }),
+                }),
+                expectedUitpasNumber: '87654321',
+            },
+        ];
+
+        cases.forEach(({ details1, details2, expectedUitpasNumber }, index) => {
+            test(`Case ${index + 1}`, () => {
+                // act
+                details1.merge(details2);
+
+                // assert
+                expect(details1.uitpasNumberDetails?.uitpasNumber).toBe(expectedUitpasNumber);
+            });
+        });
+    });
+
     describe('uitpasNumber (version 306) upgrade to uitpasNumberDetails', () => {
         test('should upgrade uitpasNumber to uitpasNumberDetails', () => {
             const data = {

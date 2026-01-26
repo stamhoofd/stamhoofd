@@ -706,8 +706,7 @@ export class MemberDetails extends AutoEncoder {
             this.requiresFinancialSupport = other.requiresFinancialSupport;
         }
 
-        // todo: test?
-        if (other.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0 >= (this.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0)) {
+        if ((other.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0) >= (this.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0)) {
             this.uitpasNumberDetails = other.uitpasNumberDetails;
         }
 
