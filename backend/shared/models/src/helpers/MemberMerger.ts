@@ -452,7 +452,6 @@ function mergeAddress(
     }
 }
 
-// todo: test
 function mergeUitpasNumberDetails(base: { uitpasNumberDetails: UitpasNumberDetails | null }, other: { uitpasNumberDetails: UitpasNumberDetails | null }, baseDetails: MemberDetails) {
     const baseUitpasNumberDetails = base.uitpasNumberDetails;
     const otherUitpasNumberDetails = other.uitpasNumberDetails;

@@ -12,6 +12,8 @@ import {
     ReviewTimes,
     TranslatedString,
     UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Member } from '../models/index.js';
@@ -459,6 +461,10 @@ describe('member merge', () => {
                 memberNumber: '123',
                 uitpasNumberDetails: UitpasNumberDetails.create({
                     uitpasNumber: '56',
+                    socialTariff: UitpasSocialTariff.create({
+                        status: UitpasSocialTariffStatus.Unknown,
+                        updatedAt: new Date(2000, 0, 1),
+                    }),
                 }),
                 email: 'b7v2x@example.com',
                 phone: '04863544',
@@ -525,6 +531,10 @@ describe('member merge', () => {
                 memberNumber: '123456',
                 uitpasNumberDetails: UitpasNumberDetails.create({
                     uitpasNumber: '567',
+                    socialTariff: UitpasSocialTariff.create({
+                        status: UitpasSocialTariffStatus.Active,
+                        updatedAt: new Date(2000, 0, 2),
+                    }),
                 }),
                 email: 'other@example.com',
                 phone: '048635449',
