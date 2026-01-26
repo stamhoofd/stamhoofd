@@ -28,9 +28,6 @@
         "test": "jest",
         "lint": "eslint ."
     },
-    "devDependencies": {
-        "nock": "^14.0.10"
-    },
     "publishConfig": {
         "access": "public"
     }
