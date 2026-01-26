@@ -641,7 +641,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     await expect(testServer.test(endpoint, request))
                         .rejects
-                        .toThrow(STExpect.errorWithCode('unknown_uitpas_number'));
+                        .toThrow(STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'));
                 });
 
                 test('Should throw and set status to unknown if number did not change', async () => {
@@ -691,7 +691,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                     await expect(testServer.test(endpoint, request))
                         .rejects
-                        .toThrow(STExpect.errorWithCode('unknown_uitpas_number'));
+                        .toThrow(STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'));
 
                     const updatedMember = await Member.getByID(member.id);
                     expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000095999');

@@ -133,11 +133,11 @@ export class UitpasMocker {
                 const result = UitpasMocker.testData.get(uitpasNumber);
                 if (!result) {
                     return [
-                        400,
+                        404,
                         {
-                            type: 'https://api.publiq.be/probs/uitpas/invalid-uitpas-number',
-                            title: 'Invalid uitpas number',
-                            status: 400,
+                            type: 'https://api.publiq.be/probs/uitpas/pass-not-found',
+                            title: 'Pass not found',
+                            status: 404,
                             detail: '0900000031617',
                             endUserMessage: {
                                 nl: 'Het UiTPAS-nummer dat je invulde konden we niet terugvinden. Kijk je het nummer even na?',
