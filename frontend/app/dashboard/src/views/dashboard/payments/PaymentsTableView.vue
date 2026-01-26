@@ -73,21 +73,33 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
 
     new Column<ObjectType, string>({
-        id: 'customer.name',
+        id: 'customer',
         name: $t('Naam'),
+        getValue: object => object.customer?.dynamicName ?? '',
+        format: value => value || $t('Onbekend'),
+        getStyle: value => !value ? 'gray' : '',
+        minimumWidth: 100,
+        recommendedWidth: 250,
+        allowSorting: false,
+    }),
+
+    new Column<ObjectType, string>({
+        id: 'customer.name',
+        name: $t('Contactpersoon'),
         getValue: object => object.customer?.name ?? '',
-        format: value => value || 'Onbekend',
+        format: value => value || $t('Onbekend'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
         allowSorting: false,
+        enabled: false,
     }),
 
     new Column<ObjectType, string>({
         id: 'description',
         name: $t('Beschrijving'),
         getValue: object => object.getShortDescription(),
-        format: value => value || 'Onbekend',
+        format: value => value || $t('Onbekend'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 350,
@@ -121,6 +133,7 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 100,
         recommendedWidth: 150,
         allowSorting: false,
+        enabled: false,
     }),
 
     new Column<ObjectType, string | null>({
