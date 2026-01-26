@@ -22,6 +22,7 @@ export { default as PhoneInput } from './PhoneInput.vue';
 export { default as PrefixInput } from './PrefixInput.vue';
 export { default as PriceInput } from './PriceInput.vue';
 export { default as Radio } from './Radio.vue';
+export { default as RadioListItem } from './RadioListItem.vue';
 export { default as RadioGroup } from './RadioGroup.vue';
 export { default as RecordAnswerInput } from './RecordAnswerInput.vue';
 export { default as ScrollableSegmentedControl } from './ScrollableSegmentedControl.vue';

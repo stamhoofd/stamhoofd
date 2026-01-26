@@ -1,10 +1,10 @@
 <template>
-    <STList>
-        <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('becc82f0-4195-4a17-b3f5-03f305582e4a')" :label="$t(`594307a3-05b8-47cf-81e2-59fb6254deba`)" />
-        <CheckboxListItem v-if="hasCompanyNumber" v-model="hasVATNumber" :description="$t('f9c27b43-9514-4e18-94b4-d1abd79ce689')" :label="$t(`9e78c772-0f29-4fb0-8ce6-fe98f9886c01`)" />
-    </STList>
-
-    <hr><h2>{{ $t('f4d00d5c-77c9-41dd-9689-a447c7977449') }}</h2>
+    <STInputBox :title="$t('BTW en ondernemingsvorm')" class="max">
+        <STList>
+            <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('becc82f0-4195-4a17-b3f5-03f305582e4a')" :label="$t(`594307a3-05b8-47cf-81e2-59fb6254deba`)" />
+            <CheckboxListItem v-if="hasCompanyNumber" v-model="hasVATNumber" :description="$t('f9c27b43-9514-4e18-94b4-d1abd79ce689')" :label="$t(`9e78c772-0f29-4fb0-8ce6-fe98f9886c01`)" />
+        </STList>
+    </STInputBox>
 
     <div class="split-inputs">
         <div>

@@ -312,6 +312,26 @@
                             <span class="icon arrow-right-small gray" />
                         </template>
                     </STListItem>
+
+                    <STListItem v-if="$feature('vat') && !payment.invoiceId" :selectable="true" @click="createInvoice">
+                        <template #left>
+                            <IconContainer icon="receipt" class="primary">
+                                <template #aside>
+                                    <span class="icon add small" />
+                                </template>
+                            </IconContainer>
+                        </template>
+
+                        <h2 class="style-title-list">
+                            {{ $t('Factuur opmaken') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Maak een factuur voor deze betaling aan.') }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
                 </STList>
             </template>
 
@@ -339,8 +359,8 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, usePlatform } from '@stamhoofd/components';
-import { BalanceItem, BalanceItemWithPayments, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
+import { CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
+import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Sorter } from '@stamhoofd/utility';
@@ -349,6 +369,7 @@ import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -374,6 +395,7 @@ const owner = useRequestOwner();
 const markingPaid = ref(false);
 const platform = usePlatform();
 const present = usePresent();
+const organization = useOrganization();
 
 const sortedItems = computed(() => {
     return props.payment.balanceItemPayments.slice().sort((a, b) => {
@@ -488,5 +510,38 @@ async function editBalanceItem(balanceItem: BalanceItem) {
         ],
         modalDisplayStyle: 'popup',
     });
+}
+
+async function createInvoice() {
+    if (!canWrite.value) {
+        return;
+    }
+
+    try {
+        const invoice = Invoice.create({
+            seller: organization.value?.meta.companies[0] ?? Company.create({}),
+            customer: props.payment.customer ?? PaymentCustomer.create({}),
+            payments: [props.payment]
+        });
+        invoice.buildFromPayments();
+
+        const component = new ComponentWithProperties(EditInvoiceView, {
+            invoice,
+            isNew: true,
+            saveHandler: async (patch: AutoEncoderPatchType<Invoice>) => {
+                // todo
+            },
+        });
+        await present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: component,
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
 }
 </script>

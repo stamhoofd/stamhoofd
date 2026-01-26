@@ -152,6 +152,22 @@ button.st-list-item {
         }
     }
 
+    &.right-columns {
+        > .main > div > .right {
+            display: flex;
+            flex-direction: row;
+            gap: 80px;
+
+            @media (max-width: 600px) {
+                gap: 15px;
+            }
+
+            > * {
+                flex-shrink: 0
+            }
+        }
+    }
+
     &.right-price {
         > .main > div > .right {
             @extend .style-description;

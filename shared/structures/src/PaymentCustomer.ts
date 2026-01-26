@@ -46,4 +46,28 @@ export class PaymentCustomer extends AutoEncoder {
     get dynamicEmail() {
         return this.email || this.company?.administrationEmail || null;
     }
+
+    equals(other: PaymentCustomer) {
+        if (this.firstName !== other.firstName) {
+            return false;
+        }
+        if (this.lastName !== other.lastName) {
+            return false;
+        }
+        if (this.email !== other.email) {
+            return false;
+        }
+        if (this.phone !== other.phone) {
+            return false;
+        }
+        if (!!this.company !== !!other.company) {
+            return false;
+        }
+        if (this.company && other.company) {
+            if (!this.company.equals(other.company)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

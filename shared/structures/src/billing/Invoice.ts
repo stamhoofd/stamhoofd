@@ -1,11 +1,13 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
+import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
-import { File } from '../files/File.js';
-import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
-import { VATExcemptReason } from '../BalanceItem.js';
 import { PriceBreakdown } from '../PriceBreakdown.js';
+import { File } from '../files/File.js';
+import { PaymentGeneral } from '../members/PaymentGeneral.js';
+import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 export class VATSubtotal extends AutoEncoder {
     /**
@@ -85,6 +87,16 @@ export class Invoice extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(InvoicedBalanceItem) })
     items: InvoicedBalanceItem[] = [];
 
+    /**
+     * The total sum of an invoice should always match the total sum of the payments connected to it.
+     * On top of that, the amounts related to each balance item in the payments, should match the invoiced balance amount in each item in the invoice.
+     *
+     * Note, that this is a limitation. A payment can only be related to a single invoice. But an invoice can be for multiple payments.
+     * More flexibility is often unneeded and makes reconciliation unnecessary complex.
+     */
+    @field({ decoder: new ArrayDecoder(PaymentGeneral) })
+    payments: PaymentGeneral[] = [];
+
     get totalWithoutVAT() {
         return this.items.reduce((sum, item) => sum + item.totalWithoutVAT, 0);
     }
@@ -118,7 +130,7 @@ export class Invoice extends AutoEncoder {
      * Best viewed as a virtual extra balance item linked to the invoice to compensate.
      *
      * This is used to explain and report why there is a difference between the sum of the balance item's prices and the actually invoiced price, comparable with roundingAmount on payments.
-     * - Say we invoice 3 items of 0,242 euro. The sum would be 0,726. The invoice total price might be 0,73 because of rounding rules. Then the balanceRoundingAmount would be -0,004.
+     * - Say we invoice 3 items of 0,242 euro. The sum would be 0,726. The invoice total price might be 0,73 because of rounding rules. Then the balanceRoundingAmount would be 0,004.
      */
     get balanceRoundingAmount() {
         return this.totalWithVAT - this.totalBalanceInvoicedAmount;
@@ -184,6 +196,41 @@ export class Invoice extends AutoEncoder {
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
 
+    validateVATRates() {
+        let intra = false;
+        if (this.customer.company && this.customer.company.VATNumber && this.customer.company.address) {
+            if (this.seller.VATNumber && this.seller.address) {
+                // Reverse charged vat applicable?
+                if (this.customer.company.address.country !== this.seller.address.country) {
+                    intra = true;
+                }
+            }
+        }
+
+        if (intra) {
+            for (const item of this.items) {
+                if (item.VATExcempt !== VATExcemptReason.IntraCommunity) {
+                    throw new SimpleError({
+                        code: 'missing_vat_excemption',
+                        message: 'Missing IntraCommunity VAT excemption',
+                        human: $t('De BTW op deze factuur moet verlegd worden (vanwege intracommunautaire btw), maar deze vrijstelling is niet toegepast bij elk item op het moment van betaling. Het onjuist instellen hiervan kan resulteren in een onjuist aangerekend bedrag. Zet dit recht, vorder of betaal eventuele verschillen terug en maak daarna een factuur aan.'),
+                    });
+                }
+            }
+        }
+        else {
+            for (const item of this.items) {
+                if (item.VATExcempt === VATExcemptReason.IntraCommunity) {
+                    throw new SimpleError({
+                        code: 'erroneous_vat_excemption',
+                        message: 'IntraCommunity VAT excemption should not apply to this item',
+                        human: $t('De BTW op deze factuur mag niet verlegd worden (geen intracommunautaire btw), maar deze vrijstelling werd foutief toegepast bij minstens één item op het moment van betaling. Het onjuist instellen hiervan kan resulteren in een onjuist aangerekend bedrag. Zet dit recht, vorder of betaal eventuele verschillen terug en maak daarna een factuur aan.'),
+                    });
+                }
+            }
+        }
+    }
+
     calculateVAT() {
         // For every VAT category, calculate the taxable amount and VAT amount
         const categories = new Map<string, VATSubtotal>();
@@ -248,11 +295,11 @@ export class Invoice extends AutoEncoder {
                 name: $t(`BTW`),
                 price: this.VATTotalAmount,
             },
-            ...(this.balanceRoundingAmount !== 0
+            ...(this.payableRoundingAmount !== 0
                 ? [
                         {
                             name: $t(`Afrondingscorrectie`),
-                            price: this.balanceRoundingAmount,
+                            price: this.payableRoundingAmount,
                         },
                     ]
                 : []),
@@ -261,5 +308,44 @@ export class Invoice extends AutoEncoder {
                 price: this.totalWithVAT,
             },
         ];
+    }
+
+    /**
+     * Call this method after changing the payments related to an invoice.
+     */
+    buildFromPayments() {
+        if (this.number) {
+            throw new SimpleError({
+                code: 'invoice_has_number',
+                message: 'An invoice is immutable after it has been generated',
+            });
+        }
+
+        // Keep the sum of all balance items.
+        const balanceItemsMap: Map<string, { balanceItem: BalanceItem; amount: number }> = new Map();
+
+        for (const payment of this.payments) {
+            for (const item of payment.balanceItemPayments) {
+                let data = balanceItemsMap.get(item.balanceItem.id);
+                if (!data) {
+                    data = {
+                        balanceItem: item.balanceItem,
+                        amount: 0,
+                    };
+                    balanceItemsMap.set(item.balanceItem.id, data);
+                }
+                data.amount += item.price;
+            }
+        }
+
+        const invoicedItems: InvoicedBalanceItem[] = [];
+
+        for (const item of balanceItemsMap.values()) {
+            const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
+            invoicedItems.push(invoiced);
+        }
+
+        this.items = invoicedItems;
+        this.calculateVAT();
     }
 }

@@ -46,6 +46,10 @@ export class Address extends AutoEncoder {
         return this.street + ', ' + this.city + ' (' + CountryHelper.getName(this.country) + ')';
     }
 
+    equals(other: Address) {
+        return this.toString() === other.toString();
+    }
+
     /**
      * @deprecated
      * Use .create({}) instead

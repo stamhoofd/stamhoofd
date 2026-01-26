@@ -19,12 +19,23 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
     balanceItem: BalanceItem;
 
     /**
+     * @deprecated Use quantity to avoid confustion with quantity vs prices (amounts)
      * Note: this can be a float in case of partial payments
      * Try to avoid using this in calculations, as this is not super reliable
      *
      * Always round when displaying!
      */
     get amount() {
+        return this.quantity;
+    }
+
+    /**
+     * Note: this can be a float in case of partial payments
+     * Try to avoid using this in calculations, as this is not super reliable
+     *
+     * Always round when displaying!
+     */
+    get quantity() {
         if (this.unitPrice === 0) {
             // Not possible to calculate amount
             return this.balanceItem.amount;

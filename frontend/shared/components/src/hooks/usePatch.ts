@@ -2,14 +2,16 @@ import { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, patchContains
 import { Version } from '@stamhoofd/structures';
 import { computed, Ref, ref, unref } from 'vue';
 
-export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>): {
-    createPatch: () => AutoEncoderPatchType<T>;
-    patched: Ref<T>;
-    patch: Ref<AutoEncoderPatchType<T>>;
-    addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void;
-    hasChanges: Ref<boolean>;
-    reset: () => void;
-} {
+export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>, options?: {
+    postProcess?: (obj: T) => T;
+}): {
+        createPatch: () => AutoEncoderPatchType<T>;
+        patched: Ref<T>;
+        patch: Ref<AutoEncoderPatchType<T>>;
+        addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => void;
+        hasChanges: Ref<boolean>;
+        reset: () => void;
+    } {
     const initialValue = unref(obj);
     if (!initialValue) {
         throw new Error('Expected a reference with an initial value at usePatch');
@@ -25,7 +27,12 @@ export function usePatch<T extends AutoEncoder>(obj: T | Ref<T>): {
         createPatch,
         patch,
         patched: computed(() => {
-            return unref(obj).patch(patch.value);
+            const o = unref(obj).patch(patch.value);
+            if (options?.postProcess) {
+                return options.postProcess(o);
+            }
+
+            return o;
         }),
         addPatch: (newPatch: PartialWithoutMethods<AutoEncoderPatchType<T>>) => {
             patch.value = patch.value.patch(unref(obj).static.patch(newPatch));
