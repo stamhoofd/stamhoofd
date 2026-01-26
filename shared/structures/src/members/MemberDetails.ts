@@ -458,8 +458,12 @@ export class MemberDetails extends AutoEncoder {
         return this.unverifiedEmails.length > 0 || this.unverifiedAddresses.length > 0 || this.unverifiedPhones.length > 0;
     }
 
+    get didCheckRequiresFinancialSupport(): boolean {
+        return this.requiresFinancialSupport?.value ?? false;
+    }
+
     get hasFinancialSupportOrActiveUitpas(): boolean {
-        return this.requiresFinancialSupport?.value === true || this.uitpasNumberDetails?.socialTariff.status === UitpasSocialTariffStatus.Active;
+        return this.didCheckRequiresFinancialSupport || this.uitpasNumberDetails?.socialTariff.status === UitpasSocialTariffStatus.Active;
     }
 
     get shouldApplyReducedPrice(): boolean {

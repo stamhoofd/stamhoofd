@@ -1544,7 +1544,7 @@ export class AdminPermissionChecker {
 
         const hasRecordAnswers = !!data.details.recordAnswers;
         const hasNotes = data.details.notes !== undefined;
-        const isSetFinancialSupportTrue = data.details.shouldApplyReducedPrice;
+        const isSetFinancialSupportTrue = data.details.didCheckRequiresFinancialSupport;
 
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
