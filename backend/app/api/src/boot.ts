@@ -131,6 +131,7 @@ export const boot = async (options: { killProcess: boolean }) => {
     await import('./email-recipient-loaders/orders');
     await import('./email-recipient-loaders/receivable-balances');
     await import('./excel-loaders/registrations');
+    await import('./email-recipient-loaders/documents');
 
     productionLog('Opening port...');
     routerServer.listen(STAMHOOFD.PORT ?? 9090);

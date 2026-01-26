@@ -1,8 +1,9 @@
 import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, InMemoryTableAction, LoadComponent, NavigationActions, TableAction, Toast } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { AsyncTableAction, CenteredMessage, EmailView, InMemoryTableAction, LoadComponent, NavigationActions, RecipientChooseOneOption, TableAction, TableActionSelection, Toast } from '@stamhoofd/components';
 import { downloadDocuments } from '@stamhoofd/document-helper';
 import { SessionContext } from '@stamhoofd/networking';
-import { DocumentData, DocumentStatus, Document as DocumentStruct, DocumentTemplatePrivate } from '@stamhoofd/structures';
+import { DocumentData, DocumentStatus, Document as DocumentStruct, DocumentTemplatePrivate, EmailRecipientFilterType, EmailRecipientSubfilter } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class DocumentActionBuilder {
@@ -34,6 +35,16 @@ export class DocumentActionBuilder {
                 allowAutoSelectAll: true,
                 handler: (documents: DocumentStruct[]) => {
                     this.downloadDocuments(documents).catch(console.error);
+                },
+            }),
+
+            new AsyncTableAction({
+                name: $t(`208ae3f1-1720-4d79-96fd-5c05d97c9de0`),
+                icon: 'email',
+                priority: 6,
+                groupIndex: 2,
+                handler: async (selection: TableActionSelection<DocumentStruct>) => {
+                    await this.openMail(selection);
                 },
             }),
 
@@ -86,6 +97,44 @@ export class DocumentActionBuilder {
                 },
             }),
         ];
+    }
+
+    async openMail(selection: TableActionSelection<DocumentStruct>) {
+        const filter = selection.filter.filter;
+        const search = selection.filter.search;
+
+        const options: RecipientChooseOneOption[] = [];
+
+        options.push({
+            type: 'ChooseOne',
+            name: $t('672a6035-da6d-403b-a31e-242cdd92cc5b'),
+            options: [
+                {
+                    id: 'accounts',
+                    name: $t(`379d43fb-034f-4280-bb99-ea658eaec729`),
+                    value: [
+                        EmailRecipientSubfilter.create({
+                            type: EmailRecipientFilterType.Documents,
+                            filter,
+                            search,
+                        }),
+                    ],
+                },
+            ],
+        });
+
+        const displayedComponent = new ComponentWithProperties(NavigationController, {
+            root: new ComponentWithProperties(EmailView, {
+                recipientFilterOptions: options,
+                defaultSenderId: null,
+            }),
+        });
+        await this.navigationActions.present({
+            components: [
+                displayedComponent,
+            ],
+            modalDisplayStyle: 'popup',
+        });
     }
 
     async editDocument(document: DocumentStruct) {

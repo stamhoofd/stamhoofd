@@ -1,7 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete';
 import { isSQLExpression, SQLExpression } from './SQLExpression';
-import { SQLAssignment, SQLCoalesce, SQLColumnExpression, SQLColumnExpressionParams, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
+import { SQLAssignment, SQLCoalesce, SQLColumnExpression, SQLColumnExpressionParams, SQLDistinct, SQLIf, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions';
 import { SQLInsert } from './SQLInsert';
 import { SQLJoin, SQLJoinType } from './SQLJoin';
 import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLJsonValueType, SQLLpad } from './SQLJsonExpressions';
@@ -111,6 +111,13 @@ class StaticSQL {
 
     coalesce(...args: ConstructorParameters<typeof SQLCoalesce>): SQLCoalesce {
         return new SQLCoalesce(...args);
+    }
+
+    distinct(column?: SQLExpression): InstanceType<typeof SQLDistinct> {
+        if (!column) {
+            return new SQLDistinct(this.wildcard());
+        }
+        return new SQLDistinct(column);
     }
 }
 
