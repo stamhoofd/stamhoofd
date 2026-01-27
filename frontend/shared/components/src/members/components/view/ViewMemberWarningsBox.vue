@@ -69,7 +69,7 @@ const warnings = computed(() => {
     }
 
     if (isPropertyEnabled('financialSupport')) {
-        if (props.member.patchedMember.details.requiresFinancialSupport && props.member.patchedMember.details.requiresFinancialSupport.value) {
+        if (props.member.patchedMember.details.shouldApplyReducedPrice) {
             warnings.push(RecordWarning.create({
                 text: TranslatedString.create(financialSupportSettings.value.warningText),
                 type: RecordWarningType.Info,
