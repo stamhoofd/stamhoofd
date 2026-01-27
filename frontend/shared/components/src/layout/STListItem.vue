@@ -30,42 +30,40 @@
     </component>
 </template>
 
-<script lang="ts">
-import { Component, Prop, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script setup lang="ts">
+import { computed, getCurrentInstance } from 'vue';
 
-@Component({
-    emits: ['click', 'contextmenu'],
+defineOptions({
     inheritAttrs: false,
-})
-export default class STListItem extends VueComponent {
-    @Prop({ default: 'article', type: String })
-    elementName!: string;
+});
 
-    @Prop({ default: false, type: Boolean })
-    selectable!: boolean;
+const props = withDefaults(
+    // props
+    defineProps<{
+        elementName?: string;
+        selectable?: boolean;
+        disabled?: boolean;
+    }>(),
+    // default values
+    {
+        elementName: 'article',
+        selectable: false,
+        disabled: false,
+    },
+);
 
-    @Prop({ default: false, type: Boolean })
-    disabled!: boolean;
+const dynamicElementName = computed(() => (props.elementName === 'article' && props.selectable && !props.disabled) ? 'button' : props.elementName);
+const hoverable = computed(() => dynamicElementName.value === 'button' || dynamicElementName.value === 'label');
+const emit = defineEmits(['click', 'contextmenu']);
+const instance = getCurrentInstance();
 
-    get dynamicElementName() {
-        if (this.elementName === 'article' && this.selectable && !this.disabled) {
-            return 'button';
-        }
-        return this.elementName;
+function onClick(event) {
+    const isDragging = instance?.proxy?.$parent?.$parent?.$el?.className?.indexOf('is-dragging') >= 0;
+    if (isDragging) {
+        console.log('canceled list item click because of drag');
+        return;
     }
-
-    get hoverable() {
-        return this.dynamicElementName === 'button' || this.dynamicElementName === 'label';
-    }
-
-    onClick(event) {
-        const isDragging = this.$parent?.$parent?.$el?.className?.indexOf('is-dragging') >= 0;
-        if (isDragging) {
-            console.log('canceled list item click because of drag');
-            return;
-        }
-        this.$emit('click', event);
-    }
+    emit('click', event);
 }
 </script>
 
