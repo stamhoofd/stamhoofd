@@ -188,6 +188,7 @@ export async function getDefaultItem({ group, member, groupOrganization, context
             return;
         }
     }
+
     return RegisterItem.defaultFor(member, group, groupOrganization);
 }
 
@@ -264,36 +265,6 @@ export function useGetDefaultItem() {
             groupOrganization,
             context: context.value,
             owner,
-        });
-    };
-}
-
-export function useCheckoutDefaultItem() {
-    const navigate = useNavigationActions();
-    const context = useContext();
-    const app = useAppContext();
-    const owner = useRequestOwner();
-
-    return async ({ group, member, groupOrganization, displayOptions, startCheckoutFlow, customNavigate, finishHandler }: {
-        group: Group;
-        member: PlatformMember;
-        groupOrganization?: Organization;
-        startCheckoutFlow?: boolean;
-        displayOptions?: DisplayOptions;
-        customNavigate?: NavigationActions;
-        finishHandler?: () => Promise<void> | void;
-    }) => {
-        await checkoutDefaultItem({
-            group,
-            member,
-            groupOrganization,
-            admin: app === 'dashboard' || app === 'admin',
-            displayOptions,
-            navigate: customNavigate ?? navigate,
-            context: context.value,
-            startCheckoutFlow,
-            owner,
-            finishHandler,
         });
     };
 }

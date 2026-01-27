@@ -4,9 +4,10 @@ import nock from 'nock';
 import qs from 'qs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { StripeWebookEndpoint } from '../../src/endpoints/global/payments/StripeWebhookEndpoint';
-import { StripeHelper } from '../../src/helpers/StripeHelper';
-import { testServer } from './TestServer';
+import { StripeWebookEndpoint } from '../../src/endpoints/global/payments/StripeWebhookEndpoint.js';
+import { StripeHelper } from '../../src/helpers/StripeHelper.js';
+import { testServer } from './TestServer.js';
+import { resetNock } from './resetNock.js';
 
 export class StripeMocker {
     paymentIntents: { id: string }[] = [];
@@ -215,8 +216,7 @@ export class StripeMocker {
     }
 
     stop() {
-        nock.cleanAll();
-        nock.disableNetConnect();
+        resetNock();
     }
 }
 

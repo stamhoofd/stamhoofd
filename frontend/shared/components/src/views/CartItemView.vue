@@ -166,31 +166,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { Request } from '@simonbackx/simple-networking';
+import { ComponentWithProperties, useCanDismiss, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { CartItem, CartStockHelper, Checkout, ProductDateRange, ProductPrice, ProductType, UitpasNumberAndPrice, UitpasPriceCheckRequest, UitpasPriceCheckResponse, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { useRequestOwner } from '@stamhoofd/networking';
 import { computed, onMounted, ref, Ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
+import { useContext } from '../hooks';
 import NumberInput from '../inputs/NumberInput.vue';
 import Radio from '../inputs/Radio.vue';
+import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
 import STToolbar from '../navigation/STToolbar.vue';
+import { CenteredMessage } from '../overlays/CenteredMessage';
 import ChooseSeatsView from './ChooseSeatsView.vue';
 import FieldBox from './FieldBox.vue';
 import OptionMenuBox from './OptionMenuBox.vue';
 import PriceBreakdownBox from './PriceBreakdownBox.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
-import { useContext } from '../hooks';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { Decoder } from '@simonbackx/simple-encoding';
-import UitpasNumberInput from '../inputs/UitpasNumberInput.vue';
-import { CenteredMessage } from '../overlays/CenteredMessage';
 
 const props = withDefaults(defineProps<{
     admin?: boolean;

@@ -235,3 +235,4 @@ __screenshots__
 /frontend/app/dashboard/dist-playwright
 /frontend/app/registration/dist-playwright
 /frontend/app/webshop/dist-playwright
+/tests/playwright/src/.auth

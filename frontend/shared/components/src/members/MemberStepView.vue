@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') : saveText" @save="save">
+    <SaveView :title="title" :loading="loading" :save-text="isDuplicate ? $t('c72a9ab2-98a0-4176-ba9b-86fe009fa755') : saveText" data-testid="member-step" @save="save">
         <template v-if="isDuplicate">
             <h1>{{ $t('f59ba68b-d007-40f2-9b87-fc5605ec55ea', {member: cloned.patchedMember.details.firstName}) }}</h1>
             <p>{{ $t('9474f01d-e447-4a95-986e-247917765ecb', {member: cloned.patchedMember.details.firstName}) }}</p>

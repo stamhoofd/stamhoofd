@@ -1,11 +1,11 @@
 import { Formatter } from '@stamhoofd/utility';
-import { FrontendProjectName, FrontendService } from "./FrontendService";
+import { FrontendProjectName, FrontendService } from './FrontendService';
 
 /**
  * Helper to create caddy configuration for playwright
  */
 export class CaddyConfigHelper {
-    static readonly GROUP_PREFIX = "playwright";
+    static readonly GROUP_PREFIX = 'playwright';
 
     /**
      * Get the group name for the caddy routes
@@ -18,7 +18,7 @@ export class CaddyConfigHelper {
      * Get the domain for the service and worker id
      */
     static getDomain(
-        service: "api" | "dashboard" | "registration" | "webshop" | 'renderer',
+        service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
         workerId: string,
     ) {
         return `playwright-${service}-${workerId}.stamhoofd`;
@@ -28,17 +28,16 @@ export class CaddyConfigHelper {
      * Get the url for the service and worker id
      */
     static getUrl(
-        service: "api" | "dashboard" | "registration" | "webshop" | 'renderer',
+        service: 'api' | 'dashboard' | 'registration' | 'webshop' | 'renderer',
         workerId: string,
     ) {
-        return "https://" + this.getDomain(service, workerId);
+        return 'https://' + this.getDomain(service, workerId);
     }
 
-
     static getPort(
-        service: "api",
+        service: 'api',
         workerId: string) {
-        const asNumber = parseInt(workerId)
+        const asNumber = parseInt(workerId);
         return 6000 + asNumber;
     }
 
@@ -46,13 +45,13 @@ export class CaddyConfigHelper {
      * Create a frontend route for the caddy config
      */
     static createFrontendRoute(service: FrontendProjectName, workerId: string) {
-        const root = FrontendService.getDestinationDistPath(service, workerId)
-        const group = this.getGroup(service, workerId)
+        const root = FrontendService.getDestinationDistPath(service, workerId);
+        const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
             workerId,
         );
-        
+
         return {
             group,
             match: [
@@ -73,7 +72,7 @@ export class CaddyConfigHelper {
                 },
                 {
                     handler: 'file_server',
-                    root
+                    root,
                 },
             ],
             terminal: true,
@@ -81,23 +80,23 @@ export class CaddyConfigHelper {
     }
 
     static createBackendRoute(service: 'api', workerId: string) {
-        const group = this.getGroup(service, workerId)
+        const group = this.getGroup(service, workerId);
         const domain = CaddyConfigHelper.getDomain(
             service,
             workerId,
-        )
+        );
         const port = this.getPort(service, workerId);
-        
+
         return {
             group,
             match: [
                 {
-                    host: [domain, "*." + domain],
+                    host: [domain, '*.' + domain],
                 },
             ],
             handle: [
                 {
-                    handler: "reverse_proxy",
+                    handler: 'reverse_proxy',
                     upstreams: [
                         {
                             dial: `127.0.0.1:${port}`,
@@ -106,16 +105,16 @@ export class CaddyConfigHelper {
                     headers: {
                         request: {
                             set: {
-                                "x-real-ip": ["{http.request.remote}"],
+                                'x-real-ip': ['{http.request.remote}'],
                             },
                         },
                     },
                 },
                 {
-                    handler: "headers",
+                    handler: 'headers',
                     response: {
                         set: {
-                            "Cache-Control": ["no-store"],
+                            'Cache-Control': ['no-store'],
                         },
                     },
                 },
@@ -123,38 +122,37 @@ export class CaddyConfigHelper {
         };
     }
 
-
     /**
      * Create the default playwright caddy config
      */
     static createDefault() {
-        const routes: {match: {host: string[]}[]}[] = [];
+        const routes: { match: { host: string[] }[] }[] = [];
         const maximumWorkers = 20;
 
         for (let workerId = 0; workerId < maximumWorkers; workerId += 1) {
             routes.push(
                 this.createFrontendRoute('dashboard', workerId.toString()),
                 this.createFrontendRoute('webshop', workerId.toString()),
-                this.createFrontendRoute('registration', workerId.toString())
-            )
+                this.createFrontendRoute('registration', workerId.toString()),
+            );
 
             routes.push(
-                this.createBackendRoute('api', workerId.toString())
-            )
+                this.createBackendRoute('api', workerId.toString()),
+            );
         }
 
-        const domains = Formatter.uniqueArray(routes.flatMap(r => r.match[0].host))
+        const domains = Formatter.uniqueArray(routes.flatMap(r => r.match[0].host));
 
         const config = {
             admin: {
-                listen: "0.0.0.0:2019",
+                listen: '0.0.0.0:2019',
             },
             apps: {
                 http: {
                     servers: {
                         stamhoofd: {
-                            listen: [":443", ":80"],
-                            routes
+                            listen: [':443', ':80'],
+                            routes,
                         },
                     },
                 },
@@ -166,7 +164,7 @@ export class CaddyConfigHelper {
                                 on_demand: false,
                                 issuers: [
                                     {
-                                        module: "internal",
+                                        module: 'internal',
                                     },
                                 ],
                             },
@@ -174,7 +172,7 @@ export class CaddyConfigHelper {
                                 on_demand: true,
                                 issuers: [
                                     {
-                                        module: "internal",
+                                        module: 'internal',
                                     },
                                 ],
                             },

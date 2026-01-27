@@ -551,8 +551,8 @@ function openResultView() {
                     description.push($t(`083a34cb-26f4-4467-978e-3dc19897befb`, { memberNumber: patched.memberNumber }));
                 }
 
-                if (patched.uitpasNumber && patched.uitpasNumber !== existingDetails.uitpasNumber) {
-                    description.push($t(`e08cef03-c352-41cd-8e7b-3ef632b69ee4`, { number: patched.uitpasNumber }));
+                if (patched.uitpasNumberDetails && patched.uitpasNumberDetails.uitpasNumber !== existingDetails.uitpasNumberDetails?.uitpasNumber) {
+                    description.push($t(`e08cef03-c352-41cd-8e7b-3ef632b69ee4`, { number: patched.uitpasNumberDetails.uitpasNumber }));
                 }
 
                 for (const parent of member.getChangedParents()) {
@@ -593,8 +593,8 @@ function openResultView() {
                     description.push($t(`123be534-a0be-4a6e-b03f-021659e1d8ba`) + ': ' + patched.memberNumber);
                 }
 
-                if (patched.uitpasNumber) {
-                    description.push($t(`e330f60b-d331-49a2-a437-cddc31a878de`) + ': ' + patched.uitpasNumber);
+                if (patched.uitpasNumberDetails) {
+                    description.push($t(`e330f60b-d331-49a2-a437-cddc31a878de`) + ': ' + patched.uitpasNumberDetails.uitpasNumber);
                 }
 
                 for (const parent of patched.parents) {

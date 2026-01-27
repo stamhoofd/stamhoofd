@@ -2,14 +2,14 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
-import { assertBalances } from '../assertions/assertBalances';
-import { testServer } from '../helpers/TestServer';
-import { initBundleDiscount } from '../init/initBundleDiscount';
-import { initStripe } from '../init/initStripe';
-import { initAdmin } from '../init/initAdmin';
-import { BalanceItemService } from '../../src/services/BalanceItemService';
-import { initPermissionRole } from '../init';
+import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
+import { BalanceItemService } from '../../src/services/BalanceItemService.js';
+import { assertBalances } from '../assertions/assertBalances.js';
+import { testServer } from '../helpers/TestServer.js';
+import { initAdmin } from '../init/initAdmin.js';
+import { initBundleDiscount } from '../init/initBundleDiscount.js';
+import { initPermissionRole } from '../init/initPermissionRole.js';
+import { initStripe } from '../init/initStripe.js';
 
 const baseUrl = `/members/register`;
 

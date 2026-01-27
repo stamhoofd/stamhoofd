@@ -1,8 +1,8 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="member-view">
         <STNavigationBar :title="member.member.details.name">
             <template #right>
-                <button :v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon edit" type="button" @click="doEdit" />
+                <button :v-tooltip="$t('f2eb0c04-0dca-4c8e-b920-7044a65aee6a')" class="button icon edit" type="button" data-testid="edit-member-button" @click="doEdit" />
             </template>
         </STNavigationBar>
 
@@ -33,7 +33,6 @@
 
 <script setup lang="ts">
 import { useAppContext, useEditMember, ViewMemberAccountsBox, ViewMemberActionsBox, ViewMemberEmergencyContactsBox, ViewMemberGeneralBox, ViewMemberParentsBox, ViewMemberRecordCategoriesBox, ViewMemberRegistrationsBox } from '@stamhoofd/components';
-import ViewMemberSecurityCodeBox from '@stamhoofd/components/src/members/components/view/ViewMemberSecurityCodeBox.vue';
 import { Gender, PlatformMember } from '@stamhoofd/structures';
 
 const props = defineProps<{

@@ -113,6 +113,10 @@ export class PlatformFamilyManager {
             }
         }
 
+        await this.savePatches(members, patches, clearAfter, shouldRetry);
+    }
+
+    private async savePatches(members: PlatformMember[], patches: PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>, clearAfter: Set<PlatformMember>, shouldRetry: boolean) {
         if (patches.changes.length) {
             for (const c of clearAfter.values()) {
                 c.prepareSave();

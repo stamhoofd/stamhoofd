@@ -11,6 +11,9 @@ import {
     ReviewTime,
     ReviewTimes,
     TranslatedString,
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
 } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Member } from '../models/index.js';
@@ -27,7 +30,7 @@ describe('member merge', () => {
                 lastName: '',
                 birthDay: undefined,
                 memberNumber: undefined,
-                uitpasNumber: undefined,
+                uitpasNumberDetails: undefined,
                 email: ' ',
                 phone: undefined,
                 gender: Gender.Other,
@@ -57,7 +60,9 @@ describe('member merge', () => {
                 lastName: 'Doe',
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
-                uitpasNumber: '56',
+                uitpasNumberDetails: UitpasNumberDetails.create({
+                    uitpasNumber: '56',
+                }),
                 email: 'b7v2x@example.com',
                 phone: '04863544',
                 gender: Gender.Male,
@@ -131,7 +136,7 @@ describe('member merge', () => {
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumber).toBe(d2Old.uitpasNumber);
+                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(d2Old.uitpasNumberDetails?.uitpasNumber);
             });
 
             test('email', () => {
@@ -227,7 +232,9 @@ describe('member merge', () => {
                 lastName: 'Doe',
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
-                uitpasNumber: '56',
+                uitpasNumberDetails: UitpasNumberDetails.create({
+                    uitpasNumber: '56',
+                }),
                 email: 'b7v2x@example.com',
                 phone: '04863544',
                 gender: Gender.Male,
@@ -280,7 +287,7 @@ describe('member merge', () => {
                 lastName: '',
                 birthDay: undefined,
                 memberNumber: undefined,
-                uitpasNumber: undefined,
+                uitpasNumberDetails: undefined,
                 email: ' ',
                 phone: undefined,
                 gender: Gender.Other,
@@ -323,7 +330,7 @@ describe('member merge', () => {
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumber).toBe(d1Old.uitpasNumber);
+                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(d1Old.uitpasNumberDetails?.uitpasNumber);
             });
 
             test('email', () => {
@@ -452,7 +459,13 @@ describe('member merge', () => {
                 lastName: 'Dôe',
                 birthDay: new Date(1990, 1, 1),
                 memberNumber: '123',
-                uitpasNumber: '56',
+                uitpasNumberDetails: UitpasNumberDetails.create({
+                    uitpasNumber: '56',
+                    socialTariff: UitpasSocialTariff.create({
+                        status: UitpasSocialTariffStatus.Unknown,
+                        updatedAt: new Date(2000, 0, 1),
+                    }),
+                }),
                 email: 'b7v2x@example.com',
                 phone: '04863544',
                 gender: Gender.Male,
@@ -516,7 +529,13 @@ describe('member merge', () => {
                 lastName: 'Doe',
                 birthDay: new Date(2000, 1, 1),
                 memberNumber: '123456',
-                uitpasNumber: '567',
+                uitpasNumberDetails: UitpasNumberDetails.create({
+                    uitpasNumber: '567',
+                    socialTariff: UitpasSocialTariff.create({
+                        status: UitpasSocialTariffStatus.Active,
+                        updatedAt: new Date(2000, 0, 2),
+                    }),
+                }),
                 email: 'other@example.com',
                 phone: '048635449',
                 gender: Gender.Female,
@@ -612,7 +631,7 @@ describe('member merge', () => {
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumber).toBe(d2Old.uitpasNumber);
+                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(d2Old.uitpasNumberDetails?.uitpasNumber);
             });
 
             test('email', () => {

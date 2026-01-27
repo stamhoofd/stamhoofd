@@ -1,4 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
+import { UitpasNumberDetails } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 import XLSX from 'xlsx';
 import { ColumnMatcher } from '../ColumnMatcher';
@@ -47,7 +48,9 @@ export class UitpasNumberColumnMatcher implements ColumnMatcher {
         }
 
         importResult.addPatch({
-            uitpasNumber: value,
+            uitpasNumberDetails: UitpasNumberDetails.patch({
+                uitpasNumber: value,
+            }),
         });
     }
 }

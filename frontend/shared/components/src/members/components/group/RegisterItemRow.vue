@@ -1,5 +1,5 @@
 <template>
-    <STListItem class="right-stack" :selectable="canEdit" @click="canEdit ? editMe() : undefined">
+    <STListItem class="right-stack" :selectable="canEdit" data-testid="register-item-row" @click="canEdit ? editMe() : undefined">
         <template v-if="showGroup" #left>
             <GroupIconWithWaitingList :group="item.group" :icon="item.replaceRegistrations.length ? 'sync' : ''" />
         </template>
@@ -31,7 +31,7 @@
 
         <template v-if="item.totalPrice !== 0">
             <footer>
-                <p class="style-price">
+                <p class="style-price" data-testid="register-item-price">
                     {{ formatPrice(item.totalPrice) }}
                 </p>
             </footer>

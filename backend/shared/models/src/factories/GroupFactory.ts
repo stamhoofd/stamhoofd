@@ -2,8 +2,8 @@ import { Factory } from '@simonbackx/simple-database';
 import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupSettings, GroupType, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { RegistrationPeriod } from '../models/index.js';
 import { Group } from '../models/Group.js';
+import { RegistrationPeriod } from '../models/index.js';
 import { Organization } from '../models/Organization.js';
 import { OrganizationFactory } from './OrganizationFactory.js';
 
@@ -22,6 +22,7 @@ class Options {
      */
     bundleDiscount?: BundleDiscount;
     bundleDiscounts?: BundleDiscount[] | Map<BundleDiscount, GroupPriceDiscount[] | null>;
+    name?: TranslatedString;
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -48,7 +49,7 @@ export class GroupFactory extends Factory<Options, Group> {
         group.waitingListId = this.options.waitingListId ?? null;
 
         group.settings = GroupSettings.create({
-            name: new TranslatedString('Group name'),
+            name: this.options.name ?? new TranslatedString('Group name'),
             startDate: new Date(new Date().getTime() - 10 * 1000),
             endDate: new Date(new Date().getTime() + 10 * 1000),
             registrationStartDate: new Date(new Date().getTime() - 10 * 1000),

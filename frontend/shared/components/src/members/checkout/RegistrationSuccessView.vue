@@ -1,5 +1,5 @@
 <template>
-    <div class="st-view">
+    <div class="st-view" data-testid="registration-success-view">
         <STNavigationBar :title="title" />
         <main>
             <h1>{{ title }}</h1>

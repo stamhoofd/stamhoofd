@@ -1,6 +1,6 @@
 <template>
     <form class="centered-message-container" @submit.prevent @mousedown="onClickOutside" @touchdown="onClickOutside">
-        <div class="centered-message" @mousedown.stop="" @touchdown.stop="">
+        <div class="centered-message" data-testid="centered-message" @mousedown.stop="" @touchdown.stop="">
             <div class="header">
                 <Spinner v-if="centeredMessage.type === 'loading'" class="" />
                 <img v-else-if="centeredMessage.type === 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
@@ -18,11 +18,11 @@
 
             <div class="buttons">
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" @click="onClickButton(button)">
+                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </a>
-                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" @click="onClickButton(button)">
+                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>
@@ -36,45 +36,45 @@
 import { usePop } from '@simonbackx/vue-app-navigation';
 
 import { ErrorBox } from '../errors/ErrorBox';
-import STErrorsDefault from "../errors/STErrorsDefault.vue"
-import LoadingButton from "../navigation/LoadingButton.vue"
-import Spinner from "../Spinner.vue"
+import STErrorsDefault from '../errors/STErrorsDefault.vue';
+import LoadingButton from '../navigation/LoadingButton.vue';
+import Spinner from '../Spinner.vue';
 import { CenteredMessage, CenteredMessageButton } from './CenteredMessage';
 import { onActivated, onDeactivated, onMounted, ref, useTemplateRef } from 'vue';
 import { useErrors } from '../errors/useErrors';
 
 const props = defineProps<{
-    centeredMessage: CenteredMessage
-}>()
+    centeredMessage: CenteredMessage;
+}>();
 const isClosing = ref(false);
 const errors = useErrors();
 const pop = usePop();
-const buttonsRef = useTemplateRef<HTMLButtonElement[] | HTMLButtonElement | null>('buttons')
+const buttonsRef = useTemplateRef<HTMLButtonElement[] | HTMLButtonElement | null>('buttons');
 
 onMounted(() => {
     props.centeredMessage.doHide = () => {
-        close()
-    }
+        close();
+    };
 
     if (document.activeElement && (document.activeElement as any).blur) {
         (document.activeElement as any).blur();
     }
     setTimeout(() => {
-        focusNextButton()
-    }, 200)
-})
+        focusNextButton();
+    }, 200);
+});
 
 function onClickOutside() {
     // If this is a touch device, do nothing
     if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)) {
-        return
+        return;
     }
     dismiss();
 }
 
 async function onClickButton(button: CenteredMessageButton) {
     if (isClosing.value) {
-        return
+        return;
     }
     if (button.loading) {
         return;
@@ -82,87 +82,89 @@ async function onClickButton(button: CenteredMessageButton) {
     if (button.action) {
         button.loading = true;
         try {
-            await button.action()
-        } catch (e) {
-            errors.errorBox = new ErrorBox(e)
-            button.loading = false
+            await button.action();
+        }
+        catch (e) {
+            errors.errorBox = new ErrorBox(e);
+            button.loading = false;
             return;
         }
-        errors.errorBox = null
-        button.loading = false
+        errors.errorBox = null;
+        button.loading = false;
     }
-    close()
+    close();
 }
 
 function dismiss() {
-    const closeButton = props.centeredMessage.buttons.find(b => b.type === "secundary")
+    const closeButton = props.centeredMessage.buttons.find(b => b.type === 'secundary');
     if (!closeButton) {
         return;
     }
 
-    onClickButton(closeButton).catch(console.error)
+    onClickButton(closeButton).catch(console.error);
 }
 
 function close() {
     if (isClosing.value) {
-        return
+        return;
     }
-    isClosing.value = true
-    pop({ force: true })
+    isClosing.value = true;
+    pop({ force: true });
 }
 
 onActivated(() => {
-    document.addEventListener("keydown", onKey);
-})
+    document.addEventListener('keydown', onKey);
+});
 
 onDeactivated(() => {
-    document.removeEventListener("keydown", onKey);
-})
+    document.removeEventListener('keydown', onKey);
+});
 
 function getButtons() {
-    let buttons = buttonsRef.value
+    let buttons = buttonsRef.value;
 
-    console.log('getButtons', buttons)
+    console.log('getButtons', buttons);
 
     if (!buttons) {
         return [];
     }
 
     if (!Array.isArray(buttons)) {
-        buttons = [buttons]
+        buttons = [buttons];
     }
     return buttons;
 }
 
 function focusNextButton() {
-    console.log('focusNextButton')
-    let buttons = getButtons()
+    console.log('focusNextButton');
+    let buttons = getButtons();
     if (buttons.length === 0) {
-        console.log('no buttons')
-        return
+        console.log('no buttons');
+        return;
     }
 
     // Find first focused button and select the next one or first one if it is the last one
-    const focusedButton = buttons.findIndex((b: any) => b === document.activeElement)
-    
+    const focusedButton = buttons.findIndex((b: any) => b === document.activeElement);
+
     let button = buttons[0];
     if (focusedButton !== -1) {
         if (focusedButton > 0) {
             button = buttons[focusedButton - 1];
-        } else {
+        }
+        else {
             button = buttons[buttons.length - 1];
         }
     }
 
     // Fix unreliable focus visible
-    button.classList.add("focus-visible");
+    button.classList.add('focus-visible');
 
     // And we'll remove it again on blur, once
-    button.addEventListener("blur", function () {
-        button.classList.remove("focus-visible");
+    button.addEventListener('blur', function () {
+        button.classList.remove('focus-visible');
     }, { once: true });
-    
-    button.focus()
+
+    button.focus();
 }
 
 function onKey(event: KeyboardEvent) {
@@ -171,41 +173,41 @@ function onKey(event: KeyboardEvent) {
     }
 
     const key = event.key || event.keyCode;
-    const closeButton = props.centeredMessage.buttons.find(b => b.type === "secundary")
+    const closeButton = props.centeredMessage.buttons.find(b => b.type === 'secundary');
 
-    if (key === "Tab") {
+    if (key === 'Tab') {
         focusNextButton();
         event.preventDefault();
         return;
     }
 
-    if (key === "Escape" || key === "Esc" || key === 27) {
+    if (key === 'Escape' || key === 'Esc' || key === 27) {
         if (!closeButton) {
             return;
         }
 
-        onClickButton(closeButton).catch(console.error)
+        onClickButton(closeButton).catch(console.error);
         event.preventDefault();
         return;
     }
 
-    if (key === "Enter" || key === 13) {
-        const focusedButton = getButtons().find((b: any) => b === document.activeElement)
+    if (key === 'Enter' || key === 13) {
+        const focusedButton = getButtons().find((b: any) => b === document.activeElement);
         if (focusedButton) {
             // Browser default
             return;
         }
         // Do we have a default action?
-        const defaultButton = props.centeredMessage.buttons.find(b => b.action !== null && b.type !== "destructive")
+        const defaultButton = props.centeredMessage.buttons.find(b => b.action !== null && b.type !== 'destructive');
         if (defaultButton) {
-            onClickButton(defaultButton).catch(console.error)
+            onClickButton(defaultButton).catch(console.error);
             event.preventDefault();
             return;
         }
     }
 }
 
-// 
+//
 // @Component({
 //     components: {
 //         Spinner,
@@ -216,15 +218,15 @@ function onKey(event: KeyboardEvent) {
 // export default class CenteredMessageView extends Mixins(NavigationMixin) {
 //     @Prop({ required: true})
 //     centeredMessage: CenteredMessage
-// 
+//
 //     isClosing = false
 //     errorBox: ErrorBox | null = null
-// 
+//
 //     mounted() {
 //         this.centeredMessage.doHide = () => {
 //             this.close()
 //         }
-// 
+//
 //         if (document.activeElement && (document.activeElement as any).blur) {
 //             (document.activeElement as any).blur();
 //         }
@@ -232,7 +234,7 @@ function onKey(event: KeyboardEvent) {
 //             this.focusNextButton()
 //         }, 200)
 //     }
-// 
+//
 //     onClickOutside() {
 //         // If this is a touch device, do nothing
 //         if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)) {
@@ -240,7 +242,7 @@ function onKey(event: KeyboardEvent) {
 //         }
 //         this.dismiss();
 //     }
-// 
+//
 //     async onClickButton(button: CenteredMessageButton) {
 //         if (this.isClosing) {
 //             return
@@ -262,16 +264,16 @@ function onKey(event: KeyboardEvent) {
 //         }
 //         this.close()
 //     }
-// 
+//
 //     dismiss() {
 //         const closeButton = this.centeredMessage.buttons.find(b => b.type === "secundary")
 //         if (!closeButton) {
 //             return;
 //         }
-// 
+//
 //         this.onClickButton(closeButton).catch(console.error)
 //     }
-// 
+//
 //     close() {
 //         if (this.isClosing) {
 //             return
@@ -279,28 +281,28 @@ function onKey(event: KeyboardEvent) {
 //         this.isClosing = true
 //         this.pop({ force: true })
 //     }
-// 
+//
 //     activated() {
 //         document.addEventListener("keydown", this.onKey);
 //     }
-// 
+//
 //     deactivated() {
 //         document.removeEventListener("keydown", this.onKey);
 //     }
-// 
+//
 //     getButtons() {
 //         let buttons = this.$refs.buttons as any
-// 
+//
 //         if (!buttons) {
 //             return [];
 //         }
-// 
+//
 //         if (buttons.length === undefined) {
 //             buttons = [buttons]
 //         }
 //         return buttons;
 //     }
-// 
+//
 //     focusNextButton() {
 //         console.log('focusNextButton')
 //         let buttons = this.getButtons()
@@ -308,10 +310,10 @@ function onKey(event: KeyboardEvent) {
 //             console.log('no buttons')
 //             return
 //         }
-// 
+//
 //         // Find first focused button and select the next one or first one if it is the last one
 //         const focusedButton = buttons.findIndex((b: any) => b === document.activeElement)
-//         
+//
 //         let button = buttons[0];
 //         if (focusedButton !== -1) {
 //             if (focusedButton >= buttons.length - 2) {
@@ -320,42 +322,42 @@ function onKey(event: KeyboardEvent) {
 //                 button = buttons[focusedButton+1]
 //             }
 //         }
-// 
+//
 //         // Fix unreliable focus visible
 //         button.classList.add("focus-visible");
-// 
+//
 //         // And we'll remove it again on blur, once
 //         button.addEventListener("blur", function () {
 //             button.classList.remove("focus-visible");
 //         }, { once: true });
-//         
+//
 //         button.focus()
 //     }
-// 
+//
 //     onKey(event) {
 //         if (event.defaultPrevented || event.repeat) {
 //             return;
 //         }
-// 
+//
 //         const key = event.key || event.keyCode;
 //         const closeButton = this.centeredMessage.buttons.find(b => b.type === "secundary")
-// 
+//
 //         if (key === "Tab") {
 //             this.focusNextButton();
 //             event.preventDefault();
 //             return;
 //         }
-// 
+//
 //         if (key === "Escape" || key === "Esc" || key === 27) {
 //             if (!closeButton) {
 //                 return;
 //             }
-// 
+//
 //             this.onClickButton(closeButton).catch(console.error)
 //             event.preventDefault();
 //             return;
 //         }
-// 
+//
 //         if (key === "Enter" || key === 13) {
 //             const focusedButton = this.getButtons().find((b: any) => b === document.activeElement)
 //             if (focusedButton) {
@@ -389,7 +391,7 @@ function onKey(event: KeyboardEvent) {
     background: $color-background;
     max-width: calc(100vw - 30px);
     width: 350px;
-    
+
     box-sizing: border-box;
     max-height: 100vh;
     overflow: auto;
@@ -425,7 +427,7 @@ function onKey(event: KeyboardEvent) {
     > *:first-child {
         margin-top: 10px;
     }
-    
+
     > img.center, > .icon.center {
         display: block;
         margin: 0 auto;
@@ -467,7 +469,6 @@ function onKey(event: KeyboardEvent) {
             transition: transform 0.30s cubic-bezier(0.0, 0.0, 0.2, 1);
         }
     }
-
 
     &.show-leave-active {
         transition: opacity 0.25s;

@@ -111,7 +111,7 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
         returnNullIfNoAccessRight(new SelectablePdfData<PlatformMember>({
             id: 'uitpasNumber',
             name: $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`),
-            getValue: ({ patchedMember: object }: PlatformMember) => object.details.uitpasNumber,
+            getValue: ({ patchedMember: object }: PlatformMember) => object.details.uitpasNumberDetails?.uitpasNumber,
         }), [AccessRight.MemberReadFinancialData]),
 
         new SelectablePdfData<PlatformMember>({

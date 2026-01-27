@@ -66,16 +66,6 @@ export class DataValidator {
         return value.length === 36 && value[8] === '-' && value[13] === '-' && value[18] === '-' && value[23] === '-';
     }
 
-    static isUitpasNumberKansenTarief(str: string) {
-        const isValid = this.isUitpasNumberValid(str);
-        if (!isValid) {
-            return false;
-        }
-
-        const char = str[str.length - 2];
-        return char === '1';
-    }
-
     static formatUitpasNumber(text: string) {
         const trimmed = this.cleanUitpasNumber(text);
         // XXXX XXX XXX XXX

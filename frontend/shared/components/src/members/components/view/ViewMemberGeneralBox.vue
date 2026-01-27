@@ -61,10 +61,10 @@
                 </dd>
             </template>
 
-            <template v-if="member.patchedMember.details.uitpasNumber">
+            <template v-if="member.patchedMember.details.uitpasNumberDetails">
                 <dt>{{ $t('d70f2a7f-d8b4-4846-8dc0-a8e978765b9d') }}</dt>
                 <dd v-copyable>
-                    {{ member.patchedMember.details.uitpasNumber }}
+                    {{ member.patchedMember.details.uitpasNumberDetails.uitpasNumber }}
                 </dd>
             </template>
 

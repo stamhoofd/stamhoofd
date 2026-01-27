@@ -13,6 +13,7 @@ import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
 import { Context } from '../../../helpers/Context.js';
 import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
+import { updateMemberDetailsUitpasNumber } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { BalanceItemService } from '../../../services/BalanceItemService.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { RegistrationService } from '../../../services/RegistrationService.js';
@@ -167,6 +168,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
+        const isBulkUpdate = members.length > 5;
+
         for (const member of members) {
             if (!await Context.auth.canAccessMember(
                 member,
@@ -178,6 +181,25 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     human: $t(`7b7c4b2b-f30c-4cad-ba13-caad591bafde`),
                     statusCode: 403,
                 });
+            }
+
+            // update uitpas social tariff
+            if (!isBulkUpdate && member.details.uitpasNumberDetails
+                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegsitration(member.details.requiresFinancialSupport)
+            ) {
+                let isUpdated: boolean = false;
+
+                try {
+                    isUpdated = await updateMemberDetailsUitpasNumber(member.details);
+                }
+                catch (e) {
+                    // catch all errors
+                }
+
+                if (isUpdated) {
+                    member.details.cleanData();
+                    await member.save();
+                }
             }
         }
 

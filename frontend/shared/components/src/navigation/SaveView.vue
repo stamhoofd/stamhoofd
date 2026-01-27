@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :loading="loadingView" :error-box="errorBox">
-        <form class="st-view" @submit.prevent="$emit('save')">
+        <form class="st-view" data-testid="save-view" @submit.prevent="$emit('save')">
             <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
@@ -18,14 +18,14 @@
                         <button v-tooltip="$t('ea84aed8-48ce-4a43-b391-0a4a16782909')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
-                        <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" />
-                        <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
+                        <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" data-testid="save-button" />
+                        <button v-else class="button navigation highlight" :disabled="disabled" type="submit" data-testid="save-button">
                             {{ saveText }}
                         </button>
                     </LoadingButton>
                     <template v-else-if="canDismiss && !(!preferLargeButton && ($isMobile || $isIOS || $isAndroid))">
-                        <button v-if="!$isIOS" class="button icon close" type="button" @click="dismiss()" />
-                        <button v-else class="button text selected unbold" type="button" @click="dismiss()">
+                        <button v-if="!$isIOS" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
+                        <button v-else class="button text selected unbold" type="button" data-testid="close-button" @click="dismiss()">
                             {{ cancelText }}
                         </button>
                     </template>
@@ -46,7 +46,7 @@
                         {{ cancelText }}
                     </button>
                     <LoadingButton :loading="loading">
-                        <button class="button" :class="saveButtonClass" :disabled="disabled" type="submit">
+                        <button class="button" :class="saveButtonClass" :disabled="disabled" type="submit" data-testid="save-button">
                             <span v-if="saveIcon" class="icon " :class="saveIcon" />
                             <span>{{ saveText }}</span>
                             <span v-if="saveIconRight" class="icon " :class="saveIconRight" />

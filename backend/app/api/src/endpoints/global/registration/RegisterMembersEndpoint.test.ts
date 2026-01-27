@@ -1,16 +1,16 @@
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { BalanceItemFactory, Group, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { assertBalances } from '../../../../tests/assertions/assertBalances';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { initAdmin, initPermissionRole } from '../../../../tests/init';
-import { initPayconiq } from '../../../../tests/init/initPayconiq';
-import { BalanceItemService } from '../../../services/BalanceItemService';
-import { RegisterMembersEndpoint } from './RegisterMembersEndpoint';
+import { assertBalances } from '../../../../tests/assertions/assertBalances.js';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { initAdmin, initPermissionRole, initUitpasApi } from '../../../../tests/init/index.js';
+import { initPayconiq } from '../../../../tests/init/initPayconiq.js';
+import { BalanceItemService } from '../../../services/BalanceItemService.js';
+import { RegisterMembersEndpoint } from './RegisterMembersEndpoint.js';
 
 const baseUrl = `/v${Version}/members/register`;
 
@@ -1247,6 +1247,183 @@ describe('Endpoint.RegisterMembers', () => {
 
             const result = await post(body, organization, token);
             expect(result).toBeDefined();
+        });
+
+        describe('Uitpas number', () => {
+            test('should update social tariff status and throw error if the price changed', async () => {
+                // #region arrange
+                initUitpasApi();
+                const { member, group, groupPrice, organization, token } = await initData();
+                member.details.uitpasNumberDetails = UitpasNumberDetails.create({
+                    // expired
+                    uitpasNumber: '0900000031618',
+                    socialTariff: UitpasSocialTariff.create({
+                        // but last time checked it was active
+                        status: UitpasSocialTariffStatus.Active,
+                        updatedAt: new Date(2000, 0, 1),
+                        endDate: new Date(2000, 0, 1),
+                    }),
+                });
+
+                await member.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    // reduced price
+                    totalPrice: 12_5000,
+                    customer: null,
+                });
+                // #endregion
+
+                // act
+
+                // should throw error
+                await expect(async () => await post(body, organization, token))
+                    .rejects
+                    .toThrow(STExpect.errorWithCode('changed_price'));
+
+                // should update status
+                const updatedMember = await Member.getByID(member.id);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
+            });
+
+            test('should not update social tariff status if updated less than 1 week ago', async () => {
+                // #region arrange
+                initUitpasApi();
+                const { member, group, groupPrice, organization, token } = await initData();
+
+                const now = new Date();
+                const weekInMs = 7 * 24 * 3600 * 1000;
+                const oneHourInMs = 3600 * 1000;
+                const lessThanAWeekAgo = new Date(now.getTime() - weekInMs + oneHourInMs);
+
+                member.details.uitpasNumberDetails = UitpasNumberDetails.create({
+                    // expired
+                    uitpasNumber: '0900000031618',
+                    socialTariff: UitpasSocialTariff.create({
+                        // but last time checked it was active
+                        status: UitpasSocialTariffStatus.Active,
+                        updatedAt: lessThanAWeekAgo,
+                        endDate: new Date(2000, 0, 1),
+                    }),
+                });
+
+                await member.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    // reduced price
+                    totalPrice: 12_5000,
+                    customer: null,
+                });
+                // #endregion
+
+                // act
+                const response = await post(body, organization, token);
+
+                // assert
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+
+                // should not update status
+                const updatedMember = await Member.getByID(member.id);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
+            });
+
+            test('should not apply reduced price if social tariff status is unknown and uitpas api is unavailable', async () => {
+                // #region arrange
+                const mocker = initUitpasApi();
+                mocker.forceFailure();
+
+                const { member, group, groupPrice, organization, token } = await initData();
+                member.details.uitpasNumberDetails = UitpasNumberDetails.create({
+                    // active
+                    uitpasNumber: '0900011354819',
+                    socialTariff: UitpasSocialTariff.create({
+                        // but last time checked it was active
+                        status: UitpasSocialTariffStatus.Unknown,
+                        updatedAt: new Date(2000, 0, 1),
+                        endDate: new Date(2000, 0, 1),
+                    }),
+                });
+
+                await member.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    // normal price
+                    totalPrice: 25_0000,
+                    customer: null,
+                });
+                // #endregion
+
+                // act
+                const response = await post(body, organization, token);
+
+                // assert
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+
+                // should not update status
+                const updatedMember = await Member.getByID(member.id);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+            });
         });
     });
 

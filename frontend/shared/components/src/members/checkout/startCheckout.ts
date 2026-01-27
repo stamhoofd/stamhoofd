@@ -28,11 +28,6 @@ export async function startCheckout({ checkout, context, displayOptions, admin, 
     await stepManager.saveHandler(null, navigate);
 }
 
-export async function startRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }, navigate: NavigationActions) {
-    checkout.validate({});
-    await register({ checkout, context, admin, members }, navigate);
-}
-
 export async function startSilentRegister({ checkout, context, admin, members }: { checkout: RegisterCheckout; context: SessionContext; admin?: boolean; members?: PlatformMember[] }) {
     checkout.validate({});
     await silentRegister({ checkout, context, admin, members });
@@ -160,7 +155,7 @@ async function register({ checkout, context, admin, members }: { checkout: Regis
             organization: checkout.singleOrganization!,
             payment,
             paymentUrl: response.data.paymentUrl,
-            paymentQRCode: response.data.paymentQRCode, 
+            paymentQRCode: response.data.paymentQRCode,
             navigate,
             transferSettings: checkout.singleOrganization!.meta.registrationPaymentConfiguration.transferSettings,
             type: 'registration',

@@ -1,25 +1,16 @@
-import { WorkerInfo } from "@playwright/test";
-import { EmailMocker } from "@stamhoofd/email";
-import { TestUtils } from "@stamhoofd/test-utils";
-import { ApiService } from "./ApiService";
-import { CaddyConfigHelper } from "./CaddyConfigHelper";
-import { DatabaseHelper } from "./DatabaseHelper";
-import { FrontendProjectName, FrontendService } from "./FrontendService";
-import { ServiceProcess } from "./ServiceHelper";
-import { WorkerData } from "./WorkerData";
+import { WorkerInfo } from '@playwright/test';
+import { TestUtils } from '@stamhoofd/test-utils';
+import { WorkerData } from '../../helpers/worker/WorkerData';
+import { ApiService } from './ApiService';
+import { CaddyConfigHelper } from './CaddyConfigHelper';
+import { FrontendProjectName, FrontendService } from './FrontendService';
+import { ServiceProcess } from './ServiceHelper';
 
 class WorkerHelperInstance {
-    private isInitialized = false;
-    private _databaseHelper: DatabaseHelper | null = null;
+    private _isInitialized = false;
 
-    private get databaseHelper() {
-        if (!this._databaseHelper) {
-            if(!WorkerData.id) {
-                throw new Error("Worker id is not set");
-            }
-            this._databaseHelper = new DatabaseHelper(WorkerData.id);
-        }
-        return this._databaseHelper;
+    get isInitialized() {
+        return this._isInitialized;
     }
 
     /**
@@ -38,14 +29,14 @@ class WorkerHelperInstance {
 
         // start frontend services
         const frontendServiceNames: FrontendProjectName[] = [
-            "dashboard",
-            "registration",
-            "webshop",
+            'dashboard',
+            'registration',
+            'webshop',
         ];
 
         const frontendProcesses: ServiceProcess[] = [];
 
-        for(const name of frontendServiceNames) {
+        for (const name of frontendServiceNames) {
             const service = new FrontendService(name, workerId);
             const process = await service.start();
             frontendProcesses.push(process);
@@ -61,13 +52,13 @@ class WorkerHelperInstance {
         await apiProcess.wait();
         console.log(`API ready for worker ${workerId}.`);
 
-        await Promise.all(frontendProcesses.map((p) => p.wait()));
+        await Promise.all(frontendProcesses.map(p => p.wait()));
         console.log(`Frontend processes ready for worker ${workerId}.`);
 
         return {
             teardown: async () => {
                 // kill processes
-                await Promise.all(allProcesses.map((p) => p.kill?.()));
+                await Promise.all(allProcesses.map(p => p.kill?.()));
             },
         };
     }
@@ -115,10 +106,12 @@ class WorkerHelperInstance {
             translationNamespace: 'stamhoofd',
             platformName: 'stamhoofd',
             DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
+            UITPAS_API_CLIENT_SECRET: 'sk_test_test',
+            UITPAS_API_CLIENT_ID: 'sk_test_test',
         };
 
         for (const key in config) {
-            TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment])
+            TestUtils.setPermanentEnvironment(key as keyof BackendEnvironment, config[key as keyof BackendEnvironment]);
         }
     }
 
@@ -126,28 +119,24 @@ class WorkerHelperInstance {
      * The playwright tests use the test environment in shared/test-utils/src/env.json, with some minor tweaks to domains and ports for multiple playwright workers
      */
     loadEnvironment() {
-        if (this.isInitialized) {
-            console.log('Environment already loaded')
+        if (this._isInitialized) {
+            console.log('Environment already loaded');
             return;
         }
 
+        this._isInitialized = true;
+
         if (!WorkerData.isInWorkerProcess) {
-            throw new Error('Loading env not possible: not in a worker process')
+            throw new Error('Loading env not possible: not in a worker process');
         }
 
         if (WorkerData.isInWorkerProcess) {
             // set environment variables
-            console.log('Loading environment')
+            console.log('Loading environment');
             this.overrideDefaultEvironment();
-            EmailMocker.infect();
-            console.log('Environment has been loaded')
-
-            this.isInitialized = true;
+            // EmailMocker.infect();
+            console.log('Environment has been loaded');
         }
-    }
-
-    async clearDatabase() {
-        await this.databaseHelper.clear();
     }
 }
 

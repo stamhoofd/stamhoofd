@@ -6,7 +6,7 @@
         <STErrorsDefault :error-box="parentErrorBox" />
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <UitpasNumberInput v-model="uitpasNumber" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`)" />
+        <UitpasNumberInputWithStatus v-model="uitpasNumberDetails" :required="isPropertyRequired('uitpasNumber')" :validator="validator" :title="isAdmin ? undefined : $t(`d70f2a7f-d8b4-4846-8dc0-a8e978765b9d`)" error-fields="uitpasNumber" />
 
         <p v-if="!willMarkReviewed && isAdmin && reviewDate" class="style-description-small">
             {{ $t('ef93c19a-9c97-4598-a11a-95d7a2bf2f02') }} {{ formatDate(reviewDate) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">
@@ -23,7 +23,7 @@ import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import { Validator } from '../../../errors/Validator';
 import { useErrors } from '../../../errors/useErrors';
-import UitpasNumberInput from '../../../inputs/UitpasNumberInput.vue';
+import UitpasNumberInputWithStatus from '../../../inputs/UitpasNumberInputWithStatus.vue';
 import { useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
 
@@ -43,10 +43,10 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const errors = useErrors({ validator: props.validator });
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 
-const uitpasNumber = computed({
-    get: () => props.member.patchedMember.details.uitpasNumber,
-    set: (uitpasNumber) => {
-        props.member.addDetailsPatch({ uitpasNumber });
+const uitpasNumberDetails = computed({
+    get: () => props.member.patchedMember.details.uitpasNumberDetails,
+    set: (details) => {
+        props.member.addDetailsPatch({ uitpasNumberDetails: details });
     },
 });
 

@@ -4,12 +4,13 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, Group, Member, RateLimiter, Registration } from '@stamhoofd/models';
 import { MemberDetails, MembersBlob, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
-import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint';
-import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate';
 import { OneToManyRelation } from '@simonbackx/simple-database';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
+import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint.js';
+import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
@@ -60,7 +61,9 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             member.organizationId = organization?.id ?? null;
 
             const securityCode = struct.details.securityCode; // will get cleared after the filter
-            Context.auth.filterMemberPut(member, struct, {asUserManager: true});
+            Context.auth.filterMemberPut(member, struct, { asUserManager: true });
+
+            await updateMemberDetailsUitpasNumber(struct.details);
             struct.details.cleanData();
             member.details = struct.details;
 
@@ -102,7 +105,15 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
                 shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
 
+                const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
+
+                const originalReviewTimes = member.details.reviewTimes;
                 member.details.patchOrPut(struct.details);
+
+                if (struct.details.uitpasNumberDetails || didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)) {
+                    await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
+                }
+
                 member.details.cleanData();
                 this.throwIfInvalidDetails(member.details);
             }

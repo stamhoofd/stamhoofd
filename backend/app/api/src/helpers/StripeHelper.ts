@@ -4,6 +4,7 @@ import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, 
 import { calculateVATPercentage, PaymentMethod, PaymentMethodHelper, PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import Stripe from 'stripe';
+import { passthroughFetch } from './passthroughFetch.js';
 
 export class StripeHelper {
     static get notConfiguredError() {
@@ -18,7 +19,16 @@ export class StripeHelper {
         if (!STAMHOOFD.STRIPE_SECRET_KEY) {
             throw this.notConfiguredError;
         }
-        return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20', typescript: true, maxNetworkRetries: 0, timeout: 10000, stripeAccount: accountId ?? undefined });
+        return new Stripe(STAMHOOFD.STRIPE_SECRET_KEY, {
+            apiVersion: '2024-06-20',
+            typescript: true,
+            maxNetworkRetries: 0,
+            timeout: 10000,
+            stripeAccount: accountId ?? undefined,
+            httpClient: STAMHOOFD.environment === 'test'
+                ? Stripe.createFetchHttpClient(passthroughFetch)
+                : undefined,
+        });
     }
 
     static async saveChargeInfo(model: StripePaymentIntent | StripeCheckoutSession, charge: Stripe.Charge, payment: Payment) {

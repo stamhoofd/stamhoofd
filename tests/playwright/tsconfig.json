@@ -28,8 +28,7 @@
         },
     },
     "include": [
-        "src/setup/**/*.ts",
-        "src/tests/**/*.ts",
+        "src/**/*.ts",
         "*.d.ts",
         "../../*.d.ts"
     ],

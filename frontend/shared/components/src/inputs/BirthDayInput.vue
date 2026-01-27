@@ -2,7 +2,7 @@
     <STInputBox :title="title" error-fields="birthDay" :error-box="errors.errorBox">
         <div class="input birth-day-selection">
             <div class="input-icon-container right icon arrow-down-small gray">
-                <select v-model="day" autocomplete="bday-day" name="bday-day" @change="updateDate">
+                <select v-model="day" autocomplete="bday-day" name="bday-day" data-testid="day-select" @change="updateDate">
                     <!-- name is needed for autocomplete in safari -->
                     <option :disabled="required" :value="null">
                         {{ $t('9ea48ee8-ed13-43f7-a900-82630b911b7a') }}
@@ -14,7 +14,7 @@
             </div>
 
             <div class="input-icon-container right icon arrow-down-small gray">
-                <select v-model="month" autocomplete="bday-month" name="bday-month" @change="updateDate">
+                <select v-model="month" autocomplete="bday-month" name="bday-month" data-testid="month-select" @change="updateDate">
                     <option :disabled="required" :value="null">
                         {{ $t('30a79bd4-2e8d-4bd4-97be-f23d04c337c8') }}
                     </option>
@@ -25,7 +25,7 @@
             </div>
 
             <div class="input-icon-container right icon arrow-down-small gray">
-                <select v-model="year" autocomplete="bday-year" name="bday-year" @change="updateDate">
+                <select v-model="year" autocomplete="bday-year" name="bday-year" data-testid="year-select" @change="updateDate">
                     <option :disabled="required" :value="null">
                         {{ $t('f88a59b7-e4ab-453b-96f2-8b1b60cb2fc0') }}
                     </option>

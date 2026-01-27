@@ -1,3 +1,6 @@
+// first import nock
+import nock from 'nock';
+
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -7,11 +10,11 @@ import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { sleep } from '@stamhoofd/utility';
 import * as jose from 'jose';
-import nock from 'nock';
-import { GlobalHelper } from '../src/helpers/GlobalHelper';
-import { BalanceItemService } from '../src/services/BalanceItemService';
-import { PayconiqMocker } from './helpers/PayconiqMocker';
-import './toMatchMap';
+import { GlobalHelper } from '../src/helpers/GlobalHelper.js';
+import { BalanceItemService } from '../src/services/BalanceItemService.js';
+import { PayconiqMocker } from './helpers/PayconiqMocker.js';
+import { resetNock } from './helpers/resetNock.js';
+import './toMatchMap.js';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
@@ -33,7 +36,7 @@ if (new Date().getTimezoneOffset() !== 0) {
 console.log = jest.fn();
 
 beforeAll(async () => {
-    nock.cleanAll();
+    resetNock();
     nock.disableNetConnect();
 
     await Database.delete('DELETE FROM `tokens`');
@@ -111,4 +114,7 @@ afterEach(async () => {
 
 TestUtils.setup();
 EmailMocker.infect();
+
+// should be mocked first (before node https imports)
+PayconiqMocker.setup();
 PayconiqMocker.infect();

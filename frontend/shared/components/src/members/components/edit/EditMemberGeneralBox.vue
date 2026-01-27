@@ -9,10 +9,10 @@
                 <STInputBox error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`)">
                     <div class="input-group">
                         <div>
-                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                            <input v-model="firstName" class="input" data-testid="first-name-input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
                         </div>
                         <div>
-                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                            <input v-model="lastName" class="input" data-testid="last-name-input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
                         </div>
                     </div>
                 </STInputBox>
@@ -111,6 +111,7 @@
 
 <script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 import { Gender, NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useAppContext } from '../../../context/appContext';
@@ -128,7 +129,6 @@ import TrackingYearInput from '../../../inputs/TrackingYearInput.vue';
 import { ContextMenu, ContextMenuItem } from '../../../overlays/ContextMenu';
 import { useIsPropertyEnabled, useIsPropertyRequired } from '../../hooks/useIsPropertyRequired';
 import Title from './Title.vue';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
 
 defineOptions({
     inheritAttrs: false,

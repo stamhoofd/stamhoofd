@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isAdmin" class="container">
+    <div v-if="isAdmin" class="container" data-testid="financial-support-box">
         <Title v-bind="$attrs" :title="title" />
 
         <STErrorsDefault :error-box="parentErrorBox" />
@@ -27,7 +27,7 @@
             {{ $t('cd5ee584-5b0c-4acb-af75-7b21ad37cead') }}
         </p>
     </div>
-    <div v-else class="container">
+    <div v-else class="container" data-testid="financial-support-box">
         <Title v-bind="$attrs" :title="title" />
         <p class="style-description pre-wrap" v-text="description" />
 
@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BooleanStatus, FinancialSupportSettings, PlatformMember } from '@stamhoofd/structures';
-import { DataValidator } from '@stamhoofd/utility';
 import { computed, nextTick } from 'vue';
 import { useAppContext } from '../../../context/appContext';
 import { ErrorBox } from '../../../errors/ErrorBox';
@@ -135,11 +134,7 @@ const requiresFinancialSupport = computed({
     },
 });
 
-const hasKansenTarief = computed(() => {
-    const uitpasNumber = props.member.patchedMember.details.uitpasNumber;
-    if (uitpasNumber === null) return false;
-    return DataValidator.isUitpasNumberKansenTarief(uitpasNumber);
-});
+const hasKansenTarief = computed(() => props.member.patchedMember.details.uitpasNumberDetails?.socialTariff.isActive === true);
 
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.date ?? null);
 

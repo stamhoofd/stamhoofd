@@ -1,6 +1,6 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
 /**
  * Keep a timestamp of when certain information was reviewed of a member
