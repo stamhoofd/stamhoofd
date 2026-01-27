@@ -161,7 +161,7 @@
 
     &.icon {
         display: flex;
-        width: auto;
+        width: 100%; // In case of button element (required to fit width)
         height: auto;
         overflow: visible;
         white-space: inherit;
