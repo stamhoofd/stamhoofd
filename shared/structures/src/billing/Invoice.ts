@@ -8,6 +8,7 @@ import { PriceBreakdown } from '../PriceBreakdown.js';
 import { File } from '../files/File.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
+import { Sorter, STMath } from '@stamhoofd/utility';
 
 export class VATSubtotal extends AutoEncoder {
     /**
@@ -257,7 +258,7 @@ export class Invoice extends AutoEncoder {
         // Calculate VAT amount for each category and round to 1 cent
         for (const category of categories.values()) {
             if (!category.VATExcempt) {
-                category.VAT = Math.round(category.taxablePrice * category.VATPercentage / 100_00) * 100;
+                category.VAT = STMath.round(category.taxablePrice * category.VATPercentage / 100_00) * 100;
             }
             else {
                 category.VAT = 0;
@@ -344,6 +345,13 @@ export class Invoice extends AutoEncoder {
             const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
             invoicedItems.push(invoiced);
         }
+
+        invoicedItems.sort((a, b) => {
+            return Sorter.stack(
+                Sorter.byNumberValue(a.totalWithoutVAT, b.totalWithoutVAT),
+                Sorter.byStringValue(a.name || a.description, b.name || b.description),
+            );
+        });
 
         this.items = invoicedItems;
         this.calculateVAT();

@@ -8,3 +8,4 @@ export * from './src/StringCompare.js';
 export * from './src/Throttle.js';
 export * from './src/deepFreeze.js';
 export * from './src/FiscalDocumentYearHelper.js';
+export * from './src/STMath.js';

@@ -2,6 +2,7 @@ import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, String
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
 import { SimpleError } from '@simonbackx/simple-errors';
+import { STMath } from '@stamhoofd/utility';
 
 export class InvoicedBalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -71,7 +72,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
      * = LineExtensionAmount
      */
     get totalWithoutVAT() {
-        return Math.round(this.unitPrice * this.quantity / 1_00_00_00) * 100;
+        return STMath.round(this.unitPrice * this.quantity / 1_00_00_00) * 100;
     }
 
     /**
@@ -99,9 +100,9 @@ export class InvoicedBalanceItem extends AutoEncoder {
         item.VATIncluded = balanceItem.VATIncluded;
 
         // Calculate amount and unit price
-        const balanceItemUnitPriceWithVAT = Math.round(balanceItem.priceWithVAT / balanceItem.quantity);
-        const quantity = Math.round(item.balanceInvoicedAmount * 1_00_00 / balanceItemUnitPriceWithVAT); // Amount per ten thousand
-        if (quantity <= 0 && amount >= 0) {
+        const balanceItemUnitPriceWithVAT = STMath.round(balanceItem.priceWithVAT / balanceItem.quantity);
+        const quantity = STMath.round(item.balanceInvoicedAmount * 1_00_00 / balanceItemUnitPriceWithVAT); // Amount per ten thousand
+        if (quantity === 0) {
             throw new SimpleError({
                 message: 'Invoiced amount is too low to create an invoiced balance item',
                 human: $t('551f6cc0-0b1a-4a62-8e09-cef159f5f7d5'),
@@ -120,7 +121,13 @@ export class InvoicedBalanceItem extends AutoEncoder {
         // so this is disabled for now. Rounding will happen on line level though
         // item.unitPrice = Math.round(item.unitPrice / 100) * 100;
         // round as integer instead (0.0001):
-        item.unitPrice = Math.round(item.unitPrice);
+        item.unitPrice = STMath.round(item.unitPrice);
+
+        // Make sure unit price is always positive, and quantity is negative instead
+        if (item.unitPrice < 0) {
+            item.unitPrice = -item.unitPrice;
+            item.quantity = -item.quantity;
+        }
 
         return item;
     }
