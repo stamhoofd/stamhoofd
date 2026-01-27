@@ -3,42 +3,42 @@
         <h1>
             {{ title }}
         </h1>
+        <button v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled" class="error-box icon disabled selectable" type="button" @click="markDue">
+            <span>{{ $t('Deze aanrekening werd geannuleerd en is niet langer te betalen.') }}</span>
+            <span class="button text">{{ $t('Heractiveer') }}</span>
+        </button>
+
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="!hasPayments(patchedBalanceItem)" class="warning-box">
+        <p v-if="!hasPaymentsRelation(patchedBalanceItem)" class="warning-box">
             {{ $t('8a4c3084-e54d-474e-94b2-6e8d2bbc9f5e') }}
         </p>
 
         <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" class="max">
             <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
         </STInputBox>
-        <p v-if="balanceItem.relations.size" class="style-description-small">
+        <p v-if="patchedBalanceItem.relations.size" class="style-description-small">
             {{ $t('3dbf1fab-6adf-4050-a5dd-5c78886035cb', {platform: platform.config.name}) }}
         </p>
 
-        <STInputBox v-if="balanceItem.status === BalanceItemStatus.Canceled" error-fields="status" :error-box="errors.errorBox" :title="$t('f21f3447-bb11-4474-8597-b9cae359faec')">
-            <Dropdown v-model="status">
-                <option :value="BalanceItemStatus.Due">
-                    {{ $t('a8fc4892-7a37-4748-9249-3499524ad288') }}
-                </option>
-                <option :value="BalanceItemStatus.Canceled">
-                    {{ $t('21ae7df0-9833-46e7-9735-ffabf99f8cdd') }}
-                </option>
-            </Dropdown>
-        </STInputBox>
+        <div class="split-inputs">
+            <div>
+                <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`)">
+                    <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
 
-        <div v-if="balanceItem.status === BalanceItemStatus.Due" class="split-inputs">
-            <STInputBox error-fields="unitPrice" :error-box="errors.errorBox" :title="$t(`bab8d047-63db-4d0f-82c7-3a8d69a85745`)">
-                <PriceInput v-model="unitPrice" :min="null" :placeholder="$t(`99e41cea-bce3-4329-8b17-e3487c4534ac`)" />
+                    <template v-if="$feature('vat') || !VATIncluded" #right>
+                        <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
+                            <span v-if="VATIncluded">{{ $t('f107bcb8-5414-4abf-954f-3e63855d65e1') }}</span>
+                            <span v-else>{{ $t('63713e8d-73e7-4013-a7be-549f035b563f') }}</span>
+                            <span class="icon arrow-swap small" />
+                        </button>
+                    </template>
 
-                <template v-if="$feature('vat') || !VATIncluded" #right>
-                    <button class="button text small" type="button" @click="VATIncluded = !VATIncluded">
-                        <span v-if="VATIncluded">{{ $t('f107bcb8-5414-4abf-954f-3e63855d65e1') }}</span>
-                        <span v-else>{{ $t('63713e8d-73e7-4013-a7be-549f035b563f') }}</span>
-                        <span class="icon arrow-swap small" />
-                    </button>
-                </template>
-            </STInputBox>
+                    <p v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled && (patchedBalanceItem.unitPrice !== balanceItem.unitPrice || patchedBalanceItem.amount !== balanceItem.amount)" class="warning-box small">
+                        {{ $t('Het wijzigen van de bedragen heeft geen invloed op het te betalen bedrag, omdat de aanrekening geannuleerd is.') }}
+                    </p>
+                </STInputBox>
+            </div>
 
             <STInputBox error-fields="amount" :error-box="errors.errorBox" :title="$t(`697df3e7-fbbf-421d-81c2-9c904dce4842`)">
                 <NumberInput v-model="amount" :min="Math.min(1, balanceItem.amount)" :stepper="true" :placeholder="$t(`bfcceb79-e614-4e9c-9fba-0ec2bd3f8f2a`)" />
@@ -161,7 +161,7 @@
             </STList>
         </template>
 
-        <template v-if="!isNew && hasPayments(patchedBalanceItem)">
+        <template v-if="!isNew && hasPaymentsRelation(patchedBalanceItem)">
             <hr><h2>{{ $t('290c7beb-61c7-425d-b35e-333aba83bbc5') }}</h2>
             <p>{{ $t('a4474840-0a73-4268-8d06-be3361fe5fc7') }}</p>
 
@@ -173,40 +173,85 @@
                 <PaymentRow v-for="payment of sortedPayments" :key="payment.id" :payment="payment.payment" :payments="patchedBalanceItem.payments.map(b => b.payment)" :price="payment.payment.isFailed ? 0 : payment.price" />
             </STList>
 
-            <template v-if="outstanding.pending === 0 && outstanding.paid === 0">
-                <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
+            <hr>
+            <h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
-                <STList>
-                    <STListItem :selectable="true" @click="doDelete">
-                        <h2 class="style-title-list">
-                            {{ $t('382c3c3e-7ac0-4d9d-871f-2316c85b51ae') }}
-                        </h2>
-                        <template #right>
-                            <button type="button" class="button secundary danger hide-smartphone">
-                                <span class="icon trash" />
-                                <span>{{ $t('63af93aa-df6a-4937-bce8-9e799ff5aebd') }}</span>
-                            </button>
-                            <button type="button" class="button icon trash only-smartphone" />
-                        </template>
-                    </STListItem>
-                </STList>
-            </template>
+            <STList>
+                <STListItem v-if="balanceItem.status === BalanceItemStatus.Canceled" :selectable="true" @click="markDue">
+                    <template #left>
+                        <IconContainer icon="receive">
+                            <template #aside>
+                                <span class="icon undo stroke small" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Heractiveer deze aanrekening') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Markeer deze aanrekening opnieuw als te betalen.') }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-if="outstanding.pending === 0 && outstanding.paid === 0" :selectable="true" class="theme-error" @click="doDelete">
+                    <template #left>
+                        <IconContainer icon="receive" class="error">
+                            <template #aside>
+                                <span class="icon trash small stroke" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('382c3c3e-7ac0-4d9d-871f-2316c85b51ae') }}
+                    </h2>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
+                <STListItem v-else-if="balanceItem.status !== BalanceItemStatus.Canceled" :selectable="true" class="theme-error" @click="doCancel">
+                    <template #left>
+                        <IconContainer icon="receive" class="error">
+                            <template #aside>
+                                <span class="icon disabled small" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Annuleer deze aanrekening') }}
+                    </h2>
+                    <p class="style-description-small">
+                        {{ $t('Een geannuleerde aanrekening blijft in het systeem, maar het te betalen bedrag wordt 0 euro.') }}
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+            </STList>
         </template>
     </SaveView>
 </template>
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
+import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, Dropdown, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, useContext, useErrors, useOrganization, usePatch, usePlatform, usePlatformFamilyManager } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, Dropdown, ErrorBox, IconContainer, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
+import { I18nComponent } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { Ref, computed, ref } from 'vue';
-import PaymentRow from './components/PaymentRow.vue';
+import { computed, Ref, ref } from 'vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
-import { I18nComponent } from '@stamhoofd/frontend-i18n';
-import { SimpleError } from '@simonbackx/simple-errors';
+import PaymentRow from './components/PaymentRow.vue';
 
 const props = defineProps<{
     balanceItem: BalanceItemWithPayments | BalanceItem;
@@ -216,7 +261,6 @@ const props = defineProps<{
 
 const { hasChanges, addPatch, patch, patched: patchedBalanceItem } = usePatch(props.balanceItem);
 const family = ref(null) as Ref<PlatformFamily | null>;
-const platformFamilyManager = usePlatformFamilyManager();
 const organization = useOrganization();
 const platform = usePlatform();
 const loading = ref(false);
@@ -238,7 +282,7 @@ const title = computed(() => {
 });
 
 const sortedPayments = computed(() => {
-    if (!hasPayments(patchedBalanceItem.value)) {
+    if (!hasPaymentsRelation(patchedBalanceItem.value)) {
         return [];
     }
     return patchedBalanceItem.value.payments.slice().sort((a, b) => Sorter.byDateValue(a.payment.paidAt ?? a.payment.createdAt, b.payment.paidAt ?? b.payment.createdAt));
@@ -334,7 +378,7 @@ async function toggleVATExcempt(event: MouseEvent) {
     await menu.show({ clickEvent: event });
 }
 
-function hasPayments(balanceItem: BalanceItemWithPayments | BalanceItem): balanceItem is BalanceItemWithPayments {
+function hasPaymentsRelation(balanceItem: BalanceItemWithPayments | BalanceItem): balanceItem is BalanceItemWithPayments {
     return (balanceItem instanceof BalanceItemWithPayments);
 }
 
@@ -356,19 +400,72 @@ async function save() {
                 code: 'invalid_field',
                 field: 'description',
                 message: 'description cannot be empty',
-                human: $t('fc883ab4-2743-4f39-9048-4afbf548ba76')
-            })
+                human: $t('fc883ab4-2743-4f39-9048-4afbf548ba76'),
+            });
         }
         if (patchedBalanceItem.value.unitPrice === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'unitPrice',
                 message: 'unitPrice cannot be zero',
-                human: $t('7596149b-b7cf-4624-99e1-b8fd949d593d')
-            })
+                human: $t('7596149b-b7cf-4624-99e1-b8fd949d593d'),
+            });
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    loading.value = false;
+}
+
+async function markDue() {
+    if (loading.value) {
+        return;
+    }
+    if (!(await CenteredMessage.confirm($t(`Deze aanrekening heractiveren?`), $t(`Ja, activeren`), $t(`Hiermee markeer je deze aanrekening opnieuw als te betalen.`)))) {
+        return;
+    }
+    if (loading.value) {
+        return;
+    }
+
+    errors.errorBox = null;
+
+    try {
+        loading.value = true;
+        await props.saveHandler(BalanceItemWithPayments.patch({
+            status: BalanceItemStatus.Due,
+        }));
+
+        Toast.success($t('De aanrekening werd geheractiveerd')).show()
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    loading.value = false;
+}
+
+async function doCancel() {
+    if (loading.value) {
+        return;
+    }
+    if (!(await CenteredMessage.confirm($t(`Deze aanrekening annuleren?`), $t(`Ja, annuleren`), $t(`Je kan dit ongedaan maken door de aanrekening later terug te markeren als te betalen.`)))) {
+        return;
+    }
+    if (loading.value) {
+        return;
+    }
+
+    errors.errorBox = null;
+
+    try {
+        loading.value = true;
+        await props.saveHandler(BalanceItemWithPayments.patch({
+            status: BalanceItemStatus.Canceled,
+        }));
+        Toast.success($t('De aanrekening werd geannuleerd')).show()
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -395,6 +492,7 @@ async function doDelete() {
             status: BalanceItemStatus.Hidden,
             price: 0,
         }));
+        Toast.success($t('De aanrekening werd verwijderd')).show()
         await pop({ force: true });
     }
     catch (e) {
@@ -446,4 +544,15 @@ async function loadFamilyFromUser() {
         return;
     }
 }
+
+const shouldNavigateAway = async () => {
+    if (!hasChanges.value) {
+        return true;
+    }
+    return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
+};
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
