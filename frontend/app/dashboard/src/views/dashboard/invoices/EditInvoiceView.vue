@@ -61,8 +61,8 @@
         <hr>
         <h2>{{ $t('Items') }}</h2>
 
-        <STList>
-            <STListItem v-for="item of invoice.items" :key="item.id" class="right-columns">
+        <STGrid>
+            <STGridItem v-for="item of invoice.items" :key="item.id" class="price-grid">
                 <template #left>
                     <IconContainer icon="box" />
                 </template>
@@ -77,17 +77,19 @@
                     {{ $t('{price} / stuk', {price: formatPrice(item.unitPrice)}) }}
                 </p>
 
-                <template #right>
-                    <p class="style-price-base">
+                <template #middleRight>
+                    <p class="style-price-base" :class="{negative: item.quantity < 0}">
                         {{ formatFloat(item.quantity / 1_00_00) }}
                     </p>
+                </template>
 
-                    <p class="style-price-base">
+                <template #right>
+                    <p class="style-price-base" :class="{negative: item.totalWithoutVAT < 0}">
                         {{ formatPrice(item.totalWithoutVAT) }}
                     </p>
                 </template>
-            </STListItem>
-        </STList>
+            </STGridItem>
+        </STGrid>
 
         <PriceBreakdownBox :price-breakdown="patched.priceBreakdown" />
     </SaveView>
@@ -95,7 +97,7 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, GeneralSettingsView, IconContainer, RadioListItem, SaveView, useAuth, useErrors, usePatch, useRequiredOrganization, PriceBreakdownBox, ErrorBox } from '@stamhoofd/components';
+import { CenteredMessage, GeneralSettingsView, IconContainer, RadioListItem, SaveView, useAuth, useErrors, usePatch, useRequiredOrganization, PriceBreakdownBox, ErrorBox, STGridItem, STGrid } from '@stamhoofd/components';
 import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
@@ -146,9 +148,10 @@ const suggestedCustomers = computed(() => {
 
 function save() {
     try {
-        patched.value.validateVATRates()
+        patched.value.validateVATRates();
         errors.errorBox = null;
-    } catch (e) {
+    }
+    catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
