@@ -220,7 +220,7 @@
                 </STListItem>
             </STList>
 
-            <template v-if="isManualMethod && canWrite">
+            <template v-if="(isManualMethod || $feature('vat')) && canWrite">
                 <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
                 <STList>
