@@ -4,7 +4,7 @@
 
         <hr v-if="email.attachments.length > 0" class="email-attachments-spacer">
         <STList v-if="email.attachments.length > 0" class="attachments-container">
-            <STListItem v-for="attachment in email.attachments" :key="attachment.id" class="file-list-item" :selectable="attachment.file" target="_blank" :href="attachment.file?.getPublicPath()" :download="attachment.file ? 1 : 0" :element-name="attachment.file ? 'a' : 'div'">
+            <STListItem v-for="attachment in email.attachments" :key="attachment.id" class="file-list-item" :selectable="!!attachment.file" target="_blank" :href="attachment.file?.getPublicPath()" :download="attachment.file ? 1 : 0" :element-name="attachment.file ? 'a' : 'div'">
                 <template #left>
                     <span :class="'icon '+attachment.icon" />
                 </template>

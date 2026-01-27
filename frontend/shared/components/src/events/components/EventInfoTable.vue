@@ -10,7 +10,7 @@
             </h2>
         </STListItem>
 
-        <STListItem v-if="event.meta.location" :selectable="googleMapsUrl" :href="googleMapsUrl" :element-name="googleMapsUrl ? 'a' : undefined" target="_blank">
+        <STListItem v-if="event.meta.location" :selectable="!!googleMapsUrl" :href="googleMapsUrl" :element-name="googleMapsUrl ? 'a' : undefined" target="_blank">
             <template #left>
                 <span class="icon location" />
             </template>

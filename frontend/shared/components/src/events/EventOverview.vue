@@ -289,7 +289,7 @@ function setOrganization(o: Organization) {
 }
 
 const canEditWebshopHere = computed(() => {
-    return props.event.webshopId && webshop.value && webshop.value.organizationId === organization.value?.id;
+    return !!props.event.webshopId && !!webshop.value && webshop.value.organizationId === organization.value?.id;
 });
 
 watch(() => props.event.webshopId, () => {
