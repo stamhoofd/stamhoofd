@@ -347,12 +347,12 @@
 
                         <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
 
-                        <p class="style-description-small">
+                        <p class="style-description-small" v-if="item.quantity !== 1">
                             {{ $t('{price} / stuk', {price: formatPrice(item.unitPrice)}) }}
                         </p>
 
                         <template #middleRight>
-                            <span class="style-price-base">{{ formatFloat(item.quantity) }}</span>
+                            <span class="style-price-base" :class="{negative: item.quantity < 0}">{{ formatFloat(item.quantity) }}</span>
                         </template>
 
                         <template #right>
