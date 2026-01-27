@@ -337,19 +337,29 @@
 
             <template v-if="payment.balanceItemPayments.length">
                 <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
-                <STList>
-                    <STListItem v-for="item in sortedItems" :key="item.id" :selectable="canWrite" @click="editBalanceItem(item.balanceItem)">
+                <p v-if="$feature('vat')">{{ $t('Alle prijzen zijn inclusief btw.') }}</p>
+                
+                <STGrid>
+                    <STGridItem v-for="item in sortedItems" :key="item.id" :selectable="canWrite" class="price-grid" @click="editBalanceItem(item.balanceItem)">
                         <template #left>
                             <BalanceItemIcon :item="item.balanceItem" :is-payable="false" />
                         </template>
 
                         <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
 
+                        <p class="style-description-small">
+                            {{ $t('{price} / stuk', {price: formatPrice(item.unitPrice)}) }}
+                        </p>
+
+                        <template #middleRight>
+                            <span class="style-price-base">{{ formatFloat(item.quantity) }}</span>
+                        </template>
+
                         <template #right>
                             <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
                         </template>
-                    </STListItem>
-                </STList>
+                    </STGridItem>
+                </STGrid>
 
                 <PriceBreakdownBox :price-breakdown="[{name: $t('43cf58c2-2263-4c99-87d2-71d61e8b95fe'), price: payment.price}]" />
             </template>
@@ -359,7 +369,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
@@ -434,7 +444,8 @@ async function markPending() {
         if (!await CenteredMessage.confirm($t('Betaling toch niet ontvangen?'), $t('Ja, niet ontvangen'), $t('De betaling blijft in verwerking waardoor je deze later terug als betaald kan markeren als je het zou ontvangen.'))) {
             return;
         }
-    } else {
+    }
+    else {
         if (!await CenteredMessage.confirm($t('Betaling heractiveren'), $t('Ja, heractiveer'), $t('De betaling komt hierna terug in de status ‘in verwerking’ en kan daarna als betaald worden gemarkeerd.'))) {
             return;
         }
@@ -521,7 +532,7 @@ async function createInvoice() {
         const invoice = Invoice.create({
             seller: organization.value?.meta.companies[0] ?? Company.create({}),
             customer: props.payment.customer ?? PaymentCustomer.create({}),
-            payments: [props.payment]
+            payments: [props.payment],
         });
         invoice.buildFromPayments();
 
@@ -540,7 +551,8 @@ async function createInvoice() {
             ],
             modalDisplayStyle: 'popup',
         });
-    } catch (e) {
+    }
+    catch (e) {
         Toast.fromError(e).show();
     }
 }
