@@ -390,6 +390,10 @@
         font-size: 20px;
     }
 
+    &.small {
+        font-size: 13px;
+    }
+
     &.negative {
         color: $color-error;
     }
