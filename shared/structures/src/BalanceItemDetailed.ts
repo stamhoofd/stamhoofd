@@ -45,10 +45,10 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
     }
 
     get unitPrice() {
-        if (this.price < 0 && this.balanceItem.unitPrice > 0) {
-            return -this.balanceItem.unitPrice;
+        if (this.price < 0 && this.balanceItem.unitPriceWithVAT > 0) {
+            return -this.balanceItem.unitPriceWithVAT;
         }
-        return this.balanceItem.unitPrice;
+        return this.balanceItem.unitPriceWithVAT;
     }
 
     /**

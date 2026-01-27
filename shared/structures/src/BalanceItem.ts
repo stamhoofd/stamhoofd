@@ -275,7 +275,19 @@ export class BalanceItem extends AutoEncoder {
         if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
             return 0;
         }
-        return this.unitPrice * this.amount;
+        return this.priceWithVAT;
+    }
+
+    /**
+     * Total price that needs to be paid, not including already paid or pending payments.
+     *
+     * The difference with priceWithVAT is that it takes into account canceled and hidden balance items
+     */
+    get payablePriceWithVAT() {
+        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+            return 0;
+        }
+        return this.priceWithVAT;
     }
 
     /**
@@ -327,6 +339,13 @@ export class BalanceItem extends AutoEncoder {
         }
 
         return this.unitPrice * this.amount;
+    }
+
+    get unitPriceWithVAT() {
+        if (this.amount === 0) {
+            return 0;
+        }
+        return Math.round(this.priceWithVAT / this.amount);
     }
 
     /**
@@ -453,10 +472,12 @@ export class BalanceItem extends AutoEncoder {
         const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0);
         const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0);
         const totalPrice = items.map(p => p.priceWithVAT).reduce((t, total) => total + t, 0);
+        const payablePriceWithVAT = items.map(p => p.payablePriceWithVAT).reduce((t, total) => total + t, 0);
         const totalOpen = items.map(p => p.priceOpen).reduce((t, total) => total + t, 0);
 
         return {
             priceWithVAT: totalPrice,
+            payablePriceWithVAT,
             pricePending: totalPending,
             priceOpen: totalOpen,
             pricePaid: totalPaid,
@@ -611,6 +632,9 @@ export class BalanceItem extends AutoEncoder {
             return 'type-' + this.type
                 + '-' + this.status
                 + '-unit-price-' + this.unitPrice
+                + '-vat-percentage-' + this.VATPercentage
+                + '-vat-included-' + this.VATIncluded
+                + '-vat-excempt-' + this.VATExcempt
                 + '-description-' + this.description
                 + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null');
         }
@@ -618,6 +642,9 @@ export class BalanceItem extends AutoEncoder {
         return 'type-' + this.type
             + '-' + this.status
             + '-unit-price-' + this.unitPrice
+            + '-vat-percentage-' + this.VATPercentage
+            + '-vat-included-' + this.VATIncluded
+            + '-vat-excempt-' + this.VATExcempt
             + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
             + '-relations' + Array.from(this.relations.entries())
             .filter(([key]) => !shouldAggregateOnRelationType(key, this))
@@ -870,7 +897,11 @@ export class GroupedBalanceItems {
     }
 
     get price() {
-        return this.items.reduce((acc, item) => acc + item.price, 0);
+        return this.items.reduce((acc, item) => acc + item.payablePriceWithVAT, 0);
+    }
+
+    get unitPriceWithVAT() {
+        return this.items.reduce((acc, item) => acc + item.unitPriceWithVAT, 0);
     }
 
     get pricePending() {
@@ -899,6 +930,10 @@ export class GroupedBalanceItems {
 
     get unitPrice() {
         return this.items[0].unitPrice;
+    }
+
+    get unitPriceWithAT() {
+        return this.items[0].unitPriceWithVAT;
     }
 
     get dueAt() {
