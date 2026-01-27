@@ -18,6 +18,7 @@
     display: grid;
     gap: calc(2 * var(--st-list-padding, 15px)) 0;
     grid-template-columns: [start] var(--st-horizontal-padding, 40px) auto [line-start] 1fr auto auto var(--st-horizontal-padding, 40px) [end line-end];
+    grid-template-columns: [start] var(--st-horizontal-padding, 40px) auto [line-start] 1fr fit-content(20%) fit-content(25%) var(--st-horizontal-padding, 40px) [end line-end];
 
     padding-top: var(--st-list-padding-top, var(--st-list-padding, 15px));
     padding-bottom: var(--st-list-padding-bottom, var(--st-list-padding, 15px));
