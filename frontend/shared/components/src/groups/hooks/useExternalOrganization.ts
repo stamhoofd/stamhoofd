@@ -2,13 +2,13 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Organization } from '@stamhoofd/structures';
-import { computed, ref, Ref, watchEffect } from 'vue';
+import { computed, ref, Ref, unref, watchEffect } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useContext, useOrganization } from '../../hooks';
 import { SearchOrganizationView } from '../../members';
 import { NavigationActions } from '../../types/NavigationActions';
 
-export function useExternalOrganization(organizationId: Ref<string | null>, organizationHint?: Organization | null) {
+export function useExternalOrganization(organizationId: Ref<string | null>, organizationHint?: Organization | null | Ref<Organization | null>) {
     const organization = useOrganization();
     const loadedOrganization = ref(null) as Ref<Organization | null>;
     const errorBox = ref(null) as Ref<ErrorBox | null>;
@@ -28,9 +28,10 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
         if (organizationId.value === organization.value?.id) {
             return organization.value;
         }
+        const unreffed = unref(organizationHint);
 
-        if (organizationHint && organizationHint.id === organizationId.value) {
-            return organizationHint;
+        if (unreffed && unreffed.id === organizationId.value) {
+            return unreffed;
         }
 
         return loadedOrganization.value;

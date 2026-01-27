@@ -30,9 +30,9 @@
                     </p>
                 </template>
 
-                <template v-if="!$isMobile && webshop && groupOrganization && !webshop.isClosed()">
+                <template v-if="!$isMobile && webshop && webshopOrganization && !webshop.isClosed()">
                     <hr><p class="style-button-bar right-align">
-                        <a class="button primary" :disabled="!!differentOrganization" :href="'https://' + webshop.getUrl(groupOrganization)" target="_blank">
+                        <a class="button primary" :href="'https://' + webshop.getUrl(webshopOrganization)" target="_blank">
                             <span v-if="webshop.hasTickets" class="icon ticket" />
                             <span v-if="webshop.hasTickets">{{ $t('6585a0cd-eb4c-448d-802c-dfcb27e5c7b8') }}</span>
                             <template v-else>
@@ -53,9 +53,9 @@
                 </template>
             </STToolbar>
 
-            <STToolbar v-if="$isMobile && webshop && groupOrganization && !webshop.isClosed()">
+            <STToolbar v-if="$isMobile && webshop && webshopOrganization && !webshop.isClosed()">
                 <template #right>
-                    <a class="button primary" :disabled="!!differentOrganization" :href="'https://' + webshop.getUrl(groupOrganization)" target="_blank">
+                    <a class="button primary" :href="'https://' + webshop.getUrl(webshopOrganization)" target="_blank">
                         <span v-if="webshop.hasTickets" class="icon ticket" />
                         <span v-if="webshop.hasTickets">{{ $t('6585a0cd-eb4c-448d-802c-dfcb27e5c7b8') }}</span>
                         <template v-else>
@@ -71,11 +71,11 @@
 
 <script setup lang="ts">
 import { Decoder } from '@simonbackx/simple-encoding';
-import { EventInfoTable, ExternalOrganizationContainer, ImageComponent, useChooseFamilyMembersForGroup, useContext, usePlatform } from '@stamhoofd/components';
+import { EventInfoTable, ExternalOrganizationContainer, ImageComponent, useChooseFamilyMembersForGroup, useContext, useExternalOrganization, useOrganization, usePlatform } from '@stamhoofd/components';
 import { useMemberManager, useRequestOwner } from '@stamhoofd/networking';
 import { Event, Organization, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, onMounted, Ref, ref } from 'vue';
 
 const props = defineProps<{
     event: Event;
@@ -84,18 +84,51 @@ const props = defineProps<{
 const platform = usePlatform();
 const title = computed(() => props.event.name);
 const memberManager = useMemberManager();
-const groupOrganization = ref<Organization | null>(null);
+const groupOrganization = ref<Organization | null>(null) as Ref<Organization | null>;
 const differentOrganization = computed(() => props.event.group && !memberManager.family.checkout.cart.isEmpty && memberManager.family.checkout.singleOrganization?.id !== props.event.group.organizationId);
 const loadedWebshop = ref<Webshop | WebshopPreview | null>(null);
 const context = useContext();
 let didLoadWebshop = false;
 const loadingWebshop = ref(false);
 const owner = useRequestOwner();
+const { loading: loadingWebshopOrganization, externalOrganization: loadedWebshopOrganization } = useExternalOrganization(computed(() => {
+    const id = loadedWebshop.value?.organizationId ?? null;
+    if (id === props.event.organizationId) {
+        // We are gonna load it anyway, don't load it again
+        return null;
+    }
+    return id;
+}), groupOrganization);
+const organization = useOrganization();
+
+const webshopOrganization = computed(() => {
+    if (!loadedWebshop.value) {
+        return null;
+    }
+    if (groupOrganization.value && groupOrganization.value.id === loadedWebshop.value.organizationId) {
+        return groupOrganization.value;
+    }
+
+    if (organization.value && organization.value.id === loadedWebshop.value.organizationId) {
+        return organization.value;
+    }
+
+    return loadedWebshopOrganization.value;
+});
 
 function setOrganization(o: Organization) {
     groupOrganization.value = o as any;
+
+    // Delay loading webshop, because we can often find the webshop inside the organization
     loadWebshop().catch(console.error);
 }
+
+onMounted(() => {
+    if (!props.event.organizationId) {
+        // Load webshop, as we won't loado the group organization
+        loadWebshop().catch(console.error);
+    }
+});
 
 const webshop = computed(() => {
     if (!props.event.webshopId) {
