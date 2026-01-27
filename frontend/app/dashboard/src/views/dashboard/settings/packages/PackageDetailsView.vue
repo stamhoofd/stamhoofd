@@ -13,6 +13,8 @@
 
             <STErrorsDefault :error-box="errorBox" />
 
+            <h2>Huidige pakket en prijzen</h2>
+
             <STList v-if="pack.meta.pricingType === 'PerMember'">
                 <STListItem>
                     Aantal leden
