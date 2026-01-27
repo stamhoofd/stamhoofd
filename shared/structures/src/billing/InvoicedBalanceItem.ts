@@ -101,7 +101,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
         // Calculate amount and unit price
         const balanceItemUnitPriceWithVAT = Math.round(balanceItem.priceWithVAT / balanceItem.quantity);
         const quantity = Math.round(item.balanceInvoicedAmount * 1_00_00 / balanceItemUnitPriceWithVAT); // Amount per ten thousand
-        if (quantity <= 0) {
+        if (quantity <= 0 && amount >= 0) {
             throw new SimpleError({
                 message: 'Invoiced amount is too low to create an invoiced balance item',
                 human: $t('551f6cc0-0b1a-4a62-8e09-cef159f5f7d5'),
