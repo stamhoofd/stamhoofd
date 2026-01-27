@@ -650,8 +650,13 @@
     font-weight: $font-weight-default;
     line-height: 1.2;
 
-    @media (max-width: 400px) {
+    @media (max-width: 600px) {
         // Fix zoom on mobile devices
+        font-size: 16px;
+    }
+
+    body.web-iOS &, body.native-iOS & {
+        // Fix zoom on iOS devices
         font-size: 16px;
     }
 }
