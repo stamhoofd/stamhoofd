@@ -65,10 +65,7 @@ export { default as LongPressDirective } from './src/directives/LongPress';
 export { default as TooltipDirective } from './src/directives/Tooltip';
 
 // Layout
-export { default as STList } from './src/layout/STList.vue';
-export { default as STListItem } from './src/layout/STListItem.vue';
-export { default as STListItemGrid } from './src/layout/STListItemGrid.vue';
-export { default as STListItemGridRow } from './src/layout/STListItemGridRow.vue';
+export * from './src/layout/index.js';
 
 // Other
 
