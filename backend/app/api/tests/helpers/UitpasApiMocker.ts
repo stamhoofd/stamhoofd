@@ -1,5 +1,6 @@
 import { sleep } from '@stamhoofd/utility';
 import nock from 'nock';
+import { resetNock } from './resetNock.js';
 
 export type UitpasSocialTariff = {
     status: 'ACTIVE' | 'EXPIRED' | 'NONE';
@@ -152,7 +153,6 @@ export class UitpasMocker {
 
     stop() {
         this.reset();
-        nock.cleanAll();
-        nock.disableNetConnect();
+        resetNock();
     }
 }

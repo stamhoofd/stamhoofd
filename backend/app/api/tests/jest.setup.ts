@@ -13,6 +13,7 @@ import * as jose from 'jose';
 import { GlobalHelper } from '../src/helpers/GlobalHelper.js';
 import { BalanceItemService } from '../src/services/BalanceItemService.js';
 import { PayconiqMocker } from './helpers/PayconiqMocker.js';
+import { resetNock } from './helpers/resetNock.js';
 import './toMatchMap.js';
 
 // Set version of saved structures
@@ -35,7 +36,7 @@ if (new Date().getTimezoneOffset() !== 0) {
 console.log = jest.fn();
 
 beforeAll(async () => {
-    nock.cleanAll();
+    resetNock();
     nock.disableNetConnect();
 
     await Database.delete('DELETE FROM `tokens`');
@@ -113,4 +114,7 @@ afterEach(async () => {
 
 TestUtils.setup();
 EmailMocker.infect();
+
+// should be mocked first (before node https imports)
+PayconiqMocker.setup();
 PayconiqMocker.infect();

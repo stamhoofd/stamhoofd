@@ -1,7 +1,7 @@
 import { Organization } from '@stamhoofd/models';
-import { StripeMocker } from '../helpers/StripeMocker';
 import { PaymentMethod } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
+import { StripeMocker } from '../helpers/StripeMocker.js';
 
 export async function initStripe({ organization }: { organization: Organization }) {
     const stripeMocker = new StripeMocker();
