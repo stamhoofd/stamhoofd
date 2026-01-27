@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Formatter, Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
@@ -301,12 +301,12 @@ export class BalanceItem extends AutoEncoder {
 
         if (this.VATIncluded) {
             // Calculate VAT on price incl. VAT, which is not 100% correct and causes roudning issues
-            return this.unitPrice * this.amount - Math.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
+            return this.unitPrice * this.amount - STMath.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
         }
 
         // Note: the rounding is only to avoid floating point errors in software, this should not cause any actual rounding
         // That is the reason why we store it up to 4 digits after comma
-        return Math.round(this.VATPercentage * this.unitPrice * this.amount / 100);
+        return STMath.round(this.VATPercentage * this.unitPrice * this.amount / 100);
     }
 
     /**
@@ -345,7 +345,7 @@ export class BalanceItem extends AutoEncoder {
         if (this.amount === 0) {
             return 0;
         }
-        return Math.round(this.priceWithVAT / this.amount);
+        return STMath.round(this.priceWithVAT / this.amount);
     }
 
     /**

@@ -1,6 +1,6 @@
 import { column, Database } from '@simonbackx/simple-database';
 import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment, VATExcemptReason } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
@@ -231,12 +231,12 @@ export class BalanceItem extends QueryableModel {
 
         if (this.VATIncluded) {
             // Calculate VAT on price incl. VAT, which is not 100% correct and causes roudning issues
-            return this.unitPrice * this.amount - Math.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
+            return this.unitPrice * this.amount - STMath.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
         }
 
         // Note: the rounding is only to avoid floating point errors in software, this should not cause any actual rounding
         // That is the reason why we store it up to 4 digits after comma
-        return Math.round(this.VATPercentage * this.unitPrice * this.amount / 100);
+        return STMath.round(this.VATPercentage * this.unitPrice * this.amount / 100);
     }
 
     /**
@@ -353,7 +353,7 @@ export class BalanceItem extends QueryableModel {
                 }
 
                 // Refund the user
-                const cancellationFee = Math.round(item.price * options.cancellationFeePercentage / 10000);
+                const cancellationFee = STMath.round(item.price * options.cancellationFeePercentage / 10000);
                 if (cancellationFee !== 0) {
                     // Create a new item
                     const cancellationItem = await item.createCancellationItem(cancellationFee);
