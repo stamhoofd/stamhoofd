@@ -236,7 +236,7 @@
                         <h2 class="style-title-list">
                             {{ $t('49238d23-bcfc-4470-85bb-4249e618e752') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t("e93f8565-8fc6-4073-94f3-95d42c19d9a0") }}
                         </p>
                         <template #right>
@@ -256,7 +256,7 @@
                         <h2 class="style-title-list">
                             {{ $t('aca879f0-55d3-4964-a8ad-0eedf18228fb') }}
                         </h2>
-                        <p v-if="payment.webshopIds.length" class="style-description">
+                        <p v-if="payment.webshopIds.length" class="style-description-small">
                             {{ $t('9e211b50-4422-411f-9c77-8e036e2a2416') }}
                         </p>
                         <template #right>
@@ -276,10 +276,10 @@
                         <h2 class="style-title-list">
                             {{ $t('3a66a01a-b0be-4696-b8ac-47c2e5532571') }}
                         </h2>
-                        <p v-if="payment.method === 'Transfer'" class="style-description">
+                        <p v-if="payment.method === 'Transfer'" class="style-description-small">
                             {{ $t('c3e75c59-a5a9-494a-aa75-d8528dcb6158') }}
                         </p>
-                        <p v-else class="style-description">
+                        <p v-else class="style-description-small">
                             {{ $t('4ac815c1-b06d-4fdb-a88a-2e4222ca535b') }}
                         </p>
                         <template #right>
@@ -299,13 +299,13 @@
                         <h2 class="style-title-list">
                             {{ $t('bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9') }}
                         </h2>
-                        <p v-if="payment.type !== PaymentType.Payment" class="style-description">
+                        <p v-if="payment.type !== PaymentType.Payment" class="style-description-small">
                             {{ $t('5c940c27-7609-443e-941c-52cd29067f9b') }}
                         </p>
-                        <p v-else-if="payment.method === 'Transfer'" class="style-description">
+                        <p v-else-if="payment.method === 'Transfer'" class="style-description-small">
                             {{ $t('Annuleer de overschrijving als je die na enkele dagen nog niet hebt ontvangen. De schuld komt dan opnieuw open te staan, de status ‘in verwerking’ vervalt en er kan een nieuwe betaalpoging worden ondernomen. Automatische herinneringsmails worden indien nodig opnieuw geactiveerd.') }}
                         </p>
-                        <p v-else class="style-description">
+                        <p v-else class="style-description-small">
                             {{ $t('Annuleer de betaling als je die na enkele dagen nog niet hebt ontvangen. De schuld komt dan opnieuw open te staan, de status ‘in verwerking’ vervalt en er kan een nieuwe betaalpoging worden ondernomen. Automatische herinneringsmails worden indien nodig opnieuw geactiveerd.') }}
                         </p>
                         <template #right>
@@ -325,7 +325,7 @@
                         <h2 class="style-title-list">
                             {{ $t('Factuur opmaken') }}
                         </h2>
-                        <p class="style-description">
+                        <p class="style-description-small">
                             {{ $t('Maak een factuur voor deze betaling aan.') }}
                         </p>
                         <template #right>
