@@ -1,13 +1,14 @@
 <template>
-    <STList>
+    <STGrid>
         <BalanceItemRow v-for="group in groupedItems" :key="group.id" :has-write="hasWrite" :item="group" :is-payable="isPayable" />
-    </STList>
+    </STGrid>
 </template>
 
 <script setup lang="ts">
 import { DetailedPayableBalance, DetailedReceivableBalance, GroupedBalanceItems } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import BalanceItemRow from './BalanceItemRow.vue';
+import STGrid from '../layout/STGrid.vue';
 
 const props = defineProps<{
     item: DetailedPayableBalance | DetailedReceivableBalance;
