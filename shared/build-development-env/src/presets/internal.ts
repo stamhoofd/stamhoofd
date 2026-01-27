@@ -1,7 +1,7 @@
-import { Service } from '../Service.js';
-import os from 'os';
 import { Formatter } from '@stamhoofd/utility';
+import os from 'os';
 import { read1PasswordCli } from '../helpers/1password.js';
+import { Service } from '../Service.js';
 
 export async function build(service: Service) {
     const config = {
@@ -40,6 +40,7 @@ export async function build(service: Service) {
         Object.assign(config, {
             UITPAS_API_CLIENT_ID: await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/client ID', { optional: true }),
             UITPAS_API_CLIENT_SECRET: await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/client secret', { optional: true }),
+            UITPAS_API_URL: await read1PasswordCli('op://Localhost/hjnat3l3mj2rojlyiwluqzurci/api url', { optional: true }),
         });
     }
 

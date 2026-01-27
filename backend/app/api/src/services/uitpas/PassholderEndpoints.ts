@@ -18,8 +18,7 @@ export type GetPassResponse = {
 };
 
 export class PassholderEndpoints {
-    // Benjamin: "TO DO: Use the URL from environment variables"
-    private readonly baseUrl = 'https://api-test.uitpas.be';
+    private readonly baseUrl = getBaseUrl();
 
     constructor(private readonly access_token: string) {}
 
@@ -163,4 +162,14 @@ function assertValidGetPassResponse(json: unknown): asserts json is GetPassRespo
             human: $t(`4c6482ff-e6d9-4ea1-b11d-e12d697b4b7b`),
         });
     }
+}
+
+function getBaseUrl(): string {
+    const baseUrl = STAMHOOFD.UITPAS_API_URL;
+
+    if (baseUrl === undefined) {
+        throw new Error('Missing environment variable UITPAS_API_URL');
+    }
+
+    return 'https://' + baseUrl;
 }
