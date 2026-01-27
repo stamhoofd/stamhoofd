@@ -36,7 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { EditBalanceItemView, GlobalEventBus, STGridItem, useContext } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, GroupedBalanceItems } from '@stamhoofd/structures';
@@ -82,14 +82,18 @@ async function editBalanceItem(balanceItem: BalanceItem) {
             const arr: PatchableArrayAutoEncoder<BalanceItemWithPayments> = new PatchableArray();
             patch.id = balanceItem.id;
             arr.addPatch(patch);
-            await context.value.authenticatedServer.request({
+            const result = await context.value.authenticatedServer.request({
                 method: 'PATCH',
                 path: '/organization/balance',
                 body: arr,
-                decoder: new ArrayDecoder(BalanceItemWithPayments),
+                decoder: new ArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>),
                 shouldRetry: false,
             });
-            GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
+            if (result.data && result.data.length === 1 && result.data[0].id === balanceItem.id) {
+                balanceItem.deepSet(result.data[0])
+            } else {
+                GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
+            }
         },
     });
     await present({
