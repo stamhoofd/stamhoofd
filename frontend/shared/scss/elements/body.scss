@@ -130,12 +130,12 @@ html, :host {
     
     /* Disabel text resize as this doesn't work across animations */
     text-size-adjust: none;
+    -webkit-text-size-adjust: none; // iOS requires the prefix, still in iOS 26.2
 
     // Allow word break if it doesn't fit only
     word-break: break-word;
 
     will-change: scroll-position;
-    
 }
 
 
