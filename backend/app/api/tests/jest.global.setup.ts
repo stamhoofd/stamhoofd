@@ -1,11 +1,13 @@
-import { TestUtils } from '@stamhoofd/test-utils';
+// first import nock
 import nock from 'nock';
+
+// prevent nock import from being removed on save
+console.log('Imported nock: ', !!nock);
+
+import { TestUtils } from '@stamhoofd/test-utils';
 import path from 'path';
 const emailPath = require.resolve('@stamhoofd/email');
 const modelsPath = require.resolve('@stamhoofd/models');
-
-// Disable network requests
-nock.disableNetConnect();
 
 // Set timezone!
 process.env.TZ = 'UTC';

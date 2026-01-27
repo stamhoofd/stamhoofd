@@ -1,3 +1,6 @@
+// first import nock
+import nock from 'nock';
+
 import { Column, Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -7,11 +10,10 @@ import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { sleep } from '@stamhoofd/utility';
 import * as jose from 'jose';
-import nock from 'nock';
-import { GlobalHelper } from '../src/helpers/GlobalHelper';
-import { BalanceItemService } from '../src/services/BalanceItemService';
-import { PayconiqMocker } from './helpers/PayconiqMocker';
-import './toMatchMap';
+import { GlobalHelper } from '../src/helpers/GlobalHelper.js';
+import { BalanceItemService } from '../src/services/BalanceItemService.js';
+import { PayconiqMocker } from './helpers/PayconiqMocker.js';
+import './toMatchMap.js';
 
 // Set version of saved structures
 Column.setJSONVersion(Version);
