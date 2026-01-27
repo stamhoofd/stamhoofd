@@ -171,5 +171,5 @@ function getBaseUrl(): string {
         throw new Error('Missing environment variable UITPAS_API_URL');
     }
 
-    return 'https://' + baseUrl;
+    return baseUrl;
 }

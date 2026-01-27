@@ -108,7 +108,7 @@ class WorkerHelperInstance {
             DB_DATABASE: `stamhoofd-playwright-${WorkerData.id}`,
             UITPAS_API_CLIENT_SECRET: 'sk_test_test',
             UITPAS_API_CLIENT_ID: 'sk_test_test',
-            UITPAS_API_URL: 'api-test.uitpas.be',
+            UITPAS_API_URL: 'https://api-test.uitpas.be',
         };
 
         for (const key in config) {
