@@ -1,5 +1,5 @@
 <template>
-    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="allColumns[0]" :Route="Route">
+    <ModernTableView ref="modernTableView" :table-object-fetcher="tableObjectFetcher" :filter-builders="filterBuilders" :title="title" :column-configuration-id="configurationId" :actions="actions" :all-columns="allColumns" :prefix-column="null" :Route="Route">
         <template #empty>
             {{ $t('0637e394-fbd7-42ea-9a1b-5acdcc86419a') }}
         </template>
@@ -73,6 +73,15 @@ const objectFetcher = useReceivableBalancesObjectFetcher({
 const tableObjectFetcher = useTableObjectFetcher<ObjectType>(objectFetcher);
 
 const allColumns: Column<ObjectType, any>[] = [
+    new Column<ObjectType, string>({
+        id: 'name',
+        name: $feature('organization-receivable-balances') ? 'Schuldenaar' : 'Lid',
+        getValue: object => object.object.name,
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        allowSorting: false,
+    }),
+
     ...($feature('organization-receivable-balances')
         ? [
                 new Column<ObjectType, string | null>({
@@ -103,14 +112,6 @@ const allColumns: Column<ObjectType, any>[] = [
             ]
         : []),
 
-    new Column<ObjectType, string>({
-        id: 'name',
-        name: $feature('organization-receivable-balances') ? 'Schuldenaar' : 'Lid',
-        getValue: object => object.object.name,
-        minimumWidth: 100,
-        recommendedWidth: 200,
-        allowSorting: false,
-    }),
     new Column<ObjectType, number>({
         id: 'amountOpen',
         name: 'Openstaand bedrag',
