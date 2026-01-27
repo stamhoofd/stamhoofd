@@ -2,7 +2,7 @@
     <figure class="style-image-with-icon">
         <slot>
             <!-- fallback content -->
-            <figure v-if="icon">
+            <figure v-if="icon" :class="{pad: !!$slots.aside}">
                 <span class="icon" :class="icon" />
             </figure>
         </slot>
