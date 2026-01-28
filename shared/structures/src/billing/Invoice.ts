@@ -300,7 +300,7 @@ export class Invoice extends AutoEncoder {
     updatePayableRoundingAmount() {
         // Calculate difference between the invoice price and the payments price
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
-        if (Math.abs(difference) < 10_00) { // Correct maximum 10 cents
+        if (Math.abs(difference) < 5_00) { // Correct maximum 5 cents
             this.payableRoundingAmount = difference;
         }
         else {
@@ -434,5 +434,13 @@ export class Invoice extends AutoEncoder {
         this.correctRoundingByUpdatingPrices();
         this.calculateVAT();
         this.updatePayableRoundingAmount();
+
+        if (this.totalWithVAT !== this.totalPaymentsAmount) {
+            throw new SimpleError({
+                code: 'price_difference',
+                message: 'The price of the generated invoice did not match the price of the corresponding payments. Possibly caused by rounding that could not be corrected automatically.',
+                human: $t('Het is niet mogelijk om een factuur aan te maken. Er zit een onverwachts verschil tussen de prijs van de aan te maken factuur en het te betalen bedrag.'),
+            });
+        }
     }
 }
