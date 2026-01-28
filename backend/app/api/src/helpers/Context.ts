@@ -6,7 +6,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { ApiUserRateLimits } from '@stamhoofd/structures';
-import { AdminPermissionChecker } from './AdminPermissionChecker';
+import { AdminPermissionChecker } from './AdminPermissionChecker.js';
 
 export const apiUserRateLimiter = new RateLimiter({
     limits: [
