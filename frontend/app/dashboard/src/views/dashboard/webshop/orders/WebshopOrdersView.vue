@@ -328,6 +328,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         cols.push(
             new Column<PrivateOrderWithTickets, { scanned: number; total: number }>({
                 name: hasSingleTickets.value ? 'Ticket' : 'Tickets',
+                allowSorting: false,
                 enabled: true,
                 getValue: (order) => {
                     return {
@@ -370,6 +371,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
                 name: 'Artikel',
+                allowSorting: false,
                 enabled: false,
                 grow: true,
                 getValue: (order) => {
@@ -406,6 +408,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
         cols.push(
             new Column<PrivateOrderWithTickets, string>({
                 name: 'Beschrijving',
+                allowSorting: false,
                 enabled: false,
                 grow: true,
                 getValue: (order) => {
@@ -473,6 +476,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
             cols.push(new Column<PrivateOrder, string | undefined>({
                 name: record.name.toString(),
                 enabled: false,
+                allowSorting: false,
                 getValue: (order) => {
                     const answer = order.data.recordAnswers.get(record.id);
                     if (!answer) {
