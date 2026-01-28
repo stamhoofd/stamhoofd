@@ -5,6 +5,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { groupJoin, memberJoin, organizationJoin } from '../sql-filters/registrations.js';
+import { Context, ContextInstance } from '../helpers/Context.js';
 
 export class RegistrationSortData {
     readonly registration: RegistrationWithMemberBlob;
@@ -17,8 +18,11 @@ export class RegistrationSortData {
 
     get organization() {
         const organization = this.organizations.find(o => o.id === this.registration.organizationId);
+        if (!organization && ContextInstance.optional?.organization && ContextInstance.optional?.organization.id === this.registration.organizationId) {
+            return Context.organization!;
+        }
         if (!organization) {
-            throw new Error('Organization not found for registration');
+            throw new Error('Organization not found for registration ' + this.registration.id);
         }
 
         return organization;
