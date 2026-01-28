@@ -619,6 +619,10 @@
     "original": "Filter alle eenheden die een lid hebben die aan deze voorwaarden voldoet.",
     "translation": "Filtrer toutes les unités qui ont un membre qui répond à ces conditions."
   },
+  "6cfe82d0-86a4-4a38-aa5f-1a5cc0a8ae4b": {
+    "original": "Eenheidsnummers",
+    "translation": "Numéros d'unités"
+  },
   "6e675a7d-b124-4507-bf0c-9b70013e98ca": {
     "original": "Er bestaat al een eenheid met dezelfde URI. Pas deze aan zodat deze uniek is, en controleer of deze eenheid niet al bestaat.",
     "translation": "Une unité avec le même URI existe déjà. Modifiez-la pour qu’elle soit unique et vérifiez que cette unité n’existe pas déjà."
@@ -970,6 +974,10 @@
   "aa39f949-6fe5-4ed2-acb7-ff3d138cf243": {
     "original": "Deze functie is niet beschikbaar voor deze eenheid",
     "translation": "Cette fonction n’est pas disponible pour cette unité"
+  },
+  "aacf9b80-b46d-48d9-8a8b-585a8d48fc9c": {
+    "original": "Bedrijf of eenheid",
+    "translation": "Entreprise ou unité"
   },
   "aad47217-df26-43ce-a43c-896697d5fbd4": {
     "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen eenheid.",

@@ -831,6 +831,10 @@
     "original": "Deze functie is niet beschikbaar voor deze groep",
     "translation": "This role is not available for this group"
   },
+  "aacf9b80-b46d-48d9-8a8b-585a8d48fc9c": {
+    "original": "Bedrijf of groep",
+    "translation": "Company or group"
+  },
   "aad47217-df26-43ce-a43c-896697d5fbd4": {
     "original": "Voeg eigen functies toe die enkel van toepassing zijn in je eigen groep.",
     "translation": "Add custom roles that only apply within your own group."
