@@ -1369,14 +1369,13 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             test('should not apply reduced price if social tariff status is unknown and uitpas api is unavailable', async () => {
-                // #region arrange
                 const mocker = initUitpasApi();
                 mocker.forceFailure();
 
                 const { member, group, groupPrice, organization, token } = await initData();
                 member.details.uitpasNumberDetails = UitpasNumberDetails.create({
                     // active
-                    uitpasNumber: '0900011354819',
+                    uitpasNumber: '0900011354829',
                     socialTariff: UitpasSocialTariff.create({
                         // but last time checked it was active
                         status: UitpasSocialTariffStatus.Unknown,
@@ -1410,7 +1409,60 @@ describe('Endpoint.RegisterMembers', () => {
                     totalPrice: 25_0000,
                     customer: null,
                 });
-                // #endregion
+
+                // act
+                const response = await post(body, organization, token);
+
+                // assert
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+
+                // should not update status
+                const updatedMember = await Member.getByID(member.id);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354829');
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+            });
+
+            test('should apply reduced price based on legacy rule if uitpas api is not connected and status is unkown', async () => {
+                TestUtils.setEnvironment('UITPAS_API_CLIENT_SECRET', undefined);
+
+                const { member, group, groupPrice, organization, token } = await initData();
+                member.details.uitpasNumberDetails = UitpasNumberDetails.create({
+                    // active
+                    uitpasNumber: '0900011354819', // Second last number is 1, so has social tariffs in legacy mode
+                    socialTariff: UitpasSocialTariff.create({
+                        // but last time checked it was active
+                        status: UitpasSocialTariffStatus.Unknown,
+                        updatedAt: new Date(2000, 0, 1),
+                        endDate: new Date(2000, 0, 1),
+                    }),
+                });
+
+                await member.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    // normal price
+                    totalPrice: 12_5000,
+                    customer: null,
+                });
 
                 // act
                 const response = await post(body, organization, token);
@@ -1422,6 +1474,60 @@ describe('Endpoint.RegisterMembers', () => {
                 // should not update status
                 const updatedMember = await Member.getByID(member.id);
                 expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+            });
+
+            test('should not apply reduced price based on legacy rule if uitpas api is not connected and status is unkown', async () => {
+                TestUtils.setEnvironment('UITPAS_API_CLIENT_SECRET', undefined);
+
+                const { member, group, groupPrice, organization, token } = await initData();
+                member.details.uitpasNumberDetails = UitpasNumberDetails.create({
+                    // active
+                    uitpasNumber: '0900011354829', // Second last number isnot 1, so does not have social tariffs in legacy mode
+                    socialTariff: UitpasSocialTariff.create({
+                        // but last time checked it was active
+                        status: UitpasSocialTariffStatus.Unknown,
+                        updatedAt: new Date(2000, 0, 1),
+                        endDate: new Date(2000, 0, 1),
+                    }),
+                });
+
+                await member.save();
+
+                const body = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                        balanceItems: [],
+                        deleteRegistrationIds: [],
+                    }),
+                    administrationFee: 0,
+                    freeContribution: 0,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    // normal price
+                    totalPrice: 25_0000,
+                    customer: null,
+                });
+
+                // act
+                const response = await post(body, organization, token);
+
+                // assert
+                expect(response.body).toBeDefined();
+                expect(response.body.registrations.length).toBe(1);
+
+                // should not update status
+                const updatedMember = await Member.getByID(member.id);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354829');
                 expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
             });
         });

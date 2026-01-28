@@ -40,6 +40,23 @@ export class UitpasMocker {
             },
         ],
         [
+            /**
+             * Example of an uitpas that does not end with 1X but is active
+             */
+            '0900011354829',
+            {
+                passholderId: '6eb040fd-3c60-4049-8170-c61e4e52c009',
+                uitpasNumber: '0900000095902',
+                firstName: 'Valère',
+                points: 8150,
+                postalCode: '9000',
+                socialTariff: {
+                    status: 'ACTIVE',
+                    endDate: '2026-04-30T21:59:59+00:00',
+                },
+            },
+        ],
+        [
             '0900011354819',
             {
                 passholderId: 'f24d31b4-ffab-4ded-98b6-3ab4a6308d4d',

@@ -1,6 +1,6 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { BooleanStatus } from './MemberDetails.js';
 import { DataValidator } from '@stamhoofd/utility';
+import { BooleanStatus } from './MemberDetails.js';
 
 /**
  * Possibles status returned from uitpas api
@@ -32,10 +32,6 @@ export class UitpasSocialTariff extends AutoEncoder {
 
     @field({ decoder: DateDecoder })
     updatedAt: Date = new Date();
-
-    get isActive(): boolean {
-        return this.status === UitpasSocialTariffStatus.Active;
-    }
 
     /**
      * @returns true if updated more than 1 week ago
