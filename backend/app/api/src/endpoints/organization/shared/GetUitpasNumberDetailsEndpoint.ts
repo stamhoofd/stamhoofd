@@ -65,9 +65,7 @@ export class GetUitpasNumberDetailsEndpoint extends Endpoint<Params, Query, Body
             }
         }
 
-        if (simpleErrors.errors.length > 0) {
-            throw simpleErrors;
-        }
+        simpleErrors.throwIfNotEmpty();
 
         return new Response(results);
     }
