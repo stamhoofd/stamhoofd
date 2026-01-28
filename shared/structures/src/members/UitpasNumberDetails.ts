@@ -74,4 +74,14 @@ export class UitpasNumberDetails extends AutoEncoder {
     socialTariff: UitpasSocialTariff = UitpasSocialTariff.create({
         status: UitpasSocialTariffStatus.Unknown,
     });
+
+    get isActive(): boolean {
+        if (this.socialTariff.status === UitpasSocialTariffStatus.Active) {
+            return true;
+        }
+
+        // todo: fallback to legacy check if unknown
+
+        return false;
+    }
 }
