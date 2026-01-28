@@ -19,11 +19,8 @@
                 {{ $t('fd3f86b0-c773-4c11-8c24-72fc990975c3') }}
             </p>
 
-            <a v-if="STAMHOOFD.platformName === 'stamhoofd'" class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist.pdf" download="tickets-checklist.pdf" target="_blank">
-                {{ $t('7021a7ac-e143-4a28-b810-f6f4fc88c3df') }}
-            </a>
-            <a v-else class="info-box icon download selectable" href="https://files.stamhoofd.be/website/docs/tickets-checklist-whitelabel.pdf" download="tickets-checklist.pdf" target="_blank">
-                {{ $t('7021a7ac-e143-4a28-b810-f6f4fc88c3df') }}
+            <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('tickets-scannen')" target="_blank">
+                {{ $t('Lees onze documentatie voor meer informatie over het scannen van tickets.') }}
             </a>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
@@ -65,6 +62,7 @@ import { Checkbox, Spinner, STList, STListItem, STNavigationBar, STToolbar } fro
 import { Category, Product, ProductDateRange, ProductType, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { computed, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
 import TicketScannerView from './TicketScannerView.vue';
