@@ -120,6 +120,7 @@ const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {
             recommendedWidth: 400,
             grow: true,
             index: isMobile ? 0 : 1,
+            allowSorting: false,
         }),
 
         new Column<PrivateOrder, string>({
