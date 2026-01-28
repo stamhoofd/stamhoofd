@@ -55,6 +55,11 @@ export default class STErrorsInput extends VueComponent {
             }
 
             this.errors.push(...errors.errors);
+
+            // If no input element currently focused
+            if (document.activeElement && this.$el.contains(document.activeElement)) {
+                continue;
+            }
             errorBox.scrollTo(this.errors, this.$refs.errors as HTMLElement);
         }
     }
