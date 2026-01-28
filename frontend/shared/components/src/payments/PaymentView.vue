@@ -4,7 +4,7 @@
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
-                <button v-if="auth.hasFullAccess()" v-tooltip="$t('Toon geschiedenis')" type="button" class="button icon history" @click="viewAudit" />
+                <button v-if="auth.hasFullAccess()" v-tooltip="$t('3763ba3a-1023-4265-b675-1c2090d4c37b')" type="button" class="button icon history" @click="viewAudit" />
             </template>
         </STNavigationBar>
 

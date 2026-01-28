@@ -324,8 +324,8 @@
     "translation": "Seat categories"
   },
   "03447d19-17e4-41b0-aa2c-cec5c9567354": {
-    "original": "Alle groepen zijn gesloten.",
-    "translation": "All groups are closed."
+    "original": "Alle verenigingen zijn gesloten.",
+    "translation": "All associations are closed."
   },
   "034eed1e-a6b2-41ee-8ca1-b6bdacbd0d9c": {
     "original": "Ben je zeker dat je wilt uitloggen?",
@@ -646,6 +646,10 @@
   "06882818-006a-4070-aa0f-c805bb2a53d4": {
     "original": "Loopt automatisch af op {date}",
     "translation": "Automatically expires on {date}"
+  },
+  "068b0bcf-f269-4425-8a48-89ad156d6fad": {
+    "original": "Alle groepsnummers",
+    "translation": "All group numbers"
   },
   "068b3219-9397-41fc-8ebf-77df845e74b8": {
     "original": "Kies je betaalmethode",
@@ -4799,6 +4803,10 @@
     "original": "Beschrijving onder keuzemenu",
     "translation": "Description below choice menu"
   },
+  "33baaf22-e844-4de1-960e-fc2dec76b5f1": {
+    "original": "Organisatornummer",
+    "translation": "Organizer number"
+  },
   "33c4f792-005f-4fb1-ad98-397dd92038aa": {
     "original": "Nationaal",
     "translation": "National"
@@ -4964,8 +4972,8 @@
     "translation": "Show reminder from"
   },
   "35c08279-a7ce-4536-a201-985bb882a6cf": {
-    "original": "Contactpersonen van groepen",
-    "translation": "Contact persons of groups"
+    "original": "Contactpersonen van verenigingen",
+    "translation": "Contact persons for associations"
   },
   "35d462bc-121e-46ad-824b-a7838a6665ae": {
     "original": "Je kan maximaal 5 bedrijven toevoegen",
@@ -5102,6 +5110,10 @@
   "376152ba-a238-451e-a2ce-5a9d4ff69e67": {
     "original": "Inschrijvingscategorieën",
     "translation": "Registration categories"
+  },
+  "3763ba3a-1023-4265-b675-1c2090d4c37b": {
+    "original": "Toon geschiedenis",
+    "translation": "Show history"
   },
   "3771b48b-2385-47ac-b948-9f7ff6d1988e": {
     "original": "klad",
@@ -8211,6 +8223,10 @@
     "original": "Ongeldige datum. Probeer in de vorm zoals 20/08/1995",
     "translation": "Invalid date. Try using the format 20/08/1995"
   },
+  "5a1993a8-2604-4ca5-be6e-8d6902d9f8c1": {
+    "original": "Alle verenigingen",
+    "translation": "All associations"
+  },
   "5a1dedb6-6d67-4538-9719-e0a511fca6dd": {
     "original": "Ingediend op",
     "translation": "Submitted on"
@@ -11048,8 +11064,8 @@
     "translation": "This document cannot be downloaded because some data is missing or invalid. Please check all data for {name} and contact us if the problem persists."
   },
   "78b5bb21-5de1-4f0d-ad18-321edc4ba275": {
-    "original": "Alle groepen waarvoor het lid is ingeschreven",
-    "translation": "All groups in which the member is registered"
+    "original": "Alle verenigingen waarvoor het lid is ingeschreven",
+    "translation": "All associations the member is registered for"
   },
   "78b9dc16-fb37-4d8b-8b30-263235e7367b": {
     "original": "Deze knop gaat naar het besteloverzicht, met alle informatie van de bestellingen en eventueel betalingsinstructies.",
@@ -11876,8 +11892,8 @@
     "translation": "Show group/activity name on document"
   },
   "83826ae8-fd89-46c2-ad3f-8f77aadd65b2": {
-    "original": "Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken",
-    "translation": "Only a platform main administrator can create new groups"
+    "original": "Enkel een platform hoofdbeheerder kan nieuwe verenigingen aanmaken",
+    "translation": "Only a platform main administrator can add new associations"
   },
   "8387199f-9705-4f77-8440-3ea0a697af2a": {
     "original": "Configureer login via Google",
@@ -14148,8 +14164,8 @@
     "translation": "You can give a percentage discount on certain items, you can make one item free, you can give a discount per item on the first x number of items (or all items) of an item..."
   },
   "9c916015-e69c-44b3-a568-d0af15854787": {
-    "original": "Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
-    "translation": "All groups are transferred to this new work year. Main administrators can still view the previous work year."
+    "original": "Alle verenigingen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
+    "translation": "All associations are switched to this new work year. Main administrators can still view the previous work year."
   },
   "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
     "original": "Vereniging ID",
@@ -18908,8 +18924,8 @@
     "translation": "No invoices have been created yet"
   },
   "d01932d9-e958-4b29-98f2-cc5ff6be29d3": {
-    "original": "Enkel een platform hoofdbeheerder kan groepen verwijderen",
-    "translation": "Only a platform main administrator can delete groups"
+    "original": "Enkel een platform hoofdbeheerder kan verenigingen verwijderen",
+    "translation": "Only a platform main administrator can delete associations"
   },
   "d03225ed-db4a-4cd2-8df4-8932b6820b17": {
     "original": "Momenteel is er niets beschikbaar.",
@@ -21252,8 +21268,8 @@
     "translation": "Deregistered on"
   },
   "e8dd32de-9708-4e77-ad38-fdd28b53d5b9": {
-    "original": "Alle nummers van de groepen waarvoor het lid is ingeschreven",
-    "translation": "All numbers of the groups in which the member is registered"
+    "original": "Alle nummers van de verenigingen waarvoor het lid is ingeschreven",
+    "translation": "All numbers of the associations the member is registered for"
   },
   "e8ea4460-67bb-42a3-b688-cc22987fe8af": {
     "original": "Wat en hoeveel?",
@@ -21616,8 +21632,8 @@
     "translation": "Move from {group}"
   },
   "ece866b1-c879-41d7-8cd6-8ba76d95521b": {
-    "original": "Groepen",
-    "translation": "Groups"
+    "original": "Verenigingen",
+    "translation": "Associations"
   },
   "ece8f68a-bde5-4734-b1bd-284b1d1df005": {
     "original": "Ongeldig werkblad {sheet}, deze wordt niet (meer) ondersteund",
@@ -21714,6 +21730,10 @@
   "ee01f571-fe9c-4c00-a4ec-68a22376edd2": {
     "original": "Nakijken of deze nog beschikbaar is...",
     "translation": "Checking if this is still available..."
+  },
+  "ee0da6c3-0032-40c1-9679-b96294e62b6e": {
+    "original": "Organisator",
+    "translation": "Organizer"
   },
   "ee10afe3-2dd4-4fa1-98bc-0e1372903fed": {
     "original": "Lidnummer",

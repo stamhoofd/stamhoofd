@@ -15,6 +15,10 @@
     "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere eenheden.",
     "translation": "Enregistrez une copie de votre plan de salle afin de pouvoir le partager avec d'autres unités."
   },
+  "03447d19-17e4-41b0-aa2c-cec5c9567354": {
+    "original": "Alle eenheden zijn gesloten.",
+    "translation": "Toutes les unités sont fermées."
+  },
   "05479234-2977-4bfd-a44b-924b01021b6e": {
     "original": "Op aanraden van andere eenheid / persoon",
     "translation": "Sur recommandation d'une autre unité / personne"
@@ -22,6 +26,10 @@
   "05723781-9357-41b2-9fb8-cb4f80dde7f9": {
     "original": "Eenheidsnummer",
     "translation": "Numéro d'unité"
+  },
+  "068b0bcf-f269-4425-8a48-89ad156d6fad": {
+    "original": "Alle eenheidsnummers",
+    "translation": "Tous les numéros d'unité"
   },
   "07290df8-cad5-40df-9e10-3c7eccc049bc": {
     "original": "Welpen",
@@ -279,6 +287,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
     "translation": "Vous vous connecterez au système de feedback avec ce compte : {email}. Vous pouvez d’abord changer d’unité si vous souhaitez vous connecter avec un autre compte."
   },
+  "35c08279-a7ce-4536-a201-985bb882a6cf": {
+    "original": "Contactpersonen van eenheden",
+    "translation": "Personnes de contact des unités"
+  },
   "3642da6c-adad-4e20-aa5a-c6553b276770": {
     "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
     "translation": "{paymentMethod} n’a pas encore été activé par Stripe. Vérifiez si toutes les informations requises ont bien été complétées dans votre tableau de bord Stripe. Le plus souvent, il manque l’adresse d’un des dirigeants dans Stripe ou le lien vers le site web de l’unité n’a pas été ajouté."
@@ -470,6 +482,10 @@
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
     "translation": "Oups, vous ne pouvez pas encore créer d'événements avec inscriptions pendant cette période. Cette année scoute n'est pas encore créée dans le système."
+  },
+  "5a1993a8-2604-4ca5-be6e-8d6902d9f8c1": {
+    "original": "Alle eenheden",
+    "translation": "Toutes les unités"
   },
   "5a8403bb-90f8-4722-8cad-b275ffa781d9": {
     "original": "Voeg je ontbrekende eenheidsgegevens toe",
@@ -707,6 +723,10 @@
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een eenheid).",
     "translation": "{member} ne peut s'inscrire qu'avec une inscription active et valable (inscription obligatoire dans une unité)."
   },
+  "78b5bb21-5de1-4f0d-ad18-321edc4ba275": {
+    "original": "Alle eenheden waarvoor het lid is ingeschreven",
+    "translation": "Toutes les unités dans lesquelles le membre est inscrit"
+  },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
     "translation": "Choisissez une unité responsable de la collecte des frais d'affiliation"
@@ -762,6 +782,10 @@
   "82d2825a-998b-4c0d-b109-f78ccc8d376f": {
     "original": "Huidige scoutsjaar",
     "translation": "Année scoute en cours"
+  },
+  "83826ae8-fd89-46c2-ad3f-8f77aadd65b2": {
+    "original": "Enkel een platform hoofdbeheerder kan nieuwe eenheden aanmaken",
+    "translation": "Seul un administrateur principal de la plateforme peut créer de nouvelles unités"
   },
   "83877c6a-5330-4299-af39-fdbac4501dff": {
     "original": "We zijn niet 100% zeker dat deze leden uit Jamboree en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Jamboree) overschrijven als je ze aanvinkt.",
@@ -912,8 +936,8 @@
     "translation": "Appliquez une réduction pour plusieurs inscriptions d'un membre ou d'une famille, par exemple pour des frères et sœurs qui s'inscrivent à un camp, ou des membres qui suivent plusieurs cours la même année scoute."
   },
   "9c916015-e69c-44b3-a568-d0af15854787": {
-    "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
-    "translation": "Tous les groupes sont transférés vers cette nouvelle année scoute. Les administrateurs principaux peuvent toujours consulter la précédente année scoute."
+    "original": "Alle eenheden worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
+    "translation": "Toutes les unités sont transférées vers cette nouvelle année scoute. Les administrateurs principaux peuvent encore consulter l'année scoute précédente."
   },
   "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
     "original": "Eenheid ID",
@@ -1263,6 +1287,10 @@
     "original": "Een terugbetaling van jouw eenheid richting een lid of supporter",
     "translation": "Un remboursement de votre unité vers un membre ou un supporter"
   },
+  "d01932d9-e958-4b29-98f2-cc5ff6be29d3": {
+    "original": "Enkel een platform hoofdbeheerder kan eenheden verwijderen",
+    "translation": "Seul un administrateur principal de la plateforme peut supprimer des unités"
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw eenheid",
     "translation": "Nom de votre unité"
@@ -1443,6 +1471,10 @@
     "original": "{name} is nu ingesteld als het huidige scoutsjaar",
     "translation": "{name} est maintenant défini comme l'année scoute en cours."
   },
+  "e8dd32de-9708-4e77-ad38-fdd28b53d5b9": {
+    "original": "Alle nummers van de eenheden waarvoor het lid is ingeschreven",
+    "translation": "Tous les numéros des unités dans lesquelles le membre est inscrit"
+  },
   "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
     "original": "* Voor de aansluiting bij Jamboree moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw eenheid gebruikt gekoppeld kan worden aan de benaming van Jamboree.",
     "translation": "* Pour l'affiliation à Jamboree, vous devez encore sélectionner un groupe d'inscription standard correct afin que le nom utilisé par votre unité puisse être lié au nom de Jamboree."
@@ -1470,6 +1502,10 @@
   "ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5": {
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar voor een standaard leeftijdsgroep",
     "translation": "Vous ne pouvez attribuer une fonction qu’aux membres inscrits cette année scoute dans un groupe d'âge standard"
+  },
+  "ece866b1-c879-41d7-8cd6-8ba76d95521b": {
+    "original": "Eenheden",
+    "translation": "Unités"
   },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze eenheid",

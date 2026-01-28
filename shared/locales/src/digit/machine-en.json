@@ -19,6 +19,10 @@
     "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere groepen.",
     "translation": "Save a copy of your seating plan so you can share it with other groups."
   },
+  "03447d19-17e4-41b0-aa2c-cec5c9567354": {
+    "original": "Alle groepen zijn gesloten.",
+    "translation": "All groups are closed."
+  },
   "040cc66c-e27f-4822-87ad-722bca4f5038": {
     "original": "Kies of je het bericht wilt publiceren in ‘Mijn account’ en/of versturen via e-mail via de knoppen bovenaan",
     "translation": "Choose whether to publish the message in ‘My account’ and/or send it by email using the buttons at the top."
@@ -235,6 +239,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van groep veranderen als je met een ander account wilt inloggen.",
     "translation": "You log in to the feedback system with this account: {email}. You can first change groups if you want to log in with a different account."
   },
+  "35c08279-a7ce-4536-a201-985bb882a6cf": {
+    "original": "Contactpersonen van groepen",
+    "translation": "Group contact persons"
+  },
   "3642da6c-adad-4e20-aa5a-c6553b276770": {
     "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de groep niet werd ingevuld.",
     "translation": "{paymentMethod} has not yet been activated by Stripe. Make sure all required information has been filled out in your Stripe dashboard. Most often, the problem is that the address of one of the administrators is missing in Stripe or the group's website link hasn't been provided."
@@ -406,6 +414,10 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "You can also set your own domain name (e.g. inschrijven.mijngroep.be). However, you must have already purchased the domain name; this will usually already be the case if you already have your own website."
+  },
+  "5a1993a8-2604-4ca5-be6e-8d6902d9f8c1": {
+    "original": "Alle groepen",
+    "translation": "All groups"
   },
   "5aca8049-d981-4cc5-a86c-0c194047743d": {
     "original": "Natuurgroep",
@@ -603,6 +615,10 @@
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een lokale groep).",
     "translation": "{member} can only register with a valid and active registration (registration with a local group is required)."
   },
+  "78b5bb21-5de1-4f0d-ad18-321edc4ba275": {
+    "original": "Alle groepen waarvoor het lid is ingeschreven",
+    "translation": "All groups the member is registered for"
+  },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een groep die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
     "translation": "Choose a group that is responsible for collecting the affiliation costs"
@@ -634,6 +650,10 @@
   "81c91169-db1e-4819-8716-5382ffbaa43b": {
     "original": "Het groepsnummer is een unieke code voor deze groep. Deze wordt in de URL-balk van de browser gebruikt.",
     "translation": "The group number is a unique code for this group. This is used in the URL bar of the browser."
+  },
+  "83826ae8-fd89-46c2-ad3f-8f77aadd65b2": {
+    "original": "Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken",
+    "translation": "Only a platform main administrator can add new groups"
   },
   "83877c6a-5330-4299-af39-fdbac4501dff": {
     "original": "We zijn niet 100% zeker dat deze leden uit Ravot en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Ravot) overschrijven als je ze aanvinkt.",
@@ -774,6 +794,10 @@
   "98d05123-a351-4fb7-a0d7-87f46bcd127d": {
     "original": "Je ontvangt een extra bevestiging via e-mail. Als er in de toekomst gegevens wijzigen kan je die vanaf nu beheren via ‘Mijn account’.",
     "translation": "You will receive an additional confirmation via email. If data changes in the future, you can now manage it via ‘My account’."
+  },
+  "9c916015-e69c-44b3-a568-d0af15854787": {
+    "original": "Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
+    "translation": "All groups are being transferred to this new work year. Head administrators can still view the previous work year."
   },
   "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
     "original": "Groep ID",
@@ -1063,6 +1087,10 @@
     "original": "Een terugbetaling van jouw groep richting een lid of supporter",
     "translation": "A refund from your group to a member or supporter."
   },
+  "d01932d9-e958-4b29-98f2-cc5ff6be29d3": {
+    "original": "Enkel een platform hoofdbeheerder kan groepen verwijderen",
+    "translation": "Only a platform head administrator can delete groups"
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw groep",
     "translation": "Name of your group"
@@ -1199,6 +1227,10 @@
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een groep terug stabiel te zijn.",
     "translation": "After periodic checks, the DNS settings of a group's domain name appear to be stable again."
   },
+  "e8dd32de-9708-4e77-ad38-fdd28b53d5b9": {
+    "original": "Alle nummers van de groepen waarvoor het lid is ingeschreven",
+    "translation": "All numbers of the groups the member is registered for"
+  },
   "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
     "original": "* Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.",
     "translation": "* For affiliation with KSA National, you must still select a correct default registration group so that the name your group uses can be linked to the name of KSA National."
@@ -1214,6 +1246,10 @@
   "ec0c482e-0528-499f-82fa-b081bf708ded": {
     "original": "Dit lid is bij geen enkele groep ingeschreven voor het huidige werkjaar en kan daardoor niet aangesloten worden",
     "translation": "This member is not registered with any group for the current work year and therefore cannot be affiliated."
+  },
+  "ece866b1-c879-41d7-8cd6-8ba76d95521b": {
+    "original": "Groepen",
+    "translation": "Groups"
   },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze groep",

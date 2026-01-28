@@ -19,6 +19,10 @@
     "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere groepen.",
     "translation": "Enregistrez une copie de votre plan de salle afin de pouvoir le partager avec d'autres groupes."
   },
+  "03447d19-17e4-41b0-aa2c-cec5c9567354": {
+    "original": "Alle groepen zijn gesloten.",
+    "translation": "Tous les groupes sont fermés."
+  },
   "040cc66c-e27f-4822-87ad-722bca4f5038": {
     "original": "Kies of je het bericht wilt publiceren in ‘Mijn account’ en/of versturen via e-mail via de knoppen bovenaan",
     "translation": "Choisissez si vous souhaitez publier le message dans ‘Mon compte’ et/ou l'envoyer par e-mail à l'aide des boutons ci-dessus"
@@ -287,6 +291,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van groep veranderen als je met een ander account wilt inloggen.",
     "translation": "Vous vous connectez au système de feedback avec ce compte : {email}. Vous pouvez d'abord changer de groupe si vous souhaitez vous connecter avec un autre compte."
   },
+  "35c08279-a7ce-4536-a201-985bb882a6cf": {
+    "original": "Contactpersonen van groepen",
+    "translation": "Contacts des groupes"
+  },
   "35f6fc8e-b63e-4e88-8324-2660c5280d5d": {
     "original": "Terug inschrijven op e-mails",
     "translation": "Se réinscrire aux e-mails"
@@ -490,6 +498,10 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "Vous pouvez également définir votre propre nom de domaine (par ex. inscription.mongroupe.be). Pour ce faire, vous devez avoir déjà acheté le nom de domaine ; c'est généralement déjà le cas si vous avez déjà un site web."
+  },
+  "5a1993a8-2604-4ca5-be6e-8d6902d9f8c1": {
+    "original": "Alle groepen",
+    "translation": "Tous les groupes"
   },
   "5aca8049-d981-4cc5-a86c-0c194047743d": {
     "original": "Natuurgroep",
@@ -715,6 +727,10 @@
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een lokale groep).",
     "translation": "{member} ne peut s'inscrire qu'avec une inscription active et valable (inscription obligatoire dans un groupe local)."
   },
+  "78b5bb21-5de1-4f0d-ad18-321edc4ba275": {
+    "original": "Alle groepen waarvoor het lid is ingeschreven",
+    "translation": "Tous les groupes dans lesquels le membre est inscrit"
+  },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een groep die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
     "translation": "Choisissez un groupe responsable de la collecte des frais d'adhésion"
@@ -746,6 +762,10 @@
   "81c91169-db1e-4819-8716-5382ffbaa43b": {
     "original": "Het groepsnummer is een unieke code voor deze groep. Deze wordt in de URL-balk van de browser gebruikt.",
     "translation": "Le numéro de groupe est un code unique pour ce groupe. Il est utilisé dans la barre d'URL du navigateur."
+  },
+  "83826ae8-fd89-46c2-ad3f-8f77aadd65b2": {
+    "original": "Enkel een platform hoofdbeheerder kan nieuwe groepen aanmaken",
+    "translation": "Seul un administrateur principal de la plateforme peut créer de nouveaux groupes"
   },
   "83877c6a-5330-4299-af39-fdbac4501dff": {
     "original": "We zijn niet 100% zeker dat deze leden uit Ravot en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Ravot) overschrijven als je ze aanvinkt.",
@@ -918,6 +938,10 @@
   "9abb03cf-d76c-4f97-afea-76982042b1ad": {
     "original": "Deze record is optioneel",
     "translation": "Ce enregistrement est facultatif"
+  },
+  "9c916015-e69c-44b3-a568-d0af15854787": {
+    "original": "Alle groepen worden overgezet op dit nieuwe werkjaar. Hoofdbeheerders kunnen het vorige werkjaar nog bekijken.",
+    "translation": "Tous les groupes sont transférés vers cette nouvelle année associative. Les administrateurs principaux peuvent encore consulter l'année associative précédente."
   },
   "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
     "original": "Groep ID",
@@ -1259,6 +1283,10 @@
     "original": "Een terugbetaling van jouw groep richting een lid of supporter",
     "translation": "Un remboursement de la part de votre groupe vers un membre ou un supporter."
   },
+  "d01932d9-e958-4b29-98f2-cc5ff6be29d3": {
+    "original": "Enkel een platform hoofdbeheerder kan groepen verwijderen",
+    "translation": "Seul un administrateur principal de la plateforme peut supprimer des groupes"
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw groep",
     "translation": "Nom de votre groupe"
@@ -1399,6 +1427,10 @@
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een groep terug stabiel te zijn.",
     "translation": "Après un contrôle périodique, il s'avère que les paramètres DNS du nom de domaine d'un groupe sont redevenus stables."
   },
+  "e8dd32de-9708-4e77-ad38-fdd28b53d5b9": {
+    "original": "Alle nummers van de groepen waarvoor het lid is ingeschreven",
+    "translation": "Tous les numéros des groupes dans lesquels le membre est inscrit"
+  },
   "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
     "original": "* Voor de aansluiting bij KSA Nationaal moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw groep gebruikt gekoppeld kan worden aan de benaming van KSA Nationaal.",
     "translation": "* Pour l'affiliation à KSA National, vous devez encore sélectionner un groupe d'inscription standard correct afin que le nom utilisé par votre groupe puisse être lié au nom de KSA National."
@@ -1418,6 +1450,10 @@
   "ec5437dc-5d11-4092-8ab7-e9090af1f71a": {
     "original": "Het is enkel mogelijk om de aansluiting binnen de start- en einddata aan te vragen.",
     "translation": "Il est uniquement possible de demander le raccordement entre les dates de début et de fin."
+  },
+  "ece866b1-c879-41d7-8cd6-8ba76d95521b": {
+    "original": "Groepen",
+    "translation": "Groupes"
   },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze groep",

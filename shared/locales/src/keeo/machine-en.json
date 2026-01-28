@@ -15,6 +15,10 @@
     "original": "Sla een kopie van jouw zaalplan op zodat je het kan delen met andere eenheden.",
     "translation": "Save a copy of your seating plan so you can share it with other units."
   },
+  "03447d19-17e4-41b0-aa2c-cec5c9567354": {
+    "original": "Alle eenheden zijn gesloten.",
+    "translation": "All units are closed."
+  },
   "05479234-2977-4bfd-a44b-924b01021b6e": {
     "original": "Op aanraden van andere eenheid / persoon",
     "translation": "On the recommendation of another unit / person"
@@ -22,6 +26,10 @@
   "05723781-9357-41b2-9fb8-cb4f80dde7f9": {
     "original": "Eenheidsnummer",
     "translation": "Unit number"
+  },
+  "068b0bcf-f269-4425-8a48-89ad156d6fad": {
+    "original": "Alle eenheidsnummers",
+    "translation": "All unit numbers"
   },
   "07290df8-cad5-40df-9e10-3c7eccc049bc": {
     "original": "Welpen",
@@ -279,6 +287,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
     "translation": "You are logging into the feedback system with this account: {email}. You can first change units if you want to log in with a different account."
   },
+  "35c08279-a7ce-4536-a201-985bb882a6cf": {
+    "original": "Contactpersonen van eenheden",
+    "translation": "Contact persons for units"
+  },
   "3642da6c-adad-4e20-aa5a-c6553b276770": {
     "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
     "translation": "{paymentMethod} has not yet been activated by Stripe. Please check if all required information is entered in your Stripe dashboard. The issue is often that the address of one of the administrators is missing in Stripe, or the unit website link hasn't been filled out."
@@ -474,6 +486,10 @@
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
     "translation": "Oops, you cannot yet create events with registrations in this period. This scout year has not yet been created in the system."
+  },
+  "5a1993a8-2604-4ca5-be6e-8d6902d9f8c1": {
+    "original": "Alle eenheden",
+    "translation": "All units"
   },
   "5a8403bb-90f8-4722-8cad-b275ffa781d9": {
     "original": "Voeg je ontbrekende eenheidsgegevens toe",
@@ -707,6 +723,10 @@
     "original": "{member} kan pas inschrijven met een geldige actieve inschrijving (verplichte inschrijving bij een eenheid).",
     "translation": "{member} can only register with a valid and active registration (registration with a unit is required)."
   },
+  "78b5bb21-5de1-4f0d-ad18-321edc4ba275": {
+    "original": "Alle eenheden waarvoor het lid is ingeschreven",
+    "translation": "All units the member is registered for"
+  },
   "78f9f25f-e02d-4310-af9e-87b075aa1232": {
     "original": "Kies een eenheid die verantwoordelijk is voor het verzamelen van de aansluitingskosten",
     "translation": "Choose a unit that is responsible for collecting the affiliation costs"
@@ -762,6 +782,10 @@
   "82d2825a-998b-4c0d-b109-f78ccc8d376f": {
     "original": "Huidige scoutsjaar",
     "translation": "Current scouting year"
+  },
+  "83826ae8-fd89-46c2-ad3f-8f77aadd65b2": {
+    "original": "Enkel een platform hoofdbeheerder kan nieuwe eenheden aanmaken",
+    "translation": "Only a platform main administrator can add new units"
   },
   "83877c6a-5330-4299-af39-fdbac4501dff": {
     "original": "We zijn niet 100% zeker dat deze leden uit Keeo en jouw bestand op dezelfde persoon duiden (bv. door een typfout of een vergissing in de geboortedatum). Kan je dit manueel verifiëren? De linkse gegevens uit jouw bestand zullen de rechtse (= uit Keeo) overschrijven als je ze aanvinkt.",
@@ -904,8 +928,8 @@
     "translation": "Give a discount for multiple registrations from a member or family, e.g. for siblings registering for a camp, or members taking multiple lessons in the same scouting year."
   },
   "9c916015-e69c-44b3-a568-d0af15854787": {
-    "original": "Alle groepen worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
-    "translation": "All groups are transferred to this new scout year. Main administrators can still view the previous scout year."
+    "original": "Alle eenheden worden overgezet op dit nieuwe scoutsjaar. Hoofdbeheerders kunnen het vorige scoutsjaar nog bekijken.",
+    "translation": "All units are switched to this new scouts year. Main administrators can still view the previous scouts year."
   },
   "9c92d16b-947d-4a06-bed4-054d8223d5cb": {
     "original": "Eenheid ID",
@@ -1251,6 +1275,10 @@
     "original": "Een terugbetaling van jouw eenheid richting een lid of supporter",
     "translation": "A refund from your unit to a member or supporter"
   },
+  "d01932d9-e958-4b29-98f2-cc5ff6be29d3": {
+    "original": "Enkel een platform hoofdbeheerder kan eenheden verwijderen",
+    "translation": "Only a platform main administrator can delete units"
+  },
   "d185d3ca-e20f-43a2-a79f-f77404b8f33a": {
     "original": "Naam van jouw eenheid",
     "translation": "Name of your unit"
@@ -1427,6 +1455,10 @@
     "original": "{name} is nu ingesteld als het huidige scoutsjaar",
     "translation": "{name} is now set as the current scouts year"
   },
+  "e8dd32de-9708-4e77-ad38-fdd28b53d5b9": {
+    "original": "Alle nummers van de eenheden waarvoor het lid is ingeschreven",
+    "translation": "All numbers of the units the member is registered for"
+  },
   "e99c7d31-f9fe-4e0f-8947-bdc30784de5b": {
     "original": "* Voor de aansluiting bij Keeo moet je nog een correcte standaard inschrijvingsgroep selecteren zodat de benaming die jouw eenheid gebruikt gekoppeld kan worden aan de benaming van Keeo.",
     "translation": "* For the Keeo connection you still need to select a correct default registration group so that the name your unit uses can be linked to the Keeo name."
@@ -1454,6 +1486,10 @@
   "ec6a555e-6bb1-4b5f-b17e-38eaa8a478b5": {
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige scoutsjaar voor een standaard leeftijdsgroep",
     "translation": "You can only assign a role to members who are registered in the current scouting year for a default age group."
+  },
+  "ece866b1-c879-41d7-8cd6-8ba76d95521b": {
+    "original": "Eenheden",
+    "translation": "Units"
   },
   "ed22b0bb-8ae7-4ef0-a139-1bc11b2a719e": {
     "original": "Deze functie kan niet worden toegewezen aan deze eenheid",

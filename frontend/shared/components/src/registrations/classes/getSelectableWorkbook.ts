@@ -61,6 +61,8 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         return column;
     };
 
+    const hasEvent = !!groups.length && !!groups.find(group => group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration);
+
     const columns: (SelectableColumn | null) [] = [
         // member
         new SelectableColumn({
@@ -158,29 +160,29 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             : null,
         // group
         ...groupColumns,
-        ...((auth.hasSomePlatformAccess() && (organization === null || organization.id === platform.membershipOrganizationId || (groups.length && groups.find(group => group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration))))
+        ...((auth.hasSomePlatformAccess() && (organization === null || organization.id === platform.membershipOrganizationId || hasEvent))
             ? [
                     new SelectableColumn({
                         id: 'organization',
-                        name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
+                        name: hasEvent ? $t('ee0da6c3-0032-40c1-9679-b96294e62b6e') : $t('2f325358-6e2f-418c-9fea-31a14abbc17a'),
                         description: $t('517e056d-b0f7-4103-b717-5550c0c38cff'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
+                        name: hasEvent ? $t('33baaf22-e844-4de1-960e-fc2dec76b5f1') : $t('9d283cbb-7ba2-4a16-88ec-ff0c19f39674'),
                         description: $t('983d267c-b44b-40bd-b0b6-565032ab01a9'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.organization',
-                        name: $t(`ece866b1-c879-41d7-8cd6-8ba76d95521b`),
+                        name: $t('5a1993a8-2604-4ca5-be6e-8d6902d9f8c1'),
                         description: $t('84f2ae7b-1ead-4d0f-9343-a4ed51b5e624'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.uri',
-                        name: $t(`6cfe82d0-86a4-4a38-aa5f-1a5cc0a8ae4b`),
+                        name: $t('068b0bcf-f269-4425-8a48-89ad156d6fad'),
                         description: $t('e8dd32de-9708-4e77-ad38-fdd28b53d5b9'),
                         enabled: false,
                     }),
