@@ -131,7 +131,7 @@ export const baseMemberColumns: XlsxTransformerColumn<PlatformMember>[] = [
         name: $t(`030be384-9014-410c-87ba-e04920c26111`),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
-            value: XlsxTransformerColumnHelper.formatBoolean(object.details.requiresFinancialSupport?.value),
+            value: XlsxTransformerColumnHelper.formatBoolean(object.details.hasFinancialSupportOrActiveUitpas),
         }),
     },
     {
