@@ -76,6 +76,21 @@ export class InvoicedBalanceItem extends AutoEncoder {
     }
 
     /**
+     * Total without VAT, but not rounded
+     */
+    get preciseTotalWithoutVAT() {
+        if (this.VATExcempt) {
+            return this.balanceInvoicedAmount;
+        }
+        return this.balanceInvoicedAmount * 100 / (100 + this.VATPercentage);
+    }
+
+    /**
+     * Debug helper
+     */
+    addedToUnitPriceToCorrectVAT = 0;
+
+    /**
      * Creates a default configuration for a balance item that needs to be invoiced. The result can still be adjusted to correct rounding issues, because
      * a balanace item cannot always be perfectly represented on an invoice (on an invoice rounding happens on invoice level, while balance items can have any price that is not really rounded at any time unless when paid).
      *
@@ -130,5 +145,32 @@ export class InvoicedBalanceItem extends AutoEncoder {
         }
 
         return item;
+    }
+
+    /**
+     * Important, this influences VAT calculatio. Items are grouped by key and VAT is calculated per group.
+     */
+    static getVATUniqueKey(item: InvoicedBalanceItem) {
+        if (item.VATExcempt === null) {
+            return `vat_${item.VATPercentage}`;
+        }
+        return `excempt_${item.VATExcempt}_${item.VATExcempt}`;
+    }
+
+    static groupPerVATCategory(items: InvoicedBalanceItem[]): InvoicedBalanceItem[][] {
+        // For every VAT category, calculate the taxable amount and VAT amount
+        const categories = new Map<string, InvoicedBalanceItem[]>();
+        for (const item of items) {
+            const key = this.getVATUniqueKey(item);
+
+            let category = categories.get(key);
+            if (!category) {
+                category = [];
+                categories.set(key, category);
+            }
+
+            category.push(item);
+        }
+        return [...categories.values()];
     }
 }

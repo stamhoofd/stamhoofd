@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
-import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
+import { BalanceItem, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { PriceBreakdown } from '../PriceBreakdown.js';
@@ -104,6 +104,10 @@ export class Invoice extends AutoEncoder {
 
     get totalBalanceInvoicedAmount() {
         return this.items.reduce((sum, item) => sum + item.balanceInvoicedAmount, 0);
+    }
+
+    get totalPaymentsAmount() {
+        return this.payments.reduce((sum, item) => sum + item.price, 0);
     }
 
     /**
@@ -234,38 +238,20 @@ export class Invoice extends AutoEncoder {
 
     calculateVAT() {
         // For every VAT category, calculate the taxable amount and VAT amount
-        const categories = new Map<string, VATSubtotal>();
-        for (const item of this.items) {
-            let key: string;
-            if (item.VATExcempt === null) {
-                key = `vat_${item.VATPercentage}`;
-            }
-            else {
-                key = `excempt_${item.VATExcempt}_${item.VATExcempt}`;
-            }
+        this.VATTotal = InvoicedBalanceItem.groupPerVATCategory(this.items).map((items) => {
+            const category = new VATSubtotal();
+            category.VATPercentage = items[0].VATExcempt === null ? items[0].VATPercentage : 0;
+            category.VATExcempt = items[0].VATExcempt;
+            category.taxablePrice = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
 
-            let category = categories.get(key);
-            if (!category) {
-                category = new VATSubtotal();
-                category.VATPercentage = item.VATExcempt === null ? item.VATPercentage : 0;
-                category.VATExcempt = item.VATExcempt;
-                categories.set(key, category);
-            }
-
-            category.taxablePrice += item.totalWithoutVAT;
-        }
-
-        // Calculate VAT amount for each category and round to 1 cent
-        for (const category of categories.values()) {
             if (!category.VATExcempt) {
                 category.VAT = STMath.round(category.taxablePrice * category.VATPercentage / 100_00) * 100;
             }
             else {
                 category.VAT = 0;
             }
-        }
-
-        this.VATTotal = Array.from(categories.values());
+            return category;
+        });
     }
 
     addItem(item: InvoicedBalanceItem) {
@@ -311,6 +297,97 @@ export class Invoice extends AutoEncoder {
         ];
     }
 
+    updatePayableRoundingAmount() {
+        // Calculate difference between the invoice price and the payments price
+        const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
+        if (Math.abs(difference) < 10_00) { // Correct maximum 10 cents
+            this.payableRoundingAmount = difference;
+        }
+        else {
+            this.payableRoundingAmount = 0;
+        }
+    }
+
+    /** */
+    correctRoundingByUpdatingPrices() {
+        console.log('correctRoundingByUpdatingPrices');
+
+        const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
+        if (difference === 0) {
+            // No need to do any magic
+            return;
+        }
+
+        // For each VAT group, we start with the expected total without VAT.
+        // We calculate the difference and try to correct for it within the same VAT group.
+        // We first try to apply extra cents (or removal of cents) to the items with the highest difference
+        for (const items of InvoicedBalanceItem.groupPerVATCategory(this.items)) {
+            console.log('Calculating for group', items);
+            const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
+            const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
+
+            const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
+
+            console.log('toAddToTaxablePrice', toAddToTaxablePrice);
+
+            if (toAddToTaxablePrice === 0) {
+                // Less than 1 cent difference, we cannot apply this
+                continue;
+            }
+
+            // If toAddToTaxablePrice > 0 -> te weinig aangerekend - difference moet worden toegevoegd aan taxableprice
+            // If toAddToTaxablePrice < 0 -> te veel aangerekend - difference moet worden toegevoegd aan taxableprice
+
+            function getNext() {
+                // Rank items by difference
+                items.sort((a, b) => {
+                    const aDiff = a.preciseTotalWithoutVAT - a.totalWithoutVAT;
+                    const bDiff = b.preciseTotalWithoutVAT - b.totalWithoutVAT;
+
+                    if (toAddToTaxablePrice < 0) {
+                        // We need to subtract, so sort ascending (largest negative items first)
+                        return aDiff - bDiff;
+                    }
+                    return bDiff - aDiff; // Sort descending
+                });
+
+                const next = items[0];
+                if (!next) {
+                    return;
+                }
+                return next;
+            }
+
+            let next = getNext();
+            let loops = 0;
+            while (next && loops < 100) {
+                loops++;
+                const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
+                const currentToAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
+                if (currentToAddToTaxablePrice === 0 || Math.sign(currentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice)) {
+                    console.log('Stopped group calculation because currentToAddToTaxablePrice is zero or switched sign', currentToAddToTaxablePrice);
+                    break;
+                }
+
+                // Change prices in steps of 0.005 (total price, so divided by quantity)
+                let step = Math.round(50 * 1_00_00 / Math.abs(next.quantity));
+                if (step <= 1) {
+                    step = 1; // Might jump further than expected / wanted
+                }
+                const addition = Math.sign(currentToAddToTaxablePrice) * Math.sign(next.quantity) * step;
+                next.unitPrice += addition;
+                next.addedToUnitPriceToCorrectVAT += addition;
+                console.log('Increasing unit price of ', next, 'with ' + addition);
+
+                // todo
+                next = getNext();
+            }
+
+            console.log('Done calculating group');
+        }
+        console.log('Done correctRoundingByUpdatingPrices');
+    }
+
     /**
      * Call this method after changing the payments related to an invoice.
      */
@@ -354,6 +431,8 @@ export class Invoice extends AutoEncoder {
         });
 
         this.items = invoicedItems;
+        this.correctRoundingByUpdatingPrices();
         this.calculateVAT();
+        this.updatePayableRoundingAmount();
     }
 }
