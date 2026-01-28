@@ -4,6 +4,7 @@
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="auth.hasFullAccess()" v-tooltip="$t('Toon geschiedenis')" type="button" class="button icon history" @click="viewAudit" />
             </template>
         </STNavigationBar>
 
@@ -337,8 +338,10 @@
 
             <template v-if="payment.balanceItemPayments.length">
                 <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
-                <p v-if="$feature('vat')">{{ $t('f5d2f75b-15c6-4311-8a44-759703535237') }}</p>
-                
+                <p v-if="$feature('vat')">
+                    {{ $t('f5d2f75b-15c6-4311-8a44-759703535237') }}
+                </p>
+
                 <STGrid>
                     <STGridItem v-for="item in sortedItems" :key="item.id" :selectable="canWrite" class="price-grid" @click="editBalanceItem(item.balanceItem)">
                         <template #left>
@@ -347,7 +350,7 @@
 
                         <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
 
-                        <p class="style-description-small" v-if="item.quantity !== 1">
+                        <p v-if="item.quantity !== 1" class="style-description-small">
                             {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice)}) }}
                         </p>
 
@@ -369,7 +372,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
+import { AuditLogsView, CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
@@ -492,6 +495,17 @@ async function mark(status: PaymentStatus) {
     markingPaid.value = false;
 }
 
+async function viewAudit() {
+    await present({
+        components: [
+            new ComponentWithProperties(AuditLogsView, {
+                objectIds: [props.payment.id],
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
 async function editBalanceItem(balanceItem: BalanceItem) {
     if (!canWrite.value) {
         return;
@@ -512,8 +526,9 @@ async function editBalanceItem(balanceItem: BalanceItem) {
             });
 
             if (result.data && result.data.length === 1 && result.data[0].id === balanceItem.id) {
-                balanceItem.deepSet(result.data[0])
-            } else {
+                balanceItem.deepSet(result.data[0]);
+            }
+            else {
                 GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
             }
         },
