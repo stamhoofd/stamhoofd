@@ -1,7 +1,7 @@
 <template>
     <div class="member-payments-view">
         <main class="container">
-            <p v-if="member.patchedMember.details.requiresFinancialSupport && member.patchedMember.details.requiresFinancialSupport.value" class="info-box">
+            <p v-if="member.patchedMember.details.hasFinancialSupportOrActiveUitpas" class="info-box">
                 {{ financialSupportWarningText }}
             </p>
 
