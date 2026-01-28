@@ -25,6 +25,7 @@ export async function handleUitpasResponse(response: Response) {
 
 async function uitpasErrorToSimpleError(response: Response) {
     const json: unknown = await response.json().catch(() => { /* ignore */ });
+    console.error('[UITPAS ERROR]', json);
 
     const statusCode = response.status;
     let human: string | undefined;
