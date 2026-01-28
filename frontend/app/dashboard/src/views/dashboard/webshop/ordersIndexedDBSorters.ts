@@ -2,7 +2,7 @@ import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/si
 import { PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
 import { IndexBox, IndexedDbIndexValue } from './IndexBox';
 
-export enum OrderIndexedDBDataIndex {
+export enum OrderIndexedDBIndex {
     Number = 'number',
     CreatedAt = 'createdAt',
     Status = 'status',
@@ -13,17 +13,12 @@ export enum OrderIndexedDBDataIndex {
     Name = 'name',
     Email = 'email',
     Phone = 'phone',
-};
-
-export enum OrderIndexedDBGeneratedIndex {
     TotalPrice = 'totalPrice',
     Amount = 'amount',
     OpenBalance = 'openBalance',
     Location = 'location',
     TimeSlotTime = 'timeSlotTime',
 }
-
-export type OrderIndexedDBIndex = OrderIndexedDBDataIndex | OrderIndexedDBGeneratedIndex;
 
 /**
  * Don't forget to add the required in memory filters.
@@ -32,51 +27,51 @@ export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
     id: {
         getValue: value => value.id,
     },
-    [OrderIndexedDBDataIndex.CreatedAt]: {
+    [OrderIndexedDBIndex.CreatedAt]: {
         getValue: value => value.createdAt.getTime(),
     },
-    [OrderIndexedDBDataIndex.Number]: {
+    [OrderIndexedDBIndex.Number]: {
         getValue: value => value.number,
     },
-    [OrderIndexedDBDataIndex.Status]: {
+    [OrderIndexedDBIndex.Status]: {
         getValue: value => value.status,
     },
-    [OrderIndexedDBDataIndex.PaymentMethod]: {
+    [OrderIndexedDBIndex.PaymentMethod]: {
         getValue: value => value.data.paymentMethod,
     },
-    [OrderIndexedDBDataIndex.CheckoutMethod]: {
+    [OrderIndexedDBIndex.CheckoutMethod]: {
         getValue: value => value.data.checkoutMethod?.type,
     },
-    [OrderIndexedDBDataIndex.TimeSlotDate]: {
+    [OrderIndexedDBIndex.TimeSlotDate]: {
         getValue: value => value.data.timeSlot?.date.getTime(),
     },
-    [OrderIndexedDBDataIndex.ValidAt]: {
+    [OrderIndexedDBIndex.ValidAt]: {
         getValue: value => value.validAt?.getTime(),
     },
-    [OrderIndexedDBDataIndex.Name]: {
+    [OrderIndexedDBIndex.Name]: {
         getValue: value => value.data.customer.name,
     },
-    [OrderIndexedDBDataIndex.Email]: {
+    [OrderIndexedDBIndex.Email]: {
         getValue: value => value.data.customer.email,
     },
-    [OrderIndexedDBDataIndex.Phone]: {
+    [OrderIndexedDBIndex.Phone]: {
         getValue: value => value.data.customer.phone,
     },
 
     // Generated (these are stored in the indexes)
-    [OrderIndexedDBGeneratedIndex.TotalPrice]: {
+    [OrderIndexedDBIndex.TotalPrice]: {
         getValue: value => value.data.totalPrice,
     },
-    [OrderIndexedDBGeneratedIndex.Amount]: {
+    [OrderIndexedDBIndex.Amount]: {
         getValue: value => value.data.amount,
     },
-    [OrderIndexedDBGeneratedIndex.OpenBalance]: {
+    [OrderIndexedDBIndex.OpenBalance]: {
         getValue: value => value.openBalance,
     },
-    [OrderIndexedDBGeneratedIndex.Location]: {
+    [OrderIndexedDBIndex.Location]: {
         getValue: value => value.data.locationName,
     },
-    [OrderIndexedDBGeneratedIndex.TimeSlotTime]: {
+    [OrderIndexedDBIndex.TimeSlotTime]: {
         getValue: value => value.data.timeSlot?.timeIndex,
     },
 };
@@ -89,7 +84,37 @@ export function createPrivateOrderIndexBox(data: PrivateOrder) {
     return new IndexBox({ data, getIndexes: getPrivateOrderIndexes });
 };
 
-export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record<OrderIndexedDBGeneratedIndex, IndexedDbIndexValue> {
+export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record<OrderIndexedDBIndex, IndexedDbIndexValue> {
+    @field({ decoder: NumberDecoder })
+    createdAt: number = 0;
+
+    @field({ decoder: NumberDecoder })
+    number: number = 0;
+
+    @field({ decoder: StringDecoder })
+    status: string = '';
+
+    @field({ decoder: StringDecoder })
+    paymentMethod: string = '';
+
+    @field({ decoder: StringDecoder })
+    checkoutMethod: string = '';
+
+    @field({ decoder: NumberDecoder })
+    timeSlotDate: number = 0;
+
+    @field({ decoder: NumberDecoder })
+    validAt: number = 0;
+
+    @field({ decoder: StringDecoder })
+    name: string = '';
+
+    @field({ decoder: StringDecoder })
+    email: string = '';
+
+    @field({ decoder: StringDecoder })
+    phone: string = '';
+
     @field({ decoder: NumberDecoder })
     totalPrice: number = 0;
 
@@ -109,9 +134,15 @@ export class PrivateOrderEncodeableIndexes extends AutoEncoder implements Record
 function getPrivateOrderIndexes(order: PrivateOrder): PrivateOrderEncodeableIndexes {
     return PrivateOrderEncodeableIndexes.create(
         Object.fromEntries(
-            Object.values(OrderIndexedDBGeneratedIndex).map((generatedIndex) => {
+            Object.values(OrderIndexedDBIndex).map((generatedIndex) => {
                 const getIndex = ordersIndexedDBSorters[generatedIndex].getValue;
-                return [generatedIndex, getIndex(order)];
+                let index = getIndex(order);
+
+                if (typeof index === 'string') {
+                    index = index.toLocaleLowerCase();
+                }
+
+                return [generatedIndex, index];
             }),
         ),
     );

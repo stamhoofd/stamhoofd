@@ -6,7 +6,7 @@ import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
 import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PermissionLevel, PrivateOrder, privateOrderFilterCompilers, PrivateWebshop, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version, WebshopPreview } from '@stamhoofd/structures';
 import { toRaw } from 'vue';
 import { IndexBoxDecoder } from './IndexBox';
-import { createPrivateOrderIndexBox, OrderIndexedDBDataIndex, OrderIndexedDBGeneratedIndex, OrderIndexedDBIndex } from './ordersIndexedDBSorters';
+import { createPrivateOrderIndexBox, OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 
 class CallbackError extends Error {}
 class CompilerFilterError extends Error {}
@@ -286,22 +286,12 @@ export class WebshopManager {
 
                 function addOrderIndexedDBIndexes(orderStore: IDBObjectStore) {
                     // typescript will show an error if an index is missing
-                    const indexes: Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }> = {
-                        [OrderIndexedDBDataIndex.Number]: { unique: false, keyPath: 'value.number' },
-                        [OrderIndexedDBDataIndex.CreatedAt]: { unique: false, keyPath: 'value.createdAt' },
-                        [OrderIndexedDBDataIndex.Status]: { unique: false, keyPath: 'value.status' },
-                        [OrderIndexedDBDataIndex.PaymentMethod]: { unique: false, keyPath: 'value.data.paymentMethod' },
-                        [OrderIndexedDBDataIndex.CheckoutMethod]: { unique: false, keyPath: 'value.data.checkoutMethod.type' },
-                        [OrderIndexedDBDataIndex.TimeSlotDate]: { unique: false, keyPath: 'value.data.timeSlot.date' },
-                        [OrderIndexedDBDataIndex.ValidAt]: { unique: false, keyPath: 'value.validAt' },
-                        [OrderIndexedDBDataIndex.Name]: { unique: false, keyPath: ['value.data.customer.firstName', 'value.data.customer.lastName'] },
-                        [OrderIndexedDBDataIndex.Email]: { unique: false, keyPath: 'value.data.customer.email' },
-                        [OrderIndexedDBDataIndex.Phone]: { unique: false, keyPath: 'value.data.customer.phone' },
+                    const indexes: Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
                         // auto generate indexes for generated indexes
-                        ...Object.fromEntries(Object.values(OrderIndexedDBGeneratedIndex).map((index) => {
+                        = Object.fromEntries(Object.values(OrderIndexedDBIndex).map((index) => {
                             return [index, { unique: false, keyPath: `indexes.${index}` }];
-                        })) as Record<OrderIndexedDBGeneratedIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>,
-                    };
+                        })) as Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
+                    ;
 
                     Object.entries(indexes).forEach(([index, options]) => {
                         orderStore.createIndex(index, options.keyPath ?? index, options);
