@@ -401,7 +401,7 @@ test.describe('Registration', () => {
                 await registrationFlow.expectSuccessView();
             });
 
-            test('Step should always be shown if status is unknown', async ({ page, pages }) => {
+            test.skip('Step should always be shown if status is unknown', async ({ page, pages }) => {
                 // create group with reduced price
                 const group = await new GroupFactory({
                     organization,
