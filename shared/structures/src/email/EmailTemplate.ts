@@ -447,6 +447,29 @@ export class EmailTemplate extends AutoEncoder {
         return null;
     }
 
+    /**
+     * Return true if this template type contains recipient types where EmailRecipientFilter.canShowInMemberPortal = true.
+     * This means that you can send an email that will also be visible in the member portal. When this is the case, you should be able to add a block to
+     * an email that is only visible when sent via email.
+     *
+     * Note: please also update EmailRecipientFilter.canShowInMemberPortal
+     * @returns
+     */
+    static canAddEmailOnlyContent(type: EmailTemplateType): boolean {
+        switch (type) {
+            case EmailTemplateType.SavedMembersEmail:
+            case EmailTemplateType.SavedDocumentsEmail:
+            case EmailTemplateType.DefaultDocumentsEmail:
+            case EmailTemplateType.UserBalanceReminder: // special case because it is sent via a cron
+            case EmailTemplateType.UserBalanceIncreaseNotification:
+            case EmailTemplateType.DefaultMembersEmail: {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     static getTypeDescription(type: EmailTemplateType): string {
         switch (type) {
             case EmailTemplateType.DefaultMembersEmail: return $t(`50a8f3bd-d967-43bb-b0e8-a918f4d3e85a`);

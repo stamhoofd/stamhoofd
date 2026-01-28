@@ -88,7 +88,7 @@ const replacements = computed(() => {
 });
 
 const emailBlock = computed(() => {
-    return patched.value.type === EmailTemplateType.SavedMembersEmail || patched.value.type === EmailTemplateType.DefaultMembersEmail;
+    return EmailTemplate.canAddEmailOnlyContent(patched.value.type);
 });
 
 async function getHTML() {
