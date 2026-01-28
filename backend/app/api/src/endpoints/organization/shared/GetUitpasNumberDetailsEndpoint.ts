@@ -2,7 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { UitpasNumberDetails, UitpasNumbersGetDetailsRequest } from '@stamhoofd/structures';
 
 import { Decoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { uitpasApiResponseToSocialTariff } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { UitpasService } from '../../../services/uitpas/UitpasService.js';
 
@@ -32,6 +32,12 @@ export class GetUitpasNumberDetailsEndpoint extends Endpoint<Params, Query, Body
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const uitpasNumbers: string[] = request.query.uitpasNumbers;
+        if (uitpasNumbers.length > 5) {
+            throw new SimpleError({
+                code: 'maximum_limit',
+                message: 'Please only request up to 5 numbers at the same time',
+            });
+        }
 
         const results: UitpasNumberDetails[] = [];
         const simpleErrors = new SimpleErrors();
