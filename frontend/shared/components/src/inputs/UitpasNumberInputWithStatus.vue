@@ -147,6 +147,7 @@ async function checkStatus() {
 
     // should never happen
     if (!model.value) {
+        isLoading.value = false;
         return;
     }
 
@@ -157,7 +158,6 @@ async function checkStatus() {
     Request.cancelAll(requestOwner);
 
     try {
-        errors.errorBox = null;
         const uitpasNumberDetails = await getDetailsFromCacheOrFetch(initialUitpasNumber);
 
         if (initialUitpasNumber !== model.value?.uitpasNumber || uitpasNumberDetails.uitpasNumber !== model.value?.uitpasNumber) {
@@ -165,6 +165,7 @@ async function checkStatus() {
             // Ignore, because a new request has already started
             return;
         }
+        errors.errorBox = null;
 
         model.value = uitpasNumberDetails;
         cacheDetails(uitpasNumberDetails);
@@ -172,6 +173,12 @@ async function checkStatus() {
         isLoading.value = false;
     }
     catch (e) {
+        if (initialUitpasNumber !== model.value?.uitpasNumber) {
+            console.info('Ignored error, counter or uitpasNumber has already changed');
+            // Ignore, because a new request has already started
+            return;
+        }
+
         isLoading.value = false;
         errors.errorBox = new ErrorBox(e);
         throw e;
@@ -194,6 +201,8 @@ function quickValidate() {
 
 async function throttledCheckStatus() {
     Request.cancelAll(requestOwner);
+    isLoading.value = true;
+    errors.errorBox = null;
     if (quickValidate()) {
         isLoading.value = false;
         return;
@@ -201,6 +210,7 @@ async function throttledCheckStatus() {
 
     // should never happen
     if (!model.value) {
+        isLoading.value = false;
         return;
     }
 
