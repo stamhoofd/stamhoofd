@@ -102,7 +102,7 @@ export function uitpasApiResponseToSocialTariff(response: GetPassResponse): Uitp
             throw new SimpleError({
                 code: 'invalid_data',
                 message: 'Invalid social tariff end date',
-                human: $t('De einddatum van jouw kansentarief is ongeldig. Neem contact op met ons om het probleem te verhelpen.'),
+                human: $t('abc1a491-8038-4435-9007-c77cc00c0886'),
             });
         }
     }

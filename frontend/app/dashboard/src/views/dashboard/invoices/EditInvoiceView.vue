@@ -4,14 +4,14 @@
             {{ title }}
         </h1>
         <p v-if="patched.payments.length > 1 && isNew" class="warning-box">
-            {{ $t('Opgelet, er wordt slechts één factuur aangemaakt voor alle betalingen samen.') }}
+            {{ $t('a6efcc6f-d148-44ef-b916-8f76dda018e3') }}
         </p>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="container">
             <hr>
-            <h2>{{ $t('Vanaf') }}</h2>
+            <h2>{{ $t('3c8b07fe-9862-456a-a990-a6da13c2b794') }}</h2>
             <STList v-if="companies.length">
                 <RadioListItem v-for="company of companies" :key="company.id" v-model="seller" :label="company.name" :value="company">
                     <p v-if="company.VATNumber" class="style-description-small">
@@ -53,13 +53,13 @@
 
         <div class="container">
             <hr>
-            <h2>{{ $t('Klant') }}</h2>
+            <h2>{{ $t('b1ac8856-0f2d-4238-a0f7-1868eebc1df1') }}</h2>
 
             <CustomerSelectionBox :validator="errors.validator" :customer="customer" :customers="suggestedCustomers" @patch:customer="addPatch({customer: $event})" />
         </div>
 
         <hr>
-        <h2>{{ $t('Items') }}</h2>
+        <h2>{{ $t('a593d3de-632e-42e1-a9c6-eb54af683907') }}</h2>
 
         <STGrid>
             <STGridItem v-for="item of invoice.items" :key="item.id" class="price-grid">
@@ -74,7 +74,7 @@
                 <p v-if="item.description" class="style-description-small pre-wrap" v-text="item.description" />
 
                 <p class="style-description-small">
-                    {{ $t('{price} / stuk', {price: formatPrice(item.unitPrice)}) }}
+                    {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice)}) }}
                 </p>
 
                 <template #middleRight>
@@ -124,7 +124,7 @@ const organization = useRequiredOrganization();
 const auth = useAuth();
 
 const saving = ref(false);
-const title = props.isNew ? $t('Nieuwe factuur maken') : $t('Factuur bewerken');
+const title = props.isNew ? $t('3db5575a-8a20-47ab-807f-fe82ffa3525b') : $t('40ce0817-94a9-4863-9f96-a90e4d09054a');
 const companies = computed(() => organization.value.meta.companies);
 const present = usePresent();
 

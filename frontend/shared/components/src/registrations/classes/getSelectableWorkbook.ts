@@ -163,25 +163,25 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     new SelectableColumn({
                         id: 'organization',
                         name: $t(`a0b1e726-345d-4288-a1db-7437d1b47482`),
-                        description: $t('De eenheid verbonden aan deze inschrijving'),
+                        description: $t('517e056d-b0f7-4103-b717-5550c0c38cff'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'uri',
                         name: $t(`4c61c43e-ed3c-418e-8773-681d19323520`),
-                        description: $t('Het nummer van de eenheid verbonden aan deze inschrijving'),
+                        description: $t('983d267c-b44b-40bd-b0b6-565032ab01a9'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.organization',
-                        name: $t(`Groepen`),
-                        description: $t('Alle eenheden waarvoor het lid is ingeschreven'),
+                        name: $t(`ece866b1-c879-41d7-8cd6-8ba76d95521b`),
+                        description: $t('84f2ae7b-1ead-4d0f-9343-a4ed51b5e624'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'member.uri',
-                        name: $t(`Groepsnummers`),
-                        description: $t('Alle nummers van de groepen waarvoor het lid is ingeschreven'),
+                        name: $t(`6cfe82d0-86a4-4a38-aa5f-1a5cc0a8ae4b`),
+                        description: $t('e8dd32de-9708-4e77-ad38-fdd28b53d5b9'),
                         enabled: false,
                     }),
                 ]

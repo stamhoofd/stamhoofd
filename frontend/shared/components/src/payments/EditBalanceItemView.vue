@@ -4,8 +4,8 @@
             {{ title }}
         </h1>
         <button v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled" class="error-box icon disabled selectable" type="button" @click="markDue">
-            <span>{{ $t('Deze aanrekening werd geannuleerd en is niet langer te betalen.') }}</span>
-            <span class="button text">{{ $t('Heractiveer') }}</span>
+            <span>{{ $t('39e508ae-7803-4da8-ac84-89cde3d46867') }}</span>
+            <span class="button text">{{ $t('659662e6-8a63-4e5a-93c2-8b878e3ab0b0') }}</span>
         </button>
 
         <STErrorsDefault :error-box="errors.errorBox" />
@@ -35,7 +35,7 @@
                     </template>
 
                     <p v-if="patchedBalanceItem.status === BalanceItemStatus.Canceled && (patchedBalanceItem.unitPrice !== balanceItem.unitPrice || patchedBalanceItem.amount !== balanceItem.amount)" class="warning-box small">
-                        {{ $t('Het wijzigen van de bedragen heeft geen invloed op het te betalen bedrag, omdat de aanrekening geannuleerd is.') }}
+                        {{ $t('81b36015-481c-4c6f-9a79-8e1038c78796') }}
                     </p>
                 </STInputBox>
             </div>
@@ -187,10 +187,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Heractiveer deze aanrekening') }}
+                        {{ $t('db67c24e-cb6b-499e-9bee-8dcbc1710c10') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('Markeer deze aanrekening opnieuw als te betalen.') }}
+                        {{ $t('c556cc16-1755-48bb-a16d-8b9c73d57ec7') }}
                     </p>
 
                     <template #right>
@@ -225,10 +225,10 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Annuleer deze aanrekening') }}
+                        {{ $t('b548b1b7-8366-49e1-9111-bc14c758acc1') }}
                     </h2>
                     <p class="style-description-small">
-                        {{ $t('Een geannuleerde aanrekening blijft in het systeem, maar het te betalen bedrag wordt 0 euro.') }}
+                        {{ $t('6d3b3257-d194-4cd7-bdd2-ffebd3f237c2') }}
                     </p>
 
                     <template #right>
@@ -424,7 +424,7 @@ async function markDue() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`Deze aanrekening heractiveren?`), $t(`Ja, activeren`), $t(`Hiermee markeer je deze aanrekening opnieuw als te betalen.`)))) {
+    if (!(await CenteredMessage.confirm($t(`c2b671e8-d20a-469a-8636-c80ddd18b474`), $t(`0cbc8bd6-b4ac-4141-a177-c571010d2275`), $t(`50b0083d-a783-4364-8f2c-007947ec613e`)))) {
         return;
     }
     if (loading.value) {
@@ -439,7 +439,7 @@ async function markDue() {
             status: BalanceItemStatus.Due,
         }));
 
-        Toast.success($t('De aanrekening werd geheractiveerd')).show()
+        Toast.success($t('e5ec1057-507d-48ef-aa51-d4b0af98fbe6')).show()
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -451,7 +451,7 @@ async function doCancel() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`Deze aanrekening annuleren?`), $t(`Ja, annuleren`), $t(`Je kan dit ongedaan maken door de aanrekening later terug te markeren als te betalen.`)))) {
+    if (!(await CenteredMessage.confirm($t(`85f9a47d-520b-4a73-b765-582b4b231a68`), $t(`cdf0fafe-b364-4dbb-ae31-b593cf447298`), $t(`81c3580c-d7b5-483c-bfb1-2eec511e36fb`)))) {
         return;
     }
     if (loading.value) {
@@ -465,7 +465,7 @@ async function doCancel() {
         await props.saveHandler(BalanceItemWithPayments.patch({
             status: BalanceItemStatus.Canceled,
         }));
-        Toast.success($t('De aanrekening werd geannuleerd')).show()
+        Toast.success($t('81735589-1395-4067-87e5-43b5e2ce335e')).show()
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -492,7 +492,7 @@ async function doDelete() {
             status: BalanceItemStatus.Hidden,
             price: 0,
         }));
-        Toast.success($t('De aanrekening werd verwijderd')).show()
+        Toast.success($t('a2110850-3b10-45ef-964f-1c1f497691f7')).show()
         await pop({ force: true });
     }
     catch (e) {

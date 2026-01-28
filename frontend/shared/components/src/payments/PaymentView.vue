@@ -303,10 +303,10 @@
                             {{ $t('5c940c27-7609-443e-941c-52cd29067f9b') }}
                         </p>
                         <p v-else-if="payment.method === 'Transfer'" class="style-description-small">
-                            {{ $t('Annuleer de overschrijving als je die na enkele dagen nog niet hebt ontvangen. De schuld komt dan opnieuw open te staan, de status ‘in verwerking’ vervalt en er kan een nieuwe betaalpoging worden ondernomen. Automatische herinneringsmails worden indien nodig opnieuw geactiveerd.') }}
+                            {{ $t('4a79216b-66d8-4849-b837-f42a6438e208') }}
                         </p>
                         <p v-else class="style-description-small">
-                            {{ $t('Annuleer de betaling als je die na enkele dagen nog niet hebt ontvangen. De schuld komt dan opnieuw open te staan, de status ‘in verwerking’ vervalt en er kan een nieuwe betaalpoging worden ondernomen. Automatische herinneringsmails worden indien nodig opnieuw geactiveerd.') }}
+                            {{ $t('4aa6f148-bb6b-4673-91da-46087ce5c400') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -323,10 +323,10 @@
                         </template>
 
                         <h2 class="style-title-list">
-                            {{ $t('Factuur opmaken') }}
+                            {{ $t('393ffd19-c415-4a6c-ac23-63303b3ea64e') }}
                         </h2>
                         <p class="style-description-small">
-                            {{ $t('Maak een factuur voor deze betaling aan.') }}
+                            {{ $t('a03de85d-dd34-4cec-a276-fffa3b910960') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -337,7 +337,7 @@
 
             <template v-if="payment.balanceItemPayments.length">
                 <hr><h2>{{ $t('4385bcc8-1643-4352-b766-a658e4c33f80') }}</h2>
-                <p v-if="$feature('vat')">{{ $t('Alle prijzen zijn inclusief btw.') }}</p>
+                <p v-if="$feature('vat')">{{ $t('f5d2f75b-15c6-4311-8a44-759703535237') }}</p>
                 
                 <STGrid>
                     <STGridItem v-for="item in sortedItems" :key="item.id" :selectable="canWrite" class="price-grid" @click="editBalanceItem(item.balanceItem)">
@@ -348,7 +348,7 @@
                         <BalanceItemTitleBox :item="item.balanceItem" :is-payable="false" :price="item.price" :payment-status="payment.status" />
 
                         <p class="style-description-small" v-if="item.quantity !== 1">
-                            {{ $t('{price} / stuk', {price: formatPrice(item.unitPrice)}) }}
+                            {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice)}) }}
                         </p>
 
                         <template #middleRight>
@@ -433,7 +433,7 @@ async function reload() {
 }
 
 async function markPaid() {
-    if (!await CenteredMessage.confirm($t('Betaling als betaald markeren?'), $t('Ja, betaald'))) {
+    if (!await CenteredMessage.confirm($t('f742fe3f-de80-446f-a9b5-d7a55858417f'), $t('f59ee71d-abf3-42c4-a8b9-e6c88a17a6b3'))) {
         return;
     }
     await mark(PaymentStatus.Succeeded);
@@ -441,12 +441,12 @@ async function markPaid() {
 
 async function markPending() {
     if (props.payment.status === PaymentStatus.Succeeded) {
-        if (!await CenteredMessage.confirm($t('Betaling toch niet ontvangen?'), $t('Ja, niet ontvangen'), $t('De betaling blijft in verwerking waardoor je deze later terug als betaald kan markeren als je het zou ontvangen.'))) {
+        if (!await CenteredMessage.confirm($t('3dd18283-b7d9-4cd9-8eee-c65cb89b9d69'), $t('3a21f69a-dda9-4ea2-87a2-b1e57e2452df'), $t('7dd54003-9a52-498a-acb2-3467e3b88017'))) {
             return;
         }
     }
     else {
-        if (!await CenteredMessage.confirm($t('Betaling heractiveren'), $t('Ja, heractiveer'), $t('De betaling komt hierna terug in de status ‘in verwerking’ en kan daarna als betaald worden gemarkeerd.'))) {
+        if (!await CenteredMessage.confirm($t('767cec61-f0b4-4a55-9568-556ebb6a3a49'), $t('59b28370-3af7-48f9-9664-a66fe57e72b7'), $t('9172b0e0-f292-4710-a0a0-486b2e911847'))) {
             return;
         }
     }
@@ -454,7 +454,7 @@ async function markPending() {
 }
 
 async function markFailed() {
-    if (!await CenteredMessage.confirm($t('Betaling annuleren?'), $t('Ja, annuleren'), $t('Een geannuleerde betaling zorgt ervoor dat een nieuwe poging tot betaling ondernomen kan worden - eventueel via een andere betaalmethode. Gebruik het om een betaling definitief als niet-betaald te markeren. De openstaande schuld van de schuldenaar stijgt dan opnieuw en het deel ‘in verwerking’ daalt terug.'))) {
+    if (!await CenteredMessage.confirm($t('99810042-aa71-49a4-9cb4-c4fb23b7bc62'), $t('cdf0fafe-b364-4dbb-ae31-b593cf447298'), $t('4d83cf39-66a5-4759-a95a-3245cd17d8b3'))) {
         return;
     }
     await mark(PaymentStatus.Failed);

@@ -28,7 +28,7 @@
     <template v-if="showPrices">
         <template v-if="paymentStatus === null && item.status !== BalanceItemStatus.Canceled">
             <p v-if="item.amount !== 1" class="style-description-small">
-                {{ $t('{price} / stuk', {price: formatPrice(item.unitPriceWithVAT)}) }}
+                {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPriceWithVAT)}) }}
             </p>
         </template>
 

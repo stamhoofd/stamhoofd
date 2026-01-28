@@ -35,7 +35,7 @@ export function useGetUitpasNumberDetails() {
 
             throw new SimpleError({
                 code: 'network_abort',
-                message: $t('Het kansentarief kon niet gevalideerd worden. Probeer het later opnieuw.'),
+                message: $t('c41adadd-126f-4336-9812-d5d6b369e0cb'),
             });
         }
     };

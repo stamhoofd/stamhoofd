@@ -67,7 +67,7 @@ export class PassholderEndpoints {
                     throw new SimpleError({
                         code: 'https://api.publiq.be/probs/uitpas/pass-not-found',
                         message: 'Pass not found',
-                        human: $t('Het UiTPAS-nummer dat je invulde konden we niet terugvinden. Kijk je het nummer even na?'),
+                        human: $t('02f758f9-a1b1-428b-9575-69c4963c2419'),
                         statusCode: 404,
                     });
                 }

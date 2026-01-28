@@ -20,7 +20,7 @@
             <STList class="info">
                 <STListItem v-if="invoice.invoicedAt">
                     <h3 class="style-definition-label">
-                        {{ $t('Factuurdatum') }}
+                        {{ $t('a3c698a7-834d-41ea-a184-22341e4cc129') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(invoice.invoicedAt) }}
@@ -32,7 +32,7 @@
 
                 <STListItem v-if="invoice.dueAt">
                     <h3 class="style-definition-label">
-                        {{ $t('Vervaldatum') }}
+                        {{ $t('92c75f77-9120-424a-83f5-39e26623c1ad') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ formatDate(invoice.dueAt) }}
@@ -41,7 +41,7 @@
             </STList>
 
             <hr>
-            <h2>{{ $t('Klant') }}</h2>
+            <h2>{{ $t('b1ac8856-0f2d-4238-a0f7-1868eebc1df1') }}</h2>
 
             <STList v-if="invoice.customer.company" class="info">
                 <STListItem>
@@ -108,10 +108,10 @@
             <STList v-else class="info">
                 <STListItem>
                     <h3 class="style-definition-label">
-                        {{ $t('Particulier') }}
+                        {{ $t('1474bb78-8f01-456a-9e85-c6b1748b76d5') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ invoice.customer.name || $t('Naamloos') }}
+                        {{ invoice.customer.name || $t('b815f278-1240-4aba-a99a-222d7f43e407') }}
                     </p>
                     <p v-if="invoice.customer.email" v-copyable class="style-description style-copyable">
                         {{ invoice.customer.email }}

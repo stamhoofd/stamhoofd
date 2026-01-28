@@ -13,7 +13,7 @@
         :Route="Route"
     >
         <template #empty>
-            {{ $t('Geen facturen gevonden') }}
+            {{ $t('2bc3b1b5-309c-47e0-a4c4-7145c0ef11af') }}
         </template>
     </ModernTableView>
 </template>
@@ -44,7 +44,7 @@ const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getPaymentsUIFilterBuilders();
 const title = computed(() => {
-    return $t('Facturen');
+    return $t('54f30f31-26eb-4801-8f03-4ec17bcb9b95');
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
@@ -78,9 +78,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer',
-        name: $t('Klant'),
+        name: $t('b1ac8856-0f2d-4238-a0f7-1868eebc1df1'),
         getValue: object => object.customer?.company ? (object.customer?.company?.name || '') : (object.customer.name || ''),
-        format: value => value || $t('Naamloos'),
+        format: value => value || $t('b815f278-1240-4aba-a99a-222d7f43e407'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -89,9 +89,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.company.VATNumber',
-        name: $t('BTW-nummer'),
+        name: $t('96091a9b-0e54-4261-aa43-b28171a9ba97'),
         getValue: object => object.customer?.company ? (object.customer?.company?.VATNumber || '') : '',
-        format: value => value || $t('Geen'),
+        format: value => value || $t('fbbcf6c9-4cfe-4113-be53-6fc15d350642'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -101,9 +101,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'customer.company.companyNumber',
-        name: $t('Ondernemingsnummer'),
+        name: $t('f475a861-b2fe-4b4c-921c-e27a0c19b8e2'),
         getValue: object => object.customer?.company ? (object.customer?.company?.companyNumber || '') : '',
-        format: value => value || $t('Geen'),
+        format: value => value || $t('fbbcf6c9-4cfe-4113-be53-6fc15d350642'),
         getStyle: value => !value ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 150,
@@ -113,16 +113,16 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, Date | null>({
         id: 'invoicedAt',
-        name: $t('Datum'),
+        name: $t('61674904-4043-4c58-ae98-58495f9ae89e'),
         getValue: object => object.invoicedAt,
-        format: (value, width) => value ? (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true)) : $t('Nog niet gefactureerd'),
+        format: (value, width) => value ? (width < 150 ? Formatter.dateNumber(value) : Formatter.date(value, true)) : $t('fec48d44-7399-4f84-9eec-e57136fa1b3c'),
         minimumWidth: 120,
         recommendedWidth: 120,
     }),
 
     new Column<ObjectType, number>({
         id: 'totalWithVAT',
-        name: $t('Bedrag incl. BTW'),
+        name: $t('85e54eed-2f1d-46ac-94b0-1070b54ba68d'),
         getValue: object => object.totalWithVAT,
         format: value => Formatter.price(value),
         minimumWidth: 50,
@@ -131,7 +131,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'totalWithoutVAT',
-        name: $t('Bedrag excl. BTW'),
+        name: $t('e225a024-7d9d-473a-91db-8bf8a7b97bda'),
         getValue: object => object.totalWithoutVAT,
         format: value => Formatter.price(value),
         minimumWidth: 50,
@@ -140,7 +140,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'VATTotalAmount',
-        name: $t('BTW'),
+        name: $t('13c04b8f-80f5-4274-9ea1-badb0f88a091'),
         getValue: object => object.VATTotalAmount,
         format: value => Formatter.price(value),
         minimumWidth: 50,
@@ -156,7 +156,7 @@ const Route = {
 
 const actions: TableAction<ObjectType>[] = [
     /* new AsyncTableAction({
-        name: $t('Exporteer naar Excel'),
+        name: $t('f97a138d-13eb-4e33-aee3-489d9787b2c8'),
         icon: 'download',
         priority: 0,
         groupIndex: 2,

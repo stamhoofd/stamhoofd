@@ -10,7 +10,7 @@ export class InvoiceService {
                 code: 'missing_customer',
                 message: 'Missing customer',
                 field: 'customer',
-                human: $t('Er kan geen factuur aangemaakt worden omdat de klantgegevens ontbreken voor deze betaling'),
+                human: $t('cb28c759-7ab7-4a07-8972-9523393993ac'),
             });
         }
 
@@ -37,7 +37,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'missing_company',
                 message: 'Missing invoice settings (companies)',
-                human: $t('Het is niet mogelijk om facturen uit te schrijven omdat er nog geen facturatiegegevens zijn ingesteld voor {organization-name}', {
+                human: $t('abd43002-de39-4d64-96c0-1c801c27e764', {
                     'organization-name': organization.name,
                 }),
             });

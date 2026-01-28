@@ -34,7 +34,7 @@ import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
-const title = $t('Bestellingen');
+const title = $t('aed41648-b8ad-476d-b98a-0221d387f96a');
 const configurationId = 'orders';
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
@@ -62,7 +62,7 @@ const actions = computed(() => {
 
     return [
         new InMemoryTableAction({
-            name: $t('Openen'),
+            name: $t('f42816c2-4aec-4d10-9d86-215358f27e7c'),
             icon: 'eye',
             priority: 0,
             groupIndex: 1,

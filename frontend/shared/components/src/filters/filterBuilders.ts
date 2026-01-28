@@ -14,26 +14,26 @@ import { UIFilter, UIFilterBuilder, UIFilterBuilders } from './UIFilter';
 export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`Naam (particulier)`),
+            name: $t(`3bd3f5e8-e8d6-4854-986d-f2ef87285441`),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`E-mailadres`),
+            name: $t(`586d5f5a-7cf3-4b7a-8119-975e048a70b6`),
             key: 'email',
         }),
         new GroupUIFilterBuilder({
-            name: $t(`Bedrijfsgegevens`),
+            name: $t(`92b9161f-cf1d-49a0-b5d1-aab82df4a160`),
             builders: [
                 new StringFilterBuilder({
-                    name: $t(`Bedrijfsnaam`),
+                    name: $t(`67928a02-b3f1-465a-9dd7-569d061599a9`),
                     key: 'name',
                 }),
                 new StringFilterBuilder({
-                    name: $t(`BTW-nummer`),
+                    name: $t(`96091a9b-0e54-4261-aa43-b28171a9ba97`),
                     key: 'VATNumber',
                 }),
                 new StringFilterBuilder({
-                    name: $t(`Ondernemingsnummer`),
+                    name: $t(`f475a861-b2fe-4b4c-921c-e27a0c19b8e2`),
                     key: 'companyNumber',
                 }),
             ],
@@ -45,7 +45,7 @@ export const getCustomerUIFilterBuilders: () => UIFilterBuilders = () => {
 
     builders.unshift(
         new GroupUIFilterBuilder({
-            name: $t('Klantgegevens'),
+            name: $t('ee847021-ab78-4ad8-a0e0-ae7172d612c8'),
             builders,
             wrapper: {
                 customer: FilterWrapperMarker,
@@ -83,7 +83,7 @@ export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
         }),
 
         new MultipleChoiceFilterBuilder({
-            name: $t(`Type`),
+            name: $t(`97c32bed-6241-48c5-89a8-65ae68d6f562`),
             options: Object.values(PaymentType).map((method) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(method)), method);
             }),
@@ -95,18 +95,18 @@ export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
         }),
 
         new NumberFilterBuilder({
-            name: $t(`Prijs`),
+            name: $t(`138ef184-831e-4842-8d11-5d5f6bdae3d4`),
             type: NumberFilterFormat.Currency,
             key: 'price',
         }),
 
         new DateFilterBuilder({
-            name: $t(`Betaaldatum`),
+            name: $t(`067200f1-7cc9-4111-b851-47e3e59fe777`),
             key: 'paidAt',
         }),
 
         new DateFilterBuilder({
-            name: $t(`Aanmaakdatum`),
+            name: $t(`6711ac76-e8c7-482b-b6b4-635ba3d16f60`),
             key: 'createdAt',
         }),
 

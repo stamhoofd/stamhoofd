@@ -38,8 +38,8 @@ export enum InvoiceType {
 export class InvoiceTypeHelper {
     static getName(type: InvoiceType): string {
         switch (type) {
-            case InvoiceType.Invoice: return $t('factuur');
-            case InvoiceType.CreditNote: return $t('creditnota');
+            case InvoiceType.Invoice: return $t('fbf8fca6-33f0-4ecc-8317-0033f256827e');
+            case InvoiceType.CreditNote: return $t('4578aaf4-a15a-4c53-ad46-768b91d96a4e');
         }
     }
 }
@@ -214,7 +214,7 @@ export class Invoice extends AutoEncoder {
                     throw new SimpleError({
                         code: 'missing_vat_excemption',
                         message: 'Missing IntraCommunity VAT excemption',
-                        human: $t('De BTW op deze factuur moet verlegd worden (vanwege intracommunautaire btw), maar deze vrijstelling is niet toegepast bij elk item op het moment van betaling. Het onjuist instellen hiervan kan resulteren in een onjuist aangerekend bedrag. Zet dit recht, vorder of betaal eventuele verschillen terug en maak daarna een factuur aan.'),
+                        human: $t('8b562a1d-e7c0-4110-b320-db535f0ea0e9'),
                     });
                 }
             }
@@ -225,7 +225,7 @@ export class Invoice extends AutoEncoder {
                     throw new SimpleError({
                         code: 'erroneous_vat_excemption',
                         message: 'IntraCommunity VAT excemption should not apply to this item',
-                        human: $t('De BTW op deze factuur mag niet verlegd worden (geen intracommunautaire btw), maar deze vrijstelling werd foutief toegepast bij minstens één item op het moment van betaling. Het onjuist instellen hiervan kan resulteren in een onjuist aangerekend bedrag. Zet dit recht, vorder of betaal eventuele verschillen terug en maak daarna een factuur aan.'),
+                        human: $t('d2c3f57f-ffae-45ea-97ce-3f4f30839cd6'),
                     });
                 }
             }
@@ -289,23 +289,23 @@ export class Invoice extends AutoEncoder {
     get priceBreakdown(): PriceBreakdown {
         return [
             {
-                name: $t(`Totaal excl. BTW`),
+                name: $t(`d642f190-1607-4f54-8530-7af2f15c651b`),
                 price: this.totalWithoutVAT,
             },
             {
-                name: $t(`BTW`),
+                name: $t(`13c04b8f-80f5-4274-9ea1-badb0f88a091`),
                 price: this.VATTotalAmount,
             },
             ...(this.payableRoundingAmount !== 0
                 ? [
                         {
-                            name: $t(`Afrondingscorrectie`),
+                            name: $t(`dafd5091-0698-4117-bc5a-db8ba05cefcd`),
                             price: this.payableRoundingAmount,
                         },
                     ]
                 : []),
             {
-                name: $t(`Totaal incl. BTW`),
+                name: $t(`0376551a-9af8-44b7-8ab3-d343384dc900`),
                 price: this.totalWithVAT,
             },
         ];

@@ -53,12 +53,12 @@ const auth = useAuth();
 
 const scannedAtDescription = computed(() => {
     if (!props.ticket.scannedAt) {
-        return $t('Niet gescand');
+        return $t('f7d79766-4bd8-45d5-b895-dc9722afd73a');
     }
     if (!props.ticket.scannedBy) {
-        return $t('Gescand op {date-time}', { 'date-time': Formatter.dateTime(props.ticket.scannedAt) });
+        return $t('230d883d-d4a5-4a8b-a6f5-8caf1c637ea6', { 'date-time': Formatter.dateTime(props.ticket.scannedAt) });
     }
-    return $t('Gescand op {date-time} door {name}', { 'date-time': Formatter.dateTime(props.ticket.scannedAt), 'name': props.ticket.scannedBy });
+    return $t('ee68953a-0aec-4fda-83e8-3cbd0df2d087', { 'date-time': Formatter.dateTime(props.ticket.scannedAt), 'name': props.ticket.scannedBy });
 });
 
 const isSingle = computed(() => webshop.value.meta.ticketType === WebshopTicketType.SingleTicket);
@@ -89,7 +89,7 @@ function openMenu(clickEvent: MouseEvent) {
     const contextMenu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Openen'),
+                name: $t('f42816c2-4aec-4d10-9d86-215358f27e7c'),
                 disabled: !hasWrite.value,
                 action: () => {
                     openTicket();
@@ -97,12 +97,12 @@ function openMenu(clickEvent: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t('Markeer als'),
+                name: $t('ab81600b-e148-4039-a9a3-c88169732a92'),
                 disabled: !hasWrite.value,
                 childMenu: getMarkAsMenu(),
             }),
             new ContextMenuItem({
-                name: $t('Download'),
+                name: $t('84506ed3-1017-445b-abc1-e071a5fec76e'),
                 action: () => {
                     download().catch(console.error);
                     return true;
@@ -127,7 +127,7 @@ function getMarkAsMenu() {
     return new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t('Gescand'),
+                name: $t('7261dad7-c8ba-4dbd-a5c7-b1ad3dd7194a'),
                 selected: !!props.ticket.scannedAt,
                 action: () => {
                     props.webshopManager.addTicketPatch(TicketPrivate.patch({
@@ -140,7 +140,7 @@ function getMarkAsMenu() {
                 },
             }),
             new ContextMenuItem({
-                name: $t('Niet gescand'),
+                name: $t('f7d79766-4bd8-45d5-b895-dc9722afd73a'),
                 selected: !props.ticket.scannedAt,
                 action: () => {
                     props.webshopManager.addTicketPatch(TicketPrivate.patch({
@@ -156,7 +156,7 @@ function getMarkAsMenu() {
     ]);
 }
 
-const statusName = computed(() => props.ticket.scannedAt ? $t('Gescand') : $t('Niet gescand'));
+const statusName = computed(() => props.ticket.scannedAt ? $t('7261dad7-c8ba-4dbd-a5c7-b1ad3dd7194a') : $t('f7d79766-4bd8-45d5-b895-dc9722afd73a'));
 const statusColor = computed(() => props.ticket.scannedAt ? '' : 'gray');
 
 async function download() {

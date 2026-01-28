@@ -72,7 +72,7 @@
 
                 <div v-if="$feature('vat') && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" class="container">
                     <hr>
-                    <h2>{{ $t('Facturen') }}</h2>
+                    <h2>{{ $t('54f30f31-26eb-4801-8f03-4ec17bcb9b95') }}</h2>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.Invoices)">
@@ -80,10 +80,10 @@
                                 <img src="@stamhoofd/assets/images/illustrations/transfer.svg">
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Alle facturen') }}
+                                {{ $t('fa389e74-a5d7-43da-8ce5-805c3a6e1a53') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('Lijst met alle facturen die werden aangemaakt en verstuurd naar leden, deelnemers, organisaties en klanten.') }}
+                                {{ $t('5a61bab4-4702-4c66-977c-d97fb306049e') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />

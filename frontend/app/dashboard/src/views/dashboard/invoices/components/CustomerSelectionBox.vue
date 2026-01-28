@@ -26,7 +26,7 @@
                 </p>
 
                 <p v-if="!customer.name" class="style-description-small">
-                    {{ $t('Naam ontbreekt') }}
+                    {{ $t('e20260ab-00a7-4acf-8dc8-938a4c0249d7') }}
                 </p>
 
                 <p v-if="customer.email && customer.email !== customer.dynamicName" class="style-description-small">
@@ -34,19 +34,19 @@
                 </p>
 
                 <p class="style-description-small">
-                    {{ $t('Particulier') }}
+                    {{ $t('1474bb78-8f01-456a-9e85-c6b1748b76d5') }}
                 </p>
             </template>
         </RadioListItem>
 
-        <RadioListItem v-model="selectedCustomer" :label="$t('Andere')" :value="null" />
+        <RadioListItem v-model="selectedCustomer" :label="$t('26677608-996f-41a5-8a53-543d6efa7de4')" :value="null" />
     </STList>
 
     <div v-if="selectedCustomer === null">
-        <STInputBox :title="$t('Type')" class="max">
+        <STInputBox :title="$t('97c32bed-6241-48c5-89a8-65ae68d6f562')" class="max">
             <STList>
-                <RadioListItem v-model="hasCompany" :label="$t('Bedrijf of vereniging')" :value="true" />
-                <RadioListItem v-model="hasCompany" :label="$t('Particulier')" :value="false" />
+                <RadioListItem v-model="hasCompany" :label="$t('aacf9b80-b46d-48d9-8a8b-585a8d48fc9c')" :value="true" />
+                <RadioListItem v-model="hasCompany" :label="$t('1474bb78-8f01-456a-9e85-c6b1748b76d5')" :value="false" />
             </STList>
         </STInputBox>
 
