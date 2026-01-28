@@ -158,7 +158,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             : null,
         // group
         ...groupColumns,
-        ...((organization === null || organization.id === platform.membershipOrganizationId)
+        ...((auth.hasSomePlatformAccess() && (organization === null || organization.id === platform.membershipOrganizationId || (groups.length && groups.find(group => group.settings.requireOrganizationIds.length !== 1 && group.type === GroupType.EventRegistration))))
             ? [
                     new SelectableColumn({
                         id: 'organization',
