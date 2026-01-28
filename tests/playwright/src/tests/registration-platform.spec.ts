@@ -268,7 +268,7 @@ test.describe('Registration', () => {
                 {
                     title: 'is invalid',
                     number: '99',
-                    errorMessage: 'Ongeldige UiTPAS-nummer',
+                    errorMessage: 'Ongeldig UiTPAS-nummer',
                 },
             ];
 
