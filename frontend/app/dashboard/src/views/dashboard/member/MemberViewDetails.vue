@@ -568,6 +568,9 @@ export default class MemberViewDetails extends Mixins(NavigationMixin) {
         if (!find) {
             return null
         }
+        if (find.unsubscribedAll) {
+            return "Heeft zich uitgeschreven voor e-mails"
+        }
         if (find.markedAsSpam) {
             return "Heeft e-mail als spam gemarkeerd"
         }
