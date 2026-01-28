@@ -265,7 +265,7 @@ function clear() {
 }
 
 useValidation(props.validator, async () => {
-    if (props.willMarkReviewed) {
+    if (props.willMarkReviewed && (app !== 'registration' && auth.canAccessPlatformMember(props.member, PermissionLevel.Write))) {
         // Force saving: increase saved date + make sure it is not null
         parentsHaveAccess.value = parentsHaveAccess.value as any;
         await nextTick();
