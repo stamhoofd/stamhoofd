@@ -3,18 +3,18 @@
         :model-value="model?.uitpasNumber ?? null"
         :validator="validator"
         :nullable="nullable" :title="title" :disabled="disabled" :class="props.class" :required="required" :placeholder="placeholder" :error-fields="errorFields" :error-box="errors.errorBox" @update:has-errors="hasUitpasInputErrors = $event" @update:model-value="updateUitpasNumber"
-    />
+    >
+        <template v-if="!hasErrors && (isLoading || socialTariffStatus !== null)">
+            <p v-if="isLoading" class="loading-box">
+                <Spinner />
+                {{ $t('Kansentarief aan het ophalen...') }}
+            </p>
 
-    <template v-if="!hasErrors && (isLoading || socialTariffStatus !== null)">
-        <p v-if="isLoading" class="loading-box">
-            <Spinner />
-            {{ $t('Kansentarief aan het ophalen...') }}
-        </p>
-
-        <p v-else-if="socialTariffStatus !== null" :class="socialTariffStatus.class" data-testid="social-tariff-status">
-            {{ socialTariffStatus.text }}
-        </p>
-    </template>
+            <p v-else-if="socialTariffStatus !== null" :class="socialTariffStatus.class" data-testid="social-tariff-status">
+                {{ socialTariffStatus.text }}
+            </p>
+        </template>
+    </UitpasNumberInput>
 </template>
 
 <script lang="ts" setup>

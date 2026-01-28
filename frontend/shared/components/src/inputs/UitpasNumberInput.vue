@@ -23,6 +23,8 @@
         <template #right>
             <slot name="right" />
         </template>
+
+        <slot />
     </STInputBox>
 </template>
 
