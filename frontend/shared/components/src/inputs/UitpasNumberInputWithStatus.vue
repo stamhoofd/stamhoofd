@@ -88,6 +88,12 @@ const socialTariffStatus = computed<null | { text: string; class: 'success-box' 
             };
         }
         case UitpasSocialTariffStatus.Unknown: {
+            if (model.value.isActive) {
+                return {
+                    text: $t('Dit UiTPAS-nummer heeft een actief kansentarief.'),
+                    class: 'success-box',
+                };
+            }
             return null;
         }
         default: {
@@ -97,6 +103,10 @@ const socialTariffStatus = computed<null | { text: string; class: 'success-box' 
 });
 
 function updateUitpasNumber(value: string | null) {
+    if (model.value && model.value.uitpasNumber === value) {
+        return;
+    }
+
     if (value === null) {
         model.value = null;
     }
@@ -106,7 +116,7 @@ function updateUitpasNumber(value: string | null) {
 }
 
 const defaultStatus = UitpasSocialTariff.create({
-    status: UitpasSocialTariffStatus.Unknown,
+    status: UitpasSocialTariffStatus.None,
 });
 
 const isLoading = ref(false);
@@ -115,15 +125,11 @@ const requestOwner = useRequestOwner();
 
 const { getUitpasNumberDetails } = useGetUitpasNumberDetails();
 
-watch(() => model.value, async () => {
+watch(() => model.value?.uitpasNumber, async () => {
     await throttledCheckStatus();
 });
 
 const cachedDetails = new Map<string, UitpasNumberDetails>();
-
-if (model.value) {
-    cacheDetails(model.value);
-}
 
 // prevent unnecessary requests
 function cacheDetails(details: UitpasNumberDetails) {
@@ -152,7 +158,6 @@ async function checkStatus() {
     }
 
     isLoading.value = true;
-    model.value.socialTariff = defaultStatus;
     const initialUitpasNumber = model.value.uitpasNumber;
 
     Request.cancelAll(requestOwner);
@@ -173,6 +178,11 @@ async function checkStatus() {
         isLoading.value = false;
     }
     catch (e) {
+        if (Request.isAbortError(e)) {
+            // Canceled, so ignore
+            return;
+        }
+
         if (initialUitpasNumber !== model.value?.uitpasNumber) {
             console.info('Ignored error, counter or uitpasNumber has already changed');
             // Ignore, because a new request has already started
@@ -192,10 +202,6 @@ function quickValidate() {
         return true;
     }
 
-    if (model.value.socialTariff.status !== UitpasSocialTariffStatus.Unknown) {
-        return true;
-    }
-
     return false;
 }
 
@@ -203,25 +209,7 @@ async function throttledCheckStatus() {
     Request.cancelAll(requestOwner);
     isLoading.value = true;
     errors.errorBox = null;
-    if (quickValidate()) {
-        isLoading.value = false;
-        return;
-    }
 
-    // should never happen
-    if (!model.value) {
-        isLoading.value = false;
-        return;
-    }
-
-    // do not throttle if the details have been cached already
-    const value = model.value.uitpasNumber;
-    if (cachedDetails.has(value)) {
-        await checkStatus();
-        return;
-    }
-
-    isLoading.value = true;
     doThrottledCheckStatus();
 }
 </script>

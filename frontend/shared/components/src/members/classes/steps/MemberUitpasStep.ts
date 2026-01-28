@@ -33,11 +33,6 @@ export class MemberUitpasStep implements EditMemberStep {
             return false;
         }
 
-        // The step should be shown if the status of the uitpas social tariff is unknown
-        if (details.uitpasNumberDetails !== null && details.uitpasNumberDetails.socialTariff.status === UitpasSocialTariffStatus.Unknown) {
-            return true;
-        }
-
         if (this.options.outdatedTime) {
             if (details.reviewTimes.isOutdated('uitpasNumber', this.options.outdatedTime)) {
                 return true;

@@ -1,5 +1,5 @@
 import { Model } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Cart, OrderStatus, Product, ProductPrice, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
@@ -11,7 +11,7 @@ import { checkPermissionsFor } from './checkPermissionsFor.js';
 import { checkUitpasNumbers } from './checkUitpasNumbers.js';
 import { getSocialTariffForEvent } from './getSocialTariffForEvent.js';
 import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers.js';
-import { PassholderEndpoints } from './PassholderEndpoints.js';
+import { GetPassResponse, PassholderEndpoints } from './PassholderEndpoints.js';
 import { RegisterTicketSaleRequest, RegisterTicketSaleResponse, registerTicketSales } from './registerTicketSales.js';
 import { searchUitpasEvents } from './searchUitpasEvents.js';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers.js';
@@ -346,8 +346,24 @@ export class UitpasService {
     /**
      * @returns the passholder endpoints
      */
-    static async getPassByUitpasNumber(uitpasNumber: string) {
-        const access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
+    static async getPassByUitpasNumber(uitpasNumber: string): Promise<GetPassResponse> {
+        let access_token!: string;
+        try {
+            access_token = await UitpasTokenRepository.getAccessTokenFor(); // use platform credentials
+        }
+        catch (e) {
+            if (isSimpleError(e) && e.hasCode('uitpas_api_not_configured_for_platform')) {
+                console.error('UiTPAS API has not been configured for this platform, so defaulting to an unknown status for number ', uitpasNumber);
+                // Ignore and return status of unknown
+                return {
+                    uitpasNumber,
+                    socialTariff: {
+                        status: 'UNKNOWN',
+                    },
+                };
+            }
+            throw e;
+        }
         return new PassholderEndpoints(access_token).getPassByUitpasNumber(uitpasNumber);
     }
 

@@ -1,5 +1,6 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { BooleanStatus } from './MemberDetails.js';
+import { DataValidator } from '@stamhoofd/utility';
 
 /**
  * Possibles status returned from uitpas api
@@ -80,7 +81,12 @@ export class UitpasNumberDetails extends AutoEncoder {
             return true;
         }
 
-        // todo: fallback to legacy check if unknown
+        // Fallback to legacy check if unknown
+        if (this.socialTariff.status === UitpasSocialTariffStatus.Unknown && this.uitpasNumber) {
+            if (DataValidator.isUitpasNumberKansenTarief(this.uitpasNumber)) {
+                return true;
+            }
+        }
 
         return false;
     }

@@ -1,14 +1,14 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { handleUitpasResponse } from './handleUitpasResponse.js';
 
 export type GetPassResponse = {
-    passholderId: string;
+    passholderId?: string;
     uitpasNumber: string;
-    firstName: string;
-    points: number;
-    postalCode: string;
+    firstName?: string;
+    points?: number;
+    postalCode?: string;
     socialTariff: {
-        status: 'ACTIVE' | 'EXPIRED' | 'NONE';
+        status: 'ACTIVE' | 'EXPIRED' | 'NONE' | 'UNKNOWN';
         endDate?: string;
     };
     messages?: {
@@ -57,8 +57,23 @@ export class PassholderEndpoints {
             });
         }
 
-        const json = await handleUitpasResponse(response);
-        return jsonToGetPassResponse(json);
+        try {
+            const json = await handleUitpasResponse(response);
+            return jsonToGetPassResponse(json);
+        }
+        catch (e) {
+            if (isSimpleError(e) || isSimpleErrors(e)) {
+                if (e.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found')) {
+                    throw new SimpleError({
+                        code: 'https://api.publiq.be/probs/uitpas/pass-not-found',
+                        message: 'Pass not found',
+                        human: $t('Het UiTPAS-nummer dat je invulde konden we niet terugvinden. Kijk je het nummer even na?'),
+                        statusCode: 404,
+                    });
+                }
+            }
+            throw e;
+        }
     }
 
     private getHeaders(): Headers {

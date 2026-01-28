@@ -134,7 +134,7 @@ const requiresFinancialSupport = computed({
     },
 });
 
-const hasKansenTarief = computed(() => props.member.patchedMember.details.uitpasNumberDetails?.socialTariff.isActive === true);
+const hasKansenTarief = computed(() => props.member.patchedMember.details.uitpasNumberDetails?.isActive === true);
 
 const dataPermissionsChangeDate = computed(() => props.member.patchedMember.details.requiresFinancialSupport?.date ?? null);
 

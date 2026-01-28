@@ -35,7 +35,7 @@ export class MemberFinancialSupportStep implements EditMemberStep {
         }
 
         // can be skipped if uitpas number is active
-        if (details.uitpasNumberDetails && details.uitpasNumberDetails.socialTariff.isActive) {
+        if (details.uitpasNumberDetails && details.uitpasNumberDetails.isActive) {
             return false;
         }
 

@@ -35,7 +35,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
         return false;
     }
 
-    const wasActive = details.uitpasNumberDetails.socialTariff.isActive;
+    const wasActive = details.uitpasNumberDetails.isActive;
 
     let isUpdated = false;
 
@@ -46,7 +46,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
         const isUitpasEqual = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
 
         if (isSimpleError(error)) {
-            if (error.statusCode === 404) {
+            if (error.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found') || error.hasCode('https://api.publiq.be/probs/uitpas/invalid-uitpas-number')) {
                 if (isUitpasEqual) {
                     // set the status of the social tariff to unknown if the uitpas number did not change and the number is unknown
                     const member = await Member.getByID(memberId);
@@ -54,6 +54,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
                         member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
                             status: UitpasSocialTariffStatus.Unknown,
                         });
+                        member.details.reviewTimes.removeReview('uitpasNumber');
 
                         await member.save();
                     }
@@ -78,7 +79,7 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
         // is uitpas equal
         && previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber
         // did change from active to not active
-        && wasActive && !details.uitpasNumberDetails.socialTariff.isActive) {
+        && wasActive && !details.uitpasNumberDetails.isActive) {
         // force a review
         details.reviewTimes.removeReview('uitpasNumber');
     }
@@ -134,7 +135,7 @@ export function didUitpasReviewChange(reviewTimesPatch: ReviewTimes | AutoEncode
  * @param status
  * @returns
  */
-function uitpasSocialTariffStatusToEnum(status: 'ACTIVE' | 'EXPIRED' | 'NONE'): UitpasSocialTariffStatus {
+function uitpasSocialTariffStatusToEnum(status: 'ACTIVE' | 'EXPIRED' | 'NONE' | 'UNKNOWN'): UitpasSocialTariffStatus {
     switch (status) {
         case 'ACTIVE':
             return UitpasSocialTariffStatus.Active;

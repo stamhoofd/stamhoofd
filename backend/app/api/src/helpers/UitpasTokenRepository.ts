@@ -73,10 +73,6 @@ export class UitpasTokenRepository {
     }
 
     private static async getModelFromDb(organizationId: string | null) {
-        let model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
-        if (model) {
-            return model; // found in database
-        }
         if (organizationId === null) {
             // platform client id and secret are not yet in the database, but should be configured in the environment variables
             if (!STAMHOOFD.UITPAS_API_CLIENT_ID || !STAMHOOFD.UITPAS_API_CLIENT_SECRET) {
@@ -86,12 +82,18 @@ export class UitpasTokenRepository {
                     human: $t('71a8218b-c58e-4e95-9626-551b80eb8367'),
                 });
             }
-            model = new UitpasClientCredential();
+            const model = new UitpasClientCredential();
             model.clientId = STAMHOOFD.UITPAS_API_CLIENT_ID;
             model.clientSecret = STAMHOOFD.UITPAS_API_CLIENT_SECRET;
             model.organizationId = null; // null means platform
             return model;
         }
+
+        const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
+        if (model) {
+            return model; // found in database
+        }
+
         return null; // not found in database
     }
 

@@ -46,4 +46,11 @@ export class UitpasClientCredential extends QueryableModel {
         skipUpdate: true,
     })
     updatedAt: Date;
+
+    async save() {
+        if (this.organizationId === null) {
+            throw new Error('Not allowed to save uitpas client credentials for platform (organizationId = null)');
+        }
+        return await super.save();
+    }
 }

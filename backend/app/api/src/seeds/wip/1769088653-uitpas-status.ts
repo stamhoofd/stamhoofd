@@ -5,7 +5,7 @@ import { Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
-import { updateMemberDetailsUitpasNumber } from '../helpers/updateMemberDetailsUitpasNumber.js';
+import { updateMemberDetailsUitpasNumber } from '../../helpers/updateMemberDetailsUitpasNumber.js';
 
 /**
  * Seed to update the social tariff of all uitpas numbers.
@@ -72,7 +72,7 @@ async function migrateMember(member: Member) {
         member.details.cleanData();
 
         // remove the review if the social tariff is not active (all uitpas number were deemed active before the migration)
-        if (!member.details.uitpasNumberDetails?.socialTariff.isActive) {
+        if (member.details.uitpasNumberDetails.uitpasNumber && !member.details.uitpasNumberDetails?.isActive) {
             member.details.reviewTimes.removeReview('uitpasNumber');
         }
 
@@ -90,7 +90,7 @@ async function migrateMember(member: Member) {
             }
 
             // if the uitpas number is not known by the uitpas api
-            if (error.statusCode === 404) {
+            if (error.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found') || error.hasCode('https://api.publiq.be/probs/uitpas/invalid-uitpas-number')) {
                 console.log(`Uitpas number ${member.details.uitpasNumberDetails?.uitpasNumber} is not known by the uitpas api for member with id ${member.id}.`);
 
                 // set updated at
@@ -109,6 +109,7 @@ async function migrateMember(member: Member) {
             }
 
             if (error.code === 'invalid_uitpas_number') {
+                // Invalid syntax
                 console.log(`Uitpas number ${member.details.uitpasNumberDetails?.uitpasNumber} is invalid. Remove uitpas number details for member with id ${member.id}.`);
 
                 // remove the uitpas number
