@@ -7,7 +7,7 @@
         <template v-if="!hasErrors && (isLoading || socialTariffStatus !== null)">
             <p v-if="isLoading" class="loading-box">
                 <Spinner />
-                {{ $t('Kansentarief aan het ophalen...') }}
+                {{ $t('Status ophalen...') }}
             </p>
 
             <p v-else-if="socialTariffStatus !== null" :class="socialTariffStatus.class" data-testid="social-tariff-status">
