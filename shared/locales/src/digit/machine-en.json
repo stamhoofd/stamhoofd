@@ -235,6 +235,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van groep veranderen als je met een ander account wilt inloggen.",
     "translation": "You log in to the feedback system with this account: {email}. You can first change groups if you want to log in with a different account."
   },
+  "3642da6c-adad-4e20-aa5a-c6553b276770": {
+    "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de groep niet werd ingevuld.",
+    "translation": "{paymentMethod} has not yet been activated by Stripe. Make sure all required information has been filled out in your Stripe dashboard. Most often, the problem is that the address of one of the administrators is missing in Stripe or the group's website link hasn't been provided."
+  },
   "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
     "original": "Welkom op het ledenplatform van KSA, hier kan je jouw gegevens beheren en je inschrijven bij een KSA groep of voor een activiteit.",
     "translation": "Welcome to the KSA member platform, where you can manage your details and register with a KSA group or for an activity."
@@ -366,6 +370,10 @@
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Groep",
     "translation": "Group"
+  },
+  "517e056d-b0f7-4103-b717-5550c0c38cff": {
+    "original": "De groep verbonden aan deze inschrijving",
+    "translation": "The group linked to this registration"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
     "original": "Breng een bedrag in rekening bij de geselecteerde groep.",
@@ -639,6 +647,10 @@
     "original": "De groep is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "The group has been created. Log in to the administrator portal to give other administrators access."
   },
+  "84f2ae7b-1ead-4d0f-9343-a4ed51b5e624": {
+    "original": "Alle groepen waarvoor het lid is ingeschreven",
+    "translation": "All groups this member is registered with"
+  },
   "864675a2-7376-4a61-9c7d-f488e7906d7b": {
     "original": "De URI van de groep is te lang",
     "translation": "The group URI is too long"
@@ -751,6 +763,10 @@
     "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Ravot afkomstig is.",
     "translation": "Something went wrong when importing the seating plan. Check whether the file you have chosen does originate from Ravot."
   },
+  "983d267c-b44b-40bd-b0b6-565032ab01a9": {
+    "original": "Het nummer van de groep verbonden aan deze inschrijving",
+    "translation": "The group number linked to this registration"
+  },
   "98603c16-adf9-4aa9-9685-4a1199dd04d4": {
     "original": "Ben je zeker dat je dit bericht in ‘Mijn account’ wilt publiceren?",
     "translation": "Are you sure you want to publish this message in ‘My account’?"
@@ -766,6 +782,10 @@
   "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
     "original": "Alle leeftijdsgroepen worden gesloten (tenzij de groep al eerder overschakelde naar dit werkjaar)",
     "translation": "All age groups will be closed (unless the group already switched to this work year earlier)"
+  },
+  "9e53d8ca-d01f-4d64-8707-3877435f28fc": {
+    "original": "Stel in welke extra gegevens groepen nog moeten indienen en tegen wanneer.",
+    "translation": "Set which additional data groups still need to submit, and by when."
   },
   "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
     "original": "Een hoofdbeheerder van jouw groep moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
@@ -1102,6 +1122,10 @@
   "da498f50-0d40-4c68-a87c-488bd555e752": {
     "original": "verificatiedocument van je groep",
     "translation": "verification document of your group"
+  },
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
+    "original": "Groepen",
+    "translation": "Groups"
   },
   "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
     "original": "Er bestaat al een groep met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",

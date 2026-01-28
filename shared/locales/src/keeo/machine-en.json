@@ -279,6 +279,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
     "translation": "You are logging into the feedback system with this account: {email}. You can first change units if you want to log in with a different account."
   },
+  "3642da6c-adad-4e20-aa5a-c6553b276770": {
+    "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
+    "translation": "{paymentMethod} has not yet been activated by Stripe. Please check if all required information is entered in your Stripe dashboard. The issue is often that the address of one of the administrators is missing in Stripe, or the unit website link hasn't been filled out."
+  },
   "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
     "original": "Welkom op het ledenplatform van FOS Open Scouting, hier kan je jouw gegevens beheren en je inschrijven bij een eenheid of voor een activiteit.",
     "translation": "Welcome to the FOS Open Scouting member platform, here you can manage your data and register with a unit or for an activity."
@@ -426,6 +430,10 @@
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Eenheid",
     "translation": "Unit"
+  },
+  "517e056d-b0f7-4103-b717-5550c0c38cff": {
+    "original": "De eenheid verbonden aan deze inschrijving",
+    "translation": "The unit linked to this registration"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
     "original": "Breng een bedrag in rekening bij de geselecteerde eenheid.",
@@ -767,6 +775,10 @@
     "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "The unit has been created. Log in to the administrator portal to grant access to other administrators."
   },
+  "84f2ae7b-1ead-4d0f-9343-a4ed51b5e624": {
+    "original": "Alle eenheden waarvoor het lid is ingeschreven",
+    "translation": "All units where the member is registered"
+  },
   "864675a2-7376-4a61-9c7d-f488e7906d7b": {
     "original": "De URI van de eenheid is te lang",
     "translation": "The URI of the unit is too long"
@@ -883,6 +895,10 @@
     "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Keeo afkomstig is.",
     "translation": "Something went wrong importing the floor plan. Check if the file you have chosen is from Keeo."
   },
+  "983d267c-b44b-40bd-b0b6-565032ab01a9": {
+    "original": "Het nummer van de eenheid verbonden aan deze inschrijving",
+    "translation": "The number of the unit linked to this registration"
+  },
   "9c775d8c-1e2c-40c4-9f61-6be6cb6bd5bb": {
     "original": "Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen in hetzelfde scoutsjaar.",
     "translation": "Give a discount for multiple registrations from a member or family, e.g. for siblings registering for a camp, or members taking multiple lessons in the same scouting year."
@@ -902,6 +918,10 @@
   "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
     "original": "Alle leeftijdsgroepen worden gesloten (tenzij de eenheid al eerder overschakelde naar dit scoutsjaar)",
     "translation": "All age groups are closed (unless the unit has already switched to this scout year)"
+  },
+  "9e53d8ca-d01f-4d64-8707-3877435f28fc": {
+    "original": "Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.",
+    "translation": "Set up which extra data units still need to submit and by when."
   },
   "9ebbdbf3-f76b-4f9a-89e2-936f56a75723": {
     "original": "Verwijder scoutsjaar",
@@ -1294,6 +1314,10 @@
   "da498f50-0d40-4c68-a87c-488bd555e752": {
     "original": "verificatiedocument van je eenheid",
     "translation": "verification document of your unit"
+  },
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
+    "original": "Eenheden",
+    "translation": "Units"
   },
   "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
     "original": "Er bestaat al een eenheid met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",

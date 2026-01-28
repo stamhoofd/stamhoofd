@@ -5000,8 +5000,8 @@
     "translation": "Documentation"
   },
   "3642da6c-adad-4e20-aa5a-c6553b276770": {
-    "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
-    "translation": "{paymentMethod} is not yet activated by Stripe. Check if all necessary information is filled in your Stripe dashboard. Often the problem is that the address of one of the directors is missing in Stripe or the unit's website link was not filled in."
+    "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de vereniging niet werd ingevuld.",
+    "translation": "{paymentMethod} has not yet been activated by Stripe. Please check if all required information has been entered in your Stripe dashboard. The issue is often that the address of one of the administrators is missing in Stripe or the association website link hasn't been filled out."
   },
   "36640c0d-7fdd-4dae-a827-dc0a220bf53e": {
     "original": "Heel erg bedankt voor de gulle bijdrage! 😍",
@@ -7476,8 +7476,8 @@
     "translation": "member"
   },
   "517e056d-b0f7-4103-b717-5550c0c38cff": {
-    "original": "De eenheid verbonden aan deze inschrijving",
-    "translation": "The unit linked to this registration"
+    "original": "De vereniging verbonden aan deze inschrijving",
+    "translation": "The association linked to this registration"
   },
   "51850490-5d94-4e0b-a415-9b84e07d86f2": {
     "original": "Soorten activiteiten",
@@ -12044,8 +12044,8 @@
     "translation": "From minimum"
   },
   "84f2ae7b-1ead-4d0f-9343-a4ed51b5e624": {
-    "original": "Alle eenheden waarvoor het lid is ingeschreven",
-    "translation": "All units for which the member is registered"
+    "original": "Alle verenigingen waarvoor het lid is ingeschreven",
+    "translation": "All associations where the member is registered"
   },
   "8505e377-cc4d-4551-98d3-60a70d8b2c7b": {
     "original": "Naam van het lokaal (optioneel)",
@@ -13784,8 +13784,8 @@
     "translation": "Bundle discounts"
   },
   "983d267c-b44b-40bd-b0b6-565032ab01a9": {
-    "original": "Het nummer van de eenheid verbonden aan deze inschrijving",
-    "translation": "The number of the unit linked to this registration"
+    "original": "Het nummer van de vereniging verbonden aan deze inschrijving",
+    "translation": "The number of the association linked to this registration"
   },
   "98469c78-6bd6-4354-b7d2-07e5b48aec12": {
     "original": "Hoog",
@@ -14292,8 +14292,8 @@
     "translation": "has been modified"
   },
   "9e53d8ca-d01f-4d64-8707-3877435f28fc": {
-    "original": "Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.",
-    "translation": "Set which additional data units must still submit and by when."
+    "original": "Stel in welke extra gegevens verenigingen nog moeten indienen en tegen wanneer.",
+    "translation": "Set up which extra data associations still need to submit and by when."
   },
   "9e5a8bc1-91db-44e5-9059-3312f4145525": {
     "original": "dit lid",
@@ -19836,8 +19836,8 @@
     "translation": "Edit membership fee"
   },
   "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
-    "original": "Eenheden",
-    "translation": "Units"
+    "original": "Verenigingen",
+    "translation": "Associations"
   },
   "da5f0578-ebf9-40e1-8caf-baa3a7970b28": {
     "original": "Vragenlijsten en gegevens",

@@ -291,6 +291,10 @@
     "original": "Terug inschrijven op e-mails",
     "translation": "Se réinscrire aux e-mails"
   },
+  "3642da6c-adad-4e20-aa5a-c6553b276770": {
+    "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de groep niet werd ingevuld.",
+    "translation": "{paymentMethod} n'a pas encore été activé par Stripe. Vérifiez que toutes les informations nécessaires ont été complétées dans votre tableau de bord Stripe. Le problème provient souvent du fait que l'adresse d'un des administrateurs manque dans Stripe ou que le lien du site web du groupe n'a pas été renseigné."
+  },
   "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
     "original": "Welkom op het ledenplatform van KSA, hier kan je jouw gegevens beheren en je inschrijven bij een KSA groep of voor een activiteit.",
     "translation": "Bienvenue sur la plateforme des membres de KSA, où vous pouvez gérer vos données et vous inscrire à un groupe KSA ou à une activité."
@@ -450,6 +454,10 @@
   "5119aacc-24c1-43e6-b025-0efa7ea60ea3": {
     "original": "Instellen als huidige",
     "translation": "Définir comme actif"
+  },
+  "517e056d-b0f7-4103-b717-5550c0c38cff": {
+    "original": "De groep verbonden aan deze inschrijving",
+    "translation": "Le groupe associé à cette inscription"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
     "original": "Breng een bedrag in rekening bij de geselecteerde groep.",
@@ -755,6 +763,10 @@
     "original": "Vanaf minimum",
     "translation": "À partir de minimum"
   },
+  "84f2ae7b-1ead-4d0f-9343-a4ed51b5e624": {
+    "original": "Alle groepen waarvoor het lid is ingeschreven",
+    "translation": "Tous les groupes pour lesquels le membre est inscrit"
+  },
   "864675a2-7376-4a61-9c7d-f488e7906d7b": {
     "original": "De URI van de groep is te lang",
     "translation": "L'URI du groupe est trop long"
@@ -887,6 +899,10 @@
     "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Ravot afkomstig is.",
     "translation": "Une erreur s'est produite lors de l'importation du plan de salle. Vérifiez si le fichier que vous avez choisi provient bien de Ravot."
   },
+  "983d267c-b44b-40bd-b0b6-565032ab01a9": {
+    "original": "Het nummer van de groep verbonden aan deze inschrijving",
+    "translation": "Le numéro du groupe associé à cette inscription"
+  },
   "98469c78-6bd6-4354-b7d2-07e5b48aec12": {
     "original": "Hoog",
     "translation": "Haut"
@@ -914,6 +930,10 @@
   "9e0461d2-7439-4588-837c-750de6946287": {
     "original": "Optioneel",
     "translation": "Facultatif"
+  },
+  "9e53d8ca-d01f-4d64-8707-3877435f28fc": {
+    "original": "Stel in welke extra gegevens groepen nog moeten indienen en tegen wanneer.",
+    "translation": "Définissez quelles informations supplémentaires les groupes doivent encore soumettre et avant quelle date."
   },
   "9ec8b45b-3321-4c1a-90bb-74e22c3e7f09": {
     "original": "Een hoofdbeheerder van jouw groep moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",
@@ -1298,6 +1318,10 @@
   "da498f50-0d40-4c68-a87c-488bd555e752": {
     "original": "verificatiedocument van je groep",
     "translation": "document de vérification de votre groupe"
+  },
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
+    "original": "Groepen",
+    "translation": "Groupes"
   },
   "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
     "original": "Er bestaat al een groep met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",

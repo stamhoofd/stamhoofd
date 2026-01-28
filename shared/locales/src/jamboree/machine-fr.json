@@ -279,6 +279,10 @@
     "original": "Je logt in op het feedback systeem met dit account: {email}. Je kan eerst van eenheid veranderen als je met een ander account wilt inloggen.",
     "translation": "Vous vous connecterez au système de feedback avec ce compte : {email}. Vous pouvez d’abord changer d’unité si vous souhaitez vous connecter avec un autre compte."
   },
+  "3642da6c-adad-4e20-aa5a-c6553b276770": {
+    "original": "{paymentMethod} is nog niet geactiveerd door Stripe. Kijk na of alle nodige informatie is ingevuld in jullie Stripe dashboard. Vaak is het probleem dat het adres van één van de bestuurders ontbreekt in Stripe of de websitelink van de eenheid niet werd ingevuld.",
+    "translation": "{paymentMethod} n’a pas encore été activé par Stripe. Vérifiez si toutes les informations requises ont bien été complétées dans votre tableau de bord Stripe. Le plus souvent, il manque l’adresse d’un des dirigeants dans Stripe ou le lien vers le site web de l’unité n’a pas été ajouté."
+  },
   "369440db-a9e0-4530-a06b-3ea05cc6a2b0": {
     "original": "Welkom op het ledenplatform van Jamboree 2027, hier kan je jouw gegevens, inschrijving en betalingen beheren.",
     "translation": "Bienvenue sur la plateforme des membres de Jamboree 2027, ici vous pouvez gérer vos données, votre inscription et vos paiements."
@@ -426,6 +430,10 @@
   "50ebabe0-8162-486d-b32a-9ef3016256fb": {
     "original": "Eenheid",
     "translation": "Unité"
+  },
+  "517e056d-b0f7-4103-b717-5550c0c38cff": {
+    "original": "De eenheid verbonden aan deze inschrijving",
+    "translation": "L'unité liée à cette inscription"
   },
   "51c27c5e-c2be-441b-a571-7bf573ee6848": {
     "original": "Breng een bedrag in rekening bij de geselecteerde eenheid.",
@@ -767,6 +775,10 @@
     "original": "De eenheid is aangemaakt. Log in het beheerderportaal in om andere beheerders toegang te geven.",
     "translation": "L'unité a été créée. Connectez-vous au portail administrateur pour donner accès à d'autres administrateurs."
   },
+  "84f2ae7b-1ead-4d0f-9343-a4ed51b5e624": {
+    "original": "Alle eenheden waarvoor het lid is ingeschreven",
+    "translation": "Toutes les unités pour lesquelles le membre est inscrit"
+  },
   "864675a2-7376-4a61-9c7d-f488e7906d7b": {
     "original": "De URI van de eenheid is te lang",
     "translation": "L'URI de l'unité est trop longue"
@@ -887,6 +899,10 @@
     "original": "Er is iets misgelopen bij het importeren van het zaalplan. Kijk na of het bestand dat je hebt gekozen wel uit Jamboree afkomstig is.",
     "translation": "Une erreur s'est produite lors de l'importation du plan de salle. Vérifiez si le fichier que vous avez choisi provient bien de Jamboree."
   },
+  "983d267c-b44b-40bd-b0b6-565032ab01a9": {
+    "original": "Het nummer van de eenheid verbonden aan deze inschrijving",
+    "translation": "Le numéro de l'unité liée à cette inscription"
+  },
   "990581a8-e4db-4c33-b36b-4df045f8c294": {
     "original": "Klaas en Piet",
     "translation": "Marc et Jean"
@@ -910,6 +926,10 @@
   "9de0900d-9daa-48e5-ab82-496c61dfc5db": {
     "original": "Alle leeftijdsgroepen worden gesloten (tenzij de eenheid al eerder overschakelde naar dit scoutsjaar)",
     "translation": "Tous les groupes d'âge sont fermés (sauf si l'unité est déjà passée à cette année scoute)"
+  },
+  "9e53d8ca-d01f-4d64-8707-3877435f28fc": {
+    "original": "Stel in welke extra gegevens eenheden nog moeten indienen en tegen wanneer.",
+    "translation": "Définissez les informations supplémentaires que les unités doivent encore fournir et la date limite."
   },
   "9ebbdbf3-f76b-4f9a-89e2-936f56a75723": {
     "original": "Verwijder scoutsjaar",
@@ -1306,6 +1326,10 @@
   "da498f50-0d40-4c68-a87c-488bd555e752": {
     "original": "verificatiedocument van je eenheid",
     "translation": "document de vérification de votre unité"
+  },
+  "da4e80d0-e482-4cef-80a6-c49e445b0f4e": {
+    "original": "Eenheden",
+    "translation": "Unités"
   },
   "daa7dc61-e8c9-4629-97b6-a75f39eaebac": {
     "original": "Er bestaat al een eenheid met dezelfde URI. Voeg bijvoorbeeld de naam van je gemeente toe.",
