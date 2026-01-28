@@ -65,7 +65,7 @@ export class Payment extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 344 })
     payingOrganizationId: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 392 })
     invoiceId: string | null = null;
 
     get isPending() {
