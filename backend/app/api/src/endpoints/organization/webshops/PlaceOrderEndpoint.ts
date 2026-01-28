@@ -8,12 +8,13 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, WebshopAuthType, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { BuckarooHelper } from '../../../helpers/BuckarooHelper';
-import { Context } from '../../../helpers/Context';
-import { StripeHelper } from '../../../helpers/StripeHelper';
-import { AuditLogService } from '../../../services/AuditLogService';
-import { UitpasService } from '../../../services/uitpas/UitpasService';
-import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper';
+import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
+import { Context } from '../../../helpers/Context.js';
+import { StripeHelper } from '../../../helpers/StripeHelper.js';
+import { AuditLogService } from '../../../services/AuditLogService.js';
+import { UitpasService } from '../../../services/uitpas/UitpasService.js';
+import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
+import { PaymentService } from '../../../services/PaymentService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -154,7 +155,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         });
 
         // The order now is valid, the stock is reserved for now (until the payment fails or expires)
-        const totalPrice = request.body.totalPrice;
+        let totalPrice = request.body.totalPrice;
 
         if (totalPrice % 100 !== 0) {
             throw new SimpleError({
@@ -178,6 +179,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 payment.method = request.body.paymentMethod;
                 payment.status = PaymentStatus.Created;
                 payment.price = totalPrice;
+                PaymentService.round(payment);
+                totalPrice = payment.price;
                 payment.paidAt = null;
                 payment.customer = PaymentCustomer.create({
                     firstName: request.body.customer.firstName,

@@ -5,10 +5,10 @@ import { BalanceItem, BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { BalanceItemService } from '../../../../services/BalanceItemService';
-import { PaymentService } from '../../../../services/PaymentService';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { BalanceItemService } from '../../../../services/BalanceItemService.js';
+import { PaymentService } from '../../../../services/PaymentService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -131,6 +131,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             // Check total price
             const totalPrice = balanceItemPayments.reduce((total, item) => total + item.price, 0);
             payment.price = totalPrice;
+            PaymentService.round(payment);
 
             switch (payment.type) {
                 case PaymentType.Payment: {

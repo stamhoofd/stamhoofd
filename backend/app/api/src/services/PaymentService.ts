@@ -341,7 +341,7 @@ export const PaymentService = {
      *
      * TODO: update this method to generate a virtual invoice and use the price of the invoice instead of the rounded payment price, so we don't get differences in calculation
      */
-    async round(payment: Payment) {
+    round(payment: Payment) {
         const amount = payment.price;
         const rounded = Payment.roundPrice(payment.price);
         const difference = rounded - amount;
@@ -354,10 +354,9 @@ export const PaymentService = {
             throw new Error('Unexpected rounding difference of ' + difference + ' for payment ' + payment.id);
         }
 
-        // payment.roundingAmount = difference;
+        payment.roundingAmount = difference;
 
         // Change payment total price
         payment.price += difference;
-        await payment.save();
     },
 };

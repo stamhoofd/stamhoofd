@@ -86,8 +86,8 @@ export class Payment extends QueryableModel {
      *
      * E.g. total price to pay is 0,242 because of VAT, then we round this to 0,24. The roundingAmount will be -0,002 in this case.
      */
-    // @column({ type: 'integer' })
-    // roundingAmount = 0;
+    @column({ type: 'integer' })
+    roundingAmount = 0;
 
     /**
      * Fee paid to the payment provider (if available, otherwise set to 0)

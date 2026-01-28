@@ -5,10 +5,11 @@ import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounte
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { AuditLogService } from '../../../../services/AuditLogService';
-import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService';
-import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper';
+import { Context } from '../../../../helpers/Context.js';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
+import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
+import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
+import { PaymentService } from '../../../../services/PaymentService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -154,6 +155,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                         payment.method = struct.data.paymentMethod;
                         payment.status = PaymentStatus.Created;
                         payment.price = totalPrice;
+                        PaymentService.round(payment);
                         payment.paidAt = null;
 
                         // Determine the payment provider (always null because no online payments here)

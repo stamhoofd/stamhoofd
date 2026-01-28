@@ -1057,6 +1057,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         payment.status = PaymentStatus.Created;
         payment.paidAt = null;
         payment.price = totalPrice;
+        PaymentService.round(payment);
+        totalPrice = payment.price;
 
         if (totalPrice === 0) {
             payment.status = PaymentStatus.Succeeded;
