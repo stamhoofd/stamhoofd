@@ -498,6 +498,7 @@ onActivated(() => {
             > .st-view > main{
                 // Disable scroll view
                 overflow: hidden;
+                overscroll-behavior: auto;
             }
         }
 
