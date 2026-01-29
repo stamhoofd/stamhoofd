@@ -55,7 +55,7 @@
             <hr>
             <h2>{{ $t('b1ac8856-0f2d-4238-a0f7-1868eebc1df1') }}</h2>
 
-            <CustomerSelectionBox :validator="errors.validator" :customer="customer" :customers="suggestedCustomers" @patch:customer="addPatch({customer: $event})" />
+            <PaymentCustomerSelectionBox :validator="errors.validator" :customer="customer" :customers="suggestedCustomers" @patch:customer="addPatch({customer: $event})" />
         </div>
 
         <hr>
@@ -71,7 +71,7 @@ import { CenteredMessage, ErrorBox, GeneralSettingsView, RadioListItem, SaveView
 import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
-import { CustomerSelectionBox, InvoiceItemsBox } from './components';
+import { PaymentCustomerSelectionBox, InvoiceItemsBox } from './components';
 
 const props = withDefaults(
     defineProps<{
