@@ -24,7 +24,33 @@
             </div>
         </STInputBox>
 
-        <CompanyInputBox v-if="customer.company" :validator="validator" :company="customer.company" @patch:company="addPatch({ company: $event })" />
+        <template v-if="customer.company">
+            <CompanyInputBox :validator="validator" :company="customer.company" @patch:company="addPatch({ company: $event })" />
+
+            <template v-if="companyWithContectPreferred || !!firstName || !!lastName || !!phone || !!email">
+                <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`Contactpersoon`)">
+                    <div class="input-group">
+                        <div>
+                            <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
+                        </div>
+                        <div>
+                            <input v-model="lastName" class="input" type="text" autocomplete="family-name" :placeholder="$t(`171bd1df-ed4b-417f-8c5e-0546d948469a`)">
+                        </div>
+                    </div>
+
+                    <template #right>
+                        <button v-tooltip="$t('Contactpersoon verwijderen')" type="button" class="button icon trash small" @click="removeContact" />
+                    </template>
+                </STInputBox>
+
+                <EmailInput v-model="email" :validator="validator" autocomplete="email" :required="false" :title="$t(`7400cdce-dfb4-40e7-996b-4817385be8d8`)" :placeholder="$t(`Optioneel`)" />
+                <PhoneInput v-model="phone" :validator="validator" autocomplete="phone" :required="false" :title="$t(`GSM-nummer`)" :placeholder="$t(`Optioneel`)" />
+            </template>
+            <button v-else type="button" class="button text" @click="enableContact">
+                <span class="icon add" />
+                <span>{{ $t('Contactpersoon') }}</span>
+            </button>
+        </template>
         <template v-else>
             <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`Naam`)">
                 <div class="input-group">
@@ -44,9 +70,9 @@
 </template>
 
 <script lang="ts" setup>
-import { CompanyInputBox, EmailInput, ErrorBox, PhoneInput, RadioListItem, STInputBox, useEmitPatch, Validator } from '@stamhoofd/components';
+import { CompanyInputBox, EmailInput, ErrorBox, PhoneInput, STInputBox, useEmitPatch, Validator } from '@stamhoofd/components';
 import { Company, PaymentCustomer } from '@stamhoofd/structures';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = withDefaults(defineProps<{
     customer: PaymentCustomer;
@@ -58,6 +84,19 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits(['patch:customer']);
 const { addPatch } = useEmitPatch<PaymentCustomer>(props, emit, 'customer');
+const companyWithContectPreferred = ref(false);
+
+function enableContact() {
+    companyWithContectPreferred.value = true;
+}
+
+function removeContact() {
+    companyWithContectPreferred.value = false;
+    firstName.value = null;
+    lastName.value = null;
+    phone.value = null;
+    email.value = null;
+}
 
 const hasCompany = computed({
     get: () => !!props.customer.company,
