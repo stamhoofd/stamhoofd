@@ -19,6 +19,10 @@
                 <span class="style-discount-old-price">{{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice - item.addedToUnitPriceToCorrectVAT)}) }}</span>
             </p>
 
+            <p v-if="invoice.VATTotal.length > 1" class="style-description-small">
+                {{ $t('{percentage%} BTW', {'percentage%': formatPercentage(item.VATPercentage * 100)}) }}
+            </p>
+
             <template #middleRight>
                 <p class="style-price-base" :class="{negative: item.quantity < 0}">
                     {{ formatFloat(item.quantity / 1_00_00) }}
@@ -37,17 +41,34 @@
         </STGridItem>
     </STGrid>
 
-    <PriceBreakdownBox :price-breakdown="invoice.priceBreakdown" />
+    <PriceBreakdownBox :price-breakdown="invoice.getPriceBreakdown({vatAction: {icon: 'info-circle', handler: showVATDetails}})" />
 </template>
 
 <script lang="ts" setup>
-import { IconContainer, PriceBreakdownBox, STGrid, STGridItem } from '@stamhoofd/components';
+import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
+import { IconContainer, PriceBreakdownBox, STGrid, STGridItem, usePositionableSheet } from '@stamhoofd/components';
 import { Invoice } from '@stamhoofd/structures';
+import { default as InvoiceVATDetailsBox } from './InvoiceVATDetailsBox.vue';
 
-withDefaults(
+const props = withDefaults(
     defineProps<{
         invoice: Invoice;
     }>(), {
     },
 );
+
+const { presentPositionableSheet } = usePositionableSheet();
+
+async function showVATDetails(event: MouseEvent) {
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(InvoiceVATDetailsBox, {
+                    invoice: props.invoice,
+                }),
+            }),
+        ],
+    }, { minimumHeight: 185 });
+}
+
 </script>

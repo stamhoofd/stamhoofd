@@ -75,6 +75,10 @@
         var(--popup-padding-top-raw), 
         var(--sheet-position-top, 0px)
     );
+    --popup-padding-bottom-full: max(
+        var(--popup-padding-bottom-raw), 
+        var(--sheet-position-bottom, 0px)
+    );
 
     --st-horizontal-padding: var(--sheet-horizontal-padding, 30px);
     --st-vertical-padding: var(--sheet-vertical-padding, 30px);
@@ -126,5 +130,13 @@
 
         transform: translate(0, var(--popup-padding-top-outside, 0px));
         transform-origin: 100% 0%;
+    }
+
+    &.y-top {
+        // Place above instead of below
+        > div:first-child {
+            bottom: 0;
+            transform: translate(0, calc(-1 * var(--popup-padding-bottom-outside, 0px)));
+        }
     }
 }

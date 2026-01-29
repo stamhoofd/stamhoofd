@@ -1,14 +1,14 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
-import { BalanceItem, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
+import { BalanceItem, getVATExcemptInvoiceNote, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
 import { Company } from '../Company.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
-import { PriceBreakdown } from '../PriceBreakdown.js';
+import { PriceBreakdown, PriceBreakdownAction } from '../PriceBreakdown.js';
 import { File } from '../files/File.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
-import { Sorter, STMath } from '@stamhoofd/utility';
+import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
 
 export class VATSubtotal extends AutoEncoder {
     /**
@@ -272,15 +272,21 @@ export class Invoice extends AutoEncoder {
         }
     }
 
-    get priceBreakdown(): PriceBreakdown {
+    get priceBreakdown() {
+        return this.getPriceBreakdown();
+    }
+
+    getPriceBreakdown(options?: { vatAction?: PriceBreakdownAction }): PriceBreakdown {
         return [
             {
                 name: $t(`d642f190-1607-4f54-8530-7af2f15c651b`),
                 price: this.totalWithoutVAT,
             },
             {
-                name: $t(`13c04b8f-80f5-4274-9ea1-badb0f88a091`),
+                name: $t(`13c04b8f-80f5-4274-9ea1-badb0f88a091`) + (this.VATTotal.length === 1 ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')' : ''),
+                description: this.VATTotal.length === 1 && this.VATTotal[0].VATExcempt ? getVATExcemptInvoiceNote(this.VATTotal[0].VATExcempt) : undefined,
                 price: this.VATTotalAmount,
+                action: this.VATTotal.length > 1 ? options?.vatAction : undefined,
             },
             ...(this.payableRoundingAmount !== 0
                 ? [

@@ -82,6 +82,10 @@ button.st-grid-item {
     grid-template-columns: subgrid;
     gap: 0;
 
+    &.header {
+        font-weight: $font-weight-semibold;
+    }
+
     &.selected {
         color: $color-primary;
     }

@@ -2,7 +2,10 @@
     <div class="pricing-box">
         <template v-for="(item, index) of priceBreakdown" :key="index">
             <div class="left">
-                <h3>{{ item.name }}</h3>
+                <h3>
+                    <span>{{ item.name }}</span>
+                    <button v-if="item.action" :class="'button icon small ' + item.action.icon" type="button" @click="item.action.handler" />
+                </h3>
                 <p v-if="item.description">
                     {{ item.description }}
                 </p>
@@ -41,6 +44,11 @@ defineProps<{
         > h3 {
             font-size: 15px;
             font-weight: $font-weight-semibold;
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            align-items: center;
+            justify-content: flex-end;
         }
 
         > p {

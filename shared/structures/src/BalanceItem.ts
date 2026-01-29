@@ -44,6 +44,12 @@ export function getVATExcemptReasonName(reason: VATExcemptReason): string {
     }
 }
 
+export function getVATExcemptInvoiceNote(reason: VATExcemptReason): string {
+    switch (reason) {
+        case VATExcemptReason.IntraCommunity: return $t('Btw verlegd: Art. 39 bis – intracommunautaire levering');
+    }
+}
+
 export enum BalanceItemType {
     Registration = 'Registration',
     AdministrationFee = 'AdministrationFee',
