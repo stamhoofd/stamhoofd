@@ -23,6 +23,9 @@ export function build(service: Service): any {
                 '': 'stamhoofd.email',
             },
             webshopCname: 'keeo.shop.stamhoofd',
+            documentation: {
+                '': 'docs.keeo.fos.be',
+            },
         },
         translationNamespace: 'keeo',
         platformName: 'keeo',
