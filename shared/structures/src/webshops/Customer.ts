@@ -1,4 +1,5 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { PaymentCustomer } from '../PaymentCustomer.js';
 
 export class Customer extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -21,5 +22,14 @@ export class Customer extends AutoEncoder {
             return this.lastName;
         }
         return this.firstName + ' ' + this.lastName;
+    }
+
+    toPaymentCustomer(): PaymentCustomer {
+        return PaymentCustomer.create({
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            phone: this.phone,
+        });
     }
 }

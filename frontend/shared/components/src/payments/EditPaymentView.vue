@@ -61,6 +61,10 @@
             </STInputBox>
         </template>
 
+        <hr>
+        <h2>{{ $t('Facturatiegegevens') }}</h2>
+        <PaymentCustomerSelectionBox :customer="patchedPayment.customer" :validator="errors.validator" :error-box="errors.errorBox" :customers="customers" @patch:customer="addPatch({customer: $event})" />
+
         <hr><h2>{{ $t('e8ea4460-67bb-42a3-b688-cc22987fe8af') }}</h2>
         <p v-if="patchedPayment.type === PaymentType.Payment">
             {{ $t('ab973473-d8d9-4126-ad71-fa26a8aa53e4') }}
@@ -70,6 +74,10 @@
         </p>
         <p v-else>
             {{ $t('f24d4ba4-4b42-4fa1-b99f-4b90dd1a3208') }}
+        </p>
+
+        <p v-if="shouldVatExcempt" class="warning-box">
+            {{ $t('Je moet de BTW verleggen omdat je factureert aan een buitenlands BTW-plichtig bedrijf. Kijk daarom na of je de juiste BTW-tarieven hebt ingesteld bij alle items.') }}
         </p>
 
         <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})" />
@@ -102,11 +110,11 @@
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { I18nController, useTranslate } from '@stamhoofd/frontend-i18n';
-import { BalanceItem, BalanceItemRelationType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { BalanceItem, BalanceItemRelationType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';
 import { useErrors } from '../errors/useErrors';
@@ -120,11 +128,13 @@ import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
 import SaveView from '../navigation/SaveView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 import { Toast } from '../overlays/Toast';
+import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
+import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 
 const props = withDefaults(
     defineProps<{
+        customers?: PaymentCustomer[];
         payment: PaymentGeneral;
         balanceItems: BalanceItem[];
         isNew?: boolean;
@@ -133,6 +143,7 @@ const props = withDefaults(
     }>(), {
         isNew: false,
         createBalanceItem: null,
+        customers: () => [],
     });
 
 const { patched: patchedPayment, addPatch, hasChanges, patch } = usePatch(props.payment);
@@ -205,6 +216,22 @@ onMounted(() => {
         // Set transfer settings default
         updateMethod(props.payment.method);
     }
+});
+
+const shouldVatExcempt = computed(() => {
+    if (patchedPayment.value.customer && patchedPayment.value.customer.company && patchedPayment.value.customer.company.VATNumber && patchedPayment.value.customer.company.address) {
+        if (organization.value) {
+            for (const company of organization.value.meta.companies.slice(0, 3)) {
+                if (company.VATNumber && company.address) {
+                    // Reverse charged vat applicable?
+                    if (patchedPayment.value.customer.company.address.country !== company.address.country) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 });
 
 function updateMethod(method: PaymentMethod) {

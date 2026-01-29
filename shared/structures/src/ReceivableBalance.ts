@@ -4,6 +4,7 @@ import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
 import { TranslateMethod } from './I18nInterface.js';
 import { PaymentGeneral } from './members/PaymentGeneral.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
+import { PaymentCustomer } from './PaymentCustomer.js';
 
 export enum ReceivableBalanceType {
     organization = 'organization',
@@ -47,12 +48,21 @@ export class ReceivableBalanceObject extends AutoEncoder {
     @field({ decoder: StringDecoder })
     name = '';
 
+    /**
+     * Only used for organization type
+     */
     @field({ decoder: StringDecoder, nullable: true, version: 362 })
     uri: string | null = null;
 
     // E-mail addresses to reach out to this entity
     @field({ decoder: new ArrayDecoder(ReceivableBalanceObjectContact) })
     contacts: ReceivableBalanceObjectContact[] = [];
+
+    /**
+     * Customer to use when creating new payments
+     */
+    @field({ decoder: new ArrayDecoder(PaymentCustomer), ...NextVersion })
+    customers: PaymentCustomer[] = [];
 }
 
 /**

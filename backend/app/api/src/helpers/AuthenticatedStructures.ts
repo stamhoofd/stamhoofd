@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, Company, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -896,10 +896,67 @@ export class AuthenticatedStructures {
 
         const result: { balance: CachedBalance; object: ReceivableBalanceObject }[] = [];
 
+        function getMemberContacts(member: Member, balance: CachedBalance) {
+            const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
+            return [
+                ...(member.details.getMemberEmails().length
+                    ? [
+                            ReceivableBalanceObjectContact.create({
+                                firstName: member.details.firstName ?? '',
+                                lastName: member.details.lastName ?? '',
+                                emails: member.details.getMemberEmails(),
+                                meta: {
+                                    type: 'member',
+                                    responsibilityIds: [],
+                                    url,
+                                },
+                            }),
+                        ]
+                    : []),
+
+                ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
+                    ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
+                            firstName: p.firstName ?? '',
+                            lastName: p.lastName ?? '',
+                            emails: p.getEmails(),
+                            meta: {
+                                type: 'parent',
+                                responsibilityIds: [],
+                                url,
+                            },
+                        }))
+                    : []),
+            ];
+        }
+
+        function getMemberCustomers(member: Member): PaymentCustomer[] {
+            return [
+                ...(member.details.defaultAge >= 14 || member.details.parents.length === 0 || !member.details.calculatedParentsHaveAccess
+                    ? [
+                            PaymentCustomer.create({
+                                firstName: member.details.firstName ?? '',
+                                lastName: member.details.lastName ?? '',
+                                email: member.details.getMemberEmails()[0] ?? null,
+                                phone: member.details.phone,
+                            }),
+                        ]
+                    : []),
+
+                ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
+                    ? member.details.parents.map(parent => PaymentCustomer.create({
+                            firstName: parent.firstName ?? '',
+                            lastName: parent.lastName ?? '',
+                            email: parent.getEmails()[0] ?? null,
+                            phone: parent.phone,
+                        }))
+                    : []),
+            ];
+        }
+
         for (const balance of balances) {
             let object = ReceivableBalanceObject.create({
                 id: balance.objectId,
-                name: 'Onbekend',
+                name: $t('Onbekend'),
             });
 
             if (balance.objectType === ReceivableBalanceType.organization) {
@@ -916,10 +973,20 @@ export class AuthenticatedStructures {
                             : [];
                     });
 
+                    const companies = organization.meta.companies.length
+                        ? organization.meta.companies
+                        : [
+                                Company.create({
+                                    name: organization.name,
+                                    address: organization.address,
+                                }),
+                            ];
+
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: organization.name,
                         uri: organization.uri,
+                        customers: companies.map(company => PaymentCustomer.create({ company })),
                         contacts: thisMembers.map(({ member, responsibilities }) => ReceivableBalanceObjectContact.create({
                             firstName: member.firstName ?? '',
                             lastName: member.lastName ?? '',
@@ -936,39 +1003,11 @@ export class AuthenticatedStructures {
             else if (balance.objectType === ReceivableBalanceType.member) {
                 const member = members.find(m => m.id === balance.objectId) ?? null;
                 if (member) {
-                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: member.details.name,
-                        contacts: [
-                            ...(member.details.getMemberEmails().length
-                                ? [
-                                        ReceivableBalanceObjectContact.create({
-                                            firstName: member.details.firstName ?? '',
-                                            lastName: member.details.lastName ?? '',
-                                            emails: member.details.getMemberEmails(),
-                                            meta: {
-                                                type: 'member',
-                                                responsibilityIds: [],
-                                                url,
-                                            },
-                                        }),
-                                    ]
-                                : []),
-
-                            ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
-                                ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
-                                        firstName: p.firstName ?? '',
-                                        lastName: p.lastName ?? '',
-                                        emails: p.getEmails(),
-                                        meta: {
-                                            type: 'parent',
-                                            responsibilityIds: [],
-                                            url,
-                                        },
-                                    }))
-                                : []),
-                        ],
+                        customers: getMemberCustomers(member),
+                        contacts: getMemberContacts(member, balance),
                     });
                 }
             }
@@ -979,39 +1018,11 @@ export class AuthenticatedStructures {
                 }
                 const member = members.find(m => m.id === registration.memberId) ?? null;
                 if (member) {
-                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + Context.organization.getHost() : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: member.details.name,
-                        contacts: [
-                            ...(member.details.getMemberEmails().length
-                                ? [
-                                        ReceivableBalanceObjectContact.create({
-                                            firstName: member.details.firstName ?? '',
-                                            lastName: member.details.lastName ?? '',
-                                            emails: member.details.getMemberEmails(),
-                                            meta: {
-                                                type: 'member',
-                                                responsibilityIds: [],
-                                                url,
-                                            },
-                                        }),
-                                    ]
-                                : []),
-
-                            ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
-                                ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
-                                        firstName: p.firstName ?? '',
-                                        lastName: p.lastName ?? '',
-                                        emails: p.getEmails(),
-                                        meta: {
-                                            type: 'parent',
-                                            responsibilityIds: [],
-                                            url,
-                                        },
-                                    }))
-                                : []),
-                        ],
+                        customers: getMemberCustomers(member),
+                        contacts: getMemberContacts(member, balance),
                     });
                 }
             }
@@ -1022,6 +1033,11 @@ export class AuthenticatedStructures {
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: user.name || user.email,
+                        customers: [PaymentCustomer.create({
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                        })],
                         contacts: [
                             ReceivableBalanceObjectContact.create({
                                 firstName: user.firstName ?? '',

@@ -243,12 +243,8 @@ async function createPayment(type: PaymentType) {
         status: PaymentStatus.Succeeded,
         type,
         paidAt: new Date(),
-        customer: detailedItem.value.object.contacts.length > 0
-            ? PaymentCustomer.create({
-                    firstName: detailedItem.value.object.contacts[0].firstName,
-                    lastName: detailedItem.value.object.contacts[0].lastName,
-                    email: detailedItem.value.object.contacts[0].emails[0] ?? null,
-                })
+        customer: detailedItem.value.object.customers.length > 0
+            ? detailedItem.value.object.customers[0]
             : null,
     });
 
@@ -259,6 +255,7 @@ async function createPayment(type: PaymentType) {
     const component = new ComponentWithProperties(EditPaymentView, {
         createBalanceItem,
         payment,
+        customers: detailedItem.value.object.customers,
         balanceItems: computed(() => detailedItem.value?.filteredBalanceItems ?? []),
         family: props.member?.family ?? null,
         isNew: true,

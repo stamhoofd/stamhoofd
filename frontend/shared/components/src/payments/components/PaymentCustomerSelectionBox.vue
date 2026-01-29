@@ -1,6 +1,6 @@
 <template>
-    <STList v-if="customers.length > 1">
-        <RadioListItem v-for="(customer, index) of customers" :key="index" v-model="selectedCustomer" :label="customer.dynamicName" :value="customer">
+    <STList v-if="customers.length > 0">
+        <RadioListItem v-for="(customer, index) of customers" :key="index" v-model="selectedCustomerModel" :label="customer.dynamicName" :value="customer">
             <template v-if="customer.company">
                 <p v-if="customer.company.VATNumber" class="style-description-small">
                     {{ customer.company.VATNumber }} {{ $t('9f72f8ee-74c7-4757-b1dc-948f632114f2') }}
@@ -39,25 +39,26 @@
             </template>
         </RadioListItem>
 
-        <RadioListItem v-model="selectedCustomer" :label="$t('26677608-996f-41a5-8a53-543d6efa7de4')" :value="null" />
+        <RadioListItem v-model="selectedCustomerModel" :label="$t('26677608-996f-41a5-8a53-543d6efa7de4')" :value="null" />
     </STList>
 
-    <template v-if="customers.length > 1 && selectedCustomer === null">
+    <template v-if="customers.length > 0 && selectedCustomerModel === null">
         <hr>
         <h2>{{ $t('Andere facturatiegegevens') }}</h2>
     </template>
-    <PaymentCustomerInput v-if="selectedCustomer === null || customers.length <= 1" :customer="customer" :validator="validator" :error-box="errorBox" @patch:customer="addPatch" />
+    <PaymentCustomerInput v-if="selectedCustomerModel === null || customers.length <= 0" :customer="mappedCustomer" :validator="validator" :error-box="errorBox" @patch:customer="addPatch" />
 </template>
 
 <script lang="ts" setup>
 import { ErrorBox, RadioListItem, useEmitPatch, Validator } from '@stamhoofd/components';
 import { PaymentCustomer } from '@stamhoofd/structures';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import PaymentCustomerInput from './PaymentCustomerInput.vue';
+import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 
 const props = withDefaults(defineProps<{
     customers?: PaymentCustomer[];
-    customer: PaymentCustomer;
+    customer: PaymentCustomer | null;
     validator: Validator;
     errorBox?: ErrorBox | null;
 }>(), {
@@ -65,23 +66,44 @@ const props = withDefaults(defineProps<{
     errorBox: null,
 });
 
+const mappedCustomer = computed(() => {
+    return props.customer ?? PaymentCustomer.create({});
+});
 const selectedCustomer = ref<null | PaymentCustomer>(null);
+const selectedCustomerModel = computed({
+    get: () => selectedCustomer.value,
+    set: (v: PaymentCustomer | null) => {
+        selectedCustomer.value = v;
 
-const emit = defineEmits(['patch']);
-const { addPatch } = useEmitPatch<PaymentCustomer>(props, emit, 'customer');
+        if (v) {
+            addPatch(v);
+        }
+        else {
+            manualSet = true;
+        }
+    },
+});
+
+const emit = defineEmits(['patch:customer']);
+const { addPatch: emitAddPatch } = useEmitPatch<PaymentCustomer>(props, emit, 'customer');
+function addPatch(d: PartialWithoutMethods<AutoEncoderPatchType<PaymentCustomer>>) {
+    if (props.customer === null) {
+        // Emit full edit
+        emitAddPatch(mappedCustomer.value.patch(d));
+        return;
+    }
+    emitAddPatch(d);
+}
 let manualSet = false;
 
 watch(() => props.customers, () => {
     const v = props.customer;
     if (v && !manualSet) {
+        // alter without calling patch
         selectedCustomer.value = props.customers.find(c => c.equals(v)) ?? null;
+    } else if (!v && !manualSet && props.customers.length) {
+        selectedCustomerModel.value = props.customers[0];
     }
 }, { immediate: true });
-
-watch(selectedCustomer, (v) => {
-    if (v === null) {
-        manualSet = true;
-    }
-}, { immediate: false, deep: false });
 
 </script>

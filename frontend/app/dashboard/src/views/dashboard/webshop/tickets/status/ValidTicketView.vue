@@ -583,6 +583,9 @@ function createPayment() {
         payment,
         balanceItems: props.order.balanceItems,
         isNew: true,
+        customers: [
+            props.order.data.customer.toPaymentCustomer()
+        ],
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
             const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
             arr.addPut(payment.patch(patch));
