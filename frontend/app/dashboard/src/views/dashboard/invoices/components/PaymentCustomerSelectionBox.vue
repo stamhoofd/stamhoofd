@@ -1,5 +1,5 @@
 <template>
-    <STList v-if="customers.length">
+    <STList v-if="customers.length > 1">
         <RadioListItem v-for="(customer, index) of customers" :key="index" v-model="selectedCustomer" :label="customer.dynamicName" :value="customer">
             <template v-if="customer.company">
                 <p v-if="customer.company.VATNumber" class="style-description-small">
@@ -42,61 +42,46 @@
         <RadioListItem v-model="selectedCustomer" :label="$t('26677608-996f-41a5-8a53-543d6efa7de4')" :value="null" />
     </STList>
 
-    <div v-if="selectedCustomer === null">
-        <STInputBox :title="$t('97c32bed-6241-48c5-89a8-65ae68d6f562')" class="max">
-            <STList>
-                <RadioListItem v-model="hasCompany" :label="$t('aacf9b80-b46d-48d9-8a8b-585a8d48fc9c')" :value="true" />
-                <RadioListItem v-model="hasCompany" :label="$t('1474bb78-8f01-456a-9e85-c6b1748b76d5')" :value="false" />
-            </STList>
-        </STInputBox>
-
-        <CompanyInputBox v-if="customer.company" :validator="validator" :company="customer.company" @patch:company="addPatch({ company: $event })" />
-    </div>
+    <template v-if="customers.length > 1 && selectedCustomer === null">
+        <hr>
+        <h2>{{ $t('Andere facturatiegegevens') }}</h2>
+    </template>
+    <PaymentCustomerInput v-if="selectedCustomer === null || customers.length <= 1" :customer="customer" :validator="validator" :error-box="errorBox" @patch:customer="addPatch" />
 </template>
 
 <script lang="ts" setup>
-import { RadioListItem, STInputBox, useEmitPatch, Validator } from '@stamhoofd/components';
-import { CompanyInputBox } from '@stamhoofd/components';
-import { Company, PaymentCustomer } from '@stamhoofd/structures';
-import { computed, ref, watch } from 'vue';
+import { ErrorBox, RadioListItem, useEmitPatch, Validator } from '@stamhoofd/components';
+import { PaymentCustomer } from '@stamhoofd/structures';
+import { ref, watch } from 'vue';
+import PaymentCustomerInput from './PaymentCustomerInput.vue';
 
 const props = withDefaults(defineProps<{
     customers?: PaymentCustomer[];
     customer: PaymentCustomer;
     validator: Validator;
+    errorBox?: ErrorBox | null;
 }>(), {
     customers: () => [],
+    errorBox: null,
 });
 
 const selectedCustomer = ref<null | PaymentCustomer>(null);
 
 const emit = defineEmits(['patch']);
 const { addPatch } = useEmitPatch<PaymentCustomer>(props, emit, 'customer');
+let manualSet = false;
 
 watch(() => props.customers, () => {
     const v = props.customer;
-    if (v) {
+    if (v && !manualSet) {
         selectedCustomer.value = props.customers.find(c => c.equals(v)) ?? null;
     }
-});
+}, { immediate: true });
 
-const hasCompany = computed({
-    get: () => !!props.customer.company,
-    set: (enabled: boolean) => {
-        if (enabled === !!props.customer.company) {
-            return;
-        }
-        if (enabled) {
-            addPatch({
-                company: Company.create({}),
-            });
-        }
-        else {
-            addPatch({
-                company: null,
-            });
-        }
-    },
-});
+watch(selectedCustomer, (v) => {
+    if (v === null) {
+        manualSet = true;
+    }
+}, { immediate: false, deep: false });
 
 </script>

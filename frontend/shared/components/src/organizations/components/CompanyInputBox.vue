@@ -1,5 +1,5 @@
 <template>
-    <STInputBox :title="$t('d9098f95-008b-4f5e-b8fe-a3f781a403b7')" class="max">
+    <STInputBox class="max">
         <STList>
             <CheckboxListItem v-model="doesNotHaveCompanyNumber" :description="$t('becc82f0-4195-4a17-b3f5-03f305582e4a')" :label="$t(`594307a3-05b8-47cf-81e2-59fb6254deba`)" />
             <CheckboxListItem v-if="hasCompanyNumber" v-model="hasVATNumber" :description="$t('f9c27b43-9514-4e18-94b4-d1abd79ce689')" :label="$t(`9e78c772-0f29-4fb0-8ce6-fe98f9886c01`)" />
