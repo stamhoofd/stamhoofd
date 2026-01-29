@@ -555,6 +555,7 @@ export default class WebshopView extends Mixins(NavigationMixin){
             > .st-view > main{
                 // Disable scroll view
                 overflow: hidden;
+                overscroll-behavior: auto;
             }
         }
 
