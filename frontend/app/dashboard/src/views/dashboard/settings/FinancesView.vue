@@ -8,6 +8,10 @@
                     {{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }}
                 </h1>
 
+                <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhouding')" target="_blank">
+                    {{ $t('Lees onze documentatie voor meer informatie over de boekhoudmodule.') }}
+                </a>
+
                 <STList class="illustration-list">
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.Export)">
                         <template #left>
@@ -145,13 +149,14 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import { ErrorBox, LoadingViewTransition, PayableBalanceCollectionView, useAuth, useContext, useErrors, useOrganization } from '@stamhoofd/components';
+import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, BalanceItem, DetailedPayableBalanceCollection, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { ComponentOptions, ref, Ref } from 'vue';
+import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
-import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 
 enum Routes {
     Transfers = 'Transfers',
