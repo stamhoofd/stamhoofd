@@ -24,12 +24,20 @@
                 {{ formatPrice(item.price) }}
             </p>
 
-            <p v-if="item.pricePaid !== 0" class="style-price-base negative small">
-                - {{ $t('72cf6e0c-87b5-47ae-af91-4112e24c13e1', {price: formatPrice(item.pricePaid )}) }}
+            <p v-if="item.pricePaid < 0" class="style-price-base negative small">
+                {{ $t('{price} terugbetaald', {price: formatPrice(-item.pricePaid )}) }}
             </p>
 
-            <p v-if="item.pricePending !== 0" class="style-price-base disabled negative small">
-                - {{ $t('b9a73b33-2a3d-44fa-a326-66cb8b8e1184', {price: formatPrice(item.pricePending)}) }}
+            <p v-if="item.pricePaid > 0" class="style-price-base negative small">
+                {{ $t('72cf6e0c-87b5-47ae-af91-4112e24c13e1', {price: formatPrice(-item.pricePaid )}) }}
+            </p>
+
+            <p v-if="item.pricePending < 0" class="style-price-base disabled negative small">
+                {{ $t('{price} terugbetaling in verwerking', {price: formatPrice(-item.pricePending)}) }}
+            </p>
+
+            <p v-if="item.pricePending > 0" class="style-price-base disabled negative small">
+                {{ $t('b9a73b33-2a3d-44fa-a326-66cb8b8e1184', {price: formatPrice(-item.pricePending)}) }}
             </p>
         </template>
     </STGridItem>
@@ -90,8 +98,9 @@ async function editBalanceItem(balanceItem: BalanceItem) {
                 shouldRetry: false,
             });
             if (result.data && result.data.length === 1 && result.data[0].id === balanceItem.id) {
-                balanceItem.deepSet(result.data[0])
-            } else {
+                balanceItem.deepSet(result.data[0]);
+            }
+            else {
                 GlobalEventBus.sendEvent('balanceItemPatch', balanceItem.patch(patch)).catch(console.error);
             }
         },
