@@ -67,11 +67,11 @@
 
 <script lang="ts" setup>
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, GeneralSettingsView, RadioListItem, SaveView, useAuth, useErrors, usePatch, useRequiredOrganization } from '@stamhoofd/components';
+import { CenteredMessage, ErrorBox, GeneralSettingsView, RadioListItem, SaveView, useAuth, useErrors, usePatch, useRequiredOrganization, PaymentCustomerSelectionBox } from '@stamhoofd/components';
 import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
-import { PaymentCustomerSelectionBox, InvoiceItemsBox } from './components';
+import { InvoiceItemsBox } from './components';
 
 const props = withDefaults(
     defineProps<{

@@ -1,7 +1,10 @@
 export { default as AsyncPaymentView } from './AsyncPaymentView.vue';
-export { default as BalanceItemRow } from './BalanceItemRow.vue';
 export { default as BalanceItemIcon } from './BalanceItemIcon.vue';
+export { default as BalanceItemRow } from './BalanceItemRow.vue';
+export { default as BalanceItemTitleBox } from './BalanceItemTitleBox.vue';
 export { default as BalancePriceBreakdown } from './BalancePriceBreakdown.vue';
+export { default as PaymentCustomerInput } from './components/PaymentCustomerInput.vue';
+export { default as PaymentCustomerSelectionBox } from './components/PaymentCustomerSelectionBox.vue';
 export { default as PaymentMethodIcon } from './components/PaymentMethodIcon.vue';
 export { default as PaymentRow } from './components/PaymentRow.vue';
 export { default as EditBalanceItemView } from './EditBalanceItemView.vue';
@@ -14,4 +17,3 @@ export { default as ReceivableBalanceBox } from './ReceivableBalanceBox.vue';
 export { default as ReceivableBalanceList } from './ReceivableBalanceList.vue';
 export { default as ReceivableBalanceView } from './ReceivableBalanceView.vue';
 export { default as SelectBalanceItemsView } from './SelectBalanceItemsView.vue';
-export { default as BalanceItemTitleBox } from './BalanceItemTitleBox.vue';
