@@ -5,11 +5,14 @@ export type PositionableSheetOptions = {
     width?: number;
     padding?: number;
     position?: 'fixed' | 'absolute';
+    yPlacement?: 'bottom' | 'top';
+    minimumHeight?: number;
 };
 
 function calculateModalPosition(event: MouseEvent, options?: PositionableSheetOptions) {
     const padding = options?.padding ?? 15;
     const innerPadding = options?.innerPadding ?? 15;
+    let yPlacement = options?.yPlacement ?? 'bottom';
 
     let width = options?.width ?? 400;
     const button = event.currentTarget as HTMLElement;
@@ -18,7 +21,8 @@ function calculateModalPosition(event: MouseEvent, options?: PositionableSheetOp
         doc = document,
         docElem = doc.documentElement,
         body = doc.getElementsByTagName('body')[0],
-        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth;
+        clientWidth = win.innerWidth || docElem.clientWidth || body.clientWidth,
+        clientHeight = win.innerHeight || docElem.clientHeight || body.clientHeight;
 
     let left = bounds.left - innerPadding;
 
@@ -32,6 +36,7 @@ function calculateModalPosition(event: MouseEvent, options?: PositionableSheetOp
     }
 
     let top = bounds.top + bounds.height + padding;
+    let bottom = 0;
     let vh: string | undefined;
 
     if (options?.position === 'absolute') {
@@ -60,7 +65,20 @@ function calculateModalPosition(event: MouseEvent, options?: PositionableSheetOp
         suffix = `; --vh: ${vh};`;
     }
 
-    return '--sheet-position: ' + (options?.position ?? 'fixed') + '; --sheet-position-left: ' + left.toFixed(1) + 'px; --sheet-position-top: ' + top.toFixed(1) + 'px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; --st-sheet-width: ' + width.toFixed(1) + 'px; ' + suffix;
+    const remainingHeight = clientHeight - top;
+    const remainingHeightTop = clientHeight - (clientHeight - bounds.top + padding);
+    const minimumHeight = options?.minimumHeight ?? Math.min(300, 0.25 * clientHeight);
+    if ((remainingHeight < minimumHeight && remainingHeightTop > remainingHeight) || (yPlacement === 'top' && !(remainingHeightTop < minimumHeight && remainingHeight > remainingHeightTop))) {
+        // Switch up
+        top = 0;
+        bottom = clientHeight - bounds.top + padding;
+        yPlacement = 'top';
+    }
+
+    return {
+        style: '--sheet-position: ' + (options?.position ?? 'fixed') + '; --sheet-position-left: ' + left.toFixed(1) + 'px; --sheet-position-top: ' + top.toFixed(1) + 'px; --sheet-position-bottom: ' + bottom.toFixed(1) + 'px; --sheet-vertical-padding: 15px; --st-popup-width: ' + width.toFixed(1) + 'px; --st-sheet-width: ' + width.toFixed(1) + 'px; ' + suffix,
+        class: 'y-' + yPlacement,
+    };
 }
 
 export function usePositionableSheet() {
@@ -68,10 +86,11 @@ export function usePositionableSheet() {
 
     return {
         presentPositionableSheet: async (event: MouseEvent, options: PushOptions, positionOptions?: PositionableSheetOptions) => {
+            const position = calculateModalPosition(event, positionOptions);
             await present({
                 modalDisplayStyle: 'popup',
-                modalClass: 'positionable-sheet',
-                modalCssStyle: calculateModalPosition(event, positionOptions),
+                modalClass: 'positionable-sheet ' + position.class,
+                modalCssStyle: position.style,
                 ...options,
             });
         },
