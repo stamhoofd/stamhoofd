@@ -206,6 +206,21 @@
                             </template>
                         </STListItem>
 
+                        <STListItem v-if="canWriteEvent && onSaveDuplicate" :selectable="true" class="left-center" @click="duplicateEvent()">
+                            <template #left>
+                                <IconContainer icon="copy" />
+                            </template>
+                            <h2 class="style-title-list">
+                                {{ $t('Activiteit dupliceren') }}
+                            </h2>
+                            <p class="style-description">
+                                {{ $t('Maak een nieuwe activiteit met dezelfde instellingen.') }}
+                            </p>
+                            <template #right>
+                                <span class="icon arrow-right-small gray" />
+                            </template>
+                        </STListItem>
+
                         <STListItem v-if="event.meta.visible" v-copyable="link" :selectable="true" class="left-center">
                             <template #left>
                                 <IconContainer icon="link" />
@@ -232,14 +247,15 @@
 
 <script setup lang="ts">
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { defineRoutes, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { useFetchOrganizationPeriodForGroup, usePatchOrganizationPeriod, useRequestOwner } from '@stamhoofd/networking';
-import { AccessRight, appToUri, EmailTemplateType, Event, Group, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { AccessRight, appToUri, EmailTemplate, EmailTemplateType, Event, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, Organization, OrganizationRegistrationPeriod, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
-import { LoadComponent } from '../containers';
+import { LoadComponent, PromiseView } from '../containers';
 import ExternalOrganizationContainer from '../containers/ExternalOrganizationContainer.vue';
 import { EditEmailTemplatesView } from '../email';
+import { useEventsObjectFetcher } from '../fetchers';
 import EditGroupView from '../groups/EditGroupView.vue';
 import { useAuth, useContext, useGlobalEventListener, useOrganization, usePlatform } from '../hooks';
 import IconContainer from '../icons/IconContainer.vue';
@@ -249,6 +265,7 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { Toast } from '../overlays/Toast';
 import { useRequiredRegistrationsFilter } from '../registrations';
 import RegistrationsTableView from '../registrations/RegistrationsTableView.vue';
+import { useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
@@ -257,6 +274,7 @@ import { useCreateEventGroup } from './composables/createEventGroup';
 
 const props = defineProps<{
     event: Event;
+    onSaveDuplicate?: (event: Event) => void;
 }>();
 
 const title = computed(() => props.event.name);
@@ -521,6 +539,7 @@ defineRoutes([{
     },
 },
 ]);
+
 const chooseOrganizationMembersForGroup = useChooseOrganizationMembersForGroup();
 const prepareOrganizationPeriod = useFetchOrganizationPeriodForGroup();
 
@@ -649,8 +668,8 @@ async function linkWebshop(event: MouseEvent) {
     });
 }
 
-async function directPatch(patch: AutoEncoderPatchType<Event>) {
-    patch.id = props.event.id;
+async function directPatch(patch: AutoEncoderPatchType<Event>, event: Event = props.event) {
+    patch.id = event.id;
 
     const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
     arr.addPatch(patch);
@@ -663,7 +682,7 @@ async function directPatch(patch: AutoEncoderPatchType<Event>) {
     });
 
     // Make sure original event is patched
-    deepSetArray([props.event], response.data);
+    deepSetArray([event], response.data);
 }
 
 async function createGroup() {
@@ -710,6 +729,168 @@ async function addMembers() {
         members: [],
         group: props.event.group,
     });
+}
+
+const objectFetcher = useEventsObjectFetcher();
+const fetcher = useInfiniteObjectFetcher<Event>(objectFetcher);
+
+async function loadEvent(event: Event): Promise<Event> {
+    const events = await fetcher.objectFetcher.fetch(
+        new LimitedFilteredRequest({
+            filter: {
+                id: event.id,
+            },
+            limit: 1,
+            sort: [],
+        }),
+    );
+
+    if (events.results.length === 1) {
+        return events.results[0];
+    }
+    Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
+    throw new Error('Event not found');
+}
+function duplicateEvent() {
+    if (!props.onSaveDuplicate) {
+        return;
+    }
+
+    async function duplicateGroupForEvent(event: Event, groupToDuplicate: Group, emailTemplates: EmailTemplate[]) {
+        let duplicateGroup: Group | undefined;
+
+        try {
+            const clonedGroup = groupToDuplicate.clone();
+            const period = eventOrganization.value?.period.period;
+
+            duplicateGroup = Group.create({
+                ...clonedGroup,
+                id: undefined,
+                periodId: period?.id,
+                stockReservations: [],
+                settings: GroupSettings.create({
+                    ...clonedGroup.settings,
+                    eventId: event.id,
+                    period: undefined,
+                    name: TranslatedString.create(event.name),
+                }),
+                createdAt: undefined,
+                status: GroupStatus.Closed,
+
+            });
+
+            // Set event group and save
+            const patch = Event.patch({
+                id: event.id,
+                group: duplicateGroup,
+            });
+
+            await directPatch(patch, event);
+        }
+        catch (e) {
+            console.error(e);
+            new Toast('Er ging iets mis bij het overnemen van de inschrijvingsgroep voor de nieuwe activiteit', 'warning').show();
+        }
+
+        if (!duplicateGroup) {
+            return;
+        }
+
+        // Copy email templates
+        try {
+            const patchedArray: PatchableArrayAutoEncoder<EmailTemplate> = new PatchableArray();
+            for (const t of emailTemplates) {
+                if (t.groupId !== groupToDuplicate.id) {
+                // Skip default templates
+                    continue;
+                }
+
+                // Create a new duplicate
+                const template = EmailTemplate.create({
+                    ...t,
+                    groupId: duplicateGroup.id,
+                    id: undefined,
+                });
+                patchedArray.addPut(template);
+            }
+
+            if (patchedArray.getPuts().length > 0) {
+                await context.value.authenticatedServer.request({
+                    method: 'PATCH',
+                    path: '/email-templates',
+                    body: patchedArray,
+                    shouldRetry: false,
+                    owner,
+                });
+            }
+        }
+        catch (e) {
+            console.error(e);
+            new Toast('Er ging iets mis bij het overnemen van de e-mails voor de nieuwe activiteit', 'warning').show();
+        }
+    }
+
+    const displayedComponent = new ComponentWithProperties(NavigationController, {
+        root: new ComponentWithProperties(PromiseView, {
+            promise: async () => {
+                try {
+                    // Make sure we have an up to date event
+                    const fetchedEvent = await loadEvent(props.event);
+
+                    const duplicateEvent = Event.create({
+                        ...fetchedEvent.clone(),
+                        // will be set later
+                        group: null,
+                        webshopId: null,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        id: undefined,
+                    });
+
+                    let templates: EmailTemplate[] = [];
+
+                    if (fetchedEvent.group) {
+                        const response = await context.value.authenticatedServer.request({
+                            method: 'GET',
+                            path: '/email-templates',
+                            query: { groupIds: [fetchedEvent.group.id] },
+                            shouldRetry: false,
+                            owner,
+                            decoder: new ArrayDecoder(EmailTemplate as Decoder<EmailTemplate>),
+                        });
+                        templates = response.data;
+                    }
+
+                    return new ComponentWithProperties(EditEventView, {
+                        event: duplicateEvent,
+                        isNew: true,
+                        callback: async () => {
+                            if (fetchedEvent.group) {
+                                await duplicateGroupForEvent(duplicateEvent, fetchedEvent.group, templates);
+                            }
+
+                            if (props.onSaveDuplicate) {
+                                props.onSaveDuplicate(duplicateEvent);
+                            }
+                        },
+                    });
+                }
+                catch (e) {
+                    Toast.fromError(e).show();
+                    throw e;
+                }
+            },
+        }),
+    });
+
+    present({
+        animated: true,
+        adjustHistory: true,
+        modalDisplayStyle: 'popup',
+        components: [
+            displayedComponent,
+        ],
+    }).catch(console.error);
 }
 
 useGlobalEventListener('event-deleted', async (event: Event) => {

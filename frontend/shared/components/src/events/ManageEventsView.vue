@@ -130,6 +130,7 @@ defineRoutes([
             if (events.results.length === 1) {
                 return {
                     event: events.results[0],
+                    onSaveDuplicate: onSaveDuplicateEvent,
                 };
             }
             Toast.error($t(`42e0e0d5-b4f9-4774-ad91-bfae7121a29e`)).show();
@@ -287,7 +288,7 @@ async function onClickEvent(event: Event) {
         return await addEvent(event);
     }
 
-    await $navigate(Routes.Event, { properties: { event } });
+    await $navigate(Routes.Event, { properties: { event, onSaveDuplicate: onSaveDuplicateEvent } });
 }
 
 async function editFilter(event: MouseEvent) {
@@ -308,6 +309,11 @@ async function editFilter(event: MouseEvent) {
             }),
         ],
     });
+}
+
+async function onSaveDuplicateEvent(event: Event) {
+    fetcher.reset();
+    await onClickEvent(event);
 }
 
 function getRequiredFilter(): StamhoofdFilter | null {
