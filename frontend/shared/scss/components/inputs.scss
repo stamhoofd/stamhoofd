@@ -340,3 +340,149 @@ select.input {
         }
     }
 }
+
+.illustration-radio-container {
+    display: grid;
+    gap: 15px;
+
+    // Default for when container queries are not supported
+    grid-template-columns: 1fr 1fr 1fr;
+    &:has(> :last-child:nth-child(2)) { /* 2 elements */
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 350px) {
+        // Default for when container queries are not supported
+        grid-template-columns: 1fr 1fr;
+
+       
+    }
+
+    @container st-view (min-width: 0px) {
+        // Supports container queries
+        grid-template-columns: 1fr;
+    }
+
+    @container st-view (min-width: 200px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @container st-view (max-width: 376px) {
+        gap: 10px;
+    }
+
+    @container st-view (min-width: 330px) {
+        grid-template-columns: repeat(3, 1fr);
+
+        &:has(> :last-child:nth-child(2)) { /* 2 elements */
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    &:has(p) {
+        // Default for when container queries are not supported
+        grid-template-columns: 1fr 1fr 1fr;
+
+        &:has(> :last-child:nth-child(2)) { /* 2 elements */
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 450px) {
+            // Default for when container queries are not supported
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @container st-view (min-width: 0px) {
+            // Supports container queries
+            grid-template-columns: 1fr;
+        }
+
+        @container st-view (min-width: 350px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @container st-view (min-width: 570px) {
+            grid-template-columns: repeat(3, 1fr);
+
+            &:has(> :last-child:nth-child(2)) { /* 2 elements */
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    }
+}
+
+.illustration-radio-box {
+    border: $border-width solid $color-border-shade;
+    background: $color-background;
+    border-radius: 8px;
+    @extend .style-input-shadow;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    position: relative;
+    gap: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, outline-color 0.2s ease;
+    outline-offset: -0.1px;
+    outline: 1.1px solid transparent;
+
+    >div:first-child {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+
+    &:has(input:checked) {
+        border-color: $color-primary;
+        outline-color: $color-primary;
+    }
+
+    >h3 {
+        @extend .style-label;
+        padding: 0 10px;
+    }
+
+    >p {
+        @extend .style-description-small;
+        padding: 0 7px;
+    }
+
+    @container st-view (max-width: 570px) {
+        img {
+            width: 38px;
+            height: 38px;
+        }
+
+        >h3 {
+            font-size: 14px;
+        }
+
+        >p {
+            font-size: 11px;
+            padding: 0 5px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        img {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    @media (hover: hover) {
+        &:hover {
+            border-color: $color-primary-gray-light;
+            outline-color: $color-primary-gray-light;
+        }
+    }
+
+    &:active {
+        border-color: $color-primary-gray-light;
+        outline-color: $color-primary-gray-light;
+        transform: scale(0.96);
+    }
+}
