@@ -973,20 +973,11 @@ export class AuthenticatedStructures {
                             : [];
                     });
 
-                    const companies = organization.meta.companies.length
-                        ? organization.meta.companies
-                        : [
-                                Company.create({
-                                    name: organization.name,
-                                    address: organization.address,
-                                }),
-                            ];
-
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: organization.name,
                         uri: organization.uri,
-                        customers: companies.map(company => PaymentCustomer.create({ company })),
+                        customers: organization.defaultCompanies.map(company => PaymentCustomer.create({ company })),
                         contacts: thisMembers.map(({ member, responsibilities }) => ReceivableBalanceObjectContact.create({
                             firstName: member.firstName ?? '',
                             lastName: member.lastName ?? '',

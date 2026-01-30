@@ -4,6 +4,7 @@
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
+                <button v-if="canWrite" v-tooltip="$t('Wijzigen')" type="button" class="button icon edit" @click="editPayment" />
                 <button v-if="auth.hasFullAccess()" v-tooltip="$t('3763ba3a-1023-4265-b675-1c2090d4c37b')" type="button" class="button icon history" @click="viewAudit" />
             </template>
         </STNavigationBar>
@@ -391,6 +392,7 @@ import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
 import OrganizationAvatar from '../context/OrganizationAvatar.vue';
+import EditPaymentView from './EditPaymentView.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -405,8 +407,8 @@ const props = withDefaults(
 
 const { hasNext, hasPrevious, goBack, goForward } = useBackForward('payment', props);
 const errors = useErrors();
-const title = props.payment.title;
-const isManualMethod = props.payment.method === PaymentMethod.Transfer || props.payment.method === PaymentMethod.PointOfSale || props.payment.method === PaymentMethod.Unknown;
+const title = computed(() => props.payment.title);
+const isManualMethod = computed(() => props.payment.method === PaymentMethod.Transfer || props.payment.method === PaymentMethod.PointOfSale || props.payment.method === PaymentMethod.Unknown);
 const auth = useAuth();
 const app = useAppContext();
 const canWrite = computed(() => app === 'dashboard' && auth.canAccessPayment(props.payment, PermissionLevel.Write));
@@ -441,6 +443,39 @@ async function reload() {
     catch (e) {
         Toast.fromError(e).show();
     }
+}
+
+async function editPayment() {
+    await reload();
+    await present({
+        components: [
+            new ComponentWithProperties(EditPaymentView, {
+                payment: props.payment,
+                isNew: false,
+                balanceItems: [],
+                saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
+                    const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
+                    arr.addPatch(patch);
+                    const response = await context.value.authenticatedServer.request({
+                        method: 'PATCH',
+                        path: '/organization/payments',
+                        body: arr,
+                        decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
+                        shouldRetry: false,
+                    });
+
+                    const updatedPayment = response.data.find(p => p.id === props.payment.id);
+                    if (updatedPayment) {
+                        props.payment.deepSet(updatedPayment);
+                    }
+                    else {
+                        await reload();
+                    }
+                },
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function markPaid() {

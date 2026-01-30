@@ -16,6 +16,7 @@ import { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodList } from './RegistrationPeriod.js';
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 import { User } from './User.js';
+import { Company } from './Company.js';
 
 export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -75,6 +76,20 @@ export class BaseOrganization extends AutoEncoder {
 
     get dashboardDomain(): string {
         return STAMHOOFD.domains.dashboard;
+    }
+
+    /**
+     * Assures at least one company at all times
+     */
+    get defaultCompanies() {
+        return this.meta.companies.length
+            ? this.meta.companies
+            : [
+                    Company.create({
+                        name: this.name,
+                        address: this.address,
+                    }),
+                ];
     }
 }
 

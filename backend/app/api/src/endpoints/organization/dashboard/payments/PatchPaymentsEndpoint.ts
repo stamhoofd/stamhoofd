@@ -1,9 +1,9 @@
-import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
+import { PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -297,6 +297,38 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 if (patch.paidAt && payment.paidAt !== null) {
                     // Only allow to set the date if it is already set
                     payment.paidAt = patch.paidAt;
+                }
+
+                if (patch.customer) {
+                    payment.customer = patchObject(payment.customer, patch.customer, { defaultValue: PaymentCustomer.create({}) });
+                }
+
+                const payingOrganizationId = patch.payingOrganizationId ?? patch.payingOrganization?.id ?? null;
+
+                if (payingOrganizationId) {
+                    if (Context.auth.hasSomePlatformAccess()) {
+                        if (await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)) {
+                            payment.payingOrganizationId = payingOrganizationId;
+                        }
+                        else {
+                            // silently ignore
+                        }
+                    }
+                }
+
+                if (patch.payingUserId) {
+                    const user = await User.getByID(patch.payingUserId);
+                    if (!user) {
+                        throw new SimpleError({
+                            code: 'user_not_found',
+                            message: 'User not found',
+                            field: 'payingUserId',
+                        });
+                    }
+                    if (await Context.auth.canAccessUser(user, PermissionLevel.Full)) {
+                        // Allowed
+                        payment.payingUserId = patch.payingUserId;
+                    }
                 }
 
                 await payment.save();
