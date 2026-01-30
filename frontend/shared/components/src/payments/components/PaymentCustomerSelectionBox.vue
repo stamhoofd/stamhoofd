@@ -71,7 +71,12 @@ const mappedCustomer = computed(() => {
 });
 const selectedCustomer = ref<null | PaymentCustomer>(null);
 const selectedCustomerModel = computed({
-    get: () => selectedCustomer.value,
+    get: () => {
+        // Avoid radio state not selecting customer if references change in props
+        const d = selectedCustomer.value;
+        const existing = d ? props.customers.find(c => c.equals(d)) : null;
+        return existing ?? d;
+    },
     set: (v: PaymentCustomer | null) => {
         selectedCustomer.value = v;
 
@@ -101,7 +106,8 @@ watch(() => props.customers, () => {
     if (v && !manualSet) {
         // alter without calling patch
         selectedCustomer.value = props.customers.find(c => c.equals(v)) ?? null;
-    } else if (!v && !manualSet && props.customers.length) {
+    }
+    else if (!v && !manualSet && props.customers.length) {
         selectedCustomerModel.value = props.customers[0];
     }
 }, { immediate: true });
