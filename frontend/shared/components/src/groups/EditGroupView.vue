@@ -292,12 +292,12 @@
                     </STList>
                 </STInputBox>
 
-                <button v-if="requireGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addRequireGroupIds">
+                <button v-if="requireGroupIds.length === 0" type="button" class="button text" @click="addRequireGroupIds">
                     <span class="icon add" />
                     <span>{{ $t('e7319239-1924-462c-bdfb-b9a29d875c41') }}</span>
                 </button>
 
-                <button v-if="preventGroupIds.length === 0" type="button" class="button text only-icon-smartphone" @click="addPreventGroupIds">
+                <button v-if="preventGroupIds.length === 0" type="button" class="button text" @click="addPreventGroupIds">
                     <span class="icon add" />
                     <span>{{ $t('7ee15d1f-e8bd-4100-900b-1ff69dc7c857') }}</span>
                 </button>
