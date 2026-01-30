@@ -7,14 +7,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, getPaymentsUIFilterBuilders, InMemoryTableAction, ModernTableView, PaymentView, TableAction, useFeatureFlag, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
-import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { ExcelExportType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
+import { Column, ComponentExposed, getPaymentsUIFilterBuilders, ModernTableView, PaymentView, useFeatureFlag, usePaymentsObjectFetcher, useTableObjectFetcher } from '@stamhoofd/components';
+import { PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, Ref } from 'vue';
-import { useSelectableWorkbook } from './getSelectableWorkbook';
-import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
+import { usePaymentActions } from './PaymentActionBuilder';
 
 const props = withDefaults(
     defineProps<{
@@ -32,7 +29,6 @@ const configurationId = computed(() => {
     return 'payments-' + (props.methods?.join('-') ?? '');
 });
 
-const present = usePresent();
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getPaymentsUIFilterBuilders();
 const $feature = useFeatureFlag();
@@ -43,8 +39,6 @@ const title = computed(() => {
 
     return $t('15589562-1e34-4197-8097-5ec5bf1636fb');
 });
-
-const markPaid = useMarkPaymentsPaid();
 
 function getRequiredFilter(): StamhoofdFilter | null {
     if (props.methods !== null) {
@@ -251,57 +245,9 @@ const Route = {
     objectKey: 'payment',
 };
 
-const { getSelectableWorkbook } = useSelectableWorkbook();
+const actionBuilder = usePaymentActions({
+    configurationId,
+});
 
-const actions: TableAction<ObjectType>[] = [
-    new InMemoryTableAction({
-        name: $t('03bd6cff-83c4-44ec-8b0d-7826bf5b4166'),
-        icon: 'success',
-        priority: 2,
-        groupIndex: 1,
-        needsSelection: true,
-        allowAutoSelectAll: false,
-        handler: async (payments: PaymentGeneral[]) => {
-            // Mark paid
-            await markPaid(payments, true);
-        },
-    }),
-    new InMemoryTableAction({
-        name: $t('fb1d3820-b4d3-446b-ab4b-931b16eb5391'),
-        icon: 'canceled',
-        priority: 1,
-        groupIndex: 1,
-        needsSelection: true,
-        allowAutoSelectAll: false,
-        handler: async (payments: PaymentGeneral[]) => {
-            // Mark paid
-            await markPaid(payments, false);
-        },
-    }),
-
-    new AsyncTableAction({
-        name: $t('f97a138d-13eb-4e33-aee3-489d9787b2c8'),
-        icon: 'download',
-        priority: 0,
-        groupIndex: 2,
-        needsSelection: true,
-        allowAutoSelectAll: true,
-        handler: async (selection) => {
-            await present({
-                components: [
-                    new ComponentWithProperties(NavigationController, {
-                        root: new ComponentWithProperties(ExcelExportView, {
-                            type: ExcelExportType.Payments,
-                            filter: selection.filter,
-                            workbook: getSelectableWorkbook(),
-                            configurationId: configurationId.value,
-                        }),
-                    }),
-                ],
-                modalDisplayStyle: 'popup',
-            });
-        },
-    }),
-];
-
+const actions = actionBuilder.getActions();
 </script>
