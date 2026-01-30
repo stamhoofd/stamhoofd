@@ -56,7 +56,11 @@ export class AdminPermissionChecker {
             if (!result) {
                 console.error('Unexpected missing organization in AdminPermissionChecker.getOrganization', id);
                 this.organizationCache.delete(id);
-                throw new Error('Unexpected missing organization in AdminPermissionChecker.getOrganization');
+
+                throw new SimpleError({
+                    code: 'organization_not_found',
+                    message: 'Organization not found',
+                });
             }
             this.organizationCache.set(id, result);
             return result;

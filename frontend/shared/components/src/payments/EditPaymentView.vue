@@ -63,6 +63,16 @@
 
         <hr>
         <h2>{{ $t('Facturatiegegevens') }}</h2>
+        <p v-if="patchedPayment.payingOrganization" class="info-box icon link selectable" @click="choosePayingOrganization">
+            <span>{{ $t('Deze betaling is gekoppeld aan {name} ({uri})', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
+            <span class="button icon edit" />
+        </p>
+
+        <p v-else-if="balanceItems.find(b => b.payingOrganizationId)" class="info-box icon link selectable" @click="choosePayingOrganization">
+            <span>{{ $t('Deze betaling is niet gekoppeld aan een vereniging') }}</span>
+            <span class="button icon edit" />
+        </p>
+
         <PaymentCustomerSelectionBox :customer="patchedPayment.customer" :validator="errors.validator" :error-box="errors.errorBox" :customers="customers" @patch:customer="addPatch({customer: $event})" />
 
         <hr><h2>{{ $t('e8ea4460-67bb-42a3-b688-cc22987fe8af') }}</h2>
@@ -109,9 +119,9 @@
 
 <script lang="ts" setup>
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { usePop } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, NavigationController, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { I18nController } from '@stamhoofd/frontend-i18n';
-import { BalanceItem, BalanceItemRelationType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemRelationType, Organization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, TransferSettings } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
@@ -131,6 +141,8 @@ import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
 import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
+import SearchOrganizationView from '../members/SearchOrganizationView.vue';
+import { NavigationActions } from '../types/NavigationActions';
 
 const props = withDefaults(
     defineProps<{
@@ -151,6 +163,26 @@ const organization = useOrganization();
 const errors = useErrors();
 const saving = ref(false);
 const pop = usePop();
+const present = usePresent();
+
+async function choosePayingOrganization() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: new ComponentWithProperties(SearchOrganizationView, {
+                    selectOrganization: async (organization: Organization, { dismiss }: NavigationActions) => {
+                        await dismiss({ force: true });
+                        addPatch({
+                            payingOrganizationId: organization.id,
+                            payingOrganization: organization,
+                        });
+                    },
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 const availableMethods = [
     PaymentMethod.Transfer,

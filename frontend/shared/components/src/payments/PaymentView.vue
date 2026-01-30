@@ -145,78 +145,85 @@
             <p v-if="!payment.customer" class="info-box">
                 {{ $t('cc6a87de-8228-4a0b-8d31-b9805556c6b8') }}
             </p>
-            <STList v-else-if="payment.customer.company" class="info">
-                <STListItem>
-                    <h3 class="style-definition-label">
-                        {{ $t('e016131d-770c-45fe-b6e9-5631761cbab2') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.company.name }}
-                    </p>
-                    <p v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber" class="style-description">
-                        {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="payment.customer.company.VATNumber">
-                    <h3 class="style-definition-label">
-                        {{ $t('4d2a6054-26bf-49ed-b91f-59a8819e6436') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig' }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
-                    <h3 class="style-definition-label">
-                        {{ $t('fb64a034-071e-45d6-8d78-6b5f291ee5f9') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig' }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="payment.customer.company.address">
-                    <h3 class="style-definition-label">
-                        {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.company.address.toString() }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="payment.customer.company.administrationEmail">
-                    <h3 class="style-definition-label">
-                        {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.company.administrationEmail }}
-                    </p>
-                </STListItem>
-
-                <STListItem v-if="payment.customer.name">
-                    <h3 class="style-definition-label">
-                        {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
-                    </h3>
-                    <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.name }}
-                    </p>
-                    <p v-if="payment.customer.email" v-copyable class="style-description style-copyable">
-                        {{ payment.customer.email }}
-                    </p>
-                </STListItem>
-            </STList>
-
             <STList v-else class="info">
-                <STListItem>
+                <STListItem v-if="payment.payingOrganization">
+                    <h3 class="style-definition-label">
+                        {{ $t('Bijhorende vereniging') }}
+                    </h3>
+                    <p v-copyable class="style-definition-text style-copyable">
+                        {{ payment.payingOrganization.name }}
+                    </p>
+                    <p v-copyable class="style-description style-copyable">
+                        {{ payment.payingOrganization.uri }}
+                    </p>
+
+                    <template #right>
+                        <OrganizationAvatar v-if="payment.payingOrganization" :organization="payment.payingOrganization" />
+                    </template>
+                </STListItem>
+
+                <template v-if="payment.customer.company">
+                    <STListItem>
+                        <h3 class="style-definition-label">
+                            {{ $t('e016131d-770c-45fe-b6e9-5631761cbab2') }}
+                        </h3>
+                        <p v-copyable class="style-definition-text style-copyable">
+                            {{ payment.customer.company.name }}
+                        </p>
+                        <p v-if="!payment.customer.company.VATNumber && !payment.customer.company.companyNumber" class="style-description">
+                            {{ $t('594307a3-05b8-47cf-81e2-59fb6254deba') }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.VATNumber">
+                        <h3 class="style-definition-label">
+                            {{ $t('4d2a6054-26bf-49ed-b91f-59a8819e6436') }}
+                        </h3>
+                        <p v-copyable class="style-definition-text style-copyable">
+                            {{ payment.customer.company.VATNumber || 'Niet BTW-plichtig' }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.companyNumber && (!payment.customer.company.VATNumber || (payment.customer.company.companyNumber !== payment.customer.company.VATNumber && payment.customer.company.companyNumber !== payment.customer.company.VATNumber.slice(2)))">
+                        <h3 class="style-definition-label">
+                            {{ $t('fb64a034-071e-45d6-8d78-6b5f291ee5f9') }}
+                        </h3>
+                        <p v-copyable class="style-definition-text style-copyable">
+                            {{ payment.customer.company.companyNumber || 'Niet BTW-plichtig' }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.address">
+                        <h3 class="style-definition-label">
+                            {{ $t('f7e792ed-2265-41e9-845f-e3ce0bc5da7c') }}
+                        </h3>
+                        <p v-copyable class="style-definition-text style-copyable">
+                            {{ payment.customer.company.address.toString() }}
+                        </p>
+                    </STListItem>
+
+                    <STListItem v-if="payment.customer.company.administrationEmail">
+                        <h3 class="style-definition-label">
+                            {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
+                        </h3>
+                        <p v-copyable class="style-definition-text style-copyable">
+                            {{ payment.customer.company.administrationEmail }}
+                        </p>
+                    </STListItem>
+                </template>
+
+                <STListItem v-if="!payment.customer.company || payment.customer.name">
                     <h3 class="style-definition-label">
                         {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.name || 'Naamloos' }}
+                        {{ payment.customer.name || $t('Naamloos') }}
                     </p>
                     <p v-if="payment.customer.email" v-copyable class="style-description style-copyable">
                         {{ payment.customer.email }}
+                    </p>
+                    <p v-if="payment.customer.phone" v-copyable class="style-description style-copyable">
+                        {{ payment.customer.phone }}
                     </p>
                 </STListItem>
             </STList>
@@ -383,6 +390,7 @@ import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
+import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 
 const props = withDefaults(
     defineProps<{

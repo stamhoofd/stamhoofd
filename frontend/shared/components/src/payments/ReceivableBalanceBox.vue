@@ -138,9 +138,9 @@
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, Toast, useContext, useErrors, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
+import { BalancePriceBreakdown, EditBalanceItemView, EditPaymentView, ErrorBox, GlobalEventBus, GroupedBalanceList, IconContainer, LoadingBoxTransition, PaymentRow, SegmentedControl, Toast, useContext, useErrors, useExternalOrganization, useLoadFamily, usePlatformFamilyManager } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItemWithPayments, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
+import { BalanceItemWithPayments, BaseOrganization, DetailedReceivableBalance, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PlatformMember, ReceivableBalance, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
@@ -150,10 +150,12 @@ const props = withDefaults(
         item: ReceivableBalance;
         member?: PlatformMember | null;
         hideSegmentedControl?: boolean;
+        payingOrganization?: BaseOrganization | null;
     }>(),
     {
         member: null,
         hideSegmentedControl: true,
+        payingOrganization: null,
     });
 
 const errors = useErrors();
@@ -243,6 +245,7 @@ async function createPayment(type: PaymentType) {
         status: PaymentStatus.Succeeded,
         type,
         paidAt: new Date(),
+        payingOrganization: props.payingOrganization,
         customer: detailedItem.value.object.customers.length > 0
             ? detailedItem.value.object.customers[0]
             : null,

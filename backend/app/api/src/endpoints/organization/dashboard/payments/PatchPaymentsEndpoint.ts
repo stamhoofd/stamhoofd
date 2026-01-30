@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Payment } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel } from '@stamhoofd/structures';
 
@@ -72,6 +72,34 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             payment.status = PaymentStatus.Created;
             payment.method = put.method;
             payment.customer = put.customer;
+
+            const payingOrganizationId = put.payingOrganizationId ?? put.payingOrganization?.id ?? null;
+
+            if (payingOrganizationId) {
+                if (Context.auth.hasSomePlatformAccess()) {
+                    if (await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)) {
+                        payment.payingOrganizationId = payingOrganizationId;
+                    }
+                    else {
+                        // silently ignore
+                    }
+                }
+            }
+
+            if (put.payingUserId) {
+                const user = await User.getByID(put.payingUserId);
+                if (!user) {
+                    throw new SimpleError({
+                        code: 'user_not_found',
+                        message: 'User not found',
+                        field: 'payingUserId',
+                    });
+                }
+                if (await Context.auth.canAccessUser(user, PermissionLevel.Full)) {
+                    // Allowed
+                    payment.payingUserId = put.payingUserId;
+                }
+            }
 
             if (put.customer?.company) {
                 await ViesHelper.checkCompany(put.customer.company, put.customer.company);
