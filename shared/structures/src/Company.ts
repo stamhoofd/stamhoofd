@@ -1,7 +1,6 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from './addresses/Address.js';
-import { PaymentCustomer } from './PaymentCustomer.js';
 
 export class Company extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
@@ -24,6 +23,10 @@ export class Company extends AutoEncoder {
 
     @field({ decoder: StringDecoder, nullable: true, optional: true })
     administrationEmail: string | null = null;
+
+    getDiffValue() {
+        return this.name;
+    }
 
     equals(other: Company) {
         if (this.name !== other.name) {
