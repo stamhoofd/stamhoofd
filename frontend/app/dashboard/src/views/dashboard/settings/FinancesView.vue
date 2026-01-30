@@ -8,7 +8,7 @@
                     {{ $t('5d5cb596-1b5b-4ec3-98dd-2c0f012d9093') }}
                 </h1>
 
-                <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhouding')" target="_blank">
+                <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
                     {{ $t('Lees onze documentatie voor meer informatie over de boekhoudmodule.') }}
                 </a>
 
