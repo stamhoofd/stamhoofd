@@ -20,7 +20,7 @@
             </p>
 
             <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('tickets-scannen')" target="_blank">
-                {{ $t('Lees onze documentatie voor meer informatie over het scannen van tickets.') }}
+                {{ $t('7093eb23-893e-445b-bc51-d637030d88c2') }}
             </a>
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">

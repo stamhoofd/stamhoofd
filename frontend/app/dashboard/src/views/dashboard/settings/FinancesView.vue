@@ -9,7 +9,7 @@
                 </h1>
 
                 <a class="info-box icon external selectable" :href="LocalizedDomains.getDocs('boekhoudingsmodule')" target="_blank">
-                    {{ $t('Lees onze documentatie voor meer informatie over de boekhoudmodule.') }}
+                    {{ $t('e9616fc3-c694-42f9-b733-29a1ece071d5') }}
                 </a>
 
                 <STList class="illustration-list">

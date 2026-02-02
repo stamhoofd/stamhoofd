@@ -956,7 +956,7 @@ export class AuthenticatedStructures {
         for (const balance of balances) {
             let object = ReceivableBalanceObject.create({
                 id: balance.objectId,
-                name: $t('Onbekend'),
+                name: $t('6c3e777c-7cd6-4566-9540-8a829c26212f'),
             });
 
             if (balance.objectType === ReceivableBalanceType.organization) {

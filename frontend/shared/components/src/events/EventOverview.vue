@@ -211,10 +211,10 @@
                                 <IconContainer icon="copy" />
                             </template>
                             <h2 class="style-title-list">
-                                {{ $t('Activiteit dupliceren') }}
+                                {{ $t('9c6bda95-5b75-46a6-960e-5685037f32ed') }}
                             </h2>
                             <p class="style-description">
-                                {{ $t('Maak een nieuwe activiteit met dezelfde instellingen.') }}
+                                {{ $t('cb6ccc98-808a-48df-99b6-d8aef5c1e4a4') }}
                             </p>
                             <template #right>
                                 <span class="icon arrow-right-small gray" />

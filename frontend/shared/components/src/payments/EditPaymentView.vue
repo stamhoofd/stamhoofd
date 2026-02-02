@@ -65,14 +65,14 @@
         </template>
 
         <hr>
-        <h2>{{ $t('Facturatiegegevens') }}</h2>
+        <h2>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h2>
         <p v-if="patchedPayment.payingOrganization" class="info-box icon link selectable" @click="choosePayingOrganization">
-            <span>{{ $t('Deze betaling is gekoppeld aan {name} ({uri})', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
+            <span>{{ $t('6b03b799-4062-4bc7-a0cd-cb22f951dbc9', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
             <span class="button icon edit" />
         </p>
 
         <p v-else-if="balanceItems.find(b => b.payingOrganizationId)" class="info-box icon link selectable" @click="choosePayingOrganization">
-            <span>{{ $t('Deze betaling is niet gekoppeld aan een vereniging') }}</span>
+            <span>{{ $t('d28dbb6c-e21b-4ded-b09b-be72a73ffdf8') }}</span>
             <span class="button icon edit" />
         </p>
 
@@ -93,7 +93,7 @@
             </p>
 
             <p v-if="shouldVatExcempt" class="warning-box">
-                {{ $t('Je moet de BTW verleggen omdat je factureert aan een buitenlands BTW-plichtig bedrijf. Kijk daarom na of je de juiste BTW-tarieven hebt ingesteld bij alle items.') }}
+                {{ $t('cc15bfe2-7db1-46c0-b16a-2a0966f24ec5') }}
             </p>
 
             <SelectBalanceItemsList :items="balanceItems" :list="patchedPayment.balanceItemPayments" :is-payable="false" @patch="addPatch({balanceItemPayments: $event})" />

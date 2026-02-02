@@ -20,7 +20,7 @@
             </p>
 
             <p v-if="invoice.VATTotal.length > 1" class="style-description-small">
-                {{ $t('{percentage%} BTW', {'percentage%': formatPercentage(item.VATPercentage * 100)}) }}
+                {{ $t('1789152b-8677-4cc6-b4b8-e90d14501d23', {'percentage%': formatPercentage(item.VATPercentage * 100)}) }}
             </p>
 
             <template #middleRight>

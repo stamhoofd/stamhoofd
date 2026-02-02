@@ -46,7 +46,7 @@ export function getVATExcemptReasonName(reason: VATExcemptReason): string {
 
 export function getVATExcemptInvoiceNote(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunity: return $t('Btw verlegd: Art. 39 bis – intracommunautaire levering');
+        case VATExcemptReason.IntraCommunity: return $t('ea742466-c76d-4b23-9387-b7a14284679e');
     }
 }
 

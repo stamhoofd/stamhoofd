@@ -44,7 +44,7 @@
 
     <template v-if="customers.length > 1 && selectedCustomer === null">
         <hr>
-        <h2>{{ $t('Andere facturatiegegevens') }}</h2>
+        <h2>{{ $t('37bdf570-09b9-4f44-a48c-b8f3a3c698ce') }}</h2>
     </template>
     <PaymentCustomerInput v-if="selectedCustomer === null || customers.length <= 1" :customer="customer" :validator="validator" :error-box="errorBox" @patch:customer="addPatch" />
 </template>

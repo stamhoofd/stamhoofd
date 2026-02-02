@@ -445,7 +445,7 @@ export class Invoice extends AutoEncoder {
             throw new SimpleError({
                 code: 'price_difference',
                 message: 'The price of the generated invoice did not match the price of the corresponding payments. Possibly caused by rounding that could not be corrected automatically.',
-                human: $t('Het is niet mogelijk om een factuur aan te maken. Er zit een onverwachts verschil tussen de prijs van de aan te maken factuur en het te betalen bedrag.'),
+                human: $t('8de3f0d6-3bbe-4668-a357-1fbf3d698177'),
             });
         }
     }

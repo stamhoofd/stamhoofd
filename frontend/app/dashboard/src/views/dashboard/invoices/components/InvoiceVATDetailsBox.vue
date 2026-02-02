@@ -1,18 +1,18 @@
 <template>
     <div class="st-view">
-        <STNavigationBar v-if="!popup" :title="$t('BTW')" />
+        <STNavigationBar v-if="!popup" :title="$t('bf9ff30d-258f-4ba3-8dd7-c27595e32da2')" />
 
         <main>
             <STGrid>
                 <STGridItem class="header price-grid">
-                    {{ $t('BTW %') }}
+                    {{ $t('4669ddfd-b0f2-46c2-88dc-beb49dd43262') }}
 
                     <template #middleRight>
-                        {{ $t('Excl. BTW') }}
+                        {{ $t('9f822d74-c9fe-480b-b141-4d758d188720') }}
                     </template>
 
                     <template #right>
-                        {{ $t('BTW') }}
+                        {{ $t('bf9ff30d-258f-4ba3-8dd7-c27595e32da2') }}
                     </template>
                 </STGridItem>
 

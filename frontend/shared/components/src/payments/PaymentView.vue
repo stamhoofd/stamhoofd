@@ -4,7 +4,7 @@
             <template #right>
                 <button v-if="hasPrevious || hasNext" v-tooltip="$t('03b92fed-e144-4ace-a931-dc8421734bcd')" type="button" class="button icon arrow-up" :disabled="!hasPrevious" @click="goBack" />
                 <button v-if="hasNext || hasPrevious" v-tooltip="$t('187657c7-d1ad-4047-a693-ab0e215d41fc')" type="button" class="button icon arrow-down" :disabled="!hasNext" @click="goForward" />
-                <button v-if="canWrite" v-tooltip="$t('Wijzigen')" type="button" class="button icon edit" @click="editPayment" />
+                <button v-if="canWrite" v-tooltip="$t('741168a8-76e8-4bcb-889e-432b1048df11')" type="button" class="button icon edit" @click="editPayment" />
                 <button v-if="auth.hasFullAccess()" v-tooltip="$t('3763ba3a-1023-4265-b675-1c2090d4c37b')" type="button" class="button icon history" @click="viewAudit" />
             </template>
         </STNavigationBar>
@@ -149,7 +149,7 @@
             <STList v-else class="info">
                 <STListItem v-if="payment.payingOrganization">
                     <h3 class="style-definition-label">
-                        {{ $t('Bijhorende vereniging') }}
+                        {{ $t('a0602ebf-8ac8-4c27-bb2e-609f1c087e83') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.payingOrganization.name }}
@@ -218,7 +218,7 @@
                         {{ $t('2cb138d8-38c3-4ca8-baa8-64bcd32fb2eb') }}
                     </h3>
                     <p v-copyable class="style-definition-text style-copyable">
-                        {{ payment.customer.name || $t('Naamloos') }}
+                        {{ payment.customer.name || $t('67d1816c-8cfb-4e48-8155-867a2da19641') }}
                     </p>
                     <p v-if="payment.customer.email" v-copyable class="style-description style-copyable">
                         {{ payment.customer.email }}
