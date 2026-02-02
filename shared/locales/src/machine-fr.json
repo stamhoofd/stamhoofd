@@ -2295,6 +2295,10 @@
     "original": "Jongen",
     "translation": "Garçon"
   },
+  "1789152b-8677-4cc6-b4b8-e90d14501d23": {
+    "original": "{percentage%} BTW",
+    "translation": "{percentage%} TVA"
+  },
   "179c8dd9-2719-41a9-ad5f-11aab6e4a1c3": {
     "original": "Naam gebouw",
     "translation": "Nom du bâtiment"
@@ -3983,6 +3987,10 @@
     "original": "Groepen",
     "translation": "Groupes"
   },
+  "2a10aac1-e404-4de4-865d-75593b2b5e8d": {
+    "original": "Contactpersoon",
+    "translation": "Personne de contact"
+  },
   "2a1a65d9-d04a-44f2-a86e-0d500f6186ee": {
     "original": "Kies een organisatie",
     "translation": "Choisissez une organisation"
@@ -4082,6 +4090,10 @@
   "2b08e5d7-6acc-4d7f-ad1a-30f349a79fe9": {
     "original": "de verwerkersovereenkomst",
     "translation": "le contrat de sous-traitance"
+  },
+  "2b09865c-4f3c-44ab-b001-03fc1d5a0ce9": {
+    "original": "Facturatiegegevens",
+    "translation": "Données de facturation"
   },
   "2b1ca6a0-662e-4326-ada1-10239b6ddc6f": {
     "original": "Oeps, je hebt geen geldige betaalmethode geselecteerd. Selecteer een betaalmethode en probeer opnieuw. Herlaad de pagina indien nodig.",
@@ -4490,6 +4502,10 @@
   "2fe38a3a-0041-4724-869e-4a5b55634380": {
     "original": "Naam document",
     "translation": "Nom du document"
+  },
+  "2feeeb44-07b2-460e-a664-a08e1713408e": {
+    "original": "Bedrijf of organisatie",
+    "translation": "Entreprise ou organisation"
   },
   "30047312-8c15-4988-8095-a0f605874c22": {
     "original": "Maak dit niet verplicht voor alle leden, anders moeten minderjarige leden ook verplicht een eigen GSM-nummer invullen, wat ze vaak niet hebben. Denk goed na over wat je instelt.",
@@ -5223,6 +5239,10 @@
     "original": "Vul een UiTPAS-nummer in.",
     "translation": "Veuillez entrer un numéro UiTPAS."
   },
+  "37bdf570-09b9-4f44-a48c-b8f3a3c698ce": {
+    "original": "Andere facturatiegegevens",
+    "translation": "Autres données de facturation"
+  },
   "37d201fd-287d-4957-b559-b882744ea886": {
     "original": "Beperk tot leden met een registratie bij deze standaard leeftijdsgroepen.",
     "translation": "Limiter aux membres ayant une inscription dans ces groupes d'âge standard."
@@ -5622,6 +5642,10 @@
   "3cbc8829-a005-42be-9d10-d6a6efba1de1": {
     "original": "Onbepaald",
     "translation": "Indéterminé"
+  },
+  "3cc87847-7c8c-4b8d-aa14-eaa7d18350be": {
+    "original": "{price} terugbetaald",
+    "translation": "{price} remboursé"
   },
   "3ccc6dce-69a4-46d4-8874-8cf8431239f4": {
     "original": "het ingevoerde e-mailadres.",
@@ -6487,6 +6511,10 @@
     "original": "Er is een fout opgetreden bij het ophalen van het kansentarief voor jouw UiTPAS-nummer. Probeer het later opnieuw.",
     "translation": "Une erreur s'est produite lors de la récupération du tarif préférentiel pour votre numéro UiTPAS. Veuillez réessayer plus tard."
   },
+  "4669ddfd-b0f2-46c2-88dc-beb49dd43262": {
+    "original": "BTW %",
+    "translation": "TVA %"
+  },
   "466a4e32-6cad-41ca-902c-b01ba6215de3": {
     "original": "Vul een onderwerp in",
     "translation": "Veuillez saisir un sujet"
@@ -7078,6 +7106,10 @@
   "4c6482ff-e6d9-4ea1-b11d-e12d697b4b7b": {
     "original": "Er is een fout opgetreden bij het ophalen van je UiTPAS. Kijk je het nummer even na?",
     "translation": "Une erreur s'est produite lors de la récupération de votre UiTPAS. Veuillez vérifier le numéro."
+  },
+  "4c65c34a-e96f-4887-9b75-26278b5d402c": {
+    "original": "Optioneel",
+    "translation": "Optionnel"
   },
   "4c66b760-cef1-47bc-899a-1ec5ec363560": {
     "original": ", kijk na of je er geen moet verwijderen of per ongeluk meerdere hebt aangemaakt",
@@ -9131,6 +9163,10 @@
     "original": "Aansluiting KSA Nationaal",
     "translation": "Affiliation KSA National"
   },
+  "61f5543d-e014-449f-bad3-a7a2f0e59dab": {
+    "original": "Contactpersoon verwijderen",
+    "translation": "Supprimer la personne de contact"
+  },
   "62013f16-5422-44c4-9993-2596eab2dc97": {
     "original": "(geboren in",
     "translation": "(né(e) le"
@@ -9651,6 +9687,10 @@
     "original": "{name} is verwijderd",
     "translation": "{name} a été supprimé"
   },
+  "67d1816c-8cfb-4e48-8155-867a2da19641": {
+    "original": "Naamloos",
+    "translation": "Sans nom"
+  },
   "67ff4ca3-6f9e-4f74-92f7-ea63acfdb3b8": {
     "original": "Moet gekoppeld worden aan specifieke lokale leeftijdsgroepen",
     "translation": "Doit être lié à des groupes d'âge locaux spécifiques"
@@ -9670,6 +9710,10 @@
   "6811d233-19c2-4e32-9900-6f138d818588": {
     "original": "Vast bedrag",
     "translation": "Montant fixe"
+  },
+  "681471a7-98f5-4149-a431-28b1cd0cebaa": {
+    "original": "{price} terugbetaling in verwerking",
+    "translation": "Remboursement de {price} en cours de traitement"
   },
   "683a45ce-773c-4867-b656-1344beb5bd55": {
     "original": "Hoe kan men dit betalen?",
@@ -9919,6 +9963,10 @@
     "original": "Geen inschrijvingen",
     "translation": "Aucune inscription"
   },
+  "6b03b799-4062-4bc7-a0cd-cb22f951dbc9": {
+    "original": "Deze betaling is gekoppeld aan {name} ({uri})",
+    "translation": "Ce paiement est lié à {name} ({uri})"
+  },
   "6b0bca07-3cba-45cf-bc94-e3217e59a69f": {
     "original": "Klik om te kopiëren",
     "translation": "Cliquez pour copier"
@@ -10022,6 +10070,10 @@
   "6c2f78d7-0b5d-4264-8a55-9164ed4f2ddd": {
     "original": "Je kan maximaal {5-items-or-persons-or-tickets} bestellen, waarvan er al één in jouw winkelmandje zit",
     "translation": "Vous pouvez commander au maximum {5-items-or-persons-or-tickets}, dont une déjà dans votre panier"
+  },
+  "6c3e777c-7cd6-4566-9540-8a829c26212f": {
+    "original": "Onbekend",
+    "translation": "Inconnu"
   },
   "6c42ae73-6653-43e6-9d99-cfee321d23f4": {
     "original": "{address} kon niet als een adres worden herkend. Controleer of het formaat \"Straatnaam huisnummer, postcode stad\" werd gevolgd.",
@@ -10455,6 +10507,10 @@
     "original": "Bevestig dat de betaalmethodes correct zijn ingesteld. Deze betaalmethodes worden gebruikt als leden inschrijven via Stamhoofd.",
     "translation": "Vérifiez que les méthodes de paiement sont bien configurées. Ces méthodes seront utilisées lorsque des membres s'inscrivent via Stamhoofd."
   },
+  "7093eb23-893e-445b-bc51-d637030d88c2": {
+    "original": "Lees onze documentatie voor meer informatie over het scannen van tickets.",
+    "translation": "Consultez notre documentation pour en savoir plus sur le scan des tickets."
+  },
   "709a5ff3-8d79-447b-906d-2c3cdabb41cf": {
     "original": "Onderwerp",
     "translation": "Objet"
@@ -10770,6 +10826,10 @@
   "7410de9e-6805-41e5-b166-9e590056c41b": {
     "original": "Waarschuwing tonen bij selectie van deze betaalmethode",
     "translation": "Afficher un avertissement lors de la sélection de ce mode de paiement"
+  },
+  "741168a8-76e8-4bcb-889e-432b1048df11": {
+    "original": "Wijzigen",
+    "translation": "Modifier"
   },
   "7418aed7-61ec-4553-ba8c-301573d32a72": {
     "original": "Volledig ingevuld",
@@ -13067,6 +13127,10 @@
     "original": "of",
     "translation": "ou"
   },
+  "8de3f0d6-3bbe-4668-a357-1fbf3d698177": {
+    "original": "Het is niet mogelijk om een factuur aan te maken. Er zit een onverwachts verschil tussen de prijs van de aan te maken factuur en het te betalen bedrag.",
+    "translation": "Il est impossible de créer une facture. Il y a une différence inattendue entre le prix de la facture à créer et le montant à payer."
+  },
   "8dead18a-892c-458e-9ef1-39f49a9b5807": {
     "original": "Uitbetaald op",
     "translation": "Déboursé le"
@@ -14327,6 +14391,10 @@
     "original": "Verwijder deze keuze",
     "translation": "Supprimer ce choix"
   },
+  "9c6bda95-5b75-46a6-960e-5685037f32ed": {
+    "original": "Activiteit dupliceren",
+    "translation": "Dupliquer l'activité"
+  },
   "9c775d8c-1e2c-40c4-9f61-6be6cb6bd5bb": {
     "original": "Geef korting bij meerdere inschrijvingen van een lid of gezin, bv. voor broers of zussen die inschrijven voor een kamp, of leden die meerdere lessen volgen in hetzelfde werkjaar.",
     "translation": "Appliquez une réduction pour plusieurs inscriptions d'un membre ou d'une famille, par exemple pour des frères et sœurs qui s'inscrivent à un camp, ou des membres qui suivent plusieurs cours la même année associative."
@@ -14619,6 +14687,10 @@
     "original": "Stopgezet",
     "translation": "Arrêté"
   },
+  "9f822d74-c9fe-480b-b141-4d758d188720": {
+    "original": "Excl. BTW",
+    "translation": "Hors TVA"
+  },
   "9f872d61-a2e3-4e8b-9a73-dfcf8c2e466e": {
     "original": "maandag",
     "translation": "lundi"
@@ -14714,6 +14786,10 @@
   "a059bcec-d0a2-42c4-a7fc-0fade27c9b0e": {
     "original": "Naam / aanspreking (optioneel)",
     "translation": "Nom / forme d'appelation (facultatif)"
+  },
+  "a0602ebf-8ac8-4c27-bb2e-609f1c087e83": {
+    "original": "Bijhorende vereniging",
+    "translation": "Association associée"
   },
   "a09b08eb-216c-4f07-b05c-0a26a4c580eb": {
     "original": "Keuze 2",
@@ -17655,6 +17731,10 @@
     "original": "(niet automatisch)",
     "translation": "(pas automatique)"
   },
+  "bf9ff30d-258f-4ba3-8dd7-c27595e32da2": {
+    "original": "BTW",
+    "translation": "TVA"
+  },
   "bfa4c1b3-9613-49c1-ad3d-360f533a4086": {
     "original": "annuleringskost voor keuzeoptie bij",
     "translation": "frais d'annulation pour l'option de choix chez"
@@ -18679,6 +18759,10 @@
     "original": "Het rijksregisternummer wordt gebruikt om fiscale attesten op te maken.",
     "translation": "Le numéro national est utilisé pour établir les attestations fiscales."
   },
+  "cb6ccc98-808a-48df-99b6-d8aef5c1e4a4": {
+    "original": "Maak een nieuwe activiteit met dezelfde instellingen.",
+    "translation": "Créez une nouvelle activité avec les mêmes paramètres."
+  },
   "cb6d8561-3187-4b56-bb71-fe6ddaba642f": {
     "original": "Deze bestelling werd nog niet (volledig) betaald.",
     "translation": "Cette commande n'a pas encore été (entièrement) payée."
@@ -18750,6 +18834,10 @@
   "cc0f2b34-b2c3-4df1-871d-17ad969205c5": {
     "original": "Je hebt een nieuwe e-mail ontvangen. Kijk jouw inbox en spambox goed na!",
     "translation": "Vous avez reçu un nouvel e-mail. Vérifiez bien votre boîte de réception et votre boîte de spam !"
+  },
+  "cc15bfe2-7db1-46c0-b16a-2a0966f24ec5": {
+    "original": "Je moet de BTW verleggen omdat je factureert aan een buitenlands BTW-plichtig bedrijf. Kijk daarom na of je de juiste BTW-tarieven hebt ingesteld bij alle items.",
+    "translation": "Vous devez appliquer l'autoliquidation de la TVA car la facture est destinée à une entreprise étrangère assujettie à la TVA. Vérifiez dès lors si vous avez bien défini les bons taux de TVA pour chaque article."
   },
   "cc1728cb-e600-4888-ad64-6ee498da11e0": {
     "original": "Wachtwoord wijzigen",
@@ -19406,6 +19494,10 @@
   "d2749916-b99a-47af-9bc4-300648fe77a7": {
     "original": "Je moet elke betaling zelf controleren en markeren als betaald in Stamhoofd",
     "translation": "Vous devez contrôler chaque paiement vous-même et le marquer comme payé dans Stamhoofd"
+  },
+  "d28dbb6c-e21b-4ded-b09b-be72a73ffdf8": {
+    "original": "Deze betaling is niet gekoppeld aan een vereniging",
+    "translation": "Ce paiement n'est pas lié à une association"
   },
   "d298a037-1da1-4435-a78b-f56b949e9dad": {
     "original": "Koppel de kolom '{column}' eerst aan een bijhorende waarde",
@@ -20811,6 +20903,10 @@
     "original": "UiTPAS-nummer wijzigen naar {number}",
     "translation": "Modifier le numéro UiTPAS en {number}"
   },
+  "e08d3cd9-7d2d-4cb9-b8b7-7417de2a8e59": {
+    "original": "GSM-nummer",
+    "translation": "Numéro de GSM"
+  },
   "e09c97db-85d7-40b0-8043-65fa24a09a01": {
     "original": "Te ontvangen bedragen",
     "translation": "Montants à recevoir"
@@ -21607,6 +21703,10 @@
     "original": "Nadat je hebt opgeslagen kan je dit niet meer ongedaan maken",
     "translation": "Après avoir enregistré, vous ne pouvez plus annuler cela"
   },
+  "e9616fc3-c694-42f9-b733-29a1ece071d5": {
+    "original": "Lees onze documentatie voor meer informatie over de boekhoudmodule.",
+    "translation": "Consultez notre documentation pour plus d'informations sur le module de comptabilité."
+  },
   "e96ab70d-4095-47b2-90bf-451870b07e05": {
     "original": "Voorgesteld bedrag",
     "translation": "Montant suggéré"
@@ -21702,6 +21802,10 @@
   "ea52e93e-6e9d-41d7-8b4c-9a5bc41440e7": {
     "original": "Zorg ervoor dat je enkel een e-mailadres deblokkeert als je zeker bent dat het probleem is opgelost en de persoon hierna geen spam meer zal melden.",
     "translation": "Ne débloquez une adresse e-mail que si vous êtes certain que le problème est résolu et que la personne ne signalera plus de spams."
+  },
+  "ea742466-c76d-4b23-9387-b7a14284679e": {
+    "original": "Btw verlegd: Art. 39 bis – intracommunautaire levering",
+    "translation": "TVA autoliquidée : art. 39 bis – livraison intracommunautaire"
   },
   "ea7a24eb-79de-40ca-8ebf-1ca4a600587e": {
     "original": "Kijk jouw verbinding na en probeer opnieuw",
@@ -21994,6 +22098,10 @@
   "ed995f5d-eeff-44ad-ac35-f518b2892524": {
     "original": "Detail",
     "translation": "Détail"
+  },
+  "ed9eecdb-c3f8-4e87-a66e-39f5d484628c": {
+    "original": "Naam",
+    "translation": "Nom"
   },
   "eda9c1b1-f601-492a-b13e-cf88c5249a7b": {
     "original": "Dit document is nog een kladversie. Nu kan je alles nog wijzigen, maar ze is nog niet zichtbaar voor leden. Publiceer het document via de knop onderaan nadat je alles hebt nagekeken.",

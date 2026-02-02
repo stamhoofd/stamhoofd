@@ -971,6 +971,10 @@
     "original": "Je kan geen eenheid aanmaken",
     "translation": "Vous ne pouvez pas créer d'unité"
   },
+  "a0602ebf-8ac8-4c27-bb2e-609f1c087e83": {
+    "original": "Bijhorende eenheid",
+    "translation": "Unité associée"
+  },
   "a0b1e726-345d-4288-a1db-7437d1b47482": {
     "original": "Eenheid",
     "translation": "Unité"
@@ -1298,6 +1302,10 @@
   "d2749916-b99a-47af-9bc4-300648fe77a7": {
     "original": "Je moet elke betaling zelf controleren en markeren als betaald in Jamboree",
     "translation": "Vous devez vérifier chaque paiement et le marquer comme payé dans Jamboree"
+  },
+  "d28dbb6c-e21b-4ded-b09b-be72a73ffdf8": {
+    "original": "Deze betaling is niet gekoppeld aan een eenheid",
+    "translation": "Ce paiement n'est pas lié à une unité"
   },
   "d35a173c-5d80-48d6-a83b-5274f883a950": {
     "original": "Andere start eind/datum dan scoutsjaar",
