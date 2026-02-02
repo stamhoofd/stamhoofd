@@ -1,5 +1,5 @@
 import { usePlatformManager, useRequestOwner } from '@stamhoofd/networking';
-import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, Gender, MemberResponsibility, Organization, OrganizationRecordsConfiguration, PermissionLevel, PermissionsResourceType, RecordCategory, StamhoofdCompareValue, StamhoofdFilter, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import { computed, ComputedRef, Ref, ref } from 'vue';
 import { useFinancialSupportSettings } from '../../groups';
 import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
@@ -545,18 +545,76 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     );
 
     if (financialSupportSettings.enabled) {
+        function getHasFinancialSupportFilter() {
+            const filter: StamhoofdFilter = {
+                $or: [
+                    {
+                        'details.requiresFinancialSupport': true,
+                    },
+                    {
+                        'details.uitpasNumberDetails.socialTariff.status': UitpasSocialTariffStatus.Active,
+                    },
+                ],
+            };
+
+            return filter;
+        }
+
+        function getDoesNotHaveFinancialSupportFilter() {
+            return {
+                $not: getHasFinancialSupportFilter(),
+            };
+        }
+
         all.push(
             new MultipleChoiceFilterBuilder({
                 name: financialSupportSettings.financialSupportSettings.value.title,
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`e8339839-a2d6-4a98-ae6b-091fb658d25f`), true),
-                    new MultipleChoiceUIFilterOption($t(`3729f1c6-ec66-4530-9012-48e0821c0bc1`), false),
-                    new MultipleChoiceUIFilterOption($t(`3cbc8829-a005-42be-9d10-d6a6efba1de1`), null),
+                    new MultipleChoiceUIFilterOption($t(`Actief`), true),
+                    new MultipleChoiceUIFilterOption($t(`Niet actief`), false),
                 ],
-                wrapper: {
-                    'details.requiresFinancialSupport': {
-                        $in: FilterWrapperMarker,
-                    },
+                wrapFilter: (f: StamhoofdFilter) => {
+                    const choices = Array.isArray(f) ? f : [f];
+                    if (choices.length !== 1) {
+                        return null;
+                    }
+
+                    const choice = choices[0];
+
+                    if (typeof choice === 'boolean') {
+                        if (choice === true) {
+                            return getHasFinancialSupportFilter();
+                        }
+
+                        return getDoesNotHaveFinancialSupportFilter();
+                    }
+
+                    return null;
+                },
+                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
+                    const activeFilter = getHasFinancialSupportFilter();
+                    const notActiveFilter = getDoesNotHaveFinancialSupportFilter();
+
+                    const cases: { wrap: StamhoofdFilter; returnValue: (boolean | null)[] }[] = [
+                        {
+                            wrap: activeFilter,
+                            returnValue: [true],
+                        },
+                        {
+                            wrap: notActiveFilter,
+                            returnValue: [false],
+                        },
+                    ];
+
+                    for (const { wrap, returnValue } of cases) {
+                        const result = unwrapFilter(f, wrap);
+
+                        if (result.match) {
+                            return returnValue;
+                        }
+                    }
+
+                    return null;
                 },
             }),
         );

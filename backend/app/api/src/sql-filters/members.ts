@@ -68,34 +68,20 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: false,
     }),
+    'details.uitpasNumberDetails.socialTariff.status': createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.uitpasNumberDetails.socialTariff.status'),
+        type: SQLValueType.JSONString,
+        nullable: true,
+        checkPermission: async () => {
+            await throwIfNoFinancialReadAccess();
+        },
+    }),
     'details.requiresFinancialSupport': createColumnFilter({
         expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.requiresFinancialSupport.value'),
         type: SQLValueType.JSONBoolean,
         nullable: true,
         checkPermission: async () => {
-            const organization = Context.organization;
-            if (!organization) {
-                if (!Context.auth.hasPlatformFullAccess()) {
-                    throw new SimpleError({
-                        code: 'permission_denied',
-                        message: 'No permissions for financial support filter.',
-                        human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
-                        statusCode: 400,
-                    });
-                }
-                return;
-            }
-
-            const permissions = await Context.auth.getOrganizationPermissions(organization);
-
-            if (!permissions || !permissions.hasAccessRight(AccessRight.MemberReadFinancialData)) {
-                throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'No permissions for financial support filter (organization scope).',
-                    human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
-                    statusCode: 400,
-                });
-            }
+            await throwIfNoFinancialReadAccess();
         },
     }),
     'email': createColumnFilter({
@@ -512,3 +498,29 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         ),
     },
 };
+
+async function throwIfNoFinancialReadAccess() {
+    const organization = Context.organization;
+    if (!organization) {
+        if (!Context.auth.hasPlatformFullAccess()) {
+            throw new SimpleError({
+                code: 'permission_denied',
+                message: 'No permissions for financial support filter.',
+                human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
+                statusCode: 400,
+            });
+        }
+        return;
+    }
+
+    const permissions = await Context.auth.getOrganizationPermissions(organization);
+
+    if (!permissions || !permissions.hasAccessRight(AccessRight.MemberReadFinancialData)) {
+        throw new SimpleError({
+            code: 'permission_denied',
+            message: 'No permissions for financial support filter (organization scope).',
+            human: $t(`64d658fa-0727-4924-9448-b243fe8e10a1`),
+            statusCode: 400,
+        });
+    }
+}
