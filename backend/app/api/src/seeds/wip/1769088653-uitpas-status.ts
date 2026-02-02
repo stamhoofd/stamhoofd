@@ -41,10 +41,7 @@ export async function migrateUitpasStatusOfAllMembers() {
         console.log('Continue from member with id ', idOfLastUpdatedMember);
         query = query.where('id', '>', idOfLastUpdatedMember);
     }
-
-    const total = await query.clone().count();
-
-    console.log(`Start updating uitpas status of ${total} members.`);
+    console.log(`Start updating uitpas status members.`);
 
     let c = 0;
 
