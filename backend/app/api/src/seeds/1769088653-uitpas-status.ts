@@ -91,14 +91,9 @@ async function migrateMember(member: Member) {
             if (error.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found') || error.hasCode('https://api.publiq.be/probs/uitpas/invalid-uitpas-number')) {
                 console.log(`Uitpas number ${member.details.uitpasNumberDetails?.uitpasNumber} is not known by the uitpas api for member with id ${member.id}.`);
 
-                // set updated at
-                if (member.details.uitpasNumberDetails) {
-                    member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
-                        status: UitpasSocialTariffStatus.Unknown,
-                    });
-                }
-
-                // remove review
+                // remove the uitpas number
+                member.details.uitpasNumberDetails = null;
+                member.details.cleanData();
                 member.details.reviewTimes.removeReview('uitpasNumber');
                 await member.save();
 
@@ -113,6 +108,9 @@ async function migrateMember(member: Member) {
                 // remove the uitpas number
                 member.details.uitpasNumberDetails = null;
                 member.details.cleanData();
+
+                // remove review
+                member.details.reviewTimes.removeReview('uitpasNumber');
                 await member.save();
 
                 // do not throw
