@@ -569,13 +569,11 @@ export class DocumentTemplate extends QueryableModel {
 
                 // Generate numbers for all documents
                 if (generateNumbers) {
-                    let nextNumber = Math.max(0, ...documents.map(d => d.number).filter(n => n !== null) as number[]) + 1;
                     for (const document of documents) {
                         abort.throwIfAborted();
                         if (document.number === null && document.status === DocumentStatus.Published) {
-                            document.number = nextNumber;
+                            document.number = this.nextNumberForDocuments(documents);
                             await document.save();
-                            nextNumber++;
                         }
                     }
                 }
@@ -618,19 +616,36 @@ export class DocumentTemplate extends QueryableModel {
 
             // Generate numbers for all documents
             if (generateNumbers) {
-                let nextNumber = Math.max(0, ...allDocuments.map(d => d.number).filter(n => n !== null) as number[]) + 1;
                 for (const document of allDocuments) {
                     abort.throwIfAborted();
                     if (document.number === null && document.status === DocumentStatus.Published) {
-                        document.number = nextNumber;
+                        document.number = this.nextNumberForDocuments(allDocuments);
                         await document.save();
-                        nextNumber++;
                     }
                 }
             }
 
             return allDocuments;
         });
+    }
+
+    private nextNumberForDocuments(documents: Document[]) {
+        const sorted = documents.filter(d => d.status === DocumentStatus.Published && !!d.number).sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0));
+
+        let lastNumber = 0;
+        for (const document of sorted) {
+            if (document.number === null) {
+                continue;
+            }
+
+            if (document.number !== lastNumber + 1) {
+                // Found a gap
+                return lastNumber + 1;
+            }
+            lastNumber = document.number;
+        }
+
+        return lastNumber + 1;
     }
 
     private async buildContext(organization: Organization) {
@@ -641,11 +656,8 @@ export class DocumentTemplate extends QueryableModel {
         let lastNumber = 0;
         for (const document of documents) {
             if (document.number !== lastNumber + 1) {
-                throw new SimpleError({
-                    code: 'invalid_document_number',
-                    message: 'Expected document number to be ' + (lastNumber + 1) + ' but got ' + document.number,
-                    human: $t(`7fd5e5f1-6ff5-48a5-beae-36776935ec90`),
-                });
+                document.number = lastNumber + 1;
+                await document.save();
             }
             lastNumber = document.number;
         }
