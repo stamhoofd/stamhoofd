@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from "@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
-import { getEmailBuilder,RateLimiter } from '@stamhoofd/models';
+import { getEmailBuilder, RateLimiter } from '@stamhoofd/models';
 import { EmailRequest, Recipient } from "@stamhoofd/structures";
 
 import { Context } from '../../../../helpers/Context';
@@ -17,7 +17,7 @@ export const paidEmailRateLimiter = new RateLimiter({
     limits: [
         {   
             // Max 5.000 emails a day
-            limit: 5000,
+            limit: 10000,
             duration: 24 * 60 * 1000 * 60
         },
         {   
@@ -71,11 +71,11 @@ export class EmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
             throw Context.auth.error()
         }  
 
-        if (request.body.recipients.length > 5000) {
+        if (request.body.recipients.length > 10000) {
             throw new SimpleError({
                 code: "too_many_recipients",
                 message: "Too many recipients",
-                human: "Je kan maar een mail naar maximaal 5000 personen tergelijk versturen. Contacteer ons om deze limiet te verhogen indien dit nodig is.",
+                human: "Je kan maar een mail naar maximaal 10000 personen tergelijk versturen. Contacteer ons om deze limiet te verhogen indien dit nodig is.",
                 field: "recipients"
             })
         }
