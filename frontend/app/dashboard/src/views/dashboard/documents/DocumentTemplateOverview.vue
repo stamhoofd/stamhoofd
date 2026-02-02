@@ -6,6 +6,15 @@
             <h1 class="style-navigation-title">
                 {{ template.settings.name }}
             </h1>
+            <p v-if="template.privateSettings.templateDefinition.type === 'fiscal'">
+                <I18nComponent :t="$t('Lees de documentatie voor fiscale attesten <button>hier</button> eerst grondig door.')">
+                    <template #button="{content}">
+                        <a class="inline-link" :href="LocalizedDomains.getDocs('fiscaal-attest-kinderopvang')" target="_blank">
+                            {{ content }}
+                        </a>
+                    </template>
+                </I18nComponent>
+            </p>
 
             <p v-if="isDraft" class="warning-box">
                 {{ $t('eda9c1b1-f601-492a-b13e-cf88c5249a7b') }}
