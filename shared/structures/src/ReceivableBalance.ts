@@ -61,7 +61,7 @@ export class ReceivableBalanceObject extends AutoEncoder {
     /**
      * Customer to use when creating new payments
      */
-    @field({ decoder: new ArrayDecoder(PaymentCustomer), ...NextVersion })
+    @field({ decoder: new ArrayDecoder(PaymentCustomer), version: 393 })
     customers: PaymentCustomer[] = [];
 }
 
