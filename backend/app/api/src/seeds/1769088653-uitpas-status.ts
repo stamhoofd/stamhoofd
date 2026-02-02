@@ -5,7 +5,7 @@ import { Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
-import { updateMemberDetailsUitpasNumber } from '../../helpers/updateMemberDetailsUitpasNumber.js';
+import { updateMemberDetailsUitpasNumber } from '../helpers/updateMemberDetailsUitpasNumber.js';
 
 /**
  * Seed to update the social tariff of all uitpas numbers.
