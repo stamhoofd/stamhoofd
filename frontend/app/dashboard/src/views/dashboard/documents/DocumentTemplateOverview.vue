@@ -57,21 +57,6 @@
                         <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
-
-                <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
-                    <template #left>
-                        <img src="@stamhoofd/assets/images/illustrations/code-export.svg">
-                    </template>
-                    <h2 class="style-title-list">
-                        {{ $t('6ba23b70-c6d5-46d2-815e-44955ce48eaf') }}
-                    </h2>
-                    <p class="style-description">
-                        {{ xmlExportDescription }}
-                    </p>
-                    <template #right>
-                        <span class="icon arrow-right-small gray" />
-                    </template>
-                </STListItem>
             </STList>
 
             <hr><h2>{{ $t('e9d4d5fb-ec7f-4a42-acc8-8f52a9bd4e7a') }}</h2>
@@ -84,7 +69,35 @@
             <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
             <STList>
+                <STListItem v-if="!isDraft && xmlExportDescription" :selectable="true" class="left-center" @click="exportXml">
+                    <template #left>
+                        <IconContainer class="" icon="government">
+                            <template #aside>
+                                <span class="icon download stroke small" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
+                    <h2 class="style-title-list">
+                        {{ $t('Exporteren naar XML (voor Belcotax)') }}
+                    </h2>
+                    <p class="style-description">
+                        {{ xmlExportDescription }}
+                    </p>
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
+
                 <STListItem v-if="isDraft" :selectable="true" @click="publishTemplate()">
+                    <template #left>
+                        <IconContainer icon="file-pdf" class="success">
+                            <template #aside>
+                                <span class="icon success small" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
                     <h2 class="style-title-list">
                         {{ $t('38427cc3-27c9-4463-acdf-a2d073a8cdb7') }}
                     </h2>
@@ -92,14 +105,19 @@
                         {{ $t('bd4b350e-d06a-44aa-a2d6-a5ae140373ca') }}
                     </p>
                     <template #right>
-                        <button type="button" class="button secundary green hide-smartphone">
-                            <span class="icon success" />
-                            <span>{{ $t('bd4ad024-9855-4623-9ef4-db5162466f53') }}</span>
-                        </button>                    <button type="button" class="button icon success only-smartphone" />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
                 <STListItem v-if="!isDraft" :selectable="true" @click="draftTemplate()">
+                    <template #left>
+                        <IconContainer icon="file-pdf" class="">
+                            <template #aside>
+                                <span class="icon undo stroke small" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
                     <h2 class="style-title-list">
                         {{ $t('28486bd5-7acc-4a49-84cf-8fbc2b2ba8b9') }}
                     </h2>
@@ -107,14 +125,19 @@
                         {{ $t('523d8098-13ec-4ef5-9851-c1bf768efdd6') }}
                     </p>
                     <template #right>
-                        <button type="button" class="button secundary hide-smartphone">
-                            <span class="icon edit" />
-                            <span>{{ $t('782a7bd5-552f-46a3-b0e3-c18a71eb0ddc') }}</span>
-                        </button>                    <button type="button" class="button icon edit only-smartphone" />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
 
                 <STListItem v-if="isDraft" :selectable="true" @click="deleteTemplate()">
+                    <template #left>
+                        <IconContainer icon="file-pdf" class="error">
+                            <template #aside>
+                                <span class="icon trash stroke small" />
+                            </template>
+                        </IconContainer>
+                    </template>
+
                     <h2 class="style-title-list">
                         {{ $t('34869ab8-e70a-4d28-8805-b6afed8aacf2') }}
                     </h2>
@@ -122,10 +145,7 @@
                         {{ $t('9db9e26b-a180-48f1-b19e-c4f468dda563') }}
                     </p>
                     <template #right>
-                        <button type="button" class="button secundary danger hide-smartphone">
-                            <span class="icon trash" />
-                            <span>{{ $t('1bb244c4-6ffb-4969-91e6-ea70f16ac5a4') }}</span>
-                        </button>                    <button type="button" class="button icon trash only-smartphone" />
+                        <span class="icon arrow-right-small gray" />
                     </template>
                 </STListItem>
             </STList>
@@ -137,7 +157,7 @@
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, Checkbox, FillRecordCategoryView, GlobalEventBus, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
+import { CenteredMessage, Checkbox, FillRecordCategoryView, GlobalEventBus, IconContainer, NavigationActions, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
 import { DocumentSettings, DocumentStatus, DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref } from 'vue';
@@ -146,6 +166,7 @@ import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import DocumentsView from './DocumentsView.vue';
 import EditDocumentTemplateView from './EditDocumentTemplateView.vue';
 import { fiscal } from './definitions/fiscal';
+import { I18nComponent, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;
@@ -302,6 +323,11 @@ async function deleteTemplate() {
 }
 
 function exportXml() {
+    if (props.template.updatesEnabled) {
+        Toast.error($t('Je kan niet exporteren naar Belcotax als je automatische wijzigingen hebt ingeschakeld. Schakel dat eerst uit.')).show();
+        return;
+    }
+
     const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
 
     // if fiscal document
