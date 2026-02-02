@@ -98,7 +98,8 @@ export class UitpasTokenRepository {
     }
 
     private async getNewAccessToken() {
-        const url = 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token';
+        console.log('UITPAS: Fetching new access token for', this.uitpasClientCredential.organizationId);
+        const url = STAMHOOFD.UITPAS_API_URL?.includes('test') ? 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token' : 'https://account.uitid.be/realms/uitid/protocol/openid-connect/token';
         const myHeaders = new Headers();
         myHeaders.append('Content-Type', 'application/x-www-form-urlencoded');
         const params = new URLSearchParams({
@@ -110,6 +111,7 @@ export class UitpasTokenRepository {
             method: 'POST',
             headers: myHeaders,
             body: params.toString(),
+            signal: AbortSignal.timeout(5000),
         };
         const response = await fetch(url, requestOptions).catch(() => {
             // Handle network errors
@@ -123,6 +125,7 @@ export class UitpasTokenRepository {
             if (response.status === 401) {
                 // Unauthorized, credentials are invalid
                 throw new SimpleError({
+                    statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                     code: 'invalid_uitpas_client_credentials',
                     message: `Invalid UiTPAS client credentials`,
                     human: $t(`1086bb24-5df4-4faf-9dc0-ab5a955b0d8f`),
@@ -130,6 +133,7 @@ export class UitpasTokenRepository {
             }
             console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`, response.statusText);
             throw new SimpleError({
+                statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                 code: 'unsuccessful_response_fetching_uitpas_token',
                 message: `Unsuccesful response when fetching UiTPAS token`,
                 human: $t(`dd9b30ca-860f-47aa-8cb1-527fd156d9ca`),
@@ -138,6 +142,7 @@ export class UitpasTokenRepository {
         const json: unknown = await response.json().catch(() => {
             // Handle JSON parsing errors
             throw new SimpleError({
+                statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                 code: 'invalid_json_fetching_uitpas_token',
                 message: `Invalid json when fetching UiTPAS token`,
                 human: $t(`8f217db0-c672-46f0-a8f7-6eba6f080947`),
