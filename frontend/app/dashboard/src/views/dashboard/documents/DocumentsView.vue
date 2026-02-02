@@ -8,6 +8,8 @@
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
         :Route="Route"
+        :default-sort-column="allColumns.find(c => c.id === 'createdAt')"
+        :default-sort-direction="SortItemDirection.DESC"
     >
         <template #empty>
             {{ $t('d3903009-28d5-48d6-b109-c89b88a9f36e') }}
@@ -17,8 +19,8 @@
 
 <script lang="ts" setup>
 import { Column, getDocumentsUIFilterBuilders, ModernTableView, UIFilterBuilders, useContext, useNavigationActions, useTableObjectFetcher } from '@stamhoofd/components';
-import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType, SortItemDirection } from '@stamhoofd/structures';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import { useDocumentsObjectFetcher } from '@stamhoofd/components/src/fetchers/useDocumentsObjectFetcher';
 import { computed } from 'vue';
@@ -122,6 +124,25 @@ const allColumns: Column<Document, any>[] = [
         },
         minimumWidth: 100,
         recommendedWidth: 150,
+    }),
+
+    new Column<Document, Date>({
+        id: 'createdAt',
+        name: $t('Aanmaakdatum'),
+        getValue: document => document.createdAt,
+        format: date => Formatter.dateTime(date),
+        minimumWidth: 100,
+        recommendedWidth: 200,
+    }),
+
+    new Column<Document, Date>({
+        id: 'updatedAt',
+        name: $t('Laatst aangepast'),
+        getValue: document => document.updatedAt,
+        format: date => Formatter.dateTime(date),
+        minimumWidth: 100,
+        recommendedWidth: 200,
+        enabled: false,
     }),
 ];
 
