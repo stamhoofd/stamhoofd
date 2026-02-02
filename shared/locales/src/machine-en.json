@@ -7099,6 +7099,10 @@
     "original": "Wil je de UiTPAS-nummers niet doorsturen en zelf het tarief instellen, <button>klik dan hier</button>.",
     "translation": "If you prefer not to send UiTPAS numbers and want to set the tarriff yourself, <button>click here</button>."
   },
+  "4d8a44e5-eebc-48e2-955d-87ca0595d4cc": {
+    "original": "Contactpersoon",
+    "translation": "Contact person"
+  },
   "4d8be2b1-559a-4c16-a76f-67a8ba85de7f": {
     "original": "Dit type melding bestaat niet",
     "translation": "This notification type does not exist"
