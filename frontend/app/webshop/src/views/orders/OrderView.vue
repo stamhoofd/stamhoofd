@@ -125,6 +125,15 @@
                         </p>
 
                         <STList class="info">
+                            <STListItem>
+                                <h3 class="style-definition-label">
+                                    {{ $t('Webshop') }}
+                                </h3>
+
+                                <p class="style-definition-text">
+                                    {{ webshop.meta.name }}
+                                </p>
+                            </STListItem>
                             <STListItem v-if="order.number && !isDeleted" class="right-description">
                                 <h3 class="style-definition-label">
                                     {{ $t('4d496edf-0203-4df3-a6e9-3e58d226d6c5') }}
@@ -523,7 +532,7 @@ async function downloadAllTickets() {
     const TicketBuilder = (await import(
         /* webpackChunkName: "TicketBuilder" */
         /* webpackPrefetch: true */
-        '@stamhoofd/ticket-builder'
+        '@stamhoofd/ticket-builder',
     )).TicketBuilder;
 
     const builder = new TicketBuilder(publicTickets.value, webshop.value, webshopManager.organization, order.value ?? undefined);
