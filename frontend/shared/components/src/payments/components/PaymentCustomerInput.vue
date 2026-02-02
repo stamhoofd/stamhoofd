@@ -28,7 +28,7 @@
             <CompanyInputBox :validator="validator" :company="customer.company" @patch:company="addPatch({ company: $event })" />
 
             <template v-if="companyWithContectPreferred || !!firstName || !!lastName || !!phone || !!email">
-                <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`Contactpersoon`)">
+                <STInputBox error-fields="firstName,lastName" :error-box="errorBox" :title="$t(`4d8a44e5-eebc-48e2-955d-87ca0595d4cc`)">
                     <div class="input-group">
                         <div>
                             <input v-model="firstName" class="input" type="text" autocomplete="given-name" :placeholder="$t(`ca52d8d3-9a76-433a-a658-ec89aeb4efd5`)">
