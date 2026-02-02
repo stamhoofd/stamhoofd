@@ -5639,10 +5639,6 @@
     "original": "ticket",
     "translation": "billet"
   },
-  "3cbc8829-a005-42be-9d10-d6a6efba1de1": {
-    "original": "Onbepaald",
-    "translation": "Indéterminé"
-  },
   "3cc87847-7c8c-4b8d-aa14-eaa7d18350be": {
     "original": "{price} terugbetaald",
     "translation": "{price} remboursé"
@@ -21590,10 +21586,6 @@
   "e82be6d7-1cde-4da3-8018-1e2c796a3f13": {
     "original": "Na periodiek controleren blijken de DNS-instellingen van de domeinnaam van een vereniging terug stabiel te zijn.",
     "translation": "Après un contrôle périodique, il s'avère que les paramètres DNS du nom de domaine d'une association sont redevenus stables."
-  },
-  "e8339839-a2d6-4a98-ae6b-091fb658d25f": {
-    "original": "Ingeschakeld",
-    "translation": "Activé"
   },
   "e8340220-a719-4ab8-82ff-627fce627235": {
     "original": "Domeinnaam kiezen",
