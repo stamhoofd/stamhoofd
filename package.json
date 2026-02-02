@@ -45,7 +45,7 @@
     "ship": "node ./.development/increase-structures-version.js && yarn -s clear:shared && yarn -s build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
     "ship:force": "node ./.development/increase-structures-version.js --force && yarn -s clear:shared && yarn -s build:shared && lerna version --exact --force-publish --yes --no-private && lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
     "ship:fix": "lerna publish from-git --yes --no-private --otp $(op item get NPM --otp || :)",
-    "translate:keys": "cd .development/i18n-uuid && yarn replace-keys",
+    "translate:keys": "cd .development/i18n-uuid && yarn replace-keys && yarn replace-keys",
     "translate:auto-translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn auto-translate",
     "translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn start",
     "frontend:types": "wait-on shared/locales/esm/dist/index.d.ts && cd frontend/app/dashboard && yarn -s check-types",
