@@ -34,8 +34,9 @@ let idOfLastUpdatedMember: string | null = null;
 
 export async function migrateUitpasStatusOfAllMembers() {
     let query = Member.select()
-    // where there is an uitpas number
-        .where(SQL.jsonValue(SQL.column('details'), '$.value.uitpasNumberDetails'), '!=', null);
+        // where there is an uitpas number
+        .where(SQL.jsonValue(SQL.column('details'), '$.value.uitpasNumber'), '!=', null)
+        .orWhere(SQL.jsonValue(SQL.column('details'), '$.value.uitpasNumberDetails'), '!=', null);
 
     if (idOfLastUpdatedMember !== null) {
         console.log('Continue from member with id ', idOfLastUpdatedMember);
