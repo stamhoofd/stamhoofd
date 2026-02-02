@@ -130,6 +130,15 @@
                     </p>
 
                     <STList class="info">
+                        <STListItem>
+                            <h3 class="style-definition-label">
+                                Webshop
+                            </h3>
+
+                            <p class="style-definition-text">
+                                {{ webshop.meta.name }}
+                            </p>
+                        </STListItem>
                         <STListItem v-if="order.number && !isDeleted" class="right-description">
                             <h3 class="style-definition-label">
                                 Bestelnummer
