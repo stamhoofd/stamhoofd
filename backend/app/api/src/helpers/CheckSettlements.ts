@@ -2,7 +2,7 @@ import { MolliePayment, MollieToken, Order, Organization, PayconiqPayment, Payme
 import { Settlement } from '@stamhoofd/structures';
 import axios from 'axios';
 
-import { StripePayoutChecker } from './StripePayoutChecker';
+import { StripePayoutChecker } from './StripePayoutChecker.js';
 
 type MollieSettlement = {
     id: string;
@@ -179,7 +179,7 @@ async function updateSettlement(token: string, settlement: MollieSettlement, fro
                         id: settlement.id,
                         reference: settlement.reference,
                         settledAt: new Date(settlement.settledAt),
-                        amount: Math.round(parseFloat(settlement.amount.value) * 100),
+                        amount: Math.round(parseFloat(settlement.amount.value) * 100) * 100,
                     });
                     const saved = await payment.save();
 

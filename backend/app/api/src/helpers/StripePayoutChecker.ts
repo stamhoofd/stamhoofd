@@ -171,8 +171,8 @@ export class StripePayoutChecker {
             return;
         }
 
-        if (payment.price !== balanceItem.amount) {
-            console.log('Amount mismatch for payment ' + payment.id + ': ' + payment.price + ' !== ' + balanceItem.amount);
+        if (payment.price !== balanceItem.amount * 100) {
+            console.log('Amount mismatch for payment ' + payment.id + ': ' + payment.price + ' !== ' + (balanceItem.amount * 100));
             return;
         }
 
@@ -180,13 +180,13 @@ export class StripePayoutChecker {
             id: payout.id,
             reference: payout.statement_descriptor ?? '',
             settledAt: new Date(payout.arrival_date * 1000),
-            amount: payout.amount,
+            amount: payout.amount * 100,
             // Set only if application fee is witheld
-            fee: totalFees,
+            fee: totalFees * 100,
         });
 
         payment.settlement = settlement;
-        payment.transferFee = totalFees - payment.serviceFeePayout;
+        payment.transferFee = totalFees * 100 - payment.serviceFeePayout;
 
         // Force an updatedAt timestamp of the related order
         // Mark order as 'updated', or the frontend won't pull in the updates
