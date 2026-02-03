@@ -1268,10 +1268,19 @@ export class RegisterItem implements ObjectWithRecords {
             }
 
             if (!this.doesMeetRequireOrganizationIds()) {
+                const ids = this.group.settings.requireOrganizationIds ?? [];
+                const organizations = ids.map(id => this.member.family.getOrganization(id)).filter(c => !!c);
+                if (organizations.length === ids.length && ids.length === 1) {
+                    throw new SimpleError({
+                        code: 'not_matching',
+                        message: 'Not matching: requireOrganizationIds',
+                        human: $t(`{member} moet ingeschreven zijn bij {organization}`, { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
+                    });
+                }
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`78a012a9-3caa-405f-851d-429610138852`, { member: this.member.patchedMember.name }),
+                    human: $t(`78a012a9-3caa-405f-851d-429610138852`, { member: this.member.patchedMember.firstName }),
                 });
             }
 
