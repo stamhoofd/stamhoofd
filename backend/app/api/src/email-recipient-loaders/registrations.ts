@@ -1,8 +1,8 @@
 import { Email, Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, RegistrationsBlob, mergeFilters } from '@stamhoofd/structures';
-import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint';
-import { memberJoin } from '../sql-filters/registrations';
+import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
+import { memberJoin } from '../sql-filters/registrations.js';
 
 async function getRecipients(result: PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>, type: 'member' | 'parents' | 'unverified') {
     const recipients: EmailRecipient[] = [];
@@ -81,7 +81,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.RegistrationUnverified, {
         const q = (await GetRegistrationsEndpoint.buildQuery(query)).join(memberJoin);
 
         return await q.sum(
-            SQL.jsonLength(SQL.column('details'), '$.value.unverifiedEmails'),
+            SQL.jsonLength(SQL.column(Member.table, 'details'), '$.value.unverifiedEmails'),
         );
     },
 });
