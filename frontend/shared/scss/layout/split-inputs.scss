@@ -1,7 +1,7 @@
 .split-inputs {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0 40px;
+    gap: 0 30px;
 
     &.option {
         margin-top: 7px

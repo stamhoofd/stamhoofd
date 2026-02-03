@@ -120,7 +120,7 @@
             transition: opacity 0.3s, visibility step-end 0.3s;
         }
 
-        .st-view {
+        .st-view:not(.st-view .st-view) {
             // We set explicit widths on all views inside a sheet, so we can animate width changes
             width: min(100vw, var(--st-popup-width, 800px));
         }

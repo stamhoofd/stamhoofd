@@ -1,11 +1,11 @@
 @use "sass:color";
 
-$input-height-original: 39px;
+$input-height-original: 43px;
 $input-height: var(--input-height, $input-height-original);
 
 @media (max-width: 550px) {
     :root {
-        --input-height: 42px;
+        --input-height: 43px;
     }
 }
 
@@ -325,6 +325,7 @@ $color-box-shadow: var(--color-box-shadow, $color-box-shadow-original);
 $dark-theme-color-box-shadow: rgba(255, 255, 255, 0.05);
 
 $color-current-background: var(--color-current-background, #{$color-background});
+$color-current-background-shade: var(--color-current-background-shade, #{$color-background-shade});
 
 .theme-warning {
     --color-primary: #{$color-warning};
@@ -422,6 +423,8 @@ $color-current-background: var(--color-current-background, #{$color-background})
     --color-overlay-shadow: #{$dark-theme-color-overlay-shadow};
     --color-box-shadow: #{$dark-theme-color-box-shadow};
 
+    --color-input-background: #{$color-current-background-shade};
+
     // Manual
     --color-shadow: rgba(255, 255, 255, 0.05);
 
@@ -472,6 +475,7 @@ $color-current-background: var(--color-current-background, #{$color-background})
         --color-current-background: #{$color-background-lighter};
         --color-current-background-shade: #{$color-background-lighter-shade};
     }
+
 
     /*.st-view.box-shade {
         @media (min-width: 801px) and (min-height: 701px) {
