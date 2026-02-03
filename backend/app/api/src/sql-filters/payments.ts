@@ -31,6 +31,11 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    payingOrganizationId: createColumnFilter({
+        expression: SQL.column('payingOrganizationId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     createdAt: createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,

@@ -24,5 +24,10 @@ export const balanceItemPaymentsCompilers: SQLFilterDefinitions = {
             type: SQLValueType.String,
             nullable: false,
         }),
+        payingOrganizationId: createColumnFilter({
+            expression: SQL.column('balance_items', 'payingOrganizationId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
     },
 };
