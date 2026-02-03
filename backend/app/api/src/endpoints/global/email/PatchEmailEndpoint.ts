@@ -1,10 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Email, Platform } from '@stamhoofd/models';
-import { EmailPreview, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
+import { EmailPreview, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, PermissionLevel } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType, Decoder, patchObject } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -124,6 +124,15 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 });
             }
 
+            if (model.recipientsStatus === EmailRecipientsStatus.Created) {
+                throw new SimpleError({
+                    code: 'already_created',
+                    message: 'Recipients already created',
+                    human: $t(`De ontvangers werden reeds ingesteld en kunnen niet meer worden gewijzigd voor dit bericht`),
+                    statusCode: 400,
+                });
+            }
+
             model.recipientFilter = patchObject(model.recipientFilter, request.body.recipientFilter);
             rebuild = true;
         }
@@ -168,10 +177,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (rebuild) {
             await model.buildExampleRecipient();
-
-            // Force null - because we have stale data
-            model.emailRecipientsCount = null;
-            model.updateCount();
+            await model.updateCount();
         }
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {

@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Email, Platform, RateLimiter } from '@stamhoofd/models';
 import { EmailPreview, EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;
@@ -128,7 +128,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         await model.save();
         await model.buildExampleRecipient();
-        model.updateCount();
+        await model.updateCount();
 
         if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {
             if (!await Context.auth.canSendEmail(model)) {

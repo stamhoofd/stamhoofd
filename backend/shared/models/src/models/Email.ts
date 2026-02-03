@@ -1032,8 +1032,27 @@ export class Email extends QueryableModel {
         });
     }
 
-    updateCount() {
+    async updateCount() {
+        // First reset
         const id = this.id;
+
+        await QueueHandler.schedule('email-count-' + this.id, async function () {
+            const upToDate = await Email.getByID(id);
+
+            if (!upToDate || upToDate.sentAt || !upToDate.id || upToDate.status !== EmailStatus.Draft) {
+                return;
+            }
+
+            if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
+                return;
+            }
+
+            upToDate.emailRecipientsCount = null;
+            upToDate.recipientsErrors = null;
+            await upToDate.save();
+        });
+        await this.refresh();
+
         QueueHandler.abort('email-count-' + this.id);
         QueueHandler.schedule('email-count-' + this.id, async function ({ abort }) {
             let upToDate = await Email.getByID(id);
@@ -1081,6 +1100,7 @@ export class Email extends QueryableModel {
                     return;
                 }
                 upToDate.emailRecipientsCount = count;
+                upToDate.recipientsErrors = null;
                 await upToDate.save();
             }
             catch (e) {
@@ -1100,6 +1120,7 @@ export class Email extends QueryableModel {
                     return;
                 }
                 upToDate.recipientsErrors = errorToSimpleErrors(e);
+                upToDate.emailRecipientsCount = null;
                 await upToDate.save();
             }
         }).catch(console.error);
