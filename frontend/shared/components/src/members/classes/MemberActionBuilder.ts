@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { AppManager, OrganizationManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
@@ -23,6 +23,7 @@ import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsi
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
 import CommunicationView from '../../communication/CommunicationView.vue';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);
@@ -195,6 +196,41 @@ export class MemberActionBuilder {
                     present: this.present,
                     platformFamilyManager: this.platformFamilyManager,
                 });
+            },
+        })];
+    }
+
+    private getClearDataAction() {
+        return [new InMemoryTableAction({
+            name: $t('Alle vragenlijsten wissen'),
+            destructive: true,
+            priority: 1,
+            groupIndex: 100,
+            needsSelection: true,
+            singleSelection: true,
+            allowAutoSelectAll: false,
+            icon: 'code',
+            enabled: !this.context.organization && this.context.auth.hasPlatformFullAccess(),
+            handler: async (members: PlatformMember[]) => {
+                if (!await CenteredMessage.confirm('Alle vragenlijsten verwijderen?', 'Ja, verwijderen')) {
+                    return;
+                }
+                const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+                for (const member of members) {
+                    const p = MemberDetails.patch({});
+                    for (const record of member.patchedMember.details.recordAnswers.keys()) {
+                        p.recordAnswers.set(record, null);
+                    }
+                    patch.addPatch(MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: p,
+                    }));
+                }
+
+                await this.platformFamilyManager.isolatedPatch(members, patch);
+
+                Toast.success($t('Gegevens gewist')).show();
+                return;
             },
         })];
     }
@@ -481,6 +517,9 @@ export class MemberActionBuilder {
             }),
             ...(options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : []),
             ...(options.includeEdit ? this.getEditAction() : []),
+
+            ...(STAMHOOFD.environment === 'development' ? this.getClearDataAction() : []),
+
             ...(options.includeDelete ? this.getDeleteAction() : []),
             ...this.getUnsubscribeAction(),
             ...this.getAuditLogAction(),
