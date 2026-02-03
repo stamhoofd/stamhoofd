@@ -33,3 +33,4 @@ export * from './useNow';
 export * from './useLoginMethods';
 export * from './useHoldValueForMinimumDuration';
 export * from './useIsRootAdmin';
+export * from './useElementWidth';
