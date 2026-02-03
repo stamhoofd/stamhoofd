@@ -18,6 +18,11 @@
     --st-safe-area-bottom: 0px;
     --st-safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
+    --st-safe-area-left: 0px;
+    --st-safe-area-left: env(safe-area-inset-left, 0px);
+    --st-safe-area-right: 0px;
+    --st-safe-area-right: env(safe-area-inset-right, 0px);
+
     --vh: 1vh;
     --vw: 1vw;
 

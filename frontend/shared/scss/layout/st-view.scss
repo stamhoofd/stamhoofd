@@ -110,7 +110,7 @@ body.modern.web-iOS {
             }
         }
 
-        padding: 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)) 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px));
+        padding: 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)) 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px));
 
 
         flex-shrink: 1;
@@ -224,6 +224,8 @@ body.modern.web-iOS {
 
         > * {
             flex-shrink: 0;
+            --st-safe-area-left: 0px;
+            --st-safe-area-right: 0px;
         }
 
         &~* {
