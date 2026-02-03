@@ -492,6 +492,8 @@ onActivated(() => {
             // Reset view insets
             --st-safe-area-top: 0px;
             --st-safe-area-bottom: 0px;
+            --st-safe-area-left: 0px;
+             --st-safe-area-right: 0px;
             --keyboard-height: 0px;
             --bottom-padding: 0px;
 
