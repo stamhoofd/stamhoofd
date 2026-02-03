@@ -22,7 +22,12 @@ export function getAllMemberSteps(member: PlatformMember, item: RegisterItem | n
     ];
 
     // We'll skip these steps for now for administrators - unless it is a requirement for the platform/owning organization is different
-    for (const recordCategory of member.getAllRecordCategories()) {
+    // note: we don't use getEnabledRecordCategories, because this can change during the steps - so all possible steps should be added at the start
+    const all = member.getAllRecordCategories({
+        scopeOrganization: item?.organization, // Only include record categories of the organization where we are registering for
+    });
+
+    for (const recordCategory of all) {
         if (recordCategory.checkPermissionForUserManager(PermissionLevel.Write)) {
             steps.push(new MemberRecordCategoryStep(recordCategory, item, options));
         }

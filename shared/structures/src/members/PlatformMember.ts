@@ -1200,13 +1200,18 @@ export class PlatformMember implements ObjectWithRecords {
         return this.patchedMember.doesMatchFilter(filter);
     }
 
-    getAllRecordCategories(): RecordCategory[] {
+    getAllRecordCategories(options?: { scopeOrganization?: Organization | null }): RecordCategory[] {
         // From organization
         const categories: RecordCategory[] = [];
         categories.push(...this.platform.config.recordsConfiguration.recordCategories);
 
-        for (const organization of this.organizations) {
-            categories.push(...organization.meta.recordsConfiguration.recordCategories);
+        if (options?.scopeOrganization) {
+            categories.push(...options.scopeOrganization.meta.recordsConfiguration.recordCategories);
+        }
+        else {
+            for (const organization of this.filterOrganizations({ currentPeriod: true })) {
+                categories.push(...organization.meta.recordsConfiguration.recordCategories);
+            }
         }
 
         return categories;
