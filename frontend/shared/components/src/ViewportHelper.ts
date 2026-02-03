@@ -1,14 +1,14 @@
-import { AppManager } from "@stamhoofd/networking";
+import { AppManager } from '@stamhoofd/networking';
 
 export class ViewportHelper {
-    static currentVh: number | null = null
-    static modern = false
+    static currentVh: number | null = null;
+    static modern = false;
     static supportsDvh = this.checkDvh();
 
     static checkDvh() {
-        const element = document.createElement("div");
-        element.style.height = "100dvh";
-        //element.inert = true;
+        const element = document.createElement('div');
+        element.style.height = '100dvh';
+        // element.inert = true;
 
         document.body.appendChild(element);
         const height = parseInt(getComputedStyle(element, null).height, 10);
@@ -18,9 +18,10 @@ export class ViewportHelper {
 
     static getScrollElement(element: HTMLElement): HTMLElement {
         const style = window.getComputedStyle(element);
-        if (style.overflowY == "scroll" || style.overflow == "scroll" || style.overflow == "auto" || style.overflowY == "auto" || style.overflow == "overlay" || style.overflowY == "overlay") {
+        if (style.overflowY == 'scroll' || style.overflow == 'scroll' || style.overflow == 'auto' || style.overflowY == 'auto' || style.overflow == 'overlay' || style.overflowY == 'overlay') {
             return element;
-        } else {
+        }
+        else {
             if (!element.parentElement) {
                 return document.documentElement;
             }
@@ -29,14 +30,14 @@ export class ViewportHelper {
     }
 
     static setup(modern = true) {
-        this.modern = modern
+        this.modern = modern;
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
         if (isPrerender) {
-            return
-        }        
+            return;
+        }
         // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
-        this.setVh(window.innerHeight ?? document.body.clientHeight)
+        this.setVh(window.innerHeight ?? document.body.clientHeight);
 
         if ('virtualKeyboard' in navigator) {
             // The VirtualKeyboard API is supported!
@@ -47,7 +48,7 @@ export class ViewportHelper {
         if (w.visualViewport) {
             let pendingUpdate = false;
             const viewportHandler = (event) => {
-                //if (pendingUpdate) return;
+                // if (pendingUpdate) return;
                 pendingUpdate = true;
 
                 requestAnimationFrame(() => {
@@ -58,31 +59,32 @@ export class ViewportHelper {
                     this.setVh(height);
                 });
             };
-            //w.visualViewport.addEventListener('scroll', viewportHandler);
+            // w.visualViewport.addEventListener('scroll', viewportHandler);
             w.visualViewport.addEventListener('resize', viewportHandler);
 
             // on iPad resize is not called so we cannot reliably calculate the keyboard height
             // const resizeObserver = new ResizeObserver(viewportHandler);
             // resizeObserver.observe(document.body);
-        } else {
+        }
+        else {
             // We listen to the resize event
             window.addEventListener(
-                "resize",
+                'resize',
                 () => {
                     // We execute the same script as before
                     this.setVh(window.innerHeight ?? document.body.clientHeight);
                 },
-                { passive: true } as EventListenerOptions
+                { passive: true } as EventListenerOptions,
             );
 
             // We listen to the resize event
             window.addEventListener(
-                "focus",
+                'focus',
                 () => {
                     // We execute the same script as before
                     this.setVh(window.innerHeight ?? document.body.clientHeight);
                 },
-                { passive: true } as EventListenerOptions
+                { passive: true } as EventListenerOptions,
             );
         }
 
@@ -93,59 +95,60 @@ export class ViewportHelper {
             // on iOS, when the keyboard is visible, and when the user already scrolled to the bottom of the scroll views
             // the user can scroll further to scroll on the body, even if overflow is hidden. To prevent this
             // we correct the scroll position
-            window.addEventListener("scroll", () => {
+            window.addEventListener('scroll', () => {
                 // Disalbe scrolling the body
                 requestAnimationFrame(() => {
                     if (document.documentElement.scrollTop > 0) {
-                        document.documentElement.scrollTop = 0
+                        document.documentElement.scrollTop = 0;
                     }
 
                     // Fixes an iOS bug where documentElement is not scrolled, but body is
                     if (document.body.scrollTop > 0) {
-                        document.body.scrollTop = 0
+                        document.body.scrollTop = 0;
                     }
                 });
             }, { passive: true });
 
-            if (AppManager.shared.getOS() === "iOS") {
+            if (AppManager.shared.getOS() === 'iOS') {
                 let clickedElement: HTMLElement | null = null;
-                
-                document.body.addEventListener("touchstart", (event) => {
+
+                document.body.addEventListener('touchstart', (event) => {
                     if (!event.target) {
-                        clickedElement = null
+                        clickedElement = null;
                         return;
                     }
-                    const scrollElement = this.getScrollElement(event.target as HTMLElement)
+                    const scrollElement = this.getScrollElement(event.target as HTMLElement);
 
-                    if (scrollElement === document.documentElement || scrollElement.tagName !== "MAIN") {
-                        clickedElement = null
-                        return
+                    if (scrollElement === document.documentElement || scrollElement.tagName !== 'MAIN') {
+                        clickedElement = null;
+                        return;
                     }
 
                     clickedElement = scrollElement;
                     // Show bottom scroll if we are idle at the bottom
 
                     if (scrollElement.scrollTop == 0 && scrollElement.scrollHeight > scrollElement.clientHeight) {
-                        let paddingTop = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'))
-                        paddingTop = isNaN(paddingTop) ? 0 : paddingTop
+                        let paddingTop = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'));
+                        paddingTop = isNaN(paddingTop) ? 0 : paddingTop;
 
-                        scrollElement.style.paddingTop = `${paddingTop + 1}px`
-                        scrollElement.scrollTop = 1
-                    } else if (scrollElement.scrollTop == scrollElement.scrollHeight - scrollElement.clientHeight) {
-                        let paddingBottom = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'))
-                        paddingBottom = isNaN(paddingBottom) ? 0 : paddingBottom
+                        scrollElement.style.paddingTop = `${paddingTop + 1}px`;
+                        scrollElement.scrollTop = 1;
+                    }
+                    else if (scrollElement.scrollTop == scrollElement.scrollHeight - scrollElement.clientHeight) {
+                        let paddingBottom = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'));
+                        paddingBottom = isNaN(paddingBottom) ? 0 : paddingBottom;
 
-                        const scrollPosition = scrollElement.scrollTop
-                        scrollElement.style.paddingBottom = `${paddingBottom + 1}px`
+                        const scrollPosition = scrollElement.scrollTop;
+                        scrollElement.style.paddingBottom = `${paddingBottom + 1}px`;
 
                         // Prevent the browser from keepign the scroll position at the bottom.
                         // We need 1 pixel outside the scroll view, so the browser thinks it can scroll in this view,
                         // so we can prevent that the browser will scroll a different view than this one
-                        scrollElement.scrollTop = scrollPosition
+                        scrollElement.scrollTop = scrollPosition;
                     }
-                }, { passive: true })
+                }, { passive: true });
 
-                document.body.addEventListener("touchend", (event) => {
+                document.body.addEventListener('touchend', (event) => {
                     // Scrollby fixes it on iOS
                     // setTimeout(() => {
                     //     requestAnimationFrame(() => {
@@ -158,36 +161,35 @@ export class ViewportHelper {
                     if (!clickedElement) {
                         // Force scroll back to top
                         document.body.scrollTop = 0; // window.scrollTo doesn't work on iOS (not always)
-                        return
+                        return;
                     }
 
-                    clickedElement.style.paddingTop = ""
-                    clickedElement.style.paddingBottom = ""
+                    clickedElement.style.paddingTop = '';
+                    clickedElement.style.paddingBottom = '';
 
                     if (clickedElement.scrollTop == 1) {
-                        clickedElement.scrollTop = 0
+                        clickedElement.scrollTop = 0;
                     }
 
                     // Force scroll back to top
                     document.body.scrollTop = 0; // window.scrollTo doesn't work on iOS (not always)
 
-                    clickedElement = null
-                }, { passive: true })
+                    clickedElement = null;
+                }, { passive: true });
             }
-        } else {
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            document.body.addEventListener("touchstart", () => { }, { passive: true });
+        }
+        else {
+            document.body.addEventListener('touchstart', () => { }, { passive: true });
         }
     }
 
     static setVh(viewportHeight: number) {
-        
         const vh = Math.floor(viewportHeight) / 100;
         if (!this.currentVh || vh.toFixed(2) != this.currentVh.toFixed(2)) {
-            this.currentVh = vh
-  
+            this.currentVh = vh;
+
             if (!this.supportsDvh) {
-                document.documentElement.style.setProperty("--vh", `${vh.toFixed(2)}px`);  
+                document.documentElement.style.setProperty('--vh', `${vh.toFixed(2)}px`);
             }
         }
 
@@ -200,25 +202,25 @@ export class ViewportHelper {
         // Calculate bottom padding
         // In modern mode, the body is set to 100dvh / 100vh, and we need to calculate the difference between 100vh and the viewport height
         // This can be used to calculate the keyboard height
-        if (AppManager.shared.getOS() === "iOS") {
+        if (AppManager.shared.getOS() === 'iOS') {
             if (window.visualViewport && this.modern) {
                 const bodyHeight = (window.innerHeight ?? document.body.clientHeight) + window.scrollY;
-                const bottomPadding = bodyHeight - window.visualViewport.height
+                const bottomPadding = bodyHeight - window.visualViewport.height;
 
                 if (bottomPadding > 200) {
                     // We are showing the keyboard
-                    document.documentElement.style.setProperty("--keyboard-height", `${bottomPadding.toFixed(2)}px`);
-                    document.documentElement.style.setProperty("--bottom-padding", `0px`);
+                    document.documentElement.style.setProperty('--keyboard-height', `${bottomPadding.toFixed(2)}px`);
+                    document.documentElement.style.setProperty('--bottom-padding', `0px`);
 
-                    document.documentElement.style.setProperty("--keyboard-open", `1`);
-                    document.documentElement.style.setProperty("--keyboard-closed", `0`);
+                    document.documentElement.style.setProperty('--keyboard-open', `1`);
+                    document.documentElement.style.setProperty('--keyboard-closed', `0`);
+                }
+                else {
+                    document.documentElement.style.setProperty('--bottom-padding', `${bottomPadding.toFixed(2)}px`);
+                    document.documentElement.style.setProperty('--keyboard-height', `0px`);
 
-                } else {
-                    document.documentElement.style.setProperty("--bottom-padding", `${bottomPadding.toFixed(2)}px`);
-                    document.documentElement.style.setProperty("--keyboard-height", `0px`);
-
-                    document.documentElement.style.setProperty("--keyboard-open", `0`);
-                    document.documentElement.style.setProperty("--keyboard-closed", `1`);
+                    document.documentElement.style.setProperty('--keyboard-open', `0`);
+                    document.documentElement.style.setProperty('--keyboard-closed', `1`);
                 }
             }
         }
@@ -227,12 +229,11 @@ export class ViewportHelper {
     static getBottomPadding() {
         if (window.visualViewport && this.modern) {
             const bodyHeight = window.innerHeight ?? document.body.clientHeight;
-            const bottomPadding = bodyHeight - window.visualViewport.height
+            const bottomPadding = bodyHeight - window.visualViewport.height;
 
-            return Math.round(bottomPadding)
+            return Math.round(bottomPadding);
         }
-        return 0
-
+        return 0;
     }
 
     static scrollIntoView(element: HTMLElement, align: 'top' | 'bottom' | 'center' = 'bottom') {
@@ -290,51 +291,51 @@ export class ViewportHelper {
      * Smooth scroll polyfill for Safari
      */
     static scrollTo(element: HTMLElement, endPosition: number, duration: number, easingFunction: (t: number) => number) {
-        //const duration = Math.min(600, Math.max(300, element.scrollTop / 2)) // ms
-        let start: number
-        let previousTimeStamp: number
+        // const duration = Math.min(600, Math.max(300, element.scrollTop / 2)) // ms
+        let start: number;
+        let previousTimeStamp: number;
 
-        const startPosition = element.scrollTop
+        const startPosition = element.scrollTop;
 
-        let previousPosition = element.scrollTop
+        let previousPosition = element.scrollTop;
 
-        element.style.willChange = "scroll-position";
-        (element.style as any).webkitOverflowScrolling = "auto"
-        element.style.overflow = "hidden"
+        element.style.willChange = 'scroll-position';
+        (element.style as any).webkitOverflowScrolling = 'auto';
+        element.style.overflow = 'hidden';
 
         // animate scrollTop of element to zero
         const step = function (timestamp) {
             if (start === undefined) {
                 start = timestamp;
-
             }
             const elapsed = timestamp - start;
 
-            if (element.scrollTop !== previousPosition && start !== timestamp){
+            if (element.scrollTop !== previousPosition && start !== timestamp) {
                 // The user has scrolled the page: stop animation
-                element.style.overflow = ""
-                element.style.willChange = "";
-                (element.style as any).webkitOverflowScrolling = ""
-                return
+                element.style.overflow = '';
+                element.style.willChange = '';
+                (element.style as any).webkitOverflowScrolling = '';
+                return;
             }
 
             if (previousTimeStamp !== timestamp) {
                 // Math.min() is used here to make sure the element stops at exactly 200px
-                element.scrollTop = Math.round((startPosition - endPosition) * (1 - easingFunction(elapsed / duration)) + endPosition)
-                element.style.overflow = ""
+                element.scrollTop = Math.round((startPosition - endPosition) * (1 - easingFunction(elapsed / duration)) + endPosition);
+                element.style.overflow = '';
             }
 
             if (elapsed < duration) { // Stop the animation after 2 seconds
-                previousTimeStamp = timestamp
-                previousPosition = element.scrollTop
+                previousTimeStamp = timestamp;
+                previousPosition = element.scrollTop;
                 window.requestAnimationFrame(step);
-            } else {
-                element.scrollTop = endPosition
-                element.style.overflow = ""
-                element.style.willChange = "";
-                (element.style as any).webkitOverflowScrolling = ""
             }
-        }
+            else {
+                element.scrollTop = endPosition;
+                element.style.overflow = '';
+                element.style.willChange = '';
+                (element.style as any).webkitOverflowScrolling = '';
+            }
+        };
 
         window.requestAnimationFrame(step);
     }
