@@ -152,7 +152,11 @@
 .style-navigation-title {
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-wrap: pretty;
 
     font-size: 32px;
     font-weight: $font-weight-semibold;

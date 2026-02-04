@@ -26,10 +26,9 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { useResizeObserver } from './hooks/useResizeObserver';
 
-
 const props = withDefaults(
-    defineProps<{items: T[], labels?: string[] | null}>(),
-    {labels: null}
+    defineProps<{ items: T[]; labels?: string[] | null }>(),
+    { labels: null },
 );
 const modelValue = defineModel<any>();
 const elements = ref<HTMLElement[]>([]);
@@ -52,7 +51,7 @@ function selectItem(index: number) {
 }
 
 function updateWidths() {
-    widths.value = elements.value.map(e => (e.offsetWidth ));
+    widths.value = elements.value.map(e => (e.offsetWidth));
 }
 
 onMounted(() => {
@@ -86,7 +85,7 @@ $segmented-control-height: 60px;
     h1 + & {
         margin-top: 0px;
     }
-    
+
     overflow-x: auto;
     overflow-y: hidden;
     display: flex;
@@ -113,10 +112,10 @@ $segmented-control-height: 60px;
         bottom: 0;
         height: 3px;
         transition: width 0.2s, transform 0.2s, opacity 0.2s;
-        
         width: var(--seek-width);
         transform: translateX(var(--seek-x));
         border-radius: 1.5px;
+        contain: style paint;
     }
 
     > .item {

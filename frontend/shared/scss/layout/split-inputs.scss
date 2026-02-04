@@ -31,4 +31,12 @@
             margin: 0;
         }
     }
+
+    .categorized-box & {
+        display: block;
+
+        & > div {
+            margin: 0;
+        }
+    }
 }
