@@ -155,6 +155,7 @@ export class PlatformFamilyManager {
                 if (updatedMember) {
                     c.member.deepSet(updatedMember);
                     c.patch.id = updatedMember.id;
+                    c.cacheMap = {};
                 }
                 else {
                     console.error('Patched members but missing in response. This should not happen.', savedMember, c);

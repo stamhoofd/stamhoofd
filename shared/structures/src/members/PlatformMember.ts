@@ -160,6 +160,7 @@ export class PlatformFamily {
             const existing = this.members.find(m => m.id === member.id);
             if (existing) {
                 existing.member.deepSet(member);
+                existing.cacheMap = {};
             }
         }
     }
@@ -227,6 +228,7 @@ export class PlatformFamily {
                 member.patch.deepSet(cloneMember.patch);
                 member.patch.id = member.id;
                 member.isNew = cloneMember.isNew;
+                member.cacheMap = {};
 
                 if (cloneMember._savingPatch || cloneMember._isCreating) {
                     console.warn('Copying from member that is being saved');
@@ -545,6 +547,69 @@ export class PlatformRegistration extends Registration {
 
         return results;
     }
+
+    getMissingData(options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } }) {
+        if (this.member.cacheMap.missingData) {
+            return this.member.cacheMap.missingData;
+        }
+
+        const base: string[] = [];
+        const scope = {
+            scopeGroups: [this.group],
+            checkPermissions: options?.checkPermissions,
+            scopeOrganization: this.member.family.getOrganization(this.organizationId),
+        };
+
+        const member = this.member;
+        const details = this.member.member.details;
+
+        // Check missing information
+        if (!details.phone && member.isPropertyRequired('phone', scope)) {
+            base.push($t(`de723a38-6e76-418a-a6f6-52c6ed45c5c8`));
+        }
+
+        if (!details.email && member.isPropertyRequired('emailAddress', scope)) {
+            base.push($t(`64163c88-2610-4542-9fd4-db523670049c`));
+        }
+
+        if (!details.address && member.isPropertyRequired('address', scope)) {
+            base.push($t(`ca287035-d735-4eaa-bbb3-ae0db435b4ea`));
+        }
+
+        if (!details.birthDay && member.isPropertyRequired('birthDay', scope)) {
+            base.push($t(`88a24a2b-d84a-4c7e-978d-6180e260a06f`));
+        }
+
+        if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
+            base.push($t(`e7a21ff5-4f90-4518-8279-ea4fb747fb66`));
+        }
+        else {
+            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
+                base.push($t(`af59b3e6-e47c-4c9f-a571-2e1662f17114`));
+            }
+        }
+
+        if (member.isPropertyRequired('parents', scope)) {
+            if (details.parents.length === 0) {
+                base.push($t(`8a5dfcff-bbe3-4b8f-8b6d-85df4d35dc94`));
+            }
+        }
+
+        if (details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
+            base.push($t(`d42f4d7d-a453-403b-9b3f-459020fc8849`));
+        }
+
+        const { categories: enabledCategories } = member.getEnabledRecordCategories(scope);
+
+        const incomplete = enabledCategories.filter(c => !c.isComplete(member));
+        const result = [...base, ...incomplete.map(c => c.name.toString())];
+        this.member.cacheMap.missingData = result;
+        return result;
+    }
+
+    isRecordEnabled(record: RecordSettings): boolean {
+        throw new Error('Never filter data with PlatformRegistration. You are doing something wrong. Use PlatformMember or Registration instead, to make it clear what you are filtering on.');
+    }
 }
 
 export class PlatformMember implements ObjectWithRecords {
@@ -563,6 +628,13 @@ export class PlatformMember implements ObjectWithRecords {
      * The frontend can't calculate this on its own because it is only temporary.
      */
     hasFullAccess = false;
+
+    /**
+     * Cached data that is cleared when the member is patched
+     */
+    cacheMap: {
+        missingData?: string[];
+    } = {};
 
     get id() {
         return this.member.id;

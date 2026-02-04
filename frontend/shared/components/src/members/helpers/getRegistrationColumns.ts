@@ -235,59 +235,14 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
                 allowSorting: false,
                 name: $t('2011b902-ec2f-4c5a-a98a-6e50a1351fae'),
                 getValue: (registration) => {
-                    const base: string[] = [];
                     const scope = {
-                        scopeGroups: groups,
                         checkPermissions: {
                             user: auth.user!,
                             level: PermissionLevel.Read,
                         },
-                        scopeOrganization: organization,
                     };
 
-                    const member = registration.member;
-                    const details = registration.member.patchedMember.details;
-
-                    // Check missing information
-                    if (!details.phone && member.isPropertyRequired('phone', scope)) {
-                        base.push($t(`de723a38-6e76-418a-a6f6-52c6ed45c5c8`));
-                    }
-
-                    if (!details.email && member.isPropertyRequired('emailAddress', scope)) {
-                        base.push($t(`64163c88-2610-4542-9fd4-db523670049c`));
-                    }
-
-                    if (!details.address && member.isPropertyRequired('address', scope)) {
-                        base.push($t(`ca287035-d735-4eaa-bbb3-ae0db435b4ea`));
-                    }
-
-                    if (!details.birthDay && member.isPropertyRequired('birthDay', scope)) {
-                        base.push($t(`88a24a2b-d84a-4c7e-978d-6180e260a06f`));
-                    }
-
-                    if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-                        base.push($t(`e7a21ff5-4f90-4518-8279-ea4fb747fb66`));
-                    }
-                    else {
-                        if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('nationalRegisterNumber', scope) && !member.patchedMember.details.parents.find(p => p.nationalRegisterNumber)) {
-                            base.push($t(`af59b3e6-e47c-4c9f-a571-2e1662f17114`));
-                        }
-                    }
-
-                    if (member.isPropertyRequired('parents', scope)) {
-                        if (details.parents.length === 0) {
-                            base.push($t(`8a5dfcff-bbe3-4b8f-8b6d-85df4d35dc94`));
-                        }
-                    }
-
-                    if (details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
-                        base.push($t(`d42f4d7d-a453-403b-9b3f-459020fc8849`));
-                    }
-
-                    const { categories: enabledCategories } = member.getEnabledRecordCategories(scope);
-
-                    const incomplete = enabledCategories.filter(c => !c.isComplete(registration));
-                    return [...base, ...incomplete.map(c => c.name.toString())];
+                    return registration.getMissingData(scope);
                 },
                 format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`c1843768-2bf4-42f2-baa4-42f49028463d`) + ' ') || $t('e41660ea-180a-45ef-987c-e780319c4331')),
                 getStyle: prices => prices.length === 0 ? 'gray' : '',
