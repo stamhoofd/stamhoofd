@@ -128,7 +128,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'already_created',
                     message: 'Recipients already created',
-                    human: $t(`De ontvangers werden reeds ingesteld en kunnen niet meer worden gewijzigd voor dit bericht`),
+                    human: $t(`457ecdaf-d1de-4136-9e82-682c18c5fa76`),
                     statusCode: 400,
                 });
             }

@@ -1274,7 +1274,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: requireOrganizationIds',
-                        human: $t(`{member} moet ingeschreven zijn bij {organization}`, { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
+                        human: $t(`89d19c46-d994-49e4-b25a-ed63308590eb`, { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
                     });
                 }
                 throw new SimpleError({

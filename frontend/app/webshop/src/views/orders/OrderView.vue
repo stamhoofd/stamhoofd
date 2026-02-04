@@ -127,7 +127,7 @@
                         <STList class="info">
                             <STListItem>
                                 <h3 class="style-definition-label">
-                                    {{ $t('Webshop') }}
+                                    {{ $t('d41226a0-e877-4874-8333-25c0dcf96001') }}
                                 </h3>
 
                                 <p class="style-definition-text">

@@ -7,7 +7,7 @@
                 {{ template.settings.name }}
             </h1>
             <p v-if="template.privateSettings.templateDefinition.type === 'fiscal'">
-                <I18nComponent :t="$t('Lees de documentatie voor fiscale attesten <button>hier</button> eerst grondig door.')">
+                <I18nComponent :t="$t('cb1e0749-34c0-4c06-b42c-bfe34dc9f11e')">
                     <template #button="{content}">
                         <a class="inline-link" :href="LocalizedDomains.getDocs('fiscaal-attest-kinderopvang')" target="_blank">
                             {{ content }}
@@ -79,7 +79,7 @@
                     </template>
 
                     <h2 class="style-title-list">
-                        {{ $t('Exporteren naar XML (voor Belcotax)') }}
+                        {{ $t('d6046963-19b5-4e4c-b72b-a3ebba89c1fe') }}
                     </h2>
                     <p class="style-description">
                         {{ xmlExportDescription }}
@@ -324,7 +324,7 @@ async function deleteTemplate() {
 
 function exportXml() {
     if (props.template.updatesEnabled) {
-        Toast.error($t('Je kan niet exporteren naar Belcotax als je automatische wijzigingen hebt ingeschakeld. Schakel dat eerst uit.')).show();
+        Toast.error($t('94090582-213a-4016-8c1c-a95331a4c225')).show();
         return;
     }
 

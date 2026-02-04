@@ -202,7 +202,7 @@ export class MemberActionBuilder {
 
     private getClearDataAction() {
         return [new InMemoryTableAction({
-            name: $t('Alle vragenlijsten wissen'),
+            name: $t('ea2a400c-5229-426b-8ef9-3ebcd117bf61'),
             destructive: true,
             priority: 1,
             groupIndex: 100,
@@ -229,7 +229,7 @@ export class MemberActionBuilder {
 
                 await this.platformFamilyManager.isolatedPatch(members, patch);
 
-                Toast.success($t('Gegevens gewist')).show();
+                Toast.success($t('4d8c51bc-447f-4166-807e-87ff0f55c327')).show();
                 return;
             },
         })];

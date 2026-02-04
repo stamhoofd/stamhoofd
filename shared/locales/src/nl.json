@@ -6070,5 +6070,17 @@
   "2a10aac1-e404-4de4-865d-75593b2b5e8d": "Contactpersoon",
   "ea742466-c76d-4b23-9387-b7a14284679e": "Btw verlegd: Art. 39 bis – intracommunautaire levering",
   "8de3f0d6-3bbe-4668-a357-1fbf3d698177": "Het is niet mogelijk om een factuur aan te maken. Er zit een onverwachts verschil tussen de prijs van de aan te maken factuur en het te betalen bedrag.",
-  "4d8a44e5-eebc-48e2-955d-87ca0595d4cc": "Contactpersoon"
+  "4d8a44e5-eebc-48e2-955d-87ca0595d4cc": "Contactpersoon",
+  "457ecdaf-d1de-4136-9e82-682c18c5fa76": "De ontvangers werden reeds ingesteld en kunnen niet meer worden gewijzigd voor dit bericht",
+  "cb1e0749-34c0-4c06-b42c-bfe34dc9f11e": "Lees de documentatie voor fiscale attesten <button>hier</button> eerst grondig door.",
+  "d6046963-19b5-4e4c-b72b-a3ebba89c1fe": "Exporteren naar XML (voor Belcotax)",
+  "94090582-213a-4016-8c1c-a95331a4c225": "Je kan niet exporteren naar Belcotax als je automatische wijzigingen hebt ingeschakeld. Schakel dat eerst uit.",
+  "7c5b5d58-b5bc-404b-9ab1-5585e6a1aa2d": "Aanmaakdatum",
+  "874a72b7-66a8-48bf-86c5-134dc109fa04": "Laatst aangepast",
+  "d41226a0-e877-4874-8333-25c0dcf96001": "Webshop",
+  "7445a6f8-589d-433b-b00a-9abf3779804e": "Actief",
+  "fe2de454-fdd1-4c16-a9c6-eb953d3e38a7": "Niet actief",
+  "ea2a400c-5229-426b-8ef9-3ebcd117bf61": "Alle vragenlijsten wissen",
+  "4d8c51bc-447f-4166-807e-87ff0f55c327": "Gegevens gewist",
+  "89d19c46-d994-49e4-b25a-ed63308590eb": "{member} moet ingeschreven zijn bij {organization}"
 }

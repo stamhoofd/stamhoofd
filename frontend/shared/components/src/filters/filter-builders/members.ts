@@ -570,8 +570,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
             new MultipleChoiceFilterBuilder({
                 name: financialSupportSettings.financialSupportSettings.value.title,
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`Actief`), true),
-                    new MultipleChoiceUIFilterOption($t(`Niet actief`), false),
+                    new MultipleChoiceUIFilterOption($t(`7445a6f8-589d-433b-b00a-9abf3779804e`), true),
+                    new MultipleChoiceUIFilterOption($t(`fe2de454-fdd1-4c16-a9c6-eb953d3e38a7`), false),
                 ],
                 wrapFilter: (f: StamhoofdFilter) => {
                     const choices = Array.isArray(f) ? f : [f];

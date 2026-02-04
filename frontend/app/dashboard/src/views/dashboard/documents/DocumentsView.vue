@@ -128,7 +128,7 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, Date>({
         id: 'createdAt',
-        name: $t('Aanmaakdatum'),
+        name: $t('7c5b5d58-b5bc-404b-9ab1-5585e6a1aa2d'),
         getValue: document => document.createdAt,
         format: date => Formatter.dateTime(date),
         minimumWidth: 100,
@@ -137,7 +137,7 @@ const allColumns: Column<Document, any>[] = [
 
     new Column<Document, Date>({
         id: 'updatedAt',
-        name: $t('Laatst aangepast'),
+        name: $t('874a72b7-66a8-48bf-86c5-134dc109fa04'),
         getValue: document => document.updatedAt,
         format: date => Formatter.dateTime(date),
         minimumWidth: 100,
