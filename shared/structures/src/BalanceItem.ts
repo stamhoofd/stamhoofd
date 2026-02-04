@@ -463,6 +463,9 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 353 })
     payingOrganizationId: string | null = null;
 
+    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    orderId: string | null = null;
+
     static getDueOffset(from: Date = new Date()) {
         const d = new Date(from.getTime() + 1000 * 60 * 60 * 24 * 7); // Added to outstanding balance 7 days before due date
 

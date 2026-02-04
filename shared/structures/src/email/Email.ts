@@ -1,25 +1,27 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { SimpleErrors } from '@simonbackx/simple-errors';
 import { v4 as uuidv4 } from 'uuid';
-import { EditorSmartButton } from '../email/EditorSmartButton.js';
-import { EditorSmartVariable } from '../email/EditorSmartVariable.js';
 import { EmailAttachment, Recipient, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import { StamhoofdFilter } from '../filters/StamhoofdFilter.js';
+import { TinyMember } from '../members/Member.js';
 import { MemberDetails } from '../members/MemberDetails.js';
 import { MemberWithRegistrationsBlob } from '../members/MemberWithRegistrationsBlob.js';
+import { BaseOrganization } from '../Organization.js';
 import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform } from '../Platform.js';
-import { EmailTemplate } from './EmailTemplate.js';
-import { SimpleErrors } from '@simonbackx/simple-errors';
 import { User } from '../User.js';
-import { BaseOrganization } from '../Organization.js';
-import { TinyMember } from '../members/Member.js';
+import { EmailTemplate } from './EmailTemplate.js';
 
 export enum EmailRecipientFilterType {
     RegistrationMembers = 'RegistrationMembers',
     RegistrationParents = 'RegistrationParents',
     RegistrationUnverified = 'RegistrationUnverified',
+    // todo: rename to PaymentOther
+    Payment = 'Payment',
+    // distinction between payment is useful to be able to not show these in the member portal?
+    PaymentOrganization = 'PaymentOrganization',
     Members = 'Members',
     MemberParents = 'MemberParents',
     MemberUnverified = 'MemberUnverified',
@@ -74,6 +76,17 @@ export class EmailRecipientSubfilter extends AutoEncoder {
     subfilter: StamhoofdFilter | null = null;
 }
 
+const emailTypesToShowInMemberPortal = new Set<EmailRecipientFilterType>([
+    EmailRecipientFilterType.Members,
+    EmailRecipientFilterType.MemberParents,
+    EmailRecipientFilterType.MemberUnverified,
+    EmailRecipientFilterType.RegistrationMembers,
+    EmailRecipientFilterType.RegistrationParents,
+    EmailRecipientFilterType.RegistrationUnverified,
+    EmailRecipientFilterType.Documents,
+    EmailRecipientFilterType.Payment,
+]);
+
 export class EmailRecipientFilter extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(EmailRecipientSubfilter) })
     filters: EmailRecipientSubfilter[] = [];
@@ -87,7 +100,7 @@ export class EmailRecipientFilter extends AutoEncoder {
 
     get canShowInMemberPortal() {
         for (const filter of this.filters) {
-            if (filter.type === EmailRecipientFilterType.Members || filter.type === EmailRecipientFilterType.MemberParents || filter.type === EmailRecipientFilterType.MemberUnverified || filter.type === EmailRecipientFilterType.RegistrationMembers || filter.type === EmailRecipientFilterType.RegistrationParents || filter.type === EmailRecipientFilterType.RegistrationUnverified || filter.type === EmailRecipientFilterType.Documents) {
+            if (emailTypesToShowInMemberPortal.has(filter.type)) {
                 return true;
             }
         }

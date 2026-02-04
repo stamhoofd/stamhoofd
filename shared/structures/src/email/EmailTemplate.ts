@@ -176,6 +176,8 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.DefaultDocumentsEmail;
         }
 
+        // todo: add template for payments
+
         return null;
     }
 
@@ -191,6 +193,8 @@ export class EmailTemplate extends AutoEncoder {
         if (type === EmailRecipientFilterType.Documents) {
             return EmailTemplateType.SavedDocumentsEmail;
         }
+
+        // todo: add template for payments
 
         return null;
     }
