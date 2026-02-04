@@ -2,7 +2,7 @@
 @use '../base/text-styles';
 
 .input-spacing {
-    max-width: 400px;
+    max-width: 340px;
 
     @media (max-width: 500px) {
         max-width: none;

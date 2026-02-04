@@ -43,7 +43,7 @@ export default class STInputBox extends VueComponent {
     display: block;
 
     > div {
-        max-width: 400px;
+        max-width: 340px;
 
         @media (max-width: 500px) {
             max-width: none;
@@ -51,7 +51,7 @@ export default class STInputBox extends VueComponent {
     }
 
     > h4:has(.button) {
-        max-width: 400px;
+        max-width: 340px;
 
         @media (max-width: 500px) {
             max-width: none;
