@@ -6399,6 +6399,10 @@
     "original": "Er ging iets mis bij het aanmaken van de ontvangers. Probeer je selectie aan te passen. Neem contact op als het probleem zich blijft voordoen.",
     "translation": "Un problème est survenu lors de la création des destinataires. Veuillez modifier votre sélection. Contactez-nous si le problème persiste."
   },
+  "457ecdaf-d1de-4136-9e82-682c18c5fa76": {
+    "original": "De ontvangers werden reeds ingesteld en kunnen niet meer worden gewijzigd voor dit bericht",
+    "translation": "Les destinataires ont déjà été définis et ne peuvent plus être modifiés pour ce message."
+  },
   "457fc4b2-9145-45c8-aba3-1fd629317330": {
     "original": "Je hebt nog niet alle gegevens toegevoegd. Vul dit aan.",
     "translation": "Vous n'avez pas encore ajouté toutes les informations. Veuillez compléter."
@@ -7214,6 +7218,10 @@
   "4d8be2b1-559a-4c16-a76f-67a8ba85de7f": {
     "original": "Dit type melding bestaat niet",
     "translation": "Ce type de notification n'existe pas"
+  },
+  "4d8c51bc-447f-4166-807e-87ff0f55c327": {
+    "original": "Gegevens gewist",
+    "translation": "Données supprimées"
   },
   "4d9168af-27ed-438e-acd9-756474dd6f5e": {
     "original": "Deze groep heeft nog geen interne beheerders.",
@@ -10859,6 +10867,10 @@
     "original": "Wissen",
     "translation": "Effacer"
   },
+  "7445a6f8-589d-433b-b00a-9abf3779804e": {
+    "original": "Actief",
+    "translation": "Actif"
+  },
   "7447ec38-44b1-448e-8745-c5aebbdf846b": {
     "original": "stuk",
     "translation": "pièce"
@@ -11562,6 +11574,10 @@
   "7c55cb44-8149-414a-a162-ca9859014e81": {
     "original": "Je kan geen inschrijvingen wijzigen van {group} omdat dat werkjaar niet actief is.",
     "translation": "Vous ne pouvez pas modifier les inscriptions de {group} car cette année n’est pas active."
+  },
+  "7c5b5d58-b5bc-404b-9ab1-5585e6a1aa2d": {
+    "original": "Aanmaakdatum",
+    "translation": "Date de création"
   },
   "7c6e4f2d-297d-4183-9079-ba123f481eb5": {
     "original": "Inschrijving bewerken",
@@ -12499,6 +12515,10 @@
     "original": "{firstName} bewerken",
     "translation": "Modifier {firstName}"
   },
+  "874a72b7-66a8-48bf-86c5-134dc109fa04": {
+    "original": "Laatst aangepast",
+    "translation": "Dernière modification"
+  },
   "87722045-cb82-4f5d-b910-122d52bd193e": {
     "original": "Leden kunnen zelf inschrijven via het ledenportaal als je deze optie open zet. Ze betalen het opgegeven tarief dan zelf via de betaalmethodes die je hebt ingesteld bij de instellingen van jouw groep.",
     "translation": "Les membres peuvent s'inscrire eux-mêmes via le portail des membres si vous activez cette option. Ils paient alors eux-mêmes le tarif indiqué via les méthodes de paiement que vous avez définies dans les paramètres de votre groupe."
@@ -12758,6 +12778,10 @@
   "89d0154d-edcb-4a56-b4d7-1c95c13c4fb1": {
     "original": "Stripe Dashboard",
     "translation": "Tableau de bord Stripe"
+  },
+  "89d19c46-d994-49e4-b25a-ed63308590eb": {
+    "original": "{member} moet ingeschreven zijn bij {organization}",
+    "translation": "{member} doit être inscrit auprès de {organization}"
   },
   "89e0fd6e-3069-41d8-8e2b-74caf363b956": {
     "original": "Je kan een logo voor al je webshops instellen via de algemene instellingen > personalisatie. Dan hoef je het niet voor elke webshop apart in te stellen.",
@@ -13698,6 +13722,10 @@
   "93fb5220-c5dc-4fdf-b014-52238288207c": {
     "original": "Blokkering opheffen",
     "translation": "Débloquer"
+  },
+  "94090582-213a-4016-8c1c-a95331a4c225": {
+    "original": "Je kan niet exporteren naar Belcotax als je automatische wijzigingen hebt ingeschakeld. Schakel dat eerst uit.",
+    "translation": "Vous ne pouvez pas exporter vers Belcotax si vous avez activé les modifications automatiques. Désactivez-les d'abord."
   },
   "940c3987-3048-441e-9933-3fa51c6d421d": {
     "original": "naam",
@@ -18739,6 +18767,10 @@
     "original": "Keuzemenu toevoegen",
     "translation": "Ajouter un menu de choix"
   },
+  "cb1e0749-34c0-4c06-b42c-bfe34dc9f11e": {
+    "original": "Lees de documentatie voor fiscale attesten <button>hier</button> eerst grondig door.",
+    "translation": "Veuillez d'abord lire attentivement la documentation relative aux attestations fiscales <button>ici</button>."
+  },
   "cb28c759-7ab7-4a07-8972-9523393993ac": {
     "original": "Er kan geen factuur aangemaakt worden omdat de klantgegevens ontbreken voor deze betaling",
     "translation": "Impossible de créer une facture car les informations client sont manquantes pour ce paiement."
@@ -19611,6 +19643,10 @@
     "original": "Markeer overschrijvingen als betaald.",
     "translation": "Marquer les virements comme payés."
   },
+  "d41226a0-e877-4874-8333-25c0dcf96001": {
+    "original": "Webshop",
+    "translation": "Boutique en ligne"
+  },
   "d41cdbe3-57e3-4a2e-83bc-cb9e65c9c840": {
     "original": "Je kan een functie enkel toekennen aan leden die zijn ingeschreven in het huidige werkjaar",
     "translation": "Vous ne pouvez attribuer une fonction qu'aux membres inscrits pour l'année associative en cours"
@@ -19778,6 +19814,10 @@
   "d5ee5112-988f-4d4b-82e0-46f257c40bbb": {
     "original": "Ze behouden ook toegang nadat {firstName} 18 jaar wordt. <button>Ongedaan maken</button>",
     "translation": "Ils conservent également l'accès après que {firstName} ait 18 ans. <button>Annuler</button>"
+  },
+  "d6046963-19b5-4e4c-b72b-a3ebba89c1fe": {
+    "original": "Exporteren naar XML (voor Belcotax)",
+    "translation": "Exporter vers XML (pour Belcotax)"
   },
   "d6244dd4-a0b6-4063-9f93-91c5ab91905c": {
     "original": "Facturatiegegevens",
@@ -21771,6 +21811,10 @@
     "original": "Bijkomende tekst onderaan",
     "translation": "Texte supplémentaire en bas"
   },
+  "ea2a400c-5229-426b-8ef9-3ebcd117bf61": {
+    "original": "Alle vragenlijsten wissen",
+    "translation": "Supprimer tous les formulaires personnalisés"
+  },
   "ea2ad051-2874-42e2-8275-aa6e8d05d66a": {
     "original": "Schrijf {member} hier in. Voeg de inschrijving toe aan je winkelmandje en reken daarna alle inschrijvingen in één keer af.",
     "translation": "Inscrivez {member} ici. Ajoutez l’inscription à votre panier et réglez ensuite toutes les inscriptions en une seule fois."
@@ -23758,6 +23802,10 @@
   "fe29857c-e4ac-4b25-aa0e-31813f3570c2": {
     "original": "tag",
     "translation": "étiquette"
+  },
+  "fe2de454-fdd1-4c16-a9c6-eb953d3e38a7": {
+    "original": "Niet actief",
+    "translation": "Inactif"
   },
   "fe3e7e2f-0fd3-440a-a904-5fa99943371b": {
     "original": "Leveringsoptie toevoegen",
