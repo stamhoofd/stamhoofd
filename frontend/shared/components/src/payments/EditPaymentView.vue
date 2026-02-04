@@ -1,86 +1,17 @@
 <template>
-    <SaveView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" :loading="saving" @save="save">
-        <h1>
-            {{ title }}
-        </h1>
-
+    <CategorizedView :title="title" :disabled="!hasChanges && !isNew" class="edit-payment-view" :loading="saving" @save="save">
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <template v-if="availableMethods.includes(payment.method)">
-            <div class="split-inputs">
-                <div v-if="isNew">
-                    <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
-                        <Dropdown v-model="type">
-                            <option v-for="m in availableTypes" :key="m" :value="m">
-                                {{ capitalizeFirstLetter(PaymentTypeHelper.getName(m)) }}
-                            </option>
-                        </Dropdown>
-                    </STInputBox>
-                </div>
-                <div>
-                    <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('b1ceeb6c-1f84-4534-872c-9b4a23e502a6') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
-                        <DateSelection v-model="paidAt" />
-                    </STInputBox>
-                </div>
-            </div>
-            <p v-if="isNew" class="style-description-small" v-text="capitalizeFirstLetter(PaymentTypeHelper.getDescription(type))" />
+        <CategorizedBox v-if="isNew" icon="box" :title=" $t('e8ea4460-67bb-42a3-b688-cc22987fe8af')">
+            <template #summary>
+                <p class="style-description-small">
+                    {{ formatPrice(patchedPayment.price) }}
+                </p>
 
-            <div v-if="!isNew || type !== PaymentType.Reallocation" class="split-inputs">
-                <STInputBox v-if="type !== PaymentType.Reallocation" :title="type === PaymentType.Payment ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`1d8b2fd0-3e5c-4364-9476-b7b40ca39c50`)" error-fields="method" :error-box="errors.errorBox">
-                    <Dropdown v-model="method">
-                        <option v-for="m in availableMethods" :key="m" :value="m">
-                            {{ PaymentMethodHelper.getNameCapitalized(m) }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-
-                <STInputBox v-if="!isNew" error-fields="status" :error-box="errors.errorBox" :title="$t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`)">
-                    <Dropdown v-model="status">
-                        <option v-for="m in availableStatuses" :key="m" :value="m">
-                            {{ PaymentStatusHelper.getNameCapitalized(m) }}
-                        </option>
-                    </Dropdown>
-                </STInputBox>
-            </div>
-
-            <template v-if="method === PaymentMethod.Transfer && type !== PaymentType.Reallocation">
-                <hr><h2 v-if="type === PaymentType.Payment">
-                    {{ $t('1a34199f-e779-4947-b0d3-a41aeefa901a') }}
-                </h2>
-                <h2 v-else>
-                    {{ $t('12472cd2-4c67-4e54-81dc-cba8fd6c1c91') }}
-                </h2>
-
-                <STInputBox :title="type === PaymentType.Payment ? $t(`31c28f13-d3b8-42ee-8979-c8224633237e`) : $t(`edfb74fb-9e81-4fbf-9591-cd9780ee977d`)" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
-                    <input v-model="creditor" class="input" type="text" autocomplete="off" :placeholder="$t(`e57ce79c-d0f6-4d7e-a8f4-2efbf12c1433`)">
-                </STInputBox>
-
-                <IBANInput v-model="iban" :validator="errors.validator" :required="false" :title="$t(`b541ddfb-cce5-4194-b6a5-3de523b27fa8`)" :placeholder="$t(`95854f9f-45df-4775-9d37-524efbbbc57f`)" />
-
-                <STInputBox error-fields="transferDescription" :error-box="errors.errorBox" :title="$t(`136b7ba4-7611-4ee4-a46d-60758869210f`)">
-                    <input ref="firstInput" v-model="transferDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`dc7631e2-c6ed-4508-ada0-40eebc5fc24e`)">
-                </STInputBox>
+                <p class="style-description-small">
+                    {{ patchedPayment.balanceItemPayments.length }} items
+                </p>
             </template>
-
-        </template>
-
-        <hr>
-        <h2>{{ $t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9') }}</h2>
-        <p v-if="patchedPayment.payingOrganization" class="info-box icon link selectable" @click="choosePayingOrganization">
-            <span>{{ $t('6b03b799-4062-4bc7-a0cd-cb22f951dbc9', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
-            <span class="button icon edit" />
-        </p>
-
-        <p v-else-if="balanceItems.find(b => b.payingOrganizationId)" class="info-box icon link selectable" @click="choosePayingOrganization">
-            <span>{{ $t('d28dbb6c-e21b-4ded-b09b-be72a73ffdf8') }}</span>
-            <span class="button icon edit" />
-        </p>
-
-        <PaymentCustomerSelectionBox :customer="patchedPayment.customer" :validator="errors.validator" :error-box="errors.errorBox" :customers="customerSuggestions" @patch:customer="addPatch({customer: $event})" />
-
-        <div v-if="isNew" class="container">
-            <hr>
-            <h2>{{ $t('e8ea4460-67bb-42a3-b688-cc22987fe8af') }}</h2>
 
             <p v-if="patchedPayment.type === PaymentType.Payment">
                 {{ $t('ab973473-d8d9-4126-ad71-fa26a8aa53e4') }}
@@ -120,8 +51,102 @@
                     </template>
                 </STListItem>
             </STList>
-        </div>
-    </SaveView>
+        </CategorizedBox>
+
+        <CategorizedBox v-if="availableMethods.includes(payment.method)" :icon="status === 'Succeeded' ? 'success' : 'clock'" :title="$t('Betaalmethode en status')">
+            <template #summary>
+                <p class="style-description-small">
+                    {{ PaymentMethodHelper.getNameCapitalized(method) }}
+                </p>
+
+                <p class="style-description-small">
+                    {{ PaymentStatusHelper.getNameCapitalized(status) }}
+                </p>
+            </template>
+
+            <div class="split-inputs">
+                <div v-if="isNew">
+                    <STInputBox error-fields="type" :error-box="errors.errorBox" :title="$t(`6c9d45e5-c9f6-49c8-9362-177653414c7e`)">
+                        <Dropdown v-model="type">
+                            <option v-for="m in availableTypes" :key="m" :value="m">
+                                {{ capitalizeFirstLetter(PaymentTypeHelper.getName(m)) }}
+                            </option>
+                        </Dropdown>
+                    </STInputBox>
+                </div>
+                <div>
+                    <STInputBox v-if="status === 'Succeeded'" :title="type === PaymentType.Reallocation ? $t('b1ceeb6c-1f84-4534-872c-9b4a23e502a6') : (type === PaymentType.Payment ? $t(`57634df7-7db8-4c1d-8351-878c649b5078`) : $t(`7cea4ccc-16d1-42ae-87af-34a603013577`))" error-fields="paidAt" :error-box="errors.errorBox">
+                        <DateSelection v-model="paidAt" />
+                    </STInputBox>
+                </div>
+            </div>
+            <p v-if="isNew" class="style-description-small" v-text="capitalizeFirstLetter(PaymentTypeHelper.getDescription(type))" />
+
+            <div v-if="!isNew || type !== PaymentType.Reallocation" class="split-inputs">
+                <STInputBox v-if="type !== PaymentType.Reallocation" :title="type === PaymentType.Payment ? $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`) : $t(`1d8b2fd0-3e5c-4364-9476-b7b40ca39c50`)" error-fields="method" :error-box="errors.errorBox">
+                    <Dropdown v-model="method">
+                        <option v-for="m in availableMethods" :key="m" :value="m">
+                            {{ PaymentMethodHelper.getNameCapitalized(m) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+
+                <STInputBox error-fields="status" :error-box="errors.errorBox" :title="$t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`)">
+                    <Dropdown v-model="status">
+                        <option v-for="m in availableStatuses" :key="m" :value="m">
+                            {{ PaymentStatusHelper.getNameCapitalized(m) }}
+                        </option>
+                    </Dropdown>
+                </STInputBox>
+            </div>
+        </CategorizedBox>
+
+        <CategorizedBox v-if="method === PaymentMethod.Transfer && type !== PaymentType.Reallocation" icon="bank" :title="type === PaymentType.Payment ? $t('1a34199f-e779-4947-b0d3-a41aeefa901a') : $t('12472cd2-4c67-4e54-81dc-cba8fd6c1c91') ">
+            <template #summary>
+                <p class="style-description-small">
+                    {{ iban || creditor }}
+                </p>
+
+                <p class="style-description-small">
+                    {{ transferDescription }}
+                </p>
+            </template>
+
+            <STInputBox :title="type === PaymentType.Payment ? $t(`31c28f13-d3b8-42ee-8979-c8224633237e`) : $t(`edfb74fb-9e81-4fbf-9591-cd9780ee977d`)" error-fields="transferSettings.creditor" :error-box="errors.errorBox">
+                <input v-model="creditor" class="input" type="text" autocomplete="off" :placeholder="$t(`e57ce79c-d0f6-4d7e-a8f4-2efbf12c1433`)">
+            </STInputBox>
+
+            <IBANInput v-model="iban" :validator="errors.validator" :required="false" :title="$t(`b541ddfb-cce5-4194-b6a5-3de523b27fa8`)" :placeholder="$t(`95854f9f-45df-4775-9d37-524efbbbc57f`)" />
+
+            <STInputBox error-fields="transferDescription" :error-box="errors.errorBox" :title="$t(`136b7ba4-7611-4ee4-a46d-60758869210f`)">
+                <input ref="firstInput" v-model="transferDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`dc7631e2-c6ed-4508-ada0-40eebc5fc24e`)">
+            </STInputBox>
+        </CategorizedBox>
+
+        <CategorizedBox icon="company" :title="$t('2b09865c-4f3c-44ab-b001-03fc1d5a0ce9')">
+            <template v-if="patchedPayment.customer" #summary>
+                <p v-if="patchedPayment.customer.company" class="style-description-small">
+                    {{ patchedPayment.customer.company.name }}
+                </p>
+
+                <p v-else class="style-description-small">
+                    {{ patchedPayment.customer.name }}
+                </p>
+            </template>
+
+            <p v-if="patchedPayment.payingOrganization" class="info-box icon link selectable" @click="choosePayingOrganization">
+                <span>{{ $t('6b03b799-4062-4bc7-a0cd-cb22f951dbc9', {name: patchedPayment.payingOrganization.name, uri: patchedPayment.payingOrganization.uri}) }}</span>
+                <span class="button icon edit" />
+            </p>
+
+            <p v-else-if="balanceItems.find(b => b.payingOrganizationId)" class="info-box icon link selectable" @click="choosePayingOrganization">
+                <span>{{ $t('d28dbb6c-e21b-4ded-b09b-be72a73ffdf8') }}</span>
+                <span class="button icon edit" />
+            </p>
+
+            <PaymentCustomerSelectionBox :customer="patchedPayment.customer" :validator="errors.validator" :error-box="errors.errorBox" :customers="customerSuggestions" @patch:customer="addPatch({customer: $event})" />
+        </CategorizedBox>
+    </CategorizedView>
 </template>
 
 <script lang="ts" setup>
@@ -141,15 +166,15 @@ import DateSelection from '../inputs/DateSelection.vue';
 import Dropdown from '../inputs/Dropdown.vue';
 import IBANInput from '../inputs/IBANInput.vue';
 import STInputBox from '../inputs/STInputBox.vue';
+import { CategorizedBox, CategorizedView } from '../layout';
 import STList from '../layout/STList.vue';
 import STListItem from '../layout/STListItem.vue';
-import SaveView from '../navigation/SaveView.vue';
+import SearchOrganizationView from '../members/SearchOrganizationView.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
+import { NavigationActions } from '../types/NavigationActions';
 import PaymentCustomerSelectionBox from './components/PaymentCustomerSelectionBox.vue';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
-import SearchOrganizationView from '../members/SearchOrganizationView.vue';
-import { NavigationActions } from '../types/NavigationActions';
 
 const props = withDefaults(
     defineProps<{

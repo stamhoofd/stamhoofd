@@ -2,6 +2,7 @@
 @use '../base/text-styles';
 
 $checkbox-border-radius: 5px;
+$checkbox-size: 20px;
 
 .checkbox-line {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -79,10 +80,10 @@ $checkbox-border-radius: 5px;
         position: relative;
         
         > div:first-child {
-            width: 20px;
-            height: 20px;
+            width: $checkbox-size;
+            height: $checkbox-size;
             flex-shrink: 0;
-            flex-basis: 20px;
+            flex-basis: $checkbox-size;
             border-radius: $checkbox-border-radius;
             border: 1px solid $color-border-shade;
             box-shadow: 0px 1px 2px 0px $color-input-shadow;
@@ -140,10 +141,10 @@ $checkbox-border-radius: 5px;
 
             &::after {
                 content: "";
-                height: 20px - $border-width * 2;
-                width: 20px - $border-width * 2;
+                height: $checkbox-size - $border-width * 2;
+                width: $checkbox-size - $border-width * 2;
                 background: $color-current-background;
-                border-radius: calc((20px - $border-width * 2) / 2);
+                border-radius: calc(($checkbox-size - $border-width * 2) / 2);
                 transition: transform 0.2s;
                 transform: scale(0.9, 0.9);
             }

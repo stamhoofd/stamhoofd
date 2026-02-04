@@ -1,7 +1,6 @@
-import { onBeforeUnmount, Ref, watch } from "vue";
+import { onBeforeUnmount, Ref, watch } from 'vue';
 
-
-export function useResizeObserver(elementRef: Ref<HTMLElement|HTMLElement[]|null>, callback: () => void) {
+export function useResizeObserver(elementRef: Ref<HTMLElement | HTMLElement[] | null>, callback: () => void) {
     const observing = new Set<HTMLElement>();
     const observer = new ResizeObserver((entries) => {
         callback();
@@ -22,20 +21,22 @@ export function useResizeObserver(elementRef: Ref<HTMLElement|HTMLElement[]|null
         observing.clear();
     }
 
-    watch(elementRef, (el) => {
+    const cleanWatcher = watch(elementRef, (el) => {
         unobserveAll();
         if (el) {
             if (Array.isArray(el)) {
                 for (const e of el) {
                     observe(e);
                 }
-            } else {
+            }
+            else {
                 observe(el);
             }
         }
-    }, {deep: true});
+    }, { deep: true });
 
     onBeforeUnmount(() => {
+        cleanWatcher();
         observer.disconnect();
     });
 }

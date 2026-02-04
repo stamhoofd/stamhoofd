@@ -5,3 +5,4 @@ export { default as STListItemGridRow } from './STListItemGridRow.vue';
 
 export { default as STGrid } from './STGrid.vue';
 export { default as STGridItem } from './STGridItem.vue';
+export * from './categorized-view';
