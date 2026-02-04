@@ -189,7 +189,7 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
                     // We'll need to fix this when SCSS changes the resolution order in the next version.
                     // More info at https://sass-lang.com/d/mixed-decls
                     // color-functions: deprecated some aliasses. Easy to fix later.
-                    silenceDeprecations: ['mixed-decls', 'color-functions'],
+                    silenceDeprecations: ['mixed-decls', 'color-functions', 'slash-div'],
                 },
             },
         },

@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :loading="loadingView" :error-box="errorBox">
-        <form class="st-view" data-testid="save-view" @submit.prevent="$emit('save')">
+        <form class="st-view" data-testid="save-view" v-bind="$attrs" @submit.prevent="$emit('save')">
             <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
@@ -65,10 +65,8 @@
 
 <script lang="ts" setup>
 import { useCanDismiss, useCanPop, useDismiss, usePop } from '@simonbackx/vue-app-navigation';
-import { TranslatedString } from '@stamhoofd/structures';
 import { computed, getCurrentInstance } from 'vue';
 import LoadingViewTransition from '../containers/LoadingViewTransition.vue';
-import { ErrorBox } from '../errors/ErrorBox';
 import { useKeyDown } from '../hooks';
 import { defineEditorContext } from '../inputs/hooks/useEditorContext';
 import BackButton from './BackButton.vue';
@@ -76,43 +74,16 @@ import LoadingButton from './LoadingButton.vue';
 import STButtonToolbar from './STButtonToolbar.vue';
 import STNavigationBar from './STNavigationBar.vue';
 import STToolbar from './STToolbar.vue';
+import { SaveViewDefaults, SaveViewProps } from './SaveViewProps';
+import { TranslatedString } from '@stamhoofd/structures';
+
+defineOptions({
+    inheritAttrs: false,
+});
 
 withDefaults(
-    defineProps<{
-        loading?: boolean;
-        loadingView?: boolean;
-        errorBox?: ErrorBox | null;
-        deleting?: boolean;
-        disabled?: boolean;
-        title?: string | TranslatedString;
-        saveText?: string;
-        saveIcon?: string | null;
-        saveButtonClass?: string | null;
-        saveIconRight?: string | null;
-        saveIconMobile?: string | null;
-        saveBadge?: string | number | null;
-        cancelText?: string | null;
-        preferLargeButton?: boolean;
-        addExtraCancel?: boolean;
-        mainClass?: string;
-    }>(), {
-        loading: false,
-        loadingView: false,
-        errorBox: null,
-        deleting: false,
-        disabled: false,
-        title: '',
-        saveText: () => $t(`bc6b2553-c28b-4e3b-aba3-4fdc2c23db6e`),
-        saveIcon: null,
-        saveButtonClass: 'primary',
-        saveIconRight: null,
-        saveIconMobile: null,
-        saveBadge: null,
-        cancelText: () => $t(`80651252-e037-46b2-8272-a1a030c54653`),
-        preferLargeButton: false,
-        addExtraCancel: false,
-        mainClass: '',
-    },
+    defineProps<SaveViewProps>(),
+    SaveViewDefaults,
 );
 
 const canDelete = computed(() => {

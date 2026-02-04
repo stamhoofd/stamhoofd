@@ -98,7 +98,7 @@ button.st-list-item {
     align-items: stretch;
     width: 100%; // fix for buttons
     box-sizing: border-box;
-    contain: style paint;
+    contain: style;
 
     @extend .style-normal;
 
