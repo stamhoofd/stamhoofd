@@ -232,6 +232,7 @@ function onKey(event: KeyboardEvent) {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    transform: translate(calc(-50% + (var(--st-safe-area-left, 0px) - var(--st-safe-area-right, 0px)) / 2), calc(-50% + (var(--st-safe-area-top, 0px) - var(--st-safe-area-bottom, 0px)) / 2));
     @extend .style-overlay-shadow;
     border-radius: $border-radius-modals;
     background: $color-background;
