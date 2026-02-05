@@ -17,6 +17,13 @@
         0px 0.7px 0.7px 0px rgba(0, 0, 0, 0.015),
         0px 1.4px 1.4px 0px rgba(0, 0, 0, calc(0.015 - 0.015 / 4)),
         0px 2.8px 2.8px 0px rgba(0, 0, 0, calc(0.015 - 0.015 / 4 - 0.015 / 4));
+
+    box-shadow: 
+        inset 0px 0.5px 1.4px 0.1px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.02), 
+        0px 0px 0px 1px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.02), // Smoothen border
+        0px 0.7px 0.7px 0px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.015),
+        0px 1.4px 1.4px 0px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), calc(0.015 - 0.015 / 4)),
+        0px 2.8px 2.8px 0px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), calc(0.015 - 0.015 / 4 - 0.015 / 4));
 }
 
 .style-input-box {

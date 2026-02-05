@@ -357,7 +357,10 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-primary-dark: #{$color-error-dark};
 }
 
+
 @mixin dark-modus {
+    --rgb-shadow: 255; 
+
     // Reduce color a little bit
     --color-saturation-factor: 0.5;
     --color-background: #{$dark-theme-color-background};
