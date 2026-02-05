@@ -219,16 +219,18 @@ defineExpose({
 @use '@stamhoofd/scss/base/variables' as *;
 
 .categorized-view {
-    --st-popup-width: 1000px;
+    --st-popup-width: 950px;
+    --st-horizontal-padding: 10px;
 
     > main.split {
         display: grid !important;
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 320px 1fr;
 
         > .summary {
             --st-horizontal-padding: 0px;
             padding-right: 30px;
             padding-top: 10px;
+            padding-left: 30px;
         }
 
         > *:last-child {
@@ -260,7 +262,7 @@ defineExpose({
             transform: translateY(var(--seek-y));
             contain: style paint;
             background: $color-background-shade-darker;
-            transition: height 0.3s, transform 0.2s, opacity 0.2s;
+            transition: height 0.2s, transform 0.2s, opacity 0.2s;
             border-radius: $border-radius;
             z-index: -4;
         }

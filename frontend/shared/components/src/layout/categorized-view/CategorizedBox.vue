@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
     border: $border-width solid $color-border;
     padding: 45px 40px;
     --st-horizontal-padding: 40px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     margin-top: 5px;
     overflow: hidden;
 
