@@ -217,7 +217,7 @@ function scrollToCategory(category: CategorizedViewCategory) {
         ViewportHelper.scrollIntoView(errorElement, 'center');
     }
     else {
-        ViewportHelper.scrollIntoView(el, 'top', { topPadding: 50 });
+        ViewportHelper.scrollIntoView(el, 'top');
     }
 }
 
