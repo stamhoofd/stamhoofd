@@ -1,3 +1,6 @@
+/**
+ * Named incorrectly, is in fact debounce
+ */
 export const throttle = (func: any, limit: any) => {
     let lastFunc: NodeJS.Timeout;
     let lastRan: any;
