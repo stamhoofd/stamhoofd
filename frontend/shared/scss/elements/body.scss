@@ -154,6 +154,9 @@ body.debug-safe-area {
     --st-safe-area-bottom: 50vh;
     --st-safe-area-top: 10vh;
 
+    --st-safe-area-left: 10vw;
+    --st-safe-area-right: 10vw;
+
     &:after {
         content: '';
         position: fixed;
@@ -162,7 +165,7 @@ body.debug-safe-area {
         left: 0;
         right: 0;
         height: var(--st-safe-area-bottom);
-        opacity: 0.02;
+        opacity: 0.08;
         z-index: 1000000;
     }
 
@@ -174,7 +177,33 @@ body.debug-safe-area {
         left: 0;
         right: 0;
         height: var(--st-safe-area-top);
-        opacity: 0.02;
+        opacity: 0.08;
         z-index: 1000000;
+    }
+
+    #app {
+        &:after {
+            content: '';
+            position: fixed;
+            background-color: red;
+            bottom: var(--st-safe-area-bottom);
+            left: 0;
+            top: var(--st-safe-area-top);
+            width: var(--st-safe-area-left);
+            opacity: 0.08;
+            z-index: 1000000;
+        }
+
+        &:before {
+            content: '';
+            position: fixed;
+            background-color: red;
+            bottom: var(--st-safe-area-bottom);
+            right: 0;
+            top: var(--st-safe-area-top);
+            width: var(--st-safe-area-right);
+            opacity: 0.08;
+            z-index: 1000000;
+        }
     }
 }
