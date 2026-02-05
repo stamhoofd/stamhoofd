@@ -37,7 +37,7 @@
                         {{ (!organization ? EmailTemplate.getPlatformTypeDescription(emailTemplate.type) : null) ?? EmailTemplate.getTypeDescription(emailTemplate.type) }}
                     </p>
 
-                    <p v-if="!organization && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
+                    <p v-if="!organization && !EmailTemplate.isSavedEmail(emailTemplate.type) && EmailTemplate.allowOrganizationLevel(emailTemplate.type) && !emailTemplate.groupId && !emailTemplate.organizationId" class="style-description-small">
                         {{ $t('8ecaf93e-e872-4556-9067-f89b3f81332e') }}
                     </p>
 
