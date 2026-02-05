@@ -7,6 +7,10 @@
     // min-height: 100vh;
     --rgb-shadow: 0; // Dark in white mode
 
+    --color-current-background: #{$color-background};
+    --color-current-background-shade: #{$color-background-shade};
+    --color-current-background-shade-darker: #{$color-background-shade-darker};
+
     --st-horizontal-padding: 20px;
     --st-vertical-padding: 40px;
 
