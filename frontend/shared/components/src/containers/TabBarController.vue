@@ -482,7 +482,7 @@ defineExpose({
         background: var(--color-current-background);
 
         &.showTopBar {
-            --vh: calc(var(--saved-vh, 1vh) - (var(--tab-bar-header-height) - var(--saved-st-safe-area-top, 0px)) / 100);
+            --vh: calc(var(--saved-vh, 1vh) - (var(--tab-bar-header-height) + var(--saved-st-safe-area-top, 0px)) / 100);
             --st-safe-area-top: 0px; // Handled by header
         }
 
