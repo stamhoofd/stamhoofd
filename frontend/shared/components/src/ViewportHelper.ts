@@ -242,6 +242,9 @@ export class ViewportHelper {
         const elRect = element.getBoundingClientRect();
         const scrollRect = scrollElement.getBoundingClientRect();
         let scrollPosition = elRect.bottom - scrollRect.top - scrollElement.clientHeight + scrollElement.scrollTop;
+
+        // Check if already in view
+
         // TODO: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
 
         if (align === 'center' && element.clientHeight > scrollElement.clientHeight) {
@@ -251,10 +254,6 @@ export class ViewportHelper {
         if (align === 'top' || align === 'center') {
             scrollPosition = elRect.top - scrollRect.top + scrollElement.scrollTop;
 
-            if (align === 'center') {
-                scrollPosition -= (scrollElement.clientHeight / 2) - (element.clientHeight / 2);
-            }
-
             let topPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'));
             if (isNaN(topPadding)) {
                 topPadding = 25;
@@ -263,6 +262,20 @@ export class ViewportHelper {
             if (isNaN(elTopPadding)) {
                 elTopPadding = 0;
             }
+
+            if (align === 'center') {
+                let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'));
+                if (isNaN(bottomPadding)) {
+                    bottomPadding = 25;
+                }
+                let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'));
+                if (isNaN(elBottomPadding)) {
+                    elBottomPadding = 0;
+                }
+
+                scrollPosition -= ((scrollElement.clientHeight - bottomPadding - topPadding) / 2) - ((element.clientHeight - elTopPadding - elBottomPadding) / 2);
+            }
+
             scrollPosition -= Math.max(0, topPadding - elTopPadding);
         }
         else {
