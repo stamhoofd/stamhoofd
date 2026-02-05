@@ -395,6 +395,18 @@ button.st-list-item {
         }
     }
 
+    &.no-color-highlight.selectable:not(.is-dragging) {
+        &:after {
+            background: $color-background-shade;
+            background: var(--color-current-background-shade, $color-background-shade);
+        }
+
+        &:before {
+            background: $color-background-shade-darker;
+            background: var(--color-current-background-shade-darker, $color-background-shade-darker);
+        }
+    }
+
     &.sortable-chosen {
         transition: none;
         background: $color-background-shade;
