@@ -27,8 +27,8 @@ $border-width: 1px;
 $border-width-thin: var(--border-width-thin, 1px);
 
 
-$border-radius: 8px;
-$border-radius-modals: 15px;
+$border-radius: 9px;
+$border-radius-modals: 16px;
 
 @function invertColor($color, $offset: 0) {
     @return hsl(color.hue($color), calc(var(--color-saturation-factor, 1) * color.saturation($color)), calc(100% - #{color.lightness($color) + $offset}));
