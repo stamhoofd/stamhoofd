@@ -214,7 +214,7 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
 
 .st-navigation-bar {
     margin: 0;
-    padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
+    padding: var(--st-safe-area-top, 0px) max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-right, 0px)) 0 max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-left, 0px));
 
     height: 56px;
     word-break: normal;
