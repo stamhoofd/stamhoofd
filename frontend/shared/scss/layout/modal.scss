@@ -101,7 +101,10 @@
             --bottom-padding: 0px;
             --st-safe-area-bottom: var(--popup-padding-bottom-inside, 0px);
             --st-safe-area-top: var(--popup-padding-top-inside, 0px);
-    
+
+            // Left and right is cleared and handled
+            --st-safe-area-left: 0px;
+            --st-safe-area-right: 0px;
         }
 
         &::after {
