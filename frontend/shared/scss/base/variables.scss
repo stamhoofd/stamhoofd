@@ -110,6 +110,11 @@ $color-background-shade-darker-original: #EBEBEB;
 $color-background-shade-darker: var(--color-background-shade-darker, $color-background-shade-darker-original);
 $dark-theme-color-background-shade-darker: invertColor($color-background-shade-darker-original, -8); //hsl(#{$color-primary-hue}, 0%, 14%);
 
+$color-background-shade-darker-darker-original: #E0E0E0;
+$color-background-shade-darker-darker: var(--color-background-shade-darker-darker, $color-background-shade-darker-darker-original);
+$dark-theme-color-background-shade-darker-darker: invertColor($color-background-shade-darker-darker-original, -8); //hsl(#{$color-primary-hue}, 0%, 14%);
+
+
 // Used for segmented control in dark mode: instead of darker, it should become lighter
 $color-background-highlight: var(--color-background-highlight, #ffffff);
 $dark-theme-color-background-highlight: hsl(#{$color-primary-hue}, 10%, 29%);
@@ -120,8 +125,10 @@ $dark-theme-color-background-interactive: invertColor(#ffffff, 0);
 
 $color-background-lighter: var(--color-background-lighter, #ffffff);
 $color-background-lighter-shade: var(--color-background-lighter-shade, #f5f5f5);
+$color-background-lighter-shade-darker: var(--color-background-lighter-shade-darker, #EBEBEB);
 $dark-theme-color-background-lighter: invertColor(#ffffff, 0);
 $dark-theme-color-background-lighter-shade: invertColor(#ffffff, -8);
+$dark-theme-color-background-lighter-shade-darker: invertColor(#ffffff, -16);
 
 // -----------------------------------------------------------------------------
 // -------- Primary contrast  --------------------------------------------------
@@ -457,6 +464,7 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
                 background: $color-background-interactive;
                 --color-current-background: #{$color-background-lighter};
                 --color-current-background-shade: #{$color-background-lighter-shade};
+            --color-current-background-shade-darker: #{$color-background-lighter-shade-darker};
     
                 body.modern & {
                     overflow: hidden;
@@ -470,6 +478,7 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
             background: $color-background-lighter;
             --color-current-background: #{$color-background-lighter};
             --color-current-background-shade: #{$color-background-lighter-shade};
+            --color-current-background-shade-darker: #{$color-background-lighter-shade-darker};
         }
     }
 
@@ -477,6 +486,7 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
         background: $color-background-lighter;
         --color-current-background: #{$color-background-lighter};
         --color-current-background-shade: #{$color-background-lighter-shade};
+        --color-current-background-shade-darker: #{$color-background-lighter-shade-darker};
     }
 
 

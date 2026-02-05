@@ -790,7 +790,8 @@ export default class ContextMenuView extends VueComponent {
     background: $color-background-shade-darker;
 
     --color-current-background: #{$color-background-shade-darker};
-    --color-current-background-shade: #{$color-border};
+    --color-current-background-shade: #{$color-background-shade-darker-darker};
+    --color-current-background-shade-darker: #{$color-border};
 
     border: $border-width-thin solid $color-border-shade;
     padding: 6px 15px;
