@@ -7,7 +7,7 @@
 
             <div ref="seeker-box" class="seeker-box">
                 <STList>
-                    <STListItem v-for="(category, index) of categories" :key="index" ref="categoryRows" :selectable="true" class="no-border" @click="scrollToCategory(category)">
+                    <STListItem v-for="(category, index) of categories" :key="index" ref="categoryRows" :selectable="true" class="no-border no-color-highlight" @click="scrollToCategory(category)">
                         <template #left>
                             <span :class="'icon ' + category.icon.value" />
                         </template>
@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 import { Sorter } from '@stamhoofd/utility';
-import { defineComponent, ref, Ref, useTemplateRef, watch } from 'vue';
+import { defineComponent, onMounted, ref, Ref, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
 import SaveView from '../../navigation/SaveView.vue';
 import { SaveViewDefaults, SaveViewProps } from '../../navigation/SaveViewProps';
@@ -56,18 +56,7 @@ const categoryRows = useTemplateRef('categoryRows');
 const seekerHeight = ref(0);
 const seekeryOffset = ref(0);
 
-function getScrollElement() {
-    return summaryElement.value?.closest('main');
-}
-
-const scrollElement = ref(null) as Ref<HTMLElement | null>;
-watch(summaryElement, () => {
-    scrollElement.value = getScrollElement() ?? null;
-});
-
-useScrollListener(scrollElement, () => {
-    console.log('did scroll');
-
+function updateVisible() {
     const scrollEl = scrollElement.value;
     if (!scrollEl) {
         return;
@@ -120,9 +109,56 @@ useScrollListener(scrollElement, () => {
     }
 
     visibleCategories.value = filtered;
+}
+
+/**
+ * This is a real throttle. The throttle method in utility is a debounce.
+ */
+function throttle(mainFunction, delay: number) {
+    let timerFlag: NodeJS.Timeout | null = null; // Variable to keep track of the timer
+    let runAtEnd = false;
+
+    // Returning a throttled version
+    return (...args) => {
+        if (timerFlag === null) { // If there is no timer currently running
+            mainFunction(...args); // Execute the main function
+            runAtEnd = false;
+            timerFlag = setTimeout(() => { // Set a timer to clear the timerFlag after the specified delay
+                timerFlag = null; // Clear the timerFlag to allow the main function to be executed again
+
+                if (runAtEnd) {
+                    mainFunction(...args);
+                }
+            }, delay);
+        }
+        else {
+            // Make sure to run at the end of current period
+            runAtEnd = true;
+        }
+    };
+}
+
+const throttledUpdateVisible = throttle(updateVisible, 200);
+
+function getScrollElement() {
+    return summaryElement.value?.closest('main');
+}
+
+const scrollElement = ref(null) as Ref<HTMLElement | null>;
+watch(summaryElement, () => {
+    scrollElement.value = getScrollElement() ?? null;
+    updateVisible();
 });
 
-watch(visibleCategories, () => {
+onMounted(() => {
+    updateVisible();
+});
+
+useScrollListener(scrollElement, () => {
+    throttledUpdateVisible();
+});
+
+watch([visibleCategories, categoryRows], () => {
     // Update seek height
     let height = 0;
     let yOffset = 0;
@@ -181,7 +217,7 @@ function scrollToCategory(category: CategorizedViewCategory) {
         ViewportHelper.scrollIntoView(errorElement, 'center');
     }
     else {
-        ViewportHelper.scrollIntoView(el, 'top');
+        ViewportHelper.scrollIntoView(el, 'top', { topPadding: 50 });
     }
 }
 
@@ -220,22 +256,27 @@ defineExpose({
 
 .categorized-view {
     --st-popup-width: 950px;
-    --st-horizontal-padding: 10px;
+
+    > main {
+        --st-horizontal-padding: 15px;
+    }
 
     > main.split {
         display: grid !important;
         grid-template-columns: 320px 1fr;
 
         > .summary {
-            --st-horizontal-padding: 0px;
             padding-right: 30px;
             padding-top: 10px;
-            padding-left: 30px;
+            padding-left: 0px;
+            margin-left: calc(30px - var(--st-horizontal-padding, 40px));
+
         }
 
         > *:last-child {
             z-index: 1;
             padding: 0;
+            margin-right: calc(15px - var(--st-horizontal-padding, 40px));
         }
 
         > *:first-child {
@@ -251,6 +292,13 @@ defineExpose({
         position: sticky;
         padding-top: 10px;
         top: 10px;
+        --st-horizontal-padding: 0px;
+
+        &:active, &:hover {
+            .seeker {
+                opacity: 0;
+            }
+        }
 
         .seeker {
             position: absolute;
@@ -264,7 +312,7 @@ defineExpose({
             background: $color-background-shade-darker;
             transition: height 0.2s, transform 0.2s, opacity 0.2s;
             border-radius: $border-radius;
-            z-index: -4;
+            z-index: -1;
         }
     }
 
