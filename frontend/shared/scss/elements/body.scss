@@ -145,8 +145,9 @@ html, :host {
 
 
 body.debug-safe-area {
-    --st-safe-area-top: 50px;
-    --st-safe-area-bottom: 50px;
+    // Debug helpers
+    --st-safe-area-bottom: 50vh;
+    --st-safe-area-top: 10vh;
 
     &:after {
         content: '';
