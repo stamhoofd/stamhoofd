@@ -51,14 +51,15 @@
 
     &[data-has-detail="true"] {
         display: grid;
-        grid-template-columns: 320px 1fr;
-        grid-template-columns: var(--split-view-width, 320px) 1fr;
+        grid-template-columns: calc(var(--split-view-width, 320px) + var(--st-safe-area-left, 0px)) 1fr !important;
 
         & > .master {
             min-width: 0;
+            --st-safe-area-right: 0px; // Handled
         }
 
         & > .detail {
+            --st-safe-area-left: 0px; // Handled
             min-width: 0;
             min-height: 100vh;
             min-height: calc(var(--vh, 1vh) * 100);
