@@ -37,6 +37,7 @@
         > * {
             --color-current-background: #{$color-background-shade};
             --color-current-background-shade: #{$color-background-shade-darker};
+            --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
         }
 
         border-radius: $border-radius-modals;

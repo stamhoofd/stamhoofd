@@ -91,6 +91,8 @@ onBeforeUnmount(() => {
     background: $color-background;
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};
+    --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
+
     border-radius: $border-radius-modals;
     border: $border-width solid $color-border;
     padding: 45px 40px;

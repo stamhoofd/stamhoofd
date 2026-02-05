@@ -204,6 +204,7 @@ body.modern.web-iOS {
 
             --color-current-background: #{$color-background-shade};
             --color-current-background-shade: #{$color-background-shade-darker};
+            --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
 
             &:before {
                 content: "";
@@ -320,6 +321,7 @@ body.modern.web-iOS {
         background: $color-background;
         --color-current-background: #{$color-background};
         --color-current-background-shade: #{$color-background-shade};
+        --color-current-background-shade-darker: #{$color-background-shade-darker};
     }
 
     &.transparent {
@@ -330,6 +332,7 @@ body.modern.web-iOS {
         background: $color-background-shade;
         --color-current-background: #{$color-background-shade};
         --color-current-background-shade: #{$color-background-shade-darker};
+        --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
     }
 
     &.box-shade {
@@ -337,6 +340,7 @@ body.modern.web-iOS {
             background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
             --color-current-background-shade: #{$color-background-shade-darker};
+            --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
         }
     }
 }
