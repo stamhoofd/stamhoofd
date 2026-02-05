@@ -104,8 +104,12 @@ export class PaymentActionBuilder {
                     });
                 },
             }),
-            this.getEmailAction(),
+
         ];
+
+        if (this.$feature('email-to-payments')) {
+            actions.push(this.getEmailAction());
+        }
 
         return actions;
     }

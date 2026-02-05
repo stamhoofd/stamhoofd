@@ -138,6 +138,15 @@
                         {{ $t('47e866d9-5349-4318-b779-161da61c2250') }}
                     </h3>
                 </STListItem>
+
+                <STListItem :selectable="true" element-name="label">
+                    <template #left>
+                        <Checkbox :model-value="getFeatureFlag('email-to-payments')" @update:model-value="setFeatureFlag('email-to-payments', !!$event)" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('E-mails verzenden naar betalingen') }}
+                    </h3>
+                </STListItem>
             </STList>
 
             <hr><button class="button text" type="button" @click="applyDiscountCode">
