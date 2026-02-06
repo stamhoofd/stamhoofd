@@ -237,7 +237,7 @@ export class Webshop extends AutoEncoder {
         return !!this.domain && this.meta.domainActive;
     }
 
-    getDefaultDomain(organization: Organization): string {
+    getDefaultDomain(organization: { address: { country: string } }): string {
         if (!STAMHOOFD.domains.webshop) {
             console.error('No webshop domains configured');
             return '';
@@ -246,7 +246,7 @@ export class Webshop extends AutoEncoder {
         return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
     }
 
-    getDefaultUrl(organization: Organization): string {
+    getDefaultUrl(organization: { address: { country: string } }): string {
         return this.getDefaultDomain(organization) + this.getDefaultSuffix();
     }
 
@@ -254,7 +254,7 @@ export class Webshop extends AutoEncoder {
         return this.domain + this.getDomainSuffix();
     }
 
-    getUrl(organization: Organization): string {
+    getUrl(organization: { address: { country: string } }): string {
         if (this.hasCustomDomain) {
             return this.getDomainUrl();
         }

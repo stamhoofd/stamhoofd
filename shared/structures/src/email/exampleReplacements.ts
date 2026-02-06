@@ -234,7 +234,11 @@ function getReplacements() {
             value: $t(`990581a8-e4db-4c33-b36b-4df045f8c294`),
         }),
         overviewTable: Replacement.create({
-            token: 'overviewTable',
+            token: 'paymentOverview',
+            html: htmlPlaceholder,
+        }),
+        balanceItemPaymentsTable: Replacement.create({
+            token: 'balanceItemPaymentsTable',
             html: htmlPlaceholder,
         }),
         paymentTable: Replacement.create({
@@ -279,6 +283,10 @@ function getReplacements() {
         }),
         orderTable: Replacement.create({
             token: 'orderTable',
+            html: htmlPlaceholder,
+        }),
+        paymentData: Replacement.create({
+            token: 'paymentData',
             html: htmlPlaceholder,
         }),
         orderUrl: Replacement.create({
