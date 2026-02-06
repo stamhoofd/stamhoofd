@@ -28,6 +28,6 @@ export function useSwitchLanguage() {
 
     return {
         switchLanguage,
-        hasLanguages: I18nController.shared.availableLanguages.length > 1,
+        hasLanguages: I18nController.shared ? (I18nController.shared.availableLanguages.length > 1) : false,
     };
 }
