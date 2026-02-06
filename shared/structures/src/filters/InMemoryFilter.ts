@@ -193,6 +193,16 @@ function objectPathValue(object: any, path: string[]) {
         if (object.has(nextSearched)) {
             return objectPathValue(object.get(nextSearched), path.slice(1));
         }
+
+        // This mimics SQL behaviour where you can add wildcards in paths, which expands to a JSONArray
+        if (nextSearched === '*') {
+            // Create an array with all the values of the map, following the path for each individual value
+            const array: any[] = [];
+            for (const value of object.values()) {
+                array.push(objectPathValue(value, path.slice(1)));
+            }
+            return array;
+        }
         return undefined;
     }
 
@@ -202,6 +212,16 @@ function objectPathValue(object: any, path: string[]) {
 
     if (nextSearched in object) {
         return objectPathValue(object[nextSearched], path.slice(1));
+    }
+
+    // This mimics SQL behaviour where you can add wildcards in paths, which expands to a JSONArray
+    if (nextSearched === '*' && Array.isArray(object)) {
+        // Create an array with all the values of the map, following the path for each individual value
+        const array: any[] = [];
+        for (const value of object) {
+            array.push(objectPathValue(value, path.slice(1)));
+        }
+        return array;
     }
 }
 

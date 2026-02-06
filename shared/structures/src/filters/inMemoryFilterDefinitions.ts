@@ -1,5 +1,7 @@
 import { InMemoryFilterDefinitions, baseInMemoryFilterCompilers, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
 
+// This should match the backend logica. Some things that might be possible in the 'in memory' compilers, are not possible in the SQL compilers.
+// so that is why we don't support $elemMatch inside selectedChoices - this has been replaced with a wildcard selector instead.
 export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
     ...baseInMemoryFilterCompilers,
     selected: createInMemoryFilterCompiler('selected'),
@@ -7,10 +9,10 @@ export const recordAnswerItemFilterCompilers: InMemoryFilterDefinitions = {
         ...baseInMemoryFilterCompilers,
         id: createInMemoryFilterCompiler('id'),
     }),
-    selectedChoices: createInMemoryFilterCompiler('selectedChoices', {
+    selectedChoices: {
         ...baseInMemoryFilterCompilers,
-        id: createInMemoryFilterCompiler('id'),
-    }),
+        id: createInMemoryFilterCompiler('selectedChoices.*.id'),
+    },
     value: createInMemoryFilterCompiler('value'),
 };
 
