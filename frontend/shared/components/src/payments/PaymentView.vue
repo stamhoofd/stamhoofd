@@ -479,7 +479,7 @@ async function editPayment() {
 }
 
 async function markPaid() {
-    if (!await CenteredMessage.confirm($t('f742fe3f-de80-446f-a9b5-d7a55858417f'), $t('f59ee71d-abf3-42c4-a8b9-e6c88a17a6b3'))) {
+    if (!await CenteredMessage.confirm($t('f742fe3f-de80-446f-a9b5-d7a55858417f'), $t('f59ee71d-abf3-42c4-a8b9-e6c88a17a6b3'), undefined, undefined, false)) {
         return;
     }
     await mark(PaymentStatus.Succeeded);
@@ -487,12 +487,12 @@ async function markPaid() {
 
 async function markPending() {
     if (props.payment.status === PaymentStatus.Succeeded) {
-        if (!await CenteredMessage.confirm($t('3dd18283-b7d9-4cd9-8eee-c65cb89b9d69'), $t('3a21f69a-dda9-4ea2-87a2-b1e57e2452df'), $t('7dd54003-9a52-498a-acb2-3467e3b88017'))) {
+        if (!await CenteredMessage.confirm($t('3dd18283-b7d9-4cd9-8eee-c65cb89b9d69'), $t('3a21f69a-dda9-4ea2-87a2-b1e57e2452df'), $t('7dd54003-9a52-498a-acb2-3467e3b88017'), undefined, false)) {
             return;
         }
     }
     else {
-        if (!await CenteredMessage.confirm($t('767cec61-f0b4-4a55-9568-556ebb6a3a49'), $t('59b28370-3af7-48f9-9664-a66fe57e72b7'), $t('9172b0e0-f292-4710-a0a0-486b2e911847'))) {
+        if (!await CenteredMessage.confirm($t('767cec61-f0b4-4a55-9568-556ebb6a3a49'), $t('59b28370-3af7-48f9-9664-a66fe57e72b7'), $t('9172b0e0-f292-4710-a0a0-486b2e911847'), undefined, false)) {
             return;
         }
     }

@@ -116,7 +116,7 @@ import { AutoEncoderPatchType, Decoder, encodeObject, PartialWithoutMethods, Pat
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AppManager, useRequestOwner } from '@stamhoofd/networking';
 import { AccessRight, Email, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, EmailTemplate, File, PermissionsResourceType } from '@stamhoofd/structures';
-import { Formatter, throttle } from '@stamhoofd/utility';
+import { Formatter, sleep, throttle } from '@stamhoofd/utility';
 import { computed, nextTick, onMounted, Ref, ref, watch } from 'vue';
 import { EditEmailTemplatesView } from '.';
 import { usePatchEmail } from '../communication/hooks/usePatchEmail';
@@ -313,6 +313,40 @@ watch([sendersLength], () => {
     }
 }, { deep: false });
 
+const isDeletingEmail = ref(false);
+async function doDelete() {
+    if (!email.value) {
+        // Does not exist yet
+        return true;
+    }
+    if (isDeletingEmail.value) {
+        return false;
+    }
+    if (!await CenteredMessage.confirm(
+        $t('c3a06b52-d25c-4ec4-afe7-208773e1332e'),
+        $t('eee720f3-5e00-429c-a847-cb3d4e237e4d'),
+    )) {
+        return false;
+    }
+
+    isDeletingEmail.value = true;
+    try {
+        await doPatchEmail(email.value, EmailPreview.patch({
+            id: email.value.id,
+            deletedAt: new Date(),
+        }));
+        return true;
+    }
+    catch (e) {
+        // Handled by the hook
+        Toast.fromError(e).show();
+        return false;
+    }
+    finally {
+        isDeletingEmail.value = false;
+    }
+}
+
 const subject = computed({
     get: () => patchedEmail.value?.subject || '',
     set: (subject) => {
@@ -341,11 +375,15 @@ const sendAsEmail = computed({
     },
 });
 
+const autoSaveEnabled = computed(() => {
+    return !(props.editEmail && props.editEmail.status !== EmailStatus.Draft);
+});
+
 watch(patch, (newValue, oldValue) => {
     if (newValue === null) {
         return;
     }
-    if (props.editEmail && props.editEmail.status !== EmailStatus.Draft) {
+    if (!autoSaveEnabled.value) {
         // Only auto save when creating a new email or editing a draft
         return;
     }
@@ -431,6 +469,14 @@ async function createEmail() {
 
 const doThrottledPatch = throttle(() => patchEmail(true), 1000);
 const { patchEmail: doPatchEmail } = usePatchEmail();
+
+async function waitForSave(timeout = 5_000) {
+    // Listen for savingPAtch becomes null
+    let start = Date.now();
+    while (savingPatch.value && (Date.now() - start) < timeout) {
+        await sleep(200);
+    }
+}
 
 async function patchEmail(async = false) {
     if (!email.value) {
@@ -570,6 +616,7 @@ async function send() {
         }
         return;
     }
+    await waitForSave();
 
     if (savingPatch.value) {
         Toast.info($t(`a6d49891-5af9-4dee-8dba-57ad854fb955`)).show();
@@ -851,6 +898,55 @@ const shouldNavigateAway = async () => {
             return true;
         }
         console.log('has changes because of json/subject', json, initialEmail.json);
+    }
+
+    if (autoSaveEnabled.value) {
+        // todo check saving
+        const option = await CenteredMessage.show({
+            title: $t('Ben je zeker dat je dit bericht wilt sluiten?'),
+            description: $t('Je berichten worden altijd automatisch opgeslagen terwijl je typt. Je kan hier later verder aan werken via het tabblad ‘Berichten’. Als je wilt kan je dit concept weggooien.'),
+            buttons: [
+                {
+                    text: $t('Ja, behouden'),
+                    type: 'primary',
+                    value: 'save',
+                    icon: 'download small',
+                },
+                {
+                    text: $t('Ja, concept weggooien'),
+                    type: 'secundary',
+                    value: 'delete',
+                    icon: 'trash small',
+                },
+                {
+                    text: $t('Annuleren'),
+                    type: 'secundary',
+                    value: 'cancel',
+                },
+            ],
+        });
+
+        if (option === 'cancel') {
+            return false;
+        }
+        if (option === 'save') {
+            await waitForSave();
+
+            if (savingPatch.value) {
+                Toast.info($t(`Het duurt langer dan normaal om het bericht op te slaan. Probeer later opnieuw.`)).show();
+                return false;
+            }
+            await patchEmail(false);
+            Toast.success($t(`Bericht opgeslagen als concept`)).show();
+            return true;
+        }
+        if (option === 'delete') {
+            // Delete
+            if (await doDelete()) {
+                return true;
+            }
+        }
+        return false;
     }
     return await CenteredMessage.confirm($t('996a4109-5524-4679-8d17-6968282a2a75'), $t('106b3169-6336-48b8-8544-4512d42c4fd6'));
 };

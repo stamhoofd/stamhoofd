@@ -1,6 +1,6 @@
 <template>
     <form class="centered-message-container" @submit.prevent @mousedown="onClickOutside" @touchdown="onClickOutside">
-        <div class="centered-message" data-testid="centered-message" @mousedown.stop="" @touchdown.stop="">
+        <div class="centered-message" data-testid="centered-message" :class="{'single-button': centeredMessage.buttons.length === 1, 'few-buttons': centeredMessage.buttons.length <= 2, 'multiple-buttons': centeredMessage.buttons.length > 2}" @mousedown.stop="" @touchdown.stop="">
             <div class="header">
                 <Spinner v-if="centeredMessage.type === 'loading'" class="" />
                 <img v-else-if="centeredMessage.type === 'clock'" class="center" src="@stamhoofd/assets/images/illustrations/clock.svg">
@@ -146,7 +146,7 @@ function focusNextButton() {
     let focusedButton = buttons.findIndex((b: any) => b === document.activeElement);
 
     if (focusedButton === -1) {
-        focusedButton = buttons.findIndex((b: any) => b.classList.contains('focus-visible'))
+        focusedButton = buttons.findIndex((b: any) => b.classList.contains('focus-visible'));
     }
 
     let button = buttons[0];
@@ -243,7 +243,36 @@ function onKey(event: KeyboardEvent) {
     overflow: auto;
     overflow-x: hidden;
 
-    @media (max-width: 551px) {
+    &.few-buttons {
+        @media (max-width: 551px) {
+            padding: 20px;
+
+            .buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 20px;
+            }
+        }
+
+        @media (min-width: 550px) {
+            width: 550px;
+            padding: 30px 40px;
+
+            .buttons {
+                border-top: $border-width-thin solid $color-border-shade;
+                padding: 15px 40px 15px 40px;
+                margin: 25px -40px -30px -40px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                flex-direction: row-reverse;
+                gap: 10px;
+            }
+        }
+    }
+
+    &.multiple-buttons {
         padding: 20px;
 
         .buttons {
@@ -251,22 +280,6 @@ function onKey(event: KeyboardEvent) {
             flex-direction: column;
             gap: 10px;
             padding-top: 20px;
-        }
-    }
-
-    @media (min-width: 550px) {
-        width: 550px;
-        padding: 30px 40px;
-
-        .buttons {
-            border-top: $border-width-thin solid $color-border-shade;
-            padding: 15px 40px 15px 40px;
-            margin: 25px -40px -30px -40px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            flex-direction: row-reverse;
-            gap: 10px;
         }
     }
 
