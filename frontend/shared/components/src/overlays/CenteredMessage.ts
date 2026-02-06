@@ -101,7 +101,27 @@ export class CenteredMessage {
             this.doHide();
             this.doHide = null;
         }
-        return this
+        return this;
+    }
+
+    static confirm(text: string, confirmText: string, description = '', cancelText?: string, destructive = true): Promise<boolean> {
+        return this.show({
+            title: text,
+            description,
+            buttons: [
+                {
+                    text: confirmText,
+                    type: destructive ? 'destructive' : 'primary',
+                    value: true,
+                    availabilityDelay: destructive ? 1_000 : undefined,
+                },
+                {
+                    text: cancelText ?? $t(`bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b`),
+                    type: 'secundary',
+                    value: false,
+                },
+            ],
+        });
     }
 
     static show<
