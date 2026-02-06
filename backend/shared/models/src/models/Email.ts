@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { User as UserStruct, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, Replacement, SortItemDirection, StamhoofdFilter, BaseOrganization } from '@stamhoofd/structures';
+import { BaseOrganization, EmailAttachment, EmailPreview, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailStatus, Email as EmailStruct, EmailTemplateType, EmailWithRecipients, getExampleRecipient, isSoftEmailRecipientError, LimitedFilteredRequest, PaginatedResponse, SortItemDirection, StamhoofdFilter, User as UserStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AnyDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
@@ -12,8 +12,8 @@ import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeRepl
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailTemplate } from './EmailTemplate.js';
 import { Organization } from './Organization.js';
-import { User } from './User.js';
 import { Platform } from './Platform.js';
+import { User } from './User.js';
 
 type Attachment = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string };
 
@@ -34,6 +34,16 @@ function errorToSimpleErrors(e: unknown) {
         );
     }
 }
+
+export type RecipientLoader<BeforeFetchAllResult = any> = {
+    /**
+     * Run one or multiple queries before fetching all recipients.
+     * The result of this function will be passed to the `fetch` function.
+     */
+    beforeFetchAll?: (request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => Promise<BeforeFetchAllResult>;
+    fetch(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
+    count(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<number>;
+};
 
 export class Email extends QueryableModel {
     static table = 'emails';
@@ -217,10 +227,7 @@ export class Email extends QueryableModel {
     })
     updatedAt: Date;
 
-    static recipientLoaders: Map<EmailRecipientFilterType, {
-        fetch(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
-        count(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<number>;
-    }> = new Map();
+    static recipientLoaders: Map<EmailRecipientFilterType, RecipientLoader> = new Map();
 
     static pendingNotificationCountUpdates: Map<string, { timer: NodeJS.Timeout | null; lastUpdate: Date | null }> = new Map();
 
@@ -1193,9 +1200,11 @@ export class Email extends QueryableModel {
                         search: subfilter.search,
                     });
 
+                    const beforeFetchAllResult = loader.beforeFetchAll ? await loader.beforeFetchAll(request, subfilter.subfilter) : undefined;
+
                     while (request) {
                         abort.throwIfAborted();
-                        const response = await loader.fetch(request, subfilter.subfilter);
+                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult);
 
                         for (const item of response.results) {
                             if (!item.email && !item.memberId && !item.userId) {
@@ -1332,8 +1341,10 @@ export class Email extends QueryableModel {
                         search: subfilter.search,
                     });
 
+                    const beforeFetchAllResult = loader.beforeFetchAll ? await loader.beforeFetchAll(request, subfilter.subfilter) : undefined;
+
                     while (request) {
-                        const response = await loader.fetch(request, subfilter.subfilter);
+                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult);
 
                         // Note: it is possible that a result in the database doesn't return a recipient (in memory filtering)
                         // so we do need pagination
