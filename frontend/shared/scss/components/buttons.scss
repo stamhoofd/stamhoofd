@@ -96,6 +96,12 @@
             }
         }
 
+        &.destructive:disabled, &.destructive.disabled {
+            color: $color-error-background;
+            background: $color-error;
+            opacity: 0.4;
+        }
+
         > .icon, > .bubble {
             align-self: center;
             
@@ -121,7 +127,7 @@
         color: $color-primary-contrast;
         background: $color-primary;
 
-        &.focus-visible {
+        &.focus-visible:not(:disabled) {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
             box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-primary;
         }
@@ -177,7 +183,7 @@
         color: white;
         background: $color-error;
 
-        &.focus-visible {
+        &.focus-visible:not(:disabled) {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
             box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-error;
         }
@@ -194,7 +200,7 @@
         
         background: $color-gray-3;
 
-        &.focus-visible {
+        &.focus-visible:not(:disabled) {
             // Create a hight contrast selection state, by adding multiple box shadows, to create a white border
             box-shadow: 0 0 0 2px var(--color-current-background, #{$color-background}), 0 0 0 4px $color-gray-1;
         }
