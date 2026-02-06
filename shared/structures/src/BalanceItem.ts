@@ -463,7 +463,7 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true, version: 353 })
     payingOrganizationId: string | null = null;
 
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 394 })
     orderId: string | null = null;
 
     static getDueOffset(from: Date = new Date()) {
