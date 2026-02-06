@@ -1,6 +1,6 @@
 import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Order, Organization, Payment, RecipientLoader, User, Webshop } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
-import { BalanceItemRelationType, BalanceItemType, CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
 import { createOrderDataHTMLTable, createPaymentDataHTMLTable } from '../helpers/email-html-helpers.js';
@@ -120,6 +120,7 @@ async function getRecipients(result: PaginatedResponse<PaymentGeneral[], Limited
     if (type === EmailRecipientFilterType.Payment) {
         recipients.push(...await getUserRecipients(userIds, replacementOptions));
         recipients.push(...await getMemberRecipients(memberIds, replacementOptions));
+        recipients.push(...await getUserRecipients(userIds, replacementOptions));
         recipients.push(...await getOrderRecipients(orderIds, replacementOptions));
     }
     else {
@@ -312,8 +313,7 @@ async function getOrderRecipients(ids: { orderId: string; payment: PaymentGenera
     return results;
 }
 
-function getEmailReplacementsForPayment(payment: PaymentGeneral, options: ReplacementsOptions): Replacement[] {
-    const { orderMap, webshopMap, organizationMap, shouldAddReplacementsForOrder } = options;
+function getEmailReplacementsForPayment(payment: PaymentGeneral, { orderMap, webshopMap, organizationMap, shouldAddReplacementsForOrder }: ReplacementsOptions): Replacement[] {
     const orderIds = new Set<string>();
 
     for (const balanceItemPayment of payment.balanceItemPayments) {
@@ -407,92 +407,9 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
             value: '',
             html: payment.getHTMLTable(),
         }),
-        Replacement.create({
-            token: 'overviewContext',
-            value: getPaymentContext(payment, options),
-        }),
         orderUrlReplacement,
         paymentDataReplacement,
     ]).filter(replacementOrNull => replacementOrNull !== null);
-}
-
-function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: ReplacementsOptions) {
-    const overviewContext = new Set<string>();
-    const registrationMemberNames = new Set<string>();
-
-    // only add to context if type is order or registration
-    for (const balanceItemPayment of payment.balanceItemPayments) {
-        const balanceItem = balanceItemPayment.balanceItem;
-        const type = balanceItem.type;
-
-        switch (type) {
-            case BalanceItemType.Order: {
-                if (balanceItem.orderId) {
-                    const order = orderMap.get(balanceItem.orderId);
-
-                    if (order) {
-                        const webshop = webshopMap.get(order.webshopId);
-                        if (webshop) {
-                            overviewContext.add($t('{webshop} (bestelling {orderNumber})', {
-                                webshop: webshop.meta.name,
-                                orderNumber: order.number ?? '',
-                            }));
-                        }
-                        else {
-                            overviewContext.add($t('Bestelling {orderNumber}', {
-                                orderNumber: order.number ?? '',
-                            }));
-                        }
-                    }
-                }
-                break;
-            }
-            case BalanceItemType.Registration: {
-                const memberName = balanceItem.relations.get(BalanceItemRelationType.Member)?.name.toString();
-                if (memberName) {
-                    registrationMemberNames.add(memberName);
-                }
-                else {
-                    overviewContext.add(balanceItem.itemTitle);
-                }
-
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    if (registrationMemberNames.size > 0) {
-        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
-        overviewContext.add($t(`01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c`) + ' ' + memberNames);
-    }
-
-    if (overviewContext.size === 0) {
-        // add item title if no balance items with type order or registration
-        if (payment.balanceItemPayments.length === 1) {
-            const balanceItem = payment.balanceItemPayments[0].balanceItem;
-            return balanceItem.itemTitle;
-        }
-
-        if (payment.balanceItemPayments.length > 1) {
-            // return title if all balance items have the same title
-            const titles = new Set(payment.balanceItemPayments.map(p => p.balanceItem.itemTitle));
-            if (titles.size === 1) {
-                return [...titles][0];
-            }
-
-            // else return default text for multiple items
-            return $t('Betaling voor {count} items', { count: payment.balanceItemPayments.length });
-        }
-
-        // else return default text for single item
-        return $t('Betaling voor 1 item');
-    }
-
-    // join texts for balance items with type order or registration
-    return [...overviewContext].join(', ');
 }
 
 type BeforeFetchAllResult = {
