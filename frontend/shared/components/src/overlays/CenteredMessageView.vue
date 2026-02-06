@@ -16,7 +16,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <div class="buttons">
+            <div class="buttons" :class="{'single-button': centeredMessage.buttons.length === 1, 'multiple-buttons': centeredMessage.buttons.length > 2}">
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
                     <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" :disabled="button.disabled" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
@@ -126,8 +126,6 @@ onDeactivated(() => {
 function getButtons() {
     let buttons = buttonsRef.value;
 
-    console.log('getButtons', buttons);
-
     if (!buttons) {
         return [];
     }
@@ -139,27 +137,32 @@ function getButtons() {
 }
 
 function focusNextButton() {
-    console.log('focusNextButton');
     let buttons = getButtons();
     if (buttons.length === 0) {
-        console.log('no buttons');
         return;
     }
 
     // Find first focused button and select the next one or first one if it is the last one
-    const focusedButton = buttons.findIndex((b: any) => b === document.activeElement);
+    let focusedButton = buttons.findIndex((b: any) => b === document.activeElement);
+
+    if (focusedButton === -1) {
+        focusedButton = buttons.findIndex((b: any) => b.classList.contains('focus-visible'))
+    }
 
     let button = buttons[0];
     if (focusedButton !== -1) {
-        if (focusedButton > 0) {
-            button = buttons[focusedButton - 1];
+        if (focusedButton < buttons.length - 1) {
+            button = buttons[focusedButton + 1];
         }
         else {
-            button = buttons[buttons.length - 1];
+            button = buttons[0];
         }
     }
 
     // Fix unreliable focus visible
+    if (focusedButton !== -1 && buttons[focusedButton]) {
+        buttons[focusedButton].classList.remove('focus-visible');
+    }
     button.classList.add('focus-visible');
 
     // And we'll remove it again on blur, once
@@ -200,8 +203,16 @@ function onKey(event: KeyboardEvent) {
             // Browser default
             return;
         }
+
+        const next = getButtons().find((b: HTMLElement) => b.classList.contains('focus-visible'));
+        if (next) {
+            next.click();
+            event.preventDefault();
+            return;
+        }
+
         // Do we have a default action?
-        const defaultButton = props.centeredMessage.buttons.find(b => b.action !== null && b.type !== 'destructive');
+        const defaultButton = props.centeredMessage.buttons[0];
         if (defaultButton) {
             onClickButton(defaultButton).catch(console.error);
             event.preventDefault();
@@ -209,174 +220,6 @@ function onKey(event: KeyboardEvent) {
         }
     }
 }
-
-//
-// @Component({
-//     components: {
-//         Spinner,
-//         STErrorsDefault,
-//         LoadingButton
-//     }
-// })
-// export default class CenteredMessageView extends Mixins(NavigationMixin) {
-//     @Prop({ required: true})
-//     centeredMessage: CenteredMessage
-//
-//     isClosing = false
-//     errorBox: ErrorBox | null = null
-//
-//     mounted() {
-//         this.centeredMessage.doHide = () => {
-//             this.close()
-//         }
-//
-//         if (document.activeElement && (document.activeElement as any).blur) {
-//             (document.activeElement as any).blur();
-//         }
-//         setTimeout(() => {
-//             this.focusNextButton()
-//         }, 200)
-//     }
-//
-//     onClickOutside() {
-//         // If this is a touch device, do nothing
-//         if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || ((navigator as any).msMaxTouchPoints > 0)) {
-//             return
-//         }
-//         this.dismiss();
-//     }
-//
-//     async onClickButton(button: CenteredMessageButton) {
-//         if (this.isClosing) {
-//             return
-//         }
-//         if (button.loading) {
-//             return;
-//         }
-//         if (button.action) {
-//             button.loading = true;
-//             try {
-//                 await button.action()
-//             } catch (e) {
-//                 this.errorBox = new ErrorBox(e)
-//                 button.loading = false
-//                 return;
-//             }
-//             this.errorBox = null
-//             button.loading = false
-//         }
-//         this.close()
-//     }
-//
-//     dismiss() {
-//         const closeButton = this.centeredMessage.buttons.find(b => b.type === "secundary")
-//         if (!closeButton) {
-//             return;
-//         }
-//
-//         this.onClickButton(closeButton).catch(console.error)
-//     }
-//
-//     close() {
-//         if (this.isClosing) {
-//             return
-//         }
-//         this.isClosing = true
-//         this.pop({ force: true })
-//     }
-//
-//     activated() {
-//         document.addEventListener("keydown", this.onKey);
-//     }
-//
-//     deactivated() {
-//         document.removeEventListener("keydown", this.onKey);
-//     }
-//
-//     getButtons() {
-//         let buttons = this.$refs.buttons as any
-//
-//         if (!buttons) {
-//             return [];
-//         }
-//
-//         if (buttons.length === undefined) {
-//             buttons = [buttons]
-//         }
-//         return buttons;
-//     }
-//
-//     focusNextButton() {
-//         console.log('focusNextButton')
-//         let buttons = this.getButtons()
-//         if (buttons.length === 0) {
-//             console.log('no buttons')
-//             return
-//         }
-//
-//         // Find first focused button and select the next one or first one if it is the last one
-//         const focusedButton = buttons.findIndex((b: any) => b === document.activeElement)
-//
-//         let button = buttons[0];
-//         if (focusedButton !== -1) {
-//             if (focusedButton >= buttons.length - 2) {
-//                 button = buttons[0];
-//             } else {
-//                 button = buttons[focusedButton+1]
-//             }
-//         }
-//
-//         // Fix unreliable focus visible
-//         button.classList.add("focus-visible");
-//
-//         // And we'll remove it again on blur, once
-//         button.addEventListener("blur", function () {
-//             button.classList.remove("focus-visible");
-//         }, { once: true });
-//
-//         button.focus()
-//     }
-//
-//     onKey(event) {
-//         if (event.defaultPrevented || event.repeat) {
-//             return;
-//         }
-//
-//         const key = event.key || event.keyCode;
-//         const closeButton = this.centeredMessage.buttons.find(b => b.type === "secundary")
-//
-//         if (key === "Tab") {
-//             this.focusNextButton();
-//             event.preventDefault();
-//             return;
-//         }
-//
-//         if (key === "Escape" || key === "Esc" || key === 27) {
-//             if (!closeButton) {
-//                 return;
-//             }
-//
-//             this.onClickButton(closeButton).catch(console.error)
-//             event.preventDefault();
-//             return;
-//         }
-//
-//         if (key === "Enter" || key === 13) {
-//             const focusedButton = this.getButtons().find((b: any) => b === document.activeElement)
-//             if (focusedButton) {
-//                 // Browser default
-//                 return;
-//             }
-//             // Do we have a default action?
-//             const defaultButton = this.centeredMessage.buttons.find(b => b.action !== null && b.type !== "destructive")
-//             if (defaultButton) {
-//                 this.onClickButton(defaultButton).catch(console.error)
-//                 event.preventDefault();
-//                 return;
-//             }
-//         }
-//     }
-// }
 </script>
 
 <style lang="scss">
@@ -425,6 +268,13 @@ function onKey(event: KeyboardEvent) {
             flex-direction: row-reverse;
             gap: 10px;
         }
+    }
+
+    .buttons.multiple-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 20px;
     }
 
     > *:first-child {
