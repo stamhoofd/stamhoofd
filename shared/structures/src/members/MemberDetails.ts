@@ -114,7 +114,7 @@ export class MemberDetails extends AutoEncoder {
     @field({
         decoder: UitpasNumberDetails,
         nullable: true,
-        version: 391,
+        version: 392,
         upgrade: (old: string | null) => {
             if (old) {
                 return UitpasNumberDetails.create({
