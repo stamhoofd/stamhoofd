@@ -1,27 +1,30 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors'
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { reactive } from 'vue';
 
-export type CenteredMessageListener = (centeredMessage: CenteredMessage) => unknown
+export type CenteredMessageListener = (centeredMessage: CenteredMessage) => unknown;
 
 export class CenteredMessageButton {
-    text: string
-    href?: string
-    action: (() => Promise<any>) | null = null
-    type: "destructive" | "secundary" | "primary"
-    icon: string | null = null
-    loading = false
+    text: string;
+    href?: string;
+    action: (() => Promise<any>) | null = null;
+    type: 'destructive' | 'secundary' | 'primary';
+    icon: string | null = null;
+    loading = false;
+    disabled = false;
 
     constructor(text, settings?: {
         action?: (() => Promise<any>);
-        type?: "destructive" | "secundary" | "primary";
+        type?: 'destructive' | 'secundary' | 'primary';
         icon?: string ;
-        href?: string
+        href?: string;
+        disabled?: boolean;
     }) {
-        this.text = text
-        this.action = settings?.action ?? null
-        this.type = settings?.type ?? "primary"
-        this.icon = settings?.icon ?? null
-        this.href = settings?.href
-
+        this.text = text;
+        this.action = settings?.action ?? null;
+        this.type = settings?.type ?? 'primary';
+        this.icon = settings?.icon ?? null;
+        this.href = settings?.href;
+        this.disabled = settings?.disabled ?? false;
     }
 }
 
@@ -100,21 +103,47 @@ export class CenteredMessage {
         return this
     }
 
-    static confirm(text: string, confirmText: string, description = "", cancelText?: string, destructive = true): Promise<boolean> {
+    static show<
+        // Some magic to make sure TypeScript infers the return type of the promise based on the value of the buttons
+        const Buttons extends readonly {
+            text: string;
+            value: string | boolean;
+            type?: 'destructive' | 'primary' | 'secundary';
+            icon?: string;
+            availabilityDelay?: number;
+        }[],
+    >(options: {
+        title: string;
+        description?: string;
+        buttons: Buttons;
+    }): Promise<Buttons[number]['value']> {
         return new Promise((resolve) => {
-            new CenteredMessage(text, description).addButton(new CenteredMessageButton(confirmText, {
-                action: () => {
-                    resolve(true)
-                    return Promise.resolve()
-                },
-                type: destructive ? "destructive" : "primary"
-            })).addButton(new CenteredMessageButton(cancelText ?? $t(`bc53d7e6-3dbc-45ec-beeb-5f132fcbedb9`), {
-                action: () => {
-                    resolve(false)
-                    return Promise.resolve()
-                },
-                type: "secundary"
-            })).show()
-        })
+            const message = new CenteredMessage(options.title, options.description);
+
+            for (const data of options.buttons) {
+                let button = new CenteredMessageButton(data.text, {
+                    action: () => {
+                        resolve(data.value);
+                        return Promise.resolve();
+                    },
+                    type: data.type as any ?? 'primary',
+                    icon: data.icon ?? undefined,
+                    disabled: data.availabilityDelay ? true : false,
+                });
+                // Make it reactive, otherwise we cannot alter the loading state here
+                button = reactive(button);
+                message.addButton(
+                    button,
+                );
+
+                if (data.availabilityDelay) {
+                    setTimeout(() => {
+                        button.disabled = false;
+                    }, data.availabilityDelay + 300); // 300 ms for delay presenting the message
+                }
+            }
+
+            message.show();
+        });
     }
 }

@@ -18,11 +18,11 @@
 
             <div class="buttons">
                 <LoadingButton v-for="(button, index) in centeredMessage.buttons" :key="index" :loading="button.loading">
-                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" @click="onClickButton(button)">
+                    <a v-if="button.href" ref="buttons" :href="button.href" class="button full" :class="button.type" data-testid="centered-message-button" :disabled="button.disabled" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </a>
-                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" @click="onClickButton(button)">
+                    <button v-else ref="buttons" class="button full" :class="button.type" type="button" :tabindex="0" data-testid="centered-message-button" :disabled="button.disabled" @click="onClickButton(button)">
                         <span v-if="button.icon" class="icon" :class="button.icon" />
                         <span>{{ button.text }}</span>
                     </button>
@@ -74,6 +74,9 @@ function onClickOutside() {
 
 async function onClickButton(button: CenteredMessageButton) {
     if (isClosing.value) {
+        return;
+    }
+    if (button.disabled) {
         return;
     }
     if (button.loading) {
