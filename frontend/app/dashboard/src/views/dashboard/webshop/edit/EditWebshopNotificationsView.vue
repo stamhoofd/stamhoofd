@@ -40,7 +40,7 @@ import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 const props = defineProps<UseEditWebshopProps>();
 const viewTitle = 'Meldingen';
 
-const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 const context = useContext();
@@ -137,4 +137,8 @@ async function checkBounces() {
 
 const suggestions = computed(() => [user.value.email].filter(e => !emails.value.includes(e)));
 const emailCount = computed(() => emails.value.length);
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

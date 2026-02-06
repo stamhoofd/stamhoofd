@@ -73,7 +73,7 @@ const props = defineProps<UseEditWebshopProps>();
 
 const present = usePresent();
 
-const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 
@@ -103,7 +103,7 @@ const cartEnabled = computed({
 function addProduct() {
     const product = Product.create({
         type: webshop.value.meta.ticketType === WebshopTicketType.Tickets ? ProductType.Ticket : ProductType.Product,
-        showStockBelow: null
+        showStockBelow: null,
     });
     const p = PrivateWebshop.patch({});
     p.products.addPut(product);
@@ -224,5 +224,9 @@ const draggableCategories = computed({
         }
         addPatch(patch);
     },
+});
+
+defineExpose({
+    shouldNavigateAway,
 });
 </script>

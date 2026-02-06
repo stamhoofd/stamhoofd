@@ -25,7 +25,7 @@ const viewTitle = 'Vrije invoervelden';
 
 const props = defineProps<UseEditWebshopProps>();
 
-const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 
@@ -38,4 +38,8 @@ function addFieldsPatch(patch: PatchableArrayAutoEncoder<WebshopField>) {
         }),
     }));
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

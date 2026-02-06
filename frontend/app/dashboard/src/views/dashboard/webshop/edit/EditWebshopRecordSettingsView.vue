@@ -43,7 +43,7 @@ import { UseEditWebshopProps, useEditWebshop } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 
-const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 
@@ -84,4 +84,8 @@ function addCategoriesPatch(patch: PatchableArrayAutoEncoder<RecordCategory>) {
         }),
     }));
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

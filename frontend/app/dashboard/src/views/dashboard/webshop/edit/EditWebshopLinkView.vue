@@ -129,7 +129,7 @@ import WebshopDNSRecordsView from './WebshopDNSRecordsView.vue';
 
 const props = defineProps<UseEditWebshopProps>();
 
-const { webshop, addPatch, errors, saving, save, hasChanges, originalWebshop } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, originalWebshop, shouldNavigateAway } = useEditWebshop({
     validate,
     shouldDismiss,
     getProps: () => props,
@@ -506,4 +506,8 @@ async function validate() {
         }
     }
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

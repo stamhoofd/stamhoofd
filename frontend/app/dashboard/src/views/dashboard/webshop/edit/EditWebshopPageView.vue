@@ -156,7 +156,7 @@ import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 
 const props = defineProps<UseEditWebshopProps>();
 
-const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 const present = usePresent();
@@ -319,10 +319,10 @@ function previewTicket() {
 
     const reservedSeat = seat
         ? CartReservedSeat.create({
-            section: section!.id,
-            row: row!.label,
-            seat: seat.label,
-        })
+                section: section!.id,
+                row: row!.label,
+                seat: seat.label,
+            })
         : null;
 
     if (reservedSeat && seatingPlan) {
@@ -350,6 +350,10 @@ function previewTicket() {
         modalDisplayStyle: 'sheet',
     }).catch(console.error);
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
 
 <style lang="scss">

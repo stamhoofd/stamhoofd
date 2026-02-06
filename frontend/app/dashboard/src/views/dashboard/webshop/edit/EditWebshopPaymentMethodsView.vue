@@ -21,7 +21,7 @@ import { useEditWebshop, UseEditWebshopProps } from './useEditWebshop';
 const props = defineProps<UseEditWebshopProps>();
 
 const organization = useOrganization();
-const { webshop, addPatch, errors, saving, save, hasChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges, shouldNavigateAway } = useEditWebshop({
     getProps: () => props,
 });
 
@@ -48,4 +48,8 @@ function patchPrivateConfig(patch: PrivatePaymentConfiguration) {
         }),
     );
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>

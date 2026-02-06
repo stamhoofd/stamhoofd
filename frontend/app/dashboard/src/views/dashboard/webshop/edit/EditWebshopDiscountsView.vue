@@ -98,7 +98,7 @@ const props = defineProps<UseEditWebshopProps>();
 const present = usePresent();
 const viewTitle = 'Kortingen';
 
-const { webshop, addPatch, errors, saving, save, hasChanges: hasWebshopChanges } = useEditWebshop({
+const { webshop, addPatch, errors, saving, save, hasChanges: hasWebshopChanges, shouldNavigateAway } = useEditWebshop({
     afterSave,
     validate: () => {},
     getProps: () => props,
@@ -267,4 +267,8 @@ async function afterSave() {
         }
     }
 }
+
+defineExpose({
+    shouldNavigateAway,
+});
 </script>
