@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, HistoryManager, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
+import { ComponentWithProperties, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { SegmentedView, TableActionsContextMenu, TableActionSelection, useAuth, useBackForward, useGlobalEventListener, useOrganization } from '@stamhoofd/components';
-import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember } from '@stamhoofd/structures';
+import { AccessRight, Gender, Group, LimitedFilteredRequest, PermissionLevel, PlatformMember, PlatformRegistration } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useMembersObjectFetcher } from '../fetchers/useMembersObjectFetcher';
 import { useMemberActions } from './classes/MemberActionBuilder';
@@ -34,20 +34,36 @@ import MemberPaymentsTab from './tabs/MemberPaymentsTab.vue';
 import MemberPlatformMembershipTab from './tabs/MemberPlatformMembershipTab.vue';
 
 type PropType = {
-    member: PlatformMember;
     initialTab?: number | null;
     group?: Group | null;
+} & ({
+    member: PlatformMember;
     getNext: (current: PlatformMember) => PlatformMember | null;
     getPrevious: (current: PlatformMember) => PlatformMember | null;
-};
+} | {
+    registration: PlatformRegistration;
+    getNext: (current: PlatformRegistration) => PlatformRegistration | null;
+    getPrevious: (current: PlatformRegistration) => PlatformRegistration | null;
+});
 
 const props = withDefaults(
     defineProps<PropType>(),
     {
         initialTab: null,
         group: null,
+        registration: undefined,
+        member: undefined,
     },
 );
+const member = computed(() => {
+    if ('member' in props && props.member) {
+        return props.member;
+    }
+    else if ('registration' in props && props.registration) {
+        return props.registration.member;
+    }
+    throw new Error('Either member or registration prop must be provided');
+}); ;
 const auth = useAuth();
 const dismiss = useDismiss();
 const present = usePresent();
@@ -83,10 +99,11 @@ const tabIndex = computed(() => {
 });
 
 const hasWrite = computed(() => {
-    return auth.canAccessPlatformMember(props.member, PermissionLevel.Write);
+    return auth.canAccessPlatformMember(member.value, PermissionLevel.Write);
 });
 
-const { hasNext, hasPrevious, goBack, goForward } = useBackForward('member', props, computed(() => {
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+const { hasNext, hasPrevious, goBack, goForward } = useBackForward<PlatformMember | PlatformRegistration, 'member' | 'registration', PropType>('member' in props && props.member ? 'member' : 'registration', props as unknown as any, computed(() => {
     return { initialTab: tabIndex.value };
 }));
 
@@ -95,8 +112,8 @@ const objectFetcher = useMembersObjectFetcher();
 
 async function showContextMenu(event: MouseEvent) {
     const builder = buildActions({
-        organizations: props.member.organizations,
-        groups: props.member.filterGroups({ currentPeriod: true, includePending: false }),
+        organizations: member.value.organizations,
+        groups: member.value.filterGroups({ currentPeriod: true, includePending: false }),
         forceWriteAccess: hasWrite.value,
     });
 
@@ -108,12 +125,12 @@ async function showContextMenu(event: MouseEvent) {
     const selection: TableActionSelection<PlatformMember> = {
         filter: new LimitedFilteredRequest({
             filter: {
-                id: props.member.id,
+                id: member.value.id,
             },
             limit: 2,
         }),
         fetcher: objectFetcher, // todo
-        markedRows: new Map([[props.member.id, props.member]]),
+        markedRows: new Map([[member.value.id, member.value]]),
         markedRowsAreSelected: true,
     };
 
@@ -129,13 +146,13 @@ async function showContextMenu(event: MouseEvent) {
 }
 
 async function editThisMember() {
-    await editMember(props.member);
+    await editMember(member.value);
 }
 
 useGlobalEventListener('members-deleted', async (members) => {
     if (Array.isArray(members)) {
         for (const member of members) {
-            if (member !== null && typeof member === 'object' && member.id === props.member.id) {
+            if (member !== null && typeof member === 'object' && member.id === member.value.id) {
                 await dismiss({ force: true });
                 return;
             }

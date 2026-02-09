@@ -20,8 +20,8 @@ import { AccessRight, Group, GroupCategoryTree, GroupType, MemberResponsibility,
 import { computed, Ref, ref } from 'vue';
 import { useRegistrationsObjectFetcher } from '../fetchers/useRegistrationsObjectFetcher';
 import { useAdvancedRegistrationWithMemberUIFilterBuilders } from '../filters/filter-builders/registrations-with-member';
+import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { getRegistrationColumns } from '../members/helpers/getRegistrationColumns';
-import RegistrationSegmentedView from './RegistrationSegmentedView.vue';
 import { useDirectRegistrationActions } from './classes/RegistrationActionBuilder';
 
 type ObjectType = PlatformRegistration;
@@ -264,7 +264,7 @@ const defaultSortColumn = allColumns.find(c => c.id === 'registeredAt') ?? null;
 const defaultSortDirection = defaultSortColumn ? SortItemDirection.DESC : null;
 
 const Route = {
-    Component: RegistrationSegmentedView,
+    Component: MemberSegmentedView,
     objectKey: 'registration',
     getProperties: () => ({
         group: props.group,
