@@ -69,10 +69,6 @@ $segmented-control-inner-height: $segmented-control-height - $segmented-control-
 
 $border-radius: 9px;
 
-.segmented-control.with-margin {
-    margin-bottom: 15px;
-}
-
 .segmented-control {
     margin-bottom: 15px;
 
