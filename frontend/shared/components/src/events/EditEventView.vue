@@ -1,5 +1,8 @@
 <template>
     <SaveView :title="title" :disabled="!hasChanges" :loading="saving" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+        <template #buttons>
+            <button v-if="!isNew" class="button icon history" type="button" @click="viewAudit" />
+        </template>
         <h1>
             {{ title }}
         </h1>
@@ -254,7 +257,7 @@
 import { ArrayDecoder, Decoder, deepSetArray, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AddressInput, AgeInput, CenteredMessage, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
+import { AddressInput, AgeInput, AuditLogsView, CenteredMessage, DateSelection, Dropdown, ErrorBox, GlobalEventBus, ImageComponent, OrganizationAvatar, TagIdsInput, TimeInput, Toast, UploadButton, useExternalOrganization, WYSIWYGTextInput } from '@stamhoofd/components';
 import { AccessRight, Country, Event, EventLocation, EventMeta, Organization, PermissionsResourceType, ResolutionRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
@@ -300,6 +303,17 @@ const { externalOrganization, choose: chooseOrganizer } = useExternalOrganizatio
         }),
     }),
 );
+
+async function viewAudit() {
+    await present({
+        components: [
+            new ComponentWithProperties(AuditLogsView, {
+                objectIds: [props.event.id],
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
 
 const type = computed(() => {
     const type = platform.value.config.eventTypes.find(e => e.id === patched.value.typeId);
