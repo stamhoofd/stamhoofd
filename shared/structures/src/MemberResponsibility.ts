@@ -57,6 +57,10 @@ export class MemberResponsibility extends AutoEncoder {
         return this.defaultAgeGroupIds !== null;
     }
 
+    compress() {
+        this.permissions?.compress();
+    }
+
     createDefaultPermissions(group: Group | null) {
         return PermissionRoleForResponsibility.create({
             name: this.name + (group ? ` van ${group.settings.name.toString()}` : ''),

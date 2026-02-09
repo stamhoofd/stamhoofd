@@ -124,8 +124,23 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     shouldUpdateSetupSteps = true;
                 }
                 organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles);
+                if (request.body.privateMeta.roles) {
+                    for (const role of organization.privateMeta.roles) {
+                        role.compress();
+                    }
+                }
                 organization.privateMeta.responsibilities = request.body.privateMeta.responsibilities.applyTo(organization.privateMeta.responsibilities);
+                if (request.body.privateMeta.responsibilities) {
+                    for (const responsibility of organization.privateMeta.responsibilities) {
+                        responsibility.compress();
+                    }
+                }
                 organization.privateMeta.inheritedResponsibilityRoles = request.body.privateMeta.inheritedResponsibilityRoles.applyTo(organization.privateMeta.inheritedResponsibilityRoles);
+                if (request.body.privateMeta.inheritedResponsibilityRoles) {
+                    for (const role of organization.privateMeta.inheritedResponsibilityRoles) {
+                        role.compress();
+                    }
+                }
                 organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey;
                 organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
                 organization.privateMeta.balanceNotificationSettings = patchObject(organization.privateMeta.balanceNotificationSettings, request.body.privateMeta.balanceNotificationSettings);

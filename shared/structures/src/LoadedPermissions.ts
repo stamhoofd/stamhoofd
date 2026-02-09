@@ -373,6 +373,7 @@ export class LoadedPermissions {
         }
         if (this.level === PermissionLevel.Full) {
             stack.push($t(`d5c41a61-1870-4dff-9422-726f8e2a1227`));
+            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
         }
 
         for (const right of this.accessRights) {
