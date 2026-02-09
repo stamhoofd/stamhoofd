@@ -1,6 +1,9 @@
 <template>
     <LoadingViewTransition :error-box="loadingExternalOrganizerErrorBox">
         <SaveView v-if="!loadingOrganizer && patchedPeriod" :loading="saving" :title="title" :disabled="!hasChanges && !isNew" class="group-edit-view" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+            <template #buttons>
+                <button class="button icon history" v-if="!isNew && type !== GroupType.EventRegistration" type="button" @click="viewAudit" />
+            </template>
             <h1>
                 {{ title }}
 
@@ -587,7 +590,7 @@
 <script setup lang="ts">
 import { AutoEncoderPatchType, PartialWithoutMethods, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
-import { AgeInput, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders, useValidation } from '@stamhoofd/components';
+import { AgeInput, AuditLogsView, DateSelection, Dropdown, EditGroupView, EditRecordCategoriesBox, ErrorBox, GroupIdsInput, InheritedRecordsConfigurationBox, LoadingViewTransition, NumberInput, OrganizationAvatar, RecordEditorSettings, RecordEditorType, TimeInput, useRegisterItemFilterBuilders, useValidation } from '@stamhoofd/components';
 import { BooleanStatus, Country, DefaultAgeGroup, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, RecordCategory, RegisterItem, TranslatedString, WaitingListType, type MemberProperty } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
@@ -648,6 +651,17 @@ function addRequireGroupIds() {
 
 function addPreventGroupIds() {
     forceShowPreventGroupIds.value = true;
+}
+
+async function viewAudit() {
+    await present({
+        components: [
+            new ComponentWithProperties(AuditLogsView, {
+                objectIds: [props.groupId],
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
 }
 
 const { externalOrganization, choose: chooseOrganizer, loading: loadingOrganizer, errorBox: loadingExternalOrganizerErrorBox } = useExternalOrganization(
