@@ -70,13 +70,16 @@ onMounted(() => {
     z-index: 12;
     opacity: 1;
     background: var(--color-current-background, #{$color-background});
-    min-height: 100vh;
-    min-height: 100dvh;
-    min-height: calc(var(--vh, 1vh) * 100);
+    //min-height: 100dvh;
+    //min-height: calc(var(--vh, 1vh) * 100);
     //transition: opacity 0.2s;
+    bottom: 0;
 
     .st-view > & {
         position: absolute !important;
+        min-height: 100vh;
+        min-height: 100dvh;
+        min-height: calc(var(--vh, 1vh) * 100);
     }
 
     > .spinner-container {
@@ -87,6 +90,7 @@ onMounted(() => {
         right: 0;
         height: 100% !important;
         transition: opacity 1s 0.5s; // Slow fading in spinner, with delay, to prevent showing it too fast (don't want to show it if everything loads fast)
+        min-height: 48px;
     }
 
     &.fade-enter-from, .loading-view-container.fade-enter-from & {

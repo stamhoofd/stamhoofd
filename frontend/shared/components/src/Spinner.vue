@@ -24,7 +24,7 @@
         display: block;
         animation: spinner-spin 2s infinite;
         overflow: hidden;
-        
+
         > circle {
             stroke: $color-primary;
             stroke: var(--color-primary, $color-primary);
@@ -49,7 +49,7 @@
         width: 100%;
         height: auto;
     }
-    
+
     &.gray {
         div.spinner > svg > circle {
             stroke: $color-gray-1;

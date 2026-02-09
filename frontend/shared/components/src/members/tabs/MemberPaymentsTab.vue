@@ -40,3 +40,9 @@ const hasWrite = computed(() => {
 });
 
 </script>
+
+<style lang="scss">
+.member-payments-view {
+    position: relative;
+}
+</style>
