@@ -14,9 +14,12 @@ import { SegmentedControl } from '../inputs';
 
 type Item = { name: string; component: ComponentWithProperties };
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     tabs: Item[];
-}>();
+    initialTab?: number | null;
+}>(), {
+    initialTab: null,
+});
 
 defineOptions({
     name: $t(`e1193431-b95a-4a8a-94b2-8659005dcb77`),
@@ -52,14 +55,16 @@ const segmentedControlItem = computed({
     },
 });
 
-defineRoutes(props.tabs.map((tab) => {
+defineRoutes(props.tabs.map((tab, index) => {
     const name = unref(tab.name);
     return {
         name,
         url: Formatter.slug(name),
-        isDefault: {
-            properties: {},
-        },
+        isDefault: index === props.initialTab || props.initialTab === null
+            ? {
+                    properties: {},
+                }
+            : undefined,
         handler: async (options) => {
             if (options.checkRoutes) {
                 tab.component.setCheckRoutes();

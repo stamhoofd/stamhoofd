@@ -16,7 +16,7 @@
                 <span v-if="member.member.details.gender === Gender.Female" v-tooltip="member.member.details.defaultAge >= 18 ? $t('06466432-eca6-41d0-a3d6-f262f8d6d2ac') : $t('dba51db1-ce45-4e09-9a2f-fcea4a7fa46e')" class="icon female pink icon-spacer" />
             </h1>
 
-            <SegmentedView :tabs="tabs" :member="member" @change="currentItem = $event" />
+            <SegmentedView :initial-tab="initialTab" :tabs="tabs" :member="member" @change="currentItem = $event" />
         </main>
     </div>
 </template>
