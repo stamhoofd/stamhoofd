@@ -25,7 +25,6 @@
         "src/**/*.ts",
         "tests/**/*.ts",
         "index.ts",
-        "migrations.ts",
         "../../../*.d.ts",
         "../../*.d.ts"
     ],

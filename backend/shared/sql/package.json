@@ -10,7 +10,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b",
+        "build": "tsc -b --clean && tsc -b",
         "test": "jest"
     },
     "publishConfig": {
