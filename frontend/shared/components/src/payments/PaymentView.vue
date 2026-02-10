@@ -367,7 +367,7 @@
                         </template>
 
                         <template #right>
-                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? 'Gratis' : formatPrice(item.price) }}</span>
+                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('Gratis') : formatPrice(item.price) }}</span>
                         </template>
                     </STGridItem>
                 </STGrid>
@@ -383,15 +383,15 @@ import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableA
 import { AuditLogsView, CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import PriceBreakdownBox from '../views/PriceBreakdownBox.vue';
 import BalanceItemIcon from './BalanceItemIcon.vue';
 import BalanceItemTitleBox from './BalanceItemTitleBox.vue';
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import EditInvoiceView from '@stamhoofd/dashboard/src/views/dashboard/invoices/EditInvoiceView.vue';
-import OrganizationAvatar from '../context/OrganizationAvatar.vue';
 import EditPaymentView from './EditPaymentView.vue';
 
 const props = withDefaults(
