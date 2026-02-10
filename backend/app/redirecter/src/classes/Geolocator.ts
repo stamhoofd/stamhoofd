@@ -50,7 +50,6 @@ export class Geolocator {
             const from = splitted[0];
             const to = splitted[1];
 
-            console.log('From ', from, 'to', to);
             range.push(new IPRange(from, to, splitted[4] ?? ''));
         }
     }
