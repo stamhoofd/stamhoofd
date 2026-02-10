@@ -19,6 +19,7 @@
     "license": "UNLICENCED",
     "scripts": {
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"yarn -s dev:watch\"",
+        "dev:full": "yarn -s dev",
         "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --delay 2000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM",
         "dev:backend": "yarn -s dev",
         "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && yarn -s copy-assets && tsc -b",

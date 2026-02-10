@@ -9,7 +9,7 @@
     },
     "license": "UNLICENCED",
     "scripts": {
-        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "build": "tsc -b",
         "build:full": "yarn -s clear && yarn -s build",
         "clear": "rm -rf ./dist",

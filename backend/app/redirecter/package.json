@@ -4,7 +4,9 @@
     "main": "index.ts",
     "license": "UNLICENCED",
     "scripts": {
-        "build": "rm -rf ./dist/src/data && tsc -b && mkdir -p ./dist/src/data && cp ./src/data/* ./dist/src/data",
+        "dev:full": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'yarn -s build --watch --preserveWatchOutput' \"wait-on ./dist/src/data/belgium.csv && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "build": "rm -rf ./dist/src/migrations && rm -rf ./dist/src/seeds && yarn -s copy-assets && tsc -b",
+        "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' -r --checksum ./src/ ./dist/src/",
         "build:full": "rm -rf ./dist && yarn build",
         "start": "yarn build && node ./dist/index.js",
         "lint": "eslint"

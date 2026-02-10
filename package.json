@@ -21,9 +21,13 @@
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev:watch-env": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ignore './shared/build-development-env/esm/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev || exit 0'",
+    "dev:watch-env:full": "npx nodemon --quiet --signal SIGTERM --watch shared/build-development-env --ignore './shared/build-development-env/dist/' --ignore './shared/build-development-env/esm/dist/' --ext .ts,.json,.sql,.mjs --exec 'yarn -s dev:full || exit 0'",
     "dev": "concurrently -r 'yarn -s dev:init' 'yarn -s build:shared:watch' 'wait-on shared/locales/esm/dist/index.d.ts && lerna run dev --stream --parallel'",
+    "dev:full": "concurrently -r 'yarn -s dev:init' 'yarn -s build:shared:watch' 'wait-on shared/locales/esm/dist/index.d.ts && lerna run dev:full --stream --parallel'",
     "dev:stamhoofd": "STAMHOOFD_ENV=stamhoofd yarn -s dev:watch-env",
+    "dev:stamhoofd:full": "STAMHOOFD_ENV=stamhoofd yarn -s dev:watch-env:full",
     "dev:keeo": "STAMHOOFD_ENV=keeo yarn -s dev:watch-env",
+    "dev:keeo:full": "STAMHOOFD_ENV=keeo yarn -s dev:watch-env:full",
     "dev:ravot": "STAMHOOFD_ENV=ravot yarn -s dev:watch-env",
     "dev:jambo": "STAMHOOFD_ENV=jambo yarn -s dev:watch-env",
     "dev:init": "wait-on shared/build-development-env/dist/src/init.js && node shared/build-development-env/dist/src/init.js",
