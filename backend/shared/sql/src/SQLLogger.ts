@@ -22,7 +22,6 @@ class StaticSQLLogger {
         if (!explainResult) {
             return;
         }
-        console.log('EXPLAIN result for query', query, params, explainResult);
         if (explainResult['type'] === 'ALL') {
             console.warn(
                 new StyledText('[FULL TABLE SCAN] ').addClass('error').addTag('query'),
