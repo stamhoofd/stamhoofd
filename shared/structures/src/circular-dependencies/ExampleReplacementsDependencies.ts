@@ -1,3 +1,4 @@
+import { Formatter } from '@stamhoofd/utility';
 import { Address, ValidatedAddress } from '../addresses/Address.js';
 import { Country } from '../addresses/CountryDecoder.js';
 import { BalanceItem } from '../BalanceItem.js';
@@ -16,9 +17,9 @@ import { CartItem, CartItemPrice } from '../webshops/CartItem.js';
 import { Customer } from '../webshops/Customer.js';
 import { Order, OrderData } from '../webshops/Order.js';
 import { Product, ProductPrice } from '../webshops/Product.js';
-import { TransferSettings, TransferDescriptionType } from '../webshops/TransferSettings.js';
+import { TransferDescriptionType, TransferSettings } from '../webshops/TransferSettings.js';
 import { WebshopPreview } from '../webshops/Webshop.js';
-import { WebshopTimeSlot, WebshopTakeoutMethod, WebshopMetaData } from '../webshops/WebshopMetaData.js';
+import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '../webshops/WebshopMetaData.js';
 
 injectReplacementValues(fillReplacements);
 function fillReplacements(replacements: Replacement[]) {
@@ -173,6 +174,14 @@ function fillReplacements(replacements: Replacement[]) {
                 balance1,
                 balance2,
             ]),
+        }),
+        Replacement.create({
+            token: 'balanceItemPaymentsTable',
+            html: paymentGeneral.getBalanceItemPaymentsHtmlTable(),
+        }),
+        Replacement.create({
+            token: 'paymentPrice',
+            value: Formatter.price(paymentGeneral.price),
         }),
     ];
 
