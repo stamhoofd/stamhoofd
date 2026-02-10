@@ -10,6 +10,7 @@ export enum EmailTemplateType {
      */
     SavedMembersEmail = 'SavedMembersEmail',
     SavedDocumentsEmail = 'SavedDocumentsEmail',
+    SavedPaymentsEmail = 'SavedPaymentsEmail',
 
     /**
      * Defaults
@@ -19,6 +20,7 @@ export enum EmailTemplateType {
     SavedReceivableBalancesEmail = 'SavedReceivableBalancesEmail',
     DefaultOrdersEmail = 'DefaultOrdersEmail',
     DefaultDocumentsEmail = 'DefaultDocumentsEmail',
+    DefaultPaymentsEmail = 'DefaultPaymentsEmail',
 
     //
     MembersExpirationReminder = 'MembersExpirationReminder',
@@ -176,7 +178,9 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.DefaultDocumentsEmail;
         }
 
-        // todo: add template for payments
+        if (type === EmailRecipientFilterType.Payment || type === EmailRecipientFilterType.PaymentOrganization) {
+            return EmailTemplateType.DefaultPaymentsEmail;
+        }
 
         return null;
     }
@@ -194,25 +198,22 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.SavedDocumentsEmail;
         }
 
-        // todo: add template for payments
+        if (type === EmailRecipientFilterType.Payment || type === EmailRecipientFilterType.PaymentOrganization) {
+            return EmailTemplateType.SavedPaymentsEmail;
+        }
 
         return null;
     }
 
     static isSavedEmail(type: EmailTemplateType): boolean {
-        if (type === EmailTemplateType.SavedMembersEmail) {
-            return true;
-        }
+        const savedEmailTemplateTypes = new Set<EmailTemplateType>([
+            EmailTemplateType.SavedMembersEmail,
+            EmailTemplateType.SavedReceivableBalancesEmail,
+            EmailTemplateType.SavedDocumentsEmail,
+            EmailTemplateType.SavedPaymentsEmail,
+        ]);
 
-        if (type === EmailTemplateType.SavedReceivableBalancesEmail) {
-            return true;
-        }
-
-        if (type === EmailTemplateType.SavedDocumentsEmail) {
-            return true;
-        }
-
-        return false;
+        return savedEmailTemplateTypes.has(type);
     }
 
     static getTypeTitle(type: EmailTemplateType): string {
@@ -220,11 +221,13 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.SavedMembersEmail: return $t(`8c609752-6cc2-4721-9bfc-8235eae583f5`);
             case EmailTemplateType.SavedReceivableBalancesEmail: return $t(`da9b79f1-f1e3-45c8-9ce9-2c28c47d8810`);
             case EmailTemplateType.SavedDocumentsEmail: return $t('e0675fb8-f471-43b0-b26f-776825da5e6b');
+            case EmailTemplateType.SavedPaymentsEmail: return $t('Opgeslagen e-mail naar betalingen');
 
             case EmailTemplateType.DefaultMembersEmail: return $t(`32a7a328-9ba4-4ca5-9305-689fe2c81355`);
             case EmailTemplateType.DefaultReceivableBalancesEmail: return $t(`ed2ff298-5b4c-47df-99f6-1050b562637b`);
             case EmailTemplateType.DefaultOrdersEmail: return $t(`1c0b80d6-8ac3-4dc3-b3c3-13fe7257c9c7`);
             case EmailTemplateType.DefaultDocumentsEmail: return $t('1d5b6851-4dea-41ff-b66f-2a65a2772b10');
+            case EmailTemplateType.DefaultPaymentsEmail: return $t('Standaard e-mail naar betalingen');
 
             case EmailTemplateType.MembersExpirationReminder: return $t(`53995057-1b3c-457a-b142-b7780152552a`);
             case EmailTemplateType.WebshopsExpirationReminder: return $t(`9128ebac-a394-422e-b1e6-c3d40f87e33b`);
@@ -291,12 +294,14 @@ export class EmailTemplate extends AutoEncoder {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail:
             case EmailTemplateType.SavedReceivableBalancesEmail:
+            case EmailTemplateType.SavedPaymentsEmail:
             case EmailTemplateType.SavedDocumentsEmail:
                 return $t(`074e2721-99c4-4825-b2be-55a97a33d722`);
 
             case EmailTemplateType.DefaultMembersEmail:
             case EmailTemplateType.DefaultReceivableBalancesEmail:
             case EmailTemplateType.DefaultOrdersEmail:
+            case EmailTemplateType.DefaultPaymentsEmail:
             case EmailTemplateType.DefaultDocumentsEmail:
                 return $t(`0c35caa6-6240-4a92-9d89-78acf2c79fc0`);
 
@@ -391,10 +396,12 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultReceivableBalancesEmail: return true;
             case EmailTemplateType.DefaultOrdersEmail: return true;
             case EmailTemplateType.DefaultDocumentsEmail: return true;
+            case EmailTemplateType.DefaultPaymentsEmail: return true;
 
             case EmailTemplateType.SavedMembersEmail: return true;
             case EmailTemplateType.SavedReceivableBalancesEmail: return true;
             case EmailTemplateType.SavedDocumentsEmail: return true;
+            case EmailTemplateType.SavedPaymentsEmail: return true;
 
             case EmailTemplateType.RegistrationConfirmation: return true;
             case EmailTemplateType.RegistrationTransferDetails: return true;
@@ -463,9 +470,11 @@ export class EmailTemplate extends AutoEncoder {
         switch (type) {
             case EmailTemplateType.SavedMembersEmail:
             case EmailTemplateType.SavedDocumentsEmail:
+            case EmailTemplateType.SavedPaymentsEmail:
             case EmailTemplateType.DefaultDocumentsEmail:
             case EmailTemplateType.UserBalanceReminder: // special case because it is sent via a cron
             case EmailTemplateType.UserBalanceIncreaseNotification:
+            case EmailTemplateType.DefaultPaymentsEmail:
             case EmailTemplateType.DefaultMembersEmail: {
                 return true;
             }
@@ -480,6 +489,7 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.DefaultReceivableBalancesEmail: return $t(`9108cbae-cb61-41f6-9838-4456f3255669`);
             case EmailTemplateType.DefaultOrdersEmail: return $t(`09754a12-7918-47a6-a783-dde118f45368`);
             case EmailTemplateType.DefaultDocumentsEmail: return $t('665dce38-70a1-450b-a65b-f41f930d88da');
+            case EmailTemplateType.DefaultPaymentsEmail: return $t('Als iemand een nieuwe e-mail opstelt, gericht aan betalingen (zoals openstaande overschrijvingen), dan zal deze template standaard al klaar staan. Deze kan dan nog aangepast worden.');
 
             case EmailTemplateType.OrderNotification: return $t(`e735ea80-2385-4377-89f9-645505d50e2f`);
             case EmailTemplateType.RegistrationConfirmation: return $t(`474e3ddc-7d96-49f0-9de6-4f132815db99`);
@@ -692,6 +702,19 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.unsubscribeUrl,
             ];
         }
+
+        if (type === EmailTemplateType.DefaultPaymentsEmail || type === EmailTemplateType.SavedPaymentsEmail) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.paymentPrice,
+                ExampleReplacements.all.paymentMethod,
+                ExampleReplacements.all.balanceItemPaymentsTable,
+                ExampleReplacements.all.paymentTable,
+                ExampleReplacements.all.overviewContext,
+                ExampleReplacements.all.paymentData,
+            ];
+        }
+
         const sharedReplacements = [
             ...ExampleReplacements.default,
             ExampleReplacements.all.orderPrice,
