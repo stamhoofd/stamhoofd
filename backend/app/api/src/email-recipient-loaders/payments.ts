@@ -8,6 +8,7 @@ import { memberResponsibilityRecordFilterCompilers } from '../sql-filters/member
 
 type ReplacementsOptions = {
     shouldAddReplacementsForOrder: boolean;
+    shouldAddReplacementsForTransfers: boolean;
     orderMap: Map<string, Order>;
     webshopMap: Map<string, Webshop>;
     organizationMap: Map<string, Organization>;
@@ -112,6 +113,7 @@ async function getRecipients(result: PaginatedResponse<PaymentGeneral[], Limited
 
     const replacementOptions: ReplacementsOptions = {
         shouldAddReplacementsForOrder: beforeFetchAllResult ? !beforeFetchAllResult.doesIncludePaymentWithoutOrders : false,
+        shouldAddReplacementsForTransfers: beforeFetchAllResult ? beforeFetchAllResult.areAllPaymentsTransfers : false,
         orderMap,
         webshopMap,
         organizationMap,
@@ -313,7 +315,7 @@ async function getOrderRecipients(ids: { orderId: string; payment: PaymentGenera
 }
 
 function getEmailReplacementsForPayment(payment: PaymentGeneral, options: ReplacementsOptions): Replacement[] {
-    const { orderMap, webshopMap, organizationMap, shouldAddReplacementsForOrder } = options;
+    const { orderMap, webshopMap, organizationMap, shouldAddReplacementsForOrder, shouldAddReplacementsForTransfers } = options;
     const orderIds = new Set<string>();
 
     for (const balanceItemPayment of payment.balanceItemPayments) {
@@ -383,19 +385,24 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
             token: 'paymentMethod',
             value: PaymentMethodHelper.getName(payment.method ?? PaymentMethod.Unknown),
         }),
-        Replacement.create({
-            token: 'transferDescription',
-            value: (payment.transferDescription ?? ''),
-        }),
-        Replacement.create({
-            token: 'transferBankAccount',
-            value: payment.transferSettings?.iban ?? '',
-        }),
-        Replacement.create({
-            token: 'transferBankCreditor',
-            // todo?
-            value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : ''),
-        }),
+        ...(shouldAddReplacementsForTransfers
+            ? [
+                    Replacement.create({
+                        token: 'transferDescription',
+                        value: (payment.transferDescription ?? ''),
+                    }),
+                    Replacement.create({
+                        token: 'transferBankAccount',
+                        value: payment.transferSettings?.iban ?? '',
+                    }),
+                    Replacement.create({
+                        token: 'transferBankCreditor',
+                        // todo?
+                        value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : ''),
+                    }),
+                ]
+            : []),
+
         Replacement.create({
             token: 'balanceItemPaymentsTable',
             value: '',
@@ -478,9 +485,11 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
 
         if (payment.balanceItemPayments.length > 1) {
             // return title if all balance items have the same title
-            const titles = new Set(payment.balanceItemPayments.map(p => p.balanceItem.itemTitle));
-            if (titles.size === 1) {
-                return [...titles][0];
+            const firstTitle = payment.balanceItemPayments[0].balanceItem.itemTitle;
+            const haveAllSameTitle = payment.balanceItemPayments.every(p => p.balanceItem.itemTitle === firstTitle);
+
+            if (haveAllSameTitle) {
+                return `${firstTitle} (${payment.balanceItemPayments.length}x)`;
             }
 
             // else return default text for multiple items
@@ -497,6 +506,7 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
 
 type BeforeFetchAllResult = {
     doesIncludePaymentWithoutOrders: boolean;
+    areAllPaymentsTransfers: boolean;
 };
 
 async function fetchPaymentRecipients(query: LimitedFilteredRequest, beforeFetchAllResult?: BeforeFetchAllResult) {
@@ -511,8 +521,11 @@ async function fetchPaymentRecipients(query: LimitedFilteredRequest, beforeFetch
 const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
     beforeFetchAll: async (query: LimitedFilteredRequest) => {
         const doesIncludePaymentWithoutOrders = await doesQueryIncludePaymentsWithoutOrder(query);
+        const areAllPaymentsTransfers = await doesQueryIncludePaymentsOtherThanTransfers(query);
+
         return {
             doesIncludePaymentWithoutOrders,
+            areAllPaymentsTransfers,
         };
     },
     fetch: async (query: LimitedFilteredRequest, _subfilter, beforeFetchAllResult) => fetchPaymentRecipients(query, beforeFetchAllResult),
@@ -564,7 +577,26 @@ async function doesQueryIncludePaymentsWithoutOrder(filterRequest: LimitedFilter
         .limit(1)
         .count();
 
-    return results === 1;
+    return results > 0;
+}
+
+async function doesQueryIncludePaymentsOtherThanTransfers(filterRequest: LimitedFilteredRequest) {
+    // create count request (without limit and page filter)
+    const countRequest = new CountFilteredRequest({
+        filter: filterRequest.filter,
+        search: filterRequest.search,
+    });
+
+    const baseQuery = await GetPaymentsEndpoint.buildQuery(countRequest);
+
+    // check if 1 payment with other method than transfer
+    const results = await baseQuery
+        // where method is not transfer
+        .whereNot(SQL.column(Payment.table, 'method'), PaymentMethod.Transfer)
+        .limit(1)
+        .count();
+
+    return results === 0;
 }
 
 async function fetchPaymentOrganizationRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult) {
