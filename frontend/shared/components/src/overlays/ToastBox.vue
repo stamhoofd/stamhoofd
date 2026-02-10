@@ -1,8 +1,9 @@
 <template>
     <div class="toast-box" :class="{ withOffset: withOffset }">
         <transition-group name="move" tag="div">
-            <div v-for="(component, index) in components"
-                 :key="component.key"
+            <div
+                v-for="(component, index) in components"
+                :key="component.key"
             >
                 <ComponentWithPropertiesInstance
                     ref="children"
@@ -18,7 +19,7 @@
 import { ComponentWithProperties, ComponentWithPropertiesInstance } from "@simonbackx/vue-app-navigation";
 import { Component, Vue } from "vue-property-decorator";
 
-import { Toast } from "./Toast"
+import { Toast } from "./Toast";
 import ToastView from './ToastView.vue';
 /**
  * This component will automatically show the root if we have a valid token. If the user logs out, we'll automatically show the login view
@@ -63,9 +64,18 @@ export default class ToastBox extends Vue {
     removeAt(index, key) {
         if (this.components[index].key === key) {
             this.components.splice(index, 1);
-        } else {
-            console.warn("Expected component with key " + key + " at index" + index);
+            return;
         }
+
+        // Search
+        for (let i = 0; i < this.components.length; i++) {
+            if (this.components[i].key === key) {
+                this.components.splice(i, 1);
+                return;
+            }
+        }
+
+        console.warn('Expected component with key ' + key + ' at index' + index);
     }
 
     beforeDestroy() {
