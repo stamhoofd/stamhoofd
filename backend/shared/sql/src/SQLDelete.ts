@@ -1,7 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
-import { SQLJoin } from './SQLJoin';
-import { SQLWhere, Whereable } from './SQLWhere';
+import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import { SQLJoin } from './SQLJoin.js';
+import { SQLLogger } from './SQLLogger.js';
+import { Whereable } from './SQLWhere.js';
 
 class EmptyClass {}
 export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
@@ -62,8 +63,7 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
-        console.log(query, params);
-        const [rows] = await Database.delete(query, params);
+        const [rows] = await SQLLogger.log(Database.delete(query, params), query, params);
         return rows;
     }
 

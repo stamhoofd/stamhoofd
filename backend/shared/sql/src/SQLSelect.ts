@@ -1,10 +1,11 @@
 import { Database, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Formatter } from '@stamhoofd/utility';
-import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
-import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions';
-import { SQLJoin } from './SQLJoin';
-import { Orderable } from './SQLOrderBy';
-import { Whereable } from './SQLWhere';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
+import { SQLJoin } from './SQLJoin.js';
+import { Orderable } from './SQLOrderBy.js';
+import { Whereable } from './SQLWhere.js';
+import { SQLLogger } from './SQLLogger.js';
 
 class EmptyClass {}
 
@@ -41,6 +42,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _joins: (InstanceType<typeof SQLJoin>)[] = [];
     _max_execution_time: number | null = null;
     private _name: string | null = null;
+    static slowQueryThresholdMs: number | null = null;
 
     _transformer: ((row: SQLResultNamespacedRow) => T) | null = null;
 
@@ -193,7 +195,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         // console.log(query, params);
         let rows: SQLResultNamespacedRow[];
         try {
-            const [_rows] = await Database.select(query, params, { nestTables: true });
+            const [_rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
             rows = _rows;
         }
         catch (e) {
@@ -256,7 +258,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
-        const [rows] = await Database.select(query, params, { nestTables: true });
+        const [rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
         if (rows.length === 1) {
             const row = rows[0];
             if ('' in row) {
@@ -291,7 +293,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         const { query, params } = normalizeSQLQuery(this.getSQL());
         // console.log(query, params);
 
-        const [rows] = await Database.select(query, params, { nestTables: true });
+        const [rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
         if (rows.length === 1) {
             const row = rows[0];
             if ('' in row) {

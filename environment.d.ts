@@ -222,6 +222,8 @@ declare global {
         readonly UITPAS_API_URL?: string
         readonly UITPAS_API_CLIENT_ID?: string 
         readonly UITPAS_API_CLIENT_SECRET?: string
+
+        readonly HEALTH_ACCESS_KEY?: string // Expose a health endpoint
     }
 
     type BackendEnvironment = SharedEnvironment & BackendSpecificEnvironment

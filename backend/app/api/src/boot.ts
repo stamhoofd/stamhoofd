@@ -10,17 +10,18 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { resumeEmails } from './helpers/EmailResumer';
-import { GlobalHelper } from './helpers/GlobalHelper';
-import { SetupStepUpdater } from './helpers/SetupStepUpdater';
-import { ContextMiddleware } from './middleware/ContextMiddleware';
-import { AuditLogService } from './services/AuditLogService';
-import { BalanceItemService } from './services/BalanceItemService';
-import { DocumentService } from './services/DocumentService';
-import { FileSignService } from './services/FileSignService';
-import { PlatformMembershipService } from './services/PlatformMembershipService';
-import { UitpasService } from './services/uitpas/UitpasService';
-import { UniqueUserService } from './services/UniqueUserService';
+import { resumeEmails } from './helpers/EmailResumer.js';
+import { GlobalHelper } from './helpers/GlobalHelper.js';
+import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
+import { ContextMiddleware } from './middleware/ContextMiddleware.js';
+import { AuditLogService } from './services/AuditLogService.js';
+import { BalanceItemService } from './services/BalanceItemService.js';
+import { DocumentService } from './services/DocumentService.js';
+import { FileSignService } from './services/FileSignService.js';
+import { PlatformMembershipService } from './services/PlatformMembershipService.js';
+import { UitpasService } from './services/uitpas/UitpasService.js';
+import { UniqueUserService } from './services/UniqueUserService.js';
+import { CpuService } from './services/CpuService.js';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -123,16 +124,16 @@ export const boot = async (options: { killProcess: boolean }) => {
     productionLog('Loading loaders...');
 
     // Register Excel loaders
-    await import('./excel-loaders');
+    await import('./excel-loaders/index.js');
 
     // Register Email Recipient loaders
-    await import('./email-recipient-loaders/members');
-    await import('./email-recipient-loaders/registrations');
-    await import('./email-recipient-loaders/orders');
-    await import('./email-recipient-loaders/receivable-balances');
-    await import('./excel-loaders/registrations');
-    await import('./email-recipient-loaders/documents');
-    await import ('./email-recipient-loaders/payments');
+    await import('./email-recipient-loaders/members.js');
+    await import('./email-recipient-loaders/registrations.js');
+    await import('./email-recipient-loaders/orders.js');
+    await import('./email-recipient-loaders/receivable-balances.js');
+    await import('./excel-loaders/registrations.js');
+    await import('./email-recipient-loaders/documents.js');
+    await import ('./email-recipient-loaders/payments.js');
 
     productionLog('Opening port...');
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
@@ -141,6 +142,8 @@ export const boot = async (options: { killProcess: boolean }) => {
     productionLog('🟢 HTTP server started in ' + Math.ceil(hrend[0] * 1000 + hrend[1] / 1000000) + 'ms');
 
     resumeEmails().catch(console.error);
+
+    CpuService.startMonitoring();
 
     if (routerServer.server) {
         // Default timeout is a bit too short
@@ -235,7 +238,7 @@ export const boot = async (options: { killProcess: boolean }) => {
     }
 
     // Register crons
-    await import('./crons');
+    await import('./crons.js');
 
     AuditLogService.listen();
     PlatformMembershipService.listen();

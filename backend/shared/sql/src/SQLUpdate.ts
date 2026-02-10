@@ -1,7 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
-import { joinSQLQuery, normalizeSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression';
-import { readDynamicSQLExpression, SQLAssignment, SQLColumnExpression, SQLDynamicExpression, SQLTableExpression } from './SQLExpressions';
-import { Whereable } from './SQLWhere';
+import { joinSQLQuery, normalizeSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
+import { readDynamicSQLExpression, SQLAssignment, SQLColumnExpression, SQLDynamicExpression, SQLTableExpression } from './SQLExpressions.js';
+import { Whereable } from './SQLWhere.js';
+import { SQLLogger } from './SQLLogger.js';
 
 class EmptyClass {}
 
@@ -66,7 +67,7 @@ export class SQLUpdate extends Whereable(EmptyClass) implements SQLExpression {
 
     async update(): Promise<{ changedRows: number }> {
         const { query, params } = normalizeSQLQuery(this.getSQL());
-        const result = await Database.update(query, params);
+        const result = await SQLLogger.log(Database.update(query, params), query, params);
         return result[0];
     }
 }

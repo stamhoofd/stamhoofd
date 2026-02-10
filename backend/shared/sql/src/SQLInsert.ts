@@ -1,6 +1,7 @@
 import { Database } from '@simonbackx/simple-database';
-import { isSQLExpression, joinSQLQuery, normalizeSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression';
-import { scalarToSQLExpression, SQLAlias, SQLAssignment, SQLColumnExpression, SQLScalarValue, SQLTableExpression } from './SQLExpressions';
+import { isSQLExpression, joinSQLQuery, normalizeSQLQuery, SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
+import { scalarToSQLExpression, SQLAlias, SQLAssignment, SQLColumnExpression, SQLScalarValue, SQLTableExpression } from './SQLExpressions.js';
+import { SQLLogger } from './SQLLogger.js';
 
 export class SQLInsert implements SQLExpression {
     _columns: SQLExpression[] = [];
@@ -106,8 +107,7 @@ export class SQLInsert implements SQLExpression {
 
     async insert(): Promise<{ insertId: any;affectedRows: number }> {
         const { query, params } = normalizeSQLQuery(this.getSQL());
-        console.log(query, params);
-        const result = await Database.insert(query, params);
+        const result = await SQLLogger.log(Database.insert(query, params), query, params);
         return result[0];
     }
 }
