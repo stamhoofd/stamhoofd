@@ -211,6 +211,11 @@ export class EditorSmartVariable extends AutoEncoder {
         }));
 
         variables.push(EditorSmartVariable.create({
+            id: 'paymentPrice',
+            name: $t(`495e591a-15f2-43f3-ba4f-f02598624f52`),
+        }));
+
+        variables.push(EditorSmartVariable.create({
             id: 'pricePaid',
             name: $t(`25c803f0-6b45-42aa-9b88-573e3706b8bb`),
         }));

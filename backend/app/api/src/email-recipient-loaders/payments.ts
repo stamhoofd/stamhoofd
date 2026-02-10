@@ -378,7 +378,7 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
 
     return ([
         Replacement.create({
-            token: 'priceToPay',
+            token: 'paymentPrice',
             value: Formatter.price(payment.price),
         }),
         Replacement.create({

@@ -213,6 +213,10 @@ function getReplacements() {
             token: 'priceToPay',
             value: '€ 40,50',
         }),
+        paymentPrice: Replacement.create({
+            token: 'paymentPrice',
+            value: textPlaceholder,
+        }),
         transferDescription: Replacement.create({
             token: 'transferDescription',
             value: '+++111/111/111+++',
