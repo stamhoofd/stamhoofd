@@ -132,7 +132,7 @@
                             <f86_2107_childfirstname>{{member.firstName}}</f86_2107_childfirstname>
 
 							{{#if (neq certification.type 'exception')}}
-                                <f86_2109_certifiercbenumber>{{certification.companyNumber}}</f86_2109_certifiercbenumber> <!-- KBO -->
+                                <f86_2109_certifiercbenumber>{{filterString certification.companyNumber}}</f86_2109_certifiercbenumber> <!-- KBO -->
                             {{/if}}
 
 							<f86_2110_numberofday1>{{ coalesce registration.days (days registration.startDate registration.endDate) }}</f86_2110_numberofday1> <!-- Dagen -->
