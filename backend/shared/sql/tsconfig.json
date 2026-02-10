@@ -22,7 +22,6 @@
         ]
     },
     "include": [
-        "*.d.ts",
         "src/**/*.ts",
         "tests/**/*.ts",
         "index.ts",
