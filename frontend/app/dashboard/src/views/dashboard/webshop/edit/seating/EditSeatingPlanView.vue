@@ -29,7 +29,9 @@
                     Verplicht optimale zaalbezetting
                 </h3>
                 <p class="style-description-small">
-                    Zorg dat het niet mogelijk is om maar één plaats tussen te laten.
+                    Zorg dat het niet mogelijk is om maar één plaats tussen te laten, tenzij het niet anders kan. In een
+                    situatie waarbij iemand 3 plaatsen wil reserveren op een rij met slechts 4 vrije plaatsen zal dit
+                    bijvoorbeeld wel nog mogelijk zijn.
                 </p>
             </STListItem>
         </STList>
