@@ -143,7 +143,9 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     resumeEmails().catch(console.error);
 
-    CpuService.startMonitoring();
+    if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
+        CpuService.startMonitoring();
+    }
 
     if (routerServer.server) {
         // Default timeout is a bit too short

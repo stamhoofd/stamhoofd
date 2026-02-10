@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { StyledText } from '@simonbackx/simple-logging';
 
 class StaticSQLLogger {
-    slowQueryThresholdMs: number | null = null;
+    slowQueryThresholdMs: number | null = STAMHOOFD.environment === 'development' ? 300 : null;
     explainAllAndLogInefficient: boolean = STAMHOOFD.environment === 'development';
 
     async explain(query: string, params: any[]) {
