@@ -79,18 +79,25 @@ class StaticCpuService {
         const sample = await this.takeSample(1000);
         this.samples[this.currentIndex] = sample;
         this.currentIndex = (this.currentIndex + 1) % this.maxSamples;
-        const min = this.getAverage(60);
+        const five = this.getAverage(5);
 
-        if (this.currentIndex % 5 === 0 || min > 80) {
-            console.log(`[CPU] 5s: ${this.getAverage(5).toFixed(2)}%\n[CPU] 1 min: ${min.toFixed(2)}%\n[CPU] 5 min: ${this.getAverage(60 * 5).toFixed(2)}%`);
+        if (this.currentIndex % 5 === 0 || five > 80) {
+            const min = this.getAverage(60);
+            console.log(`[CPU] 5s: ${five.toFixed(2)}%\n[CPU] 1 min: ${min.toFixed(2)}%\n[CPU] 5 min: ${this.getAverage(60 * 5).toFixed(2)}%`);
         }
 
-        if (min > 80) {
+        if (five > 80) {
             // Danger zone, in this case we don't want to log all slow queries any longer because the information won't be trustworthy.
             SQLLogger.slowQueryThresholdMs = null;
         }
         else {
-            SQLLogger.slowQueryThresholdMs = 500;
+            if (five < 20) {
+                // No load, safe to log all slow queries
+                SQLLogger.slowQueryThresholdMs = 300;
+            }
+            else {
+                SQLLogger.slowQueryThresholdMs = 500;
+            }
         }
     }
 
