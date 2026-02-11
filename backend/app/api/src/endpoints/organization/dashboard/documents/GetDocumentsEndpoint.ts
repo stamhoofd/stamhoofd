@@ -4,11 +4,11 @@ import { assertSort, CountFilteredRequest, Document as DocumentStruct, getSortFi
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
-import { documentFilterCompilers } from '../../../../sql-filters/documents';
-import { documentSorters } from '../../../../sql-sorters/documents';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';
+import { documentFilterCompilers } from '../../../../sql-filters/documents.js';
+import { documentSorters } from '../../../../sql-sorters/documents.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
@@ -45,6 +45,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
 
         const query = SQL
             .select(SQL.wildcard(documentTable))
+            .setMaxExecutionTime(15 * 1000)
             .from(SQL.table(documentTable))
             .where('organizationId', organization.id);
 
