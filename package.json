@@ -106,7 +106,7 @@
     "jest-cli": "^30",
     "jest-console-group-reporter": "^1.1.1",
     "jest-extended": "^6",
-    "lerna": "^9",
+    "lerna": "^9.0.4",
     "maildev": "^2.2.1",
     "nodemon": "^3.1.0",
     "postcss-discard-duplicates": "^7.0.2",
