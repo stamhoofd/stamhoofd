@@ -589,6 +589,7 @@ export class Email extends QueryableModel {
     }
 
     async queueForSending(waitForSending = false) {
+        console.log('Queueing email for sending', this.id);
         this.throwIfNotReadyToSend();
         this.throwIfNoUnsubscribeButton();
         await this.lock(async (upToDate) => {
@@ -1304,7 +1305,7 @@ export class Email extends QueryableModel {
         });
     }
 
-    async buildExampleRecipient() {
+    async buildExampleRecipient(isNewlyCreated = false) {
         const id = this.id;
         await QueueHandler.schedule('email-build-recipients-' + this.id, async function () {
             const upToDate = await Email.getByID(id);
@@ -1319,12 +1320,14 @@ export class Email extends QueryableModel {
 
             try {
                 // Delete all recipients
-                await SQL
-                    .delete()
-                    .from(
-                        SQL.table('email_recipients'),
-                    )
-                    .where(SQL.column('emailId'), upToDate.id);
+                if (!isNewlyCreated) {
+                    await SQL
+                        .delete()
+                        .from(
+                            SQL.table('email_recipients'),
+                        )
+                        .where(SQL.column('emailId'), upToDate.id);
+                }
 
                 for (const subfilter of upToDate.recipientFilter.filters) {
                     // Create recipients
