@@ -148,7 +148,7 @@ export const boot = async (options: { killProcess: boolean }) => {
         CpuService.startMonitoring();
     }
     else if (STAMHOOFD.environment === 'development') {
-        SQLLogger.slowQueryThresholdMs = 300;
+        SQLLogger.slowQueryThresholdMs = 200;
         SQLLogger.explainAllAndLogInefficient = true;
     }
 
