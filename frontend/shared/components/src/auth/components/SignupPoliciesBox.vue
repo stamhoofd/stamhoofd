@@ -51,7 +51,7 @@ const policies = computed(() => {
                 url,
                 checkbox: true,
                 richText: RichText.create({
-                    html: $t(`cad17893-df84-445c-b85b-b48e2eccfdaf`) + '<a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`2d9ef8cb-a1be-4968-82a1-ea029c5fa104`) + `</a>.`,
+                    html: $t(`cad17893-df84-445c-b85b-b48e2eccfdaf`) + ' <a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`2d9ef8cb-a1be-4968-82a1-ea029c5fa104`) + `</a>.`,
                 }),
             }),
         ];
