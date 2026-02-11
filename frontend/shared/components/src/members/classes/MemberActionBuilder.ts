@@ -2,18 +2,20 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { AppManager, OrganizationManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
+import { AppManager, SessionContext, useRequestOwner } from '@stamhoofd/networking';
 import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, Group, GroupCategoryTree, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, PermissionLevel, PermissionsResourceType, Platform, PlatformMember, RegistrationWithPlatformMember, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { markRaw } from 'vue';
 import { EditMemberAllBox, MemberSegmentedView, MemberStepView, checkoutDefaultItem, chooseOrganizationMembersForGroup } from '..';
 import { GlobalEventBus } from '../../EventBus';
 import { AuditLogsView } from '../../audit-logs';
+import CommunicationView from '../../communication/CommunicationView.vue';
 import { LoadComponent } from '../../containers/AsyncComponent';
 import EmailView, { RecipientChooseOneOption } from '../../email/EmailView.vue';
 import MembersPdfExportView from '../../export/MembersPdfExportView.vue';
 import { useContext, useOrganization, usePlatform } from '../../hooks';
 import ChargeMembersView from '../../members/ChargeMembersView.vue';
+import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction, TableAction, TableActionSelection } from '../../tables/classes';
 import { NavigationActions } from '../../types/NavigationActions';
@@ -22,8 +24,6 @@ import { PlatformFamilyManager, usePlatformFamilyManager } from '../PlatformFami
 import EditMemberResponsibilitiesBox from '../components/edit/EditMemberResponsibilitiesBox.vue';
 import { RegistrationsActionBuilder } from './RegistrationsActionBuilder';
 import { getSelectableWorkbook } from './getSelectableWorkbook';
-import CommunicationView from '../../communication/CommunicationView.vue';
-import { CenteredMessage } from '../../overlays/CenteredMessage';
 
 export function useDirectMemberActions(options?: { groups?: Group[]; organizations?: Organization[] }) {
     return useMemberActions()(options);
@@ -95,11 +95,24 @@ export class MemberActionBuilder {
             return this.forceWriteAccess;
         }
 
+        return this.canWriteAllGroups();
+    }
+
+    private canWriteAllGroups() {
         for (const group of this.groups) {
             if (!this.context.auth.canAccessGroup(group, PermissionLevel.Write)) {
                 return false;
             }
         }
+
+        if (this.groups.length === 0) {
+            if (STAMHOOFD.userMode === 'platform') {
+                return this.context.auth.hasPlatformFullAccess() || this.context.auth.hasFullAccess();
+            }
+
+            return this.context.auth.hasFullAccess();
+        }
+
         return true;
     }
 
@@ -180,6 +193,12 @@ export class MemberActionBuilder {
     }
 
     private getDeleteAction() {
+        const enabled = STAMHOOFD.userMode === 'platform' ? (!this.context.organization && this.context.auth.hasPlatformFullAccess()) : this.context.auth.hasFullAccess();
+
+        if (!enabled) {
+            return [];
+        }
+
         return [new InMemoryTableAction({
             name: $t('d20e1a65-6c0d-4591-9dac-1abc01b9a563'),
             destructive: true,
@@ -189,7 +208,7 @@ export class MemberActionBuilder {
             singleSelection: true,
             allowAutoSelectAll: false,
             icon: 'trash',
-            enabled: !this.context.organization && this.context.auth.hasPlatformFullAccess(),
+            enabled,
             handler: async (members: PlatformMember[]) => {
                 await presentDeleteMembers({
                     members,
@@ -467,7 +486,7 @@ export class MemberActionBuilder {
         presentEditMember({ member, present: this.present, context: this.context }).catch(console.error);
     }
 
-    getActions(options: { includeDelete?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
+    getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}): TableAction<PlatformMember>[] {
         const actions = [
             new InMemoryTableAction({
                 name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
@@ -520,7 +539,7 @@ export class MemberActionBuilder {
 
             ...(STAMHOOFD.environment === 'development' ? this.getClearDataAction() : []),
 
-            ...(options.includeDelete ? this.getDeleteAction() : []),
+            ...this.getDeleteAction(),
             ...this.getUnsubscribeAction(),
             ...this.getAuditLogAction(),
             ...this.getMessagesAction(),

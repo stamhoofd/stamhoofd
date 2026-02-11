@@ -259,7 +259,11 @@ const actions: TableAction<ObjectType>[] = [
             });
         },
     }),
-    ...actionBuilder.getActions({ selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value, includeMove: true, includeEdit: !excludeEdit }),
+    ...actionBuilder.getActions({
+        selectedOrganizationRegistrationPeriod: organizationRegistrationPeriod.value,
+        includeMove: true,
+        includeEdit: !excludeEdit,
+    }),
 ];
 
 if (app !== 'admin' && auth.canManagePayments()) {

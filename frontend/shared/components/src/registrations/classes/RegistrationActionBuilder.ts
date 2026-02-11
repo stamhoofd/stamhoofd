@@ -65,6 +65,7 @@ export class RegistrationActionBuilder {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -88,15 +89,14 @@ export class RegistrationActionBuilder {
         this.platform = settings.platform;
     }
 
-    getActions(options: { includeDeleteMember?: boolean; includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
+    getActions(options: { includeMove?: boolean; includeEdit?: boolean; selectedOrganizationRegistrationPeriod?: OrganizationRegistrationPeriod } = {}) {
         const actions: TableAction<PlatformRegistration>[] = [
-            ...this.getMemberActions(options),
+            ...this.getMemberActions(),
             this.getEmailAction(),
             this.getSmsAction(),
             this.getExportAction(),
             (options.includeMove ? this.getMoveAction(options.selectedOrganizationRegistrationPeriod) : null),
             (options.includeEdit ? this.getEditAction() : null),
-            (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
             this.getUnsubscribeAction(),
             ...this.getAuditLogAction(),
             ...this.getMessagesAction(),
@@ -105,7 +105,7 @@ export class RegistrationActionBuilder {
         return actions;
     }
 
-    private getMemberActions(options: { includeDeleteMember?: boolean }) {
+    private getMemberActions() {
         const actions: TableAction<PlatformRegistration>[] = [
             new InMemoryTableAction({
                 name: $t(`28f20fae-6270-4210-b49d-68b9890dbfaf`),
@@ -146,7 +146,7 @@ export class RegistrationActionBuilder {
                 enabled: this.hasWrite && !!this.context.organization,
                 childActions: () => this.getRegisterActions(),
             }),
-            (options.includeDeleteMember ? this.getDeleteMemberAction() : null),
+            this.getDeleteMemberAction(),
         ].filter(a => a !== null);
 
         return actions;
@@ -336,6 +336,10 @@ export class RegistrationActionBuilder {
     }
 
     private getDeleteMemberAction() {
+        const enabled = STAMHOOFD.userMode === 'platform' ? (!this.context.organization && this.context.auth.hasPlatformFullAccess()) : this.context.auth.hasFullAccess();
+        if (!enabled) {
+            return null;
+        }
         return new InMemoryTableAction({
             name: $t('d20e1a65-6c0d-4591-9dac-1abc01b9a563'),
             destructive: true,
@@ -345,7 +349,7 @@ export class RegistrationActionBuilder {
             singleSelection: true,
             allowAutoSelectAll: false,
             icon: 'trash',
-            enabled: !this.context.organization && this.context.auth.hasPlatformFullAccess(),
+            enabled,
             handler: async (registrations: PlatformRegistration[]) => {
                 await presentDeleteMembers({
                     members: getUniqueMembersFromRegistrations(registrations),
