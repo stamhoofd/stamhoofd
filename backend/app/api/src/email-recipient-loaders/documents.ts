@@ -47,20 +47,7 @@ async function fetch(query: LimitedFilteredRequest) {
 async function count(request: LimitedFilteredRequest) {
     const query = await GetDocumentsEndpoint.buildQuery(request);
     const uniqueMemberIds = await query.count(SQL.distinct(SQL.column('memberId')));
-
-    if (uniqueMemberIds > 100 || uniqueMemberIds === 0) {
-        return uniqueMemberIds; // rough estimate
-    }
-    // do full count
-    request.limit = 100;
-    let count = 0;
-    let req: LimitedFilteredRequest | null = request;
-    while (req) {
-        const result = await fetch(request);
-        count += result.results.length;
-        req = result.next ?? null;
-    }
-    return count;
+    return uniqueMemberIds;
 };
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Documents, { fetch, count });
