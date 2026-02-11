@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars.js';
-import { RegistrationWithMember } from './Member.js';
+import { MemberWithRegistrations, RegistrationWithMember } from './Member.js';
 import { Organization } from './Organization.js';
 import { Registration } from './Registration.js';
 
@@ -152,11 +152,11 @@ export class Document extends QueryableModel {
         await template.updateDocumentFor(this, registration);
     }
 
-    static async updateForMember(memberId: string) {
+    static async updateForMember(memberOrId: string | MemberWithRegistrations) {
         try {
-            console.log('Updating documents for member', memberId);
+            console.log('Updating documents for member', typeof memberOrId === 'string' ? memberOrId : memberOrId.id);
             const Member = (await import('./Member.js')).Member;
-            const member = await Member.getWithRegistrations(memberId);
+            const member = typeof memberOrId === 'string' ? await Member.getWithRegistrations(memberOrId) : memberOrId;
             if (member) {
                 const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
                 for (const organizationId of organizationIds) {

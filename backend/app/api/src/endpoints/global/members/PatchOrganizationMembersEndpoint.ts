@@ -210,7 +210,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Update documents
-            await Document.updateForMember(member.id);
+            await Document.updateForMember(member);
 
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
@@ -871,7 +871,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     await MemberUserSyncer.onChangeMember(m);
 
                     // Update documents
-                    await Document.updateForMember(m.id);
+                    await Document.updateForMember(m);
                 }
             }
         }

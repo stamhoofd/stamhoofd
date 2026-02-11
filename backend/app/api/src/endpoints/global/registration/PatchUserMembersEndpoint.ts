@@ -149,7 +149,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             await MemberUserSyncer.onChangeMember(member);
 
             // Update documents
-            await Document.updateForMember(member.id);
+            await Document.updateForMember(member);
         }
 
         // Modify members
@@ -173,7 +173,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     await MemberUserSyncer.linkUser(user.email, updatedMember, true);
                 }
 
-                await Document.updateForMember(updatedMember.id);
+                await Document.updateForMember(updatedMember);
             }
         }
 
