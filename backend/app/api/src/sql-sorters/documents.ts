@@ -27,7 +27,7 @@ export const documentSorters: SQLSortDefinitions<Document> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonExtract(SQL.column('data'), '$.value.description'),
+                column: SQL.jsonValue(SQL.column('data'), '$.value.description', 'CHAR'),
                 direction,
             });
         },
