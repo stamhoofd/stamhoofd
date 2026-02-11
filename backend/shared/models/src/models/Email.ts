@@ -1075,6 +1075,8 @@ export class Email extends QueryableModel {
 
             let count = 0;
 
+            console.log('Updating recipient count for email', id);
+
             try {
                 for (const subfilter of upToDate.recipientFilter.filters) {
                     // Create recipients
@@ -1105,11 +1107,14 @@ export class Email extends QueryableModel {
                     return;
                 }
                 if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
+                    console.log('Canceled recipient count update for email', id, 'already created recipients');
                     return;
                 }
                 upToDate.emailRecipientsCount = count;
                 upToDate.recipientsErrors = null;
                 await upToDate.save();
+
+                console.log('Updated recipient count for email', id, 'to', count);
             }
             catch (e) {
                 if (isAbortedError(e)) {
