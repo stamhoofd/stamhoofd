@@ -59,12 +59,15 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('e9d4d5fb-ec7f-4a42-acc8-8f52a9bd4e7a') }}</h2>
-            <p>{{ $t('fa988b87-6665-43e4-a177-77031826e9a8') }}</p>
+            <template v-if="canAlterUpdates">
+                <hr>
+                <h2>{{ $t('e9d4d5fb-ec7f-4a42-acc8-8f52a9bd4e7a') }}</h2>
+                <p>{{ $t('fa988b87-6665-43e4-a177-77031826e9a8') }}</p>
 
-            <Checkbox :model-value="template.updatesEnabled" :disabled="settingUpdatesEnabled" @update:model-value="toggleUpdatesEnabled">
-                {{ $t('ecbe0afb-6a6c-4b67-8b11-3a75a182c344') }}
-            </Checkbox>
+                <Checkbox :model-value="template.updatesEnabled" :disabled="settingUpdatesEnabled" @update:model-value="toggleUpdatesEnabled">
+                    {{ $t('ecbe0afb-6a6c-4b67-8b11-3a75a182c344') }}
+                </Checkbox>
+            </template>
 
             <hr><h2>{{ $t('dc052084-eea5-407e-8775-237bf550895a') }}</h2>
 
@@ -233,6 +236,27 @@ async function draftTemplate() {
 }
 
 const settingUpdatesEnabled = ref(false);
+const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
+
+const canAlterUpdates = computed(() => {
+    if (isDraft.value) {
+        return true;
+    }
+    if (props.template.updatesEnabled) {
+        return true;
+    }
+
+    if (props.template.privateSettings.templateDefinition.type === 'fiscal') {
+        if (fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year, props.template.createdAt)) {
+            // Still possible to make changes before publishing to belcotax
+            return true;
+        }
+    }
+    else {
+        return true;
+    }
+    return false;
+});
 
 async function patchTemplate(patch: AutoEncoderPatchType<DocumentTemplatePrivate>) {
     const arr: PatchableArrayAutoEncoder<DocumentTemplatePrivate> = new PatchableArray() as PatchableArrayAutoEncoder<DocumentTemplatePrivate>;
@@ -265,7 +289,13 @@ async function toggleUpdatesEnabled() {
         return;
     }
     const updatesEnabled = !props.template.updatesEnabled;
-    if (!(await CenteredMessage.confirm(updatesEnabled ? 'Automatische wijzigingen aanzetten?' : 'Automatische wijzigingen uitzetten?', updatesEnabled ? 'Aanzetten' : 'Uitzetten', updatesEnabled ? 'Alle documenten zullen meteen worden bijgewerkt.' : 'Alle documenten zullen niet langer aangepast worden.'))) {
+    if (!(await CenteredMessage.confirm(
+        updatesEnabled ? $t('Automatische wijzigingen aanzetten?') : $t('Automatische wijzigingen uitzetten?'),
+        updatesEnabled ? $t('Aanzetten') : $t('Uitzetten'),
+        updatesEnabled ? $t('Opgelet, doe dit nooit voor documenten die al officieel werden ingediend. Alle documenten zullen meteen worden bijgewerkt, je kan dit niet ongedaan maken.') : $t('Alle documenten zullen niet langer aangepast worden.'),
+        undefined,
+        updatesEnabled ? true : false, // destructive to enable updates
+    ))) {
         return;
     }
 
@@ -321,14 +351,11 @@ async function deleteTemplate() {
     }
     deleting.value = false;
 }
-
 function exportXml() {
     if (props.template.updatesEnabled) {
         Toast.error($t('94090582-213a-4016-8c1c-a95331a4c225')).show();
         return;
     }
-
-    const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
 
     // if fiscal document
     if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
