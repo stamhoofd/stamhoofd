@@ -30,7 +30,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
-import { EmailInput, SaveView, STErrorsDefault, useContext } from '@stamhoofd/components';
+import { EmailInput, getInvalidEmailDescription as getInvalidEmailDescriptionHelper, SaveView, STErrorsDefault, useContext } from '@stamhoofd/components';
 import { EmailInformation, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { useOrganizationManager } from '@stamhoofd/networking';
@@ -99,16 +99,8 @@ function getInvalidEmailDescription(n: number) {
     if (!find) {
         return null;
     }
-    if (find.unsubscribedAll) {
-        return 'Heeft zich uitgeschreven voor e-mails';
-    }
-    if (find.markedAsSpam) {
-        return 'Heeft e-mail als spam gemarkeerd';
-    }
-    if (find.hardBounce) {
-        return 'Ongeldig e-mailadres';
-    }
-    return null;
+
+    return getInvalidEmailDescriptionHelper(find);
 }
 
 const checkingBounces = ref(false);
