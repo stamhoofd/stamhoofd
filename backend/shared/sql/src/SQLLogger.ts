@@ -2,8 +2,8 @@ import { Database } from '@simonbackx/simple-database';
 import { StyledText } from '@simonbackx/simple-logging';
 
 class StaticSQLLogger {
-    slowQueryThresholdMs: number | null = STAMHOOFD.environment === 'development' ? 300 : null;
-    explainAllAndLogInefficient: boolean = STAMHOOFD.environment === 'development';
+    slowQueryThresholdMs: number | null = null;
+    explainAllAndLogInefficient = false;
 
     async explain(query: string, params: any[]) {
         // Run an EXPLAIN on the query to see what is going on

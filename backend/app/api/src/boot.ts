@@ -22,6 +22,7 @@ import { PlatformMembershipService } from './services/PlatformMembershipService.
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
 import { CpuService } from './services/CpuService.js';
+import { SQLLogger } from '@stamhoofd/sql';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -145,6 +146,10 @@ export const boot = async (options: { killProcess: boolean }) => {
 
     if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
         CpuService.startMonitoring();
+    }
+    else if (STAMHOOFD.environment === 'development') {
+        SQLLogger.slowQueryThresholdMs = 300;
+        SQLLogger.explainAllAndLogInefficient = true;
     }
 
     if (routerServer.server) {
