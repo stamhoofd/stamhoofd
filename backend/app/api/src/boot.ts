@@ -90,6 +90,7 @@ export const boot = async (options: { killProcess: boolean }) => {
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/webshops');
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/shared');
     await router.loadAllEndpoints(__dirname + '/endpoints/organization/shared/*');
+    await router.loadAllEndpoints(__dirname + '/endpoints/system');
 
     router.endpoints.push(new CORSPreflightEndpoint());
 
