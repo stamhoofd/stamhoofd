@@ -1,7 +1,7 @@
 import { CachedBalance, Email } from '@stamhoofd/models';
 import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
+import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint.js';
 
 async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) {
     const result = await GetReceivableBalancesEndpoint.buildData(query);
@@ -73,15 +73,6 @@ Email.recipientLoaders.set(EmailRecipientFilterType.ReceivableBalances, {
     // For now: only count the number of organizations - not the amount of emails
     count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
         const q = await GetReceivableBalancesEndpoint.buildQuery(query);
-        const base = await q.count();
-
-        if (base < 1000) {
-            // Do full scan
-            query.limit = 1000;
-            const result = await fetch(query, subfilter);
-            return result.results.length;
-        }
-
-        return base;
+        return await q.count();
     },
 });

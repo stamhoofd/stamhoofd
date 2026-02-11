@@ -613,16 +613,7 @@ const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> 
     // For now: only count the number of payments - not the amount of emails
     count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
         const q = await GetPaymentsEndpoint.buildQuery(query);
-        const base = await q.count();
-
-        if (base < 1000) {
-            // Do full scan
-            query.limit = 1000;
-            const result = await fetchPaymentOrganizationRecipients(query, subfilter);
-            return result.results.length;
-        }
-
-        return base;
+        return await q.count();
     },
 };
 
