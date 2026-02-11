@@ -60,7 +60,7 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonExtract(SQL.column('meta'), '$.value.type'),
+                column: SQL.jsonValue(SQL.column('meta'), '$.value.type', 'CHAR'),
                 direction,
             });
         },
@@ -71,7 +71,7 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonExtract(SQL.column('address'), '$.value.city'),
+                column: SQL.jsonValue(SQL.column('address'), '$.value.city', 'CHAR'),
                 direction,
             });
         },
@@ -82,7 +82,7 @@ export const organizationSorters: SQLSortDefinitions<Organization> = {
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.jsonExtract(SQL.column('address'), '$.value.country'),
+                column: SQL.jsonValue(SQL.column('address'), '$.value.country', 'CHAR'),
                 direction,
             });
         },
