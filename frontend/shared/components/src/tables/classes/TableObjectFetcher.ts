@@ -170,7 +170,8 @@ export class TableObjectFetcher<O extends { id: string }> {
             this.delayFetchUntil = new Date(new Date().getTime() + 500);
         }
         else {
-            this.delayFetchUntil = null;
+            // Shorter debounce
+            this.delayFetchUntil = new Date(new Date().getTime() + 100);
         }
 
         this.searchQuery = query;
@@ -183,9 +184,7 @@ export class TableObjectFetcher<O extends { id: string }> {
         }
 
         // Debounce when editing filters
-        if (!isEmptyFilter(filter)) {
-            this.delayFetchUntil = new Date(new Date().getTime() + 200);
-        }
+        this.delayFetchUntil = new Date(new Date().getTime() + 200);
 
         this.baseFilter = filter;
         this.reset(false, true);
@@ -196,6 +195,9 @@ export class TableObjectFetcher<O extends { id: string }> {
             return;
         }
         console.log('setSort', this.sort);
+
+        // Debounce when editing sort
+        this.delayFetchUntil = new Date(new Date().getTime() + 100);
 
         this.sort = sort;
         this.reset(false, false);
