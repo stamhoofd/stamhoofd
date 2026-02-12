@@ -253,7 +253,15 @@ export class AuthenticatedStructures {
             const period = periodMap.get(periodId);
             if (!period) {
                 console.error('Period not found for id', periodId);
-                continue;
+                throw new Error('Period not found for id ' + periodId);
+            }
+
+            // Automatically create missing organization periods for now
+            for (const organization of organizations) {
+                const organizationPeriodModel = result.find(r => r.organizationId === organization.id);
+                if (!organizationPeriodModel) {
+                    result.push(await organization.getPeriod());
+                }
             }
 
             // Do this onece per period, because otherwise we can't optimize fetching the groups for each period
