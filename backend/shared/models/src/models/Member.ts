@@ -4,7 +4,7 @@ import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Group, MemberResponsibilityRecord, Payment, Registration, User } from './index.js';
+import { Group, MemberResponsibilityRecord, MemberUser, Payment, Registration, User } from './index.js';
 export type MemberWithUsers = Member & {
     users: User[];
 };
@@ -244,60 +244,62 @@ export class Member extends QueryableModel {
         if (ids.length == 0) {
             return [];
         }
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()}  from \`${Member.table}\`\n`;
-        query += `LEFT JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`;
-        query += Member.users.joinQuery(Member.table, User.table) + '\n';
 
-        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Member.table}\`.\`${Member.primary.name}\` IN (?)`;
-
-        const [results] = await Database.select(query, [ids]);
+        const baseMembers = await this.getByIDs(...ids);
         const members: MemberWithRegistrationsAndGroups[] = [];
 
-        // Load groups
-        const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
-        const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
+        if (baseMembers.length === 0) {
+            return [];
+        }
+        ids = baseMembers.map(m => m.id);
 
-        for (const row of results) {
-            const foundMember = Member.fromRow(row[Member.table]);
-            if (!foundMember) {
-                throw new Error('Expected member in every row');
-            }
-            const _f = foundMember
+        // Load registrations of these members
+        const registrations = await Registration.select()
+            .where('memberId', ids)
+            .where(
+                SQL.where('registeredAt', '!=', null)
+                    .or('canRegister', 1),
+            )
+            .fetch();
+
+        const users = await User.select(SQL.wildcard(User.table), SQL.column(MemberUser.table, 'membersId'))
+            .join(
+                SQL.join(MemberUser.table)
+                    .where(
+                        SQL.parentColumn('id'),
+                        SQL.column('usersId'),
+                    ),
+            )
+            .where(SQL.column(MemberUser.table, 'membersId'), ids)
+            .fetch();
+
+        const groups = await Group.getByIDs(...Formatter.uniqueArray(registrations.map(r => r.groupId)));
+
+        for (const member of baseMembers) {
+            const memberWithRelations: MemberWithRegistrationsAndGroups = member
                 .setManyRelation(Member.registrations as unknown as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
                 .setManyRelation(Member.users, []);
 
-            // Seach if we already got this member?
-            const existingMember = members.find(m => m.id == _f.id);
-
-            const member: MemberWithRegistrationsAndGroups = (existingMember ?? _f);
-            if (!existingMember) {
-                members.push(member);
-            }
-
-            // Check if we have a registration with a payment
-            const registration = Registration.fromRow(row[Registration.table]);
-            if (registration) {
-                // Check if we already have this registration
-                if (!member.registrations.find(r => r.id == registration.id)) {
-                    const g = groups.find(g => g.id == registration.groupId);
-                    if (!g) {
-                        throw new Error('Group not found');
-                    }
-                    if (g.deletedAt === null) {
-                        member.registrations.push(registration.setRelation(Registration.group, g));
-                    }
+            // Add registrations
+            const memberRegistrations = registrations.filter(r => r.memberId === member.id);
+            for (const registration of memberRegistrations) {
+                const g = groups.find(g => g.id === registration.groupId);
+                if (g && g.deletedAt === null) {
+                    memberWithRelations.registrations.push(registration.setRelation(Registration.group, g));
                 }
             }
 
-            // Check if we have a user
-            const user = User.fromRow(row[User.table]);
-            if (user) {
-                // Check if we already have this registration
-                if (!member.users.find(r => r.id == user.id)) {
-                    member.users.push(user);
+            // Add users
+            const memberUsers = users.filter((u) => {
+                const memberId = u.rawSelectedRow?.[MemberUser.table]?.['membersId'];
+                if (memberId) {
+                    return memberId === member.id;
                 }
-            }
+                return false;
+            });
+            memberWithRelations.users.push(...memberUsers);
+
+            members.push(memberWithRelations);
         }
 
         return members;

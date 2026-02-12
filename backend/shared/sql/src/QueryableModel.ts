@@ -7,13 +7,20 @@ import { SQLInsert } from './SQLInsert.js';
 import { SQLExpression } from './SQLExpression.js';
 
 export class QueryableModel extends Model {
+    rawSelectedRow: SQLResultNamespacedRow | null = null;
+
     static select<T extends typeof Model>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
         const transformer = (row: SQLResultNamespacedRow): InstanceType<T> => {
             const d = (this as T).fromRow(row[this.table] as any) as InstanceType<T> | undefined;
 
+            // If there are any other namespaces, include it as metadata
+
             if (!d) {
                 console.error('Could not transform row', row, 'into model', this.table, 'check if the primary key is returned in the query');
                 throw new Error('Missing data for model ' + this.table);
+            }
+            if (d instanceof QueryableModel) {
+                d.rawSelectedRow = row;
             }
 
             return d;
