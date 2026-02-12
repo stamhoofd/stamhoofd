@@ -1,12 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
-import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression';
-import { SQLJoin } from '../SQLJoin';
-import { SQLJsonValue } from '../SQLJsonExpressions';
-import { SQLSelect } from '../SQLSelect';
-import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere';
-import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers';
-import { $containsSQLFilterCompiler } from './compilers/contains';
+import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
+import { SQLJoin } from '../SQLJoin.js';
+import { SQLJsonValue } from '../SQLJsonExpressions.js';
+import { SQLSelect } from '../SQLSelect.js';
+import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere.js';
+import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';
+import { $containsSQLFilterCompiler } from './compilers/contains.js';
+import { SQLSafeValue } from '../SQLExpressions.js';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -123,7 +124,9 @@ export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & 
                 type: SQLValueType.Table,
                 nullable: false,
             });
-            const q = baseSelect.clone().andWhere(w);
+            const q = baseSelect.clone();
+            q._columns = [new SQLSafeValue(1)];
+            q.andWhere(w);
             return new SQLWhereExists(q);
         };
     };
