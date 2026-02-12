@@ -1,10 +1,10 @@
 import { Model, SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { SQLSelect } from './SQLSelect';
-import { SQL } from './SQL';
-import { SQLDelete } from './SQLDelete';
-import { SQLUpdate } from './SQLUpdate';
-import { SQLInsert } from './SQLInsert';
-import { SQLExpression } from './SQLExpression';
+import { SQLSelect } from './SQLSelect.js';
+import { SQL } from './SQL.js';
+import { SQLDelete } from './SQLDelete.js';
+import { SQLUpdate } from './SQLUpdate.js';
+import { SQLInsert } from './SQLInsert.js';
+import { SQLExpression } from './SQLExpression.js';
 
 export class QueryableModel extends Model {
     static select<T extends typeof Model>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
@@ -67,5 +67,25 @@ export class QueryableModel extends Model {
                 }
             }
         }
+    }
+
+    /**
+     * Get a model by its primary key
+     * @param id primary key
+     */
+    static override async getByID<T extends typeof Model>(this: T, id: number | string): Promise<InstanceType<T> | undefined> {
+        return (this as any as typeof QueryableModel).select().where(this.primary.name, id).first(false) as any as InstanceType<T> | undefined;
+    }
+
+    /**
+     * Get multiple models by their ID
+     * @param ids primary key of the models you want to fetch
+     */
+    static override async getByIDs<T extends typeof Model>(this: T, ...ids: (number | string)[]): Promise<InstanceType<T>[]> {
+        if (ids.length === 0) {
+            return [];
+        }
+
+        return (this as any as typeof QueryableModel).select().where(this.primary.name, ids).limit(ids.length).fetch() as any as InstanceType<T>[];
     }
 }
