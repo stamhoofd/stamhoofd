@@ -276,18 +276,18 @@ export class AuthenticatedStructures {
                         throw new Error('Organization registration period not found for id ' + organizationPeriodModel.id);
                     }
 
-                // check if private data can be accessed
-                const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
-                if (canAccessPrivateData) {
+                    // check if private data can be accessed
+                    const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
+                    if (canAccessPrivateData) {
                         organizationIdsToGetWebshopsFor.push(organization.id);
+                    }
+                    organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData });
                 }
-                organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData });
-            }
                 else {
                     // Should never happen
                     throw new Error('Organization registration period model not found for organization id ' + organizationId + ' and period id ' + periodId);
                 }
-        }
+            }
         }
 
         // Get webshop previews
@@ -425,10 +425,126 @@ export class AuthenticatedStructures {
             return MembersBlob.create({ members: [], organizations: [] });
         }
         const organizations = new Map<string, Organization>();
+        const relevantPeriodIds = Formatter.uniqueArray([
+            Platform.shared.period.previousPeriodId,
+            Platform.shared.period.id,
+            Platform.shared.period.nextPeriodId,
+            Context.organization?.periodId ?? null,
+        ].filter(id => id !== null)) as string[];
 
         const registrationIds = Formatter.uniqueArray(members.flatMap(m => m.registrations.map(r => r.id)));
 
+        // This code is a bit messy, we need to optimize it a bit. But it is this complex because it tries
+        // to load as many relations as possible in advance in one go, to avoid doing queries inside the loops.
+        // this is very important as this method is called very often.
+
+        // Load responsibilities
+        const responsibilities = members.length > 0
+            ? await MemberResponsibilityRecord.select()
+                .where('memberId', members.map(m => m.id))
+                .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
+                .fetch()
+            : [];
+        const platformMemberships = members.length > 0
+            ? await MemberPlatformMembership.select()
+                .where('memberId', members.map(m => m.id))
+                .where('deletedAt', null)
+                .where('periodId', relevantPeriodIds)
+                .fetch()
+            : [];
+
+        // Load organizations
+        const organizationIds = responsibilities.map(r => r.organizationId)
+            .concat(
+                platformMemberships.map(r => r.organizationId),
+            )
+            .filter(id => id !== null);
+
+        if (includeUser) {
+            for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
+                if (includeContextOrganization || organizationId !== Context.auth.organization?.id) {
+                    organizationIds.push(organizationId);
+                }
+            }
+        }
+
+        if (STAMHOOFD.singleOrganization && !Context.auth.organization) {
+            organizationIds.push(STAMHOOFD.singleOrganization);
+        }
+
+        const membershipOrganizationId = Platform.shared.membershipOrganizationId;
+        if (membershipOrganizationId && Context.auth.hasSomePlatformAccess()) {
+            if (await Context.auth.hasSomeAccess(membershipOrganizationId)) {
+                organizationIds.push(membershipOrganizationId);
+            }
+        }
+
+        for (const member of members) {
+            for (const registration of member.registrations) {
+                organizationIds.push(registration.organizationId);
+            }
+        }
+
+        // Now fetch organizations
+        // todo: optimize this
+        for (const id of organizationIds) {
+            if (includeContextOrganization || id !== Context.auth.organization?.id) {
+                const found = organizations.get(id);
+                if (!found) {
+                    const organization = await Context.auth.getOrganization(id);
+                    organizations.set(organization.id, organization);
+                }
+            }
+        }
+
+        // Already fetch these organizations fully, because then we can reuse the groups in here
+        const activeOrganizations: Organization[] = [];
+
+        for (const organization of organizations.values()) {
+            if (organization.active || await Context.auth.hasFullAccess(organization.id)) {
+                activeOrganizations.push(organization);
+            }
+        }
+        const organizationStructs = await this.organizations(activeOrganizations);
+
+        let groupIds = Formatter.uniqueArray(
+            [
+                ...members.flatMap(m => m.registrations.map(r => r.groupId)).filter(id => id !== null),
+                ...responsibilities.map(r => r.groupId).filter(id => id !== null),
+            ],
+        );
+
+        // Set gropus that we already loaded
+        const allGroups = new Map<string, GroupStruct>();
+        for (const organization of organizationStructs) {
+            for (const group of organization.period.groups) {
+                allGroups.set(group.id, group);
+            }
+        }
+
+        const preloadedGroupModels: Map<string, Group> = new Map();
+
+        for (const member of members) {
+            for (const registration of member.registrations) {
+                if (!allGroups.has(registration.groupId) && !preloadedGroupModels.has(registration.groupId)) {
+                    preloadedGroupModels.set(registration.group.id, registration.group);
+                }
+            }
+        }
+
+        // Remove duplicates and already loaded ones
+        groupIds = groupIds.filter(id => !allGroups.has(id) && !preloadedGroupModels.has(id));
+        const groups = groupIds.length > 0 ? [...preloadedGroupModels.values(), ...await Group.getByIDs(...groupIds)] : [...preloadedGroupModels.values()];
+        if (groupIds.length > 0 && STAMHOOFD.environment === 'development') {
+            console.log('Doing extra group query for groups', groupIds);
+        }
+        const groupStructs = await this.groups(groups);
+        for (const group of groupStructs) {
+            allGroups.set(group.id, group);
+        }
+
         if (Context.organization) {
+            // todo: we should remove this, this does not belong here
             await BalanceItemService.flushCaches(Context.organization.id);
         }
         const balances = await CachedBalance.getForObjects(registrationIds, null, ReceivableBalanceType.registration);
@@ -437,7 +553,8 @@ export class AuthenticatedStructures {
             ? (await CachedBalance.getForObjects(memberIds, Context.organization.id, ReceivableBalanceType.member))
             : [];
 
-        if (includeUser) {
+        // Delete organizations that no longer exist in the permissions of the user
+        /* if (includeUser) {
             for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
                 if (includeContextOrganization || organizationId !== Context.auth.organization?.id) {
                     const found = organizations.get(organizationId);
@@ -465,26 +582,7 @@ export class AuthenticatedStructures {
                     }
                 }
             }
-        }
-
-        if (includeContextOrganization && STAMHOOFD.singleOrganization && !Context.auth.organization) {
-            const found = organizations.get(STAMHOOFD.singleOrganization);
-            if (!found) {
-                const organization = await Context.auth.getOrganization(STAMHOOFD.singleOrganization);
-                organizations.set(organization.id, organization);
-            }
-        }
-
-        const membershipOrganizationId = Platform.shared.membershipOrganizationId;
-        if (Context.auth.hasSomePlatformAccess() && membershipOrganizationId) {
-            if (await Context.auth.hasSomeAccess(membershipOrganizationId)) {
-                const found = organizations.get(membershipOrganizationId);
-                if (!found) {
-                    const organization = await Context.auth.getOrganization(membershipOrganizationId);
-                    organizations.set(organization.id, organization);
-                }
-            }
-        }
+        } */
 
         const memberBlobs: MemberWithRegistrationsBlob[] = [];
         for (const member of members) {
@@ -537,7 +635,13 @@ export class AuthenticatedStructures {
                                     return GenericBalance.create(b);
                                 }))
                             : [];
-                        base.group = await this.group(r.group);
+                        const g = allGroups.get(r.groupId);
+                        if (g) {
+                            base.group = g;
+                        }
+                        else {
+                            console.error('Group not preloaded for registration', r.id, r.groupId);
+                        }
 
                         return base;
                     }),
@@ -549,55 +653,6 @@ export class AuthenticatedStructures {
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob, { forAdminCartCalculation: options?.forAdminCartCalculation ?? false }),
             );
-        }
-
-        // Load responsibilities
-        const responsibilities = members.length > 0 ? await MemberResponsibilityRecord.where({ memberId: { sign: 'IN', value: members.map(m => m.id) } }) : [];
-        const platformMemberships = members.length > 0 ? await MemberPlatformMembership.where({ deletedAt: null, memberId: { sign: 'IN', value: members.map(m => m.id) } }) : [];
-
-        // Load missing organizations
-        const organizationIds = Formatter.uniqueArray(responsibilities.map(r => r.organizationId).concat(platformMemberships.map(r => r.organizationId)).filter(id => id !== null));
-        for (const id of organizationIds) {
-            if (includeContextOrganization || id !== Context.auth.organization?.id) {
-                const found = organizations.get(id);
-                if (!found) {
-                    const organization = await Context.auth.getOrganization(id);
-                    organizations.set(organization.id, organization);
-                }
-            }
-        }
-
-        const activeOrganizations: Organization[] = [];
-
-        for (const organization of organizations.values()) {
-            if (organization.active || await Context.auth.hasFullAccess(organization.id)) {
-                activeOrganizations.push(organization);
-            }
-        }
-        const organizationStructs = await this.organizations(activeOrganizations);
-
-        // Load missing groups
-        const allGroups = new Map<string, GroupStruct>();
-        for (const organization of organizationStructs) {
-            for (const group of organization.period.groups) {
-                allGroups.set(group.id, group);
-            }
-        }
-
-        for (const blob of memberBlobs) {
-            for (const registration of blob.registrations) {
-                if (registration.group) {
-                    allGroups.set(registration.group.id, registration.group);
-                }
-            }
-        }
-
-        const groupIds = Formatter.uniqueArray(responsibilities.map(r => r.groupId).filter(id => id !== null)).filter(id => !allGroups.has(id));
-        const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : [];
-        const groupStructs = await this.groups(groups);
-
-        for (const group of groupStructs) {
-            allGroups.set(group.id, group);
         }
 
         for (const blob of memberBlobs) {
@@ -769,6 +824,10 @@ export class AuthenticatedStructures {
     }
 
     static async orders(orders: Order[]): Promise<PrivateOrder[]> {
+        if (orders.length === 0) {
+            return [];
+        }
+
         const result: PrivateOrder[] = [];
         const webshopIds = new Set(orders.map(o => o.webshopId));
 
@@ -788,9 +847,10 @@ export class AuthenticatedStructures {
                 });
             }
         }
+        const allBalanceItems = await BalanceItem.select().where('orderId', orders.map(o => o.id)).fetch();
 
         for (const order of orders) {
-            const balanceItems = await BalanceItem.where({ orderId: order.id });
+            const balanceItems = allBalanceItems.filter(b => b.orderId === order.id);
 
             const struct = PrivateOrder.create({
                 ...order,
