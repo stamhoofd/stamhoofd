@@ -419,7 +419,7 @@ export class AdminPermissionChecker {
         if (member.registrations.length === 0 && this.isUserManager(member)) {
             const cachedBalance = await CachedBalance.getForObjects([member.id], null, ReceivableBalanceType.member);
             if (cachedBalance.length === 0 || (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)) {
-                const platformMemberships = await MemberPlatformMembership.where({ memberId: member.id });
+                const platformMemberships = await MemberPlatformMembership.select().where('memberId', member.id).fetch();
                 if (platformMemberships.length === 0) {
                     return true;
                 }
