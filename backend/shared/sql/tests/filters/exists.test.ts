@@ -1,27 +1,8 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/SQLFilter';
-import { SQL } from '../../src/SQL';
-import { testSelect } from '../utils';
+import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
+import { SQL } from '../../src/SQL.js';
+import { testSelect } from '../utils/index.js';
 
 describe('Exists relations', () => {
-    const organizationJoin = SQL.leftJoin('organizations')
-        .where(
-            SQL.column('id'),
-            SQL.parentColumn('organizationId'),
-        );
-
-    const organizationInnerJoin = SQL.innerJoin('organizations', 'o')
-        .where(
-            SQL.column('id'),
-            SQL.parentColumn('organizationId'),
-        );
-
-    /**
-     * Tests that should be repeated for all filter types
-     */
-    describe('Common checks', () => {
-        // todo
-    });
-
     it('Added when used', async () => {
         const filters = {
             ...baseSQLFilterCompilers,
@@ -51,7 +32,7 @@ describe('Exists relations', () => {
             ],
             filters,
             query: {
-                query: 'SELECT `test_table`.* FROM `test_table` WHERE EXISTS (SELECT `o`.* FROM `organizations` `o` WHERE `test_table`.`organizationId` = `o`.`id` AND `o`.`id` = ?)',
+                query: 'SELECT `test_table`.* FROM `test_table` WHERE EXISTS (SELECT 1 FROM `organizations` `o` WHERE `test_table`.`organizationId` = `o`.`id` AND `o`.`id` = ?)',
                 params: ['123'],
             },
         });
@@ -88,7 +69,7 @@ describe('Exists relations', () => {
             ],
             filters,
             query: {
-                query: 'SELECT `test_table`.* FROM `test_table` WHERE EXISTS (SELECT `o`.* FROM `organizations` `o` WHERE `test_table`.`organizationId` = `o`.`id`)',
+                query: 'SELECT `test_table`.* FROM `test_table` WHERE EXISTS (SELECT 1 FROM `organizations` `o` WHERE `test_table`.`organizationId` = `o`.`id`)',
                 params: [],
             },
         });
