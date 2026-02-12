@@ -243,13 +243,11 @@ export class AuthenticatedStructures {
         const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
 
         for (const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
-            const organizationMap = new Map(organizations.map(o => [o.id, o]));
-
             const result = await OrganizationRegistrationPeriod.where({
                 periodId,
                 organizationId: {
                     sign: 'IN',
-                    value: Array.from(organizationMap.keys()),
+                    value: Formatter.uniqueArray(organizations.map(o => o.id)),
                 },
             });
             const period = periodMap.get(periodId);
