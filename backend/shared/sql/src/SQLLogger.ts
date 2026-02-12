@@ -4,6 +4,7 @@ import { StyledText } from '@simonbackx/simple-logging';
 class StaticSQLLogger {
     slowQueryThresholdMs: number | null = null;
     explainAllAndLogInefficient = false;
+    customLoggers: ((query: string, params: any[], elapsedTimeMs: number) => void)[] = [];
 
     async explain(query: string, params: any[]) {
         // Run an EXPLAIN on the query to see what is going on

@@ -1,28 +1,31 @@
 import { Column, Database, Migration } from '@simonbackx/simple-database';
-import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
-import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
+import { CORSPreflightEndpoint, ResponseMiddleware, Router, RouterServer } from '@simonbackx/simple-endpoints';
+import { logger } from '@simonbackx/simple-logging';
+import { CORSMiddleware, LogMiddleware, requestPrefix, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { Email } from '@stamhoofd/email';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
+import { Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
+import { SQLLogger } from '@stamhoofd/sql';
+import { ContextInstance } from './helpers/Context.js';
 import { resumeEmails } from './helpers/EmailResumer.js';
 import { GlobalHelper } from './helpers/GlobalHelper.js';
 import { SetupStepUpdater } from './helpers/SetupStepUpdater.js';
 import { ContextMiddleware } from './middleware/ContextMiddleware.js';
 import { AuditLogService } from './services/AuditLogService.js';
 import { BalanceItemService } from './services/BalanceItemService.js';
+import { CpuService } from './services/CpuService.js';
 import { DocumentService } from './services/DocumentService.js';
 import { FileSignService } from './services/FileSignService.js';
 import { PlatformMembershipService } from './services/PlatformMembershipService.js';
 import { UitpasService } from './services/uitpas/UitpasService.js';
 import { UniqueUserService } from './services/UniqueUserService.js';
-import { CpuService } from './services/CpuService.js';
-import { SQLLogger } from '@stamhoofd/sql';
 
 process.on('unhandledRejection', (error: Error) => {
     console.error('unhandledRejection');
@@ -149,8 +152,32 @@ export const boot = async (options: { killProcess: boolean }) => {
         CpuService.startMonitoring();
     }
     else if (STAMHOOFD.environment === 'development') {
-        SQLLogger.slowQueryThresholdMs = 200;
+        SQLLogger.slowQueryThresholdMs = 75;
         SQLLogger.explainAllAndLogInefficient = true;
+
+        if (process.env.LOG_REQUEST_QUERIES) {
+            console.log('Logging all SQL queries for each request');
+            SQLLogger.customLoggers.push((query, params, elapsedTimeMs) => {
+                const context = ContextInstance.optional;
+                if (context) {
+                    context.queries.push({ query, time: elapsedTimeMs });
+                }
+            });
+            const LogQueriesMiddleware: ResponseMiddleware = {
+                handleResponse(request: Request, response: Response, error?: Error) {
+                    const prefix = !error ? [] : requestPrefix(request, 'error');
+                    const context = (request as any)._context as ContextInstance | undefined;
+
+                    if (context && request.method !== 'OPTIONS') {
+                        logger.log(
+                            ...prefix,
+                            ' - Queries ' + context.queries.map(q => `\n- ${q.query} (${q.time?.toFixed(2) ?? '-'}ms)`).join(''),
+                        );
+                    }
+                },
+            };
+            routerServer.addResponseMiddleware(LogQueriesMiddleware);
+        }
     }
 
     if (routerServer.server) {
