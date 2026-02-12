@@ -1,9 +1,9 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Member, MemberWithRegistrations } from '@stamhoofd/models';
+import { Member, MemberWithRegistrationsAndGroups } from '@stamhoofd/models';
 
 import { MembersBlob } from '@stamhoofd/structures';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined;
@@ -47,7 +47,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
 
         let foundMember = false;
 
-        const validatedMembers: MemberWithRegistrations[] = [];
+        const validatedMembers: MemberWithRegistrationsAndGroups[] = [];
 
         for (const member of members) {
             if (member.id === request.params.id) {

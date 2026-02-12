@@ -6,7 +6,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { Member, MemberWithRegistrations, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
+import { Member, MemberWithRegistrationsAndGroups, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');
@@ -138,7 +138,7 @@ export class Group extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
-    async getMembersWithRegistration(waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrations[]> {
+    async getMembersWithRegistration(waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrationsAndGroups[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()} from \`${Member.table}\`\n`;
 
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`;
@@ -156,7 +156,7 @@ export class Group extends QueryableModel {
         query += `where reg_filter.\`groupId\` = ? AND reg_filter.\`cycle\` = ?`;
 
         const [results] = await Database.select(query, [this.id, this.cycle - cycleOffset]);
-        const members: MemberWithRegistrations[] = [];
+        const members: MemberWithRegistrationsAndGroups[] = [];
 
         const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
         const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
@@ -171,7 +171,7 @@ export class Group extends QueryableModel {
             // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id);
 
-            const member: MemberWithRegistrations = (existingMember ?? _f);
+            const member: MemberWithRegistrationsAndGroups = (existingMember ?? _f);
             if (!existingMember) {
                 members.push(member);
             }

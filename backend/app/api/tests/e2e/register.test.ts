@@ -1,16 +1,16 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrationsAndGroups, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
-import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint';
-import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
-import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint';
-import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
-import { PlatformMembershipService } from '../../src/services/PlatformMembershipService';
-import { testServer } from '../helpers/TestServer';
+import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint.js';
+import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
+import { GetMemberBalanceEndpoint } from '../../src/endpoints/organization/dashboard/payments/GetMemberBalanceEndpoint.js';
+import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint.js';
+import { PlatformMembershipService } from '../../src/services/PlatformMembershipService.js';
+import { testServer } from '../helpers/TestServer.js';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { BalanceItemService } from '../../src/services/BalanceItemService';
-import { assertBalances } from '../assertions/assertBalances';
+import { BalanceItemService } from '../../src/services/BalanceItemService.js';
+import { assertBalances } from '../assertions/assertBalances.js';
 
 describe('E2E.Register', () => {
     const registerEndpoint = new RegisterMembersEndpoint();
@@ -78,7 +78,7 @@ describe('E2E.Register', () => {
 
         const member = await new MemberFactory({ organization, user }).create();
 
-        const otherMembers: MemberWithRegistrations[] = [];
+        const otherMembers: MemberWithRegistrationsAndGroups[] = [];
 
         for (let i = 0; i < otherMemberAmount; i++) {
             otherMembers.push(await new MemberFactory({ organization, user }).create());

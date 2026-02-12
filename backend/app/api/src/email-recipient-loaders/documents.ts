@@ -9,7 +9,7 @@ async function fetch(query: LimitedFilteredRequest) {
     const recipients: EmailRecipient[] = [];
     const memberIds = new Set(result.results.map(doc => doc.memberId).filter(id => id !== null)); // silently skip null memberIds
 
-    const members = await Member.getBlobByIds(...memberIds);
+    const members = await Member.getByIdsWithUsers(...memberIds);
     for (const member of members) {
         const emails = member.details.getNotificationEmails();
         for (const user of member.users) {

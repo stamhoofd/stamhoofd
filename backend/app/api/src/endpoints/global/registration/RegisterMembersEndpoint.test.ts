@@ -1,7 +1,7 @@
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, MemberWithRegistrations, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, Group, GroupFactory, Member, MemberFactory, MemberWithRegistrationsAndGroups, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemCartItem, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, PermissionLevel, Permissions, PermissionsResourceType, ReduceablePrice, RegisterItemOption, ResourcePermissions, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -80,7 +80,7 @@ describe('Endpoint.RegisterMembers', () => {
         const member = await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })
             .create();
 
-        const otherMembers: MemberWithRegistrations[] = [];
+        const otherMembers: MemberWithRegistrationsAndGroups[] = [];
 
         for (let i = 0; i < otherMemberAmount; i++) {
             otherMembers.push(await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })

@@ -2,7 +2,7 @@ import { OneToManyRelation } from '@simonbackx/simple-database';
 import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
+import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrationsAndGroups, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -72,7 +72,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
         }
 
-        const members: MemberWithRegistrations[] = [];
+        const members: MemberWithRegistrationsAndGroups[] = [];
 
         const platform = await Platform.getShared();
 
@@ -754,7 +754,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async mergeDuplicateRelations(member: MemberWithRegistrations, patch: AutoEncoderPatchType<MemberDetails> | MemberDetails) {
+    static async mergeDuplicateRelations(member: MemberWithRegistrationsAndGroups, patch: AutoEncoderPatchType<MemberDetails> | MemberDetails) {
         const _familyMembers = await Member.getFamilyWithRegistrations(member.id);
         const familyMembers: typeof _familyMembers = [];
         // Only modify members if we have write access to them (this avoids issues with overriding data)
@@ -901,7 +901,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async checkSecurityCode(member: MemberWithRegistrations, securityCode: string | null | undefined, type: 'put' | 'patch') {
+    static async checkSecurityCode(member: MemberWithRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch') {
         if ((type === 'put' && await member.isSafeToMergeDuplicateWithoutSecurityCode()) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         }

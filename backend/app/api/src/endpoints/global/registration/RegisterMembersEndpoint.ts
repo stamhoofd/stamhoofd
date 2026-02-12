@@ -4,7 +4,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithRegistrations, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithRegistrationsAndGroups, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -145,7 +145,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
         }
 
-        let members: MemberWithRegistrations[] = [];
+        let members: MemberWithRegistrationsAndGroups[] = [];
         if (request.body.asOrganizationId) {
             const memberIds = Formatter.uniqueArray(
                 [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
@@ -911,10 +911,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }));
     }
 
-    async createPayment({ balanceItems, organization, user, checkout, members }: { balanceItems: Map<BalanceItem, number>; organization: Organization; user: User; checkout: IDRegisterCheckout; members: MemberWithRegistrations[] }) {
+    async createPayment({ balanceItems, organization, user, checkout, members }: { balanceItems: Map<BalanceItem, number>; organization: Organization; user: User; checkout: IDRegisterCheckout; members: MemberWithRegistrationsAndGroups[] }) {
         // Calculate total price to pay
         let totalPrice = 0;
-        const payMembers: MemberWithRegistrations[] = [];
+        const payMembers: MemberWithRegistrationsAndGroups[] = [];
         let hasNegative = false;
 
         for (const [balanceItem, price] of balanceItems) {
