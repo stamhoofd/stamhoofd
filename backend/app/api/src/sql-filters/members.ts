@@ -217,7 +217,7 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             ...baseRegistrationFilterCompilers,
             // Override the registration periodId - can be outdated - and always use the group periodId
             periodId: createColumnFilter({
-                expression: SQL.column('groups', 'periodId'),
+                expression: SQL.column('registrations', 'periodId'),
                 type: SQLValueType.String,
                 nullable: false,
             }),
