@@ -37,7 +37,7 @@ export class SQLDistinct implements SQLExpression {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
-            'DISTINCT',
+            'DISTINCT ',
             this.expression.getSQL(options),
         ]);
     }
