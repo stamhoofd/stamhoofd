@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailAddress } from '@stamhoofd/email';
 import { EmailInformation } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -28,11 +28,18 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOrganizationScope();
+        const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canAccessEmailBounces(organization.id)) {
-            throw Context.auth.error();
+        if (organization) {
+            if (!await Context.auth.canAccessEmailBounces(organization.id)) {
+                throw Context.auth.error();
+            }
+        }
+        else {
+            if (!Context.auth.hasPlatformFullAccess()) {
+                throw Context.auth.error();
+            }
         }
 
         if (request.body.length > 10000) {
@@ -44,7 +51,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        const emails = await EmailAddress.getByEmails(request.body, organization.id);
+        const emails = await EmailAddress.getByEmails(request.body, organization ? organization.id : null);
         return new Response(emails.map(e => EmailInformation.create(e)));
     }
 }
