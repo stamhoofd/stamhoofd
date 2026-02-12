@@ -31,15 +31,11 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (organization) {
-            if (!await Context.auth.canAccessEmailBounces(organization.id)) {
-                throw Context.auth.error();
-            }
-        }
-        else {
-            if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error();
-            }
+        // null if platform
+        const organizationId: string | null = organization ? organization.id : null;
+
+        if (!await Context.auth.canAccessEmailBounces(organizationId)) {
+            throw Context.auth.error();
         }
 
         if (request.body.length > 10000) {
@@ -51,7 +47,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
 
-        const emails = await EmailAddress.getByEmails(request.body, organization ? organization.id : null);
+        const emails = await EmailAddress.getByEmails(request.body, organizationId);
         return new Response(emails.map(e => EmailInformation.create(e)));
     }
 }

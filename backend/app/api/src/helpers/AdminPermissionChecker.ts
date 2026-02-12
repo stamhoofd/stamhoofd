@@ -928,8 +928,11 @@ export class AdminPermissionChecker {
         return this.hasFullAccess(organizationId);
     }
 
-    async canAccessEmailBounces(organizationId: string) {
-        return this.hasSomeAccess(organizationId);
+    async canAccessEmailBounces(organizationId: string | null) {
+        if (organizationId) {
+            return this.hasSomeAccess(organizationId);
+        }
+        return this.hasPlatformFullAccess();
     }
 
     async canSendEmails(organizationId: Organization | string | null) {
