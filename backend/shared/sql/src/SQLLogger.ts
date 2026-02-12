@@ -18,14 +18,14 @@ class StaticSQLLogger {
         return null;
     }
 
-    async logInefficientExplainResult(query: string, params: any[], explainResult: any) {
+    async logInefficientExplainResult(query: string, params: any[], explainResult: any, elapsedTimeMs?: number) {
         if (!explainResult) {
             return;
         }
         if (explainResult['type'] === 'ALL') {
             console.warn(
                 new StyledText('[FULL TABLE SCAN] ').addClass('error').addTag('query'),
-                'Inefficient query detected:',
+                `Inefficient query detected${elapsedTimeMs !== undefined ? ' (' + elapsedTimeMs.toFixed(0) + 'ms)' : ''}:`,
                 query,
                 params,
                 'EXPLAIN result:',
@@ -56,7 +56,7 @@ class StaticSQLLogger {
         }
 
         if (this.explainAllAndLogInefficient) {
-            await this.logInefficientExplainResult(query, params, await this.explain(query, params));
+            await this.logInefficientExplainResult(query, params, await this.explain(query, params), elapsedTimeMs);
             return result;
         }
 
