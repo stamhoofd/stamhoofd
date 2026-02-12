@@ -74,7 +74,7 @@ export class QueryableModel extends Model {
      * @param id primary key
      */
     static override async getByID<T extends typeof Model>(this: T, id: number | string): Promise<InstanceType<T> | undefined> {
-        return (this as any as typeof QueryableModel).select().where(this.primary.name, id).first(false) as any as InstanceType<T> | undefined;
+        return ((await (this as any as typeof QueryableModel).select().where(this.primary.name, id).first(false)) ?? undefined) as any as InstanceType<T> | undefined;
     }
 
     /**
