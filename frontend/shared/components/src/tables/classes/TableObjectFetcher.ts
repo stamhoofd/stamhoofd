@@ -42,7 +42,7 @@ export class TableObjectFetcher<O extends { id: string }> {
 
     limit = STAMHOOFD.environment === 'development' ? 100 : 100; // To help catch bugs in pagination
     maxLimit = 100;
-    minimumLimit = STAMHOOFD.environment === 'development' ? 20 : 20; // To help catch bugs in pagination
+    minimumLimit = STAMHOOFD.environment === 'development' ? 10 : 10; // To help catch bugs in pagination
     sort: SortList = [];
 
     retryTimer: NodeJS.Timeout | null = null;
