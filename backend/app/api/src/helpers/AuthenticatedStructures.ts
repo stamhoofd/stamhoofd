@@ -222,8 +222,8 @@ export class AuthenticatedStructures {
             return [];
         }
 
-        // #region get period ids / organizations map
         const periodIdOrganizationsMap = new Map<string, Organization[]>();
+        const organizationIdsToGetWebshopsFor: string[] = [];
 
         for (const organization of organizations) {
             const periodId = organization.periodId;
@@ -235,11 +235,12 @@ export class AuthenticatedStructures {
                 periodIdOrganizationsMap.set(periodId, [organization]);
             }
         }
-        // #endregion
 
-        // #region get registration period and whether private data can be accessed for each organization
-        const organizationData: Map<string, { organizationRegistrationPeriod: OrganizationRegistrationPeriod; canAccessPrivateData: boolean }> = new Map();
-        const organizationIdsToGetWebshopsFor: string[] = [];
+        // Get registration period and whether private data can be accessed for each organization
+        const organizationData: Map<string, { organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct; canAccessPrivateData: boolean }> = new Map();
+        const allPeriodIds = periodIdOrganizationsMap.keys();
+        const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
+        const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
 
         for (const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
             const organizationMap = new Map(organizations.map(o => [o.id, o]));
@@ -251,31 +252,35 @@ export class AuthenticatedStructures {
                     value: Array.from(organizationMap.keys()),
                 },
             });
+            const period = periodMap.get(periodId);
+            if (!period) {
+                console.error('Period not found for id', periodId);
+                continue;
+            }
 
-            const organizationRegistrationPeriods = new Map(result.map(r => [r.organizationId, r]));
+            // Do this onece per period, because otherwise we can't optimize fetching the groups for each period
+            const organizationRegistrationPeriods = await this.organizationRegistrationPeriods(result, [period]);
 
             for (const organization of organizations) {
                 const organizationId = organization.id;
-                const organizationRegistrationPeriod = organizationRegistrationPeriods.get(organizationId) ?? await organization.getPeriod();
+                const organizationPeriodModel = result.find(r => r.organizationId === organizationId);
+                if (organizationPeriodModel) {
+                    const organizationRegistrationPeriod = organizationRegistrationPeriods.find(o => o.id === organizationPeriodModel.id);
+                    if (!organizationRegistrationPeriod) {
+                        throw new Error('Organization registration period not found for id ' + organizationPeriodModel.id);
+                    }
 
                 // check if private data can be accessed
                 const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
                 if (canAccessPrivateData) {
-                    organizationIdsToGetWebshopsFor.push(organizationId);
+                        organizationIdsToGetWebshopsFor.push(organization.id);
                 }
-
                 organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData });
             }
         }
-        // #endregion
+        }
 
-        // #region get periods
-        const allPeriodIds = periodIdOrganizationsMap.keys();
-        const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
-        const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
-        // #endregion
-
-        // #region get webshop previews
+        // Get webshop previews
         const webshops = organizationIdsToGetWebshopsFor.length > 0
             ? await Webshop.where(
                 {
@@ -306,9 +311,8 @@ export class AuthenticatedStructures {
                 webshopPreviews.set(organizationId, [preview]);
             }
         }
-        // #endregion
 
-        // #region create organization structs
+        // Create organization structs
         const results: OrganizationStruct[] = [];
 
         for (const organization of organizations) {
@@ -327,7 +331,7 @@ export class AuthenticatedStructures {
 
             let result: OrganizationStruct;
 
-            const period = await this.organizationRegistrationPeriod(data.organizationRegistrationPeriod, [registrationPeriod]);
+            const period = data.organizationRegistrationPeriod;
             const baseStruct = organization.getBaseStructure();
 
             if (data.canAccessPrivateData) {
@@ -347,7 +351,6 @@ export class AuthenticatedStructures {
 
             results.push(result);
         }
-        // #endregion
 
         return results;
     }
