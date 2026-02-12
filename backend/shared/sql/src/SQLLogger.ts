@@ -22,6 +22,11 @@ class StaticSQLLogger {
         if (!explainResult) {
             return;
         }
+        if (elapsedTimeMs !== undefined && elapsedTimeMs < 20) {
+            // Probably fine
+            return;
+        }
+
         if (explainResult['type'] === 'ALL') {
             console.warn(
                 new StyledText('[FULL TABLE SCAN] ').addClass('error').addTag('query'),
@@ -53,6 +58,15 @@ class StaticSQLLogger {
 
         if (elapsedTimeMs > this.slowQueryThresholdMs) {
             console.trace('Slow SQL query (' + elapsedTimeMs.toFixed(2) + 'ms)\nQuery: ' + query, params);
+        }
+
+        for (const logger of this.customLoggers) {
+            try {
+                logger(query, params, elapsedTimeMs);
+            }
+            catch (e) {
+                console.error('Error in custom SQL logger', e);
+            }
         }
 
         if (this.explainAllAndLogInefficient) {
