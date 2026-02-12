@@ -50,6 +50,10 @@
             <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
                 {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
             </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('STA-673')" @update:model-value="setFeatureFlag('STA-673', !!$event)">
+                {{ $t('Afmeldingen van e-mailadressen lezen en bewerken') }} (wip)
+            </Checkbox>
         </template>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>
