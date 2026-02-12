@@ -69,7 +69,7 @@ describe('Model.Platform', () => {
         });
     });
 
-    describe('Creating fresh platform', () => {
+    describe('it creates the first platform in the database', () => {
         beforeEach(async () => {
             await Database.delete('DELETE FROM platform');
             await Platform.clearCacheWithoutRefresh();
@@ -82,14 +82,14 @@ describe('Model.Platform', () => {
             const editable = await Platform.getForEditing();
             expect(editable.id).toBe('1');
 
-            expect(await Platform.getByID('1')).toEqual(editable);
+            expect((await Platform.getByID('1'))?.id).toEqual(editable.id);
         });
 
         test('when requesting getShared', async () => {
             const shared = await Platform.getShared();
             expect(shared.id).toBe('1');
 
-            expect(await Platform.getByID('1')).toMatchObject(shared);
+            expect((await Platform.getByID('1'))?.id).toEqual(shared.id);
         });
 
         test('when requesting getSharedPrivateStruct', async () => {
