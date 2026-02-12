@@ -53,6 +53,7 @@ export class AuthorizationPostBody extends AutoEncoder {
 export class ContextInstance {
     request: Request;
     queries: { query: string; time?: number }[] = [];
+    timers: Map<string, number> = new Map();
 
     user?: User;
     organization?: Organization;
