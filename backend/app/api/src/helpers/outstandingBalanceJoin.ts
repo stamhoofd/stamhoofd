@@ -12,7 +12,9 @@ export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
     )
         .from(CachedBalance.table)
         .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
-        .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId')).as('memberCachedBalance') as SQLNamedExpression, 'memberCachedBalance',
+        .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId'))
+        .as('memberCachedBalance') as SQLNamedExpression,
+    'memberCachedBalance',
 )
     .where(SQL.column('objectId'), SQL.column(Registration.table, 'memberId'))
     .andWhere(SQL.column('organizationId'), SQL.column(Registration.table, 'organizationId'));
