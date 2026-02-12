@@ -283,6 +283,10 @@ export class AuthenticatedStructures {
                 }
                 organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData });
             }
+                else {
+                    // Should never happen
+                    throw new Error('Organization registration period model not found for organization id ' + organizationId + ' and period id ' + periodId);
+                }
         }
         }
 
