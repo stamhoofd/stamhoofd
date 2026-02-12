@@ -5,8 +5,8 @@
             <a v-if="!$isTouch && app !== 'registration'" class="button icon gray help" target="_blank" :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')" />
         </h2>
         <p>{{ $t('db162d2e-be1b-4e8a-9915-b1e58ffa0aca', {member: member.patchedMember.firstName}) }}</p>
-        <STList>
-            <STListItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
+        <STGrid>
+            <STGridItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
                 <template v-if="user.hasAccount && user.verified" #left>
                     <span class="icon user small" />
                 </template>
@@ -31,13 +31,18 @@
                 <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
                     {{ $t('d5be56ba-2189-47b0-a32f-ef92cac0c2f8') }}
                 </p>
+
+                <template v-if="shouldShowEmailWarning()" #middleRight>
+                    <EmailWarning :email="user.email" />
+                </template>
+
                 <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
                     <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
                         <button type="button" class="button icon trash" @click.stop="deleteUser(user)" />
                     </LoadingButton>
                 </template>
-            </STListItem>
-        </STList>
+            </STGridItem>
+        </STGrid>
     </div>
 </template>
 
@@ -46,11 +51,14 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { MemberWithRegistrationsBlob, PermissionLevel, PlatformMember, User } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
+import { useAdmins } from '../../../admins/hooks/useAdmins';
 import { useAppContext } from '../../../context/appContext';
-import { useAuth } from '../../../hooks';
+import { useAuth, useShouldShowEmailWarning } from '../../../hooks';
+import STGrid from '../../../layout/STGrid.vue';
+import STGridItem from '../../../layout/STGridItem.vue';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
-import { useAdmins } from '../../../admins/hooks/useAdmins';
+import EmailWarning from '../detail/EmailWarning.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -64,6 +72,7 @@ const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, Permi
 const deletingUsers = ref(new Set<string>());
 const platformFamilyManager = usePlatformFamilyManager();
 const { hasEmptyAccess } = useAdmins(false);
+const shouldShowEmailWarning = useShouldShowEmailWarning();
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {

@@ -40,6 +40,7 @@
                 <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ member.patchedMember.details.alternativeEmails.length ? '1' : '' }}</dt>
                 <dd v-copyable>
                     {{ member.patchedMember.details.email }}
+                    <EmailWarning v-if="shouldShowEmailWarning()" :email="member.patchedMember.details.email" />
                 </dd>
             </template>
 
@@ -87,7 +88,8 @@
 
 <script setup lang="ts">
 import { NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
-import { useCountry } from '../../../hooks';
+import { useCountry, useShouldShowEmailWarning } from '../../../hooks';
+import EmailWarning from '../detail/EmailWarning.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -98,4 +100,5 @@ defineProps<{
 }>();
 
 const currentCountry = useCountry();
+const shouldShowEmailWarning = useShouldShowEmailWarning();
 </script>
