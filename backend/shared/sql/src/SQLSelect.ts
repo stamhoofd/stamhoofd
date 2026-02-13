@@ -98,6 +98,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
+        if (!this._from) {
+            throw new Error('Forgot to define .from(...) for SQLSelect');
+        }
+
         const query: SQLQuery[] = [
             'SELECT',
         ];
