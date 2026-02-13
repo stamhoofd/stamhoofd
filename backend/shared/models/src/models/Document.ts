@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
 import { render } from '../helpers/Handlebars.js';
-import { MemberWithUsersRegistrationsAndGroups, RegistrationWithMember } from './Member.js';
+import { Member, MemberWithRegistrations, MemberWithUsersRegistrationsAndGroups, RegistrationWithMember } from './Member.js';
 import { Organization } from './Organization.js';
 import { Registration } from './Registration.js';
 
@@ -142,25 +142,27 @@ export class Document extends QueryableModel {
         }
 
         const Member = (await import('./Member.js')).Member;
-        const [registration] = await Member.getRegistrationWithMembersByIDs([this.registrationId]);
+        const registration = await Registration.getByID(this.registrationId);
         if (!registration) {
             console.log('No registration when updating document', this.id);
             await template.updateDocumentWithAnswers(this, this.data.fieldAnswers);
             return;
         }
 
-        await template.updateDocumentFor(this, registration);
+        const [loadedRegistration] = await Member.loadMembersForRegistrations([registration]);
+        await template.updateDocumentFor(this, loadedRegistration);
     }
 
-    static async updateForMember(memberOrId: string | MemberWithUsersRegistrationsAndGroups) {
+    static async updateForMember(memberOrId: string | Member | MemberWithRegistrations) {
         try {
             console.log('Updating documents for member', typeof memberOrId === 'string' ? memberOrId : memberOrId.id);
             const Member = (await import('./Member.js')).Member;
-            const member = typeof memberOrId === 'string' ? await Member.getWithRegistrations(memberOrId) : memberOrId;
+            const member = typeof memberOrId === 'string' ? await Member.getByID(memberOrId) : memberOrId;
             if (member) {
-                const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
+                const [loadedMember] = await Member.loadRegistrations([member]);
+                const organizationIds = Formatter.uniqueArray(loadedMember.registrations.map(r => r.organizationId));
                 for (const organizationId of organizationIds) {
-                    await this.updateForRegistrations(member.registrations.filter(r => r.registeredAt && r.deactivatedAt === null && r.organizationId === organizationId).map(r => r.id), organizationId);
+                    await this.updateForRegistrations(loadedMember.registrations.filter(r => r.registeredAt && r.deactivatedAt === null && r.organizationId === organizationId).map(r => r.id), organizationId);
                 }
             }
         }
@@ -198,7 +200,7 @@ export class Document extends QueryableModel {
         }
     }
 
-    static async updateForRegistrations(registrationIds: string[], organizationId: string) {
+    static async updateForRegistrations(registrationIds: string[] | Registration[], organizationId: string) {
         if (!registrationIds.length) {
             return;
         }
@@ -210,10 +212,11 @@ export class Document extends QueryableModel {
 
             if (templates.length) {
                 const Member = (await import('./Member.js')).Member;
-                const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds);
+                const registrations = registrationIds.length === 0 || typeof registrationIds[0] !== 'string' ? (registrationIds as Registration[]) : await Member.getRegistrationWithMembersByIDs(registrationIds as string[]);
+                const loadedRegistrations = await Member.loadMembersForRegistrations(registrations);
 
                 for (const template of templates) {
-                    await template.updateForRegistrations(registrations);
+                    await template.updateForRegistrations(loadedRegistrations);
                 }
             }
         }

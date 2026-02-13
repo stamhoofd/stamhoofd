@@ -4,9 +4,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, Member, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
 import { LoginMethod, NewUser, PermissionLevel, SignupResponse, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 
-import { Context } from '../../helpers/Context';
-import { MemberUserSyncer } from '../../helpers/MemberUserSyncer';
-import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures';
+import { Context } from '../../helpers/Context.js';
+import { MemberUserSyncer } from '../../helpers/MemberUserSyncer.js';
+import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -49,7 +49,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         if (await Context.auth.canEditUserName(editUser)) {
             if (editUser.memberId) {
-                const member = await Member.getWithRegistrations(editUser.memberId);
+                const member = await Member.getByID(editUser.memberId);
                 if (member) {
                     member.details.firstName = request.body.firstName ?? member.details.firstName;
                     member.details.lastName = request.body.lastName ?? member.details.lastName;

@@ -254,7 +254,7 @@ async function getMemberRecipients(ids: { memberId: string; payment: PaymentGene
     }
 
     const allMemberIds = Formatter.uniqueArray(ids.map(i => i.memberId));
-    const members = await Member.getBlobByIds(...allMemberIds);
+    const members = await Member.getByIdsWithUsers(...allMemberIds);
 
     const results: EmailRecipient[] = [];
 

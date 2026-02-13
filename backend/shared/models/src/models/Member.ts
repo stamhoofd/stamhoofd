@@ -115,9 +115,45 @@ export class Member extends QueryableModel {
         return (await this.getBlobByIds(id))[0] ?? null;
     }
 
+    /**
+     * Fetch all members with their corresponding (valid) registration
+     */
+    static async getByIdWithRegistrationsAndGroups(id: string): Promise<MemberWithRegistrationsAndGroups | null> {
+        const member = await this.getByID(id);
+        if (!member) {
+            return null;
+        }
+        await this.loadRegistrations([member], true);
+        return member as MemberWithRegistrationsAndGroups;
+    }
+
+    /**
+     * Fetch all members with their corresponding (valid) registration
+     */
+    static async getByIdWithUsers(id: string): Promise<MemberWithUsers | null> {
+        const member = await this.getByID(id);
+        if (!member) {
+            return null;
+        }
+        await this.loadUsers([member]);
+        return member as MemberWithUsers;
+    }
+
+    /**
+     * Fetch all members with their corresponding (valid) registration
+     */
+    static async getByIdWithUsersAndRegistrations(id: string): Promise<MemberWithUsersAndRegistrations | null> {
+        const member = await this.getByID(id);
+        if (!member) {
+            return null;
+        }
+        await this.loadRegistrationsAndUsers([member]);
+        return member as MemberWithUsersAndRegistrations;
+    }
+
     static async getByIdsWithUsers(...ids: string[]): Promise<MemberWithUsers[]> {
-        // todo: don't load users
-        return this.getBlobByIds(...ids);
+        const members = await Member.getByIDs(...ids);
+        return await Member.loadUsers(members);
     }
 
     /**
@@ -127,115 +163,52 @@ export class Member extends QueryableModel {
         if (ids.length === 0) {
             return [];
         }
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
 
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`canRegister\` = 1)\n`;
+        const registrations = await Registration.getByIDs(...ids);
+        await this.loadMembersForRegistrations(registrations);
+        return registrations as RegistrationWithMember[];
+    }
 
-        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Registration.table}\`.\`${Registration.primary.name}\` IN (?)`;
-
-        const [results] = await Database.select(query, [ids]);
-        const registrations: RegistrationWithMember[] = [];
-
-        // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
-        const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
-        registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
-
-        for (const row of results) {
-            const registration = Registration.fromRow(row[Registration.table]);
-            if (!registration) {
-                throw new Error('Expected registration in every row');
-            }
-
-            const foundMember = Member.fromRow(row[Member.table]);
-            if (!foundMember) {
-                throw new Error('Expected member in every row');
-            }
-
-            const _f = registration.setRelation(registrationMemberRelation, foundMember);
-            registrations.push(_f);
+    /**
+     * Fetch all registrations with members with their corresponding (valid) registrations
+     */
+    static async loadMembersForRegistrations(registrations: Registration[]): Promise<RegistrationWithMember[]> {
+        if (registrations.length === 0) {
+            return [];
         }
 
-        return registrations;
+        const memberIds = Formatter.uniqueArray(registrations.map(r => r.memberId));
+        if (memberIds.length) {
+            // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
+            const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
+            registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
+
+            const members = await Member.getByIDs(...memberIds);
+            for (const registration of registrations) {
+                const member = members.find(m => m.id === registration.memberId);
+                if (member) {
+                    registration.setRelation(registrationMemberRelation, member);
+                }
+                else {
+                    throw new Error('Unexpected missing member for registration ' + registration.id);
+                }
+            }
+        }
+
+        return registrations as RegistrationWithMember[];
     }
 
     /**
      * Fetch all registrations with members with their corresponding (valid) registrations
      */
     static async getRegistrationWithMembersForGroup(groupId: string): Promise<RegistrationWithMember[]> {
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
+        const registrations = await Registration.select()
+            .where('groupId', groupId)
+            .where('registeredAt', '!=', null)
+            .where('deactivatedAt', null)
+            .fetch();
 
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND \`${Registration.table}\`.\`registeredAt\` is not null AND \`${Registration.table}\`.\`deactivatedAt\` is null\n`;
-
-        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `where \`${Registration.table}\`.\`groupId\` = ?`;
-
-        const [results] = await Database.select(query, [groupId]);
-        const registrations: RegistrationWithMember[] = [];
-
-        // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
-        const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
-        registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
-
-        for (const row of results) {
-            const registration = Registration.fromRow(row[Registration.table]);
-            if (!registration) {
-                throw new Error('Expected registration in every row');
-            }
-
-            const foundMember = Member.fromRow(row[Member.table]);
-            if (!foundMember) {
-                throw new Error('Expected member in every row');
-            }
-
-            const _f = registration.setRelation(registrationMemberRelation, foundMember);
-            registrations.push(_f);
-        }
-
-        return registrations;
-    }
-
-    /**
-     * Fetch all registrations with members with their corresponding (valid) registrations and payment
-     */
-    static async getRegistrationWithMembersForPayment(paymentId: string): Promise<RegistrationWithMember[]> {
-        const { BalanceItem, BalanceItemPayment } = await import('./index.js');
-
-        let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()} from \`${Member.table}\`\n`;
-
-        query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\`\n`;
-
-        query += `LEFT JOIN \`${BalanceItem.table}\` ON \`${BalanceItem.table}\`.\`registrationId\` = \`${Registration.table}\`.\`${Registration.primary.name}\`\n`;
-        query += `LEFT JOIN \`${BalanceItemPayment.table}\` ON \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.balanceItem.foreignKey}\` = \`${BalanceItem.table}\`.\`${BalanceItem.primary.name}\`\n`;
-        query += `JOIN \`${Payment.table}\` ON \`${Payment.table}\`.\`${Payment.primary.name}\` = \`${BalanceItemPayment.table}\`.\`${BalanceItemPayment.payment.foreignKey}\`\n`;
-
-        // We do an extra join because we also need to get the other registrations of each member (only one regitration has to match the query)
-        query += `WHERE \`${Payment.table}\`.\`${Payment.primary.name}\` = ?\n`;
-        query += `GROUP BY \`${Registration.table}\`.\`${Registration.primary.name}\`, \`${Member.table}\`.\`${Member.primary.name}\``;
-
-        const [results] = await Database.select(query, [paymentId]);
-        const registrations: RegistrationWithMember[] = [];
-
-        // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
-        const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
-        registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
-
-        for (const row of results) {
-            const registration = Registration.fromRow(row[Registration.table]);
-            if (!registration) {
-                throw new Error('Expected registration in every row');
-            }
-
-            const foundMember = Member.fromRow(row[Member.table]);
-            if (!foundMember) {
-                throw new Error('Expected member in every row');
-            }
-
-            const _f = registration.setRelation(registrationMemberRelation, foundMember);
-            registrations.push(_f);
-        }
-
-        return registrations;
+        return this.loadMembersForRegistrations(registrations);
     }
 
     static async loadRegistrations(members: Member[], withGroups?: false): Promise<MemberWithRegistrations[]>;
@@ -268,11 +241,15 @@ export class Member extends QueryableModel {
             const registrations = await Registration.select()
                 .where('memberId', ids)
                 .where(
-                    SQL.where('registeredAt', '!=', null)
-                        .or('canRegister', 1),
+                    SQL.where('registeredAt', '!=', null),
                 )
                 .fetch() as (Registration | undefined)[];
             alreadyLoadedRegistrations.push(...registrations);
+        }
+        else {
+            if (!withGroups) {
+                return members as MemberWithRegistrations[];
+            }
         }
 
         if (withGroups) {
@@ -294,6 +271,12 @@ export class Member extends QueryableModel {
                     }
                 }
             }
+            else {
+                if (ids.length === 0) {
+                    // Nothing loaded
+                    return members as MemberWithRegistrations[];
+                }
+            }
         }
 
         for (const member of members) {
@@ -313,7 +296,10 @@ export class Member extends QueryableModel {
             return members as MemberWithUsers[];
         }
 
-        const users = await User.select(SQL.wildcard(User.table), SQL.column(MemberUser.table, 'membersId'))
+        const users = await User.select(
+            SQL.wildcard(User.table),
+            SQL.column(MemberUser.table, 'membersId'),
+        )
             .join(
                 SQL.join(MemberUser.table)
                     .where(
@@ -342,6 +328,22 @@ export class Member extends QueryableModel {
         }
 
         return members as MemberWithUsers[];
+    }
+
+    static unloadUsers(members: Member[]) {
+        for (const member of members) {
+            if ('users' in member) {
+                delete member.users;
+            }
+        }
+    }
+
+    static unloadRegistrations(members: Member[]) {
+        for (const member of members) {
+            if ('registrations' in member) {
+                delete member.registrations;
+            }
+        }
     }
 
     /**
@@ -376,15 +378,28 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    static async getFamilyWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups[]> {
-        let query = `SELECT l2.membersId as id from _members_users l1\n`;
-        query += `JOIN _members_users l2 on l2.usersId = l1.usersId \n`;
-        query += `where l1.membersId = ? group by l2.membersId`;
+    static async getFamily(id: string): Promise<Member[]> {
+        const results = await SQL.select(
+            SQL.column('l2', 'membersId'),
+        )
+            .from('_members_users', 'l1')
+            .join(
+                SQL.join('_members_users', 'l2')
+                    .where(
+                        SQL.column('l2', 'usersId'),
+                        SQL.column('l1', 'usersId'),
+                    ),
+            )
+            .where(
+                SQL.column('l1', 'membersId'),
+                id,
+            )
+            .groupBy(SQL.column('l2', 'membersId'))
+            .fetch();
 
-        const [results] = await Database.select(query, [id]);
         const ids: string[] = [];
         for (const row of results) {
-            ids.push(row['l2']['id'] as string);
+            ids.push(row['l2']['membersId'] as string);
         }
 
         if (!ids.includes(id)) {
@@ -392,7 +407,16 @@ export class Member extends QueryableModel {
             ids.push(id);
         }
 
-        return await this.getBlobByIds(...ids);
+        return await this.getByIDs(...ids);
+    }
+
+    /**
+     * @deprecated Please avoid implicit relation loading and only load the rel
+     * Fetch all members with their corresponding (valid) registrations and payment
+     */
+    static async getFamilyWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups[]> {
+        const members = await this.getFamily(id);
+        return await this.loadRegistrationsAndUsers(members, true);
     }
 
     /**
@@ -400,25 +424,23 @@ export class Member extends QueryableModel {
      */
     static async getMemberIdsForUser(user: User): Promise<string[]> {
         const query = SQL
-            .select('id')
-            .from(Member.table)
-            .join(
-                SQL
-                    .leftJoin('_members_users')
-                    .where(
-                        SQL.column('_members_users', 'membersId'),
-                        SQL.column(Member.table, 'id'),
-                    ),
-            ).where(
-                SQL.column('_members_users', 'usersId'),
-                user.id,
-            );
+            .select('membersId')
+            .from('_members_users')
+            .where('usersId', user.id);
 
         const data = await query.fetch();
-        return Formatter.uniqueArray(data.map(r => r.members.id as string));
+        return Formatter.uniqueArray(data.map(r => r._members_users.membersId as string));
     }
 
     /**
+     * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
+     */
+    static async getMembersForUser(user: User): Promise<Member[]> {
+        return this.getByIDs(...(await this.getMemberIdsForUser(user)));
+    }
+
+    /**
+     * @deprecated Use getMembersForUser and load relations as needed
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithUsersRegistrationsAndGroups[]> {

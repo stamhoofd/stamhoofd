@@ -3,7 +3,7 @@ import { Document, DocumentTemplate, Member } from '@stamhoofd/models';
 import { Document as DocumentStruct, DocumentStatus } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;
@@ -31,7 +31,7 @@ export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, Resp
         const organization = await Context.setUserOrganizationScope();
         const { user } = await Context.authenticate();
 
-        const members = await Member.getMembersWithRegistrationForUser(user);
+        const members = await Member.getMembersForUser(user);
         let templates = organization ? await DocumentTemplate.where({ status: 'Published', organizationId: organization.id }) : null;
         const memberIds = members.map(m => m.id);
         const templateIds = templates ? templates.map(t => t.id) : null;

@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithUsersRegistrationsAndGroups, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrations, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, ReceivableBalanceType, RecordSettings, ResourcePermissions, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
@@ -361,7 +361,7 @@ export class AdminPermissionChecker {
         return await this.hasFullAccess(organizationId);
     }
 
-    async canAccessMember(member: MemberWithUsersRegistrationsAndGroups, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessMember(member: MemberWithUsersAndRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (permissionLevel !== PermissionLevel.Full && this.isUserManager(member)) {
             return true;
         }
@@ -415,7 +415,7 @@ export class AdminPermissionChecker {
     /**
      * Only full admins can delete members permanently
      */
-    async canDeleteMember(member: MemberWithUsersRegistrationsAndGroups) {
+    async canDeleteMember(member: MemberWithUsersAndRegistrations) {
         if (member.registrations.length === 0 && this.isUserManager(member)) {
             const cachedBalance = await CachedBalance.getForObjects([member.id], null, ReceivableBalanceType.member);
             if (cachedBalance.length === 0 || (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)) {
@@ -840,7 +840,7 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canLinkBalanceItemToMember(member: MemberWithUsersRegistrationsAndGroups) {
+    async canLinkBalanceItemToMember(member: MemberWithUsersAndRegistrations) {
         if (!this.checkScope(member.organizationId)) {
             return false;
         }
@@ -1108,14 +1108,14 @@ export class AdminPermissionChecker {
         return !!organizationPermissions && organizationPermissions.hasAccess(level);
     }
 
-    isUserManager(member: MemberWithUsersRegistrationsAndGroups) {
+    isUserManager(member: MemberWithUsers) {
         return !!member.users.find(u => u.id === this.user.id);
     }
 
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasFinancialMemberAccess(member: MemberWithUsersRegistrationsAndGroups, level: PermissionLevel = PermissionLevel.Read, organizationId?: string): Promise<boolean> {
+    async hasFinancialMemberAccess(member: MemberWithUsersAndRegistrations, level: PermissionLevel = PermissionLevel.Read, organizationId?: string): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager && level === PermissionLevel.Read) {
@@ -1200,7 +1200,7 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasNRNAccess(member: MemberWithUsersRegistrationsAndGroups, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async hasNRNAccess(member: MemberWithUsersAndRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager) {

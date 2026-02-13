@@ -5,8 +5,8 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { AuditLogSource, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { AuditLogService } from './AuditLogService';
-import { MemberNumberService } from './MemberNumberService';
+import { AuditLogService } from './AuditLogService.js';
+import { MemberNumberService } from './MemberNumberService.js';
 
 export class PlatformMembershipService {
     static listen() {
@@ -147,7 +147,7 @@ export class PlatformMembershipService {
                     console.log('update memberships for id ', id);
                 }
 
-                const me = await Member.getWithRegistrations(id);
+                const me = await Member.getByIdWithRegistrationsAndGroups(id);
                 if (!me) {
                     if (!silent) {
                         console.log('Skipping automatic membership for: ' + id, ' - member not found');

@@ -900,11 +900,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        const updatedMembers = await Member.getBlobByIds(...members.map(m => m.id));
+        // Force reload registrations and group data
+        Member.unloadRegistrations(members);
+        await Member.loadRegistrations(members, true);
 
         return new Response(RegisterResponse.create({
             payment: payment ? PaymentStruct.create(payment) : null,
-            members: await AuthenticatedStructures.membersBlob(updatedMembers),
+            members: await AuthenticatedStructures.membersBlob(members),
             registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r)),
             paymentUrl,
             paymentQRCode,

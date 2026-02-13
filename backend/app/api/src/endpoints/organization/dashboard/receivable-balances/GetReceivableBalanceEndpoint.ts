@@ -2,10 +2,10 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { DetailedReceivableBalance, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { BalanceItem, BalanceItemPayment, CachedBalance, MemberUser, Payment } from '@stamhoofd/models';
-import { Context } from '../../../../helpers/Context';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
+import { Context } from '../../../../helpers/Context.js';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemService } from '../../../../services/BalanceItemService';
+import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string; type: ReceivableBalanceType };
@@ -44,7 +44,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         switch (request.params.type) {
             case ReceivableBalanceType.organization: {
                 // Force cache updates, because sometimes the cache could be out of date
-                BalanceItemService.scheduleOrganizationUpdate(organization.id, request.params.id);
+                // BalanceItemService.scheduleOrganizationUpdate(organization.id, request.params.id);
 
                 paymentModels = await Payment.select()
                     .where('organizationId', organization.id)
@@ -67,7 +67,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
 
             case ReceivableBalanceType.member: {
                 // Force cache updates, because sometimes the cache could be out of date
-                BalanceItemService.scheduleMemberUpdate(organization.id, request.params.id);
+                // BalanceItemService.scheduleMemberUpdate(organization.id, request.params.id);
 
                 paymentModels = await Payment.select()
                     .where('organizationId', organization.id)
@@ -93,11 +93,11 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
                 const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
 
                 // Force cache updates, because sometimes the cache could be out of date
-                BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
-
-                for (const memberId of memberIds) {
-                    BalanceItemService.scheduleMemberUpdate(organization.id, memberId);
-                }
+                // BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
+                //
+                // for (const memberId of memberIds) {
+                //    BalanceItemService.scheduleMemberUpdate(organization.id, memberId);
+                // }
 
                 const q = Payment.select()
                     .where('organizationId', organization.id)
@@ -131,7 +131,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
 
             case ReceivableBalanceType.userWithoutMembers: {
                 // Force cache updates, because sometimes the cache could be out of date
-                BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
+                // BalanceItemService.scheduleUserUpdate(organization.id, request.params.id);
 
                 const q = Payment.select()
                     .where('organizationId', organization.id)
@@ -176,7 +176,7 @@ export class GetReceivableBalanceEndpoint extends Endpoint<Params, Query, Body, 
         }
 
         // Flush caches (this makes sure that we do a reload in the frontend after a registration or change, we get the newest balances)
-        await BalanceItemService.flushCaches(organization.id);
+        // await BalanceItemService.flushCaches(organization.id);
         const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
         const payments = await AuthenticatedStructures.paymentsGeneral(paymentModels, false);

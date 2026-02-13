@@ -242,7 +242,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     async validateMemberId(memberId: string) {
-        const member = (await Member.getWithRegistrations(memberId));
+        const member = (await Member.getByIdWithUsersAndRegistrations(memberId));
 
         if (!member || !(await Context.auth.canLinkBalanceItemToMember(member))) {
             throw new SimpleError({

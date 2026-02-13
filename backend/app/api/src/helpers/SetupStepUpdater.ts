@@ -21,9 +21,9 @@ import {
     SetupSteps,
 } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { AuditLogService } from '../services/AuditLogService';
-import { GroupedThrottledQueue } from './GroupedThrottledQueue';
-import { AuthenticatedStructures } from './AuthenticatedStructures';
+import { AuditLogService } from '../services/AuditLogService.js';
+import { GroupedThrottledQueue } from './GroupedThrottledQueue.js';
+import { AuthenticatedStructures } from './AuthenticatedStructures.js';
 
 type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
 
@@ -381,7 +381,8 @@ export class SetupStepUpdater {
 
         // Remove invalid responsibilities: members that are not registered in the current period
         const memberIds = Formatter.uniqueArray(allRecords.map(r => r.memberId));
-        const members = await Member.getBlobByIds(...memberIds);
+        const _members = await Member.getByIDs(...memberIds);
+        const members = await Member.loadRegistrations(_members, true);
         const validMembers = members.filter(m => m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.defaultAgeGroupId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
         const invalidMembers = members.filter(m => !m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.defaultAgeGroupId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
 

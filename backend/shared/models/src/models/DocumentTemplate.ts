@@ -2,7 +2,7 @@ import { column } from '@simonbackx/simple-database';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, Parent, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
-import { Sorter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
@@ -96,7 +96,7 @@ export class DocumentTemplate extends QueryableModel {
         const fieldAnswers = new Map<string, RecordAnswer>();
         let missingData = false;
 
-        const group = await Group.getByID(registration.groupId);
+        const group = 'group' in registration ? registration.group as Group : await Group.getByID(registration.groupId);
         const { items: balanceItems, payments } = await BalanceItem.getForRegistration(registration.id, this.organizationId);
 
         const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
@@ -421,9 +421,20 @@ export class DocumentTemplate extends QueryableModel {
         const existingDocuments = await Document.where({ templateId: this.id, registrationId: { sign: 'IN', value: registrations.map(r => r.id) } });
         const documents: Document[] = [];
 
+        const includedRegistrations = registrations.filter(r => this.checkRegistrationIncluded(r));
+
+        // Load groups
+        const groupIds = Formatter.uniqueArray(includedRegistrations.map(r => r.groupId));
+        const groups = await Group.getByIDs(...groupIds);
+
         for (const registration of registrations) {
+            const group = groups.find(g => g.id === registration.groupId);
+            if (group) {
+                registration.setRelation(Registration.group, group);
+            }
             documents.push(...await this.updateForRegistration(registration, existingDocuments.filter(d => d.registrationId === registration.id)));
         }
+
         return documents;
     }
 
@@ -447,7 +458,7 @@ export class DocumentTemplate extends QueryableModel {
             return [];
         }
 
-        const group = await Group.getByID(registration.groupId);
+        const group = 'group' in registration ? registration.group as Group : await Group.getByID(registration.groupId);
         const description = `${registration.member.details.name}, ${group ? group.settings.name.toString() : ''}${group && group.settings.period && group.type === GroupType.Membership ? ' ' + group.settings.period?.nameShort : ''}`;
 
         if (existingDocuments.length > 0) {

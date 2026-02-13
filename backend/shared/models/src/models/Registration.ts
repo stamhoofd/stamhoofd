@@ -189,7 +189,7 @@ export class Registration extends QueryableModel {
     async getRecipients(organization: Organization, group: import('./').Group) {
         const { Member } = await import('./Member.js');
 
-        const member = await Member.getWithRegistrations(this.memberId);
+        const member = await Member.getByIdWithUsers(this.memberId);
 
         if (!member) {
             return [];

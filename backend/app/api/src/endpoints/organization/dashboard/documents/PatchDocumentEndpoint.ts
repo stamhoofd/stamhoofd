@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Document, DocumentTemplate, Member, Registration } from '@stamhoofd/models';
 import { DocumentStatus, Document as DocumentStruct, PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -104,7 +104,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 put.memberId = registration.memberId;
             }
             if (put.memberId) {
-                const member = await Member.getWithRegistrations(put.memberId);
+                const member = await Member.getByIdWithUsersAndRegistrations(put.memberId);
                 if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
                     throw new SimpleError({
                         code: 'not_found',
