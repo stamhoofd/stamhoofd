@@ -2,7 +2,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SessionContext } from '@stamhoofd/networking';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import { computed, ComputedRef, onUnmounted, Ref, ref, unref, watch } from 'vue';
+import { computed, ComputedRef, onUnmounted, Ref, ref, watch } from 'vue';
 import { useContext, useFeatureFlag } from '.';
 import { useAppContext } from '../context/appContext';
 import { getInvalidEmailDescription } from '../helpers';
@@ -167,56 +167,55 @@ class EmailInformationManager {
 
 const emailInformationManager = new EmailInformationManager();
 
-export function useEmailInformationManager() {
+/**
+* This composable will register the email and starts a debounced fetch of all the newly registered emails since the last fetch.
+* @param email
+* @returns A ComputedRef of the email information. The value will be null at first. After the fetch the value will be set.
+*/
+export function useEmailInformation(email: string | ComputedRef<string | null | undefined>) {
     const context = useContext();
 
     emailInformationManager.init(context.value);
 
-    /**
-    * This method will register the email and starts a debounced fetch of all the newly registered emails since the last fetch.
-    * @param email
-    * @returns A ComputedRef of the email information. The value will be null at first. After the fetch the value will be set.
-    */
-    const subscribeForEmailInformation = (email: string | ComputedRef<string | null | undefined>): ComputedRef<EmailInformation | null> => {
+    if (typeof email === 'string') {
         // prevent unncessary fetches
-        onUnmounted(() => {
-            const unreffedEmail = unref(email);
-            if (unreffedEmail) {
-                emailInformationManager.unregisterEmail(unreffedEmail);
-            }
-        });
+        onUnmounted(() => emailInformationManager.unregisterEmail(email));
 
-        if (typeof email === 'string') {
-            emailInformationManager.registerEmail(email);
-            return computed(() => emailInformationManager.getFromCache(email));
+        emailInformationManager.registerEmail(email);
+        return computed(() => emailInformationManager.getFromCache(email));
+    }
+
+    watch(email, () => {
+        if (email.value) {
+            emailInformationManager.registerEmail(email.value);
         }
+    }, { immediate: true });
 
-        watch(email, () => {
-            if (email.value) {
-                emailInformationManager.registerEmail(email.value);
-            }
-        }, { immediate: true });
+    const emailInformation = computed(() => email.value ? emailInformationManager.getFromCache(email.value) : null);
 
-        return computed(() => email.value ? emailInformationManager.getFromCache(email.value) : null);
-    };
+    // prevent unncessary fetches
+    onUnmounted(() => {
+        if (email.value) {
+            emailInformationManager.unregisterEmail(email.value);
+        }
+    });
 
-    return {
-        /**
-         * This method will register the email and starts a debounced fetch of all the newly registered emails since the last fetch.
-         * @param email
-         * @returns A ComputedRef of the email information. The value will be null at first. After the fetch the value will be set.
-         */
-        subscribeForEmailInformation,
-        subscribeForEmailWarning: (email: string | ComputedRef<string | null | undefined>): ComputedRef<string | null> => {
-            const emailInformation = subscribeForEmailInformation(email);
-            return computed(() => {
-                if (emailInformation.value) {
-                    return getInvalidEmailDescription(emailInformation.value);
-                }
-                return null;
-            });
-        },
-    };
+    return emailInformation;
+}
+
+/**
+* This composable will register the email and starts a debounced fetch of all the newly registered emails since the last fetch.
+* @param email
+* @returns A ComputedRef of the email warning message. The value will be null at first. After the fetch the value will be a string if there is a warning.
+*/
+export function useEmailWarningMessage(email: string | ComputedRef<string | null | undefined>) {
+    const emailInformation = useEmailInformation(email);
+    return computed(() => {
+        if (emailInformation.value) {
+            return getInvalidEmailDescription(emailInformation.value);
+        }
+        return null;
+    });
 }
 
 export function useShouldShowEmailWarning(): () => boolean {
