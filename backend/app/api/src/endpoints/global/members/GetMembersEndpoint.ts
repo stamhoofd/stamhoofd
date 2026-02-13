@@ -126,10 +126,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
         }
 
-        const query = SQL
-            .select(
-                SQL.column('members', 'id'),
-            )
+        const query = Member.select()
             .setMaxExecutionTime(15 * 1000)
             .from(
                 SQL.table('members'),
@@ -257,7 +254,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
         const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
-        let data: SQLResultNamespacedRow[];
+        let data: Member[];
 
         try {
             data = await query.fetch();
@@ -273,16 +270,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw error;
         }
 
-        const memberIds = data.map((r) => {
-            if (typeof r.members.id === 'string') {
-                return r.members.id;
-            }
-            throw new Error('Expected string');
-        });
-
-        const _members = await Member.getBlobByIds(...memberIds);
-        // Make sure members is in same order as memberIds
-        const members = memberIds.map(id => _members.find(m => m.id === id)!);
+        const members = await Member.loadRegistrationsAndUsers(data, true);
 
         for (const member of members) {
             if (!await Context.auth.canAccessMember(member, permissionLevel)) {
@@ -293,7 +281,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         let next: LimitedFilteredRequest | undefined;
 
-        if (memberIds.length >= requestQuery.limit) {
+        if (members.length >= requestQuery.limit) {
             const lastObject = members[members.length - 1];
             const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
 
