@@ -159,7 +159,6 @@ export * from './src/members/Parent.js';
 export * from './src/members/ParentType.js';
 export * from './src/members/Payment.js';
 export * from './src/members/PaymentGeneral.js';
-export * from './src/members/PaymentWithRegistrations.js';
 export * from './src/members/PlatformMember.js';
 export * from './src/members/records/LegacyRecord.js';
 export * from './src/members/records/LegacyRecordType.js';
