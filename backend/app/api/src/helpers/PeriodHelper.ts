@@ -2,11 +2,11 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, Group as GroupStruct, PermissionLevel } from '@stamhoofd/structures';
-import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
-import { AuditLogService } from '../services/AuditLogService';
-import { AuthenticatedStructures } from './AuthenticatedStructures';
-import { MemberUserSyncer } from './MemberUserSyncer';
-import { SetupStepUpdater } from './SetupStepUpdater';
+import { PatchOrganizationRegistrationPeriodsEndpoint } from '../endpoints/organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint.js';
+import { AuditLogService } from '../services/AuditLogService.js';
+import { AuthenticatedStructures } from './AuthenticatedStructures.js';
+import { MemberUserSyncer } from './MemberUserSyncer.js';
+import { SetupStepUpdater } from './SetupStepUpdater.js';
 
 export class PeriodHelper {
     static async moveOrganizationToPeriod(organization: Organization, period: RegistrationPeriod) {
@@ -58,46 +58,6 @@ export class PeriodHelper {
         }
 
         console.log('Done: stopped all responsibilities: ' + c);
-    }
-
-    static async syncAllMemberUsers() {
-        console.log('Syncing all members');
-
-        let c = 0;
-        let lastId: string = '';
-
-        while (true) {
-            const rawMembers = await Member.where({
-                id: {
-                    value: lastId,
-                    sign: '>',
-                },
-            }, { limit: 500, sort: ['id'] });
-
-            if (rawMembers.length === 0) {
-                break;
-            }
-
-            const membersWithRegistrations = await Member.getBlobByIds(...rawMembers.map(m => m.id));
-
-            const promises: Promise<any>[] = [];
-
-            for (const memberWithRegistrations of membersWithRegistrations) {
-                promises.push((async () => {
-                    await MemberUserSyncer.onChangeMember(memberWithRegistrations);
-                    c++;
-
-                    if (c % 10000 === 0) {
-                        console.log('Synced ' + c + ' members');
-                    }
-                })());
-            }
-
-            await Promise.all(promises);
-            lastId = rawMembers[rawMembers.length - 1].id;
-        }
-
-        console.log('Done: synced all members: ' + c);
     }
 
     static async createOrganizationPeriodForPeriod(organization: Organization, period: RegistrationPeriod) {
