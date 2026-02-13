@@ -23,7 +23,7 @@
                             <span>{{ $t('Als spam gemarkeerd') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('De ontvanger heeft eerder een e-mail als spam gemarkeerd. Hierdoor worden geen e-mails meer verzonden naar dit e-mailadres. Meer informatie vind je in onze <button>documentatie</button>.')">
+                            <I18nComponent :t="$t('De ontvanger heeft eerder een e-mail als spam gemarkeerd. Hierdoor worden geen e-mails meer verzonden naar dit e-mailadres. <button>Meer info</button>')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('spam-complaints')" target="_blank">
                                         {{ content }}
@@ -38,7 +38,7 @@
                             <span>{{ $t('Hard bounce') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('Een e-mail kon eerder niet worden verzonden omwille van een permanenten reden (= hard bounce). Hierdoor worden geen e-mails meer verzonden naar dit e-mailadres. Meer informatie vind je in onze <button>documentatie</button>.')">
+                            <I18nComponent :t="$t('Een e-mail kon eerder niet worden verzonden omwille van een permanenten reden (= hard bounce). Hierdoor worden geen e-mails meer verzonden naar dit e-mailadres. <button>Meer info</button>')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('bounces')" target="_blank">
                                         {{ content }}
@@ -53,7 +53,7 @@
                             <span>{{ $t('Soft bounce') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('Een e-mail kon eerder niet worden verzonden omwille van een tijdelijke reden (= soft bounce). Meer informatie vind je in onze <button>documentatie</button>.')">
+                            <I18nComponent :t="$t('Een e-mail kon eerder niet worden verzonden omwille van een tijdelijke reden (= soft bounce). <button>Meer info</button>')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('bounces')" target="_blank">
                                         {{ content }}
