@@ -424,6 +424,7 @@ export class AuthenticatedStructures {
         if (members.length === 0 && !includeUser) {
             return MembersBlob.create({ members: [], organizations: [] });
         }
+
         const organizations = new Map<string, Organization>();
         const relevantPeriodIds = Formatter.uniqueArray([
             Platform.shared.period.previousPeriodId,
@@ -543,10 +544,6 @@ export class AuthenticatedStructures {
             allGroups.set(group.id, group);
         }
 
-        if (Context.organization) {
-            // todo: we should remove this, this does not belong here
-            await BalanceItemService.flushCaches(Context.organization.id);
-        }
         const balances = await CachedBalance.getForObjects(registrationIds, null, ReceivableBalanceType.registration);
         const memberIds = members.map(m => m.id);
         const allMemberBalances = Context.organization

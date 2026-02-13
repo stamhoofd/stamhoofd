@@ -32,6 +32,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Flush caches so data is up to date in response
+                    await BalanceItemService.flushCaches(organization.id);
                 });
                 return;
             }
@@ -56,6 +59,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Flush caches so data is up to date in response
+                    await BalanceItemService.flushCaches(organization.id);
                 });
             }
 
@@ -71,6 +77,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Flush caches so data is up to date in response
+                    await BalanceItemService.flushCaches(organization.id);
                 });
             }
 
@@ -86,6 +95,9 @@ export const PaymentService = {
                     }
 
                     await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
+
+                    // Flush caches so data is up to date in response
+                    await BalanceItemService.flushCaches(organization.id);
                 });
             }
         });

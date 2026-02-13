@@ -6,7 +6,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, BalanceItemPayment, CachedBalance, Group, Member, MemberWithUsersRegistrationsAndGroups, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, Platform, RateLimiter, Registration, User } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, IDRegisterCheckout, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, PaymentType, PermissionLevel, PlatformFamily, PlatformMember, ReceivableBalanceType, RegisterItem, RegisterResponse, TranslatedString, Version } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, sleep } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
@@ -899,6 +899,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 await group.save();
             }
         }
+
+        // Flush caches so data is up to date in response
+        await BalanceItemService.flushCaches(organization.id);
 
         // Force reload registrations and group data
         Member.unloadRegistrations(members);
