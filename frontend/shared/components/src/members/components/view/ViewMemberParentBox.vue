@@ -19,10 +19,7 @@
 
             <template v-if="parent.email">
                 <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
-                <dd v-copyable>
-                    {{ parent.email }}
-                    <EmailWarning v-if="shouldShowEmailWarning()" :email="parent.email" />
-                </dd>
+                <EmailDetail :email="parent.email" />
             </template>
 
             <template v-for="(email, index) of parent.alternativeEmails" :key="index">
@@ -55,8 +52,8 @@
 
 <script setup lang="ts">
 import { NationalRegisterNumberOptOut, Parent, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
-import { useCountry, useShouldShowEmailWarning } from '../../../hooks';
-import EmailWarning from '../detail/EmailWarning.vue';
+import { useCountry } from '../../../hooks';
+import EmailDetail from '../detail/EmailDetail.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -68,6 +65,5 @@ defineProps<{
 }>();
 
 const currentCountry = useCountry();
-const shouldShowEmailWarning = useShouldShowEmailWarning();
 
 </script>

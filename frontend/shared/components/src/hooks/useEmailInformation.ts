@@ -3,8 +3,7 @@ import { SessionContext } from '@stamhoofd/networking';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
 import { computed, ComputedRef, onUnmounted, Ref, ref, watch } from 'vue';
-import { useContext, useFeatureFlag } from '.';
-import { useAppContext } from '../context/appContext';
+import { useContext } from '.';
 import { getInvalidEmailDescription } from '../helpers';
 
 class EmailInformationManager {
@@ -216,11 +215,4 @@ export function useEmailWarningMessage(email: string | ComputedRef<string | null
         }
         return null;
     });
-}
-
-export function useShouldShowEmailWarning(): () => boolean {
-    const featureFlag = useFeatureFlag();
-    const app = useAppContext();
-
-    return () => app !== 'registration' && featureFlag('STA-673');
 }

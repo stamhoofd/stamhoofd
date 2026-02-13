@@ -6,42 +6,7 @@
         </h2>
         <p>{{ $t('db162d2e-be1b-4e8a-9915-b1e58ffa0aca', {member: member.patchedMember.firstName}) }}</p>
         <STGrid>
-            <STGridItem v-for="user in sortedUsers" :key="user.id" class="hover-box">
-                <template v-if="user.hasAccount && user.verified" #left>
-                    <span class="icon user small" />
-                </template>
-                <template v-else-if="user.hasAccount && !user.verified" #left>
-                    <span class="icon email small" :v-tooltip="$t('726b28db-0878-4441-8cc9-a75ed6734a24')" />
-                </template>
-                <template v-else #left>
-                    <span class="icon email small" :v-tooltip="$t('d900b182-3fd8-4607-824f-b4a1f4a60e6c')" />
-                </template>
-                <template v-if="(user.firstName || user.lastName)">
-                    <h3 v-if="user.firstName || user.lastName" class="style-title-list">
-                        <span>{{ user.firstName }} {{ user.lastName }}</span>
-                        <span v-if="user.memberId === member.id" v-tooltip="$t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName})" class="icon dot small primary" />
-                    </h3>
-                    <p class="style-description-small">
-                        {{ user.email }}
-                    </p>
-                </template>
-                <h3 v-else class="style-title-list">
-                    {{ user.email }}
-                </h3>
-                <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
-                    {{ $t('d5be56ba-2189-47b0-a32f-ef92cac0c2f8') }}
-                </p>
-
-                <template v-if="shouldShowEmailWarning()" #middleRight>
-                    <EmailWarning :email="user.email" />
-                </template>
-
-                <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
-                    <LoadingButton :loading="isDeletingUser(user)" class="hover-show">
-                        <button type="button" class="button icon trash" @click.stop="deleteUser(user)" />
-                    </LoadingButton>
-                </template>
-            </STGridItem>
+            <MemberAccountBox v-for="user in sortedUsers" :key="user.id" :member="member" :user="user" :is-deleting="isDeletingUser(user)" :has-empty-access="hasEmptyAccess" :has-write="hasWrite" @delete-user="deleteUser" />
         </STGrid>
     </div>
 </template>
@@ -53,12 +18,11 @@ import { Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { useAdmins } from '../../../admins/hooks/useAdmins';
 import { useAppContext } from '../../../context/appContext';
-import { useAuth, useShouldShowEmailWarning } from '../../../hooks';
+import { useAuth } from '../../../hooks';
 import STGrid from '../../../layout/STGrid.vue';
-import STGridItem from '../../../layout/STGridItem.vue';
 import { Toast } from '../../../overlays/Toast';
 import { usePlatformFamilyManager } from '../../PlatformFamilyManager';
-import EmailWarning from '../detail/EmailWarning.vue';
+import MemberAccountBox from '../detail/MemberAccountBox.vue';
 
 defineOptions({
     inheritAttrs: false,
@@ -72,7 +36,6 @@ const hasWrite = computed(() => auth.canAccessPlatformMember(props.member, Permi
 const deletingUsers = ref(new Set<string>());
 const platformFamilyManager = usePlatformFamilyManager();
 const { hasEmptyAccess } = useAdmins(false);
-const shouldShowEmailWarning = useShouldShowEmailWarning();
 
 const sortedUsers = computed(() => {
     return props.member.patchedMember.users.slice().sort((a, b) => {
