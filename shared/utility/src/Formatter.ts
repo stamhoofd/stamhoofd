@@ -380,7 +380,17 @@ export class Formatter {
         return (datetime.hour + '').padStart(2, '0') + ':' + (datetime.minute + '').padStart(2, '0');
     }
 
-    static uniqueArray<T>(array: T[]): T[] {
+    static uniqueArray<T>(array: T[], removeNullOrUndefined?: true): NonNullable<T>[];
+    static uniqueArray<T>(array: T[], removeNullOrUndefined: false): T[];
+    static uniqueArray<T>(array: T[], removeNullOrUndefined = true): T[] {
+        if (removeNullOrUndefined) {
+            function onlyUnique(value, index, self) {
+                return value !== undefined && value !== null && self.indexOf(value) === index;
+            }
+
+            return array.filter(onlyUnique);
+        }
+
         function onlyUnique(value, index, self) {
             return self.indexOf(value) === index;
         }
