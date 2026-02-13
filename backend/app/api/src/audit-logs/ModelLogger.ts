@@ -2,8 +2,8 @@ import { Model, ModelEvent } from '@simonbackx/simple-database';
 import { AuditLog } from '@stamhoofd/models';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
-import { ContextInstance } from '../helpers/Context';
-import { AuditLogService } from '../services/AuditLogService';
+import { ContextInstance } from '../helpers/Context.js';
+import { AuditLogService } from '../services/AuditLogService.js';
 
 export type ModelEventLogOptions<D> = {
     type: AuditLogType;
@@ -197,7 +197,6 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                     }
                 }
                 else {
-                    console.log('No changes');
                     return false;
                 }
             }
