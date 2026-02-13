@@ -14,11 +14,11 @@
                 <span>{{ user.firstName }} {{ user.lastName }}</span>
                 <span v-if="user.memberId === member.id" v-tooltip="$t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName})" class="icon dot small primary" />
             </h3>
-            <p class="style-description-small" :class="{'style-copyable': canManageEmailAddress}" @click="presentEmailInformation">
+            <p class="style-description-small" :class="{'style-copyable': canManageEmailAddress && emailWarningMessage}" @click="onClickEmail">
                 {{ user.email }}
             </p>
         </template>
-        <h3 v-else class="style-title-list" :class="{'style-copyable': canManageEmailAddress}" @click="presentEmailInformation">
+        <h3 v-else class="style-title-list" :class="{'style-copyable': canManageEmailAddress && emailWarningMessage}" @click="onClickEmail">
             {{ user.email }}
         </h3>
         <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
@@ -63,4 +63,10 @@ async function deleteUser(user: User) {
 }
 
 const { emailWarningMessage, canManageEmailAddress, presentEmailInformation, canReadEmailInformation } = useManageMemberEmail(props.user.email);
+
+function onClickEmail() {
+    if (canManageEmailAddress.value && emailWarningMessage.value) {
+        presentEmailInformation().catch(console.error);
+    }
+}
 </script>

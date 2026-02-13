@@ -53,7 +53,7 @@ export function useManageMemberEmail(email: string | ComputedRef<string | null |
         canReadEmailInformation,
         canManageEmailAddress,
         presentEmailInformation: async () => {
-            if (emailInformation.value && canManageEmailAddress.value) {
+            if (emailInformation.value) {
                 presentEmailInformation.present(emailInformation.value).catch(console.error);
             }
         },
