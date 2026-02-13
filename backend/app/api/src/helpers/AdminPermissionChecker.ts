@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, PatchMap } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithRegistrationsAndGroups, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, Document, Email, EmailTemplate, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberWithUsersRegistrationsAndGroups, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, User, Webshop } from '@stamhoofd/models';
 import { AccessRight, EmailTemplate as EmailTemplateStruct, EventPermissionChecker, FinancialSupportSettings, GroupCategory, GroupStatus, GroupType, MemberWithRegistrationsBlob, PermissionLevel, PermissionsResourceType, Platform as PlatformStruct, ReceivableBalanceType, RecordSettings, ResourcePermissions, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
@@ -16,7 +16,7 @@ export class AdminPermissionChecker {
     /**
      * The member that is linked to this user = is this user
      */
-    member: MemberWithRegistrationsAndGroups | null = null;
+    member: MemberWithUsersRegistrationsAndGroups | null = null;
     platform: PlatformStruct;
 
     organizationCache: Map<string, Organization | Promise<Organization | undefined>> = new Map();
@@ -361,7 +361,7 @@ export class AdminPermissionChecker {
         return await this.hasFullAccess(organizationId);
     }
 
-    async canAccessMember(member: MemberWithRegistrationsAndGroups, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessMember(member: MemberWithUsersRegistrationsAndGroups, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         if (permissionLevel !== PermissionLevel.Full && this.isUserManager(member)) {
             return true;
         }
@@ -407,7 +407,7 @@ export class AdminPermissionChecker {
      * The server will temporarily grant the user access to this member, and store this in the server
      * memory. This is required for adding new members to an organization (first add member -> then patch with registrations, which requires write access).
      */
-    async temporarilyGrantMemberAccess(member: MemberWithRegistrationsAndGroups, permissionLevel: PermissionLevel = PermissionLevel.Write) {
+    async temporarilyGrantMemberAccess(member: MemberWithUsersRegistrationsAndGroups, permissionLevel: PermissionLevel = PermissionLevel.Write) {
         console.log('Temporarily granting access to member', member.id, 'for user', this.user.id);
         addTemporaryMemberAccess(this.user.id, member.id, permissionLevel);
     }
@@ -415,7 +415,7 @@ export class AdminPermissionChecker {
     /**
      * Only full admins can delete members permanently
      */
-    async canDeleteMember(member: MemberWithRegistrationsAndGroups) {
+    async canDeleteMember(member: MemberWithUsersRegistrationsAndGroups) {
         if (member.registrations.length === 0 && this.isUserManager(member)) {
             const cachedBalance = await CachedBalance.getForObjects([member.id], null, ReceivableBalanceType.member);
             if (cachedBalance.length === 0 || (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)) {
@@ -436,7 +436,7 @@ export class AdminPermissionChecker {
     /**
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
-    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithRegistrationsAndGroups = true) {
+    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithUsersRegistrationsAndGroups = true) {
         if (registration.deactivatedAt || !registration.registeredAt) {
             if (!checkMember) {
                 // We can't grant access to a member because of a deactivated registration
@@ -840,7 +840,7 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canLinkBalanceItemToMember(member: MemberWithRegistrationsAndGroups) {
+    async canLinkBalanceItemToMember(member: MemberWithUsersRegistrationsAndGroups) {
         if (!this.checkScope(member.organizationId)) {
             return false;
         }
@@ -1108,14 +1108,14 @@ export class AdminPermissionChecker {
         return !!organizationPermissions && organizationPermissions.hasAccess(level);
     }
 
-    isUserManager(member: MemberWithRegistrationsAndGroups) {
+    isUserManager(member: MemberWithUsersRegistrationsAndGroups) {
         return !!member.users.find(u => u.id === this.user.id);
     }
 
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasFinancialMemberAccess(member: MemberWithRegistrationsAndGroups, level: PermissionLevel = PermissionLevel.Read, organizationId?: string): Promise<boolean> {
+    async hasFinancialMemberAccess(member: MemberWithUsersRegistrationsAndGroups, level: PermissionLevel = PermissionLevel.Read, organizationId?: string): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager && level === PermissionLevel.Read) {
@@ -1200,7 +1200,7 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasNRNAccess(member: MemberWithRegistrationsAndGroups, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async hasNRNAccess(member: MemberWithUsersRegistrationsAndGroups, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager) {
@@ -1322,7 +1322,7 @@ export class AdminPermissionChecker {
         };
     }
 
-    async checkRecordAccess(member: MemberWithRegistrationsAndGroups, recordId: string, level: PermissionLevel = PermissionLevel.Read): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
+    async checkRecordAccess(member: MemberWithUsersRegistrationsAndGroups, recordId: string, level: PermissionLevel = PermissionLevel.Read): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
         const record = await MemberRecordStore.getRecord(recordId);
         if (!record) {
             return {
@@ -1455,7 +1455,7 @@ export class AdminPermissionChecker {
     /**
      * Changes data inline
      */
-    async filterMemberData(member: MemberWithRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean }): Promise<MemberWithRegistrationsBlob> {
+    async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean }): Promise<MemberWithRegistrationsBlob> {
         const cloned = data.clone();
 
         for (const [key, value] of cloned.details.recordAnswers.entries()) {
@@ -1514,7 +1514,7 @@ export class AdminPermissionChecker {
     /**
      * Only for creating new members
      */
-    filterMemberPut(member: MemberWithRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options: { asUserManager: boolean }) {
+    filterMemberPut(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options: { asUserManager: boolean }) {
         if (options.asUserManager || STAMHOOFD.userMode === 'platform') {
             // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
             data.details.memberNumber = null;
@@ -1529,7 +1529,7 @@ export class AdminPermissionChecker {
         }
     }
 
-    async filterMemberPatch(member: MemberWithRegistrationsAndGroups, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
+    async filterMemberPatch(member: MemberWithUsersRegistrationsAndGroups, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
         if (!data.details) {
             return data;
         }

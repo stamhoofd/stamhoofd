@@ -8,17 +8,16 @@ import { Group, MemberResponsibilityRecord, MemberUser, Payment, Registration, U
 export type MemberWithUsers = Member & {
     users: User[];
 };
+export type MemberWithRegistrations<R extends Registration> = Member & {
+    registrations: (R)[];
+};
+export type MemberWithRegistrationsAndGroups = MemberWithRegistrations<Registration & { group: Group }>;
 
 /**
  * @deprecated
  * For performance reasons, avoid loading the groups of registrations when not required. Use MemberWithRegistrations instead.
  */
-export type MemberWithRegistrationsAndGroups = MemberWithUsers & {
-    registrations: (Registration & { group: Group })[];
-};
-export type MemberWithRegistrations = MemberWithUsers & {
-    registrations: (Registration)[];
-};
+export type MemberWithUsersRegistrationsAndGroups = MemberWithUsers & MemberWithRegistrationsAndGroups;
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member };
@@ -110,7 +109,7 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registration
      */
-    static async getWithRegistrations(id: string): Promise<MemberWithRegistrationsAndGroups | null> {
+    static async getWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups | null> {
         return (await this.getBlobByIds(id))[0] ?? null;
     }
 
@@ -240,13 +239,13 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
-    static async getBlobByIds(...ids: string[]): Promise<MemberWithRegistrationsAndGroups[]> {
+    static async getBlobByIds(...ids: string[]): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         if (ids.length == 0) {
             return [];
         }
 
         const baseMembers = await this.getByIDs(...ids);
-        const members: MemberWithRegistrationsAndGroups[] = [];
+        const members: MemberWithUsersRegistrationsAndGroups[] = [];
 
         if (baseMembers.length === 0) {
             return [];
@@ -276,7 +275,7 @@ export class Member extends QueryableModel {
         const groups = await Group.getByIDs(...Formatter.uniqueArray(registrations.map(r => r.groupId)));
 
         for (const member of baseMembers) {
-            const memberWithRelations: MemberWithRegistrationsAndGroups = member
+            const memberWithRelations: MemberWithUsersRegistrationsAndGroups = member
                 .setManyRelation(Member.registrations as unknown as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
                 .setManyRelation(Member.users, []);
 
@@ -308,7 +307,7 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    static async getFamilyWithRegistrations(id: string): Promise<MemberWithRegistrationsAndGroups[]> {
+    static async getFamilyWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         let query = `SELECT l2.membersId as id from _members_users l1\n`;
         query += `JOIN _members_users l2 on l2.usersId = l1.usersId \n`;
         query += `where l1.membersId = ? group by l2.membersId`;
@@ -353,7 +352,7 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
-    static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithRegistrationsAndGroups[]> {
+    static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         return this.getBlobByIds(...(await this.getMemberIdsForUser(user)));
     }
 

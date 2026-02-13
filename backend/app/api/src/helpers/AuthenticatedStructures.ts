@@ -1,5 +1,5 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrationsAndGroups, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
+import { AuditLog, BalanceItem, CachedBalance, Document, Event, EventNotification, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithUsersRegistrationsAndGroups, Order, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Ticket, User, Webshop } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, Company, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PaymentGeneral, PermissionLevel, Platform, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
@@ -378,7 +378,7 @@ export class AuthenticatedStructures {
 
     static async userWithMembers(user: User): Promise<UserWithMembers> {
         const members = await Member.getMembersWithRegistrationForUser(user);
-        const filtered: MemberWithRegistrationsAndGroups[] = [];
+        const filtered: MemberWithUsersRegistrationsAndGroups[] = [];
         for (const member of members) {
             if (await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
                 filtered.push(member);
@@ -416,11 +416,11 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    static async members(members: MemberWithRegistrationsAndGroups[]): Promise<MemberWithRegistrationsBlob[]> {
+    static async members(members: MemberWithUsersRegistrationsAndGroups[]): Promise<MemberWithRegistrationsBlob[]> {
         return (await this.membersBlob(members, false)).members;
     }
 
-    static async membersBlob(members: MemberWithRegistrationsAndGroups[], includeContextOrganization = false, includeUser?: User, options?: { forAdminCartCalculation?: boolean }): Promise<MembersBlob> {
+    static async membersBlob(members: MemberWithUsersRegistrationsAndGroups[], includeContextOrganization = false, includeUser?: User, options?: { forAdminCartCalculation?: boolean }): Promise<MembersBlob> {
         if (members.length === 0 && !includeUser) {
             return MembersBlob.create({ members: [], organizations: [] });
         }
@@ -695,7 +695,7 @@ export class AuthenticatedStructures {
         return (await this.eventNotifications([eventNotification]))[0];
     }
 
-    static async registrationsBlob(registrations: (Registration & { group: Group })[], members: MemberWithRegistrationsAndGroups[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
+    static async registrationsBlob(registrations: (Registration & { group: Group })[], members: MemberWithUsersRegistrationsAndGroups[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
         const membersBlob = await this.membersBlob(members, includeContextOrganization, includeUser);
 
         const memberBlobs = membersBlob.members;

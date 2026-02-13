@@ -1,5 +1,5 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithRegistrationsAndGroups, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import { BalanceItemFactory, GroupFactory, MemberFactory, MemberWithUsersRegistrationsAndGroups, Organization, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, PermissionLevel, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { GetMemberFamilyEndpoint } from '../../src/endpoints/global/members/GetMemberFamilyEndpoint.js';
@@ -78,7 +78,7 @@ describe('E2E.Register', () => {
 
         const member = await new MemberFactory({ organization, user }).create();
 
-        const otherMembers: MemberWithRegistrationsAndGroups[] = [];
+        const otherMembers: MemberWithUsersRegistrationsAndGroups[] = [];
 
         for (let i = 0; i < otherMemberAmount; i++) {
             otherMembers.push(await new MemberFactory({ organization, user }).create());

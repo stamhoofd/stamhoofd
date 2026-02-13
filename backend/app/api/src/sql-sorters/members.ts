@@ -1,8 +1,8 @@
-import { MemberWithRegistrationsAndGroups } from '@stamhoofd/models';
+import { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const memberSorters: SQLSortDefinitions<MemberWithRegistrationsAndGroups> = {
+export const memberSorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.

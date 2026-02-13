@@ -2,7 +2,7 @@ import { Factory } from '@simonbackx/simple-database';
 import { Gender, MemberDetails, ParentType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Member, MemberWithRegistrationsAndGroups } from '../models/Member.js';
+import { Member, MemberWithUsersRegistrationsAndGroups } from '../models/Member.js';
 import { Organization } from '../models/Organization.js';
 import { User } from '../models/User.js';
 import { EmergencyContactFactory } from './EmergencyContactFactory.js';
@@ -27,8 +27,8 @@ class Options {
     maxAge?: number;
 }
 
-export class MemberFactory extends Factory<Options, MemberWithRegistrationsAndGroups> {
-    async create(): Promise<MemberWithRegistrationsAndGroups> {
+export class MemberFactory extends Factory<Options, MemberWithUsersRegistrationsAndGroups> {
+    async create(): Promise<MemberWithUsersRegistrationsAndGroups> {
         const organization = this.options.organization
             ?? (STAMHOOFD.userMode === 'organization' ? (await new OrganizationFactory({}).create()) : null);
 

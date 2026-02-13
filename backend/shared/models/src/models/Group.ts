@@ -6,7 +6,7 @@ import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { Member, MemberWithRegistrationsAndGroups, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
+import { Member, MemberWithUsersRegistrationsAndGroups, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');
@@ -138,7 +138,7 @@ export class Group extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
-    async getMembersWithRegistration(waitingList = false, cycleOffset = 0): Promise<MemberWithRegistrationsAndGroups[]> {
+    async getMembersWithRegistration(waitingList = false, cycleOffset = 0): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         let query = `SELECT ${Member.getDefaultSelect()}, ${Registration.getDefaultSelect()}, ${User.getDefaultSelect()} from \`${Member.table}\`\n`;
 
         query += `JOIN \`${Registration.table}\` ON \`${Registration.table}\`.\`${Member.registrations.foreignKey}\` = \`${Member.table}\`.\`${Member.primary.name}\` AND (\`${Registration.table}\`.\`registeredAt\` is not null OR \`${Registration.table}\`.\`waitingList\` = 1)\n`;
@@ -156,7 +156,7 @@ export class Group extends QueryableModel {
         query += `where reg_filter.\`groupId\` = ? AND reg_filter.\`cycle\` = ?`;
 
         const [results] = await Database.select(query, [this.id, this.cycle - cycleOffset]);
-        const members: MemberWithRegistrationsAndGroups[] = [];
+        const members: MemberWithUsersRegistrationsAndGroups[] = [];
 
         const groupIds = results.map(r => r[Registration.table]?.groupId).filter(id => id) as string[];
         const groups = await Group.getByIDs(...Formatter.uniqueArray(groupIds));
@@ -171,7 +171,7 @@ export class Group extends QueryableModel {
             // Seach if we already got this member?
             const existingMember = members.find(m => m.id == _f.id);
 
-            const member: MemberWithRegistrationsAndGroups = (existingMember ?? _f);
+            const member: MemberWithUsersRegistrationsAndGroups = (existingMember ?? _f);
             if (!existingMember) {
                 members.push(member);
             }
