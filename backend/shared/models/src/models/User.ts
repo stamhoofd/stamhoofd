@@ -1,6 +1,6 @@
 import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
+import { ModelCache, QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
 import { LoginProviderType, NewUser, Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +11,7 @@ import { Organization } from './index.js';
 
 export class User extends QueryableModel {
     static table = 'users';
+    // static cache = new ModelCache<User>();
 
     // Columns
     @column({

@@ -1,5 +1,5 @@
 import { column, Database, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
-import { QueryableModel, SQL } from '@stamhoofd/sql';
+import { ModelCache, QueryableModel, SQL } from '@stamhoofd/sql';
 import { MemberDetails, NationalRegisterNumberOptOut, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,6 +26,7 @@ export type RegistrationWithMember = Registration & { member: Member };
 
 export class Member extends QueryableModel {
     static table = 'members';
+    // static cache = new ModelCache<Member>();
 
     // #region Columns
     @column({

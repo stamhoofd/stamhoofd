@@ -2,7 +2,7 @@ import { column, Database } from '@simonbackx/simple-database';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { EmailInterfaceRecipient } from '@stamhoofd/email';
-import { QueryableModel } from '@stamhoofd/sql';
+import { ModelCache, QueryableModel } from '@stamhoofd/sql';
 import { Address, appToUri, Country, DNSRecordStatus, EmailTemplateType, Language, OrganizationEmail, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, PrivatePaymentConfiguration, Recipient, Replacement, STPackageType, TransferSettings } from '@stamhoofd/structures';
 
 import { CreateEmailIdentityCommand, DeleteEmailIdentityCommand, GetEmailIdentityCommand, GetEmailIdentityCommandOutput, PutEmailIdentityFeedbackAttributesCommand, PutEmailIdentityMailFromAttributesCommand, SESv2Client } from '@aws-sdk/client-sesv2';
@@ -18,6 +18,7 @@ import { OrganizationRegistrationPeriod, StripeAccount } from './index.js';
 
 export class Organization extends QueryableModel {
     static table = 'organizations';
+    // static cache = new ModelCache<Organization>();
 
     @column({
         primary: true, type: 'string', beforeSave(value) {

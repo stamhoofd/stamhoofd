@@ -11,3 +11,4 @@ export * from './src/SQLInsert.js';
 export * from './src/QueryableModel.js';
 export * from './src/SQLTranslatedStringHelper.js';
 export * from './src/SQLLogger.js';
+export * from './src/ModelCache.js';

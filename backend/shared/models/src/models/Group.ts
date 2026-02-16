@@ -1,12 +1,11 @@
-import { column, Database, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
+import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
 import { GroupCategory, GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel } from '@stamhoofd/sql';
-import { Formatter } from '@stamhoofd/utility';
-import { Member, MemberWithUsersRegistrationsAndGroups, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
+import { ModelCache, QueryableModel } from '@stamhoofd/sql';
+import { Member, OrganizationRegistrationPeriod, Payment, Registration, User } from './index.js';
 
 if (Member === undefined) {
     throw new Error('Import Member is undefined');
@@ -23,6 +22,7 @@ if (Registration === undefined) {
 
 export class Group extends QueryableModel {
     static table = 'groups';
+    // static cache = new ModelCache<Group>();
 
     @column({
         primary: true, type: 'string', beforeSave(value) {
