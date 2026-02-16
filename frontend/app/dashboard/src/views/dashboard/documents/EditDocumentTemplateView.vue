@@ -154,15 +154,48 @@ const fieldCategories = computed(() => RecordCategory.flattenCategories(patchedD
 const documentFieldCategories = computed(() => patchedDocument.value.privateSettings.templateDefinition.documentFieldCategories.filter(c => c.getAllRecords().filter(r => isDocumentFieldEditable(r)).length > 0));
 const auth = useAuth();
 const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
-
-function isDocumentFieldEditable(field: RecordSettings) {
-    const supportedFields = getDefaultSupportedIds();
-    return !supportedFields.includes(field.id);
-}
-
 const recordAnswers = computed(() => {
     return patchedDocument.value.getRecordAnswers();
 });
+
+function calculateHasBeenExported() {
+    const allowedIds = new Set<string>();
+    for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
+        allowedIds.add(field.id);
+    }
+
+    for (const field of patchedDocument.value.privateSettings.templateDefinition.exportFieldCategories.flatMap(c => c.getAllRecords())) {
+        if (allowedIds.has(field.id)) {
+            continue;
+        }
+        allowedIds.add(field.id);
+        if (recordAnswers.value.has(field.id)) {
+            console.log('Has been exported because of field', field);
+            return true;
+        }
+    }
+    return false;
+}
+
+const hasBeenExported = calculateHasBeenExported();
+
+function isDocumentFieldEditable(field: RecordSettings) {
+    if (hasBeenExported) {
+        // When the document has been exported, prevnet changing duplicate export fields and organization details
+        for (const f of patchedDocument.value.privateSettings.templateDefinition.exportFieldCategories.flatMap(c => c.getAllRecords())) {
+            if (f.id === field.id) {
+                return true;
+            }
+        }
+        if (field.id.startsWith('organization.')) {
+            // Allow to override invoice settings
+            return true;
+        }
+    }
+
+    const supportedFields = getDefaultSupportedIds();
+    return !supportedFields.includes(field.id);
+}
 
 const requestOwner = useRequestOwner();
 const organization = useRequiredOrganization();
@@ -630,6 +663,23 @@ function autoLink() {
     const globalData = getDefaultGlobalData();
     const allowedIds = new Set<string>();
     for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
+        allowedIds.add(field.id);
+        if (isDocumentFieldEditable(field)) {
+            if (recordAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
+                continue;
+            }
+        }
+        const d = globalData[field.id];
+        if (d && d instanceof RecordAnswerDecoder.getClassForType(field.type)) {
+            // add answer
+            d.settings = field;
+            linkedInside.add(field.id);
+
+            patchAnswers(new PatchMap([[field.id, d]]));
+        }
+    }
+
+    for (const field of patchedDocument.value.privateSettings.templateDefinition.exportFieldCategories.flatMap(c => c.getAllRecords())) {
         allowedIds.add(field.id);
         if (isDocumentFieldEditable(field)) {
             if (recordAnswers.value.has(field.id) && !linkedInside.has(field.id)) {
