@@ -29,6 +29,17 @@
     align-items: center;
     position: relative;
 
+    &.inline-description {
+        display: inline-flex;
+        font-size: inherit;
+        width: unset;
+        height: unset;
+
+        &:before {
+            font-size: inherit;
+        }
+    }
+
     &.small {
         width: 20px;
         height: 20px;

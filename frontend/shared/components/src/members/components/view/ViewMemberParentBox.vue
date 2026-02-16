@@ -19,7 +19,7 @@
 
             <template v-if="parent.email">
                 <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ parent.alternativeEmails.length ? '1' : '' }}</dt>
-                <EmailDetail :email="parent.email" />
+                <EmailDetailWithWarning tag="dd" :email="parent.email" />
             </template>
 
             <template v-for="(email, index) of parent.alternativeEmails" :key="index">
@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { NationalRegisterNumberOptOut, Parent, ParentTypeHelper, PlatformMember } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
-import EmailDetail from '../detail/EmailDetail.vue';
+import EmailDetailWithWarning from '../detail/EmailDetailWithWarning.vue';
 
 defineOptions({
     inheritAttrs: false,
