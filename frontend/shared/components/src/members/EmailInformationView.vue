@@ -48,21 +48,6 @@
                         </p>
                     </STListItem>
 
-                    <STListItem v-if="emailInformation.hardBounce" class="theme-warning">
-                        <h3 class="style-definition-label">
-                            <span>{{ $t('Soft bounce') }}</span><span class="icon warning tiny" />
-                        </h3>
-                        <p class="style-definition-text">
-                            <I18nComponent :t="$t('Een e-mail kon eerder niet worden verzonden omwille van een tijdelijke reden (= soft bounce). <button>Meer info</button>')">
-                                <template #button="{content}">
-                                    <a class="inline-link" :href="LocalizedDomains.getDocs('bounces')" target="_blank">
-                                        {{ content }}
-                                    </a>
-                                </template>
-                            </I18nComponent>
-                        </p>
-                    </STListItem>
-
                     <STListItem v-if="emailInformation.unsubscribedAll" class="theme-warning">
                         <h3 class="style-definition-label">
                             <span>{{ $t('Afgemeld voor alle e-mails') }}</span><span class="icon warning tiny" />
