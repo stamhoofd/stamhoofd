@@ -43,9 +43,7 @@
 
             <template v-for="(email, index) of member.patchedMember.details.alternativeEmails" :key="index">
                 <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ index + 2 }}</dt>
-                <dd v-copyable>
-                    {{ email }}
-                </dd>
+                <EmailDetailWithWarning tag="dd" :email="email" />
             </template>
 
             <template v-if="member.patchedMember.details.address">
