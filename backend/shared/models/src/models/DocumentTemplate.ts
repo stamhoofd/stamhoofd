@@ -90,6 +90,18 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     /**
+     * Still do an update when answers are locked
+     */
+    async updateAnswers(document: Document) {
+        // Add global answers (same for each document)
+        for (const answer of this.settings.fieldAnswers.values()) {
+            // todo: check duplicate
+            answer.reviewedAt = null;
+            document.data.fieldAnswers.set(answer.settings.id, answer);
+        }
+    }
+
+    /**
      * Returns the default answers for a given registration
      */
     async buildAnswers(registration: RegistrationWithMember): Promise<{ fieldAnswers: Map<string, RecordAnswer>; missingData: boolean }> {
@@ -372,11 +384,11 @@ export class DocumentTemplate extends QueryableModel {
             }
         }
 
-        // Add global answers (same for each document)
-        for (const answer of this.settings.fieldAnswers.values()) {
-            // todo: check duplicate
-            answer.reviewedAt = null;
-            fieldAnswers.set(answer.settings.id, answer);
+        // Add other default data
+        for (const key in defaultData) {
+            if (defaultData[key] && defaultData[key].settings.id === key && !fieldAnswers.get(key)) {
+                fieldAnswers.set(key, defaultData[key]);
+            }
         }
 
         // Add group based answers (same for each group)
@@ -386,11 +398,11 @@ export class DocumentTemplate extends QueryableModel {
             fieldAnswers.set(answer.settings.id, answer);
         }
 
-        // Add other default data
-        for (const key in defaultData) {
-            if (defaultData[key] && defaultData[key].settings.id === key && !fieldAnswers.get(key)) {
-                fieldAnswers.set(key, defaultData[key]);
-            }
+        // Add global answers (same for each document)
+        for (const answer of this.settings.fieldAnswers.values()) {
+            // todo: check duplicate
+            answer.reviewedAt = null;
+            fieldAnswers.set(answer.settings.id, answer);
         }
 
         // Verify answers
@@ -572,6 +584,7 @@ export class DocumentTemplate extends QueryableModel {
                 const documents = await Document.where({ templateId: this.id });
                 for (const document of documents) {
                     abort.throwIfAborted();
+                    await this.updateAnswers(document); // Only update global data
                     if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
                         document.status = this.status;
                         await document.save();
