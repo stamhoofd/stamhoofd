@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/build-development-env",
-    "version": "2.115.1",
+    "version": "2.116.0",
     "main": "./dist/index.js",
     "module": "./esm/dist/index.js",
     "types": "./dist/index.d.ts",
