@@ -38,7 +38,7 @@
 
             <template v-if="member.patchedMember.details.email">
                 <dt>{{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }} {{ member.patchedMember.details.alternativeEmails.length ? '1' : '' }}</dt>
-                <EmailDetail :email="props.member.patchedMember.details.email" />
+                <EmailDetailWithWarning tag="dd" :email="props.member.patchedMember.details.email" />
             </template>
 
             <template v-for="(email, index) of member.patchedMember.details.alternativeEmails" :key="index">
@@ -86,7 +86,7 @@
 <script setup lang="ts">
 import { NationalRegisterNumberOptOut, PlatformMember } from '@stamhoofd/structures';
 import { useCountry } from '../../../hooks';
-import EmailDetail from '../detail/EmailDetail.vue';
+import EmailDetailWithWarning from '../detail/EmailDetailWithWarning.vue';
 
 defineOptions({
     inheritAttrs: false,

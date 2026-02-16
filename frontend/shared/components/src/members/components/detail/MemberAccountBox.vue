@@ -14,20 +14,12 @@
                 <span>{{ user.firstName }} {{ user.lastName }}</span>
                 <span v-if="user.memberId === member.id" v-tooltip="$t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName})" class="icon dot small primary" />
             </h3>
-            <p class="style-description-small" :class="{'style-copyable': canManageEmailAddress && emailWarningMessage}" @click="onClickEmail">
-                {{ user.email }}
-            </p>
+            <EmailDetailWithWarning tag="p" :email="user.email" class="style-description-small" />
         </template>
-        <h3 v-else class="style-title-list" :class="{'style-copyable': canManageEmailAddress && emailWarningMessage}" @click="onClickEmail">
-            {{ user.email }}
-        </h3>
+        <EmailDetailWithWarning v-else tag="h3" :email="user.email" class="style-title-list" />
         <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
             {{ $t('d5be56ba-2189-47b0-a32f-ef92cac0c2f8') }}
         </p>
-
-        <template v-if="canReadEmailInformation" #middleRight>
-            <EmailWarningMessage :message="emailWarningMessage" />
-        </template>
 
         <template v-if="app !== 'registration' && hasWrite && user.hasAccount" #right>
             <LoadingButton :loading="isDeleting" class="hover-show">
@@ -41,10 +33,9 @@
 import { PlatformMember, User } from '@stamhoofd/structures';
 import { useAppContext } from '../../../context/appContext';
 import STGridItem from '../../../layout/STGridItem.vue';
-import { useManageMemberEmail } from '../../composables/useManageMemberEmail';
-import EmailWarningMessage from './EmailWarningMessage.vue';
+import EmailDetailWithWarning from './EmailDetailWithWarning.vue';
 
-const props = defineProps<{
+defineProps<{
     member: PlatformMember;
     user: User;
     isDeleting: boolean;
@@ -60,13 +51,5 @@ const app = useAppContext();
 
 async function deleteUser(user: User) {
     emits('deleteUser', user);
-}
-
-const { emailWarningMessage, canManageEmailAddress, presentEmailInformation, canReadEmailInformation } = useManageMemberEmail(props.user.email);
-
-function onClickEmail() {
-    if (canManageEmailAddress.value && emailWarningMessage.value) {
-        presentEmailInformation().catch(console.error);
-    }
 }
 </script>
