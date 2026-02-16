@@ -1,5 +1,5 @@
 import { Column } from '@simonbackx/simple-database';
-import { EncodedResponse, ResponseMiddleware, RouterServer } from '@simonbackx/simple-endpoints';
+import { EncodedResponse, ResponseMiddleware, Router, RouterServer } from '@simonbackx/simple-endpoints';
 import { logger } from '@simonbackx/simple-logging';
 import { requestPrefix } from '@stamhoofd/backend-middleware';
 
@@ -82,6 +82,25 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         return result;
     };
 
+    const routerDecode = Router.prototype.decode;
+    Router.prototype.decode = function (...args) {
+        const startTime = process.hrtime.bigint();
+        const result = routerDecode.apply(this, args);
+        const elapsedTime = process.hrtime.bigint() - startTime;
+        const elapsedTimeMs = Number(elapsedTime) / 1000 / 1000;
+
+        if (elapsedTimeMs > 1) {
+            console.log('Router.decode took ' + elapsedTimeMs.toFixed(2) + 'ms');
+        }
+
+        // Count total request
+        const context = ContextInstance.optional;
+        if (context) {
+            context.timers.set('Router.decode', (context.timers.get('Router.decode') ?? 0) + elapsedTimeMs);
+        }
+        return result;
+    };
+
     const encodedResponseEncode = EncodedResponse.encode;
     EncodedResponse.encode = function (...args) {
         const startTime = process.hrtime.bigint();
@@ -92,6 +111,13 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         if (elapsedTimeMs > 1) {
             console.log('EncodedResponse.encode took ' + elapsedTimeMs.toFixed(2) + 'ms');
         }
+
+        // Count total request
+        const context = ContextInstance.optional;
+        if (context) {
+            context.timers.set('EncodedResponse.encode', (context.timers.get('EncodedResponse.encode') ?? 0) + elapsedTimeMs);
+        }
+
         return result;
     };
 
