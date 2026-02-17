@@ -237,7 +237,7 @@ export function useEmailInformation(email: string | ComputedRef<string | null | 
         if (!e) {
             return null;
         }
-        return emailInformationManager.getFromCache(email.value);
+        return emailInformationManager.getFromCache(e);
     });
 
     // prevent unncessary fetches
