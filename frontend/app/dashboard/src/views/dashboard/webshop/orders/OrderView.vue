@@ -223,7 +223,7 @@
                         {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
                     </h3>
                     <p class="style-definition-text">
-                        {{ order.data.customer.email }}
+                        <EmailAddress :email="order.data.customer.email" />
                     </p>
                 </STListItem>
 
@@ -295,8 +295,8 @@
 import { ArrayDecoder, AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
-import { AsyncPaymentView, CartItemRow, EditPaymentView, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useArrowUpDown, useAuth, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
-import { AccessRight, BalanceItemWithPrivatePayments, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
+import { AsyncPaymentView, CartItemRow, EditPaymentView, EmailAddress, GlobalEventBus, PriceBreakdownBox, STList, STListItem, STNavigationBar, TableActionsContextMenu, TableActionSelection, Toast, useArrowUpDown, useAuth, useContext, ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
+import { AccessRight, BalanceItemWithPrivatePayments, LimitedFilteredRequest, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivatePayment, ProductType, RecordCategory, RecordWarning, TicketPrivate, WebshopTakeoutMethod, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import OrderView from './OrderView.vue';
 
@@ -685,7 +685,7 @@ function createPayment() {
         payment,
         balanceItems: order.value.balanceItems,
         customers: [
-            order.value.data.customer.toPaymentCustomer()
+            order.value.data.customer.toPaymentCustomer(),
         ],
         isNew: true,
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
