@@ -174,4 +174,5 @@ export default {
     'reviewTimes': 'laatst nagekeken',
     'updatedAt': 'laatst gewijzigd op',
     'showInMemberPortal': 'tonen in ledenportaal',
+    'bundleDiscounts': 'bundelkortingen',
 };
