@@ -142,9 +142,11 @@ blockquote {
     font-variant: inherit;
     text-transform: inherit;
     text-decoration: inherit;
+    font-variation-settings: inherit;
     appearance: none;
     -webkit-appearance: none;
     border-radius: 0;
+    letter-spacing: inherit;
 }
 
 // Disable number arrows in inputs
