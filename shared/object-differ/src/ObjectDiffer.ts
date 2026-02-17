@@ -95,6 +95,10 @@ function getDiffName(autoEncoder: unknown): AuditLogReplacement | null {
     if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && typeof autoEncoder.name === 'string') {
         return autoEncoder.name ? AuditLogReplacement.string(autoEncoder.name) : AuditLogReplacement.key('untitled');
     }
+
+    if (typeof autoEncoder === 'object' && autoEncoder !== null && 'name' in autoEncoder && autoEncoder.name instanceof TranslatedString) {
+        return autoEncoder.name.toString() ? AuditLogReplacement.string(autoEncoder.name.toString()) : AuditLogReplacement.key('untitled');
+    }
     return null;
 }
 function getDiffPutValue(autoEncoder: unknown, key?: AuditLogReplacement): AuditLogReplacement | null {
