@@ -207,8 +207,8 @@
                         <h3 class="style-definition-label">
                             {{ $t('7400cdce-dfb4-40e7-996b-4817385be8d8') }}
                         </h3>
-                        <p v-copyable class="style-definition-text style-copyable">
-                            {{ payment.customer.company.administrationEmail }}
+                        <p class="style-definition-text">
+                            <EmailAddress :email="payment.customer.company.administrationEmail" />
                         </p>
                     </STListItem>
                 </template>
@@ -220,8 +220,8 @@
                     <p v-copyable class="style-definition-text style-copyable">
                         {{ payment.customer.name || $t('67d1816c-8cfb-4e48-8155-867a2da19641') }}
                     </p>
-                    <p v-if="payment.customer.email" v-copyable class="style-description style-copyable">
-                        {{ payment.customer.email }}
+                    <p v-if="payment.customer.email" v-copyable class="style-description">
+                        <EmailAddress :email="payment.customer.email" />
                     </p>
                     <p v-if="payment.customer.phone" v-copyable class="style-description style-copyable">
                         {{ payment.customer.phone }}
@@ -380,7 +380,7 @@
 
 <script lang="ts" setup>
 import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { AuditLogsView, CenteredMessage, EditBalanceItemView, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
+import { AuditLogsView, CenteredMessage, EditBalanceItemView, EmailAddress, GlobalEventBus, IconContainer, STErrorsDefault, STGrid, STGridItem, STList, STListItem, STNavigationBar, Toast, useAppContext, useAuth, useBackForward, useContext, useErrors, useOrganization, usePlatform } from '@stamhoofd/components';
 import { BalanceItem, BalanceItemWithPayments, Company, Invoice, Payment, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, PaymentTypeHelper, PermissionLevel } from '@stamhoofd/structures';
 
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
