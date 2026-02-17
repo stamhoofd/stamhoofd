@@ -120,11 +120,12 @@ import { I18nComponent, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { EmailInformation } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
-import { LoadingViewTransition } from '../containers';
-import { useAuth, useContext } from '../hooks';
 import IconContainer from '../icons/IconContainer.vue';
 import { CenteredMessage } from '../overlays/CenteredMessage';
 import { Toast } from '../overlays/Toast';
+import { LoadingViewTransition } from '../containers';
+import { useAuth } from '../hooks/useAuth';
+import { useContext } from '../hooks/useContext';
 
 const props = defineProps<{
     emailInformation: EmailInformation;

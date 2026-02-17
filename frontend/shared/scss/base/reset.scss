@@ -147,6 +147,9 @@ blockquote {
     -webkit-appearance: none;
     border-radius: 0;
     letter-spacing: inherit;
+    line-height: inherit;
+    block-size: auto;
+    text-align: inherit;
 }
 
 // Disable number arrows in inputs

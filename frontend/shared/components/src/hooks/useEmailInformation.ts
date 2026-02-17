@@ -2,9 +2,11 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SessionContext } from '@stamhoofd/networking';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import { computed, ComputedRef, onUnmounted, Ref, ref, watch } from 'vue';
-import { useContext } from '.';
-import { getInvalidEmailDescription } from '../helpers';
+import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onUnmounted, Ref, ref, unref, watch } from 'vue';
+import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
+import { useAppContext } from '../context/appContext';
+import { useContext } from './useContext';
+import { useFeatureFlag } from './useFeatureFlag';
 
 class EmailInformationManager {
     private static INSTANCE: EmailInformationManager | null = null;
@@ -68,7 +70,7 @@ class EmailInformationManager {
         if (this.wasInit === false) {
             this.wasInit = true;
 
-            const timeoutInMs = 500;
+            const timeoutInMs = 1_000;
 
             // create a function that fetches the newly registred emails only if the function was not called again before the timeout
             this.debounceFetchNewlyRegisteredEmails = throttle(async () => {
@@ -87,10 +89,18 @@ class EmailInformationManager {
                 const result = await this.fetchEmailInformation(emails, context);
 
                 if (result) {
-                    result.forEach((emailInformation) => {
+                    // We don't get all email addresses returned, so make sure we set a default (no bounces etc) state for all fetched email addresses
+                    for (const email of emails) {
+                        this.cache.value.set(email, { emailInformation: EmailInformation.create({
+                            email,
+                        }), fetchedAt });
+                    }
+
+                    // Replace with detailed info from the backend
+                    for (const emailInformation of result) {
                         const email = emailInformation.email;
                         this.cache.value.set(email, { emailInformation, fetchedAt });
-                    });
+                    }
                 }
             }, timeoutInMs);
 
@@ -119,7 +129,7 @@ class EmailInformationManager {
         const index = this.newlyRegisteredEmails.indexOf(email);
         if (index !== -1) {
             // should only remove first occurrence (email can be registered in multiple components)
-            this.newlyRegisteredEmails = this.newlyRegisteredEmails.splice(index, 1);
+            this.newlyRegisteredEmails.splice(index, 1);
         }
     }
 
@@ -166,37 +176,77 @@ class EmailInformationManager {
 
 const emailInformationManager = new EmailInformationManager();
 
+function checkCanReadEmailInformation() {
+    const app = useAppContext();
+
+    return app !== 'registration' && useFeatureFlag()('STA-673');
+}
+
 /**
 * This composable will register the email and starts a debounced fetch of all the newly registered emails since the last fetch.
 * @param email
 * @returns A ComputedRef of the email information. The value will be null at first. After the fetch the value will be set.
 */
-export function useEmailInformation(email: string | ComputedRef<string | null | undefined>) {
+export function useEmailInformation(email: string | ComputedRef<string | null | undefined>): Ref<null | EmailInformation> {
+    if (!checkCanReadEmailInformation()) {
+        return ref(null);
+    }
     const context = useContext();
 
     emailInformationManager.init(context.value);
 
-    if (typeof email === 'string') {
-        // prevent unncessary fetches
-        onUnmounted(() => emailInformationManager.unregisterEmail(email));
+    let didRegisterEmails: string[] = [];
 
-        emailInformationManager.registerEmail(email);
-        return computed(() => emailInformationManager.getFromCache(email));
+    function deregister() {
+        for (const e of didRegisterEmails) {
+            emailInformationManager.unregisterEmail(e);
+        }
+        didRegisterEmails = [];
     }
 
-    watch(email, () => {
-        if (email.value) {
-            emailInformationManager.registerEmail(email.value);
+    function register() {
+        const e = unref(email);
+        if (!e) {
+            deregister();
+            return;
         }
-    }, { immediate: true });
 
-    const emailInformation = computed(() => email.value ? emailInformationManager.getFromCache(email.value) : null);
+        if (didRegisterEmails.includes(e)) {
+            return;
+        }
+        deregister();
+
+        if (e) {
+            emailInformationManager.registerEmail(e);
+            didRegisterEmails.push(e);
+        }
+    }
+
+    if (typeof email !== 'string') {
+        watch(email, () => {
+            register();
+        }, { immediate: false });
+    }
+
+    onActivated(() => {
+        register();
+    });
+
+    const emailInformation = computed(() => {
+        const e = unref(email);
+        if (!e) {
+            return null;
+        }
+        return emailInformationManager.getFromCache(email.value);
+    });
 
     // prevent unncessary fetches
-    onUnmounted(() => {
-        if (email.value) {
-            emailInformationManager.unregisterEmail(email.value);
-        }
+    onDeactivated(() => {
+        deregister();
+    });
+
+    onBeforeUnmount(() => {
+        deregister();
     });
 
     return emailInformation;

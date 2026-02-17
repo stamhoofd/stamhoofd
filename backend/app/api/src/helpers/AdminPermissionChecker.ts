@@ -932,7 +932,7 @@ export class AdminPermissionChecker {
         if (organizationId) {
             return this.hasSomeAccess(organizationId);
         }
-        return this.hasPlatformFullAccess();
+        return this.hasSomePlatformAccess();
     }
 
     async canSendEmails(organizationId: Organization | string | null) {

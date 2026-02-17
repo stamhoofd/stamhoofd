@@ -14,9 +14,13 @@
                 <span>{{ user.firstName }} {{ user.lastName }}</span>
                 <span v-if="user.memberId === member.id" v-tooltip="$t('8e6f7cf0-e785-4d26-b6cf-80ddb912e87b', {member: member.patchedMember.firstName})" class="icon dot small primary" />
             </h3>
-            <EmailDetailWithWarning tag="p" :email="user.email" class="style-description-small" />
+            <p class="style-description-small">
+                <EmailAddress :email="user.email" />
+            </p>
         </template>
-        <EmailDetailWithWarning v-else tag="h3" :email="user.email" class="style-title-list" />
+        <h3 v-else class="style-title-list">
+            <EmailAddress :email="user.email" />
+        </h3>
         <p v-if="user.permissions && app !== 'registration' && !user.permissions.isEmpty && !hasEmptyAccess(user)" class="style-description-small">
             {{ $t('d5be56ba-2189-47b0-a32f-ef92cac0c2f8') }}
         </p>
@@ -33,7 +37,7 @@
 import { PlatformMember, User } from '@stamhoofd/structures';
 import { useAppContext } from '../../../context/appContext';
 import STGridItem from '../../../layout/STGridItem.vue';
-import EmailDetailWithWarning from './EmailDetailWithWarning.vue';
+import EmailAddress from '../../../email/EmailAddress.vue';
 
 defineProps<{
     member: PlatformMember;

@@ -35,3 +35,4 @@ export * from './useHoldValueForMinimumDuration';
 export * from './useIsRootAdmin';
 export * from './useElementWidth';
 export * from './useEmailInformation';
+export * from './useEmailWarning';
