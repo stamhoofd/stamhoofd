@@ -3,7 +3,7 @@ import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import { BalanceItemRelationType, BalanceItemType, CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
-import { createOrderDataHTMLTable, createPaymentDataHTMLTable } from '../helpers/email-html-helpers.js';
+import { createOrderDataHTMLTable } from '../helpers/email-html-helpers.js';
 import { memberResponsibilityRecordFilterCompilers } from '../sql-filters/member-responsibility-records.js';
 
 type ReplacementsOptions = {
@@ -364,7 +364,7 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
             }
         }
 
-        return createPaymentDataHTMLTable(payment);
+        return payment.getPaymentDataHTMLTable();
     };
 
     const paymentDataHtml = createPaymentDataHtml();

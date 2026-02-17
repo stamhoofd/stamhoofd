@@ -7,6 +7,7 @@ import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { BaseOrganization } from '../Organization.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { Payment, Settlement } from './Payment.js';
+import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
 
 export class PaymentGeneral extends Payment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
@@ -153,6 +154,50 @@ export class PaymentGeneral extends Payment {
 
         for (const balanceItemPayment of this.balanceItemPayments) {
             str += `<tr><td><h4>${Formatter.escapeHtml(balanceItemPayment.balanceItem.description)}</h4></td><td class="price">${Formatter.escapeHtml(Formatter.price(balanceItemPayment.price))}</td></tr>`;
+        }
+
+        return str + '</tbody></table>';
+    }
+
+    /**
+     * Customer name, phone, payment method and total price
+     */
+    getPaymentDataHTMLTable() {
+        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+
+        const customer = this.customer;
+
+        const replacements: { title: string; value: string }[] = [];
+
+        if (customer) {
+            replacements.push({
+                title: $t(`17edcdd6-4fb2-4882-adec-d3a4f43a1926`),
+                value: customer.dynamicName,
+            });
+
+            if (customer.phone) {
+                replacements.push({
+                    title: $t(`feea3664-9353-4bd4-b17d-aff005d3e265`),
+                    value: customer.phone,
+                });
+            }
+        }
+
+        replacements.push({
+            title: $t(`07e7025c-0bfb-41be-87bc-1023d297a1a2`),
+            value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method ?? PaymentMethod.Unknown)),
+        });
+
+        replacements.push({
+            title: $t(`Totaal`),
+            value: Formatter.price(this.price),
+        });
+
+        for (const replacement of replacements) {
+            if (replacement.value.length === 0) {
+                continue;
+            }
+            str += `<tr><td><h4>${Formatter.escapeHtml(replacement.title)}</h4></td><td>${Formatter.escapeHtml(replacement.value)}</td></tr>`;
         }
 
         return str + '</tbody></table>';

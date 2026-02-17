@@ -183,6 +183,10 @@ function fillReplacements(replacements: Replacement[]) {
             token: 'paymentPrice',
             value: Formatter.price(paymentGeneral.price),
         }),
+        Replacement.create({
+            token: 'paymentData',
+            html: paymentGeneral.getPaymentDataHTMLTable(),
+        }),
     ];
 
     for (const replacement of [...recipient.replacements, ...recipient.getDefaultReplacements(), ...paymentReplacemnets]) {
