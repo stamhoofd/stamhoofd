@@ -53,11 +53,11 @@
         <hr>
         <h2>Geavanceerde instellingen</h2>
 
-        <Checkbox v-if="!enableBuckaroo" key="mollie" v-model="forceMollie">
-            Mollie (betaalprovider)
+        <Checkbox key="payconiq" v-model="forcePayconiq">
+            Payconiq API-key gebruiken
         </Checkbox>
         <p class="style-description-small">
-            Lees de gids door voor meer informatie hoe je aansluit via Mollie: <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/mollie/'" class="inline-link" target="_blank">Mollie</a>
+            Lees <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" class="inline-link" target="_blank">de gids</a> door voor meer informatie.
         </p>
 
         <Checkbox :checked="getFeatureFlag('webshop-advanced-settings')" @change="setFeatureFlag('webshop-advanced-settings', !!$event)">

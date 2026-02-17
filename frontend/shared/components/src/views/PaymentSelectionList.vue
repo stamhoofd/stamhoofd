@@ -6,23 +6,15 @@
                 <h2 :class="{ 'style-title-list': !!getDescription(paymentMethod) }">
                     {{ getName(paymentMethod) }}
 
-                    <span v-if="paymentMethod == 'Payconiq' && hasNonPayconiq" class="style-tag inline-first">Meest gebruikt</span>
+                    <span v-if="paymentMethod == 'Bancontact' && hasNonBancontact" class="style-tag inline-first">Meest gebruikt</span>
                 </h2>
                 <p v-if="getDescription(paymentMethod)" class="style-description-small">
                     {{ getDescription(paymentMethod) }}
                 </p>
 
-                <div v-if="paymentMethod == 'Payconiq'" class="payment-app-banner">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/payconiq/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/kbc/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/ing/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/belfius/app.svg">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/bnp/app.png">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/hello-bank/app.png">
-                    <img class="payment-app-logo" src="~@stamhoofd/assets/images/partners/argenta/app.png">
-                </div>
-
-                <img v-if="getLogo(paymentMethod) && (!$isMobile || paymentMethod !== 'Payconiq')" slot="right" :src="getLogo(paymentMethod)" class="payment-method-logo" :class="paymentMethod.toLowerCase()">
+                <template #right>
+                    <PaymentMethodIcon :method="paymentMethod" />
+                </template>
             </STListItem>
         </STList>
     </div>
@@ -32,9 +24,12 @@
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import bancontactLogo from "@stamhoofd/assets/images/partners/bancontact/logo.svg";
 import idealLogo from "@stamhoofd/assets/images/partners/ideal/logo.svg";
+import payconiqLogo from "@stamhoofd/assets/images/partners/payconiq/app.svg";
 import { LoadingButton, Radio, STErrorsDefault, STList, STListItem, STNavigationBar, STToolbar } from "@stamhoofd/components";
-import { Country, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
+import { Country, isBancontactPay, Organization, PaymentMethod, PaymentMethodHelper } from "@stamhoofd/structures";
 import { Component, Mixins, Prop } from "vue-property-decorator";
+
+import PaymentMethodIcon from './PaymentMethodIcon.vue';
 
 @Component({
     components: {
@@ -44,7 +39,8 @@ import { Component, Mixins, Prop } from "vue-property-decorator";
         STListItem,
         Radio,
         LoadingButton,
-        STErrorsDefault
+        STErrorsDefault,
+        PaymentMethodIcon
     },
     model: {
         // Already vue 3 compliant
@@ -64,6 +60,8 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     @Prop({ default: null }) 
         context: null | "takeout" | "delivery"
+
+    PaymentMethod = PaymentMethod;
 
     mounted() {
         if (!this.selectedPaymentMethod || this.selectedPaymentMethod === PaymentMethod.Unknown || !this.paymentMethods.includes(this.selectedPaymentMethod)) {
@@ -89,18 +87,16 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
-        }
-
-        // Force a given ordering
-        if (methods.includes(PaymentMethod.Bancontact)) {
+        if (methods.includes(PaymentMethod.Bancontact) && this.organization.address.country != Country.Netherlands) {
             r.push(PaymentMethod.Bancontact)
         }
 
         // Force a given ordering
-        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country != Country.Netherlands) {
-            r.push(PaymentMethod.iDEAL)
+        if (methods.includes(PaymentMethod.Payconiq)) {
+            if (!isBancontactPay() || !methods.includes(PaymentMethod.Bancontact)) {
+                // Don't add it
+                r.push(PaymentMethod.Payconiq)
+            }
         }
 
         // Force a given ordering
@@ -109,9 +105,20 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         }
 
         // Force a given ordering
+        if (methods.includes(PaymentMethod.iDEAL) && this.organization.address.country != Country.Netherlands) {
+            r.push(PaymentMethod.iDEAL)
+        }
+
+        // Force a given ordering
+        if (methods.includes(PaymentMethod.Bancontact) && this.organization.address.country == Country.Netherlands) {
+            r.push(PaymentMethod.Bancontact)
+        }
+
+        // Force a given ordering
         if (methods.includes(PaymentMethod.Transfer)) {
             r.push(PaymentMethod.Transfer)
         }
+        
 
         // Others
         r.push(...methods.filter(p => p != PaymentMethod.Payconiq && p != PaymentMethod.Bancontact && p != PaymentMethod.iDEAL && p != PaymentMethod.CreditCard && p != PaymentMethod.Transfer))
@@ -119,7 +126,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
         return r
     }
 
-    get hasNonPayconiq() {
+    get hasNonBancontact() {
         const hasTransfer = this.paymentMethods.includes(PaymentMethod.Transfer) ? 1 : 0
         const hasPOS = this.paymentMethods.includes(PaymentMethod.PointOfSale) ? 1 : 0
         return this.paymentMethods.length > 1 || !!hasTransfer || !!hasPOS
@@ -127,7 +134,12 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getName(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return 'Payconiq by Bancontact'
+            case PaymentMethod.Payconiq: {
+                if (isBancontactPay()) {
+                    return "Bancontact Pay | Wero"
+                }
+                return 'Payconiq by Bancontact'
+            }
             case PaymentMethod.Transfer: return "Via overschrijving"
             case PaymentMethod.DirectDebit: return "Via bank"
         }
@@ -136,9 +148,17 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getDescription(paymentMethod: PaymentMethod): string {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return "Betaal met de Payconiq by Bancontact app, de KBC-app, Belfius, BNP Paribas Fortis, ING-app, Fintro, Hello bank!, Argenta of Crelan app"
+            case PaymentMethod.Payconiq: {
+                if (this.paymentMethods.includes(PaymentMethod.Bancontact)) {
+                    return ""
+                }
+                if (isBancontactPay()) {
+                    return "Betaal met je Bancontact Pay-app of met je bankapp die Bancontact of Wero-betalingen ondersteunt"
+                }
+                return "Betaal met de Payconiq by Bancontact app of met je bankapp die Payconiq-betalingen ondersteunt"
+            }
             case PaymentMethod.Transfer: return ""
-            case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "" : ""
+            case PaymentMethod.Bancontact: return this.organization.address.country === Country.Belgium ? "Betaal met je Bancontact-app of met je bankapp die Bancontact-betalingen ondersteunt" : ""
             case PaymentMethod.iDEAL: return this.organization.address.country === Country.Netherlands ? "Meest gebruikte betaalmethode." : ""
             case PaymentMethod.Unknown: return ""
             case PaymentMethod.DirectDebit: return "Gebruik de app van je bank om je bankrekening te koppelen."
@@ -149,7 +169,7 @@ export default class PaymentSelectionList extends Mixins(NavigationMixin){
 
     getLogo(paymentMethod: PaymentMethod): string | null {
         switch (paymentMethod) {
-            case PaymentMethod.Payconiq: return null;
+            case PaymentMethod.Payconiq: return payconiqLogo;
             case PaymentMethod.Transfer: return null
             case PaymentMethod.Bancontact: return bancontactLogo
             case PaymentMethod.iDEAL: return idealLogo

@@ -22,6 +22,27 @@
             </a>
         </p>
 
+        <p v-if="!getPaymentMethod('Bancontact') && getPaymentMethod('Payconiq')" :class="'warning-box'">
+            We raden het gebruik van Payconiq af. Het is tijd om over te schakelen en Bancontact te gebruiken. Dit is veel stabieler en geeft minder problemen.
+            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" target="_blank" class="button text">
+                Meer info
+            </a>
+        </p>
+
+        <p v-if="getPaymentMethod('Bancontact') && getPaymentMethod('Payconiq') && !isWero" :class="'warning-box'">
+            Vanaf 16 maart zal Payconiq niet meer zichtbaar zijn.
+            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" target="_blank" class="button text">
+                Meer info
+            </a>
+        </p>
+
+        <p v-if="getPaymentMethod('Bancontact') && getPaymentMethod('Payconiq') && isWero" :class="'warning-box'">
+            Je kan Payconiq (nu Bancontact Pay | Wero) niet langer combineren met Bancontact. Bancontact is nu voldoende.
+            <a :href="'https://'+ $t('shared.domains.marketing') +'/docs/payconiq/'" target="_blank" class="button text">
+                Meer info
+            </a>
+        </p>
+
         <STList>
             <STListItem v-for="method in sortedPaymentMethods" :key="method" :selectable="true" element-name="label" :class="{'left-center': !(showPrices && getPaymentMethod(method) && getDescription(method))}" @click="canEnablePaymentMethod(method) ? undefined : setPaymentMethod(method, true)">
                 <Checkbox slot="left" :checked="getPaymentMethod(method)" :disabled="!canEnablePaymentMethod(method)" @change="setPaymentMethod(method, $event)" />
@@ -127,7 +148,7 @@ import { ComponentWithProperties, NavigationController, NavigationMixin } from "
 import { Checkbox, Dropdown, ErrorBox, IBANInput,LoadingView,PermyriadInput,PriceInput,Radio, STErrorsDefault, STInputBox, STList, STListItem, Toast, ToastButton, Validator } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { SessionManager } from "@stamhoofd/networking";
-import { AdministrationFeeSettings, Country, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings, Webshop } from "@stamhoofd/structures";
+import { AdministrationFeeSettings, Country, isBancontactPay, Organization, PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentProvider, PrivatePaymentConfiguration, StripeAccount, TransferDescriptionType, TransferSettings, Webshop } from "@stamhoofd/structures";
 import { Formatter, Sorter } from "@stamhoofd/utility";
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -183,6 +204,7 @@ export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
 
     loadingStripeAccounts = false
     stripeAccounts: StripeAccount[] = []
+    isWero = isBancontactPay();
 
     created() {
         this.loadStripeAccounts().catch(console.error)
@@ -340,8 +362,13 @@ export default class EditPaymentMethodsBox extends Mixins(NavigationMixin) {
         r.push(PaymentMethod.Bancontact)
 
         // Force a given ordering
-        if (this.country == Country.Belgium || this.getPaymentMethod(PaymentMethod.Payconiq)) {
-            r.push(PaymentMethod.Payconiq)
+        if ((this.country == Country.Belgium && this.canEnablePaymentMethod(PaymentMethod.Payconiq)) || this.getPaymentMethod(PaymentMethod.Payconiq)) {
+
+            // Disable Payconiq if Bancontact is enabled
+            if (!this.canEnablePaymentMethod(PaymentMethod.Bancontact) || this.getPaymentMethod(PaymentMethod.Payconiq) || !isBancontactPay()) {
+                // Only allowed as legacy fallover
+                r.push(PaymentMethod.Payconiq)
+            }
         }
 
         r.push(PaymentMethod.CreditCard)

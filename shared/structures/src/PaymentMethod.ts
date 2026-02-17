@@ -20,6 +20,10 @@ export enum PaymentMethodV150 {
     CreditCard = "CreditCard"
 }
 
+export function isBancontactPay() {
+    return new Date() > new Date(2026, 3 + 1, 16) //|| STAMHOOFD.environment === 'development'
+}
+
 export function downgradePaymentMethodV150(newerValue: PaymentMethod): PaymentMethodV150 {
     if (newerValue === PaymentMethod.PointOfSale) {
         return PaymentMethodV150.Transfer

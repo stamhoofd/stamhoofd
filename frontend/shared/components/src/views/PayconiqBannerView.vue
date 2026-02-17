@@ -1,13 +1,19 @@
 <template>
-    <div class="payconiq-banner-view">
+    <div class="payconiq-banner-view" :class="{payconiq: !isWero}">
         <button class="payconiq-close button icon close white" type="button" @click="close" />
-        <h1>Scan en betaal met Payconiq by Bancontact</h1>
+        <h1 v-if="isWero">
+            Scan en betaal met Bancontact Pay
+        </h1>
+        <h1 v-else>
+            Scan en betaal met Payconiq by Bancontact
+        </h1>
 
-        <div class="payconiq-logo" />
+        <div v-if="!isWero"class="payconiq-logo" />
 
         <div class="qr-code" :class="{ scanned: payment.status == 'Pending'}">
             <img v-if="payment.status == 'Pending' || payment.status == 'Created'" :src="qrCodeSrc" draggable="false">
         </div>
+        <img v-if="isWero" height="64" src="@stamhoofd/assets/images/partners/icons/bancontact-pay.png">
 
         <LoadingButton :loading="payment && payment.status == 'Pending'" class="price-loading">
             <p class="price">
@@ -24,7 +30,7 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { NavigationMixin } from "@simonbackx/vue-app-navigation";
 import { CenteredMessage, EmailInput, LoadingButton, STErrorsDefault,STFloatingFooter, STNavigationBar } from "@stamhoofd/components"
-import { Payment,PaymentStatus } from '@stamhoofd/structures';
+import { isBancontactPay, Payment,PaymentStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Component, Mixins, Prop } from "vue-property-decorator";
 
@@ -60,6 +66,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
     loading = false
     canceling = false
+    isWero = isBancontactPay()
 
     mounted() {
         this.timer = setTimeout(this.poll.bind(this), 3000);
@@ -168,7 +175,7 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
 
     .payconiq-banner-view {
         padding: 40px 30px;
-        background: $color-payconiq;
+        background: $color-background;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -176,8 +183,13 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         position: relative;
         --st-sheet-width: 380px;
 
+        p {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
         .payconiq-close {
-            color: $color-payconiq-dark-original;
+            color: $color-dark;
             position: absolute !important;
             top: 15px;
             right: 15px;
@@ -186,8 +198,38 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
         > h1 {
             font-size: 25px;
             font-weight: bold;
-            color: white;
             line-height: 1.5;
+            padding-bottom: 10px;
+        }
+
+        .price {
+            font-size: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        &.payconiq {
+            background: $color-payconiq;
+
+            p {
+                color: $color-payconiq-dark-original;
+            }
+
+            .payconiq-close {
+                color: $color-payconiq-dark-original;
+            }
+
+            > h1 {
+                color: white;
+            }
+
+            .price-loading {
+                --color-primary: white;
+            }
+
+            .price {
+                color: white;
+            }
         }
 
         .payconiq-logo {
@@ -222,25 +264,9 @@ export default class PayconiqBannerView extends Mixins(NavigationMixin){
             }
         }
 
-        p {
-            color: $color-payconiq-dark-original;
-            font-size: 16px;
-            font-weight: 500;
-        }
 
         .install {
             margin-bottom: 15px;;
-        }
-
-        .price-loading {
-            --color-primary: white;
-        }
-
-        .price {
-            color: white;
-            font-size: 25px;
-            font-weight: bold;
-            margin: 20px 0;
         }
     }
 </style>

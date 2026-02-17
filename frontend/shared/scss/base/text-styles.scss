@@ -1137,6 +1137,19 @@
         }
     }
 
+    &.white {
+        color: $color-dark;
+        
+        figure {
+            background: $color-background;
+            color: $color-dark;
+        }
+    
+        >aside {
+            color: $color-dark;
+        }
+    }
+
     &.tertiary {
         color: $color-tertiary-dark;
 
@@ -1201,6 +1214,7 @@
             margin-right: 0px;
         }
     }
+    
 
     figure {
         width: var(--block-width, 40px);
@@ -1228,6 +1242,12 @@
 
         >img {
             display: block;
+        }
+    }
+
+    &.dual {
+        figure {
+            width: 60px;
         }
     }
 

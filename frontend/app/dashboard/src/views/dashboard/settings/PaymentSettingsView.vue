@@ -4,7 +4,7 @@
             Betaalaccounts
         </h1>
 
-        <p>Koppel betaalaccounts via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Stripe</a>, <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/mollie/'" target="_blank">Mollie</a> of <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Payconiq</a>  om online betalingen te accepteren. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/tag/betaalmethodes/'" target="_blank">Meer info</a>.</p>
+        <p>Koppel betaalaccounts via <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/stripe/'" target="_blank">Stripe</a> of <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/mollie/'" target="_blank">Mollie</a> om online betalingen te accepteren. <a class="inline-link" :href="'https://'+$t('shared.domains.marketing')+'/docs/bancontact/'" target="_blank">Meer info</a>.</p>
         
         <LoadingView v-if="loadingStripeAccounts" />
         <STErrorsDefault :error-box="errorBox" />
@@ -64,7 +64,7 @@
                         IBAN
                     </h3>
                     <p class="style-definition-text">
-                        xxxx {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
+                        •••• {{ account.meta.bank_account_last4 }} ({{ account.meta.bank_account_bank_name }})
                     </p>
                 </STListItem>
 
@@ -267,7 +267,7 @@
             </aside>
             <h2>Online betalingen via Payconiq</h2>
             <p class="style-description">
-                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>. Heb je geen API-key en wil je snel aan de slag, stel dan Stripe (Bancontact) hierboven in. Een Payconiq API-key aanvragen duurt enkele weken.
+                Vul hieronder jouw API-key in om betalingen rechtstreeks via Payconiq te verwerken. <a href="https://www.stamhoofd.be/docs/payconiq/" target="_blank" class="inline-link">Meer info</a>.
             </p>
 
             <a v-if="payconiqAccount && payconiqAccount.legacyApi" :selectable="true" class="warning-box" :href="'https://'+ $t('shared.domains.marketing') +'/docs/oude-payconiq-accounts/'" target="_blank">
@@ -305,14 +305,6 @@
                 Gebruik Buckaroo voor online betalingen
             </Checkbox>
 
-            <Checkbox :checked="getFeatureFlag('stripe')" @change="setFeatureFlag('stripe', !!$event)">
-                Stripe koppeling toestaan
-            </Checkbox>
-
-            <Checkbox v-if="!enableBuckaroo" v-model="forceMollie">
-                Mollie koppeling toestaan
-            </Checkbox>
-
             <div v-if="enableBuckaroo" class="split-inputs">
                 <div>
                     <STInputBox title="Key" error-fields="buckarooSettings.key" :error-box="errorBox" class="max">
@@ -342,7 +334,7 @@
                 </div>
             </div>
 
-            <hr>
+            <hr v-if="stripeAccounts.length">
 
             <code v-for="account of stripeAccounts" :key="'code-'+account.id" class="style-code" v-text="formatJson(account.meta.blob)" />
         </template>
@@ -522,7 +514,7 @@ export default class PaymentSettingsView extends Mixins(NavigationMixin) {
     }
 
     get forcePayconiq() {
-        return this.getFeatureFlag('forcePayconiq') || this.isBelgium
+        return this.getFeatureFlag('forcePayconiq')
     }
 
     set forcePayconiq(forcePayconiq: boolean) {

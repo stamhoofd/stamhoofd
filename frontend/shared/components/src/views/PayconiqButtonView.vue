@@ -1,12 +1,22 @@
 <template>
-    <div class="st-view payconiq-button-view">
-        <STNavigationBar title="Payconiq by Bancontact">
+    <div class="st-view payconiq-button-view" :class="{payconiq: !isWero}">
+        <STNavigationBar :title="isWero ? 'Bancontact Pay' : 'Payconiq by Bancontact'">
             <button slot="right" class="button icon gray close" type="button" @click="close" />
         </STNavigationBar>
 
         <main>
-            <h1>Betaal met Payconiq by Bancontact</h1>
-            <p class="style-description">
+            <h1 v-if="isWero">
+                Betaal met Bancontact Pay
+            </h1>
+            <h1 v-else>
+                Betaal met Payconiq by Bancontact
+            </h1>
+
+            <p v-if="isWero" class="style-description">
+                Je hebt één van volgende apps nodig om te kunnen betalen: Bancontact Pay, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.
+            </p>
+
+            <p v-else class="style-description">
                 Je hebt één van volgende apps nodig om te kunnen betalen: Payconiq by Bancontact, KBC Mobile, ING Banking, Belfius, BNP Paribas Fortis, Fintro, Hello Bank!, Argenta of Crelan.
             </p>
         </main>
@@ -27,6 +37,7 @@
 
 <script lang="ts">
 import { CenteredMessage,EmailInput, LoadingButton, STErrorsDefault, STNavigationBar, STToolbar } from "@stamhoofd/components"
+import { isBancontactPay } from "@stamhoofd/structures";
 import { Component, Prop } from "vue-property-decorator";
 
 import PayconiqBannerView from "./PayconiqBannerView.vue";
@@ -43,6 +54,7 @@ import PayconiqBannerView from "./PayconiqBannerView.vue";
 export default class PayconiqButtonView extends PayconiqBannerView {
     @Prop({})
         paymentUrl: string;
+    isWero = isBancontactPay()
 
     getOS(): string {
         var userAgent = navigator.userAgent || navigator.vendor;
@@ -103,8 +115,6 @@ export default class PayconiqButtonView extends PayconiqBannerView {
 
 <style lang="scss">
 .payconiq-button-view {
-    --color-primary: #FF4785;
-
     .payment-app-logo {
         height: 28px;
     }
