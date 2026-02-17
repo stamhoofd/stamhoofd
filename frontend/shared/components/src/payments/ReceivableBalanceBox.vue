@@ -123,8 +123,11 @@
                     <h3 class="style-definition-label">
                         {{ contact.firstName || 'Onbekende naam' }} {{ contact.lastName }}
                     </h3>
-                    <p v-for="(email, j) of contact.emails" :key="j" v-copyable class="style-definition-text style-copyable">
-                        {{ email }}
+                    <p v-for="(email, j) of contact.emails" :key="email" class="style-definition-text">
+                        <EmailAddress :email="email" />
+                    </p>
+                    <p v-if="contact.emails.length === 0" class="style-definition-text">
+                        {{ $t('Nog geen e-mailadres ingesteld') }}
                     </p>
                 </STListItem>
             </STList>
@@ -144,6 +147,7 @@ import { BalanceItemWithPayments, BaseOrganization, DetailedReceivableBalance, P
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, Ref } from 'vue';
 import ReceivableBalanceList from './ReceivableBalanceList.vue';
+import EmailAddress from '../email/EmailAddress.vue';
 
 const props = withDefaults(
     defineProps<{

@@ -2,7 +2,7 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SessionContext } from '@stamhoofd/networking';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onUnmounted, Ref, ref, unref, watch } from 'vue';
+import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, Ref, ref, unref, watch } from 'vue';
 import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
 import { useAppContext } from '../context/appContext';
 import { useContext } from './useContext';
@@ -115,6 +115,7 @@ class EmailInformationManager {
     }
 
     registerEmail(email: string) {
+        console.log('register', email);
         const cachedValue = this.cache.value.get(email);
 
         // add if no cached value or if cached value is older than 10 seconds
@@ -126,6 +127,7 @@ class EmailInformationManager {
     }
 
     unregisterEmail(email: string) {
+        console.log('unregister', email);
         const index = this.newlyRegisteredEmails.indexOf(email);
         if (index !== -1) {
             // should only remove first occurrence (email can be registered in multiple components)
@@ -229,6 +231,10 @@ export function useEmailInformation(email: string | ComputedRef<string | null | 
     }
 
     onActivated(() => {
+        register();
+    });
+
+    onMounted(() => {
         register();
     });
 
