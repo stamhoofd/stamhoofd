@@ -48,6 +48,34 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const emails = await EmailAddress.getByEmails(request.body, organizationId);
-        return new Response(emails.map(e => EmailInformation.create(e)));
+
+        // Remove duplicates + remove emails where all values are false
+        const cleaned: EmailInformation[] = [];
+        for (const email of emails) {
+            const c = EmailInformation.create(email);
+            const existing = cleaned.find(cc => cc.email === email.email);
+            if (existing) {
+                existing.markedAsSpam = existing.markedAsSpam || c.markedAsSpam;
+                existing.hardBounce = existing.hardBounce || c.hardBounce;
+
+                if (email.organizationId === null && organizationId === null) {
+                    // Only show unsubscribe status of platform
+                    existing.unsubscribedAll = c.unsubscribedAll;
+                    existing.unsubscribedMarketing = c.unsubscribedMarketing;
+                }
+                continue;
+            }
+
+            if (email.organizationId !== null && organizationId === null) {
+                // Only show unsubscribe status of platform
+                c.unsubscribedAll = false;
+                c.unsubscribedMarketing = false;
+            }
+
+            cleaned.push(c);
+        }
+
+        // We don't return empty ones to increase privacy a bit - admins should not know what email addresses are in the system unless they have bounced
+        return new Response(cleaned.filter(c => c.markedAsSpam || c.hardBounce || c.unsubscribedAll || c.unsubscribedMarketing));
     }
 }

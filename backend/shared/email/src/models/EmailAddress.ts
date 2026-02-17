@@ -3,7 +3,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailInterfaceRecipient } from '../classes/Email';
+import { EmailInterfaceRecipient } from '../classes/Email.js';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -91,19 +91,19 @@ export class EmailAddress extends QueryableModel {
 
     // Methods
     static async getByEmails(emails: string[], organizationId: string | null): Promise<EmailAddress[]> {
-        if (emails.length > 30) {
+        if (emails.length > 100) {
             // Normally an organization will never have so much bounces, so we'll request all emails and filter in them
             const all = await this.where({ organizationId }, { limit: 1000 });
             return all.filter(e => emails.includes(e.email));
         }
 
-        if (emails.length == 0) {
+        if (emails.length === 0) {
             return [];
         }
 
         if (organizationId === null) {
             const [rows] = await Database.select(
-                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND \`organizationId\` is NULL`,
+                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND (\`organizationId\` is NULL OR \`hardBounce\` = 1 OR \`markedAsSpam\` = 1)`,
                 [emails],
             );
 
