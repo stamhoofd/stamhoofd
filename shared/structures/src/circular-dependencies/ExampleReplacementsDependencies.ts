@@ -29,7 +29,7 @@ function fillReplacements(replacements: Replacement[]) {
             id: '',
             method: PaymentMethod.Transfer,
             transferDescription: '+++111/111/111+++',
-            price: 1500,
+            price: 1500_00,
             transferSettings: TransferSettings.create({
                 type: TransferDescriptionType.Structured,
                 iban: 'BE1234 1234 1234',
@@ -79,13 +79,13 @@ function fillReplacements(replacements: Replacement[]) {
                             name: $t(`feb79403-3266-47de-9e27-55122bc0c881`),
                         }),
                         productPrice: ProductPrice.create({
-                            price: 550,
+                            price: 550_00,
                         }),
                         amount: 2,
                         calculatedPrices: [CartItemPrice.create({
-                            price: 550,
+                            price: 550_00,
                         }), CartItemPrice.create({
-                            price: 550,
+                            price: 550_00,
                         })],
                     }),
                     CartItem.create({
@@ -93,11 +93,11 @@ function fillReplacements(replacements: Replacement[]) {
                             name: $t(`d93000f0-cb13-4756-a6ac-961950efb25c`),
                         }),
                         productPrice: ProductPrice.create({
-                            price: 400,
+                            price: 400_00,
                         }),
                         amount: 1,
                         calculatedPrices: [CartItemPrice.create({
-                            price: 400,
+                            price: 400_00,
                         })],
                     }),
                 ],
@@ -124,11 +124,11 @@ function fillReplacements(replacements: Replacement[]) {
 
     const balance1 = BalanceItem.create({
         description: $t(`260c4ef6-413c-45c9-9f59-6aee4e67a848`),
-        unitPrice: 1234,
+        unitPrice: 1234_00,
     });
     const balance2 = BalanceItem.create({
         description: $t(`e7e960cc-94aa-42c1-b476-8a8ad67512f3`),
-        unitPrice: 1234,
+        unitPrice: 1234_00,
         amount: 2,
     });
 
@@ -143,14 +143,14 @@ function fillReplacements(replacements: Replacement[]) {
             iban: 'BE1234 1234 1234',
             creditor: $t('16ba3d97-5943-451d-92b5-0bf21555f7ae'),
         }),
-        price: 1234 + 2468,
+        price: 1234_00 + 2468_00,
         balanceItemPayments: [
             BalanceItemPaymentDetailed.create({
-                price: 1234,
+                price: 1234_00,
                 balanceItem: balance1,
             }),
             BalanceItemPaymentDetailed.create({
-                price: 2468,
+                price: 2468_00,
                 balanceItem: balance2,
             }),
         ],
