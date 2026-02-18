@@ -16,3 +16,11 @@
 <script lang="ts" setup>
 defineProps<{ icon?: string }>();
 </script>
+
+<style lang="scss" scoped>
+
+:slotted(.image-component) img {
+    object-fit: cover;
+
+}
+</style>
