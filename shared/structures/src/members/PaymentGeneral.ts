@@ -99,28 +99,6 @@ export class PaymentGeneral extends Payment {
             let description = Formatter.escapeHtml(payment.itemDescription ?? '');
             const item = payment.balanceItem;
 
-            let prefix = '';
-            let prefixClass = '';
-
-            if (item.dueAt && item.payablePriceWithVAT >= 0) {
-                prefix = `Te betalen tegen ${Formatter.date(item.dueAt)}`;
-
-                if (item.isOverDue) {
-                    prefixClass = 'error';
-                }
-            }
-
-            if (item.status === BalanceItemStatus.Canceled) {
-                prefix = $t(`72fece9f-e932-4463-9c2b-6e8b22a98f15`);
-                prefixClass = 'error';
-            }
-            else if (item.priceOpen < 0 && item.pricePaid > item.payablePriceWithVAT && item.pricePaid > 0) {
-                prefix = $t(`0c39a71f-be73-4404-8af0-cd9f238d2060`);
-            }
-            else if (item.payablePriceWithVAT >= 0 && item.priceOpen < 0) {
-                // todo: is this correct?
-                prefix = $t(`bdf22906-037e-4221-8d3e-113bc62da28e`);
-            }
 
             if (payment.quantity !== 1) {
                 if (description) {
@@ -129,15 +107,8 @@ export class PaymentGeneral extends Payment {
                 description += `${Formatter.escapeHtml(Formatter.float(payment.quantity))} x ${Formatter.escapeHtml(Formatter.price(payment.unitPrice))}`;
             }
 
-            let prefixHtml = '';
-
-            if (prefix) {
-                const prefixClassHtml = prefixClass ? ' ' + prefixClass : '';
-                prefixHtml = `<p class="email-style-title-prefix-list${prefixClassHtml}">${Formatter.escapeHtml(prefix)}</p>`;
-            }
-
             const descriptionText = description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : '';
-            const titleColumn = `<td>${prefixHtml}<h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
+            const titleColumn = `<td><h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
 
             const price = payment.price === 0 ? $t('Gratis') : Formatter.price(payment.price);
             const priceColumn = `<td>${Formatter.escapeHtml(price)}</td>`;
