@@ -54,7 +54,8 @@
     "translate": "cd shared/locales && yarn -s build && cd ../.. && cd .development/i18n-uuid && yarn start",
     "frontend:types": "wait-on shared/locales/esm/dist/index.d.ts && cd frontend/app/dashboard && yarn -s check-types",
     "prepare": "husky",
-    "dns": "export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && cd .development && coredns"
+    "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
+
   },
   "dependencies": {
     "@simonbackx/simple-encoding": "2.23.1",
