@@ -230,7 +230,7 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
             const replacements = getEmailReplacementsForPayment(payment, replacementOptions);
 
             for (const member of members) {
-                for (const email of member.details.getMemberEmails()) {
+                for (const email of member.details.getNotificationEmails()) {
                     results.push(EmailRecipient.create({
                         objectId: payment.id,
                         name: organization.name,
