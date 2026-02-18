@@ -400,7 +400,20 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
                         value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : ''),
                     }),
                 ]
-            : []),
+            : [
+                    Replacement.create({
+                        token: 'transferDescription',
+                        value: '',
+                    }),
+                    Replacement.create({
+                        token: 'transferBankAccount',
+                        value: '',
+                    }),
+                    Replacement.create({
+                        token: 'transferBankCreditor',
+                        value: '',
+                    }),
+                ]),
 
         Replacement.create({
             token: 'balanceItemPaymentsTable',
