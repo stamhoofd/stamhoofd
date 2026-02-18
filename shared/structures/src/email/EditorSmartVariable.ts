@@ -262,7 +262,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'balanceItemPaymentsTable',
-            name: $t(`Tabel met betaalitems`),
+            name: $t(`Tabel met alle items uit de betaling`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -283,11 +283,13 @@ export class EditorSmartVariable extends AutoEncoder {
         variables.push(EditorSmartVariable.create({
             id: 'paymentData',
             name: $t(`Tabel met gegevens`),
+            description: $t('Naam, eventueel bestelnummer, GSM-nummer en totaalbedrag'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewContext',
             name: $t(`a62f0a8f-384b-403a-9bc3-c719ca3839cf`),
+            description: $t('Korte beschrijving (2 - 3 woorden) waarvoor er betaald werd'),
         }));
 
         variables.push(EditorSmartVariable.create({
