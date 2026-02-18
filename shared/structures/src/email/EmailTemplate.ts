@@ -712,6 +712,7 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.paymentTable,
                 ExampleReplacements.all.overviewContext,
                 ExampleReplacements.all.paymentData,
+                ExampleReplacements.all.paymentUrl,
             ];
         }
 

@@ -26,25 +26,6 @@ export class EditorSmartButton extends AutoEncoder {
         return EditorSmartVariable.fillExamples(this.all.map(v => v.clone()), replacements);
     }
 
-    static forRecipient(recipient: EmailRecipient | Recipient) {
-        const replacements = [...recipient.replacements, ...recipient.getDefaultReplacements()];
-
-        return this.all.map(v => v.clone()).filter((variable) => {
-            // Always supported: signInUrl + unsubscribeUrl
-            if (variable.id === 'signInUrl' || variable.id === 'unsubscribeUrl') {
-                return true;
-            }
-
-            const replacement = replacements.find(r => r.token === variable.id && (r.value.length > 0 || r.html !== undefined));
-            if (!replacement) {
-                // Not found
-                return false;
-            }
-
-            return true;
-        });
-    }
-
     static get all() {
         const buttons: EditorSmartButton[] = [];
 

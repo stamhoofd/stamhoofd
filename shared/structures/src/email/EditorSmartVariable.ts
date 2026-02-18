@@ -30,11 +30,6 @@ export class EditorSmartVariable extends AutoEncoder {
         return { type: this.html ? 'smartVariableBlock' : 'smartVariable', attrs: { id: this.id } };
     }
 
-    static forRecipient(recipient: EmailRecipient | Recipient) {
-        const replacements = [...recipient.replacements, ...recipient.getDefaultReplacements()];
-        return this.forReplacements(replacements);
-    }
-
     static forReplacements(replacements: Replacement[]) {
         return this.fillExamples(this.all.map(v => v.clone()), replacements);
     }
@@ -66,6 +61,26 @@ export class EditorSmartVariable extends AutoEncoder {
                     // Do not change text
                 }
             }
+
+            if (variable instanceof EditorSmartVariable) {
+                if (variable.id === 'outstandingBalance') {
+                    // Hide outstandingBalance in combination with paymentPrice - becuase these can be confused very easily.
+                    // Although technically supported, we just hide it in the UI
+                    if (replacements.find(r => r.token === 'paymentPrice' && (r.value || r.html))) {
+                        return false;
+                    }
+                }
+            }
+
+            if (variable.id === 'paymentUrl' && variable instanceof EditorSmartButton) {
+                if (replacements.find(r => r.token === 'paymentTable' && (r.value || r.html))) {
+                    // Rename default button in the case of mailing to payments
+                    variable.text = $t('Betaling nakijken');
+                    variable.name = $t('Knop om de betaling na te kijken');
+                    variable.hint = $t('Deze knop gaat naar een pagina om de betaalinformatie te bekijken, zoals de overschrijvingsinstructies.');
+                }
+            }
+
             return true;
         });
     }

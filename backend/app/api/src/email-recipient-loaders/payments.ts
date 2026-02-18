@@ -340,6 +340,7 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
     }
 
     let orderUrlReplacement: Replacement | null = null;
+    let paymentUrl: string = '{{signInUrl}}';
 
     // add replacement for order url if only 1 order is linked
     if (singleOrder && shouldAddReplacementsForOrder) {
@@ -353,6 +354,7 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
                 token: 'orderUrl',
                 value: 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id),
             });
+            paymentUrl = 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id);
         }
     }
 
@@ -368,15 +370,12 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
     };
 
     const paymentDataHtml = createPaymentDataHtml();
-    const paymentDataReplacement = paymentDataHtml
-        ? Replacement.create({
-                token: 'paymentData',
-                value: '',
-                html: paymentDataHtml,
-            })
-        : null;
 
     return ([
+        Replacement.create({
+            token: 'paymentUrl',
+            value: paymentUrl,
+        }),
         Replacement.create({
             token: 'paymentPrice',
             value: Formatter.price(payment.price),
@@ -415,11 +414,15 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
             html: payment.getHTMLTable(),
         }),
         Replacement.create({
+            token: 'paymentData',
+            value: '',
+            html: paymentDataHtml,
+        }),
+        Replacement.create({
             token: 'overviewContext',
             value: getPaymentContext(payment, options),
         }),
         orderUrlReplacement,
-        paymentDataReplacement,
     ]).filter(replacementOrNull => replacementOrNull !== null);
 }
 

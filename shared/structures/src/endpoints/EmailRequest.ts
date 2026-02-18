@@ -43,6 +43,18 @@ export function replaceEmailHtml(html: string, replacements: Replacement[]) {
             replacement.html || Formatter.escapeHtml(replacement.value),
         );
     }
+
+    // Do two passes to support recursive replacements
+    for (const replacement of replacements) {
+        replacedHtml = replacedHtml.replace(
+            new RegExp(
+                Formatter.escapeRegex('{{' + replacement.token + '}}'),
+                'g',
+            ),
+            replacement.html || Formatter.escapeHtml(replacement.value),
+        );
+    }
+
     return replacedHtml;
 }
 
@@ -58,6 +70,18 @@ export function replaceEmailText(text: string, replacements: Replacement[]) {
             replacement.value,
         );
     }
+
+    // Two passes to support recursive replacements
+    for (const replacement of replacements) {
+        replacedText = replacedText.replace(
+            new RegExp(
+                Formatter.escapeRegex('{{' + replacement.token + '}}'),
+                'g',
+            ),
+            replacement.value,
+        );
+    }
+
     return replacedText;
 }
 
