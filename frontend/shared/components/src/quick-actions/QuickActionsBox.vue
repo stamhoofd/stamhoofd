@@ -8,7 +8,7 @@
             <STList>
                 <STListItem v-for="action of actions" class="left-center right-stack" :selectable="true" @click="action.action">
                     <template #left>
-                        <component :is="action.leftComponent" v-if="action.leftComponent" />
+                        <component :is="action.leftComponent" v-bind="action.leftProps || {}" v-if="action.leftComponent" />
                         <img v-else :src="action.illustration" class="style-illustration-img">
                     </template>
                     <h3 class="style-title-list">

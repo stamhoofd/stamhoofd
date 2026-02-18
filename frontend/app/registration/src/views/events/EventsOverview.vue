@@ -37,12 +37,11 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
-import { EventRow, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
+import { EventRow, EventView, InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAppContext, useEventsObjectFetcher, useEventUIFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePlatform, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
 import { useMemberManager } from '@stamhoofd/networking';
 import { Event, isEmptyFilter, isEqualFilter, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, onActivated, ref, Ref, watchEffect } from 'vue';
-import EventView from './EventView.vue';
 
 type ObjectType = Event;
 

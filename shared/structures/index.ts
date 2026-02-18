@@ -100,6 +100,7 @@ export * from './src/MemberAdmin.js';
 export * from './src/LoadedPermissions.js';
 export * from './src/UitpasClientCredentialsStatus.js';
 export * from './src/members/UitpasNumberDetails.js';
+export * from './src/getActivePeriods.js';
 
 // UserPermissions
 export * from './src/UserPermissions.js';

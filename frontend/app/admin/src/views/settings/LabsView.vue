@@ -54,6 +54,10 @@
             <Checkbox :model-value="getFeatureFlag('STA-673')" @update:model-value="setFeatureFlag('STA-673', !!$event)">
                 {{ $t('Afmeldingen van e-mailadressen lezen en bewerken') }} (wip)
             </Checkbox>
+
+            <Checkbox :model-value="getFeatureFlag('STA-33')" @update:model-value="setFeatureFlag('STA-33', !!$event)">
+                {{ $t('Suggesties voor activiteiten in ledenportaal') }} (wip)
+            </Checkbox>
         </template>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>

@@ -37,6 +37,11 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.String,
         nullable: true,
     }),
+    'webshopId': createColumnFilter({
+        expression: SQL.column('webshopId'),
+        type: SQLValueType.String,
+        nullable: true,
+    }),
     'typeId': createColumnFilter({
         expression: SQL.column('typeId'),
         type: SQLValueType.String,
@@ -80,6 +85,52 @@ export const eventFilterCompilers: SQLFilterDefinitions = {
                 expression: SQL.column('organizationId'),
                 type: SQLValueType.String,
                 nullable: false,
+            }),
+            status: createColumnFilter({
+                expression: SQL.column('status'),
+                type: SQLValueType.String,
+                nullable: false,
+            }),
+            registrationStartDate: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('settings'), '$.value.registrationStartDate'),
+                type: SQLValueType.JSONNumber,
+                nullable: true,
+            }),
+            registrationEndDate: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('settings'), '$.value.registrationEndDate'),
+                type: SQLValueType.JSONNumber,
+                nullable: true,
+            }),
+            preRegistrationsDate: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('settings'), '$.value.preRegistrationsDate'),
+                type: SQLValueType.JSONNumber,
+                nullable: true,
+            }),
+        },
+    ),
+    'webshop': createExistsFilter(
+        SQL.select()
+            .from(SQL.table('webshops'))
+            .where(
+                SQL.column('id'),
+                SQL.column('events', 'webshopId'),
+            ),
+        {
+            ...baseSQLFilterCompilers,
+            status: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('meta'), '$.value.status'),
+                type: SQLValueType.JSONString,
+                nullable: false,
+            }),
+            availableUntil: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('meta'), '$.value.availableUntil'),
+                type: SQLValueType.JSONNumber,
+                nullable: true,
+            }),
+            openAt: createColumnFilter({
+                expression: SQL.jsonExtract(SQL.column('meta'), '$.value.openAt'),
+                type: SQLValueType.JSONNumber,
+                nullable: true,
             }),
         },
     ),
