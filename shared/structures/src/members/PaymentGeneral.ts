@@ -2,12 +2,12 @@ import { ArrayDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/
 import { Formatter } from '@stamhoofd/utility';
 
 import { Sorter } from '@stamhoofd/utility';
-import { BalanceItemRelationType, BalanceItemStatus } from '../BalanceItem.js';
+import { BalanceItemRelationType } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { BaseOrganization } from '../Organization.js';
+import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { Payment, Settlement } from './Payment.js';
-import { PaymentMethod, PaymentMethodHelper } from '../PaymentMethod.js';
 
 export class PaymentGeneral extends Payment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
@@ -98,7 +98,6 @@ export class PaymentGeneral extends Payment {
             const title = payment.itemTitle;
             let description = Formatter.escapeHtml(payment.itemDescription ?? '');
             const item = payment.balanceItem;
-
 
             if (payment.quantity !== 1) {
                 if (description) {
