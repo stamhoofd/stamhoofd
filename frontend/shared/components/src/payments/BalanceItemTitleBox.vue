@@ -1,9 +1,5 @@
 <template>
     <template v-if="paymentStatus === null">
-        <p v-if="item.dueAt && item.price >= 0" class="style-title-prefix-list" :class="{error: item.isOverDue}">
-            <span>{{ $t('04392571-f6a2-470d-b2a1-90004ac27dbc', {date: formatDate(item.dueAt)}) }}</span>
-            <span v-if="item.isOverDue" class="icon error small" />
-        </p>
         <p v-if="item.status === BalanceItemStatus.Canceled && (price === null || price < 0)" class="style-title-prefix-list error">
             <span>{{ $t('72fece9f-e932-4463-9c2b-6e8b22a98f15') }}</span>
             <span class="icon disabled small" />
@@ -22,8 +18,13 @@
     <h3 class="style-title-list">
         {{ item.itemTitle }}
     </h3>
-
+    <p v-if="paymentStatus === null && item.dueAt && item.price >= 0" class="style-description-small" :class="{error: item.isOverDue}">
+        <span>{{ $t('04392571-f6a2-470d-b2a1-90004ac27dbc', {date: formatDate(item.dueAt)}) }}</span>
+        <span v-if="item.isOverDue" class="icon error gray tiny" />
+    </p>
     <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
+
+
 
     <template v-if="showPrices">
         <template v-if="paymentStatus === null && item.status !== BalanceItemStatus.Canceled">
