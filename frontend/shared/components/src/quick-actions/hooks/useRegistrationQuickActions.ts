@@ -298,10 +298,6 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
         }
         const periodIdsArray = [...periodIds];
 
-        for (const organization of family.organizations) {
-            organizationIds.add(organization.id);
-        }
-
         for (const member of family.members) {
             for (const group of member.filterGroups({ types: [GroupType.Membership], periodIds: periodIdsArray, includePending: true })) {
                 groupIds.add(group.id);
@@ -321,6 +317,13 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                         ages.add(d2);
                     }
                 }
+            }
+        }
+
+        // for userMode organization if no registrations
+        if (organizationIds.size === 0) {
+            for (const organization of family.organizations) {
+                organizationIds.add(organization.id);
             }
         }
 
