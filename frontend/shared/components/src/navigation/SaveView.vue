@@ -4,7 +4,7 @@
             <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
-                    <button v-else-if="$isAndroid" class="button icon close" type="button" @click="pop()" />
+                    <button v-else-if="$isAndroid || $isIOS" class="button icon close" type="button" @click="pop()" />
                     <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
@@ -18,16 +18,14 @@
                         <button v-tooltip="$t('ea84aed8-48ce-4a43-b391-0a4a16782909')" class="button icon trash" type="button" :disabled="deleting" @click="$emit('delete')" />
                     </LoadingButton>
                     <LoadingButton v-if="!preferLargeButton && ($isMobile || $isIOS || $isAndroid)" :loading="loading">
-                        <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" data-testid="save-button" />
+                        <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="disabled" type="submit" data-testid="save-button" />
+                        <button v-else-if="$isIOS || $isAndroid" v-tooltip="saveText" :class="'button icon navigation highlight ' + (saveIcon ?? 'success')" :disabled="disabled" type="submit" data-testid="save-button" />
                         <button v-else class="button navigation highlight" :disabled="disabled" type="submit" data-testid="save-button">
                             {{ saveText }}
                         </button>
                     </LoadingButton>
                     <template v-else-if="canDismiss && !(!preferLargeButton && ($isMobile || $isIOS || $isAndroid))">
-                        <button v-if="!$isIOS" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
-                        <button v-else class="button text selected unbold" type="button" data-testid="close-button" @click="dismiss()">
-                            {{ cancelText }}
-                        </button>
+                        <button class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
                     </template>
                 </template>
             </STNavigationBar>
