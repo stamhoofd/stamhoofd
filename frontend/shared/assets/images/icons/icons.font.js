@@ -44,5 +44,14 @@ module.exports = {
                 ctx.apple_icons[icon.substr(0, icon.length - ('-apple'.length))] = ctx.codepoints[icon];
             }
         }
+
+        // Custom icons when used inside a circle button
+        ctx.circle_icons = {};
+        for (const icon in ctx.codepoints) {
+            if (icon.endsWith('-in-circle')) {
+                // Remove android suffix
+                ctx.circle_icons[icon.substr(0, icon.length - ('-in-circle'.length))] = ctx.codepoints[icon];
+            }
+        }
     },
 };
