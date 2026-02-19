@@ -24,8 +24,6 @@
     </p>
     <p v-if="item.itemDescription" class="style-description-small pre-wrap" v-text="item.itemDescription" />
 
-
-
     <template v-if="showPrices">
         <template v-if="paymentStatus === null && item.status !== BalanceItemStatus.Canceled">
             <p v-if="item.amount !== 1" class="style-description-small">
