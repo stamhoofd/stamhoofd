@@ -75,7 +75,7 @@ function focusNextElement() {
                 }, { once: true });
             }
 
-            nextElement.focus();
+            nextElement.focus({ preventScroll: true });
         }
     }
     return true;
@@ -145,6 +145,21 @@ export class VueGlobalHelper {
 
                     window.setTimeout(() => {
                         target.classList.remove('active');
+                    }, 250);
+                }
+            }, { passive: true });
+        }
+
+        if (app.config.globalProperties.$OS === 'iOS') {
+            document.addEventListener('focusin', (event) => {
+                const el = document.activeElement as HTMLElement;
+                if (el) {
+                    ViewportHelper.scrollIntoView(el, 'center');
+
+                    window.setTimeout(() => {
+                        if (el === document.activeElement) {
+                            ViewportHelper.scrollIntoView(el, 'center');
+                        }
                     }, 250);
                 }
             }, { passive: true });
