@@ -28,6 +28,7 @@
                         <button class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
                     </template>
                 </template>
+                <slot name="fixed" />
             </STNavigationBar>
             <main class="center" :class="mainClass">
                 <slot />
@@ -74,6 +75,7 @@ import STNavigationBar from './STNavigationBar.vue';
 import STToolbar from './STToolbar.vue';
 import { SaveViewDefaults, SaveViewProps } from './SaveViewProps';
 import { TranslatedString } from '@stamhoofd/structures';
+import { Comment, Fragment, isVNode } from 'vue';
 
 defineOptions({
     inheritAttrs: false,
