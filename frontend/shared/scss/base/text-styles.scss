@@ -202,12 +202,6 @@
     }
 }
 
-.style-title-2-larger {
-    font-size: 24px;
-    line-height: 1.3;
-    font-weight: $font-weight-semibold;
-}
-
 .style-title-2 {
     font-size: 18px;
     line-height: 1.3;
@@ -215,6 +209,17 @@
 
     > .style-tag {
         margin-left: 5px;
+    }
+}
+
+
+.style-title-2-larger {
+    font-size: 24px;
+    line-height: 1.3;
+    font-weight: $font-weight-semibold;
+
+    @media (max-width: 600px) {
+        font-size: 20px;
     }
 }
 
@@ -229,6 +234,21 @@
 
     @media (max-width: 400px) {
         font-size: 14px;
+    }
+}
+
+.style-navigation-bar-title {
+    font-size: 15px;
+    font-weight: $font-weight-semibold;
+
+    @media (max-width: 400px) {
+        font-size: 14px;
+    }
+
+    body.web-android &, body.native-android & {
+        // Increase title size a bit
+        font-size: 19px;
+        letter-spacing: -0.015em;
     }
 }
 
@@ -291,8 +311,13 @@
         color: $color-error;
     }
 
-    @media (max-width: 400px) {
+    @media (max-width: 600px) {
         font-size: 15px;
+        
+    }
+
+    @media (max-width: 400px) {
+        font-size: 14px;
         
     }
 
@@ -521,7 +546,7 @@
 .font-size-description {
     font-size: 15px;
 
-    @media (max-width: 400px) {
+    @media (max-width: 600px) {
         font-size: 14px;
     }
 }
@@ -536,8 +561,6 @@
 
 .style-description {
     @extend .font-size-description;
-
-    font-size: 15px;
     line-height: 1.5;
     font-weight: $font-weight-default;
     color: $color-gray-text;
@@ -545,6 +568,10 @@
 
     strong {
         @extend .style-strong;
+    }
+
+     @media (max-width: 600px) {
+        font-size: 14px;
     }
 }
 
@@ -644,8 +671,8 @@
     color: $color-gray-text;
     font-variation-settings: 'opsz' 19;
 
-    @media (max-width: 400px) {
-        font-size: 14px;
+    @media (max-width: 600px) {
+        font-size: 13px;
     }
 
     &.for-input {
@@ -739,7 +766,7 @@
     line-height: 1.6;
 
     @media (max-width: 450px) {
-        font-size: 15px;
+        font-size: 14px;
     }
 }
 
@@ -1034,11 +1061,19 @@
         > h2 {
             @extend .style-title-2;
             padding-bottom: 15px;
+
+             @media (max-width: 600px) {
+                padding-bottom: 7px;
+            }
         }
 
         > h2.larger {
             @extend .style-title-2-larger;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
+
+             @media (max-width: 600px) {
+                padding-bottom: 7px;
+            }
         }
 
         > h2.style-with-button {
@@ -1085,7 +1120,7 @@
     height: var(--block-width, 40px);
     margin-right: 5px;
 
-    @media (max-width: 400px) {
+    @media (max-width: 600px) {
         margin-right: 0px;
     }
 }
@@ -1209,6 +1244,7 @@
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
+        vertical-align: middle;
 
         &.pad {
             padding-bottom: 2px;
@@ -1219,10 +1255,33 @@
         }
 
         > span {
-            display: block;
-            opacity: 0.8;
+            //display: block;
+            //opacity: 0.8;
             vertical-align: middle;
             margin-right: -3px; // visual correction
+
+            &.icon {
+                // Force smaller icons
+                @media (max-width: 400px) {
+                    width: 20px;
+                    height: 20px;
+                    font-size: 20px;
+
+                    &:before {
+                        font-size: 20px;
+                    }
+                }
+
+                @media (max-width: 350px) {
+                    width: 14px;
+                    height: 14px;
+                    font-size: 14px;
+
+                    &:before {
+                        font-size: 14px;
+                    }
+                }
+            }
         }
 
         > img {
