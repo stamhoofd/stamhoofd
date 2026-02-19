@@ -44,3 +44,10 @@ body.web-iOS .icon-base.{{@key}}:before, body.native-iOS .icon-base.{{@key}}:bef
 content: "\\{{this}}";
 }
 {{/each}}
+
+{{#each circle_icons}}
+body.native-iOS .st-navigation-bar .button.icon.{{@key}}:before, body.web-iOS .st-navigation-bar .button.icon.{{@key}}:before,
+body.native-android .st-navigation-bar .button.icon.{{@key}}.highlight:before, body.web-android .st-navigation-bar .button.icon.{{@key}}.highlight:before {
+content: "\\{{this}}";
+}
+{{/each}}
