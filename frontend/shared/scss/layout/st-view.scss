@@ -162,6 +162,37 @@ body.modern.web-iOS {
             scrollbar-width: thin;
         }
 
+        > header {
+            background: $color-background;
+            margin: 
+                calc(-140px) // Bounce animation
+                calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)))
+                0 
+                calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px)));
+            padding: 
+                100px 
+                max(20px, max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)))
+                0 
+                max(20px, max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px)));
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+
+            //z-index: -10;
+            //contain: content;
+
+            border-bottom-left-radius: $border-radius-modals;
+            border-bottom-right-radius: $border-radius-modals;
+            box-shadow:
+                inset 0px 0.5px 1.4px 0.1px rgba(0, 0, 0, 0.02),
+                0px 0px 0px 1px rgba(0, 0, 0, 0.02), // Smoothen border
+                0px 7px 7px 0px rgba(0, 0, 0, 0.015),
+                0px 14px 14px 0px rgba(0, 0, 0, 0.015 - 0.015/4),
+                0px 28px 28px 0px rgba(0, 0, 0, 0.015- 0.015/4- 0.015/4),
+                0 2px 2px 1px rgba(0, 0, 0, 0.03), 0 0px 20px 0 rgba(0, 0, 0, 0.02);
+            border-bottom: $border-width solid $color-border;
+            
+        }
+
         /**
             @deprecated
         */
@@ -329,6 +360,13 @@ body.modern.web-iOS {
     }
 
     &.shade {
+        background: $color-background-shade;
+        --color-current-background: #{$color-background-shade};
+        --color-current-background-shade: #{$color-background-shade-darker};
+        --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
+    }
+
+    &.main-shade > main {
         background: $color-background-shade;
         --color-current-background: #{$color-background-shade};
         --color-current-background-shade: #{$color-background-shade-darker};
