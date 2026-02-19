@@ -367,16 +367,18 @@ button.st-list-item {
             transition: opacity 0.4s 0.1s;
         }
 
-        &.hoverable:hover {
-            &:after {
-                opacity: 1;
-                transition: none;
-            }
-
-            &:has(button:hover), &:has(select:hover), &:has(textarea:hover), &:has(input:not([type=radio]):not([type=checkbox]):hover), &:has(label:hover), &:has(.input:hover) {
-                // Skip hover
+        @media (pointer: fine) {
+            &.hoverable:hover {
                 &:after {
-                    opacity: 0;
+                    opacity: 1;
+                    transition: none;
+                }
+
+                &:has(button:hover), &:has(select:hover), &:has(textarea:hover), &:has(input:not([type=radio]):not([type=checkbox]):hover), &:has(label:hover), &:has(.input:hover) {
+                    // Skip hover
+                    &:after {
+                        opacity: 0;
+                    }
                 }
             }
         }
