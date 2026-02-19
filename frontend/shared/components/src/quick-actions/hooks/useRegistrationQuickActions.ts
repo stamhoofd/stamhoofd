@@ -356,6 +356,10 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
         // cannot use $now because this is a json property and not a column
         const currentTime = (new Date()).getTime();
 
+        // max 1 year into the future
+        const maxStartDate = new Date(currentTime);
+        maxStartDate.setFullYear(maxStartDate.getFullYear() + 1);
+
         const filter: StamhoofdFilter = [
             {
                 'organizationId': {
@@ -381,6 +385,7 @@ export async function getFeaturedEventsForFamily({ context, family, owner }: { c
                 // in future
                 'startDate': {
                     $gt: { $: '$now' },
+                    $lte: maxStartDate,
                 },
                 // visible
                 'meta.visible': true,
