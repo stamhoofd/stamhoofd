@@ -4,7 +4,7 @@
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />
                 <template v-else-if="$isMobile || $isIOS || $isAndroid">
-                    <button v-if="$isAndroid" class="button icon close" type="button" @click="pop()" />
+                    <button v-if="$isAndroid || $isIOS" class="button icon close" type="button" @click="pop()" />
                     <button v-else class="button text selected unbold" type="button" @click="pop()">
                         {{ cancelText }}
                     </button>
@@ -13,7 +13,8 @@
 
             <template v-if="$isMobile || $isIOS || $isAndroid" #right>
                 <LoadingButton :loading="loading">
-                    <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation ' + saveIconMobile" :disabled="disabled" type="submit" />
+                    <button v-if="saveIconMobile" v-tooltip="saveText" :class="'button icon navigation highlight ' + saveIconMobile" :disabled="disabled" type="submit" />
+                    <button v-else-if="$isIOS" v-tooltip="saveText" :class="'button icon navigation highlight ' + (saveIcon ?? 'success')" :disabled="disabled" type="submit" data-testid="save-button" />
                     <button v-else class="button navigation highlight" :disabled="disabled" type="submit">
                         {{ saveText }}
                     </button>
