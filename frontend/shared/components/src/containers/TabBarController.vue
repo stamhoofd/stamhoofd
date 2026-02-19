@@ -422,7 +422,7 @@ defineExpose({
 @use '@stamhoofd/scss/base/variables' as *;
 
 .tab-bar-controller {
-    --tab-bar-header-height: 70px;
+    --tab-bar-header-height: 80px;
     height: calc(var(--vh, 1vh) * 100);
     max-height: 100vh;
     max-height: 100dvh;
@@ -503,16 +503,21 @@ defineExpose({
 
     > footer {
         height: var(--tab-bar-header-height);
-        border-top: $border-width-thin solid $color-border;
+        //border-top: $border-width-thin solid $color-border;
         background: $color-background-shade;
         background: color-mix(in srgb, $color-background-shade 70%, transparent);
         padding-bottom: var(--st-safe-area-bottom, 0px);
         user-select: none;
 
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
 
         transition: transform 0.2s, opacity 0.2s;
+
+        body.web-android &, body.native-android & {
+            background: $color-background-shade;
+            backdrop-filter: none;
+            border-top: 0;
+        }
 
         position: fixed;
         left: 0;
