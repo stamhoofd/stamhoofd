@@ -84,38 +84,7 @@ export class PaymentGeneral extends Payment {
     }
 
     getBalanceItemPaymentsHtmlTable() {
-        const payments = this.balanceItemPayments.slice().sort((a, b) => {
-            return Sorter.stack(
-                Sorter.byNumberValue(a.price, b.price),
-                Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description),
-            );
-        });
-
-        let str = '';
-        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
-
-        for (const payment of payments) {
-            const title = payment.itemTitle;
-            let description = Formatter.escapeHtml(payment.itemDescription ?? '');
-            const item = payment.balanceItem;
-
-            if (payment.quantity !== 1) {
-                if (description) {
-                    description += `\n`;
-                }
-                description += `${Formatter.escapeHtml(Formatter.float(payment.quantity))} x ${Formatter.escapeHtml(Formatter.price(payment.unitPrice))}`;
-            }
-
-            const descriptionText = description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : '';
-            const titleColumn = `<td><h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
-
-            const price = payment.price === 0 ? $t('Gratis') : Formatter.price(payment.price);
-            const priceColumn = `<td>${Formatter.escapeHtml(price)}</td>`;
-
-            str += `<tr>${titleColumn}${priceColumn}</tr>`;
-        }
-
-        return str + '</tbody></table>';
+        return getBalanceItemPaymentsHtmlTable(this.balanceItemPayments);
     }
 
     getDetailsHTMLTable(): string {
@@ -195,4 +164,39 @@ export class PaymentGeneral extends Payment {
 
         return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' '));
     }
+}
+
+export type BalanceItemPaymentsHtmlTableItem = { price: number; itemDescription: string | null; balanceItem: { description: string }; itemTitle: string; quantity: number; unitPrice: number };
+export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItemPaymentsHtmlTableItem[]) {
+    const payments = balanceItemPayments.slice().sort((a, b) => {
+        return Sorter.stack(
+            Sorter.byNumberValue(a.price, b.price),
+            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.description, b.itemDescription ?? b.balanceItem.description),
+        );
+    });
+
+    let str = '';
+    str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+
+    for (const payment of payments) {
+        const title = payment.itemTitle;
+        let description = Formatter.escapeHtml(payment.itemDescription ?? '');
+
+        if (payment.quantity !== 1) {
+            if (description) {
+                description += `\n`;
+            }
+            description += `${Formatter.escapeHtml(Formatter.float(payment.quantity))} x ${Formatter.escapeHtml(Formatter.price(payment.unitPrice))}`;
+        }
+
+        const descriptionText = description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : '';
+        const titleColumn = `<td><h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
+
+        const price = payment.price === 0 ? $t('Gratis') : Formatter.price(payment.price);
+        const priceColumn = `<td>${Formatter.escapeHtml(price)}</td>`;
+
+        str += `<tr>${titleColumn}${priceColumn}</tr>`;
+    }
+
+    return str + '</tbody></table>';
 }

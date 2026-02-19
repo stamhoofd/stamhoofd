@@ -1,6 +1,6 @@
 import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Order, Organization, Payment, RecipientLoader, User, Webshop } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
-import { BalanceItemRelationType, BalanceItemType, CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { BalanceItemPaymentsHtmlTableItem, BalanceItemRelationType, BalanceItemType, CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, getBalanceItemPaymentsHtmlTable, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
 import { createOrderDataHTMLTable } from '../helpers/email-html-helpers.js';
@@ -396,8 +396,7 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
                     }),
                     Replacement.create({
                         token: 'transferBankCreditor',
-                        // todo?
-                        value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : ''),
+                        value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : '') ?? '',
                     }),
                 ]
             : [
@@ -418,8 +417,7 @@ function getEmailReplacementsForPayment(payment: PaymentGeneral, options: Replac
         Replacement.create({
             token: 'balanceItemPaymentsTable',
             value: '',
-            // todo: unbox orders?
-            html: payment.getBalanceItemPaymentsHtmlTable(),
+            html: getBalanceItemPaymentsHtmlTable(unboxBalanceItemPayments(payment, orderMap)),
         }),
         Replacement.create({
             token: 'paymentTable',
@@ -518,6 +516,42 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
 
     // join texts for balance items with type order or registration
     return [...overviewContext].join(', ');
+}
+
+function unboxBalanceItemPayments({ balanceItemPayments }: PaymentGeneral, orderMap: Map<string, Order>): BalanceItemPaymentsHtmlTableItem[] {
+    const results: BalanceItemPaymentsHtmlTableItem[] = [];
+    for (const item of balanceItemPayments) {
+        const orderId = item.balanceItem.orderId;
+        if (orderId === null) {
+            results.push(item);
+            continue;
+        }
+
+        const order = orderMap.get(orderId);
+        if (!order) {
+            // if 1 order is not found -> do not unbox the payment
+            return balanceItemPayments;
+        }
+
+        for (const cartItem of order.data.cart.items) {
+            const price = cartItem.getPriceWithDiscounts();
+            const quantity = cartItem.amount;
+            const unitPrice = Math.abs(quantity) > 1 ? price / quantity : price;
+
+            results.push({
+                itemTitle: cartItem.product.name,
+                itemDescription: cartItem.description,
+                balanceItem: {
+                    description: cartItem.description,
+                },
+                quantity,
+                unitPrice,
+                price,
+            });
+        }
+    }
+
+    return results;
 }
 
 type BeforeFetchAllResult = {
