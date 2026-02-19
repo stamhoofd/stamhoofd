@@ -1,172 +1,185 @@
 <template>
-    <header class="st-navigation-bar-container">
-        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }">
+    <header class="st-navigation-bar-container" :class="{negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
+        <div v-if="!hasLeft && !hasRight" class="st-navigation-bar-background" :class="{ scrolled, large }">
             <InheritComponent name="tabbar-replacement" />
         </div>
-        <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
-            <div v-if="hasLeft || hasRight" class="left">
-                <BackButton v-if="canPop && !disablePop" @click="pop()" />
-                <button v-else-if="canDismiss && !disableDismiss && $isAndroid" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
-                <slot name="left" />
+        <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
+            <div class="header" :class="{ large, 'show-title': showTitle}" :style="{'grid-template-columns': templateColumns}">
+                <div v-if="hasLeft || hasRight" class="left">
+                    <BackButton v-if="canPop && !disablePop" @click="pop()" />
+                    <button v-else-if="canDismiss && !disableDismiss && ($isAndroid)" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
+                    <slot name="left" />
+                </div>
+
+                <slot v-if="hasMiddle" name="middle">
+                    <h1>
+                        {{ title }}
+                    </h1>
+                </slot>
+
+                <div v-if="hasLeft || hasRight" class="right">
+                    <slot name="right" />
+                    <button v-if="canDismiss && !disableDismiss && !$isAndroid" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
+                </div>
             </div>
-
-            <slot v-if="hasMiddle" name="middle">
-                <h1>
-                    {{ title }}
-                </h1>
-            </slot>
-
-            <div v-if="hasRight || hasRight" class="right">
-                <slot name="right" />
-                <button v-if="canDismiss && !disableDismiss && $isIOS" class="button navigation" type="button" data-testid="close-button" @click="dismiss()">
-                    {{ $t('bef7a2f9-129a-4e1c-b8d2-9003ff0a1f8b') }}
-                </button>
-                <button v-else-if="canDismiss && !disableDismiss && !$isAndroid" class="button icon close" type="button" data-testid="close-button" @click="dismiss()" />
+            <div v-if="$slots.default && isValidVnodes($slots.default())" class="footer" :class="{ scrolled }">
+                <slot />
             </div>
         </div>
     </header>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
+<script setup lang="ts">
+import { useCanDismiss, useCanPop, useDismiss, usePop, useUrl } from '@simonbackx/vue-app-navigation';
+import { Comment, computed, Fragment, getCurrentInstance, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots } from 'vue';
 
 import InheritComponent from '../containers/InheritComponent.vue';
+import { useIsAndroid, useIsIOS } from '../hooks';
 import BackButton from './BackButton.vue';
 
-@Component({
-    components: {
-        BackButton,
-        InheritComponent,
-    },
-})
-export default class STNavigationBar extends Mixins(NavigationMixin) {
-    @Prop({ default: '', type: String })
-    title!: string;
+const slots = useSlots();
 
-    @Prop({ default: true, type: Boolean })
-    addShadow!: boolean;
+const props = withDefaults(defineProps<{
+    title?: string;
+    addShadow?: boolean;
+    showTitle?: boolean;
+    large?: boolean;
+    disableDismiss?: boolean;
+    disablePop?: boolean;
+    leftLogo?: boolean;
+}>(), {
+    addShadow: true,
+    showTitle: false,
+    large: false,
+    disableDismiss: false,
+    disablePop: false,
+    leftLogo: false,
+    title: '',
+});
 
-    /**
-     * Also show the title when not scrolled
-     */
-    @Prop({ default: false, type: Boolean })
-    showTitle!: boolean;
+const scrolled = ref(false);
+const scrollElement = ref<HTMLElement | null>(null);
 
-    @Prop({ default: false, type: Boolean })
-    large!: boolean;
+const canDismiss = useCanDismiss();
+const canPop = useCanPop();
+const dismiss = useDismiss();
+const pop = usePop();
+const $url = useUrl();
+const $isAndroid = useIsAndroid();
+const $isIOS = useIsIOS();
 
-    @Prop({ default: false, type: Boolean })
-    disableDismiss!: boolean;
+const hasLeft = computed(() => {
+    return (canPop.value && !props.disablePop) || (canDismiss.value && !props.disableDismiss && $isAndroid) || (!!slots['left'] && isValidVnodes(slots['left']()));
+});
 
-    @Prop({ default: false, type: Boolean })
-    disablePop!: boolean;
+const hasRight = computed(() => {
+    return ((canDismiss.value && !props.disableDismiss) && !$isAndroid) || !!slots['right'];
+});
 
-    @Prop({ default: false, type: Boolean })
-    leftLogo!: boolean;
+const hasMiddle = computed(() => {
+    return !!slots['middle'] || props.title.length > 0;
+});
 
-    scrolled = false;
-    scrollElement!: HTMLElement | null;
-
-    get hasLeft() {
-        return (this.canPop && !this.disablePop) || (this.canDismiss && !this.disableDismiss && (this as any).$isAndroid) || !!this.$slots['left'];
+const templateColumns = computed(() => {
+    if (hasMiddle.value && (hasLeft.value || hasRight.value)) {
+        if ($isAndroid && (canPop.value && (!props.disablePop || hasLeft.value))) {
+            return 'auto 1fr auto';
+        }
+        return '1fr auto 1fr';
     }
 
-    get hasRight() {
-        return ((this.canDismiss && !this.disableDismiss) && !(this as any).$isAndroid) || !!this.$slots['right'];
+    if (!hasMiddle.value) {
+        if (props.leftLogo) {
+            return '1fr auto';
+        }
+        return 'auto 1fr';
     }
 
-    get hasMiddle() {
-        return !!this.$slots['middle'] || this.title.length > 0;
+    return '1fr';
+});
+
+// Helps detect empty nodes
+function isValidVnodes(vnodes: any) {
+    return vnodes.some((child: any) => {
+        if (!isVNode(child)) return false;
+        if (child.type === Comment) return false;
+        if (child.type === Fragment && !isValidVnodes(child.children)) return false;
+        return true;
+    })
+        ? true
+        : false;
+}
+
+function getScrollElement(element: HTMLElement | null = null): HTMLElement {
+    const instance = getCurrentInstance();
+    const el = instance?.proxy?.$el as HTMLElement;
+    return el?.nextElementSibling as HTMLElement;
+}
+
+function addListener() {
+    if (scrollElement.value) {
+        return;
+    }
+    scrollElement.value = getScrollElement();
+
+    if (!scrollElement.value) {
+        console.error('No scroll element found for STNavigationBar');
+        return;
     }
 
-    get templateColumns() {
-        if (this.hasMiddle && (this.hasLeft || this.hasRight)) {
-            if ((this as any).$isAndroid) {
-                return 'auto 1fr auto';
-            }
-            return '1fr auto 1fr';
-        }
-
-        if (!this.hasMiddle) {
-            if (this.leftLogo) {
-                return '1fr auto';
-            }
-            return 'auto 1fr';
-        }
-
-        return '1fr';
+    if (scrollElement.value === document.documentElement) {
+        window.addEventListener('scroll', onScroll, { passive: true });
     }
-
-    getScrollElement(element: HTMLElement | null = null): HTMLElement {
-        return this.$el.nextElementSibling as HTMLElement;
-    }
-
-    addListener() {
-        if (this.scrollElement) {
-            return;
-        }
-        this.scrollElement = this.getScrollElement();
-
-        if (!this.scrollElement) {
-            console.error('No scroll element found for STNavigationBar');
-            return;
-        }
-
-        if (this.scrollElement === document.documentElement) {
-            window.addEventListener('scroll', this.onScroll, { passive: true });
-        }
-        else {
-            this.scrollElement.addEventListener('scroll', this.onScroll, { passive: true });
-        }
-    }
-
-    mounted() {
-        if (this.title) {
-            this.$url.setTitle(this.title);
-        }
-
-        // fix for element not yet in dom
-        this.addListener();
-        this.onScroll();
-    }
-
-    activated() {
-        if (this.title) {
-            this.$url.setTitle(this.title);
-        }
-
-        // fix for element not yet in dom
-        this.addListener();
-        this.onScroll();
-    }
-
-    deactivated() {
-        if (!this.scrollElement) {
-            return;
-        }
-        if (this.scrollElement === document.documentElement) {
-            window.removeEventListener('scroll', this.onScroll);
-        }
-        else {
-            this.scrollElement.removeEventListener('scroll', this.onScroll);
-        }
-        this.scrollElement = null;
-    }
-
-    onScroll() {
-        if (!this.scrollElement) {
-            return;
-        }
-        const scroll = this.scrollElement!.scrollTop;
-        if (scroll > 20) {
-            this.scrolled = true;
-        }
-        else if (scroll < 15) {
-            this.scrolled = false;
-        }
+    else {
+        scrollElement.value.addEventListener('scroll', onScroll, { passive: true });
     }
 }
+
+function onScroll() {
+    if (!scrollElement.value) {
+        return;
+    }
+    const scroll = scrollElement.value.scrollTop;
+    if (scroll > 25) {
+        scrolled.value = true;
+    }
+    else if (scroll < 20) {
+        scrolled.value = false;
+    }
+}
+
+onMounted(() => {
+    if (props.title) {
+        $url.setTitle(props.title);
+    }
+
+    // fix for element not yet in dom
+    addListener();
+    onScroll();
+});
+
+onActivated(() => {
+    if (props.title) {
+        $url.setTitle(props.title);
+    }
+
+    // fix for element not yet in dom
+    addListener();
+    onScroll();
+});
+
+onDeactivated(() => {
+    if (!scrollElement.value) {
+        return;
+    }
+    if (scrollElement.value === document.documentElement) {
+        window.removeEventListener('scroll', onScroll);
+    }
+    else {
+        scrollElement.value.removeEventListener('scroll', onScroll);
+    }
+    scrollElement.value = null;
+});
 </script>
 
 <style lang="scss">
@@ -175,10 +188,54 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
 
 .st-navigation-bar-container {
     position: relative;
+    --st-hr-margin: 0px;
+    overflow: visible;
+    z-index: 200;
 
     &.transparent {
         > .st-navigation-bar {
             background: transparent;
+        }
+    }
+
+    body.web-iOS &, body.native-iOS & {
+        height: 0;
+
+        & + main {
+            // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
+            -webkit-app-region: drag;
+
+            --st-navigation-bar-correction: 70px;
+        }
+    }
+
+    &.negative {
+        height: 0;
+
+        & + main {
+            // Todo: height should be responsive
+            // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
+            --st-navigation-bar-correction: 100px;
+        }
+
+        body.web-iOS &, body.native-iOS & {
+            & + main {
+                --st-navigation-bar-correction: 115px;
+            }
+        }
+    }
+
+    &+ main {
+        > h1:first-child, > *:first-child > h1:first-child {
+            transition: opacity 0.4s;
+        }
+    }
+
+    &.scrolled {
+        &+ main {
+            > h1:first-child, > *:first-child > h1:first-child {
+                opacity: 0;
+            }
         }
     }
 }
@@ -189,21 +246,17 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
     box-sizing: border-box;
     width: 100%;
-    height: 56px;
+    height: 70px;
     opacity: 1;
     transition: opacity 0.2s;
-    z-index: 1;
-
-    @media (min-width: 550px) {
-        height: 55px;
-    }
+    z-index: 201;
 
     &.large {
         height: 80px;
     }
 
-    body.native-iOS & {
-        height: 42px; // 44px - 2 x border width thin
+    body.native-iOS &, body.web-iOS & {
+        height: 70px; // 44px - 2 x border width thin
     }
 
     &.scrolled {
@@ -215,174 +268,187 @@ export default class STNavigationBar extends Mixins(NavigationMixin) {
 .st-navigation-bar {
     margin: 0;
     padding: var(--st-safe-area-top, 0px) max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-right, 0px)) 0 max(var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)), var(--st-safe-area-left, 0px));
-
-    height: 56px;
     word-break: normal;
-
-    @media (min-width: 550px) {
-        padding-top: max(var(--st-safe-area-top, 0px), 5px);
-        height: 55px;
-    }
-
-    body.native-iOS & {
-        height: 42px; // 44px - 2 x border width thin
-    }
-
-    &.large {
-        height: 80px;
-        //margin-top: calc(-1 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px));
-        margin-bottom: 0px;
-        padding: var(--st-safe-area-top, 0px) 20px 0 20px;
-
-        @media (max-width: 450px) {
-            padding: var(--st-safe-area-top, 0px) 15px 0 15px;
-        }
-    }
-    -webkit-app-region: drag;
-
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    background: $color-background;
-    background: var(--color-current-background, white);
-    transition: background-color 0.3s, border-color 0.3s;
+    background: transparent;
     z-index: 200;
+    position: relative;
+    margin-top: -1px;
 
-    > div {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        &.left{
-            padding-right: 15px;
-
-            &:empty, &.empty {
-                min-width: 0;
-                + h1 {
-                    margin-left: -10px;
-                }
-                padding-right: 0px;;
-            }
-
-            display: flex;
-            flex-direction: row;
-
-            align-items: center;
-            justify-content: flex-start;
-
-            > .button, > .loading-button {
-                margin-left: 10px;
-                margin-right: 10px;
-
-                &:first-child {
-                    margin-left: 0;
-                }
-
-                &:last-child {
-                    margin-right: 0;
-                }
-            }
-        }
-
-        &.right {
-            padding-left: 15px;
-            &:empty, &.empty {
-                min-width: 0;
-                padding-left: 0px;;
-            }
-
-            justify-content: flex-end;
-
-            display: flex;
-            flex-direction: row;
-
-            align-items: center;
-            justify-content: flex-end;
-
-            > .button, > .loading-button {
-                margin-left: 10px;
-                margin-right: 10px;
-
-                &:first-child {
-                    margin-left: 0;
-                }
-
-                &:last-child {
-                    margin-right: 0;
-                }
-            }
-        }
-    }
-
-    &.wrap {
-        height: auto;
-
-        > div {
-            &:last-child {
-                flex-wrap: wrap;
-                margin: -5px -10px;
-
-                > * {
-                    margin: 5px 10px;
-                }
-            }
-        }
-    }
-
-    > h1 {
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    &::before {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        content: '';
+        background: transparent;
+        border-bottom: $border-width-thin solid transparent;
+        transition: opacity 0.3s, transform 0.3s;
+        //transform: translateY(-50px);
+        z-index: -1;
         opacity: 0;
-        transition: opacity 0.2s;
-        @extend .style-title-small;
 
-        text-align: center;
-
-        body.web-android &, body.native-android & {
-            text-align: left;
-        }
-    }
-
-    body.web-android &, body.native-android & {
-        // Increase title size a bit
-        > h1 {
-            font-size: 19px;
-        }
-    }
-
-    body.web-iOS &, body.native-iOS & {
-        // Increase title size a bit
-        > h1 {
-            font-size: 17px;
-        }
-    }
-
-    &.show-title {
-        > h1 {
-            opacity: 1;
-        }
-    }
-
-    border-bottom: $border-width-thin solid transparent;
-
-    // also one at the top to fix centering
-    border-top: $border-width-thin solid transparent;
-
-    &.scrolled {
         background: $color-background-shade;
-
-        //box-shadow: 0px 2px 3px $color-shadow;
+        pointer-events: none;
         border-bottom-color: $color-border-shade;
 
-        &.large, body.native-android &, body.web-android & {
+        &.large {
             box-shadow: 0px 2px 5px $color-shadow;
             border-bottom-color: transparent;
         }
 
-        > h1 {
+        body.native-android &, body.web-android & {
+            //box-shadow: 0px 2px 5px $color-shadow;
+            border-bottom: none;
+        }
+
+        body.web-iOS &, body.native-iOS & {
+            background: linear-gradient($color-background, rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0) 100%);
+            //mask: linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0) 100%);
+            border-bottom: none;
+            bottom: -120px;
+        }
+    }
+
+    &.negative {
+        &::before {
+            body.web-iOS &, body.native-iOS & {
+                background: linear-gradient($color-background, rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.5) 100%);
+                backdrop-filter: blur(5px);
+                bottom: 0px;
+            }
+        }
+    }
+
+    &.scrolled {
+        &::before {
             opacity: 1;
+            transform: translateY(0px);
+        }
+
+        > .header > h1 {
+            opacity: 1;
+            //transition: opacity 0.2s 0.2s; // Delay when expanding
+        }
+    }
+
+    @media (min-width: 550px) {
+        padding-top: max(var(--st-safe-area-top, 0px), 5px);
+    }
+
+    .footer {
+        transition: opacity 0.3s, transform 0.3s;
+        opacity: 0;
+        //transform: translateY(-50px);
+        pointer-events: none;
+
+        &.scrolled {
+            opacity: 1;
+            transform: translateY(0px);
+            pointer-events: all;
+        }
+    }
+
+    > .header {
+        height: 64px;
+        -webkit-app-region: drag;
+
+        body.native-iOS &, body.web-iOS & {
+            height: 70px;
+        }
+
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+
+        > div {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            &.left{
+                padding-right: 15px;
+
+                &:empty, &.empty {
+                    min-width: 0;
+                    + h1 {
+                        margin-left: -10px;
+                    }
+                    padding-right: 0px;;
+                }
+
+                display: flex;
+                flex-direction: row;
+
+                align-items: center;
+                justify-content: flex-start;
+
+                gap: 25px;
+
+                body.web-iOS &, body.native-iOS & {
+                    gap: 10px;
+                }
+
+                body.web-android &, body.native-android & {
+                    &:has(.icon.arrow-back) + h1 {
+                        text-align: left;
+                    }
+                }
+
+            }
+
+            &.right {
+                padding-left: 15px;
+                &:empty, &.empty {
+                    min-width: 0;
+                    padding-left: 0px;;
+                }
+
+                justify-content: flex-end;
+
+                display: flex;
+                flex-direction: row;
+
+                align-items: center;
+                justify-content: flex-end;
+                gap: 24px;
+
+                body.web-iOS &, body.native-iOS & {
+                    gap: 12px;
+                }
+            }
+        }
+
+        > h1 {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+            @extend .style-navigation-bar-title;
+
+            text-align: center;
+        }
+
+        &.show-title {
+            > h1 {
+                opacity: 1;
+            }
+        }
+
+        &.large > .header {
+            height: 80px;
+            margin-bottom: 0px;
+        }
+
+    }
+
+    &.large {
+        padding: var(--st-safe-area-top, 0px) 20px 0 20px;
+
+        @media (max-width: 450px) {
+            padding: var(--st-safe-area-top, 0px) 15px 0 15px;
         }
     }
 
