@@ -6,6 +6,8 @@
     // the tabbars should become visible after transitioning from a long to a short modal
     // min-height: 100vh;
     --rgb-shadow: 0; // Dark in white mode
+    --rgb-background: 255; 
+    --is-dark-mode: 0;
 
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};
@@ -59,11 +61,11 @@
     --block-width: 40px;
 
     @media (max-width: 400px) {
-        --block-width: 30px;
+        --block-width: 35px;
     }
 
     @media (max-width: 350px) {
-        --block-width: 25px;
+        --block-width: 30px;
     }
 
     --color-background: #{$color-background-original};
@@ -146,6 +148,9 @@ html, :host {
     word-break: break-word;
 
     will-change: scroll-position;
+
+    // Disable elastic bounces
+    overscroll-behavior: none;
 }
 
 

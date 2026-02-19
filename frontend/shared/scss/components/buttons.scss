@@ -444,7 +444,13 @@
 
             @media (max-width: 600px) {
                 &.column {
-                    font-size: 10px;
+                    font-size: 12px;
+                }
+            }
+
+            @media (max-width: 350px) {
+                &.column {
+                    font-size: 11px;
                 }
             }
         }
@@ -567,7 +573,7 @@
 
     &.icon {
         color: $color-gray-4;
-        transition: opacity 0.2s ease-out, color 0.2s ;
+        transition: opacity 0.2s ease-out, color 0.2s;
         overflow: visible; // fix for breakout region
         position: relative;
 
@@ -576,7 +582,119 @@
         }
 
         body.native-iOS .st-navigation-bar &, body.web-iOS .st-navigation-bar & {
-            color: $color-primary;
+            background: $color-background-shade;
+            color: $color-dark;
+            transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+
+            &:disabled {
+                background: $color-gray-2;
+                color: $color-background !important;
+
+                &:active, &.active {
+                    &:before {
+                        color: $color-background !important;
+                    }
+                }
+            }
+
+            &:after {
+                display: none;
+            }
+
+            &:before {
+                transition: opacity 0.2s ease-out;
+            }
+
+            &:active, &.active {
+                opacity: 1;
+                &:before {
+                    opacity: 0.2;
+                    transition: opacity 0s;
+                }
+            }
+
+            box-shadow: 
+                inset 0.5px 1px 0.5px 0px rgba(255, 255, 255, calc(0.7 - var(--is-dark-mode) * 0.5)),
+                inset -0.5px -1px 0.5px 0px rgba(255, 255, 255, calc(0.7 - var(--is-dark-mode) * 0.5)),
+                0 0 12px 0 rgba(0, 0, 0, 0.05),
+                0 0 24px 0 rgba(0, 0, 0, 0.05),
+                0 0 148px 30px rgba(0, 0, 0, 0.1)
+            ;
+            //backdrop-filter: blur(10px);
+
+
+            &.highlight:not(:disabled) {
+                color: $color-primary-contrast;
+                background: $color-primary;
+
+                &:active, &.active {
+                    &:before {
+                        color: $color-primary-contrast;
+                    }
+                }
+            }
+
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            text-align: center;
+
+            &::before {
+                display: block;
+                margin: 0 auto;
+            }
+
+            &:active, &.active {
+                background: $color-background !important;
+                transform: scale(1.3, 1.3);
+
+                box-shadow: 
+                    inset 0.5px 1px 0.5px 0px rgba(255, 255, 255, calc(0.7 - var(--is-dark-mode) * 0.5)),
+                    inset -0.5px -1px 0.5px 0px rgba(255, 255, 255, calc(0.7 - var(--is-dark-mode) * 0.5)),
+                    0 0 2px 0 rgba(0, 0, 0, 0.15), 
+                    0 1px 16px 0 rgba(0, 0, 0, 0.10),
+                    0 0px 100px 50px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.05);
+            }
+        }
+
+        body.native-android .st-navigation-bar &.highlight, body.web-android .st-navigation-bar &.highlight {
+            background: $color-primary-background;
+            color: $color-dark;
+            transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+
+            &:disabled {
+                background: $color-gray-2;
+                color: $color-background !important;
+
+                &:active, &.active {
+                    &:before {
+                        color: $color-background !important;
+                    }
+                }
+            }
+
+            &:after {
+                display: none;
+            }
+
+            &:before {
+                transition: opacity 0.2s ease-out;
+            }
+
+            &.highlight:not(:disabled) {
+                color: $color-primary-contrast;
+                background: $color-primary;
+            }
+
+            width: 36px;
+            height: 36px;
+            border-radius: 20px;
+            text-align: center;
+
+            &::before {
+                display: block;
+                margin: 0 auto;
+            }
         }
 
         body.native-android .st-navigation-bar &, body.web-android .st-navigation-bar & {
@@ -726,13 +844,13 @@
                 position: absolute;
                 left: 50% !important;
                 right: auto !important;
-                width: 50px;
-                height: 50px;
+                width: 48px;
+                height: 48px;
                 top: 50% !important;
                 bottom: auto !important;
                 background: $color-gray-3;
                 border-radius: 200px;
-                pointer-events: none;
+                //pointer-events: none;
 
                 transform: translate(-50%, -50%) scale(0.05, 0.05) ;
                 z-index: 0;

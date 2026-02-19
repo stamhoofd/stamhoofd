@@ -6,7 +6,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { type App } from 'vue';
 
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext } from '..';
+import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext, ViewportHelper } from '..';
 import PromiseView from './containers/PromiseView.vue';
 import { ColorDirective } from './directives/ColorDirective';
 import { FormatInputDirective } from './directives/FormatInputDirective';
@@ -137,7 +137,7 @@ export class VueGlobalHelper {
             }
         });
 
-        if (app.config.globalProperties.$OS === 'android') {
+        if (app.config.globalProperties.$OS === 'android' || app.config.globalProperties.$OS === 'iOS') {
             document.addEventListener('touchstart', (event) => {
                 const target = event.target as HTMLElement;
                 if (target && target.tagName === 'BUTTON') {
