@@ -10,7 +10,10 @@
             @click="selectItem(index)"
         >
             <slot v-if="$slots.item" name="item" :item="item" :index="index" />
-            <span v-else>{{ labels ? labels[index] : item }}</span>
+            <template v-else>
+                <span v-if="icons && icons[index]" :class="'icon small ' + icons[index]" />
+                <span>{{ labels ? labels[index] : item }}</span>
+            </template>
         </button>
 
         <div class="right">
@@ -25,10 +28,11 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { useResizeObserver } from './hooks/useResizeObserver';
+import { ViewportHelper } from '../ViewportHelper';
 
 const props = withDefaults(
-    defineProps<{ items: T[]; labels?: string[] | null }>(),
-    { labels: null },
+    defineProps<{ items: T[]; labels?: string[] | null; icons?: (string | null)[] | null }>(),
+    { labels: null, icons: null },
 );
 const modelValue = defineModel<any>();
 const elements = ref<HTMLElement[]>([]);
@@ -71,12 +75,34 @@ watch(() => props.labels, async () => {
     await nextTick();
     updateWidths();
 });
+
+watch(modelValue, (n, old) => {
+    if (old !== n) {
+        // Scroll to
+        const index = props.items.indexOf(n);
+        if (index === -1) {
+            return;
+        }
+        const el = elements.value[index];
+        if (el) {
+            ViewportHelper.scrollXIntoView(el, 'center');
+        }
+    }
+});
 </script>
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 @use '@stamhoofd/scss/base/text-styles.scss';
-$segmented-control-height: 60px;
+$segmented-control-height: var(--segmented-control-height, 60px);
+
+.st-navigation-bar {
+    --segmented-control-height: 50px;
+
+    .scrollable-segmented-control {
+        margin-top: -5px;
+    }
+}
 
 .scrollable-segmented-control {
     margin: var(--st-hr-margin, 30px) calc(-1 * var(--st-horizontal-padding, 40px));
@@ -93,7 +119,23 @@ $segmented-control-height: 60px;
     position: relative;
     --seek-x: 0px;
     --seek-width: 100px;
-    scrollbar-width: thin;
+
+    @media (pointer: coarse) {
+        // Hide scrollbars on mobile
+
+        scrollbar-width: thin;
+
+        /* Hide scrollbar for Firefox */
+        scrollbar-width: none;
+
+        /* Hide scrollbar for IE, Edge */
+        -ms-overflow-style: none;
+
+        /* Hide scrollbar for Chrome, Safari, and other WebKit browsers */
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
 
     &:before {
         content: '';
@@ -122,7 +164,7 @@ $segmented-control-height: 60px;
         height: $segmented-control-height;
         min-width: 0;
         flex-shrink: 0;
-        max-width: 30vw;
+        max-width: max(200px, 30vw);
         @extend .style-interactive-small;
         border-bottom: 3px solid transparent;
         line-height: $segmented-control-height;
@@ -136,19 +178,33 @@ $segmented-control-height: 60px;
         align-items: center;
         gap: 7px;
 
+        > span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         &:first-child {
             margin-left: 0;
         }
 
-        &:active, &:hover {
+        &:active{
             opacity: 0.4;
+        }
+
+        @media (pointer: fine) {
+            &:hover {
+                opacity: 0.4;
+            }
         }
 
         &.selected {
             color: $color-primary;
 
-            &:hover ~ .seeker {
-                opacity: 0.4;
+            @media (pointer: fine) {
+                &:hover ~ .seeker {
+                    opacity: 0.4;
+                }
             }
         }
     }

@@ -29,6 +29,19 @@ export class ViewportHelper {
         }
     }
 
+    static getScrollXElement(element: HTMLElement): HTMLElement {
+        const style = window.getComputedStyle(element);
+        if (style.overflowX == 'scroll' || style.overflow == 'scroll' || style.overflow == 'auto' || style.overflowX == 'auto' || style.overflow == 'overlay' || style.overflowX == 'overlay') {
+            return element;
+        }
+        else {
+            if (!element.parentElement) {
+                return document.documentElement;
+            }
+            return this.getScrollXElement(element.parentElement);
+        }
+    }
+
     static setup(modern = true) {
         this.modern = modern;
         const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
@@ -236,16 +249,46 @@ export class ViewportHelper {
         return 0;
     }
 
-    static scrollIntoView(element: HTMLElement, align: 'top' | 'bottom' | 'center' = 'bottom') {
+    static scrollIntoView(element: HTMLElement, align: 'top' | 'bottom' | 'center' = 'bottom', skipIfAlreadyVisible = true) {
         // default scrollIntoView is broken on Safari and sometimes causes the scrollview to scroll too far and get stuck
         const scrollElement = ViewportHelper.getScrollElement(element);
         const elRect = element.getBoundingClientRect();
         const scrollRect = scrollElement.getBoundingClientRect();
+
+        let topPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'));
+        if (isNaN(topPadding)) {
+            topPadding = 25;
+        }
+        let elTopPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-top'));
+        if (isNaN(elTopPadding)) {
+            elTopPadding = 0;
+        }
+
+        let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'));
+        if (isNaN(bottomPadding)) {
+            bottomPadding = 25;
+        }
+        let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'));
+        if (isNaN(elBottomPadding)) {
+            elBottomPadding = 0;
+        }
+
         let scrollPosition = elRect.bottom - scrollRect.top - scrollElement.clientHeight + scrollElement.scrollTop;
 
         // Check if already in view
 
-        // TODO: add the bottom padding of scrollRect as an extra offset (e.g. for the keyboard of st-view)
+        if (skipIfAlreadyVisible) {
+            const requiredPadding = 20; // Element should be within this margin to be counted visible
+
+            // Check top and right
+            const top = elRect.top - scrollRect.top - requiredPadding - topPadding - elTopPadding;
+            const bottom = scrollRect.bottom - elRect.bottom - requiredPadding - bottomPadding - elBottomPadding;
+
+            if ((top > 0 && bottom > 0) || (top <= 0 && bottom <= 0)) {
+                // Fully visible or height of element is larger than scrollElement and visible
+                return;
+            }
+        }
 
         if (align === 'center' && element.clientHeight > scrollElement.clientHeight) {
             align = 'top';
@@ -254,40 +297,13 @@ export class ViewportHelper {
         if (align === 'top' || align === 'center') {
             scrollPosition = elRect.top - scrollRect.top + scrollElement.scrollTop;
 
-            let topPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-top'));
-            if (isNaN(topPadding)) {
-                topPadding = 25;
-            }
-            let elTopPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-top'));
-            if (isNaN(elTopPadding)) {
-                elTopPadding = 0;
-            }
-
             if (align === 'center') {
-                let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'));
-                if (isNaN(bottomPadding)) {
-                    bottomPadding = 25;
-                }
-                let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'));
-                if (isNaN(elBottomPadding)) {
-                    elBottomPadding = 0;
-                }
-
                 scrollPosition -= ((scrollElement.clientHeight - bottomPadding - topPadding) / 2) - ((element.clientHeight - elTopPadding - elBottomPadding) / 2);
             }
 
             scrollPosition -= Math.max(0, topPadding - elTopPadding);
         }
         else {
-            let bottomPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-bottom'));
-            if (isNaN(bottomPadding)) {
-                bottomPadding = 25;
-            }
-            let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'));
-            if (isNaN(elBottomPadding)) {
-                elBottomPadding = 0;
-            }
-
             scrollPosition += Math.max(0, bottomPadding - elBottomPadding);
         }
 
@@ -300,11 +316,98 @@ export class ViewportHelper {
         ViewportHelper.scrollTo(scrollElement, scrollPosition, Math.min(600, Math.max(300, Math.abs(element.scrollTop - scrollPosition) / 2)), exponential);
     }
 
+    static scrollXIntoView(element: HTMLElement, align: 'left' | 'right' | 'center' = 'left', skipIfAlreadyVisible = true) {
+        const scrollElement = ViewportHelper.getScrollXElement(element);
+        const elRect = element.getBoundingClientRect();
+        const scrollRect = scrollElement.getBoundingClientRect();
+
+        if (skipIfAlreadyVisible) {
+            const requiredPadding = 20; // Element should be within this margin to be counted visible
+
+            // Check left and right
+            const left = elRect.left - scrollRect.left - requiredPadding;
+            const right = scrollRect.right - elRect.right - requiredPadding;
+
+            if ((left > 0 && right > 0) || (left <= 0 && right <= 0)) {
+                // Fully visible or width of element is larger than scrollElement and visible
+                return;
+            }
+        }
+
+        // Default: align right (equivalent to 'bottom' in vertical)
+        let scrollPosition = elRect.right - scrollRect.left - scrollElement.clientWidth + scrollElement.scrollLeft;
+
+        if (align === 'center' && element.clientWidth > scrollElement.clientWidth) {
+            align = 'left';
+        }
+
+        if (align === 'left' || align === 'center') {
+            scrollPosition = elRect.left - scrollRect.left + scrollElement.scrollLeft;
+
+            let leftPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-left'));
+            if (isNaN(leftPadding)) {
+                leftPadding = 25;
+            }
+            let elLeftPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-left'));
+            if (isNaN(elLeftPadding)) {
+                elLeftPadding = 0;
+            }
+
+            if (align === 'center') {
+                let rightPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-right'));
+                if (isNaN(rightPadding)) {
+                    rightPadding = 25;
+                }
+                let elRightPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-right'));
+                if (isNaN(elRightPadding)) {
+                    elRightPadding = 0;
+                }
+
+                scrollPosition -= ((scrollElement.clientWidth - rightPadding - leftPadding) / 2) - ((element.clientWidth - elLeftPadding - elRightPadding) / 2);
+            }
+
+            scrollPosition -= Math.max(0, leftPadding - elLeftPadding);
+        }
+        else {
+            let rightPadding = parseInt(window.getComputedStyle(scrollElement, null).getPropertyValue('padding-right'));
+            if (isNaN(rightPadding)) {
+                rightPadding = 25;
+            }
+            let elRightPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-right'));
+            if (isNaN(elRightPadding)) {
+                elRightPadding = 0;
+            }
+
+            scrollPosition += Math.max(0, rightPadding - elRightPadding);
+        }
+
+        scrollPosition = Math.max(0, Math.min(scrollPosition, scrollElement.scrollWidth - scrollElement.clientWidth));
+
+        const exponential = function (x: number): number {
+            return x === 1 ? 1 : 1 - Math.pow(1.5, -20 * x);
+        };
+
+        ViewportHelper.scrollXTo(scrollElement, scrollPosition, Math.min(600, Math.max(300, Math.abs(element.scrollLeft - scrollPosition) / 2)), exponential);
+    }
+
+    // Helper to cancel scroll animations if multiple are pending (only the last survives)
+    static scrollingIndexes: WeakMap<HTMLElement, number> = new WeakMap();
+
+    private static increaseIndex(element: HTMLElement) {
+        const i = (this.scrollingIndexes.get(element) ?? 0) + 1;
+        this.scrollingIndexes.set(element, i);
+        return i;
+    }
+
+    private static shouldStopScrolling(element: HTMLElement, index: number) {
+        return (this.scrollingIndexes.get(element) ?? 0) !== index;
+    }
+
     /**
      * Smooth scroll polyfill for Safari
      */
     static scrollTo(element: HTMLElement, endPosition: number, duration: number, easingFunction: (t: number) => number) {
-        // const duration = Math.min(600, Math.max(300, element.scrollTop / 2)) // ms
+        const index = this.increaseIndex(element);
         let start: number;
         let previousTimeStamp: number;
 
@@ -314,10 +417,14 @@ export class ViewportHelper {
 
         element.style.willChange = 'scroll-position';
         (element.style as any).webkitOverflowScrolling = 'auto';
-        element.style.overflow = 'hidden';
+        // element.style.overflow = 'hidden';
 
         // animate scrollTop of element to zero
-        const step = function (timestamp) {
+        const step = (timestamp) => {
+            if (this.shouldStopScrolling(element, index)) {
+                return;
+            }
+
             if (start === undefined) {
                 start = timestamp;
             }
@@ -344,6 +451,61 @@ export class ViewportHelper {
             }
             else {
                 element.scrollTop = endPosition;
+                element.style.overflow = '';
+                element.style.willChange = '';
+                (element.style as any).webkitOverflowScrolling = '';
+            }
+        };
+
+        window.requestAnimationFrame(step);
+    }
+
+    /**
+     * Smooth scroll polyfill for Safari
+     */
+    static scrollXTo(element: HTMLElement, endPosition: number, duration: number, easingFunction: (t: number) => number) {
+        const index = this.increaseIndex(element);
+        let start: number;
+        let previousTimeStamp: number;
+
+        const startPosition = element.scrollLeft;
+
+        let previousPosition = element.scrollLeft;
+
+        element.style.willChange = 'scroll-position';
+        (element.style as any).webkitOverflowScrolling = 'auto';
+
+        // animate scrollLeft of element to zero
+        const step = (timestamp) => {
+            if (this.shouldStopScrolling(element, index)) {
+                return;
+            }
+            if (start === undefined) {
+                start = timestamp;
+            }
+            const elapsed = timestamp - start;
+
+            if (element.scrollLeft !== previousPosition && start !== timestamp) {
+                // The user has scrolled the page: stop animation
+                element.style.overflow = '';
+                element.style.willChange = '';
+                (element.style as any).webkitOverflowScrolling = '';
+                return;
+            }
+
+            if (previousTimeStamp !== timestamp) {
+                // Math.min() is used here to make sure the element stops at exactly 200px
+                element.scrollLeft = Math.round((startPosition - endPosition) * (1 - easingFunction(elapsed / duration)) + endPosition);
+                element.style.overflow = '';
+            }
+
+            if (elapsed < duration) { // Stop the animation after 2 seconds
+                previousTimeStamp = timestamp;
+                previousPosition = element.scrollLeft;
+                window.requestAnimationFrame(step);
+            }
+            else {
+                element.scrollLeft = endPosition;
                 element.style.overflow = '';
                 element.style.willChange = '';
                 (element.style as any).webkitOverflowScrolling = '';
