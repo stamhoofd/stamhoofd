@@ -5,7 +5,7 @@
         <CategorizedBox v-if="isNew" icon="box" :title=" $t('e8ea4460-67bb-42a3-b688-cc22987fe8af')">
             <template #summary>
                 <p class="style-description-small">
-                    {{ formatPrice(patchedPayment.price) }}
+                    {{ formatPrice(patchedPayment.calculatedPrice) }}
                 </p>
 
                 <p class="style-description-small">

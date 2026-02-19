@@ -56,6 +56,10 @@ export class PaymentGeneral extends Payment {
     @field({ decoder: BaseOrganization, nullable: true, version: 344 })
     payingOrganization: BaseOrganization | null = null;
 
+    get calculatedPrice() {
+        return this.balanceItemPayments.reduce((total, item) => total + item.price, 0);
+    }
+
     get groupIds() {
         const ids = this.balanceItemPayments.flatMap((p) => {
             const id = p.balanceItem.relations.get(BalanceItemRelationType.Group)?.id;
