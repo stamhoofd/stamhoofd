@@ -110,6 +110,7 @@
         line-height: 42px;
         font-size: 16px; 
         font-weight: bold;
+        text-box-trim: none; // Breaks line height trick
 
         &:active {
             transform: none;
