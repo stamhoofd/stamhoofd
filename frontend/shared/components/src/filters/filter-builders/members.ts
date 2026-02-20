@@ -548,8 +548,13 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     );
 
     if (financialSupportSettings.enabled) {
-        function getHasFinancialSupportFilter() {
-            const filter: StamhoofdFilter = {
+        all.push(simpleBooleanFilterFactory({
+            name: financialSupportSettings.financialSupportSettings.value.title,
+            optionNames: {
+                true: $t(`7445a6f8-589d-433b-b00a-9abf3779804e`),
+                false: $t(`fe2de454-fdd1-4c16-a9c6-eb953d3e38a7`),
+            },
+            filterIfTrue: {
                 $or: [
                     {
                         'details.requiresFinancialSupport': true,
@@ -558,69 +563,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                         'details.uitpasNumberDetails.socialTariff.status': UitpasSocialTariffStatus.Active,
                     },
                 ],
-            };
-
-            return filter;
-        }
-
-        function getDoesNotHaveFinancialSupportFilter() {
-            return {
-                $not: getHasFinancialSupportFilter(),
-            };
-        }
-
-        all.push(
-            new MultipleChoiceFilterBuilder({
-                name: financialSupportSettings.financialSupportSettings.value.title,
-                options: [
-                    new MultipleChoiceUIFilterOption($t(`7445a6f8-589d-433b-b00a-9abf3779804e`), true),
-                    new MultipleChoiceUIFilterOption($t(`fe2de454-fdd1-4c16-a9c6-eb953d3e38a7`), false),
-                ],
-                wrapFilter: (f: StamhoofdFilter) => {
-                    const choices = Array.isArray(f) ? f : [f];
-                    if (choices.length !== 1) {
-                        return null;
-                    }
-
-                    const choice = choices[0];
-
-                    if (typeof choice === 'boolean') {
-                        if (choice === true) {
-                            return getHasFinancialSupportFilter();
-                        }
-
-                        return getDoesNotHaveFinancialSupportFilter();
-                    }
-
-                    return null;
-                },
-                unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
-                    const activeFilter = getHasFinancialSupportFilter();
-                    const notActiveFilter = getDoesNotHaveFinancialSupportFilter();
-
-                    const cases: { wrap: StamhoofdFilter; returnValue: (boolean | null)[] }[] = [
-                        {
-                            wrap: activeFilter,
-                            returnValue: [true],
-                        },
-                        {
-                            wrap: notActiveFilter,
-                            returnValue: [false],
-                        },
-                    ];
-
-                    for (const { wrap, returnValue } of cases) {
-                        const result = unwrapFilter(f, wrap);
-
-                        if (result.match) {
-                            return returnValue;
-                        }
-                    }
-
-                    return null;
-                },
-            }),
-        );
+            },
+        }));
     }
 
     if (!recordsConfiguration || recordsConfiguration.dataPermission) {
