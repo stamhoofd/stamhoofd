@@ -314,6 +314,10 @@ export class Invoice extends AutoEncoder {
         }
     }
 
+    get didChangeUnitPricesToCorrectRounding() {
+        return !!this.items.find(i => !!i.addedToUnitPriceToCorrectVAT);
+    }
+
     /** */
     correctRoundingByUpdatingPrices() {
         console.log('correctRoundingByUpdatingPrices');
@@ -366,7 +370,7 @@ export class Invoice extends AutoEncoder {
 
             let next = getNext();
             let loops = 0;
-            while (next && loops < 100) {
+            while (next && loops < 1000) {
                 loops++;
                 const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
                 const currentToAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
