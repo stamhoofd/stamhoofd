@@ -25,8 +25,12 @@ import { Request } from '@simonbackx/simple-networking';
     },
 })
 export default class STErrorsInput extends VueComponent {
-    @Prop({ default: '' }) errorFields: string;
-    @Prop({ default: null }) errorBox: ErrorBox | ErrorBox[] | null;
+    @Prop({ default: '' })
+    errorFields: string;
+
+    @Prop({ default: null })
+    errorBox: ErrorBox | ErrorBox[] | null;
+
     errors: SimpleError[] = [];
 
     @Watch('errorBox')
