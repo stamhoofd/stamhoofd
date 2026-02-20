@@ -68,9 +68,6 @@ const TooltipDirective: ObjectDirective<HTMLElement & { $tooltipDisplayedCompone
                         console.error(e);
                     }
                 }
-                else {
-                    console.error('Tooltip $tooltipDisplayedComponent.vnode not set', el.$tooltipDisplayedComponent);
-                }
                 el.$tooltipDisplayedComponent = null;
             },
             { passive: true },
