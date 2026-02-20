@@ -320,8 +320,6 @@ export class Invoice extends AutoEncoder {
 
     /** */
     correctRoundingByUpdatingPrices() {
-        console.log('correctRoundingByUpdatingPrices');
-
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
         if (difference === 0) {
             // No need to do any magic
@@ -332,7 +330,6 @@ export class Invoice extends AutoEncoder {
         // We calculate the difference and try to correct for it within the same VAT group.
         // We first try to apply extra cents (or removal of cents) to the items with the highest difference
         for (const items of InvoicedBalanceItem.groupPerVATCategory(this.items)) {
-            console.log('Calculating for group', items);
             const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
             const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
 
@@ -375,7 +372,6 @@ export class Invoice extends AutoEncoder {
                 const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
                 const currentToAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
                 if (currentToAddToTaxablePrice === 0 || Math.sign(currentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice)) {
-                    console.log('Stopped group calculation because currentToAddToTaxablePrice is zero or switched sign', currentToAddToTaxablePrice);
                     break;
                 }
 
@@ -387,15 +383,11 @@ export class Invoice extends AutoEncoder {
                 const addition = Math.sign(currentToAddToTaxablePrice) * Math.sign(next.quantity) * step;
                 next.unitPrice += addition;
                 next.addedToUnitPriceToCorrectVAT += addition;
-                console.log('Increasing unit price of ', next, 'with ' + addition);
 
                 // todo
                 next = getNext();
             }
-
-            console.log('Done calculating group');
         }
-        console.log('Done correctRoundingByUpdatingPrices');
     }
 
     /**
