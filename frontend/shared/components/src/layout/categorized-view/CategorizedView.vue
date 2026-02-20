@@ -309,10 +309,10 @@ function scrollToCategory(category: CategorizedViewCategory) {
     }
     const errorElement = el.querySelector('.error-box') as HTMLElement;
     if (errorElement) {
-        ViewportHelper.scrollIntoView(errorElement, 'center');
+        ViewportHelper.scrollIntoView(errorElement, 'center', false);
     }
     else {
-        ViewportHelper.scrollIntoView(el, 'center');
+        ViewportHelper.scrollIntoView(el, 'center', false);
     }
 }
 
