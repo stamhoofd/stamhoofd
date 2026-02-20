@@ -2,6 +2,7 @@
     <transition
         appear
         name="error-box-transition"
+        :duration="10000"
         @before-enter="beforeEnter as any"
         @enter="enter as any"
         @after-enter="afterEnter as any"
@@ -9,47 +10,78 @@
     >
         <div>
             <div class="error-box-parent">
-                <div class="error-box">
-                    <slot />
+                <div ref="error-box" class="error-box">
+                    {{ errorMessage }}
                 </div>
             </div>
         </div>
     </transition>
 </template>
 
-<script lang="ts">
-import { Component, VueComponent } from '@simonbackx/vue-app-navigation/classes';
+<script lang="ts" setup>
+import { SimpleError } from '@simonbackx/simple-errors';
+import { computed, useTemplateRef, watch } from 'vue';
+import { Request } from '@simonbackx/simple-networking';
 
-@Component({})
-export default class STErrorBox extends VueComponent {
-    beforeEnter(el: HTMLElement) {
-        el.style.opacity = '0';
+const props = defineProps<{
+    error: SimpleError;
+}>();
+
+const errorBoxElement = useTemplateRef('error-box');
+
+const errorMessage = computed(() => {
+    if (Request.isNetworkError(props.error)) {
+        return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`);
     }
+    return props.error.getHuman();
+});
 
-    enter(el: HTMLElement) {
-        const height = el.offsetHeight;
-        el.style.height = '0';
+function beforeEnter(el: HTMLElement) {
+    el.style.opacity = '0';
+}
 
-        requestAnimationFrame(() => {
-            el.style.height = height + 'px';
-            el.style.opacity = '1';
-        });
-    }
+function enter(el: HTMLElement) {
+    const height = el.offsetHeight;
+    el.style.height = '0';
 
-    afterEnter(el: HTMLElement) {
-        el.style.height = '';
-    }
-
-    leave(el: HTMLElement) {
-        const height = el.offsetHeight;
+    requestAnimationFrame(() => {
         el.style.height = height + 'px';
+        el.style.opacity = '1';
+    });
+}
 
-        requestAnimationFrame(() => {
-            el.style.height = '0px';
-            el.style.opacity = '0';
-        });
+function afterEnter(el: HTMLElement) {
+    el.style.height = '';
+}
+
+function leave(el: HTMLElement) {
+    const height = el.offsetHeight;
+    el.style.height = height + 'px';
+
+    requestAnimationFrame(() => {
+        el.style.height = '0px';
+        el.style.opacity = '0';
+    });
+}
+
+function replay() {
+    const el = errorBoxElement.value;
+    if (el) {
+        // Get all animations currently applied to the element
+        const animations = el.getAnimations();
+
+        if (animations.length > 0) {
+            // Reset the first animation to the beginning and play it
+            animations[0].currentTime = 0;
+            animations[0].play();
+        }
     }
 }
+
+watch(() => props.error.id, () => {
+    console.log('error id changed', props.error.id);
+    replay();
+});
 </script>
 
 <style lang="scss">

@@ -1,9 +1,7 @@
 <template>
     <div ref="errors">
-        <template v-for="error in errors" :key="error.id">
-            <STErrorBox>
-                {{ getErrorMessage(error) }}
-            </STErrorBox>
+        <template v-for="(error, index) in errors" :key="index">
+            <STErrorBox :error="error" />
         </template>
     </div>
 </template>
