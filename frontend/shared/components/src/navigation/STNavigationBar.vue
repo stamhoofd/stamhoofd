@@ -205,7 +205,7 @@ onDeactivated(() => {
             // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
             -webkit-app-region: drag;
 
-            --st-navigation-bar-correction: 70px;
+            --st-navigation-bar-correction: calc(70px + var(--st-safe-area-top, 0px));
         }
     }
 
@@ -215,12 +215,20 @@ onDeactivated(() => {
         & + main {
             // Todo: height should be responsive
             // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-            --st-navigation-bar-correction: 100px;
+            --st-navigation-bar-correction: calc(109px + var(--st-safe-area-top, 0px));
+
+            @media (min-width: 550px) {
+                --st-navigation-bar-correction:  calc(109px + max(var(--st-safe-area-top, 0px), 5px));
+            }
         }
 
         body.web-iOS &, body.native-iOS & {
             & + main {
-                --st-navigation-bar-correction: 115px;
+                --st-navigation-bar-correction: calc(115px + var(--st-safe-area-top, 0px));
+
+                @media (min-width: 550px) {
+                --st-navigation-bar-correction:  calc(115px + max(var(--st-safe-area-top, 0px), 5px));
+                }
             }
         }
     }
@@ -246,7 +254,7 @@ onDeactivated(() => {
     padding: var(--st-safe-area-top, 0px) var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px)) 0 var(--navigation-bar-horizontal-padding, var(--st-horizontal-padding, 40px));
     box-sizing: border-box;
     width: 100%;
-    height: 70px;
+    height: 64px;
     opacity: 1;
     transition: opacity 0.2s;
     z-index: 201;
