@@ -1,7 +1,7 @@
-import { onMounted, onUnmounted } from "vue";
-import { GlobalEventBus } from "../EventBus";
+import { onMounted, onUnmounted } from 'vue';
+import { GlobalEventBus } from '../EventBus';
 
-export function useGlobalEventListener<Value>(eventName: string, handler: (value: Value) => Promise<void>) {
+export function useGlobalEventListener<Value>(eventName: string | symbol, handler: (value: Value) => Promise<void> | void) {
     const owner = {};
 
     onMounted(() => {

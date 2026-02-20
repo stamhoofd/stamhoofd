@@ -1,6 +1,6 @@
 import { isReactive, markRaw } from 'vue';
 
-type Listener<E, Value> = (value: Value, type: E) => Promise<void>;
+type Listener<E, Value> = (value: Value, type: E) => Promise<void> | void;
 
 /**
  * Controls the fetching and decrypting of members
@@ -31,11 +31,11 @@ export class EventBus<E, Value> {
     }
 
     async sendEvent(type: E, value: Value) {
-        const values: Promise<any>[] = [];
+        const values: (Promise<any> | undefined)[] = [];
         for (const owner of this.listeners.values()) {
             for (const listener of owner) {
-                if (listener.type == type) {
-                    values.push(listener.listener(value, type));
+                if (listener.type === type) {
+                    values.push(listener.listener(value, type) ?? undefined);
                 }
             }
         }
@@ -43,4 +43,4 @@ export class EventBus<E, Value> {
     }
 }
 
-export const GlobalEventBus = new EventBus<string, any>();
+export const GlobalEventBus = new EventBus<string | symbol, any>();

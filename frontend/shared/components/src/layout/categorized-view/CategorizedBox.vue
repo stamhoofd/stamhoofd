@@ -13,10 +13,12 @@
 
 <script lang="ts" setup>
 import { getExposeProxy } from '@simonbackx/vue-app-navigation';
-import { computed, getCurrentInstance, onBeforeUnmount, onMounted, onUpdated, ref, Ref, unref, useSlots, useTemplateRef } from 'vue';
+import { computed, getCurrentInstance, onActivated, onBeforeUnmount, onMounted, ref, Ref, unref, useSlots, useTemplateRef } from 'vue';
+import { ErrorBox } from '../../errors/ErrorBox';
+import { useGlobalEventListener } from '../../hooks';
+import IconContainer from '../../icons/IconContainer.vue';
 import CategorizedView from './CategorizedView.vue';
 import { CategorizedViewCategory } from './CategorizedViewCategory';
-import IconContainer from '../../icons/IconContainer.vue';
 
 const props = withDefaults(defineProps<{
     title: string;
@@ -45,7 +47,7 @@ const slots = useSlots();
 const rootElement = useTemplateRef('root');
 const hasError = ref(false);
 
-onUpdated(() => {
+function updateHasError() {
     const el = rootElement.value;
     if (el) {
         if (el.querySelector('.error-box')) {
@@ -55,7 +57,17 @@ onUpdated(() => {
             hasError.value = false;
         }
     }
+}
+
+onMounted(() => {
+    updateHasError();
 });
+
+onActivated(() => {
+    updateHasError();
+});
+
+useGlobalEventListener(ErrorBox.updateEvent, updateHasError);
 
 let destruct: (() => void) | undefined;
 

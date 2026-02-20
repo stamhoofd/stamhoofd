@@ -24,7 +24,9 @@ const props = withDefaults(
 const errors = ref<SimpleError[]>([]);
 const errorsElement = useTemplateRef('errorElement');
 
-watch(() => props.errorBox, (val: ErrorBox | ErrorBox[] | null) => {
+watch(() => props.errorBox, (val: ErrorBox | null) => {
+    ErrorBox.sendUpdateEventIfNeeded();
+
     if (!val) {
         errors.value = [];
         return;

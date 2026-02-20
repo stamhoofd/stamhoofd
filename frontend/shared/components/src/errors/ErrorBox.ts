@@ -1,6 +1,7 @@
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 
 import { ViewportHelper } from '../ViewportHelper';
+import { GlobalEventBus } from '../EventBus';
 /***
  * Distributes errors to components that ask for it. The first that asks receives
  */
@@ -86,5 +87,24 @@ export class ErrorBox {
         if (!this.scrollTimer) {
             this.scrollTimer = window.setTimeout(this.fireScroll.bind(this), 250);
         }
+    }
+
+    static _didSignal = false;
+
+    static readonly updateEvent = Symbol();
+
+    /**
+     * Notifies listeners of a change in displayed errors
+     */
+    static sendUpdateEventIfNeeded() {
+        if (this._didSignal) {
+            return;
+        }
+        this._didSignal = true;
+
+        window.setTimeout(() => {
+            this._didSignal = false;
+            GlobalEventBus.sendEvent(this.updateEvent, undefined).catch(console.error);
+        }, 150);
     }
 }
