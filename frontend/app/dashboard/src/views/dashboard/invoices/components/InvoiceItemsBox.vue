@@ -15,8 +15,9 @@
                 {{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice)}) }}
             </p>
 
-            <p v-if="item.addedToUnitPriceToCorrectVAT !== 0" class="style-description-small">
+            <p v-if="STAMHOOFD.environment === 'development' && item.addedToUnitPriceToCorrectVAT !== 0" class="style-description-small">
                 <span class="style-discount-old-price">{{ $t('22ba722b-947f-42f0-9679-4e965f5b7200', {price: formatPrice(item.unitPrice - item.addedToUnitPriceToCorrectVAT)}) }}</span>
+                <span> ({{ formatPriceChange(item.addedToUnitPriceToCorrectVAT) }})</span>
             </p>
 
             <p v-if="invoice.VATTotal.length > 1" class="style-description-small">
@@ -32,10 +33,6 @@
             <template #right>
                 <p class="style-price-base" :class="{negative: item.totalWithoutVAT < 0}">
                     {{ formatPrice(item.totalWithoutVAT) }}
-                </p>
-
-                <p class="style-price-base" :class="{negative: item.preciseTotalWithoutVAT < 0}">
-                    {{ formatPrice(item.preciseTotalWithoutVAT) }}
                 </p>
             </template>
         </STGridItem>
