@@ -67,10 +67,10 @@
                     <h3 class="style-definition-label">
                         {{ payment.price >= 0 ? 'Betaling' : 'Terugbetaling' }} {{ order.payments.length > 1 ? index + 1 : '' }}
                     </h3>
-                    <p class="style-definition-text">
+                    <p class="style-definition-text with-icons">
                         <span>{{ getName(payment.method) }}</span>
-                        <span v-if="payment.status === 'Succeeded'" class="icon primary success" />
-                        <span v-else class="icon clock" />
+                        <span v-if="payment.status === 'Succeeded'" class="icon primary success small" />
+                        <span v-else class="icon clock small" />
                     </p>
 
                     <template v-if="order.payments.length > 1 || hasPaymentsWrite" #right>

@@ -541,6 +541,23 @@
     &.placeholder {
         color: $color-gray-text;
     }
+
+     &.with-icons {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        > *:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        > .icon {
+            flex-shrink: 0;
+        }
+    }
 }
 
 .font-size-description {

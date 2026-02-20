@@ -69,25 +69,25 @@
                     <h3 class="style-definition-label">
                         {{ $t('e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5') }}
                     </h3>
-                    <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled && !account.warning" class="style-definition-text">
+                    <p v-if="account.meta.charges_enabled && account.meta.payouts_enabled && !account.warning" class="style-definition-text with-icons">
                         <span>{{ $t('6f442433-dc3a-4500-918a-65e5776307fc') }}</span>
-                        <span class="icon success primary" />
+                        <span class="icon success primary small" />
                     </p>
-                    <p v-else-if="account.meta.charges_enabled && account.meta.payouts_enabled && account.warning" class="style-definition-text">
+                    <p v-else-if="account.meta.charges_enabled && account.meta.payouts_enabled && account.warning" class="style-definition-text with-icons">
                         <span>{{ $t('9631f5ce-dbb9-4463-b565-618446657ea2') }}</span>
-                        <span class="icon clock gray" />
+                        <span class="icon clock gray small" />
                     </p>
-                    <p v-else-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text">
+                    <p v-else-if="account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text with-icons">
                         <span>{{ $t('993b4fec-d7a4-4b8f-807a-f0343843e369') }}</span>
-                        <span class="icon clock gray" />
+                        <span class="icon clock gray small" />
                     </p>
-                    <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled && !account.meta.details_submitted" class="style-definition-text">
+                    <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled && !account.meta.details_submitted" class="style-definition-text with-icons">
                         <span>{{ $t('21b3891d-7c0e-49ca-ae35-d77d54e9f0c3') }}</span>
-                        <span class="icon red canceled" />
+                        <span class="icon red canceled small" />
                     </p>
-                    <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text">
+                    <p v-else-if="!account.meta.charges_enabled && !account.meta.payouts_enabled" class="style-definition-text with-icons">
                         <span>{{ $t('7d59ec07-4b73-441c-a679-426796f426e4') }}</span>
-                        <span class="icon red canceled" />
+                        <span class="icon red canceled small" />
                     </p>
                 </STListItem>
             </STList>
