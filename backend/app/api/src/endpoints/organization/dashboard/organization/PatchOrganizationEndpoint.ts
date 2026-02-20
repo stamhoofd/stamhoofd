@@ -71,7 +71,18 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         let updateTags = false;
 
         if (await Context.auth.hasFullAccess(organization.id)) {
-            organization.name = request.body.name ?? organization.name;
+            if (request.body.name) {
+                if (request.body.name.length < 2) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'Name is too short',
+                        field: 'name',
+                        human: $t('Vul de naam van je vereniging in'),
+                    });
+                }
+                organization.name = request.body.name ?? organization.name;
+            }
+
             if (request.body.website !== undefined) {
                 organization.website = request.body.website;
             }
