@@ -61,6 +61,9 @@ export class AuthenticatedStructures {
 
         const { invoicedBalanceItems } = await Invoice.loadBalanceItems(invoices);
 
+        const paymentModels = await Payment.select().where('invoiceId', invoices.map(i => i.id)).fetch();
+        const payments = await this.paymentsGeneral(paymentModels, false);
+
         return invoices.map((invoice) => {
             const items = invoicedBalanceItems.filter(i => i.invoiceId === invoice.id);
             return InvoiceStruct.create({
@@ -68,6 +71,7 @@ export class AuthenticatedStructures {
                 items: items.map((item) => {
                     return InvoicedBalanceItem.create(item);
                 }),
+                payments: payments.filter(p => p.invoiceId === invoice.id),
             });
         });
     }

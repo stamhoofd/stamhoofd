@@ -318,7 +318,6 @@ export class Invoice extends AutoEncoder {
         return !!this.items.find(i => !!i.addedToUnitPriceToCorrectVAT);
     }
 
-    /** */
     correctRoundingByUpdatingPrices() {
         const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
         if (difference === 0) {
@@ -334,8 +333,6 @@ export class Invoice extends AutoEncoder {
             const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
 
             const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
-
-            console.log('toAddToTaxablePrice', toAddToTaxablePrice);
 
             if (toAddToTaxablePrice === 0) {
                 // Less than 1 cent difference, we cannot apply this
@@ -390,6 +387,20 @@ export class Invoice extends AutoEncoder {
         }
     }
 
+    updatePrices() {
+        this.correctRoundingByUpdatingPrices();
+        this.calculateVAT();
+        this.updatePayableRoundingAmount();
+
+        if (this.totalWithVAT !== this.totalPaymentsAmount) {
+            throw new SimpleError({
+                code: 'price_difference',
+                message: 'The price of the generated invoice did not match the price of the corresponding payments. Possibly caused by rounding that could not be corrected automatically.',
+                human: $t('8de3f0d6-3bbe-4668-a357-1fbf3d698177'),
+            });
+        }
+    }
+
     /**
      * Call this method after changing the payments related to an invoice.
      */
@@ -433,16 +444,6 @@ export class Invoice extends AutoEncoder {
         });
 
         this.items = invoicedItems;
-        this.correctRoundingByUpdatingPrices();
-        this.calculateVAT();
-        this.updatePayableRoundingAmount();
-
-        if (this.totalWithVAT !== this.totalPaymentsAmount) {
-            throw new SimpleError({
-                code: 'price_difference',
-                message: 'The price of the generated invoice did not match the price of the corresponding payments. Possibly caused by rounding that could not be corrected automatically.',
-                human: $t('8de3f0d6-3bbe-4668-a357-1fbf3d698177'),
-            });
-        }
+        this.updatePrices();
     }
 }

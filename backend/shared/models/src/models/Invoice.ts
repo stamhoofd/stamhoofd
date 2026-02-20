@@ -153,63 +153,6 @@ export class Invoice extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async createFrom(organization: { id: string }, struct: InvoiceStruct) {
-        const model = new Invoice();
-        model.customer = struct.customer;
-        model.seller = struct.seller;
-        model.organizationId = organization.id;
-        model.payingOrganizationId = struct.payingOrganizationId;
-
-        model.payableRoundingAmount = struct.payableRoundingAmount;
-        model.VATTotal = struct.VATTotal;
-        model.VATTotalAmount = struct.VATTotalAmount;
-        model.totalWithoutVAT = struct.totalWithoutVAT;
-        model.totalWithVAT = struct.totalWithVAT;
-        model.totalBalanceInvoicedAmount = struct.totalBalanceInvoicedAmount;
-
-        model.ipAddress = struct.ipAddress;
-        model.userAgent = struct.userAgent;
-
-        model.stripeAccountId = struct.stripeAccountId;
-        model.reference = struct.reference;
-
-        model.negativeInvoiceId = struct.negativeInvoiceId;
-
-        await model.save();
-
-        // Create balances
-        try {
-            for (const item of struct.items) {
-                const invoiced = new InvoicedBalanceItem();
-                invoiced.invoiceId = model.id;
-                invoiced.organizationId = model.organizationId;
-                invoiced.balanceItemId = item.balanceItemId;
-
-                invoiced.VATExcempt = item.VATExcempt;
-                invoiced.VATPercentage = item.VATPercentage;
-                invoiced.VATIncluded = item.VATIncluded;
-
-                invoiced.unitPrice = item.unitPrice;
-                invoiced.quantity = item.quantity;
-
-                invoiced.balanceInvoicedAmount = item.balanceInvoicedAmount;
-
-                invoiced.totalWithoutVAT = item.totalWithoutVAT;
-
-                await invoiced.save();
-            }
-        }
-        catch (e) {
-            try {
-                await model.delete();
-            }
-            catch (ee) {
-                console.error('Error while trying to delete invoice because of fail save', ee, 'Deleting because of error', e);
-            }
-            throw e;
-        }
-    }
-
     static async loadBalanceItems(invoices: Invoice[]) {
         if (invoices.length === 0) {
             return { invoicedBalanceItems: [] };

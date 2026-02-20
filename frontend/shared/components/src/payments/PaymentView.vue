@@ -139,6 +139,20 @@
                         </template> <a :href="$domains.getDocs('transactiekosten-inhouding')" class="inline-link" target="_blank">{{ $t('a36700a3-64be-49eb-b1fd-60af7475eb4e') }}</a>
                     </p>
                 </STListItem>
+
+                <STListItem v-if="payment.invoiceId" :selectable="true">
+                    <h3 class="style-definition-label">
+                        {{ $t('Facturatie') }}
+                    </h3>
+                    <p class="style-definition-text with-icons">
+                        <span>{{ $t('Gefactureerd') }}</span>
+                        <span class="icon success small primary" />
+                    </p>
+
+                    <template #right>
+                        <span class="icon arrow-right-small gray" />
+                    </template>
+                </STListItem>
             </STList>
 
             <hr><h2>{{ $t('f777a982-6f69-41cc-bef1-18d146e870db') }}</h2>
@@ -602,8 +616,7 @@ async function createInvoice() {
         const component = new ComponentWithProperties(EditInvoiceView, {
             invoice,
             isNew: true,
-            saveHandler: async (patch: AutoEncoderPatchType<Invoice>) => {
-                // todo
+            saveHandler: (updated: Invoice) => {
             },
         });
         await present({

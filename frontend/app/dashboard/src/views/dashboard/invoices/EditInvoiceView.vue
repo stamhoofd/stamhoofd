@@ -105,7 +105,7 @@
                 </p>
             </template>
 
-            <p class="warning-box" v-if="patched.didChangeUnitPricesToCorrectRounding">
+            <p v-if="patched.didChangeUnitPricesToCorrectRounding" class="warning-box">
                 {{ $t('De eenheidsprijs (excl. BTW) van bepaalde items werd licht aangepast om het afrondingsverschil door BTW-berekeningsregels te verkleinen tegenover het aangerekende bedrag (BTW moet afgerond worden op factuurniveau en niet op lijnniveau).') }}
             </p>
             <InvoiceItemsBox :invoice="patched" />
@@ -114,23 +114,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ErrorBox, GeneralSettingsView, RadioListItem, CategorizedView, useAuth, useErrors, usePatch, useRequiredOrganization, PaymentCustomerSelectionBox, CategorizedBox } from '@stamhoofd/components';
+import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, ErrorBox, GeneralSettingsView, RadioListItem, CategorizedView, useAuth, useErrors, usePatch, useRequiredOrganization, PaymentCustomerSelectionBox, CategorizedBox, useContext, Toast } from '@stamhoofd/components';
 import { Company, Invoice, PaymentCustomer } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
 import { InvoiceItemsBox } from './components';
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import { useRequestOwner } from '@stamhoofd/networking';
 
 const props = withDefaults(
     defineProps<{
         invoice: Invoice;
         isNew?: boolean;
+        saveHandler?: ((invoice: Invoice) => void) | null;
     }>(), {
         isNew: true,
+        saveHandler: null,
     },
 );
 
-const { patched, hasChanges, addPatch, patch } = usePatch(props.invoice, {
+const { patched, hasChanges, addPatch, patch, reset } = usePatch(props.invoice, {
     postProcess(obj) {
         obj.calculateVAT();
         return obj;
@@ -144,6 +148,9 @@ const saving = ref(false);
 const title = props.isNew ? $t('3db5575a-8a20-47ab-807f-fe82ffa3525b') : $t('40ce0817-94a9-4863-9f96-a90e4d09054a');
 const companies = computed(() => organization.value.meta.companies);
 const present = usePresent();
+const context = useContext();
+const owner = useRequestOwner();
+const pop = usePop();
 
 const seller = computed({
     get: () => patched.value.seller,
@@ -163,13 +170,58 @@ const suggestedCustomers = computed(() => {
     return patched.value.payments.map(p => p.customer).filter(c => !!c);
 });
 
-function save() {
+async function save() {
+    if (saving.value) {
+        return;
+    }
+    saving.value = true;
     try {
         patched.value.validateVATRates();
         errors.errorBox = null;
+
+        if (!await errors.validator.validate()) {
+            return;
+        }
+
+        const arr = new PatchableArray() as PatchableArrayAutoEncoder<Invoice>;
+        if (props.isNew) {
+            arr.addPut(patched.value);
+        }
+        else {
+            arr.addPatch(patch.value);
+        }
+
+        // Valid
+        const response = await context.value.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/invoices',
+            body: arr,
+            decoder: new ArrayDecoder(Invoice as Decoder<Invoice>),
+            shouldRetry: true,
+            owner,
+        });
+
+        const updatedValue = response.data[0];
+        if (updatedValue) {
+            props.invoice.deepSet(updatedValue);
+            reset();
+        }
+
+        if (props.isNew) {
+            Toast.success($t('Een nieuwe factuur werd aangemaakt')).show();
+        }
+        else {
+            Toast.success($t('De factuur werd aangepast')).show();
+        }
+
+        props.saveHandler?.(props.invoice);
+        await pop({ force: true });
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
+    }
+    finally {
+        saving.value = false;
     }
 }
 
