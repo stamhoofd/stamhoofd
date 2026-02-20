@@ -366,6 +366,8 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
 
 
 @mixin dark-modus {
+    color-scheme: dark;
+
     --rgb-shadow: 255; 
     --rgb-background: 0; 
     --is-dark-mode: 1;

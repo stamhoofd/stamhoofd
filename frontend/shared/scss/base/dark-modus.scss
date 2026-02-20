@@ -7,7 +7,6 @@ body, :host {
 
 body.dark, :host.dark {
     // Force dark
-    color-scheme: dark;
     @include dark-modus;
 }
 

@@ -179,6 +179,11 @@ select.input {
         color: transparent;
         text-shadow: 0 0 0 #000;
     }
+
+    option {
+        color: $color-dark;
+        background: $color-background;
+    }
 }
 
 // Used to put multiple inputs next to each other
