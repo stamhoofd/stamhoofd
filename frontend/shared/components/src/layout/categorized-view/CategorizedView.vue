@@ -30,7 +30,7 @@
             </div>
         </div>
         <div ref="scrollColumn">
-            <SaveView v-bind="attrs" class="scroll-column" :class="{'main-shade': !columnsEnabled && isEnabled, 'shade': columnsEnabled && isEnabled}">
+            <SaveView v-bind="attrs" class="scroll-column" :class="{'main-shade': !columnsEnabled && isEnabled, 'shade': columnsEnabled && isEnabled}" @save="$emit('save', $event)" v-on="{delete: canDelete ? () => $emit('delete'): undefined}">
                 <template v-if="!columnsEnabled && isEnabled" #fixed>
                     <ScrollableSegmentedControl v-model="visibleCategory" :items="[null, ...categories]" :labels="['Overzicht', ...categories.map(c => c.title.value)]" :icons="[null, ...categories.map(c => c.icon.value)]" />
                 </template>
@@ -68,7 +68,7 @@
 
 <script lang="ts" setup>
 import { Sorter } from '@stamhoofd/utility';
-import { computed, defineComponent, onMounted, ref, Ref, useTemplateRef, watch } from 'vue';
+import { computed, defineComponent, getCurrentInstance, onMounted, ref, Ref, useTemplateRef, watch } from 'vue';
 import { ViewportHelper } from '../../ViewportHelper';
 import { useDeviceWidth, useScrollListener } from '../../hooks';
 import SaveView from '../../navigation/SaveView.vue';
@@ -101,6 +101,11 @@ const deviceWidth = useDeviceWidth();
 
 const columnsEnabled = computed(() => {
     return deviceWidth.value >= 800;
+});
+
+const canDelete = computed(() => {
+    // Check has delete listener
+    return !!getCurrentInstance()?.vnode.props?.onDelete;
 });
 
 function updateVisible() {
