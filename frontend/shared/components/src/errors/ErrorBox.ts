@@ -7,8 +7,8 @@ import { ViewportHelper } from '../ViewportHelper';
 export class ErrorBox {
     /// Remaining errors to distribute
     errors: SimpleErrors;
-    scrollToElements: [any[], HTMLElement][] = [];
-    scrollTimer?: number;
+    static scrollToElements: [any[], HTMLElement][] = [];
+    static scrollTimer?: number;
 
     constructor(errors: unknown) {
         if (isSimpleError(errors)) {
@@ -46,17 +46,21 @@ export class ErrorBox {
         return this.errors;
     }
 
-    scrollIntoView(element: HTMLElement) {
+    static scrollIntoView(element: HTMLElement) {
         ViewportHelper.scrollIntoView(element, 'center', true);
     }
 
-    private fireScroll() {
+    private static fireScroll() {
         // Take the highest element
         let minimum: number | undefined;
         let firstElement: HTMLElement | undefined;
 
         for (const [arr, element] of this.scrollToElements) {
-            if (arr.length == 0) {
+            if (arr.length === 0) {
+                continue;
+            }
+            if (!document.body.contains(element)) {
+                // Went out of dom before the timer fired
                 continue;
             }
             const pos = element.getBoundingClientRect().top;
@@ -76,7 +80,7 @@ export class ErrorBox {
     /// Scroll to an element, errorBox will decide which one if it is called multiple times
     // You need to provide the array of errors because it is possible to change the errors after this call
     // So we need to detect if the errors are empty or not
-    scrollTo(errors: any[], el: HTMLElement) {
+    static scrollTo(errors: any[], el: HTMLElement) {
         this.scrollToElements.push([errors, el]);
 
         if (!this.scrollTimer) {

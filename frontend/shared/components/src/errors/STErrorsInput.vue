@@ -1,76 +1,68 @@
 <template>
-    <div ref="errors" :class="{'input-errors': errors.length > 0}">
+    <div ref="errorElement" :class="{'input-errors': errors.length > 0}">
         <slot />
         <div>
-            <template v-for="(error, index) in errors" :key="index">
-                <STErrorBox :error="error" />
-            </template>
+            <STErrorBox v-for="(error, index) of errors" :key="index" :error="error" />
         </div>
     </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
+import { ref, useTemplateRef, watch } from 'vue';
 
 import { ErrorBox } from './ErrorBox';
 import STErrorBox from './STErrorBox.vue';
-import { Request } from '@simonbackx/simple-networking';
 
-@Component({
-    components: {
-        STErrorBox,
-    },
-})
-export default class STErrorsInput extends VueComponent {
-    @Prop({ default: '' })
-    errorFields: string;
+const props = withDefaults(
+    defineProps<{
+        errorFields?: string;
+        errorBox?: ErrorBox | ErrorBox[] | null;
+    }>(),
+    {
+        errorFields: '',
+        errorBox: null,
+    });
 
-    @Prop({ default: null })
-    errorBox: ErrorBox | ErrorBox[] | null;
+const errors = ref<SimpleError[]>([]);
+const errorsElement = useTemplateRef('errorElement');
 
-    errors: SimpleError[] = [];
-
-    @Watch('errorBox')
-    onNewErrors(val: ErrorBox | ErrorBox[] | null) {
-        if (!val) {
-            this.errors = [];
-            return;
-        }
-        const arr = Array.isArray(val) ? val : [val];
-        if (arr.length === 0) {
-            this.errors = [];
-            return;
-        }
-        this.errors = [];
-        for (const errorBox of arr) {
-            if (this.errorFields === '') {
-                continue;
-            }
-            let errors: SimpleErrors;
-
-            if (this.errorFields === '*') {
-                errors = errorBox.remaining;
-            }
-            else {
-                errors = errorBox.forFields(this.errorFields.split(','));
-            }
-
-            this.errors.push(...errors.errors);
-
-            // If no input element currently focused
-            if (document.activeElement && this.$el.contains(document.activeElement)) {
-                continue;
-            }
-            errorBox.scrollTo(this.errors, this.$refs.errors as HTMLElement);
-        }
+watch(() => props.errorBox, (val: ErrorBox | ErrorBox[] | null) => {
+    if (!val) {
+        errors.value = [];
+        return;
     }
-
-    getErrorMessage(error: SimpleError) {
-        if (Request.isNetworkError(error as any)) {
-            return $t(`94bdc2a4-9ebb-42d2-a4e9-d674eb9aafef`);
-        }
-        return error.getHuman();
+    const arr = Array.isArray(val) ? val : [val];
+    if (arr.length === 0) {
+        errors.value = [];
+        return;
     }
-}
+    let newArray: SimpleError[] = [];
+    for (const errorBox of arr) {
+        if (props.errorFields === '') {
+            continue;
+        }
+        let errorList: SimpleErrors;
+
+        if (props.errorFields === '*') {
+            errorList = errorBox.remaining;
+        }
+        else {
+            errorList = errorBox.forFields(props.errorFields.split(','));
+        }
+
+        newArray.push(...errorList.errors);
+
+        // If no input element currently focused
+        const el = errorsElement.value as HTMLElement;
+        if (!el) {
+            continue;
+        }
+        if (document.activeElement && el?.contains(document.activeElement)) {
+            continue;
+        }
+        ErrorBox.scrollTo(newArray, el);
+    }
+    errors.value = newArray;
+}, { immediate: true });
 </script>

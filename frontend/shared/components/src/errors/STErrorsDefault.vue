@@ -48,7 +48,7 @@ export default class STErrorsDefault extends VueComponent {
             const errors = unref(val).remaining;
             this.errors = errors.errors;
 
-            unref(val).scrollTo(this.errors, this.$refs.errors as HTMLElement);
+            ErrorBox.scrollTo(this.errors, this.$refs.errors as HTMLElement);
         });
     }
 }
