@@ -10,6 +10,7 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
+import { simpleBooleanFilterFactory } from './helpers';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
@@ -57,11 +58,13 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         });
     };
 
+    const recordsConfiguration = OrganizationRecordsConfiguration.build({
+        platform,
+        organization: organization.value,
+    });
+
     const all = getMemberBaseFilters(
-        OrganizationRecordsConfiguration.build({
-            platform,
-            organization: organization.value,
-        }),
+        recordsConfiguration,
     );
 
     if (user?.permissions?.platform !== null) {
@@ -618,6 +621,20 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 },
             }),
         );
+    }
+
+    if (!recordsConfiguration || recordsConfiguration.dataPermission) {
+        all.push(simpleBooleanFilterFactory({
+            name: $t('Toestemming gegevensverzameling'),
+            optionNames: {
+                true: $t(`Gaf toestemming`),
+                false: $t(`Gaf geen toestemming`),
+            },
+            wrapChoice: (value: boolean) => ({
+                'details.dataPermissions': value,
+            }),
+
+        }));
     }
 
     all.push(new DateFilterBuilder({

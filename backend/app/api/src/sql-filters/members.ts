@@ -84,6 +84,11 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             await throwIfNoFinancialReadAccess();
         },
     }),
+    'details.dataPermissions': createColumnFilter({
+        expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.dataPermissions.value'),
+        type: SQLValueType.JSONBoolean,
+        nullable: true,
+    }),
     'email': createColumnFilter({
         expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.email'),
         type: SQLValueType.JSONString,
