@@ -380,6 +380,7 @@ defineExpose({
                 z-index: 1;
                 margin: 0;
                 padding: 7px 0;
+                text-align: center;
 
                 @media (max-width: 400px) {
                     padding: 12px 0;
