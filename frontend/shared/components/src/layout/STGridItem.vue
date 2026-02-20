@@ -81,6 +81,8 @@ button.st-grid-item {
     grid-column: start / end;
     grid-template-columns: subgrid;
     gap: 0;
+    contain: layoout style;
+    z-index: 1;
 
     &.header {
         font-weight: $font-weight-semibold;
