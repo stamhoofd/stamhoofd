@@ -15,7 +15,7 @@
             <STList>
                 <STListItem v-if="email.sentAt && email.status === EmailStatus.Sent">
                     <template #left>
-                        <span class="icon calendar-grid small" />
+                        <span class="icon date-time" />
                     </template>
 
                     <h2 class="style-title-list">

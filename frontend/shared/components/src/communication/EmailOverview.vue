@@ -81,7 +81,7 @@
             <STList>
                 <STListItem v-if="!(email.sentAt && email.status === EmailStatus.Sent)" class="left-center">
                     <template #left>
-                        <span class="icon calendar-grid small" />
+                        <span class="icon date-time" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -91,7 +91,7 @@
 
                 <STListItem v-if="email.fromName || email.organization?.name || email.fromAddress" v-tooltip="$t('26e90995-ce5d-48ff-96e8-21e39e489d14')">
                     <template #left>
-                        <span class="icon email small" />
+                        <span class="icon email" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -104,7 +104,7 @@
 
                 <STListItem v-if="email.user && (!user || email.user.id !== user.id)">
                     <template #left>
-                        <span class="icon user small" />
+                        <span class="icon user" />
                     </template>
 
                     <h2 v-if="email.user.name" class="style-title-list">
@@ -117,7 +117,7 @@
 
                 <STListItem v-if="email.status !== EmailStatus.Draft && !email.sendAsEmail && email.showInMemberPortal">
                     <template #left>
-                        <span class="icon send-off small" />
+                        <span class="icon send-off" />
                     </template>
 
                     <h2 class="style-title-list">
@@ -130,7 +130,7 @@
 
                 <STListItem v-if="email.status !== EmailStatus.Draft && email.sendAsEmail && !email.showInMemberPortal && email.recipientFilter.canShowInMemberPortal">
                     <template #left>
-                        <span class="icon eye-off small" />
+                        <span class="icon eye-off" />
                     </template>
 
                     <h2 class="style-title-list">

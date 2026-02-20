@@ -2,7 +2,7 @@
     <STList>
         <STListItem>
             <template #left>
-                <span class="icon calendar-grid" />
+                <span class="icon event" />
             </template>
 
             <h2 class="style-title-list">
