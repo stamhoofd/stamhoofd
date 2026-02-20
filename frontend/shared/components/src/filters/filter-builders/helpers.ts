@@ -4,10 +4,10 @@ import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../Mu
 /**
  * Create a multiple choice filter builder with an option for true and false.
  */
-export function simpleBooleanFilterFactory({ name, wrapChoice, description, allowCreation, optionNames }: { name: string; wrapChoice: (choice: boolean) => StamhoofdFilter; description?: string; allowCreation?: boolean; optionNames: {
+export function simpleBooleanFilterFactory({ name, description, optionNames, filterIfTrue, allowCreation }: { name: string; description?: string; optionNames: {
     true: string;
     false: string;
-}; }) {
+}; filterIfTrue: StamhoofdFilter; allowCreation?: boolean; }) {
     return new MultipleChoiceFilterBuilder({
         name,
         description,
@@ -22,7 +22,12 @@ export function simpleBooleanFilterFactory({ name, wrapChoice, description, allo
                 const choice = choices[0];
 
                 if (typeof choice === 'boolean') {
-                    return wrapChoice(choice);
+                    if (choice) {
+                        return filterIfTrue;
+                    }
+                    return {
+                        $not: filterIfTrue,
+                    };
                 }
             }
 
@@ -30,7 +35,7 @@ export function simpleBooleanFilterFactory({ name, wrapChoice, description, allo
         },
         unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
             for (const value of [true, false]) {
-                const result = unwrapFilter(f, wrapChoice(value));
+                const result = unwrapFilter(f, value ? filterIfTrue : { $not: filterIfTrue });
 
                 if (result.match) {
                     return [value];

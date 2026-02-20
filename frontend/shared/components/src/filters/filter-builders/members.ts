@@ -630,10 +630,9 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 true: $t(`Gaf toestemming`),
                 false: $t(`Gaf geen toestemming`),
             },
-            wrapChoice: (value: boolean) => ({
-                'details.dataPermissions': value,
-            }),
-
+            filterIfTrue: {
+                'details.dataPermissions': true,
+            },
         }));
     }
 
@@ -821,6 +820,23 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 },
             }));
     }
+
+    // accounts
+    all.push(simpleBooleanFilterFactory({
+        name: $t('Accounts'),
+        description: $t('Filter leden die wel of geen geverifieerd account hebben om de gegevens van leden te wijzigen via het ledenportaal.'),
+        optionNames: {
+            true: $t('Heeft een geverifieerd account'),
+            false: $t('Heeft geen geverifieerd account'),
+        },
+        filterIfTrue: {
+            users: {
+                $elemMatch: {
+                    verified: true,
+                },
+            },
+        },
+    }));
 
     if (recordCategoriesFilterBuilders.length > 0) {
         const groupFilter = new GroupUIFilterBuilder({

@@ -1,10 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Email, Member } from '@stamhoofd/models';
+import { Email, Member, MemberUser } from '@stamhoofd/models';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 import { AccessRight } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
 import { baseRegistrationFilterCompilers } from './base-registration-filter-compilers.js';
 import { organizationFilterCompilers } from './organizations.js';
+import { userFilterCompilers } from './users.js';
 
 const membersTable = SQL.table(Member.table);
 
@@ -502,6 +503,20 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
             },
         ),
     },
+    'users': createExistsFilter(
+        SQL.select()
+            .from(
+                SQL.table('users'),
+            ).join(
+                SQL.innerJoin(MemberUser.table)
+                    .where(
+                        SQL.parentColumn('id'),
+                        SQL.column('usersId'),
+                    ),
+            )
+            .where(SQL.column(MemberUser.table, 'membersId'), SQL.column('members', 'id')),
+        userFilterCompilers,
+    ),
 };
 
 async function throwIfNoFinancialReadAccess() {
