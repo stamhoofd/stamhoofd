@@ -9,7 +9,7 @@
                 </p>
 
                 <p class="style-description-small">
-                    {{ patchedPayment.balanceItemPayments.length }} items
+                    {{ pluralText(patchedPayment.balanceItemPayments.length, $t('item'), $t('items')) }}
                 </p>
             </template>
 
