@@ -259,7 +259,7 @@ export class ViewportHelper {
         if (isNaN(topPadding)) {
             topPadding = 25;
         }
-        let elTopPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-top'));
+        let elTopPadding = 0//parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-top'));
         if (isNaN(elTopPadding)) {
             elTopPadding = 0;
         }
@@ -268,7 +268,7 @@ export class ViewportHelper {
         if (isNaN(bottomPadding)) {
             bottomPadding = 25;
         }
-        let elBottomPadding = parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'));
+        let elBottomPadding = 0//parseInt(window.getComputedStyle(element, null).getPropertyValue('padding-bottom'));
         if (isNaN(elBottomPadding)) {
             elBottomPadding = 0;
         }
