@@ -68,6 +68,12 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({ multipleGrou
             membershipFilters,
         });
 
+        originalFilters.unshift(
+            new GroupUIFilterBuilder({
+                builders: originalFilters,
+            }),
+        );
+
         all.push(
             new GroupUIFilterBuilder({
                 name: $t('6c7534a5-53c7-4343-b9e0-5277fe640496'),

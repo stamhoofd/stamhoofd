@@ -1091,6 +1091,26 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
 export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsConfiguration) {
     const all: UIFilterBuilders = [];
 
+    const nameFilter = new GroupUIFilterBuilder({
+        name: $t('Naam'),
+        builders: [
+            new StringFilterBuilder({
+                name: $t('Naam (voor- en achternaam)'),
+                key: 'name',
+            }),
+            new StringFilterBuilder({
+                name: $t('Voornaam'),
+                key: 'firstName',
+            }),
+            new StringFilterBuilder({
+                name: $t('Achternaam'),
+                key: 'lastName',
+            }),
+        ],
+    });
+
+    all.push(nameFilter);
+
     if (!recordConfiguration || recordConfiguration.birthDay) {
         all.push(new DateFilterBuilder({
             name: $t(`f3b87bd8-e36c-4fb8-917f-87b18ece750e`),
