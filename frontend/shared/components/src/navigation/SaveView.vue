@@ -1,6 +1,6 @@
 <template>
     <LoadingViewTransition :loading="loadingView" :error-box="errorBox">
-        <form class="st-view" data-testid="save-view" v-bind="$attrs" @submit.prevent="$emit('save')">
+        <form class="st-view" data-testid="save-view" v-bind="$attrs" @submit.prevent="$emit('save')" novalidate>
             <STNavigationBar :title="title instanceof TranslatedString ? title.toString() : title" :disable-pop="true" :disable-dismiss="true">
                 <template v-if="canPop || (!preferLargeButton && ($isMobile || $isIOS || $isAndroid))" #left>
                     <BackButton v-if="canPop" @click="pop()" />
