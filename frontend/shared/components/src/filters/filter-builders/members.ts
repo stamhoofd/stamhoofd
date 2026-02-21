@@ -6,11 +6,11 @@ import { useAuth, useOrganization, usePlatform, useUser } from '../../hooks';
 import { DateFilterBuilder } from '../DateUIFilter';
 import { getFilterBuildersForRecordCategories } from '../filterBuilders';
 import { GroupUIFilterBuilder } from '../GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 import { NumberFilterBuilder, NumberFilterFormat } from '../NumberUIFilter';
 import { StringFilterBuilder } from '../StringUIFilter';
 import { UIFilter, UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
-import { simpleBooleanFilterFactory } from './helpers';
+import { simpleBooleanFilterFactory, simpleMultipleChoiceFilterFactory } from './helpers';
 import { useAdvancedRegistrationsUIFilterBuilders } from './registrations';
 
 export function useAdvancedMemberWithRegistrationsBlobUIFilterBuilders() {
@@ -780,6 +780,67 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 },
             },
         },
+    }));
+
+    // missing data
+    all.push(simpleMultipleChoiceFilterFactory({
+        name: $t(`8e92e034-b745-4d0f-8ac1-4363101f9603`),
+        description: $t('Toon leden als één van de geselecteerde gegevens ontbreekt of niet is ingevuld.'),
+        filterMode: MultipleChoiceUIFilterMode.Or,
+        options: [
+            {
+                name: $t('00650ac3-eb78-4c8b-b7ec-d892772837a1'),
+                value: 'birthDay',
+                filter: {
+                    birthDay: null,
+                },
+            },
+
+            {
+                name: $t('8aad46a6-a864-4e60-a3f0-dffe2b37033c'),
+                value: 'address',
+                filter: {
+                    'details.address': {
+                        value: null,
+                    },
+                },
+            },
+            {
+                name: $t('a68020d1-1ee8-4b57-a307-840fb5deaa02'),
+                value: 'phone',
+                filter: {
+                    phone: null,
+                },
+            },
+            {
+                name: $t('effd2b1f-01f6-46e0-a5af-488bcbd93f1d'),
+                value: 'email',
+                filter: {
+                    email: null,
+                },
+            },
+            {
+                name: $t('3f196c5f-1b59-4d18-8fca-feaef78e7f09'),
+                value: 'parents',
+                filter: {
+                    'details.parents.length': 0,
+                },
+            },
+            {
+                name: $t('a148463b-5ae7-44d8-9cac-20538fc95431'),
+                value: 'secondParent',
+                filter: {
+                    'details.parents.length': 1,
+                },
+            },
+            {
+                name: $t('23911c89-12b5-403a-a355-20f3c986c76f'),
+                value: 'emergencyContacts',
+                filter: {
+                    'details.emergencyContacts.length': 0,
+                },
+            },
+        ],
     }));
 
     if (recordCategoriesFilterBuilders.length > 0) {

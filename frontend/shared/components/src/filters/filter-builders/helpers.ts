@@ -1,5 +1,5 @@
-import { StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
+import { StamhoofdCompareValue, StamhoofdFilter, unwrapFilter } from '@stamhoofd/structures';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterMode, MultipleChoiceUIFilterOption } from '../MultipleChoiceUIFilter';
 
 /**
  * Create a multiple choice filter builder with an option for true and false.
@@ -39,6 +39,68 @@ export function simpleBooleanFilterFactory({ name, description, optionNames, fil
 
                 if (result.match) {
                     return [value];
+                }
+            }
+
+            return null;
+        },
+
+    });
+}
+
+/**
+ * Create a multiple choice filter with simple logic (each option has a filter).
+ */
+export function simpleMultipleChoiceFilterFactory<T extends StamhoofdCompareValue>({ name, description, options, allowCreation, filterMode = MultipleChoiceUIFilterMode.And }:
+{
+    name: string;
+    description?: string;
+    filterMode: MultipleChoiceUIFilterMode;
+    options: { name: string; value: T; filter: StamhoofdFilter }[];
+    allowCreation?: boolean;
+}) {
+    const isAnd: boolean = filterMode === MultipleChoiceUIFilterMode.And;
+
+    return new MultipleChoiceFilterBuilder({
+        name,
+        description,
+        allowCreation,
+        multipleChoiceConfiguration: { mode: filterMode },
+        options: options.map(o => new MultipleChoiceUIFilterOption(o.name, o.value)),
+        wrapFilter: (f: StamhoofdFilter) => {
+            const choices = Array.isArray(f) ? f : [f];
+
+            const filters: StamhoofdFilter[] = [];
+
+            for (const choice of choices) {
+                const option = options.find(o => o.value === choice);
+                if (option) {
+                    filters.push(option.filter);
+                }
+            }
+
+            if (filters.length === 0) {
+                return null;
+            }
+
+            if (filters.length === 1) {
+                return filters[0];
+            }
+
+            if (isAnd) {
+                return filters;
+            }
+
+            return {
+                $or: filters,
+            };
+        },
+        unwrapFilter: (f: StamhoofdFilter): StamhoofdFilter | null => {
+            for (const option of options) {
+                const result = unwrapFilter(f, option.filter);
+
+                if (result.match) {
+                    return [option.value];
                 }
             }
 

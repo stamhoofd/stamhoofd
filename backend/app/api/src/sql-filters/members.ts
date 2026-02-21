@@ -100,6 +100,16 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.JSONArray,
         nullable: true,
     }),
+    'details.emergencyContacts.length': createColumnFilter({
+        expression: SQL.jsonLength(SQL.column(membersTable, 'details'), '$.value.emergencyContacts'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
+    'details.parents.length': createColumnFilter({
+        expression: SQL.jsonLength(SQL.column(membersTable, 'details'), '$.value.parents'),
+        type: SQLValueType.Number,
+        nullable: false,
+    }),
     'details.parents[0]': {
         ...baseSQLFilterCompilers,
         name: createColumnFilter({
@@ -158,6 +168,12 @@ export const memberFilterCompilers: SQLFilterDefinitions = {
         number: createColumnFilter({
             expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.address.number'),
             type: SQLValueType.JSONString,
+            nullable: true,
+        }),
+        // for checking if the address is null
+        value: createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column(membersTable, 'details'), '$.value.address'),
+            type: SQLValueType.JSONObject,
             nullable: true,
         }),
     },
