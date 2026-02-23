@@ -72,10 +72,10 @@ export function getHealth(): BackupHealth {
         status = 'error';
     }
     else {
-        if (LAST_BINARY_BACKUP.date.getTime() - now.getTime() > 60 * 10 * 1000) {
+        if (now.getTime() - LAST_BINARY_BACKUP.date.getTime() > 60 * 10 * 1000) {
             status = 'error';
         }
-        if (LAST_BACKUP.date.getTime() - now.getTime() > 60 * 60 * 1000 * 25) {
+        if (now.getTime() - LAST_BACKUP.date.getTime() > 60 * 60 * 1000 * 25) {
             status = 'error';
         }
         if (LAST_BACKUP.size < (STAMHOOFD.MINIMUM_BACKUP_SIZE ?? 1 * 1000 * 1000)) {
