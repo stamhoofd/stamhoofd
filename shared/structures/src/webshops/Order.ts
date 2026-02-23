@@ -208,6 +208,11 @@ export class Order extends AutoEncoder {
         return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     }
 
+    get paidAt() {
+        const time = Math.min(new Date(2100, 0, 1).getTime(), ...this.payments.map(p => (p.paidAt ?? new Date(2100, 0, 1)).getTime()));
+        return new Date(time);
+    }
+
     getHTMLTable(): string {
         const allFree = this.data.cart.items.every(i => i.getPriceWithoutDiscounts() === 0);
 

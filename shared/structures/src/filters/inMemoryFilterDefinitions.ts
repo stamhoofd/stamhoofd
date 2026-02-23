@@ -124,13 +124,12 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     name: createInMemoryFilterCompiler('data.customer.name'),
     email: createInMemoryFilterCompiler('data.customer.email'),
     phone: createInMemoryFilterCompiler('data.customer.phone'),
-
-    // generated
     totalPrice: createInMemoryFilterCompiler('data.totalPrice'),
     amount: createInMemoryFilterCompiler('data.amount'),
     timeSlotTime: createInMemoryFilterCompiler('data.timeSlot.timeIndex'),
     openBalance: createInMemoryFilterCompiler('openBalance'),
     location: createInMemoryFilterCompiler('data.locationName'),
+    paidAt: createInMemoryFilterCompiler('paidAt'),
 
     // Other (no sorters)
     items: createInMemoryFilterCompiler('data.cart.items', {

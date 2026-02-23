@@ -699,6 +699,11 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         },
     }));
 
+    builders.push(new DateFilterBuilder({
+        key: 'paidAt',
+        name: $t('Betaaldatum'),
+    }));
+
     const distinctCheckoutMethods = Formatter.uniqueArray(preview.meta.checkoutMethods.map(m => m.type));
 
     if (distinctCheckoutMethods.length > 1) {
