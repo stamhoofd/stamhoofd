@@ -1,4 +1,5 @@
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import { BalanceItem, BalanceItemPayment, Order, Payment } from '@stamhoofd/models';
+import { baseSQLFilterCompilers, createAggregateExistsFilter, createColumnFilter, createExistsFilter, createWildcardColumnFilter, SQL, SQLCast, SQLConcat, SQLFilterDefinitions, SQLJsonExtract, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
 export const orderFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,
@@ -106,7 +107,37 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         type: SQLValueType.Datetime,
         nullable: true,
     }),
+    groupedPayments: createAggregateExistsFilter(
+        {
+            baseSelect: SQL.select()
+                .from(SQL.table(BalanceItem.table))
+                .join(
+                    SQL.join(SQL.table(BalanceItemPayment.table)).where(SQL.column(BalanceItemPayment.table, 'balanceItemId'), SQL.column(BalanceItem.table, 'id')),
+                ).join(
+                    SQL.join(SQL.table(Payment.table)).where(SQL.column(Payment.table, 'id'), SQL.column(BalanceItemPayment.table, 'paymentId')),
+                )
+                .where(SQL.column(Order.table, 'id'), SQL.column(BalanceItem.table, 'orderId')),
+            groupByColumns: [SQL.column(BalanceItem.table, 'orderId')],
+            where: {
+                ...baseSQLFilterCompilers,
+                status: createColumnFilter({
+                    expression: SQL.column(Payment.table, 'status'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
 
+            },
+            having: {
+                ...baseSQLFilterCompilers,
+                minPaidAt: createColumnFilter({
+                    expression: SQL.aggregateColumn('MIN', SQL.column(Payment.table, 'paidAt')),
+                    type: SQLValueType.Datetime,
+                    nullable: true,
+                }),
+
+            },
+        },
+    ),
     items: createExistsFilter(
         /**
          * There is a bug in MySQL 8 that is fixed in 9.3
