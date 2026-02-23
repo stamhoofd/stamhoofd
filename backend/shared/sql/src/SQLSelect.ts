@@ -3,9 +3,9 @@ import { Formatter } from '@stamhoofd/utility';
 import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
 import { SQLJoin } from './SQLJoin.js';
-import { Orderable } from './SQLOrderBy.js';
-import { Whereable } from './SQLWhere.js';
 import { SQLLogger } from './SQLLogger.js';
+import { Orderable } from './SQLOrderBy.js';
+import { SQLWhere, Whereable } from './SQLWhere.js';
 
 class EmptyClass {}
 
@@ -43,6 +43,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _max_execution_time: number | null = null;
     private _name: string | null = null;
     static slowQueryThresholdMs: number | null = null;
+    _having: SQLWhere | null = null;
 
     _transformer: ((row: SQLResultNamespacedRow) => T) | null = null;
 
@@ -89,6 +90,17 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
     groupBy(...columns: SQLExpression[]): this {
         this._groupBy.push(...columns);
+        return this;
+    }
+
+    having(where: SQLWhere): this {
+        if (this._having) {
+            this._having = this._having.and(where);
+        }
+        else {
+            this._having = where;
+        }
+
         return this;
     }
 
@@ -157,6 +169,17 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     ', ',
                 ),
             );
+        }
+
+        if (this._having) {
+            const always = this._having.isAlways;
+            if (always === false) {
+                throw new Error('Cannot use SQLSelect with a having that is not always true');
+            }
+            else if (always === null) {
+                query.push('HAVING');
+                query.push(this._having.getSQL(options));
+            }
         }
 
         if (this._orderBy) {

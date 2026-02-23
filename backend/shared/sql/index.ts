@@ -4,7 +4,7 @@ export * from './src/SQLExpressions.js';
 export * from './src/SQLJsonExpressions.js';
 export * from './src/SQLWhere.js';
 export * from './src/SQLSelect.js';
-export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, SQLValueType, compileToSQLFilter, baseSQLFilterCompilers, SQLFilterDefinitions } from './src/filters/SQLFilter.js';
+export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createAggregateExistsFilter, createJoinedRelationFilter, SQLValueType, compileToSQLFilter, baseSQLFilterCompilers, SQLFilterDefinitions } from './src/filters/SQLFilter.js';
 export * from './src/filters/SQLSorter.js';
 export * from './src/SQLOrderBy.js';
 export * from './src/SQLInsert.js';

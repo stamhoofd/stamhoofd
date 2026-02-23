@@ -1,13 +1,13 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { compileFilter, FilterCompiler, FilterDefinitions, filterDefinitionsToCompiler, RequiredFilterCompiler, StamhoofdFilter } from '@stamhoofd/structures';
 import { SQLExpression, SQLExpressionOptions, SQLQuery } from '../SQLExpression.js';
+import { SQLSafeValue } from '../SQLExpressions.js';
 import { SQLJoin } from '../SQLJoin.js';
 import { SQLJsonValue } from '../SQLJsonExpressions.js';
 import { SQLSelect } from '../SQLSelect.js';
 import { SQLWhere, SQLWhereAnd, SQLWhereExists, SQLWhereJoin, SQLWhereNot, SQLWhereOr } from '../SQLWhere.js';
-import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';
 import { $containsSQLFilterCompiler } from './compilers/contains.js';
-import { SQLSafeValue } from '../SQLExpressions.js';
+import { $equalsSQLFilterCompiler, $greaterThanSQLFilterCompiler, $inSQLFilterCompiler, $lessThanSQLFilterCompiler } from './compilers/index.js';
 
 export type SQLSyncFilterRunner = (column: SQLCurrentColumn) => SQLWhere;
 export type SQLFilterRunner = (column: SQLCurrentColumn) => Promise<SQLWhere> | SQLWhere;
@@ -127,6 +127,46 @@ export function createExistsFilter(baseSelect: InstanceType<typeof SQLSelect> & 
             const q = baseSelect.clone();
             q._columns = [new SQLSafeValue(1)];
             q.andWhere(w);
+            return new SQLWhereExists(q);
+        };
+    };
+}
+
+/**
+ * Filter with a subquery that should return at least one result.
+ */
+export function createAggregateExistsFilter(options: {
+    baseSelect: InstanceType<typeof SQLSelect> & SQLExpression;
+    groupByColumns: SQLExpression[];
+    where: SQLFilterDefinitions;
+    having: SQLFilterDefinitions;
+}): SQLFilterCompiler {
+    return (filter: StamhoofdFilter, _: SQLFilterCompiler) => {
+        if (filter !== null && typeof filter === 'object' && '$elemMatch' in filter) {
+            filter = filter['$elemMatch'] as StamhoofdFilter;
+        }
+
+        const whereRunner = compileToSQLRunner(filter, options.where);
+        const havingRunner = compileToSQLRunner(filter, options.having);
+
+        return async (_: SQLCurrentColumn) => {
+            const w = await whereRunner({
+                expression: SQLRootExpression,
+                type: SQLValueType.Table,
+                nullable: false,
+            });
+            const h = await havingRunner({
+                expression: SQLRootExpression,
+                type: SQLValueType.Table,
+                nullable: false,
+            });
+
+            const q = options.baseSelect.clone();
+            q._columns = [new SQLSafeValue(1)];
+            q.andWhere(w);
+            q.groupBy(...options.groupByColumns);
+            q.having(h);
+
             return new SQLWhereExists(q);
         };
     };

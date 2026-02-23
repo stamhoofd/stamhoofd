@@ -421,6 +421,21 @@ export class SQLColumnExpression implements SQLExpression {
     }
 }
 
+export type SQLAggregateColumnType = 'COUNT' | 'SUM' | 'MIN' | 'MAX' | 'AVG';
+
+export class SQLAggregateColumnExpression implements SQLExpression {
+    constructor(private readonly type: SQLAggregateColumnType, private readonly columnExpression: SQLColumnExpression) {
+    }
+
+    getSQL(options?: SQLExpressionOptions): SQLQuery {
+        return joinSQLQuery([
+            this.type + '(',
+            this.columnExpression.getSQL(options),
+            ')',
+        ]);
+    }
+}
+
 export class SQLIfNull implements SQLExpression {
     constructor(private readonly columnExpression: SQLColumnExpression, private readonly value: string | number) {
     }

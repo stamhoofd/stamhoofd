@@ -1,7 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQLDelete } from './SQLDelete.js';
 import { isSQLExpression, SQLExpression } from './SQLExpression.js';
-import { SQLAssignment, SQLCoalesce, SQLColumnExpression, SQLColumnExpressionParams, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
+import { SQLAggregateColumnExpression, SQLAggregateColumnType, SQLAssignment, SQLCoalesce, SQLColumnExpression, SQLColumnExpressionParams, SQLDistinct, SQLIf, SQLIsNull, SQLJSONTableExpression, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLScalarValue, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
 import { SQLInsert } from './SQLInsert.js';
 import { SQLJoin, SQLJoinType } from './SQLJoin.js';
 import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLJsonValueType, SQLLpad } from './SQLJsonExpressions.js';
@@ -16,6 +16,10 @@ class StaticSQL {
 
     column(...args: SQLColumnExpressionParams): SQLColumnExpression {
         return new SQLColumnExpression(...args);
+    }
+
+    aggregateColumn(type: SQLAggregateColumnType, column: SQLColumnExpression) {
+        return new SQLAggregateColumnExpression(type, column);
     }
 
     parentColumn(column: string): SQLColumnExpression {
