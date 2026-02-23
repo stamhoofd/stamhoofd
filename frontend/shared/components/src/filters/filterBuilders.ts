@@ -704,18 +704,15 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         name: $t('Betaaldatum'),
     }));
 
-    const distinctCheckoutMethods = Formatter.uniqueArray(preview.meta.checkoutMethods.map(m => m.type));
-
-    if (distinctCheckoutMethods.length > 1) {
+    if (preview.meta.checkoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
-            name: $t(`389460d3-8e4b-4238-8d57-a106ec987bcd`),
-            options: distinctCheckoutMethods.map((checkoutMethod) => {
-                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(CheckoutMethodTypeHelper.getName(checkoutMethod)), checkoutMethod);
+            name: $t(`Afhaal/leveringsmethode`),
+            options: preview.meta.checkoutMethods.map((checkoutMethod) => {
+                const name = Formatter.capitalizeFirstLetter(`${CheckoutMethodTypeHelper.getName(checkoutMethod.type)}: ${checkoutMethod.name}`);
+                return new MultipleChoiceUIFilterOption(name, checkoutMethod.id);
             }),
             wrapper: {
-                checkoutMethod: {
-                    $in: FilterWrapperMarker,
-                },
+                checkoutMethodId: { $in: FilterWrapperMarker },
             },
         }));
     }

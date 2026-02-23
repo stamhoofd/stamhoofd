@@ -119,6 +119,7 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     status: createInMemoryFilterCompiler('status'),
     paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
     checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
+    checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id'),
     timeSlotDate: createInMemoryFilterCompiler('data.timeSlot.date'),
     validAt: createInMemoryFilterCompiler('validAt'),
     name: createInMemoryFilterCompiler('data.customer.name'),
