@@ -69,12 +69,14 @@ async function crons() {
             break;
         }
         if (job.running) {
+            console.warn(job.name, 'is still running');
             continue;
         }
         job.running = true;
         run(job.name, job.method).finally(() => {
             job.running = false;
         }).catch((e) => {
+            job.running = false;
             console.error(e);
         });
 
