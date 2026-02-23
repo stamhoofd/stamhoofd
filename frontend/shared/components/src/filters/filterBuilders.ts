@@ -767,6 +767,16 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
             }));
     }
 
+    builders.push(new StringFilterBuilder({
+        key: 'code',
+        name: $t('Kortingscode'),
+        wrapper: {
+            discountCodes: {
+                $elemMatch: FilterWrapperMarker,
+            },
+        },
+    }));
+
     if (preview instanceof Webshop) {
         builders.push(getCartFilterBuilder(preview));
     }

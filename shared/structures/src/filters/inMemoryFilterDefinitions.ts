@@ -120,6 +120,10 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     paymentMethod: createInMemoryFilterCompiler('data.paymentMethod'),
     checkoutMethod: createInMemoryFilterCompiler('data.checkoutMethod.type'),
     checkoutMethodId: createInMemoryFilterCompiler('data.checkoutMethod.id'),
+    discountCodes: createInMemoryFilterCompiler('data.discountCodes', {
+        ...baseInMemoryFilterCompilers,
+        code: createInMemoryFilterCompiler('code'),
+    }),
     timeSlotDate: createInMemoryFilterCompiler('data.timeSlot.date'),
     validAt: createInMemoryFilterCompiler('validAt'),
     name: createInMemoryFilterCompiler('data.customer.name'),
