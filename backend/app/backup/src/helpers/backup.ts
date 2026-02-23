@@ -2,7 +2,7 @@ import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCo
 import { Database } from '@simonbackx/simple-database';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Formatter } from '@stamhoofd/utility';
+import { Formatter, Sorter } from '@stamhoofd/utility';
 import chalk from 'chalk';
 import { exec } from 'child_process';
 import fs from 'fs';
@@ -17,8 +17,8 @@ const execPromise = util.promisify(exec);
 // Since well create a backup every day, keeping 1000 binary logs would give
 // a full history of 40 days - and leaves us enough margin in case more
 // logs are created in a day
-const MAX_BINARY_LOGS = 200;
-const MAX_BACKUPS = 60; // in days
+let MAX_BINARY_LOGS = 2000; // ±50 GB = ±60days
+const MAX_BACKUPS = 90; // in days = ±270 GB
 const BACKUP_PREFIX = 'backup-';
 const BINARY_LOG_PREFIX = 'binlog.';
 
@@ -148,7 +148,8 @@ export async function cleanBinaryLogBackups() {
     const client = getS3Client();
 
     // List all backup files on the server
-    const allBackups = (await listAllFiles(STAMHOOFD.objectStoragePath + '/binlogs')).filter(f => f.key.endsWith('.enc') && path.basename(f.key).startsWith(BINARY_LOG_PREFIX));
+    const allBackups = (await listAllFiles(STAMHOOFD.objectStoragePath + '/binlogs')).filter(f => f.key.endsWith('.enc') && f.key.startsWith(BINARY_LOG_PREFIX));
+
     const numberToDelete = allBackups.length - MAX_BINARY_LOGS;
 
     if (numberToDelete <= 0) {
@@ -203,6 +204,10 @@ export async function listAllFiles(prefix: string): Promise<ObjectStorageFile[]>
         }
 
         if (!response.NextMarker) {
+            break;
+        }
+
+        if (response.Contents.length < 1000) {
             break;
         }
 
@@ -456,9 +461,8 @@ export async function backupBinlogs() {
 
     if (rows.length > MAX_BINARY_LOGS) {
         console.error(chalk.bold(chalk.red('Warning: MAX_BINARY_LOGS is larger than the binary logs stored on the system. Please check the MySQL configuration.')));
-
-        // Only copy last MAX_BINARY_LOGS rows
-        rows.splice(0, rows.length - MAX_BINARY_LOGS);
+        console.error('Found ' + rows.length + ' binlogs. Increasing binary logs max size.');
+        MAX_BINARY_LOGS = rows.length;
     }
 
     const lastRow = rows.pop();
