@@ -48,7 +48,7 @@
         <div class="split-inputs">
             <div>
                 <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
-                    <DateSelection v-model="createdAt" />
+                    <DateSelection v-model="createdAt" :adjust-initial-time="isNew" :time="{hours: 12}" />
                 </STInputBox>
             </div>
 

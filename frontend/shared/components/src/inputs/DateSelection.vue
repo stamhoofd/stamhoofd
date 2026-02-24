@@ -65,7 +65,13 @@ const props = withDefaults(defineProps<{
     min?: Date;
     max?: Date;
     // local time!
-    time?: { hours: number; minutes: number; seconds: number; millisecond?: number } | null;
+    time?: { hours: number; minutes?: number; seconds?: number; millisecond?: number } | null;
+
+    /**
+     * Prevent changing the time (hour, minute, second, ms) if the initial date is selected / resellected.
+     * Can be used in combination with time to force the time to a specific value only if changed.
+     */
+    adjustInitialTime?: boolean;
 }>(), {
     required: true,
     placeholder: () => $t(`2ac677a6-f225-46b6-8fea-f6e0f10582ca`),
@@ -73,14 +79,15 @@ const props = withDefaults(defineProps<{
     min: () => new Date(1900, 0, 1, 0, 0, 0, 0),
     max: () => new Date(2100, 0, 1, 0, 0, 0, 0),
     time: null,
+    adjustInitialTime: true,
 });
 
 const defaultLocalTime: ComputedRef<{ hour: number; minute: number; second: number; millisecond: number }> = computed(() => {
     if (props.time !== null) {
         return {
             hour: props.time.hours,
-            minute: props.time.minutes,
-            second: props.time.seconds,
+            minute: props.time.minutes ?? 0,
+            second: props.time.seconds ?? 0,
             millisecond: props.time.millisecond ?? 0,
         };
     }
@@ -478,11 +485,23 @@ function focusFirst() {
 function setTime(dateTime: DateTime) {
     return dateTime.set({ ...defaultLocalTime.value });
 }
+const initialDate = model.value;
 
 function emitDateTime(dateTime: DateTime | null): void {
     function emit(date: Date | null) {
         // only update if changed
         if (date?.getTime() !== model.value?.getTime()) {
+            if (date && !props.adjustInitialTime && initialDate && Formatter.dateIso(initialDate) === Formatter.dateIso(date)) {
+                // Force same time as initial time, to the ms
+                const dateTime = Formatter.luxon(date);
+                const initialDateTime = Formatter.luxon(initialDate);
+                date = dateTime.set({
+                    hour: initialDateTime.hour,
+                    minute: initialDateTime.minute,
+                    second: initialDateTime.second,
+                    millisecond: initialDateTime.millisecond,
+                }).toJSDate();
+            }
             model.value = date;
         }
     }
@@ -501,6 +520,7 @@ function emitDateTime(dateTime: DateTime | null): void {
         // If the date is not valid, we don't set the model
         return;
     }
+
     emit(dateTime.toJSDate());
 }
 
