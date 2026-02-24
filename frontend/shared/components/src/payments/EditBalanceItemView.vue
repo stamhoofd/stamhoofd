@@ -143,7 +143,7 @@
 
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
-        <template v-if="family && family.members.length >= (originalMemberId ? 2 : 1)">
+        <template v-if="patchedBalanceItem.relations.size === 0 && family && family.members.length >= (originalMemberId ? 2 : 1)">
             <hr><h2>{{ $t('f4052a0b-9564-49c4-a6b6-41af3411f3b0') }}</h2>
             <p>{{ $t('00c61f8a-204c-41d5-abbb-7da96675b0e3') }}</p>
 
@@ -263,7 +263,7 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, Dropdown, ErrorBox, IconContainer, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform, useShowMember } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, ErrorBox, IconContainer, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform, useShowMember } from '@stamhoofd/components';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
@@ -558,6 +558,10 @@ async function doDelete() {
 }
 
 async function loadMember() {
+    if (patchedBalanceItem.value.relations.size > 0) {
+        return;
+    }
+
     if (!props.balanceItem.memberId) {
         return;
     }
@@ -575,6 +579,10 @@ async function loadMember() {
 }
 
 async function loadFamilyFromUser() {
+    if (patchedBalanceItem.value.relations.size > 0) {
+        return;
+    }
+
     if (!props.balanceItem.userId) {
         return;
     }
