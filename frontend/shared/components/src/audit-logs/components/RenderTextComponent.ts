@@ -1,17 +1,17 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';
 import { PromiseView } from '../../containers';
 import { useAppContext } from '../../context';
-import { EventOverview } from '../../events';
-import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
-import { MemberSegmentedView } from '../../members';
-import { Toast } from '../../overlays/Toast';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
+import { EventOverview } from '../../events';
+import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
+import { useShowMember } from '../../members';
+import { Toast } from '../../overlays/Toast';
 import { PaymentView } from '../../payments';
 import SafeHtmlView from '../SafeHtmlView.vue';
-import { Formatter } from '@stamhoofd/utility';
 
 export interface Renderable {
     render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
@@ -29,28 +29,29 @@ function tooltip(vnode: ReturnType<typeof h>, text: string): ReturnType<typeof h
     return withDirectives(vnode, [[TooltipDirective, text]]);
 }
 
-export function renderAny(obj: unknown, context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[] {
+export function renderAny(obj: unknown, context: Context): () => (string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[]) {
     if (typeof obj === 'string') {
-        return obj;
+        return () => obj;
     }
 
     if (isRenderable(obj)) {
-        return obj.render(context);
+        return () => obj.render(context);
     }
 
     if (obj instanceof AuditLogReplacement) {
         if (obj.type === AuditLogReplacementType.Member && obj.id) {
             // Open member button
-            return h('button', {
+            const showMember = useShowMember();
+            return () => h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showMember(obj.id!, context),
+                onClick: () => showMember(obj.id!),
                 type: 'button',
             }, obj.value);
         }
 
         if (obj.type === AuditLogReplacementType.Payment && obj.id) {
             // Open payment button
-            return h('button', {
+            return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showPayment(obj.id!, context),
                 type: 'button',
@@ -59,12 +60,12 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
 
         if (obj.type === AuditLogReplacementType.StripeAccount) {
             // Render as code
-            return copyable(h('span', { class: 'style-inline-code style-copyable' }, obj.value));
+            return () => copyable(h('span', { class: 'style-inline-code style-copyable' }, obj.value));
         }
 
         if (obj.type === AuditLogReplacementType.Event && obj.id) {
             // Open member button
-            return h('button', {
+            return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showEvent(obj.id!, context),
                 type: 'button',
@@ -73,7 +74,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
 
         if (obj.type === AuditLogReplacementType.Image && obj.id) {
             // Open member button
-            return h('a', {
+            return () => h('a', {
                 class: 'style-inline-resource simple',
                 href: obj.id,
                 target: '_blank',
@@ -97,7 +98,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
 
         if (obj.type === AuditLogReplacementType.File && obj.id) {
             // Open member button
-            return h('a', {
+            return () => h('a', {
                 class: 'style-inline-resource simple',
                 href: obj.id,
                 target: '_blank',
@@ -109,7 +110,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         if (obj.type === AuditLogReplacementType.Organization && obj.id) {
             if (context.app === 'admin') {
             // Open member button
-                return h('button', {
+                return () => h('button', {
                     class: 'style-inline-resource button simple',
                     onClick: () => showOrganization(obj.id!, context),
                     type: 'button',
@@ -118,7 +119,7 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         }
 
         if (obj.type === AuditLogReplacementType.Html && obj.value) {
-            return h('button', {
+            return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showHtml(obj.value!, context),
                 type: 'button',
@@ -127,10 +128,10 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
 
         if (obj.type === AuditLogReplacementType.LongText && obj.value) {
             if (obj.value.length < 200 && !obj.value.includes('\n')) {
-                return obj.value;
+                return () => obj.value;
             }
             const style = `padding: 0; margin: 0; font-size: 15px; line-height: 1.5; font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`;
-            return h('button', {
+            return () => h('button', {
                 class: 'style-inline-resource button simple',
                 onClick: () => showHtml('<p style="' + Formatter.escapeHtml(style) + '">' + Formatter.escapeHtml(obj.value!).replace(/\n/g, '<br>') + '</p>', context),
                 type: 'button',
@@ -138,32 +139,36 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         }
 
         if (obj.type === AuditLogReplacementType.Array) {
-            const a = obj.values.flatMap((part) => {
-                const q = renderAny(part, context);
-                if (Array.isArray(q)) {
-                    if (q.length === 0) {
-                        return [];
+            const allRenderMethods = obj.values.map(part => renderAny(part, context));
+
+            return () => {
+                const a = allRenderMethods.flatMap((p) => {
+                    const q = p();
+                    if (Array.isArray(q)) {
+                        if (q.length === 0) {
+                            return [];
+                        }
+                        return [...q, ' → '];
                     }
-                    return [...q, ' → '];
-                }
-                return [q, ' → '];
-            });
-            a.pop();
-            return a;
+                    return [q, ' → '];
+                });
+                a.pop();
+                return a;
+            };
         }
 
         if (obj.description) {
-            return tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString()), obj.description);
+            return () => tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString()), obj.description);
         }
 
         if (obj.id) {
-            return copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || $t('0e21480d-5597-4337-bcee-5f4eba73fb7e')), 'ID: ' + obj.id), obj.id);
+            return () => copyable(tooltip(h('span', { class: 'style-inline-resource style-tooltip' }, obj.toString() || $t('0e21480d-5597-4337-bcee-5f4eba73fb7e')), 'ID: ' + obj.id), obj.id);
         }
         const str = obj.toString();
 
         if (str.startsWith('#') && str.length === 7) {
             // Render color string
-            return [
+            return () => [
                 h('span', {
                     class: 'style-color-box',
                     style: {
@@ -175,12 +180,12 @@ export function renderAny(obj: unknown, context: Context): string | ReturnType<t
         }
 
         if (!str) {
-            return [];
+            return () => [];
         }
 
-        return str;
+        return () => str;
     }
-    return '';
+    return () => '';
 }
 
 export const RenderTextComponent = {
@@ -206,7 +211,9 @@ export const RenderTextComponent = {
             organizationFetcher,
             paymentFetcher,
         };
-        return () => props.text.map(part => renderAny(part, context));
+
+        const renderFunctions = props.text.map(part => renderAny(part, context));
+        return () => renderFunctions.map(r => r());
     },
 };
 
@@ -249,33 +256,6 @@ async function showPayment(paymentId: string, context: Context) {
                 }
                 return new ComponentWithProperties(PaymentView, {
                     payment: payments.results[0],
-                });
-            },
-        }),
-    });
-
-    await context.present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-async function showMember(memberId: string, context: Context) {
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                const members = await context.memberFetcher.fetch(new LimitedFilteredRequest({
-                    filter: {
-                        id: memberId,
-                    },
-                    limit: 1,
-                }));
-                if (members.results.length === 0) {
-                    Toast.error($t(`22541ecc-ba4f-4a91-b8d3-8213bfaaea0b`)).show();
-                    throw new Error('Member not found');
-                }
-                return new ComponentWithProperties(MemberSegmentedView, {
-                    member: members.results[0],
                 });
             },
         }),
