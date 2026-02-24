@@ -17,3 +17,4 @@ export { default as ReceivableBalanceBox } from './ReceivableBalanceBox.vue';
 export { default as ReceivableBalanceList } from './ReceivableBalanceList.vue';
 export { default as ReceivableBalanceView } from './ReceivableBalanceView.vue';
 export { default as SelectBalanceItemsView } from './SelectBalanceItemsView.vue';
+export * from './hooks/index.js';

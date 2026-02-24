@@ -10,7 +10,7 @@ import { EventOverview } from '../../events';
 import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
 import { useShowMember } from '../../members';
 import { Toast } from '../../overlays/Toast';
-import { PaymentView } from '../../payments';
+import { PaymentView, useShowPayment } from '../../payments';
 import SafeHtmlView from '../SafeHtmlView.vue';
 
 export interface Renderable {
@@ -51,9 +51,10 @@ export function renderAny(obj: unknown, context: Context): () => (string | Retur
 
         if (obj.type === AuditLogReplacementType.Payment && obj.id) {
             // Open payment button
+            const showPayment = useShowPayment();
             return () => h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showPayment(obj.id!, context),
+                onClick: () => showPayment(obj.id!),
                 type: 'button',
             }, obj.value);
         }
@@ -231,33 +232,6 @@ async function showHtml(html: string, context: Context) {
         root: new ComponentWithProperties(SafeHtmlView, {
             html,
             title: $t(`71a1a391-f437-41e4-b2d4-e9e32121d4ee`),
-        }),
-    });
-
-    await context.present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-async function showPayment(paymentId: string, context: Context) {
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                const payments = await context.paymentFetcher.fetch(new LimitedFilteredRequest({
-                    filter: {
-                        id: paymentId,
-                    },
-                    limit: 1,
-                }));
-                if (payments.results.length === 0) {
-                    Toast.error($t(`5e6f043a-6ed5-41eb-b670-d9ac6b63e598`)).show();
-                    throw new Error('Payment not found');
-                }
-                return new ComponentWithProperties(PaymentView, {
-                    payment: payments.results[0],
-                });
-            },
         }),
     });
 
