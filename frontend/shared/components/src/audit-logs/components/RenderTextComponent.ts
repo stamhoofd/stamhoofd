@@ -6,12 +6,13 @@ import { PromiseView } from '../../containers';
 import { useAppContext } from '../../context';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
-import { EventOverview } from '../../events';
+import { EventOverview, useShowEvent } from '../../events';
 import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
 import { useShowMember } from '../../members';
 import { Toast } from '../../overlays/Toast';
 import { PaymentView, useShowPayment } from '../../payments';
 import SafeHtmlView from '../SafeHtmlView.vue';
+import { useShowOrganization } from '../../organizations';
 
 export interface Renderable {
     render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
@@ -66,9 +67,10 @@ export function renderAny(obj: unknown, context: Context): () => (string | Retur
 
         if (obj.type === AuditLogReplacementType.Event && obj.id) {
             // Open member button
+            const showEvent = useShowEvent();
             return () => h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showEvent(obj.id!, context),
+                onClick: () => showEvent(obj.id!),
                 type: 'button',
             }, obj.value);
         }
@@ -110,10 +112,10 @@ export function renderAny(obj: unknown, context: Context): () => (string | Retur
 
         if (obj.type === AuditLogReplacementType.Organization && obj.id) {
             if (context.app === 'admin') {
-            // Open member button
+                const showOrganization = useShowOrganization();
                 return () => h('button', {
                     class: 'style-inline-resource button simple',
-                    onClick: () => showOrganization(obj.id!, context),
+                    onClick: () => showOrganization(obj.id!),
                     type: 'button',
                 }, obj.value);
             }
@@ -232,63 +234,6 @@ async function showHtml(html: string, context: Context) {
         root: new ComponentWithProperties(SafeHtmlView, {
             html,
             title: $t(`71a1a391-f437-41e4-b2d4-e9e32121d4ee`),
-        }),
-    });
-
-    await context.present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-async function showEvent(eventId: string, context: Context) {
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                const events = await context.eventFetcher.fetch(new LimitedFilteredRequest({
-                    filter: {
-                        id: eventId,
-                    },
-                    limit: 1,
-                }));
-                if (events.results.length === 0) {
-                    Toast.error($t(`6f8446d7-f625-4134-bf05-553ba577619f`)).show();
-                    throw new Error('Event not found');
-                }
-                return new ComponentWithProperties(EventOverview, {
-                    event: events.results[0],
-                });
-            },
-        }),
-    });
-
-    await context.present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}
-
-async function showOrganization(organizationId: string, context: Context) {
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(PromiseView, {
-            promise: async () => {
-                const organizations = await context.organizationFetcher.fetch(new LimitedFilteredRequest({
-                    filter: {
-                        id: organizationId,
-                    },
-                    limit: 1,
-                }));
-                if (organizations.results.length === 0) {
-                    Toast.error($t(`6350b2c6-ab40-4a92-873e-f667386055a4`)).show();
-                    throw new Error('Event not found');
-                }
-                const OrganizationView = (await import('@stamhoofd/admin-frontend/src/views/organizations/OrganizationView.vue')).default;
-                return new ComponentWithProperties(OrganizationView, {
-                    organization: organizations.results[0],
-                    getNext: () => null,
-                    getPrevious: () => null,
-                });
-            },
         }),
     });
 
