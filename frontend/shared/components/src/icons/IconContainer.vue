@@ -10,11 +10,22 @@
         <aside v-if="$slots.aside">
             <slot name="aside" />
         </aside>
+        <aside v-else-if="asideIcon">
+            <span :class="'icon small ' + asideIcon" />
+        </aside>
     </figure>
 </template>
 
 <script lang="ts" setup>
-defineProps<{ icon?: string }>();
+withDefaults(
+    defineProps<{
+        icon?: string;
+        asideIcon?: string;
+    }>(), {
+        icon: '',
+        asideIcon: '',
+    },
+);
 </script>
 
 <style lang="scss" scoped>
