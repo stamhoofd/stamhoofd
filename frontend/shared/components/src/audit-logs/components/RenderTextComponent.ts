@@ -1,25 +1,23 @@
-import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AuditLogReplacement, AuditLogReplacementType, LimitedFilteredRequest } from '@stamhoofd/structures';
+import { usePresent } from '@simonbackx/vue-app-navigation';
+import { AuditLogReplacement, AuditLogReplacementType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { h, withDirectives } from 'vue';
-import { PromiseView } from '../../containers';
 import { useAppContext } from '../../context';
 import CopyableDirective from '../../directives/Copyable';
 import TooltipDirective from '../../directives/Tooltip';
-import { EventOverview, useShowEvent } from '../../events';
+import { useShowEvent } from '../../events';
 import { useEventsObjectFetcher, useMembersObjectFetcher, useOrganizationsObjectFetcher, usePaymentsObjectFetcher } from '../../fetchers';
 import { useShowMember } from '../../members';
-import { Toast } from '../../overlays/Toast';
-import { PaymentView, useShowPayment } from '../../payments';
-import SafeHtmlView from '../SafeHtmlView.vue';
 import { useShowOrganization } from '../../organizations';
+import { useShowPayment } from '../../payments';
+import { useShowHtml } from '../hooks';
 
 export interface Renderable {
-    render(context: Context): string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[];
+    setup(): () => (string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[]);
 }
 
 function isRenderable(obj: unknown): obj is Renderable {
-    return typeof obj === 'object' && obj !== null && (obj as Renderable).render !== undefined;
+    return typeof obj === 'object' && obj !== null && (obj as Renderable).setup !== undefined;
 }
 
 function copyable(vnode: ReturnType<typeof h>, text?: string): ReturnType<typeof h> {
@@ -30,13 +28,13 @@ function tooltip(vnode: ReturnType<typeof h>, text: string): ReturnType<typeof h
     return withDirectives(vnode, [[TooltipDirective, text]]);
 }
 
-export function renderAny(obj: unknown, context: Context): () => (string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[]) {
+export function renderAny(obj: unknown): () => (string | ReturnType<typeof h> | (ReturnType<typeof h> | string)[]) {
     if (typeof obj === 'string') {
         return () => obj;
     }
 
     if (isRenderable(obj)) {
-        return () => obj.render(context);
+        return obj.setup();
     }
 
     if (obj instanceof AuditLogReplacement) {
@@ -111,7 +109,8 @@ export function renderAny(obj: unknown, context: Context): () => (string | Retur
         }
 
         if (obj.type === AuditLogReplacementType.Organization && obj.id) {
-            if (context.app === 'admin') {
+            const app = useAppContext();
+            if (app === 'admin') {
                 const showOrganization = useShowOrganization();
                 return () => h('button', {
                     class: 'style-inline-resource button simple',
@@ -122,9 +121,10 @@ export function renderAny(obj: unknown, context: Context): () => (string | Retur
         }
 
         if (obj.type === AuditLogReplacementType.Html && obj.value) {
+            const showHtml = useShowHtml();
             return () => h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showHtml(obj.value!, context),
+                onClick: () => showHtml(obj.value!),
                 type: 'button',
             }, obj.toString() as string);
         }
@@ -134,15 +134,16 @@ export function renderAny(obj: unknown, context: Context): () => (string | Retur
                 return () => obj.value;
             }
             const style = `padding: 0; margin: 0; font-size: 15px; line-height: 1.5; font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`;
+            const showHtml = useShowHtml();
             return () => h('button', {
                 class: 'style-inline-resource button simple',
-                onClick: () => showHtml('<p style="' + Formatter.escapeHtml(style) + '">' + Formatter.escapeHtml(obj.value!).replace(/\n/g, '<br>') + '</p>', context),
+                onClick: () => showHtml('<p style="' + Formatter.escapeHtml(style) + '">' + Formatter.escapeHtml(obj.value!).replace(/\n/g, '<br>') + '</p>'),
                 type: 'button',
             }, obj.toString() as string);
         }
 
         if (obj.type === AuditLogReplacementType.Array) {
-            const allRenderMethods = obj.values.map(part => renderAny(part, context));
+            const allRenderMethods = obj.values.map(part => renderAny(part));
 
             return () => {
                 const a = allRenderMethods.flatMap((p) => {
@@ -199,23 +200,7 @@ export const RenderTextComponent = {
         },
     },
     setup(props: { text: unknown[] }) {
-        const present = usePresent();
-        const memberFetcher = useMembersObjectFetcher();
-        const eventFetcher = useEventsObjectFetcher();
-        const organizationFetcher = useOrganizationsObjectFetcher();
-        const paymentFetcher = usePaymentsObjectFetcher();
-        const app = useAppContext();
-
-        const context: Context = {
-            app,
-            present,
-            memberFetcher,
-            eventFetcher,
-            organizationFetcher,
-            paymentFetcher,
-        };
-
-        const renderFunctions = props.text.map(part => renderAny(part, context));
+        const renderFunctions = props.text.map(part => renderAny(part));
         return () => renderFunctions.map(r => r());
     },
 };
@@ -228,17 +213,3 @@ export type Context = {
     organizationFetcher: ReturnType<typeof useOrganizationsObjectFetcher>;
     paymentFetcher: ReturnType<typeof usePaymentsObjectFetcher>;
 };
-
-async function showHtml(html: string, context: Context) {
-    const component = new ComponentWithProperties(NavigationController, {
-        root: new ComponentWithProperties(SafeHtmlView, {
-            html,
-            title: $t(`71a1a391-f437-41e4-b2d4-e9e32121d4ee`),
-        }),
-    });
-
-    await context.present({
-        components: [component],
-        modalDisplayStyle: 'popup',
-    });
-}

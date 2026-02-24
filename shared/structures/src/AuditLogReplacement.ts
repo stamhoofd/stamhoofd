@@ -147,7 +147,7 @@ export class AuditLogReplacement extends AutoEncoder {
         return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.LongText, description: title });
     }
 
-    toString() {
+    toString(): string {
         if (this.type === AuditLogReplacementType.Key || this.type === AuditLogReplacementType.EmailTemplate) {
             return getAuditLogPatchKeyName(this.value);
         }

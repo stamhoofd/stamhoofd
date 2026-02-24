@@ -7,8 +7,8 @@
 
 <script setup lang="ts">
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacementType } from '@stamhoofd/structures';
-import { Context, Renderable, renderAny, RenderTextComponent } from './RenderTextComponent';
 import { h } from 'vue';
+import { Renderable, renderAny, RenderTextComponent } from './RenderTextComponent';
 
 defineProps<{
     items: AuditLogPatchItem[];
@@ -23,10 +23,11 @@ class TextWithClass implements Renderable {
         this.className = className;
     }
 
-    render(context: Context) {
-        return h('span', {
+    setup() {
+        const renderChildren = renderAny(this.children);
+        return () => h('span', {
             class: this.className,
-        }, renderAny(this.children, context));
+        }, renderChildren());
     }
 }
 
