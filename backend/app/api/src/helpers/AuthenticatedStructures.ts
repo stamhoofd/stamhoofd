@@ -1207,4 +1207,7 @@ export class AuthenticatedStructures {
 
         return structs;
     }
+    static async balanceItemsWithPayments(balanceItems: BalanceItem[]) {
+        return await BalanceItem.getStructureWithPayments(balanceItems);
+    }
 }

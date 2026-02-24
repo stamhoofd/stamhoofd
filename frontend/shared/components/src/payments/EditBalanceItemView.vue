@@ -249,7 +249,7 @@ import { I18nComponent } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { computed, Ref, ref } from 'vue';
+import { computed, onMounted, Ref, ref } from 'vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
 import PaymentRow from './components/PaymentRow.vue';
 
@@ -259,7 +259,11 @@ const props = defineProps<{
     saveHandler: ((patch: AutoEncoderPatchType<BalanceItem>) => Promise<void>);
 }>();
 
-const { hasChanges, addPatch, patch, patched: patchedBalanceItem } = usePatch(props.balanceItem);
+const balanceItemWithPayments = ref<null | BalanceItemWithPayments>(null);
+const balanceItem = computed(() => {
+    return balanceItemWithPayments.value ?? props.balanceItem;
+});
+const { hasChanges, addPatch, patch, patched: patchedBalanceItem } = usePatch(balanceItem);
 const family = ref(null) as Ref<PlatformFamily | null>;
 const organization = useOrganization();
 const platform = usePlatform();
@@ -269,6 +273,7 @@ const pop = usePop();
 const context = useContext();
 const owner = useRequestOwner();
 const loadFamilyFromId = useLoadFamilyFromId();
+const loadingPayments = ref(false);
 
 // Load mmeber on load
 loadMember().catch(console.error);
@@ -278,7 +283,7 @@ const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
         return props.isNew ? $t(`c40f80b1-3553-4639-ac5c-937c45baf05e`) : $t(`6c1f62aa-e2c7-40cb-8cb9-7ea3365d5cf4`);
     }
-    return props.isNew ? $t(`d7d6da3d-3522-4c21-a03f-ef980380d4ae`) : $t(`620143a1-0620-483c-8cec-16747a8d4856`);
+    return props.isNew ? $t(`Aanrekening toevoegen`) : $t(`Aanrekening bewerken`);
 });
 
 const sortedPayments = computed(() => {
@@ -378,6 +383,12 @@ async function toggleVATExcempt(event: MouseEvent) {
     await menu.show({ clickEvent: event });
 }
 
+onMounted(() => {
+    if (!hasPaymentsRelation(props.balanceItem)) {
+        reload().catch(console.error);
+    }
+});
+
 function hasPaymentsRelation(balanceItem: BalanceItemWithPayments | BalanceItem): balanceItem is BalanceItemWithPayments {
     return (balanceItem instanceof BalanceItemWithPayments);
 }
@@ -420,6 +431,32 @@ async function save() {
     loading.value = false;
 }
 
+async function reload() {
+    if (props.isNew) {
+        return;
+    }
+    if (loadingPayments.value) {
+        return;
+    }
+    errors.errorBox = null;
+    loadingPayments.value = true;
+
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/balance-items/' + props.balanceItem.id,
+            decoder: BalanceItemWithPayments as Decoder<BalanceItemWithPayments>,
+        });
+
+        props.balanceItem.deepSet(response.data);
+        balanceItemWithPayments.value = response.data;
+    }
+    catch (e) {
+        errors.errorBox = new ErrorBox(e);
+    }
+    loadingPayments.value = false;
+}
+
 async function markDue() {
     if (loading.value) {
         return;
@@ -439,7 +476,7 @@ async function markDue() {
             status: BalanceItemStatus.Due,
         }));
 
-        Toast.success($t('e5ec1057-507d-48ef-aa51-d4b0af98fbe6')).show()
+        Toast.success($t('e5ec1057-507d-48ef-aa51-d4b0af98fbe6')).show();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -465,7 +502,7 @@ async function doCancel() {
         await props.saveHandler(BalanceItemWithPayments.patch({
             status: BalanceItemStatus.Canceled,
         }));
-        Toast.success($t('81735589-1395-4067-87e5-43b5e2ce335e')).show()
+        Toast.success($t('81735589-1395-4067-87e5-43b5e2ce335e')).show();
     }
     catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -492,7 +529,7 @@ async function doDelete() {
             status: BalanceItemStatus.Hidden,
             price: 0,
         }));
-        Toast.success($t('a2110850-3b10-45ef-964f-1c1f497691f7')).show()
+        Toast.success($t('a2110850-3b10-45ef-964f-1c1f497691f7')).show();
         await pop({ force: true });
     }
     catch (e) {
