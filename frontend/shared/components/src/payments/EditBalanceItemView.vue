@@ -10,12 +10,35 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" class="max">
+        <STInputBox v-if="balanceItem.relations.size === 0" error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" class="max">
             <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
         </STInputBox>
-        <p v-if="patchedBalanceItem.relations.size" class="style-description-small">
-            {{ $t('3dbf1fab-6adf-4050-a5dd-5c78886035cb', {platform: platform.config.name}) }}
-        </p>
+        <STList v-else>
+            <STListItem>
+                <h3 class="style-definition-label">
+                    {{ $t('Type') }}
+                </h3>
+                <p class="style-definition-text">
+                    {{ getBalanceItemTypeName(patchedBalanceItem.type) }}
+                </p>
+            </STListItem>
+
+            <STListItem v-for="[type, relation] in patchedBalanceItem.relations" :key="type" :selectable="canOpenRelation(type)" @click="canOpenRelation(type) ? openRelation(type, relation) : undefined">
+                <h3 class="style-definition-label">
+                    {{ getBalanceItemRelationTypeName(type) }}
+                </h3>
+                <p class="style-definition-text">
+                    {{ relation.name.toString() }}
+                </p>
+                <p class="style-description-small">
+                    {{ getBalanceItemRelationTypeDescription(type) }}
+                </p>
+
+                <template v-if="canOpenRelation(type)" #right>
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </STList>
 
         <div class="split-inputs">
             <div>
@@ -240,10 +263,10 @@
 import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, Dropdown, ErrorBox, IconContainer, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform } from '@stamhoofd/components';
+import { CenteredMessage, ContextMenu, ContextMenuItem, DateSelection, Dropdown, ErrorBox, IconContainer, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useOrganization, usePatch, usePlatform, useShowMember } from '@stamhoofd/components';
 import { I18nComponent } from '@stamhoofd/frontend-i18n';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { BalanceItem, BalanceItemStatus, BalanceItemWithPayments, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemWithPayments, getBalanceItemRelationTypeDescription, getBalanceItemRelationTypeName, getBalanceItemTypeName, getVATExcemptReasonName, PlatformFamily, UserWithMembers, VATExcemptReason } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed, onMounted, Ref, ref } from 'vue';
 import { useLoadFamilyFromId } from '../members/hooks/useLoadFamily';
@@ -575,6 +598,20 @@ async function loadFamilyFromUser() {
     catch (e) {
         console.error(e);
         return;
+    }
+}
+
+function canOpenRelation(type: BalanceItemRelationType) {
+    if (type === BalanceItemRelationType.Member) {
+        return true;
+    }
+}
+
+const showMember = useShowMember();
+
+function openRelation(type: BalanceItemRelationType, relation: BalanceItemRelation) {
+    if (type === BalanceItemRelationType.Member) {
+        return showMember(relation.id);
     }
 }
 
