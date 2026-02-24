@@ -10,10 +10,6 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <p v-if="!hasPaymentsRelation(patchedBalanceItem)" class="warning-box">
-            {{ $t('8a4c3084-e54d-474e-94b2-6e8d2bbc9f5e') }}
-        </p>
-
         <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t(`3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d`)" class="max">
             <input ref="firstInput" v-model="description" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`e61decd2-e7a4-4be9-b9d4-c46710faa1a7`)">
         </STInputBox>
