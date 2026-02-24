@@ -3,9 +3,9 @@ import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcrete
 import { StripeAccount } from '@stamhoofd/models';
 import { BalanceItemPaymentDetailed, BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentGeneral, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint';
-import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
+import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 type PaymentWithItem = {
     payment: PaymentGeneral;
@@ -111,6 +111,14 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                         bold: true,
                     },
                 },
+            }),
+        },
+        {
+            id: 'balanceItem.id',
+            name: $t(`Aanrekening ID`),
+            width: 40,
+            getValue: (object: PaymentWithItem) => ({
+                value: object.balanceItemPayment.balanceItem.id,
             }),
         },
         {

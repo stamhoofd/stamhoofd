@@ -56,8 +56,16 @@ export function getSelectableWorkbook() {
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`8daf57de-69cf-48fe-b09b-772c54473184`),
+                        name: $t(`ID`),
                         description: $t(`8388c47d-9510-4bbb-b1f5-c9c3476da7e2`),
+                        enabled: false,
+                    }),
+
+                    new SelectableColumn({
+                        id: 'balanceItem.id',
+                        name: $t(`Aanrekening ID`),
+                        description: $t(`Unieke identificatie van de aanrekening die betaald werd`),
+                        enabled: false,
                     }),
 
                     new SelectableColumn({

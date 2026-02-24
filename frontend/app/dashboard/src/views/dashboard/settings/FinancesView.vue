@@ -60,13 +60,28 @@
 
                     <STListItem v-if="auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.ReceivableBalance)">
                         <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/outstanding-amount.svg">
+                            <img src="@stamhoofd/assets/images/illustrations/account-balance.svg">
                         </template>
                         <h2 class="style-title-list">
                             {{ $t('3df2215e-5c13-493d-afc6-4a866150960c') }}
                         </h2>
                         <p class="style-description">
                             {{ $t('d74d7aec-8fd5-489a-b93d-89d56ca8ae34', {organization: organization!.name}) }}
+                        </p>
+                        <template #right>
+                            <span class="icon arrow-right-small gray" />
+                        </template>
+                    </STListItem>
+
+                    <STListItem v-if="STAMHOOFD.environment === 'development' && auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)" :selectable="true" class="left-center" @click="$navigate(Routes.BalanceItems)">
+                        <template #left>
+                            <img src="@stamhoofd/assets/images/illustrations/box.svg">
+                        </template>
+                        <h2 class="style-title-list">
+                            {{ $t('Individuele aanrekeningen') }}
+                        </h2>
+                        <p class="style-description">
+                            {{ $t('Alle items die werden aangerekend, los van of ze al betaald werden of niet.') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />
@@ -157,11 +172,14 @@ import InvoicesTableView from '../invoices/InvoicesTableView.vue';
 import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
+import BalanceItemsTableView from '../balance-items/BalanceItemsTableView.vue';
+import IconContainer from '@stamhoofd/components/src/icons/IconContainer.vue';
 
 enum Routes {
     Transfers = 'Transfers',
     Export = 'Export',
     Payments = 'Payments',
+    BalanceItems = 'BalanceItems',
     Invoices = 'Invoices',
     PayableBalance = 'PayableBalance',
     ReceivableBalance = 'ReceivableBalance',
@@ -206,6 +224,11 @@ defineRoutes([
                 },
             };
         },
+    },
+    {
+        name: Routes.BalanceItems,
+        url: 'balance-items',
+        component: BalanceItemsTableView as ComponentOptions,
     },
     {
         name: Routes.Invoices,

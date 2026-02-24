@@ -10,3 +10,4 @@ export * from './useReceivableBalancesObjectFetcher';
 export * from './useUserEmailsObjectFetcher';
 export * from './useDocumentTemplatesObjectFetcher';
 export * from './useInvoicesObjectFetcher';
+export * from './useBalanceItemsObjectFetcher';

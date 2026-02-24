@@ -1,4 +1,4 @@
-import { AppType, AuditLogType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, Platform, PrivateWebshop, RecordCategory, RecordType, Webshop, WebshopPreview } from '@stamhoofd/structures';
+import { AppType, AuditLogType, BalanceItemStatus, BalanceItemType, CheckoutMethodType, CheckoutMethodTypeHelper, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, FilterWrapperMarker, getAuditLogTypeName, getBalanceItemStatusName, getBalanceItemTypeName, Group, LoadedPermissions, OrderStatus, OrderStatusHelper, Organization, PaymentMethod, PaymentMethodHelper, PaymentStatus, PaymentStatusHelper, PaymentType, PaymentTypeHelper, Platform, PrivateWebshop, RecordCategory, RecordType, Webshop, WebshopPreview } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { Gender } from '../../../../../shared/structures/esm/dist/src/members/Gender';
@@ -111,6 +111,59 @@ export const getPaymentsUIFilterBuilders: () => UIFilterBuilders = () => {
         }),
 
         getCustomerUIFilterBuilders()[0],
+    ];
+
+    builders.unshift(
+        new GroupUIFilterBuilder({
+            builders,
+        }),
+    );
+
+    return builders;
+};
+
+export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
+    const builders: UIFilterBuilders = [
+        new MultipleChoiceFilterBuilder({
+            name: $t(`e4b54218-b4ff-4c29-a29e-8bf9a9aef0c5`),
+            options: Object.values(BalanceItemStatus).filter(f => f !== BalanceItemStatus.Hidden).map((method) => {
+                return new MultipleChoiceUIFilterOption(getBalanceItemStatusName(method), method);
+            }),
+            wrapper: {
+                status: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }),
+
+        new MultipleChoiceFilterBuilder({
+            name: $t(`97c32bed-6241-48c5-89a8-65ae68d6f562`),
+            options: Object.values(BalanceItemType).map((method) => {
+                return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(getBalanceItemTypeName(method)), method);
+            }),
+            wrapper: {
+                type: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }),
+
+        new NumberFilterBuilder({
+            name: $t(`138ef184-831e-4842-8d11-5d5f6bdae3d4`),
+            type: NumberFilterFormat.Currency,
+            key: 'priceWithVAT',
+        }),
+
+        new NumberFilterBuilder({
+            name: $t(`Openstaand bedrag`),
+            type: NumberFilterFormat.Currency,
+            key: 'priceOpen',
+        }),
+
+        new DateFilterBuilder({
+            name: $t(`6711ac76-e8c7-482b-b6b4-635ba3d16f60`),
+            key: 'createdAt',
+        }),
     ];
 
     builders.unshift(

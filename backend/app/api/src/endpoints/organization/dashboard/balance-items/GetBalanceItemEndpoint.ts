@@ -29,7 +29,7 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManagePayments(organization.id)) {
+        if (!await Context.auth.hasSomeAccess(organization.id)) {
             throw Context.auth.error();
         }
 
@@ -42,6 +42,10 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
                 message: 'Balance item not found',
                 human: $t('Deze aanrekening bestaat niet (meer)'),
             });
+        }
+
+        if (!await Context.auth.canAccessBalanceItems([balanceItem])) {
+            throw Context.auth.error();
         }
 
         return new Response(

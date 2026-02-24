@@ -6,9 +6,9 @@ import { Platform, RateLimiter, sendEmailTemplate } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, ExcelExportType, IPaginatedResponse, LimitedFilteredRequest, Replacement, Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
-import { Context } from '../../../helpers/Context';
-import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
-import { FileCache } from '../../../helpers/FileCache';
+import { Context } from '../../../helpers/Context.js';
+import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator.js';
+import { FileCache } from '../../../helpers/FileCache.js';
 
 type Params = { type: string };
 type Query = undefined;
@@ -149,7 +149,7 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
                 const writer = new XlsxWriter(zipWriterAdapter);
 
                 // Limit to pages of 100
-                request.filter.limit = STAMHOOFD.environment === 'development' ? 1 : 100; // in development, we need to check if total count matches and pagination is working correctly
+                request.filter.limit = STAMHOOFD.environment === 'development' ? 1000 : 100; // in development, we need to check if total count matches and pagination is working correctly
 
                 await exportToExcel({
                     definitions: loader.sheets,

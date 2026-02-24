@@ -513,7 +513,7 @@ export class BalanceItem extends QueryableModel {
         await Database.update(query, params);
     }
 
-    static async loadPayments(items: BalanceItem[]) {
+    static async loadPayments(items: (BalanceItem | { id: string })[]) {
         if (items.length == 0) {
             return { balanceItemPayments: [], payments: [] };
         }
@@ -535,7 +535,7 @@ export class BalanceItem extends QueryableModel {
         });
     }
 
-    static async getStructureWithPayments(items: BalanceItem[]): Promise<BalanceItemWithPayments[]> {
+    static async getStructureWithPayments(items: (BalanceItem | BalanceItemStruct)[]): Promise<BalanceItemWithPayments[]> {
         if (items.length === 0) {
             return [];
         }
