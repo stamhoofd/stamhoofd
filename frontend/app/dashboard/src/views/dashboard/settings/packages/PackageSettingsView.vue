@@ -83,11 +83,12 @@
 
 <script lang="ts" setup>
 import { Decoder } from '@simonbackx/simple-encoding';
-import { ErrorBox, useContext, useErrors, useRequiredOrganization, IconContainer } from '@stamhoofd/components';
-import { useRequestOwner } from '@stamhoofd/networking';
-import { OrganizationPackagesStatus, STPackage, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
+import { ErrorBox, useContext, useErrors, useRequiredOrganization, IconContainer, Toast } from '@stamhoofd/components';
+import { SessionManager, useRequestOwner } from '@stamhoofd/networking';
+import { OrganizationPackagesStatus, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';
 import { onMounted, ref, Ref, watch } from 'vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { ComponentWithProperties, useDismiss } from '@simonbackx/vue-app-navigation';
 
 const status = ref(null) as Ref<OrganizationPackagesStatus | null>;
 const errors = useErrors();
@@ -96,6 +97,8 @@ const packages = ref([] as SelectablePackage[]);
 const loadingStatus = ref(false);
 const owner = useRequestOwner();
 const context = useContext();
+const dismiss = useDismiss();
+const loadingModule = ref(null as STPackageType | null);
 
 class SelectablePackage {
     package: STPackage;
@@ -230,8 +233,70 @@ async function stopTrial(pack: SelectablePackage) {
     // todo
 }
 
+async function checkoutTrial(bundle: STPackageBundle, message: string) {
+    if (loadingModule.value) {
+        new Toast($t('Even geduld, nog bezig met laden...'), 'info').show();
+        return;
+    }
+    loadingModule.value = bundle as any as STPackageType;
+
+    try {
+        await context.value.authenticatedServer.request({
+            method: 'POST',
+            path: '/billing/activate-packages',
+            body: {
+                bundles: [bundle],
+                paymentMethod: PaymentMethod.Unknown,
+            },
+            // decoder: STInvoiceResponse as Decoder<STInvoiceResponse>,
+            shouldRetry: false,
+        });
+        // await SessionManager.currentSession!.fetchOrganization(false);
+        // await this.reload();
+        new Toast(message, 'success green').show();
+    }
+    catch (e) {
+        Toast.fromError(e).show();
+    }
+
+    loadingModule.value = null;
+}
+
+async function openPackageDetails(pack: SelectablePackage) {
+    // this.show(new ComponentWithProperties(PackageConfirmView, {
+    //    bundles: [pack.bundle]
+    // }))
+}
+
 async function checkout(pack: SelectablePackage) {
-    // todo
+    if (!pack.alreadyBought && !pack.inTrial && pack.canStartTrial) {
+        // Start trial
+        switch (pack.bundle) {
+            case STPackageBundle.Members: {
+                if (!organization.value.meta.packages.canStartMembersTrial) {
+                    new Toast($t('Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.'), 'error').show();
+                    await openPackageDetails(pack);
+                    return;
+                }
+                // Activate trial if possible (otherwise go to confirm)
+                // this.setupMemberAdministration();
+                break;
+            }
+            case STPackageBundle.Webshops: {
+                if (!organization.value.meta.packages.canStartWebshopsTrial) {
+                    new Toast($t('Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.'), 'error').show();
+                    await openPackageDetails(pack);
+                    return;
+                }
+                // Activate trial if possible (otherwise go to confirm)
+                await checkoutTrial(STPackageBundle.TrialWebshops, $t('De proefperiode voor webshops is gestart. Neem je tijd om alles rustig uit te proberen. Als je het daarna definitief in gebruik wilt nemen, kan je het systeem activeren.'));
+                await dismiss({ force: true });
+                break;
+            }
+        }
+        return;
+    }
+    await openPackageDetails(pack);
 }
 
 </script>
