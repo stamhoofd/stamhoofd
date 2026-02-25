@@ -546,9 +546,9 @@ async function onOrdersDeleted(orders: PrivateOrder[]): Promise<void> {
 const owner = {};
 
 function created() {
-    props.webshopManager.ticketsEventBus.addListener(owner, 'fetched', tickets => onNewTickets(tickets));
-    props.webshopManager.ticketPatchesEventBus.addListener(owner, 'patched', tickets => onNewTicketPatches(tickets));
-    props.webshopManager.ordersEventBus.addListener(owner, 'deleted', orders => onOrdersDeleted(orders));
+    props.webshopManager.tickets.eventBus.addListener(owner, 'fetched', tickets => onNewTickets(tickets));
+    props.webshopManager.tickets.patchesEventBus.addListener(owner, 'patched', tickets => onNewTicketPatches(tickets));
+    props.webshopManager.orders.eventBus.addListener(owner, 'deleted', orders => onOrdersDeleted(orders));
 
     if (hasTickets.value) {
         recheckTickets();
@@ -566,9 +566,9 @@ function created() {
 }
 
 onBeforeUnmount(() => {
-    props.webshopManager.ticketsEventBus.removeListener(owner);
-    props.webshopManager.ticketPatchesEventBus.removeListener(owner);
-    props.webshopManager.ordersEventBus.removeListener(owner);
+    props.webshopManager.tickets.eventBus.removeListener(owner);
+    props.webshopManager.tickets.patchesEventBus.removeListener(owner);
+    props.webshopManager.orders.eventBus.removeListener(owner);
 });
 
 created();
@@ -576,7 +576,7 @@ created();
 function recheckTickets() {
     if (hasTickets.value) {
         loadingTickets.value = true;
-        props.webshopManager.getTicketsForOrder(order.value.id, true).then((tickets) => {
+        props.webshopManager.tickets.getForOrder(order.value.id, true).then((tickets) => {
             order.value.tickets = tickets;
             loadingTickets.value = false;
         }).catch((e) => {
@@ -641,14 +641,14 @@ function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
 }
 
 async function downloadNewOrders() {
-    await props.webshopManager.fetchOrders();
+    await props.webshopManager.orders.fetchAllUpdated();
 }
 
 function downloadNewTickets() {
     if (!hasTickets.value) {
         return;
     }
-    props.webshopManager.fetchTickets().catch((e: Error) => {
+    props.webshopManager.tickets.fetchAllUpdated().catch((e: Error) => {
         if (tickets.value.length === 0) {
             if (Request.isNetworkError(e)) {
                 new Toast('Het laden van de tickets die bij deze bestelling horen is mislukt. Controleer je internetverbinding en probeer opnieuw.', 'error red').show();

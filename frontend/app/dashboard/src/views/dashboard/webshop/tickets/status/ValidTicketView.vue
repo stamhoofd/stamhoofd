@@ -499,7 +499,7 @@ function changePaymentStatus(event: Event) {
 
 async function cancelScan() {
     if (props.ticket.scannedAt) {
-        await props.webshopManager.addTicketPatch(TicketPrivate.patch({
+        await props.webshopManager.tickets.putPatch(TicketPrivate.patch({
             id: props.ticket.id,
             secret: props.ticket.secret, // needed for lookups
             scannedAt: null,
@@ -511,7 +511,7 @@ async function cancelScan() {
 
 async function markScanned() {
     if (!props.ticket.scannedAt) {
-        await props.webshopManager.addTicketPatch(TicketPrivate.patch({
+        await props.webshopManager.tickets.putPatch(TicketPrivate.patch({
             id: props.ticket.id,
             secret: props.ticket.secret, // needed for lookups
             scannedAt: new Date(),
@@ -551,12 +551,12 @@ function created() {
     // Listen for patches in payments
     GlobalEventBus.addListener(owner, 'paymentPatch', async (payment) => {
         if (payment && payment.id && props.order.payments.find(p => p.id === payment.id as string)) {
-            await props.webshopManager.fetchOrders();
+            await props.webshopManager.orders.fetchAllUpdated();
         }
         return Promise.resolve();
     });
 
-    props.webshopManager.ordersEventBus.addListener(owner, 'fetched', (orders: PrivateOrder[]) => {
+    props.webshopManager.orders.eventBus.addListener(owner, 'fetched', (orders: PrivateOrder[]) => {
         for (const order of orders) {
             if (order.id === props.order.id) {
                 props.order.deepSet(order);
@@ -569,7 +569,7 @@ function created() {
 created();
 
 onBeforeUnmount(() => {
-    props.webshopManager.ordersEventBus.removeListener(this);
+    props.webshopManager.orders.eventBus.removeListener(this);
 });
 
 function createPayment() {
@@ -584,7 +584,7 @@ function createPayment() {
         balanceItems: props.order.balanceItems,
         isNew: true,
         customers: [
-            props.order.data.customer.toPaymentCustomer()
+            props.order.data.customer.toPaymentCustomer(),
         ],
         saveHandler: async (patch: AutoEncoderPatchType<PaymentGeneral>) => {
             const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
@@ -598,7 +598,7 @@ function createPayment() {
             });
 
             // Update order
-            await props.webshopManager.fetchOrders();
+            await props.webshopManager.orders.fetchAllUpdated();
         },
     });
 

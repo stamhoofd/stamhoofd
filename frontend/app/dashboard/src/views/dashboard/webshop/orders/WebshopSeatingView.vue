@@ -102,8 +102,9 @@ const onDeleteOrders = async (orders: PrivateOrder[]): Promise<void> => {
 };
 
 function created() {
-    props.webshopManager.ordersEventBus.addListener(requestOwner, 'fetched', onNewOrders);
-    props.webshopManager.ordersEventBus.addListener(requestOwner, 'deleted', onDeleteOrders);
+    const ordersEventBus = props.webshopManager.orders.eventBus;
+    ordersEventBus.addListener(requestOwner, 'fetched', onNewOrders);
+    ordersEventBus.addListener(requestOwner, 'deleted', onDeleteOrders);
 
     reload();
     loadOrders().catch(console.error);
@@ -112,9 +113,9 @@ function created() {
 created();
 
 onBeforeUnmount(() => {
-    props.webshopManager.ordersEventBus.removeListener(requestOwner);
-    props.webshopManager.ticketsEventBus.removeListener(requestOwner);
-    props.webshopManager.ticketPatchesEventBus.removeListener(requestOwner);
+    props.webshopManager.orders.eventBus.removeListener(requestOwner);
+    props.webshopManager.tickets.eventBus.removeListener(requestOwner);
+    props.webshopManager.tickets.patchesEventBus.removeListener(requestOwner);
 });
 
 const availableProducts = computed(() => {
@@ -279,7 +280,7 @@ async function loadOrders() {
         // We use a buffer to prevent DOM updates or Vue slowdown during streaming
         const arrayBuffer: PrivateOrderWithTickets[] = [];
 
-        await props.webshopManager.streamOrders({
+        await props.webshopManager.orders.stream({
             callback: (order) => {
             // Same orders could be seen twice
                 arrayBuffer.push(
@@ -290,11 +291,11 @@ async function loadOrders() {
 
         const ticketBuffer: TicketPrivate[] = [];
 
-        await props.webshopManager.streamTickets((ticket) => {
+        await props.webshopManager.tickets.streamAll((ticket) => {
             ticketBuffer.push(ticket);
         }, false);
 
-        await props.webshopManager.streamTicketPatches((patch) => {
+        await props.webshopManager.tickets.streamAllPatches((patch) => {
             const ticket = ticketBuffer.find(o => o.id === patch.id);
             if (ticket) {
                 ticket.deepSet(ticket.patch(patch));
@@ -335,7 +336,7 @@ async function refresh(reset = false) {
         if (reset) {
             orders.value = [];
         }
-        await props.webshopManager.fetchOrders({ isFetchAll: reset });
+        await props.webshopManager.orders.fetchAllUpdated({ isFetchAll: reset });
     }
     catch (e) {
         // Fetching failed
@@ -345,7 +346,7 @@ async function refresh(reset = false) {
     // And preload the tickets if needed
     if (hasTickets.value) {
         try {
-            await props.webshopManager.fetchTickets();
+            await props.webshopManager.tickets.fetchAllUpdated();
         }
         catch (e) {
             // Fetching failed
@@ -353,7 +354,7 @@ async function refresh(reset = false) {
         }
 
         // Do we still have some missing patches that are not yet synced with the server?
-        props.webshopManager.trySavePatches().catch((e: Error) => {
+        props.webshopManager.tickets.trySavePatches().catch((e: Error) => {
             console.error(e);
             Toast.fromError(e).show();
         });

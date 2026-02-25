@@ -92,7 +92,7 @@ function openMenu(clickEvent: MouseEvent) {
                 name: $t('f42816c2-4aec-4d10-9d86-215358f27e7c'),
                 disabled: !hasWrite.value,
                 action: () => {
-                    openTicket();
+                    openTicket().catch(console.error);
                     return true;
                 },
             }),
@@ -130,7 +130,7 @@ function getMarkAsMenu() {
                 name: $t('7261dad7-c8ba-4dbd-a5c7-b1ad3dd7194a'),
                 selected: !!props.ticket.scannedAt,
                 action: () => {
-                    props.webshopManager.addTicketPatch(TicketPrivate.patch({
+                    props.webshopManager.tickets.putPatch(TicketPrivate.patch({
                         id: props.ticket.id,
                         secret: props.ticket.secret, // needed for lookups
                         scannedAt: new Date(),
@@ -143,7 +143,7 @@ function getMarkAsMenu() {
                 name: $t('f7d79766-4bd8-45d5-b895-dc9722afd73a'),
                 selected: !props.ticket.scannedAt,
                 action: () => {
-                    props.webshopManager.addTicketPatch(TicketPrivate.patch({
+                    props.webshopManager.tickets.putPatch(TicketPrivate.patch({
                         id: props.ticket.id,
                         secret: props.ticket.secret, // needed for lookups
                         scannedAt: null,

@@ -3,8 +3,8 @@ import { Request } from '@simonbackx/simple-networking';
 import { ObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
-import { WebshopManager } from '../WebshopManager';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
+import { WebshopManager } from '../WebshopManager';
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -42,12 +42,10 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
 
                 this.isOffline = false;
-                await manager.fetchOrders({
+                await manager.orders.fetchAllUpdated({
                     isFetchAll: false,
                 });
-                await manager.fetchTickets({
-                    isFetchAll: false,
-                });
+                await manager.tickets.fetchAllUpdated();
                 this.lastInternetLoad = Date.now();
             }
             catch (e) {
@@ -100,7 +98,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
-            await manager.streamOrders({
+            await manager.orders.stream({
                 callback: (order) => {
                     arrayBuffer.push(
                         PrivateOrderWithTickets.create(order),
@@ -161,7 +159,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             await this.loadFromInternet();
 
-            await manager.streamOrders({
+            await manager.orders.stream({
                 callback: () => {
                     count++;
                 },
@@ -180,11 +178,11 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 async function addTickets(manager: WebshopManager, arrayBuffer: PrivateOrderWithTickets[]): Promise<void> {
     const ticketBuffer: TicketPrivate[] = [];
 
-    await manager.streamTickets((ticket) => {
+    await manager.tickets.streamAll((ticket) => {
         ticketBuffer.push(ticket);
     }, false);
 
-    await manager.streamTicketPatches((patch) => {
+    await manager.tickets.streamAllPatches((patch) => {
         const ticket = ticketBuffer.find(o => o.id === patch.id);
         if (ticket) {
             ticket.deepSet(ticket.patch(patch));
