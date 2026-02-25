@@ -522,6 +522,11 @@ export class BalanceItem extends AutoEncoder {
                     return $t(`973d141e-441d-41b8-ad43-06f71c10126f`) + ' ' + group;
                 }
 
+                const member = this.relations.get(BalanceItemRelationType.Member);
+                if (member) {
+                    return $t('Inschrijving van {name} voor {group}', { name: member.name, group });
+                }
+
                 return $t(`7a6a379d-97fb-4874-bdcf-48be82a76087`) + ' ' + group;
             }
 
