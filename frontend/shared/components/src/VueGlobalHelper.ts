@@ -5,7 +5,7 @@ import { CountryHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { type App } from 'vue';
 
-import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
+import { I18nComponent, LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { Checkbox, CopyableDirective, GlobalEventBus, LoadingButton, LoadingView, LongPressDirective, Radio, SaveView, Spinner, STList, STToolbar, TooltipDirective, useAppContext, ViewportHelper } from '..';
 import PromiseView from './containers/PromiseView.vue';
 import { ColorDirective } from './directives/ColorDirective';
@@ -125,6 +125,7 @@ export class VueGlobalHelper {
         app.component('Spinner', Spinner);
         app.component('TTextarea', TTextarea);
         app.component('TInput', TInput);
+        app.component('I18nComponent', I18nComponent);
 
         document.addEventListener('keydown', (event) => {
             const element = event.target as HTMLInputElement;

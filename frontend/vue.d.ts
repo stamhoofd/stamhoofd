@@ -62,6 +62,7 @@ declare module 'vue' {
         readonly STToolbar: typeof import('@stamhoofd/components').STToolbar;
         readonly TTextarea: typeof import('@stamhoofd/components').TTextarea;
         readonly TInput: typeof import('@stamhoofd/components').TInput;
+        readonly I18nComponent: typeof import('@stamhoofd/frontend-i18n').I18nComponent;
 
         // Formatters
         formatPrice: typeof Formatter.price;
