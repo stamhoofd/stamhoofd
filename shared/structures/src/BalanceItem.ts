@@ -63,6 +63,11 @@ export enum BalanceItemType {
      * Small differences that occurred when creating a payment or invoice
      */
     Rounding = 'Rounding',
+
+    /**
+     * Platform package activation (features)
+     */
+    STPackage = 'STPackage',
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
@@ -84,6 +89,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
         case BalanceItemType.Rounding: return $t('5841f72b-67d8-4add-8cfa-801bcb71cba7');
+        case BalanceItemType.STPackage: return $t('Pakket');
     }
 }
 
@@ -98,6 +104,7 @@ export function getBalanceItemTypeIcon(type: BalanceItemType): string | null {
         case BalanceItemType.CancellationFee: return 'canceled';
         case BalanceItemType.RegistrationBundleDiscount: return 'label';
         case BalanceItemType.Rounding: return 'calculator';
+        case BalanceItemType.STPackage: return 'box';
     }
 }
 
@@ -110,6 +117,8 @@ export enum BalanceItemRelationType {
     Member = 'Member', // Contains the name of the member you registered
     MembershipType = 'MembershipType',
     Discount = 'Discount', // Name and id of the related discount
+
+    STPackage = 'STPackage', // Purchase - Stamhoofd specific
 }
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
@@ -122,6 +131,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.Member: return $t(`f4052a0b-9564-49c4-a6b6-41af3411f3b0`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
         case BalanceItemRelationType.Discount: return $t(`40939025-cebb-4afb-90e9-847233cb256f`);
+        case BalanceItemRelationType.STPackage: return $t(`Pakket`);
     }
 }
 
@@ -135,6 +145,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
         case BalanceItemRelationType.Discount: return $t(`4d5cd18a-ad96-4b2b-aa91-80af307cb8cd`);
+        case BalanceItemRelationType.STPackage: return $t(`Naam van het pakket geassocieerd aan deze aanrekening`);
     }
 }
 
@@ -538,6 +549,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`03df4cd8-446f-4f40-8d27-90a51bb5a6ba`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`ab4ad0cf-53df-4f35-96a8-59747075417f`);
             case BalanceItemType.Rounding: return this.description;
+            case BalanceItemType.STPackage: return this.description;
         }
     }
 
@@ -560,6 +572,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
             case BalanceItemType.Rounding: return $t('097441a3-6b49-4768-87c3-8b290bb073ed');
+            case BalanceItemType.STPackage: return $t('pakketten');
         }
     }
 
@@ -692,6 +705,10 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return $t(`0495e7f0-10bf-4cd9-8d93-1a8b62ce19aa`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`25589636-c28d-4c5b-9b5c-0f1cfd4037ef`);
             case BalanceItemType.Rounding: return $t(`e50caf1a-fe3d-4b35-8b69-eee76406ecbc`);
+            case BalanceItemType.STPackage: {
+                const pack = this.relations.get(BalanceItemRelationType.STPackage);
+                return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
+            }
         }
     }
 
