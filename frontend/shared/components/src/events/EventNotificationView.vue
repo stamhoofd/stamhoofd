@@ -236,7 +236,7 @@ const props = withDefaults(
 );
 
 const notification = props.viewModel.useNotification();
-const errors = useErrors(); ;
+const errors = useErrors();
 const type = props.viewModel.useType();
 const present = usePresent();
 const auth = useAuth();
