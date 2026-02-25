@@ -43,6 +43,10 @@ export class WebshopOrdersRepo {
         this.tickets = tickets;
     }
 
+    reset() {
+        this.apiClient.reset();
+    }
+
     /**
      * Get the orders from the backend and store them in the indexed db
      * @param isFetchAll true if all orders should be fetched (and not only the updated orders)
@@ -251,7 +255,7 @@ export class OrdersStore {
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                this.database.delete();
+                this.database.delete().catch(console.error);
                 reject(event);
             };
 
@@ -286,12 +290,7 @@ export class OrdersStore {
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
-                try {
-                    this.database.delete();
-                }
-                catch (e) {
-                    console.error(e);
-                }
+                this.database.delete().catch(console.error);
                 reject(event);
             };
 
@@ -471,6 +470,12 @@ class WebshopOrdersApiClient {
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
         this.fetcher = this.getObjectFetcher();
+    }
+
+    reset() {
+        this._isFetching = false;
+        this.lastFetchedOrder = undefined;
+        this._lastUpdated = null;
     }
 
     /**

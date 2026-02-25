@@ -34,6 +34,10 @@ export class WebshopTicketsRepo {
         this.patchesStore = new WebshopTicketPatchesStore({ database });
     }
 
+    reset() {
+        this.apiClient.reset();
+    }
+
     /**
      * Fetch all the updated tickets from the server and store them in the offline database.
      * @returns
@@ -592,6 +596,12 @@ class WebshopTicketsApiClient {
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
         this.fetcher = this.getObjectFetcher();
+    }
+
+    reset() {
+        this._isFetching = false;
+        this.lastFetchedTicket = undefined;
+        this._lastUpdated = null;
     }
 
     async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void }): Promise<void> {

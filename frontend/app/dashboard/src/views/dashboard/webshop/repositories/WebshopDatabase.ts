@@ -11,13 +11,13 @@ type ObjectStoreInitFunction = (options: { oldVersion: number; database: IDBData
  * Offline database for storing webshop data (separate database for each webshop).
  */
 export class WebshopDatabase {
-    readonly id: string;
+    readonly databaseName: string;
 
     private getPromise: Promise<IDBDatabase> | null = null;
     private _database: IDBDatabase | null = null;
 
     constructor({ webshopId }: { webshopId: string }) {
-        this.id = 'webshop-' + webshopId;
+        this.databaseName = 'webshop-' + webshopId;
     }
 
     /**
@@ -51,7 +51,7 @@ export class WebshopDatabase {
             const version = Version;
             let resolved = false;
 
-            const DBOpenRequest = window.indexedDB.open(this.id, version);
+            const DBOpenRequest = window.indexedDB.open(this.databaseName, version);
 
             DBOpenRequest.onsuccess = () => {
                 this._database = DBOpenRequest.result;
@@ -76,7 +76,7 @@ export class WebshopDatabase {
                 }
 
                 // Try to delete this database if something goes wrong
-                this.delete();
+                this.delete().catch(console.error);
 
                 resolved = true;
                 reject(new SimpleError({
@@ -142,11 +142,62 @@ export class WebshopDatabase {
         });
     }
 
+    close() {
+        if (this._database) {
+            this._database.close();
+            this._database = null;
+        }
+    }
+
     /**
      * Delete the database.
+     * @param shouldRetry Whether to retry if the deletion is blocked (can happen if the database is not closed yet)
      */
-    delete() {
-        window.indexedDB.deleteDatabase(this.id);
+    async delete(shouldRetry = false): Promise<boolean> {
+        try {
+            this.close();
+            const request = window.indexedDB.deleteDatabase(this.databaseName);
+
+            const deletePromise = new Promise<void>((resolve, reject) => {
+                request.onsuccess = () => {
+                    resolve();
+                };
+
+                request.onerror = (event) => {
+                    reject(event);
+                };
+
+                request.onblocked = () => {
+                    if (shouldRetry) {
+                        // retry after 2 seconds
+                        console.log('Deletion of "' + this.databaseName + '" is blocked, retrying...');
+                        setTimeout(() => {
+                            this.delete(false).then((didDelete) => {
+                                if (didDelete) {
+                                    resolve();
+                                    return;
+                                }
+
+                                reject();
+                            }).catch((error) => {
+                                reject(error);
+                            });
+                        }, 2000);
+                        return;
+                    }
+
+                    reject(new Error(`Deletion of "${this.databaseName}" is blocked – close all open connections first.`));
+                    return;
+                };
+            });
+
+            await deletePromise;
+            return true;
+        }
+        catch (e) {
+            console.error(e);
+            return false;
+        }
     }
 
     /**

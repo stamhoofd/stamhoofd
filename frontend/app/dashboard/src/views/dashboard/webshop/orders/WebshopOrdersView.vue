@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { Request } from '@simonbackx/simple-networking';
-import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, UIFilterBuilders, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
+import { Column, getWebshopOrderUIFilterBuilders, GlobalEventBus, InMemoryTableAction, ModernTableView, Toast, UIFilterBuilders, useIsMobile, useTableObjectFetcher } from '@stamhoofd/components';
 import { CheckoutMethod, CheckoutMethodType, OrderStatus, OrderStatusHelper, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PrivateOrder, PrivateOrderWithTickets, TicketPrivate, WebshopTimeSlot } from '@stamhoofd/structures';
 
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
@@ -60,7 +60,7 @@ const actions = computed(() => {
         webshopManager: props.webshopManager,
     });
 
-    return [
+    const results = [
         new InMemoryTableAction({
             name: $t('f42816c2-4aec-4d10-9d86-215358f27e7c'),
             icon: 'eye',
@@ -72,11 +72,35 @@ const actions = computed(() => {
                 openOrder(orders[0]);
             },
         }),
-
         ...builder.getActions({
             includeAdd: true,
         }),
     ];
+
+    if (STAMHOOFD.environment === 'development') {
+        results.push(new InMemoryTableAction({
+            name: $t(`Herlaad alle bestellingen`),
+            icon: 'retry',
+            priority: 10,
+            groupIndex: 4,
+            handler: async () => {
+                if (objectFetcher.isOffline) {
+                    Toast.fromError(new Error($t('Kan bestellingen niet herladen zonder internet.'))).show();
+                    return;
+                }
+
+                if (await props.webshopManager.reload()) {
+                    objectFetcher.reset();
+                    tableObjectFetcher.reset(true, true);
+                }
+                else {
+                    Toast.fromError(new Error($t('Herladen van bestellingen mislukt.'))).show();
+                }
+            },
+        }));
+    }
+
+    return results;
 });
 
 const allColumns = ((): Column<PrivateOrderWithTickets, any>[] => {

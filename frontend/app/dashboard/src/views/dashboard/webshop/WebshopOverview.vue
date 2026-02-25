@@ -454,6 +454,7 @@ const splitViewController = useSplitViewController();
 const owner = useRequestOwner();
 
 const loading = ref(false);
+
 const webshopManager = ref(new WebshopManager(context.value, props.preview));
 const webshop = computed(() => webshopManager.value.webshop);
 
@@ -466,10 +467,6 @@ function reload() {
     }).finally(() => {
         loading.value = false;
     });
-}
-
-function getFeatureFlag(flag: string) {
-    return organization.value?.privateMeta?.featureFlags.includes(flag) ?? false;
 }
 
 const auth = useAuth();
@@ -852,7 +849,7 @@ async function deleteWebshop() {
 onBeforeUnmount(() => {
     // Clear all pending requests
     Request.cancelAll(this);
-    webshopManager.value.close();
+    webshopManager.value.closeDatabase();
     document.removeEventListener('visibilitychange', doRefresh);
 });
 
