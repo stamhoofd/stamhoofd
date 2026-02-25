@@ -2,7 +2,11 @@ import { Organization, Payment } from '@stamhoofd/models';
 import { calculateVATPercentage, PaymentProvider, STPackageType } from '@stamhoofd/structures';
 
 export class ServiceFeeHelper {
-    static setServiceFee(payment: Payment, organization: Organization, type: 'webshop' | 'members' | 'tickets', itemPrices: number[]): void {
+    static setServiceFee(payment: Payment, organization: Organization, type: 'webshop' | 'members' | 'tickets' | 'system', itemPrices: number[]): void {
+        if (type === 'system') {
+            return;
+        }
+
         let vat = 0;
 
         // Calculate item count

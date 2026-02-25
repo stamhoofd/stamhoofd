@@ -1,8 +1,13 @@
-import createMollieClient, { PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
-import { BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
+import createMollieClient, { PaymentMethod as molliePaymentMethod, PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
+import { SimpleError } from '@simonbackx/simple-errors';
+import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { AuditLogSource, Checkoutable, EmailTemplateType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Version } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
+import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
+import { Context } from '../helpers/Context.js';
+import { ServiceFeeHelper } from '../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../helpers/StripeHelper.js';
 import { AuditLogService } from './AuditLogService.js';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
@@ -370,5 +375,379 @@ export class PaymentService {
 
         // Change payment total price
         payment.price += difference;
+    }
+
+    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType }: {
+        balanceItems: Map<BalanceItem, number>;
+        organization: Organization;
+        user: User;
+        members?: Member[];
+        checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
+        payingOrganization?: Organization | null;
+        serviceFeeType: 'webshop' | 'members' | 'tickets' | 'system';
+    }) {
+        // Calculate total price to pay
+        let totalPrice = 0;
+        const payMembers: Member[] = [];
+        let hasNegative = false;
+
+        for (const [balanceItem, price] of balanceItems) {
+            if (organization.id !== balanceItem.organizationId) {
+                throw new Error('Unexpected balance item from other organization');
+            }
+
+            if (price > 0 && price > Math.max(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: $t(`38ddccb2-7cf6-4b47-aa71-d11ad73386d8`),
+                });
+            }
+
+            if (price < 0 && price < Math.min(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: $t(`dd14a1d9-c569-4d5e-bb26-569ecede4c52`),
+                });
+            }
+
+            if (price < 0) {
+                hasNegative = true;
+            }
+
+            totalPrice += price;
+
+            if (price > 0 && balanceItem.memberId) {
+                const member = members?.find(m => m.id === balanceItem.memberId);
+                if (!member && balanceItem.registrationId) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: $t(`e64b8269-1cda-434d-8d6f-35be23a9d6e9`),
+                    });
+                }
+                if (member) {
+                    payMembers.push(member);
+                }
+            }
+        }
+
+        if (totalPrice < 0) {
+            // todo: try to make it non-negative by reducing some balance items
+            throw new SimpleError({
+                code: 'negative_price',
+                message: $t(`725715e5-b0ac-43c1-adef-dd42b8907327`),
+            });
+        }
+
+        if (totalPrice !== checkout.totalPrice) {
+            // Changed!
+            throw new SimpleError({
+                code: 'changed_price',
+                message: $t(`e424d549-2bb8-4103-9a14-ac4063d7d454`, { total: Formatter.price(totalPrice) }),
+            });
+        }
+
+        const payment = new Payment();
+        payment.method = checkout.paymentMethod ?? PaymentMethod.Unknown;
+
+        if (totalPrice === 0) {
+            if (balanceItems.size === 0) {
+                return;
+            }
+            // Create an egalizing payment
+            payment.method = PaymentMethod.Unknown;
+
+            if (hasNegative) {
+                payment.type = PaymentType.Reallocation;
+            }
+        }
+        else if (payment.method === PaymentMethod.Unknown) {
+            throw new SimpleError({
+                code: 'invalid_data',
+                message: $t(`86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73`),
+            });
+        }
+
+        // Who will receive this money?
+        payment.organizationId = organization.id;
+
+        // Who paid
+        payment.payingUserId = user.id;
+        payment.payingOrganizationId = payingOrganization?.id ?? null;
+
+        // Fill in customer default value
+        payment.customer = PaymentCustomer.create({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+        });
+
+        // Use structured transfer description prefix
+        let prefix = '';
+
+        if (payingOrganization) {
+            if (!checkout.customer) {
+                throw new SimpleError({
+                    code: 'missing_fields',
+                    message: 'customer is required when paying as an organization',
+                    human: $t(`d483aa9a-289c-4c59-955f-d2f99ec533ab`),
+                });
+            }
+
+            if (!checkout.customer.company) {
+                throw new SimpleError({
+                    code: 'missing_fields',
+                    message: 'customer.company is required when paying as an organization',
+                    human: $t(`bc89861d-a799-4100-b06c-29d6808ba8d2`),
+                });
+            }
+
+            // Search company id
+            // this avoids needing to check the VAT number every time
+            const id = checkout.customer.company.id;
+            const foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
+
+            if (!foundCompany) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: $t(`0ab71307-8f4f-4701-b120-b552a1b6bdd0`),
+                });
+            }
+
+            payment.customer.company = foundCompany;
+
+            const orgNumber = parseInt(payingOrganization.uri);
+
+            if (orgNumber !== 0 && !isNaN(orgNumber)) {
+                prefix = orgNumber + '';
+            }
+        }
+
+        payment.status = PaymentStatus.Created;
+        payment.paidAt = null;
+        payment.price = totalPrice;
+        PaymentService.round(payment);
+        totalPrice = payment.price;
+
+        if (totalPrice === 0) {
+            payment.status = PaymentStatus.Succeeded;
+            payment.paidAt = new Date();
+        }
+
+        if (payment.method === PaymentMethod.Transfer) {
+            // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
+            payment.transferSettings = organization.mappedTransferSettings;
+
+            if (!payment.transferSettings.iban) {
+                throw new SimpleError({
+                    code: 'no_iban',
+                    message: 'No IBAN',
+                    human: $t(`cc8b5066-a7e4-4eae-b556-f56de5d3502c`),
+                });
+            }
+
+            const m = payMembers.map(r => r.details);
+            payment.generateDescription(
+                organization,
+                Formatter.groupNamesByFamily(m),
+                {
+                    name: Formatter.groupNamesByFamily(m),
+                    naam: Formatter.groupNamesByFamily(m),
+                    email: user.email,
+                    prefix,
+                },
+            );
+        }
+
+        // Determine the payment provider
+        // Throws if invalid
+        const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationPaymentConfiguration);
+        payment.provider = provider;
+        payment.stripeAccountId = stripeAccount?.id ?? null;
+        ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
+
+        await payment.save();
+
+        // Create balance item payments
+        const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = [];
+
+        for (const [balanceItem, price] of balanceItems) {
+            // Create one balance item payment to pay it in one payment
+            const balanceItemPayment = new BalanceItemPayment();
+            balanceItemPayment.balanceItemId = balanceItem.id;
+            balanceItemPayment.paymentId = payment.id;
+            balanceItemPayment.organizationId = organization.id;
+            balanceItemPayment.price = price;
+            await balanceItemPayment.save();
+
+            balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
+        }
+
+        const description = $t(`33a926ea-9bc7-444e-becc-c0f2f70e1f0e`) + ' ' + organization.name;
+
+        let paymentUrl: string | null = null;
+        let paymentQRCode: string | null = null;
+
+        try {
+            // Update balance items
+            if (payment.method === PaymentMethod.Transfer) {
+                // Send a small reminder email
+                try {
+                    await this.sendTransferEmail(user, organization, payment);
+                }
+                catch (e) {
+                    console.error('Failed to send transfer email');
+                    console.error(e);
+                }
+            }
+            else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
+                if (!checkout.redirectUrl || !checkout.cancelUrl) {
+                    throw new Error('Should have been caught earlier');
+                }
+
+                const _redirectUrl = new URL(checkout.redirectUrl);
+                _redirectUrl.searchParams.set('paymentId', payment.id);
+                _redirectUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+
+                const _cancelUrl = new URL(checkout.cancelUrl);
+                _cancelUrl.searchParams.set('paymentId', payment.id);
+                _cancelUrl.searchParams.set('cancel', 'true');
+                _cancelUrl.searchParams.set('organizationId', organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+
+                const redirectUrl = _redirectUrl.href;
+                const cancelUrl = _cancelUrl.href;
+
+                const webhookUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
+
+                if (payment.provider === PaymentProvider.Stripe) {
+                    const stripeResult = await StripeHelper.createPayment({
+                        payment,
+                        stripeAccount,
+                        redirectUrl,
+                        cancelUrl,
+                        statementDescriptor: organization.name,
+                        metadata: {
+                            organization: organization.id,
+                            user: user.id,
+                            payment: payment.id,
+                        },
+                        i18n: Context.i18n,
+                        lineItems: balanceItemPayments,
+                        organization,
+                        customer: {
+                            name: user.name ?? payMembers[0]?.details.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+                            email: user.email,
+                        },
+                    });
+                    paymentUrl = stripeResult.paymentUrl;
+                }
+                else if (payment.provider === PaymentProvider.Mollie) {
+                    // Mollie payment
+                    const token = await MollieToken.getTokenFor(organization.id);
+                    if (!token) {
+                        throw new SimpleError({
+                            code: '',
+                            message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        });
+                    }
+                    const profileId = organization.privateMeta.mollieProfile?.id ?? await token.getProfileId(organization.getHost());
+                    if (!profileId) {
+                        throw new SimpleError({
+                            code: '',
+                            message: $t(`5574469f-8eee-47fe-9fb6-1b097142ac75`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        });
+                    }
+                    const mollieClient = createMollieClient({ accessToken: await token.getAccessToken() });
+                    const locale = Context.i18n.locale.replace('-', '_');
+                    const molliePayment = await mollieClient.payments.create({
+                        amount: {
+                            currency: 'EUR',
+                            value: (totalPrice / 100).toFixed(2),
+                        },
+                        method: payment.method == PaymentMethod.Bancontact ? molliePaymentMethod.bancontact : (payment.method == PaymentMethod.iDEAL ? molliePaymentMethod.ideal : molliePaymentMethod.creditcard),
+                        testmode: organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
+                        profileId,
+                        description,
+                        redirectUrl,
+                        webhookUrl,
+                        metadata: {
+                            paymentId: payment.id,
+                        },
+                        locale: ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(locale) ? (locale as any) : null,
+                    });
+                    paymentUrl = molliePayment.getCheckoutUrl();
+
+                    // Save payment
+                    const dbPayment = new MolliePayment();
+                    dbPayment.paymentId = payment.id;
+                    dbPayment.mollieId = molliePayment.id;
+                    await dbPayment.save();
+                }
+                else if (payment.provider === PaymentProvider.Payconiq) {
+                    ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl));
+                }
+                else if (payment.provider === PaymentProvider.Buckaroo) {
+                    // Increase request timeout because buckaroo is super slow (in development)
+                    Context.request.request?.setTimeout(60 * 1000);
+                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                    const ip = Context.request.getIP();
+                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl);
+                    await payment.save();
+
+                    // TypeScript doesn't understand that the status can change and isn't a const....
+                    if ((payment.status as any) === PaymentStatus.Failed) {
+                        throw new SimpleError({
+                            code: 'payment_failed',
+                            message: $t(`b77e1f68-8928-42a2-802b-059fa73bedc3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                        });
+                    }
+                }
+            }
+        }
+        catch (e) {
+            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+            throw e;
+        }
+
+        return {
+            payment,
+            balanceItemPayments,
+            provider,
+            stripeAccount,
+            paymentUrl,
+            paymentQRCode,
+        };
+    }
+
+    static async sendTransferEmail(user: User, organization: Organization, payment: Payment) {
+        const paymentGeneral = await payment.getGeneralStructure();
+        const groupIds = paymentGeneral.groupIds;
+
+        const replacements = getEmailReplacementsForPayment(paymentGeneral, await buildReplacementOptions([paymentGeneral]));
+
+        const recipients = [
+            Recipient.create({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                userId: user.id,
+                replacements,
+            }),
+        ];
+
+        let group: Group | undefined | null = null;
+
+        if (groupIds.length === 1) {
+            group = await Group.getByID(groupIds[0]);
+        }
+
+        // Create e-mail builder
+        await sendEmailTemplate(organization, {
+            template: {
+                type: groupIds.length ? EmailTemplateType.RegistrationTransferDetails : EmailTemplateType.RegistrationTransferDetails,
+                group,
+            },
+            type: 'transactional',
+            recipients,
+        });
     }
 };

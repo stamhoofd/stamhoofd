@@ -1,12 +1,11 @@
-import { column, Database, ManyToOneRelation } from '@simonbackx/simple-database';
-import { AppliedRegistrationDiscount, EmailTemplateType, GroupPrice, PaymentMethod, PaymentMethodHelper, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import { column, ManyToOneRelation } from '@simonbackx/simple-database';
+import { AppliedRegistrationDiscount, EmailTemplateType, GroupPrice, Recipient, RecordAnswer, RecordAnswerDecoder, RegisterItemOption, Registration as RegistrationStructure, Replacement, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { QueryableModel } from '@stamhoofd/sql';
+import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { Group, Organization, User } from './index.js';
+import { Group, Organization } from './index.js';
 
 export class Registration extends QueryableModel {
     static table = 'registrations';
@@ -169,21 +168,23 @@ export class Registration extends QueryableModel {
      * This is used for billing
      */
     static async getActiveMembers(organizationId: string): Promise<number> {
-        const query = `
-        SELECT COUNT(DISTINCT \`${Registration.table}\`.memberId) as c FROM \`${Registration.table}\` 
-        JOIN \`groups\` ON \`groups\`.id = \`${Registration.table}\`.groupId
-        WHERE \`groups\`.organizationId = ? AND \`${Registration.table}\`.cycle = \`groups\`.cycle AND \`groups\`.deletedAt is null AND \`${Registration.table}\`.registeredAt is not null AND \`${Registration.table}\`.deactivatedAt is null`;
-
-        const [results] = await Database.select(query, [organizationId]);
-        const count = results[0]['']['c'];
-
-        if (Number.isInteger(count)) {
-            return count as number;
+        const organization = await Organization.getByID(organizationId);
+        if (!organization) {
+            return 0;
         }
-        else {
-            console.error('Unexpected result for occupancy', results);
-            throw new Error('Query failed');
-        }
+
+        return await this.select()
+            .join(
+                SQL.join(Group.table)
+                    .where(SQL.column('id'), SQL.parentColumn('groupId')),
+            )
+            .where('periodId', organization.periodId)
+            .where('deactivatedAt', null)
+            .where('registeredAt', '!=', null)
+            .where(SQL.column(Group.table, 'deletedAt'), null)
+            .count(
+                SQL.distinct(SQL.column('memberId')),
+            );
     }
 
     async getRecipients(organization: Organization, group: import('./').Group) {
@@ -248,85 +249,6 @@ export class Registration extends QueryableModel {
             },
             recipients,
             type: 'transactional',
-        });
-    }
-
-    static async sendTransferEmail(user: User, organization: Organization, payment: import('./').Payment) {
-        const paymentGeneral = await payment.getGeneralStructure();
-        const groupIds = paymentGeneral.groupIds;
-
-        const recipients = [
-            Recipient.create({
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                userId: user.id,
-                replacements: [
-                    Replacement.create({
-                        token: 'priceToPay',
-                        value: Formatter.price(payment.price),
-                    }),
-                    Replacement.create({
-                        token: 'paymentMethod',
-                        value: PaymentMethodHelper.getName(payment.method ?? PaymentMethod.Unknown),
-                    }),
-                    Replacement.create({
-                        token: 'transferDescription',
-                        value: (payment.transferDescription ?? ''),
-                    }),
-                    Replacement.create({
-                        token: 'transferBankAccount',
-                        value: payment.transferSettings?.iban ?? '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankCreditor',
-                        value: payment.transferSettings?.creditor ?? organization.name,
-                    }),
-                    Replacement.create({
-                        token: 'overviewContext',
-                        value: $t(`01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c`) + ' ' + paymentGeneral.memberNames,
-                    }),
-                    Replacement.create({
-                        token: 'memberNames',
-                        value: paymentGeneral.memberNames,
-                    }),
-                    Replacement.create({
-                        token: 'overviewTable',
-                        value: '',
-                        html: paymentGeneral.getDetailsHTMLTable(),
-                    }),
-                    Replacement.create({
-                        token: 'paymentTable',
-                        value: '',
-                        html: paymentGeneral.getHTMLTable(),
-                    }),
-                    Replacement.create({
-                        token: 'registerUrl',
-                        value: 'https://' + organization.getHost(),
-                    }),
-                    Replacement.create({
-                        token: 'organizationName',
-                        value: organization.name,
-                    }),
-                ],
-            }),
-        ];
-
-        let group: Group | undefined | null = null;
-
-        if (groupIds.length == 1) {
-            const Group = (await import('./index.js')).Group;
-            group = await Group.getByID(groupIds[0]);
-        }
-
-        // Create e-mail builder
-        await sendEmailTemplate(organization, {
-            template: {
-                type: EmailTemplateType.RegistrationTransferDetails,
-                group,
-            },
-            type: 'transactional',
-            recipients,
         });
     }
 
