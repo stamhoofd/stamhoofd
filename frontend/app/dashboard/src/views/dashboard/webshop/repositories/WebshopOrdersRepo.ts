@@ -144,27 +144,28 @@ export class WebshopOrdersRepo {
         return patched;
     }
 
-    async stream(
-        { callback, filter, limit, sortItem, networkFetch }: {
-            callback: (data: PrivateOrder) => void;
-            filter?: StamhoofdFilter;
-            limit?: number;
-            sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-            /**
-             * @deprecated
-             */
-            networkFetch?: boolean;
-        },
-    ): Promise<void> {
+    /**
+     *
+     * @param options
+     * @returns order of last item that had been streamed
+     */
+    async stream(options: {
+        callback: (data: PrivateOrder) => void;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        advanceCount?: number;
+    },
+    ): Promise<number> {
         try {
             // todo: handle decode error in a cleaner way
-            await this.store.stream({
-                callback,
+            return await this.store.stream({
+                ...options,
                 handleDecodeError: async () => {
                     // force fetch all again
                     await this.apiClient.clearLastFetchedOrder();
                 },
-                filter, limit, sortItem });
+            });
         }
         catch (e) {
             if (e instanceof CallbackError || e instanceof CompilerFilterError) {
@@ -174,24 +175,6 @@ export class WebshopOrdersRepo {
                 code: 'loading_failed',
                 message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
             });
-        }
-
-        if (networkFetch) {
-            const owner = {};
-            this.eventBus.addListener(owner, 'fetched', (orders: PrivateOrder[]) => {
-                for (const order of orders) {
-                    callback(order);
-                }
-                return Promise.resolve();
-            });
-
-            try {
-                await this.fetchAllUpdated();
-            }
-
-            finally {
-                this.eventBus.removeListener(owner);
-            }
         }
     }
 
@@ -274,18 +257,23 @@ export class OrdersStore {
         });
     }
 
-    async stream(
-        { callback, handleDecodeError, filter, limit, sortItem }: {
-            callback: (data: PrivateOrder) => void;
-            handleDecodeError: () => Promise<void>;
-            filter?: StamhoofdFilter;
-            limit?: number;
-            sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
-        },
-    ): Promise<void> {
+    /**
+     *
+     * @param param0
+     * @returns order of last item that had been streamed
+     */
+    async stream({ callback, handleDecodeError, filter, limit, sortItem, advanceCount }: {
+        callback: (data: PrivateOrder) => void;
+        handleDecodeError: () => Promise<void>;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        advanceCount?: number;
+    },
+    ): Promise<number> {
         const db = await this.database.get();
 
-        await new Promise<void>((resolve, reject) => {
+        return await new Promise<number>((resolve, reject) => {
             const transaction = db.transaction([OrdersStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
@@ -294,7 +282,6 @@ export class OrdersStore {
                 reject(event);
             };
 
-            // Do the actual saving
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
             let request: IDBRequest<IDBCursorWithValue | null>;
@@ -308,8 +295,12 @@ export class OrdersStore {
                         direction = 'prev';
                     }
 
-                    request = (sortItem.key === 'id' ? objectStore : objectStore.index(sortItem.key))
-                        .openCursor(null, direction);
+                    if (sortItem.key === 'id') {
+                        request = objectStore.openCursor(null, direction);
+                    }
+                    else {
+                        request = objectStore.index(sortItem.key).openCursor(null, direction);
+                    }
                 }
                 else {
                     request = objectStore.openCursor();
@@ -321,6 +312,7 @@ export class OrdersStore {
             }
 
             let matchedItemsCount = 0;
+            let totalIterationCount = advanceCount ?? 0;
 
             let compiledFilter: InMemoryFilterRunner | undefined;
 
@@ -337,52 +329,70 @@ export class OrdersStore {
 
             const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>);
 
-            request.onsuccess = (event: any) => {
+            const iterator: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
                 if (limit && matchedItemsCount >= limit) {
                     // limit reached
-                    resolve();
+                    resolve(totalIterationCount);
                     return;
                 }
 
                 const cursor: IDBCursor & { value: any } | undefined = event.target.result;
-                if (cursor) {
-                    const rawOrder = cursor.value;
-
-                    let decodedResult: PrivateOrder;
-
-                    try {
-                        decodedResult = decoder.decode(new ObjectData(rawOrder, { version: Version }));
-                    }
-                    catch (e) {
-                        handleDecodeError().catch(console.error);
-
-                        // Stop reading without throwing an error
-                        return;
-                    }
-
-                    if (compiledFilter && !compiledFilter(decodedResult)) {
-                        cursor.continue();
-                        return;
-                    }
-
-                    try {
-                        callback(decodedResult);
-                    }
-                    catch (e: any) {
-                        console.error('callback failed', e);
-                        // Propagate error
-                        reject(new CallbackError((e.message as string | undefined) ?? 'Callback failed'));
-                        return;
-                    }
-
-                    cursor.continue();
-                    matchedItemsCount += 1;
-                }
-                else {
+                if (!cursor) {
                     // no more results
-                    resolve();
+                    resolve(totalIterationCount);
+                    return;
                 }
+
+                const rawOrder = cursor.value;
+
+                let decodedResult: PrivateOrder;
+
+                try {
+                    decodedResult = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+                }
+                catch (e) {
+                    handleDecodeError().catch(console.error);
+                    // Stop reading without throwing an error
+                    return;
+                }
+
+                if (compiledFilter && !compiledFilter(decodedResult)) {
+                    cursor.continue();
+                    totalIterationCount += 1;
+                    return;
+                }
+
+                try {
+                    callback(decodedResult);
+                }
+                catch (e: any) {
+                    console.error('callback failed', e);
+                    // Propagate error
+                    reject(new CallbackError((e.message as string | undefined) ?? 'Callback failed'));
+                    return;
+                }
+
+                cursor.continue();
+                totalIterationCount += 1;
+                matchedItemsCount += 1;
             };
+
+            if (advanceCount) {
+                request.onsuccess = (event: any) => {
+                    const cursor: IDBCursor & { value: any } | undefined = event.target.result;
+                    if (!cursor) {
+                    // no more results
+                        resolve(totalIterationCount);
+                        return;
+                    }
+
+                    cursor.advance(advanceCount);
+                    request.onsuccess = iterator;
+                };
+                return;
+            }
+
+            request.onsuccess = iterator;
         });
     }
 

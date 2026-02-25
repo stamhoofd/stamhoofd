@@ -1,10 +1,20 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
+import { toRaw } from 'vue';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 import { WebshopManager } from '../WebshopManager';
+
+/**
+ * todo:
+ * - do not stream all orders (use advance() on cursor): https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor
+ * - do not stream all tickets
+ */
+
+let lastNextRequest: LimitedFilteredRequest | null = null;
+let itemsToAdvanceNext: number = 0;
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -60,6 +70,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         },
 
         async fetch(data: LimitedFilteredRequest) {
+            data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
             const arrayBuffer: PrivateOrderWithTickets[] = [];
             const filters = [data.filter];
@@ -98,7 +109,19 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
-            await manager.orders.stream({
+            let advanceCount = 0;
+
+            if (lastNextRequest !== null) {
+                if (lastNextRequest === data) {
+                    advanceCount = itemsToAdvanceNext;
+                }
+                else {
+                    lastNextRequest = null;
+                    itemsToAdvanceNext = 0;
+                }
+            }
+
+            itemsToAdvanceNext = await manager.orders.stream({
                 callback: (order) => {
                     arrayBuffer.push(
                         PrivateOrderWithTickets.create(order),
@@ -107,6 +130,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 filter,
                 limit: data.limit,
                 sortItem,
+                advanceCount,
             });
 
             console.log('Orders(IndexedDb).fetch', 'addTickets');
@@ -140,6 +164,14 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     code: 'network_error',
                     message: 'No internet connection',
                 });
+            }
+
+            if (next) {
+                lastNextRequest = next;
+            }
+            else {
+                lastNextRequest = null;
+                itemsToAdvanceNext = 0;
             }
 
             return { results: arrayBuffer, next };
@@ -180,27 +212,21 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
     return objectFetcher;
 }
 
+function startTimeLogger(label: string) {
+    const before = Date.now();
+
+    return {
+        stop: () => {
+            const after = Date.now();
+            const seconds = (after - before) / 1000;
+            console.log(`${label}: ${seconds} sec`);
+        },
+    };
+}
+
 async function addTickets(manager: WebshopManager, arrayBuffer: PrivateOrderWithTickets[]): Promise<void> {
-    const ticketBuffer: TicketPrivate[] = [];
-
-    await manager.tickets.streamAll((ticket) => {
-        ticketBuffer.push(ticket);
-    }, false);
-
-    await manager.tickets.streamAllPatches((patch) => {
-        const ticket = ticketBuffer.find(o => o.id === patch.id);
-        if (ticket) {
-            ticket.deepSet(ticket.patch(patch));
-        }
-    });
-
-    for (const ticket of ticketBuffer) {
-        const order = arrayBuffer.find(o => o.id === ticket.orderId);
-        if (order) {
-            order.tickets.push(ticket);
-        }
-        else {
-            console.warn('Couldn\'t find order for ticket with id', ticket.id);
-        }
+    for (const order of arrayBuffer) {
+        const patchedTickets = await manager.tickets.getForOrder(order.id, true);
+        order.tickets = patchedTickets;
     }
 }

@@ -267,6 +267,7 @@ function putOrder(order: PrivateOrder) {
     orders.value.push(PrivateOrderWithTickets.create(order));
 }
 
+// todo: refactor -> can be more efficient
 async function loadOrders() {
     console.log('Loading orders...');
     orders.value = [];
