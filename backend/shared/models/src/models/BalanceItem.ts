@@ -49,6 +49,12 @@ export class BalanceItem extends QueryableModel {
     orderId: string | null = null;
 
     /**
+     * The STPackage ID that is linked to this balance item
+     */
+    @column({ type: 'string', nullable: true })
+    packageId: string | null = null;
+
+    /**
      * The depending balance item ID that is linked to this balance item
      * -> as soon as this balance item is paid, we'll mark this balance item as pending if it is still hidden
      * -> allows for a pay back system where one user needs to pay back a different user
@@ -64,6 +70,20 @@ export class BalanceItem extends QueryableModel {
 
     @column({ type: 'string' })
     description = '';
+
+    /**
+     * In case this balance item is associated with an item that was charged for a certain period, the startDate is saved here.
+     * e.g. startDate of the registration.
+     */
+    @column({ type: 'datetime', nullable: true })
+    startDate: Date | null = null;
+
+    /**
+     * In case this balance item is associated with an item that was charged for a certain period, the endDate is saved here.
+     * e.g. endDate of the registration.
+     */
+    @column({ type: 'datetime', nullable: true })
+    endDate: Date | null = null;
 
     /**
      * @deprecated Use quantity
@@ -304,6 +324,16 @@ export class BalanceItem extends QueryableModel {
             return -this.pricePaid - this.pricePending;
         }
         return this.priceWithVAT - this.pricePaid - this.pricePending;
+    }
+
+    /**
+     * Returns zero if the balance item is canceled, otherwise priceWithVAT
+     */
+    get priceDue() {
+        if (this.status === BalanceItemStatus.Canceled) {
+            return 0;
+        }
+        return this.priceWithVAT;
     }
 
     /**
