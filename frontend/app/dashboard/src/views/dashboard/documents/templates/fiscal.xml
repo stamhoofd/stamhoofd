@@ -17,7 +17,7 @@
 		<v0021_contactpersoon>{{organization.contactName}}</v0021_contactpersoon>
 		<v0022_taalcode>1</v0022_taalcode> <!-- 1 = NL -->
 		<v0023_emailadres>{{organization.email}}</v0023_emailadres>
-		<v0024_nationaalnr>{{filterString organization.companyNumber}}</v0024_nationaalnr> <!-- ondernemingsnummer -->
+		<v0024_nationaalnr>{{filterString organization.companyNumber type="companyNumber"}}</v0024_nationaalnr> <!-- ondernemingsnummer -->
         
 		<v0025_typeenvoi>0</v0025_typeenvoi> <!-- 0=originele verzending, 1= gegroepeerde verbeteringen -->
 		<v0028_landwoonplaats>0</v0028_landwoonplaats>
@@ -25,7 +25,7 @@
 		<Aangiften>
 			<Aangifte>
 				<a1002_inkomstenjaar>{{ year documents.0.registration.startDate }}</a1002_inkomstenjaar>
-				<a1005_registratienummer>{{filterString organization.companyNumber}}</a1005_registratienummer>
+				<a1005_registratienummer>{{filterString organization.companyNumber type="companyNumber"}}</a1005_registratienummer>
 				<a1011_naamnl1>{{organization.name}}</a1011_naamnl1>
 				<a1013_adresnl>{{organization.address.street}} {{organization.address.number}}</a1013_adresnl>
 				<a1014_postcodebelgisch>{{organization.address.postalCode}}</a1014_postcodebelgisch>
@@ -40,7 +40,7 @@
                             <f2002_inkomstenjaar>{{ year registration.startDate }}</f2002_inkomstenjaar>
 
                             <!-- KBO nummer vereniging -->
-							<f2005_registratienummer>{{filterString organization.companyNumber}}</f2005_registratienummer>
+							<f2005_registratienummer>{{filterString organization.companyNumber type="companyNumber"}}</f2005_registratienummer>
 							<f2007_division/> <!-- nvt -->
 
                             <!-- Fishe type is fiscaal attest kinderopvang -->
@@ -132,7 +132,7 @@
                             <f86_2107_childfirstname>{{member.firstName}}</f86_2107_childfirstname>
 
 							{{#if (neq certification.type 'exception')}}
-                                <f86_2109_certifiercbenumber>{{filterString certification.companyNumber}}</f86_2109_certifiercbenumber> <!-- KBO -->
+                                <f86_2109_certifiercbenumber>{{filterString certification.companyNumber type="companyNumber"}}</f86_2109_certifiercbenumber> <!-- KBO -->
                             {{/if}}
 
 							<f86_2110_numberofday1>{{ coalesce registration.days (days registration.startDate registration.endDate) }}</f86_2110_numberofday1> <!-- Dagen -->
@@ -156,7 +156,7 @@
 				</Opgaven>
 
 				<r8002_inkomstenjaar>{{ year documents.0.registration.startDate }}</r8002_inkomstenjaar>
-				<r8005_registratienummer>{{filterString organization.companyNumber}}</r8005_registratienummer>
+				<r8005_registratienummer>{{filterString organization.companyNumber type="companyNumber"}}</r8005_registratienummer>
 				<r8007_division/>
 				<r8010_aantalrecords>{{ sum documents.length 2 }}</r8010_aantalrecords> <!-- aantal fiches in de aangifte +2 -->
 				<r8011_controletotaal>{{ arraySum documents "number" }}</r8011_controletotaal> <!-- = som van de volgnummers van de fiches (zones 2.009) in de aangifte -->

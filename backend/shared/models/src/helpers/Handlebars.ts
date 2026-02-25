@@ -81,6 +81,10 @@ Handlebars.registerHelper('filterString', (a, options) => {
     if (options.hash.type === 'phone') {
         return Formatter.removeAccents(a).replace(/[^A-Za-z0-9+]+/g, '');
     }
+    if (options.hash.type === 'companyNumber') {
+        // BE prefix not allowed
+        return Formatter.removeAccents(a).replace(/[^0-9]+/g, '');
+    }
     // Default: alphanumeric
     return Formatter.removeAccents(a).replace(/[^A-Za-z0-9]+/g, '');
 });
