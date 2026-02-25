@@ -108,12 +108,20 @@ export class STPackageMeta extends AutoEncoder {
     @field({ ...upgradePriceFrom2To4DecimalPlaces, optional: true, nullable: true })
     serviceFeeMaximum: number | null = null;
 
-    /// Contains the (paid) invoiced amount
+    /**
+     * @deprecated
+     * Contains the (paid) invoiced amount.
+     *
+     * This should be replaced by manually querying the balance items created for the package
+     */
     @field({ decoder: IntegerDecoder })
-    @field({ ...upgradePriceFrom2To4DecimalPlaces })
     paidAmount = 0;
 
-    /// Contains the (paid) invoiced price. Used for statistics and reporting
+    /**
+     * @deprecated
+     * Contains the (paid) invoiced price. Used for statistics and reporting
+     * This should be replaced by manually querying the balance items created for the package
+     */
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     paidPrice = 0;
