@@ -35,9 +35,10 @@ export abstract class Checkoutable<T> extends AutoEncoder {
 
     /**
      * Invoice details. Will get saved into the created payment and/or invoice.
+     * Can only be null if the total price is zero.
      */
     @field({ decoder: PaymentCustomer, nullable: true })
-    customer = PaymentCustomer.create({});
+    customer: PaymentCustomer | null = null;
 
     /**
      * Whether to set up a new mandate for this customer.
