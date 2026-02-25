@@ -3,7 +3,7 @@ import { GroupFactory, Organization, OrganizationFactory, OrganizationRegistrati
 import { BundleDiscountGroupPriceSettings, GroupPrice, GroupType, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
-import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init.js';
+import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init/index.js';
 import { GetGroupsEndpoint } from './GetGroupsEndpoint.js';
 import { Database } from '@simonbackx/simple-database';
 
