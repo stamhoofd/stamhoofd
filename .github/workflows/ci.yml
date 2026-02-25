@@ -77,6 +77,8 @@ jobs:
         run: yarn install --prefer-offline --frozen-lockfile
       - name: Build shared packages
         run: yarn build:shared
+      - name: Linting
+        run: cd backend/app/api && yarn lint --quiet
       - name: Run tests
         run: cd backend/app/api && yarn build && yarn test --bail
       - name: Notify Slack of failure
@@ -130,6 +132,8 @@ jobs:
         run: yarn install --prefer-offline --frozen-lockfile
       - name: Build shared packages
         run: yarn build:shared
+      - name: Linting
+        run: cd backend/shared/models && yarn lint --quiet
       - name: Run tests
         run: cd backend/shared/models && yarn build && yarn test --bail
       - name: Notify Slack of failure
@@ -183,6 +187,8 @@ jobs:
         run: yarn install --prefer-offline --frozen-lockfile
       - name: Build shared packages
         run: yarn build:shared
+      - name: Linting
+        run: cd backend/shared/sql && yarn lint --quiet
       - name: Run tests
         run: cd backend/shared/sql && yarn test --bail
       - name: Notify Slack of failure
