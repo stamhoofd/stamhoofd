@@ -1,8 +1,8 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { BalanceItemRelationType, BalanceItemWithPayments, DetailedReceivableBalance, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getReceivableBalanceTypeName, PaginatedResponse, ReceivableBalance } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
+import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint.js';
 
 type ReceivableBalanceWithItem = {
     receivableBalance: DetailedReceivableBalance;

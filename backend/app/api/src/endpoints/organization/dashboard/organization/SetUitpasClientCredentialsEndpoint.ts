@@ -2,8 +2,8 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { UitpasClientCredentialsStatus, UitpasClientIdAndSecret, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
-import { Context } from '../../../../helpers/Context';
-import { UitpasService } from '../../../../services/uitpas/UitpasService';
+import { Context } from '../../../../helpers/Context.js';
+import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

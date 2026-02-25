@@ -5,10 +5,10 @@ import { Event } from '@stamhoofd/models';
 import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, Event as EventStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { eventFilterCompilers } from '../../../sql-filters/events';
-import { eventSorters } from '../../../sql-sorters/events';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { eventFilterCompilers } from '../../../sql-filters/events.js';
+import { eventSorters } from '../../../sql-sorters/events.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

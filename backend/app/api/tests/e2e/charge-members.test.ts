@@ -2,9 +2,9 @@ import { Request, Response } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BalanceItemWithPayments, ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint';
-import { testServer } from '../helpers/TestServer';
-import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint';
+import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';
+import { testServer } from '../helpers/TestServer.js';
+import { GetReceivableBalanceEndpoint } from '../../src/endpoints/organization/dashboard/receivable-balances/GetReceivableBalanceEndpoint.js';
 
 describe('E2E.ChargeMembers', () => {
     const chargeMembersEndpoint = new ChargeMembersEndpoint();

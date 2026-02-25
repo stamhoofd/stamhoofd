@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { Address, Country, CreateOrganization, NewUser, Organization as OrganizationStruct, Version } from '@stamhoofd/structures';
 
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { CreateOrganizationEndpoint } from './CreateOrganizationEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { CreateOrganizationEndpoint } from './CreateOrganizationEndpoint.js';
 
 describe.skip('Endpoint.CreateOrganization', () => {
     // Test endpoint

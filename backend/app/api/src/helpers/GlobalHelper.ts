@@ -1,8 +1,8 @@
 import { I18n } from '@stamhoofd/backend-i18n';
-import { BalanceItemService } from '../services/BalanceItemService';
-import { FileSignService } from '../services/FileSignService';
-import { MemberRecordStore } from '../services/MemberRecordStore';
-import { ContextInstance } from './Context';
+import { BalanceItemService } from '../services/BalanceItemService.js';
+import { FileSignService } from '../services/FileSignService.js';
+import { MemberRecordStore } from '../services/MemberRecordStore.js';
+import { ContextInstance } from './Context.js';
 
 export class GlobalHelper {
     static async load() {

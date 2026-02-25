@@ -6,7 +6,7 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel, PrivateWebshop, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;

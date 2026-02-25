@@ -4,8 +4,8 @@ import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/struc
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import { Context } from '../../../helpers/Context';
-import { PeriodHelper } from '../../../helpers/PeriodHelper';
+import { Context } from '../../../helpers/Context.js';
+import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

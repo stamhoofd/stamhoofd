@@ -2,8 +2,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EmailTemplate, GroupFactory, Organization, OrganizationFactory, Platform, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { EmailTemplateType, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../../tests/helpers/TestServer';
-import { GetEmailTemplatesEndpoint } from './GetEmailTemplatesEndpoint';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { GetEmailTemplatesEndpoint } from './GetEmailTemplatesEndpoint.js';
 
 const baseUrl = `/v${Version}/email-templates`;
 

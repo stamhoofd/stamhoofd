@@ -5,13 +5,13 @@ import { MemberResponsibility, PlatformConfig, PlatformPremiseType, Platform as 
 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Context } from '../../../helpers/Context';
-import { MembershipCharger } from '../../../helpers/MembershipCharger';
-import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer';
-import { PeriodHelper } from '../../../helpers/PeriodHelper';
-import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater';
-import { TagHelper } from '../../../helpers/TagHelper';
-import { PlatformMembershipService } from '../../../services/PlatformMembershipService';
+import { Context } from '../../../helpers/Context.js';
+import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
+import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
+import { PeriodHelper } from '../../../helpers/PeriodHelper.js';
+import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
+import { TagHelper } from '../../../helpers/TagHelper.js';
+import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

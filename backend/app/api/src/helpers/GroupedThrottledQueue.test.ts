@@ -1,4 +1,4 @@
-import { GroupedThrottledQueue } from './GroupedThrottledQueue';
+import { GroupedThrottledQueue } from './GroupedThrottledQueue.js';
 
 describe('GroupedThrottledQueue', () => {
     // Mock timers for controlling setTimeout

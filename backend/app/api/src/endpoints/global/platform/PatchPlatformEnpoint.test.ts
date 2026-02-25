@@ -4,8 +4,8 @@ import { PermissionLevel, Permissions, PlatformConfig, Platform as PlatformStruc
 
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchPlatformEndpoint } from './PatchPlatformEnpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { PatchPlatformEndpoint } from './PatchPlatformEnpoint.js';
 
 describe('Endpoint.PatchPlatform', () => {
     // Test endpoint

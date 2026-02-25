@@ -1,7 +1,7 @@
 import { Group, Member, MemberResponsibilityRecord, Organization, Platform, Registration } from '@stamhoofd/models';
 import { SQL, SQLWhereExists } from '@stamhoofd/sql';
 import { GroupType } from '@stamhoofd/structures';
-import { MemberUserSyncer } from './MemberUserSyncer';
+import { MemberUserSyncer } from './MemberUserSyncer.js';
 
 export class FlagMomentCleanup {
     /**

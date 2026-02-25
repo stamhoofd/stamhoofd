@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
 import { ApiUser } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;

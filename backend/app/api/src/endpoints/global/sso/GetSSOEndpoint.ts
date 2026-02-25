@@ -1,10 +1,10 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 import { Platform } from '@stamhoofd/models';
 import { AutoEncoder, Decoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
-import { SSOService } from '../../../services/SSOService';
+import { SSOService } from '../../../services/SSOService.js';
 
 type Params = Record<string, never>;
 export class SSOQuery extends AutoEncoder {

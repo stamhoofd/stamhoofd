@@ -137,7 +137,7 @@ export class AddressValidatorStatic {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid street, do you mean ' + bestStreet.name + '?',
-                        human: $t("f35e3d3a-880e-4703-a018-a24eed53bf64", { street: bestStreet.name }),
+                        human: $t('f35e3d3a-880e-4703-a018-a24eed53bf64', { street: bestStreet.name }),
                         field: 'street',
                     });
                 }

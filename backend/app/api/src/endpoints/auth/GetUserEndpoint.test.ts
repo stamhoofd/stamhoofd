@@ -1,8 +1,8 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 
-import { testServer } from '../../../tests/helpers/TestServer';
-import { GetUserEndpoint } from './GetUserEndpoint';
+import { testServer } from '../../../tests/helpers/TestServer.js';
+import { GetUserEndpoint } from './GetUserEndpoint.js';
 
 describe('Endpoint.GetUser', () => {
     // Test endpoint

@@ -1,9 +1,9 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
 import { BalanceItem, Document, Group, Member, Registration } from '@stamhoofd/models';
 import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, StockReservation, TranslatedString, Version } from '@stamhoofd/structures';
-import { AuditLogService } from './AuditLogService';
-import { GroupService } from './GroupService';
-import { PlatformMembershipService } from './PlatformMembershipService';
+import { AuditLogService } from './AuditLogService.js';
+import { GroupService } from './GroupService.js';
+import { PlatformMembershipService } from './PlatformMembershipService.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';
 import { encodeObject } from '@simonbackx/simple-encoding';

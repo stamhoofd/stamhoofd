@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
 import { EmailTemplateType, LoginMethod, NewUser, Recipient, Replacement, SignupResponse } from '@stamhoofd/structures';
 
-import { Context } from '../../helpers/Context';
+import { Context } from '../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

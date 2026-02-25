@@ -1,6 +1,6 @@
 import { EmailAddress } from '@stamhoofd/email';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
-import { ModelLogger } from './ModelLogger';
+import { ModelLogger } from './ModelLogger.js';
 
 export const EmailAddressLogger = new ModelLogger(EmailAddress, {
     async optionsGenerator(event) {

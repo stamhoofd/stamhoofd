@@ -1,7 +1,7 @@
 import { Email, Organization, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { EmailStatus } from '@stamhoofd/structures';
-import { ContextInstance } from './Context';
+import { ContextInstance } from './Context.js';
 
 export async function resumeEmails() {
     const query = SQL.select()

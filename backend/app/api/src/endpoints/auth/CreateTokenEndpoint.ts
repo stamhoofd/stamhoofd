@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailVerificationCode, PasswordToken, Platform, Token, User } from '@stamhoofd/models';
 import { ChallengeGrantStruct, CreateTokenStruct, LoginMethod, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../helpers/Context';
+import { Context } from '../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

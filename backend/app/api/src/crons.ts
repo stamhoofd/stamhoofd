@@ -4,9 +4,9 @@ import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/struct
 import { Formatter } from '@stamhoofd/utility';
 import { SQL } from '@stamhoofd/sql';
 import { registerCron } from '@stamhoofd/crons';
-import { checkSettlements } from './helpers/CheckSettlements';
-import { PaymentService } from './services/PaymentService';
-import { RegistrationService } from './services/RegistrationService';
+import { checkSettlements } from './helpers/CheckSettlements.js';
+import { PaymentService } from './services/PaymentService.js';
+import { RegistrationService } from './services/RegistrationService.js';
 
 let lastDNSCheck: Date | null = null;
 let lastDNSId = '';

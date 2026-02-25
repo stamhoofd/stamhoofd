@@ -4,9 +4,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Order } from '@stamhoofd/models';
 import { PaymentGeneral } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { PaymentService } from '../../../services/PaymentService';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { PaymentService } from '../../../services/PaymentService.js';
 
 type Params = { id: string };
 class Query extends AutoEncoder {

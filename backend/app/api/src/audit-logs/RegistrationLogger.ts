@@ -1,5 +1,5 @@
 import { Group, Member, Registration } from '@stamhoofd/models';
-import { ModelLogger } from './ModelLogger';
+import { ModelLogger } from './ModelLogger.js';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
 
 export const RegistrationLogger = new ModelLogger(Registration, {

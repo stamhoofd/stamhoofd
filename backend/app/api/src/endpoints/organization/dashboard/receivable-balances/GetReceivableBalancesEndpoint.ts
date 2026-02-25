@@ -5,10 +5,10 @@ import { CachedBalance } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { assertSort, CountFilteredRequest, DetailedReceivableBalance, getSortFilter, LimitedFilteredRequest, PaginatedResponse, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { receivableBalanceFilterCompilers } from '../../../../sql-filters/receivable-balances';
-import { receivableBalanceSorters } from '../../../../sql-sorters/receivable-balances';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { receivableBalanceFilterCompilers } from '../../../../sql-filters/receivable-balances.js';
+import { receivableBalanceSorters } from '../../../../sql-sorters/receivable-balances.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

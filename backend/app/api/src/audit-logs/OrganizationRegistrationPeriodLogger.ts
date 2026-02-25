@@ -1,5 +1,5 @@
 import { Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/models';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
 
 const defaultGenerator = getDefaultGenerator({

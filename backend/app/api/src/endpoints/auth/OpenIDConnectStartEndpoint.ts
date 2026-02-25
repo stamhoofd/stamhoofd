@@ -2,8 +2,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { StartOpenIDFlowStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../helpers/Context';
-import { SSOService } from '../../services/SSOService';
+import { Context } from '../../helpers/Context.js';
+import { SSOService } from '../../services/SSOService.js';
 
 type Params = Record<string, never>;
 type Query = StartOpenIDFlowStruct;

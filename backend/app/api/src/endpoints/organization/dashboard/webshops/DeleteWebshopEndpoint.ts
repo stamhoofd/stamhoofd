@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { BalanceItem, Order, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { UitpasService } from '../../../../services/uitpas/UitpasService';
+import { Context } from '../../../../helpers/Context.js';
+import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = { id: string };

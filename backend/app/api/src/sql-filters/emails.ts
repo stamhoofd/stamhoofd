@@ -1,5 +1,5 @@
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
-import { emailRecipientsFilterCompilers } from './email-recipients';
+import { emailRecipientsFilterCompilers } from './email-recipients.js';
 
 export const userEmailFilterCompilers: SQLFilterDefinitions = {
     ...baseSQLFilterCompilers,

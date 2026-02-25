@@ -3,8 +3,8 @@ import { CachedBalance, Organization } from '@stamhoofd/models';
 import { PayableBalance, PayableBalanceCollection, ReceivableBalanceType } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

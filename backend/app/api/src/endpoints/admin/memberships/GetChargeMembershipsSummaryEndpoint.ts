@@ -3,7 +3,7 @@ import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLAlias, SQLCount, SQLDistinct, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
 import { ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = Record<string, never>;

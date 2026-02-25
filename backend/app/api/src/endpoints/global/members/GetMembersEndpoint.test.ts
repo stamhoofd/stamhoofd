@@ -2,9 +2,9 @@ import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, RecordAnswer, RecordTextAnswer, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { GetMembersEndpoint } from './GetMembersEndpoint';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { initPlatformRecordCategory } from '../../../../tests/init/initPlatformRecordCategory';
+import { GetMembersEndpoint } from './GetMembersEndpoint.js';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { initPlatformRecordCategory } from '../../../../tests/init/initPlatformRecordCategory.js';
 
 const baseUrl = `/members`;
 const endpoint = new GetMembersEndpoint();

@@ -1,6 +1,6 @@
 import { Group, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriod, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { GroupCategory, GroupCategorySettings, GroupPriceDiscountType, GroupStatus, OldGroupPrice, OldGroupPrices, TranslatedString } from '@stamhoofd/structures';
-import { migratePrices } from './1754560914-groups-prices';
+import { migratePrices } from './1754560914-groups-prices.js';
 
 describe('migration.migratePrices', () => {
     /**

@@ -1,6 +1,6 @@
 import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, createExistsFilter, SQL, SQLFilterDefinitions, SQLValueType } from '@stamhoofd/sql';
-import { eventFilterCompilers } from './events';
-import { organizationFilterCompilers } from './organizations';
+import { eventFilterCompilers } from './events.js';
+import { organizationFilterCompilers } from './organizations.js';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
 

@@ -1,5 +1,5 @@
 import { STExpect } from '@stamhoofd/test-utils';
-import { UitpasService } from './UitpasService';
+import { UitpasService } from './UitpasService.js';
 
 describe.skip('UitpasService', () => {
     it('should validate a correct Uitpas number with kansentarief', async () => {

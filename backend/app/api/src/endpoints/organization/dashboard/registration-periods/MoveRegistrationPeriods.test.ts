@@ -1,11 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Group, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, Version } from '@stamhoofd/structures';
-import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint';
+import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 
-import { testServer } from '../../../../../tests/helpers/TestServer';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 const endpoint = new PatchOrganizationRegistrationPeriodsEndpoint();

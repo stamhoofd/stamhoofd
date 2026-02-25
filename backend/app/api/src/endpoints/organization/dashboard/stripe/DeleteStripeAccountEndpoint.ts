@@ -2,10 +2,10 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { StripeAccount } from '@stamhoofd/models';
 import { AuditLogType, PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { StripeHelper } from '../../../../helpers/StripeHelper';
+import { Context } from '../../../../helpers/Context.js';
+import { StripeHelper } from '../../../../helpers/StripeHelper.js';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { AuditLogService } from '../../../../services/AuditLogService';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
 
 type Params = { id: string };
 type Body = undefined;

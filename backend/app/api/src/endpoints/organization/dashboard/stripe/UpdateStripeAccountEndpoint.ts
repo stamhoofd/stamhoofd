@@ -2,9 +2,9 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { StripeAccount } from '@stamhoofd/models';
 import { AuditLogSource, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { StripeHelper } from '../../../../helpers/StripeHelper';
-import { AuditLogService } from '../../../../services/AuditLogService';
+import { Context } from '../../../../helpers/Context.js';
+import { StripeHelper } from '../../../../helpers/StripeHelper.js';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
 
 type Params = { id: string };
 type Body = undefined;

@@ -4,8 +4,8 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { DNSRecord, DNSRecordType, Organization as OrganizationStruct, OrganizationDomains } from '@stamhoofd/structures';
 import NodeRSA from 'node-rsa';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
 import { Formatter } from '@stamhoofd/utility';
 
 type Params = Record<string, never>;

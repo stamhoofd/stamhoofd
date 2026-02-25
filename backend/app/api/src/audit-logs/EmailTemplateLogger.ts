@@ -1,6 +1,6 @@
 import { EmailTemplate } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.EmailTemplateAdded,
     updated: AuditLogType.EmailTemplateEdited,

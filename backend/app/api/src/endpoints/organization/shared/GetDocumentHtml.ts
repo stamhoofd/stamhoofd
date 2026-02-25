@@ -3,7 +3,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { signInternal } from '@stamhoofd/backend-env';
 import { Document, Organization } from '@stamhoofd/models';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined;

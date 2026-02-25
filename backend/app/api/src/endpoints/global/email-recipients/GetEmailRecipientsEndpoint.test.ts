@@ -1,9 +1,9 @@
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint';
+import { GetEmailRecipientsEndpoint } from './GetEmailRecipientsEndpoint.js';
 import { AccessRight, EmailStatus, LimitedFilteredRequest, OrganizationEmail, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { Email, EmailRecipient, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { Request } from '@simonbackx/simple-endpoints';
-import { testServer } from '../../../../tests/helpers/TestServer';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
 
 const baseUrl = `/email-recipients`;
 

@@ -4,9 +4,9 @@ import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models'
 import { LoginMethod, LoginProviderType, OpenIDClientConfiguration, StartOpenIDFlowStruct, Token as TokenStruct } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
-import { Context } from '../helpers/Context';
+import { Context } from '../helpers/Context.js';
 
-import { CookieHelper, ObjectWithHeaders } from '../helpers/CookieHelper';
+import { CookieHelper, ObjectWithHeaders } from '../helpers/CookieHelper.js';
 
 async function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {

@@ -3,10 +3,10 @@ import { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Group, Member, MemberResponsibilityRecord } from '@stamhoofd/models';
 import { ExcelExportType, LimitedFilteredRequest, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse, Platform as PlatformStruct, Premise } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
-import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint';
-import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
-import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
+import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint.js';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 class MemberResponsibilityRecordWithMember extends MemberResponsibilityRecordStruct {
     @field({ decoder: MemberWithRegistrationsBlob })

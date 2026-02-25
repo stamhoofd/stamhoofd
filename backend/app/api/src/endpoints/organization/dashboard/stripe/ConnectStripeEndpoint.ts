@@ -4,9 +4,9 @@ import { StripeAccount } from '@stamhoofd/models';
 import { AuditLogType, PermissionLevel, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
 import Stripe from 'stripe';
 
-import { Context } from '../../../../helpers/Context';
-import { StripeHelper } from '../../../../helpers/StripeHelper';
-import { AuditLogService } from '../../../../services/AuditLogService';
+import { Context } from '../../../../helpers/Context.js';
+import { StripeHelper } from '../../../../helpers/StripeHelper.js';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
 type Params = Record<string, never>;
 type Body = undefined;
 type Query = undefined;

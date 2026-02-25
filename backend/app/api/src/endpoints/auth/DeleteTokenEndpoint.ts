@@ -1,6 +1,6 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 
-import { Context } from '../../helpers/Context';
+import { Context } from '../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

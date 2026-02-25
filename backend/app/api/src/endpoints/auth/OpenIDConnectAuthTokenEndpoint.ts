@@ -1,8 +1,8 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 
-import { Context } from '../../helpers/Context';
-import { SSOService } from '../../services/SSOService';
+import { Context } from '../../helpers/Context.js';
+import { SSOService } from '../../services/SSOService.js';
 import { OpenIDAuthTokenResponse } from '@stamhoofd/structures';
 
 type Params = Record<string, never>;

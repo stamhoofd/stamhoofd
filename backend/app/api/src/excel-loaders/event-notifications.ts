@@ -1,9 +1,9 @@
 import { XlsxBuiltInNumberFormat, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { EventNotification, EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType, LimitedFilteredRequest, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { GetEventNotificationsEndpoint } from '../endpoints/global/events/GetEventNotificationsEndpoint';
-import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint';
-import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper';
+import { GetEventNotificationsEndpoint } from '../endpoints/global/events/GetEventNotificationsEndpoint.js';
+import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
+import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
 const sheet: XlsxTransformerSheet<EventNotification, EventNotification> = {

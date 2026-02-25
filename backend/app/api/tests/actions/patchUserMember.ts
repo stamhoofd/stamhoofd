@@ -2,8 +2,8 @@ import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encodin
 import { Request } from '@simonbackx/simple-endpoints';
 import { Organization, Token, User } from '@stamhoofd/models';
 import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
-import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint';
-import { testServer } from '../helpers/TestServer';
+import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint.js';
+import { testServer } from '../helpers/TestServer.js';
 
 export async function patchUserMember({ patch, organization, user }: { patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>; organization: Organization; user: User }) {
     expect(patch.id).toBeString();

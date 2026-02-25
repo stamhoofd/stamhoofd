@@ -5,10 +5,10 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { organizationRegistrationPeriodFilterCompilers } from '../../../../sql-filters/organization-registration-periods';
-import { organizationRegistrationPeriodSorters } from '../../../../sql-sorters/organization-registration-periods';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { organizationRegistrationPeriodFilterCompilers } from '../../../../sql-filters/organization-registration-periods.js';
+import { organizationRegistrationPeriodSorters } from '../../../../sql-sorters/organization-registration-periods.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

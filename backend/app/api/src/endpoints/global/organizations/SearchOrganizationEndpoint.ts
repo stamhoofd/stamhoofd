@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Organization } from '@stamhoofd/models';
 import { scalarToSQLExpression, SQL, SQLMatch, SQLWhere, SQLWhereLike } from '@stamhoofd/sql';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 
 type Params = Record<string, never>;
 

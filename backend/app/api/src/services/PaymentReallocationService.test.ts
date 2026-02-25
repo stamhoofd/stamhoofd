@@ -1,7 +1,7 @@
 import { BalanceItem, BalanceItemPayment, MemberFactory, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, PaymentMethod, PaymentStatus, ReceivableBalanceType, TranslatedString } from '@stamhoofd/structures';
-import { PaymentReallocationService } from './PaymentReallocationService';
-import { BalanceItemService } from './BalanceItemService';
+import { PaymentReallocationService } from './PaymentReallocationService.js';
+import { BalanceItemService } from './BalanceItemService.js';
 
 let sharedOrganization: Organization | undefined;
 
@@ -651,8 +651,8 @@ describe('PaymentReallocationService', () => {
                 objectId: memberId,
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
-                    [BalanceItemRelationType.GroupPrice]: 'defaultprice', 
-                    [BalanceItemRelationType.Member]: 'member1', 
+                    [BalanceItemRelationType.GroupPrice]: 'defaultprice',
+                    [BalanceItemRelationType.Member]: 'member1',
                 },
             });
 
@@ -689,7 +689,7 @@ describe('PaymentReallocationService', () => {
 
         it('Balances with one different relation are prioritized over same amount', async () => {
             const memberId = (await getMember()).id;
-            
+
             const b3 = await createItem({
                 unitPrice: 30_00,
                 amount: 1,
@@ -697,7 +697,7 @@ describe('PaymentReallocationService', () => {
                 priceOpen: 30_00, // This adds internal assert
                 objectId: memberId,
             });
-            
+
             const b1 = await createItem({
                 unitPrice: 30_00,
                 amount: 1,
@@ -720,7 +720,7 @@ describe('PaymentReallocationService', () => {
                 relations: {
                     [BalanceItemRelationType.Group]: 'group1',
                     [BalanceItemRelationType.GroupPrice]: 'price2', // This one is different
-                    [BalanceItemRelationType.Member]: 'member1', 
+                    [BalanceItemRelationType.Member]: 'member1',
                 },
             });
             await PaymentReallocationService.reallocate(
@@ -745,7 +745,6 @@ describe('PaymentReallocationService', () => {
                 paid: [],
             });
         });
-
 
         it('Balances with different amount should not create a reallocation payment', async () => {
             const memberId = (await getMember()).id;
@@ -792,7 +791,7 @@ describe('PaymentReallocationService', () => {
             });
 
             await expectItem(b2, {
-                priceOpen: 30_00, 
+                priceOpen: 30_00,
                 paid: [],
             });
 
@@ -909,7 +908,7 @@ describe('PaymentReallocationService', () => {
 
             // Check if the balance items are now equal
             await expectItem(b1, {
-                priceOpen: 0, 
+                priceOpen: 0,
                 paid: [],
             });
 

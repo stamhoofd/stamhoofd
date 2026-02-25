@@ -3,8 +3,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Webshop } from '@stamhoofd/models';
 import { PrivateWebshop, Webshop as WebshopStruct } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;

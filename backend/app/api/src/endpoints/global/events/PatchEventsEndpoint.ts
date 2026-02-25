@@ -6,10 +6,10 @@ import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, 
 import { SimpleError } from '@simonbackx/simple-errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { AuditLogService } from '../../../services/AuditLogService';
-import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { AuditLogService } from '../../../services/AuditLogService.js';
+import { PatchOrganizationRegistrationPeriodsEndpoint } from '../../organization/dashboard/registration-periods/PatchOrganizationRegistrationPeriodsEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

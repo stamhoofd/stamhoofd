@@ -3,8 +3,8 @@ import { Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions, Version } from '@stamhoofd/structures';
 
 import { TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { GetPlatformEndpoint } from './GetPlatformEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetPlatformEndpoint } from './GetPlatformEndpoint.js';
 
 describe('Endpoint.GetPlatformEndpoint', () => {
     const endpoint = new GetPlatformEndpoint();

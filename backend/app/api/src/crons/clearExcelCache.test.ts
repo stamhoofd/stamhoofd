@@ -1,6 +1,6 @@
 import { Dirent } from 'fs';
 import fs from 'fs/promises';
-import { clearExcelCacheHelper } from './clearExcelCache';
+import { clearExcelCacheHelper } from './clearExcelCache.js';
 
 const testPath = '/Users/user/project/backend/app/api/.cache';
 jest.mock('fs/promises');

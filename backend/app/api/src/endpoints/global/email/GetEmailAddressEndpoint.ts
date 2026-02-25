@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailAddress } from '@stamhoofd/email';
 import { Organization } from '@stamhoofd/models';
 import { EmailAddressSettings, OrganizationSimple } from '@stamhoofd/structures';
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

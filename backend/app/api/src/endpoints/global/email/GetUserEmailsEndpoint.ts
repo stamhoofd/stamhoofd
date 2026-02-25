@@ -5,9 +5,9 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email, Member } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { Context } from '../../../helpers/Context';
-import { emailFilterCompilers, userEmailFilterCompilers } from '../../../sql-filters/emails';
-import { emailSorters } from '../../../sql-sorters/emails';
+import { Context } from '../../../helpers/Context.js';
+import { emailFilterCompilers, userEmailFilterCompilers } from '../../../sql-filters/emails.js';
+import { emailSorters } from '../../../sql-sorters/emails.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

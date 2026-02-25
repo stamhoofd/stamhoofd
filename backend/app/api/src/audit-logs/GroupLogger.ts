@@ -1,6 +1,6 @@
 import { Group } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, GroupType } from '@stamhoofd/structures';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.GroupAdded,

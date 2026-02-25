@@ -2,7 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Platform } from '@stamhoofd/models';
 import { Platform as PlatformStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

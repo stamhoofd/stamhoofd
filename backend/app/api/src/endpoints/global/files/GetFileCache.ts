@@ -1,8 +1,8 @@
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { Readable } from 'node:stream';
-import { Context } from '../../../helpers/Context';
-import { FileCache } from '../../../helpers/FileCache';
+import { Context } from '../../../helpers/Context.js';
+import { FileCache } from '../../../helpers/FileCache.js';
 import { Formatter } from '@stamhoofd/utility';
 import { RateLimiter } from '@stamhoofd/models';
 

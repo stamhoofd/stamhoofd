@@ -3,8 +3,8 @@ import { OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamho
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
 
 import { TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { GetWebshopEndpoint } from './GetWebshopEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetWebshopEndpoint } from './GetWebshopEndpoint.js';
 
 describe('Endpoint.GetWebshop', () => {
     // Test endpoint

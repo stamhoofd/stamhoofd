@@ -4,11 +4,11 @@ import { Ticket } from '@stamhoofd/models';
 import { assertSort, CountFilteredRequest, getSortFilter, LimitedFilteredRequest, PaginatedResponse, TicketPrivate } from '@stamhoofd/structures';
 
 import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
-import { ticketFilterCompilers } from '../../../../sql-filters/tickets';
-import { ticketSorters } from '../../../../sql-sorters/tickets';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';
+import { ticketFilterCompilers } from '../../../../sql-filters/tickets.js';
+import { ticketSorters } from '../../../../sql-sorters/tickets.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

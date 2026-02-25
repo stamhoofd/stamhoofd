@@ -3,10 +3,10 @@ import { Organization, OrganizationFactory, StripeAccount, Token, User, UserFact
 import { Address, Cart, CartItem, CartItemOption, Country, Customer, Option, OptionMenu, OrderData, OrderResponse, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import sinon from 'sinon';
 
-import { StripeMocker } from '../../../../tests/helpers/StripeMocker';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchWebshopOrdersEndpoint } from '../dashboard/webshops/PatchWebshopOrdersEndpoint';
-import { PlaceOrderEndpoint } from './PlaceOrderEndpoint';
+import { StripeMocker } from '../../../../tests/helpers/StripeMocker.js';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { PatchWebshopOrdersEndpoint } from '../dashboard/webshops/PatchWebshopOrdersEndpoint.js';
+import { PlaceOrderEndpoint } from './PlaceOrderEndpoint.js';
 
 const address = Address.create({
     street: 'Demostraat',

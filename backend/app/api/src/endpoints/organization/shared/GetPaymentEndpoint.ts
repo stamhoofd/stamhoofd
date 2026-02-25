@@ -3,8 +3,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Payment } from '@stamhoofd/models';
 import { PaymentGeneral } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;

@@ -1,8 +1,8 @@
 import { Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { UitpasGetClientIdResponse } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { UitpasService } from '../../../../services/uitpas/UitpasService';
+import { Context } from '../../../../helpers/Context.js';
+import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

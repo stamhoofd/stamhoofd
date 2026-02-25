@@ -4,15 +4,15 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { Email, EmailRecipient, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EmailRecipientFilter, EmailRecipientFilterType, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchEmailEndpoint } from './PatchEmailEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { PatchEmailEndpoint } from './PatchEmailEndpoint.js';
 
 // Import recipient loaders to initialize them
 import { Formatter } from '@stamhoofd/utility';
-import '../../../email-recipient-loaders/members';
-import '../../../email-recipient-loaders/orders';
-import '../../../email-recipient-loaders/receivable-balances';
-import '../../../email-recipient-loaders/registrations';
+import '../../../email-recipient-loaders/members.js';
+import '../../../email-recipient-loaders/orders.js';
+import '../../../email-recipient-loaders/receivable-balances.js';
+import '../../../email-recipient-loaders/registrations.js';
 import { EmailMocker } from '@stamhoofd/email';
 
 const baseUrl = `/v${Version}/email`;

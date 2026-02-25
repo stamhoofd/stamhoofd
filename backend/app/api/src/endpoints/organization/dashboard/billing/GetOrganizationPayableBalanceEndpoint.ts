@@ -1,8 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { PayableBalanceCollection, ReceivableBalanceType } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { GetUserPayableBalanceEndpoint } from '../../../global/registration/GetUserPayableBalanceEndpoint';
+import { Context } from '../../../../helpers/Context.js';
+import { GetUserPayableBalanceEndpoint } from '../../../global/registration/GetUserPayableBalanceEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

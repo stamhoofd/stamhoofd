@@ -1,7 +1,7 @@
 import { Migration, SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { Member, mergeTwoMembers } from '@stamhoofd/models';
 import { SQL, SQLSelect } from '@stamhoofd/sql';
-import { PatchOrganizationMembersEndpoint } from '../endpoints/global/members/PatchOrganizationMembersEndpoint';
+import { PatchOrganizationMembersEndpoint } from '../endpoints/global/members/PatchOrganizationMembersEndpoint.js';
 
 type MergeType = {
     a: {

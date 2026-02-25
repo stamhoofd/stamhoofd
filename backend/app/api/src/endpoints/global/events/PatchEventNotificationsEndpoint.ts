@@ -4,9 +4,9 @@ import { Event, EventNotification, Platform, RegistrationPeriod } from '@stamhoo
 import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, PermissionLevel, RecordCategory } from '@stamhoofd/structures';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { EventNotificationService } from '../../../services/EventNotificationService';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { EventNotificationService } from '../../../services/EventNotificationService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

@@ -2,9 +2,9 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { BundleDiscountGroupPriceSettings, GroupPrice, GroupType, LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init';
-import { GetGroupsEndpoint } from './GetGroupsEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init.js';
+import { GetGroupsEndpoint } from './GetGroupsEndpoint.js';
 import { Database } from '@simonbackx/simple-database';
 
 const baseUrl = `/groups`;

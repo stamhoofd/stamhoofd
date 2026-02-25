@@ -6,11 +6,11 @@ import { applySQLSorter, compileToSQLFilter, SQL, SQLFilterDefinitions, SQLSortD
 
 import { Decoder } from '@simonbackx/simple-encoding';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper';
-import { orderFilterCompilers } from '../../../../sql-filters/orders';
-import { orderSorters } from '../../../../sql-sorters/orders';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { LimitedFilteredRequestHelper } from '../../../../helpers/LimitedFilteredRequestHelper.js';
+import { orderFilterCompilers } from '../../../../sql-filters/orders.js';
+import { orderSorters } from '../../../../sql-sorters/orders.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

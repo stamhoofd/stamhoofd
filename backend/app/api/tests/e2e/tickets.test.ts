@@ -3,10 +3,10 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { Organization, OrganizationFactory, StripeAccount, Ticket, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
 
-import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint';
-import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
-import { StripeMocker } from '../helpers/StripeMocker';
-import { testServer } from '../helpers/TestServer';
+import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint.js';
+import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint.js';
+import { StripeMocker } from '../helpers/StripeMocker.js';
+import { testServer } from '../helpers/TestServer.js';
 
 const customer = Customer.create({
     firstName: 'John',

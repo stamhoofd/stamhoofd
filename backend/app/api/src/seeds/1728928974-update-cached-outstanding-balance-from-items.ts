@@ -1,7 +1,7 @@
 import { Migration } from '@simonbackx/simple-database';
 import { logger } from '@simonbackx/simple-logging';
 import { BalanceItem } from '@stamhoofd/models';
-import { BalanceItemService } from '../services/BalanceItemService';
+import { BalanceItemService } from '../services/BalanceItemService.js';
 
 /**
  * This migration is required to keep '1733994455-balance-item-status-open' working

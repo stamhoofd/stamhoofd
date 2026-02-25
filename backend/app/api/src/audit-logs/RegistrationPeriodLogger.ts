@@ -1,5 +1,5 @@
 import { RegistrationPeriod } from '@stamhoofd/models';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
 
 export const RegistrationPeriodLogger = new ModelLogger(RegistrationPeriod, {

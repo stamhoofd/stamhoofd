@@ -1,5 +1,5 @@
 import { registerCron } from '@stamhoofd/crons';
-import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup';
+import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup.js';
 import { Platform, RegistrationPeriod } from '@stamhoofd/models';
 
 // Only delete responsibilities when the server is running during a month change.

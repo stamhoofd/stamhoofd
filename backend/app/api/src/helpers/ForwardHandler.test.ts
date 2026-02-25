@@ -2,7 +2,7 @@ import { EmailAddress } from '@stamhoofd/email';
 import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { OrganizationEmail, PermissionLevel, Permissions } from '@stamhoofd/structures';
 
-import { ForwardHandler } from './ForwardHandler';
+import { ForwardHandler } from './ForwardHandler.js';
 
 describe('ForwardHandler', () => {
     it('should send to default e-mail', async () => {

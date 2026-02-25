@@ -4,10 +4,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { ChargeOrganizationsRequest, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
-import { Context } from '../../../helpers/Context';
-import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator';
-import { OrganizationCharger } from '../../../helpers/OrganizationCharger';
-import { GetOrganizationsEndpoint } from './GetOrganizationsEndpoint';
+import { Context } from '../../../helpers/Context.js';
+import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator.js';
+import { OrganizationCharger } from '../../../helpers/OrganizationCharger.js';
+import { GetOrganizationsEndpoint } from './GetOrganizationsEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

@@ -6,10 +6,10 @@ import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, StamhoofdFilter, TransferSettings, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { paymentFilterCompilers } from '../../../../sql-filters/payments';
-import { paymentSorters } from '../../../../sql-sorters/payments';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { paymentFilterCompilers } from '../../../../sql-filters/payments.js';
+import { paymentSorters } from '../../../../sql-sorters/payments.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

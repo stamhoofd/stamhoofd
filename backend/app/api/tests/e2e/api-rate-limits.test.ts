@@ -5,9 +5,9 @@ import { Organization, OrganizationFactory, Token, UserFactory } from '@stamhoof
 import { PatchMap } from '@simonbackx/simple-encoding';
 import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { CreateApiUserEndpoint } from '../../src/endpoints/organization/dashboard/users/CreateApiUserEndpoint';
-import { testServer } from '../helpers/TestServer';
-import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint';
+import { CreateApiUserEndpoint } from '../../src/endpoints/organization/dashboard/users/CreateApiUserEndpoint.js';
+import { testServer } from '../helpers/TestServer.js';
+import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint.js';
 
 describe('E2E.APIRateLimits', () => {
     // Test endpoint

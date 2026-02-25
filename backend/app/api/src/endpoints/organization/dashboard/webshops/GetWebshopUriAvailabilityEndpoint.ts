@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, WebshopUriAvailabilityResponse } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = { id: string };
 type Body = undefined;

@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Registration } from '@stamhoofd/models';
-import { RegistrationService } from '../services/RegistrationService';
+import { RegistrationService } from '../services/RegistrationService.js';
 
 export default new Migration(async () => {
     if (STAMHOOFD.environment == 'test') {

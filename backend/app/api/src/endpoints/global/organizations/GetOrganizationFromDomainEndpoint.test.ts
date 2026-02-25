@@ -2,8 +2,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/structures';
 
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { GetOrganizationFromDomainEndpoint } from './GetOrganizationFromDomainEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetOrganizationFromDomainEndpoint } from './GetOrganizationFromDomainEndpoint.js';
 
 describe('Endpoint.GetOrganizationFromDomain', () => {
     // Test endpoint

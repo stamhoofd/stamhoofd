@@ -4,8 +4,8 @@ import { GroupSettings, Group as GroupStruct, OrganizationRegistrationPeriod as 
 
 import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../../tests/helpers/TestServer';
-import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 
 describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
     // Test endpoint

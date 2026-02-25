@@ -1,7 +1,7 @@
 import { Email } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { ModelLogger } from './ModelLogger';
+import { ModelLogger } from './ModelLogger.js';
 
 export const EmailLogger = new ModelLogger(Email, {
     skipKeys: ['json', 'text', 'status', 'userId', 'createdAt', 'updatedAt', 'deletedAt', 'recipientFilter', 'emailRecipientsCount', 'otherRecipientsCount', 'succeededCount', 'softFailedCount', 'failedCount', 'membersCount', 'hardBouncesCount', 'softBouncesCount', 'spamComplaintsCount', 'recipientsStatus', 'recipientsErrors', 'emailErrors', 'sentAt'],

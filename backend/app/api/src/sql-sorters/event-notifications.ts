@@ -1,7 +1,7 @@
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
 import { SQL, SQLOrderBy, SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
-import { organizationJoin } from '../sql-filters/event-notifications';
+import { organizationJoin } from '../sql-filters/event-notifications.js';
 
 export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!

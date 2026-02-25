@@ -3,14 +3,14 @@ import { Document, DocumentTemplateFactory, Group, GroupFactory, Member, MemberF
 import { IDRegisterCart, IDRegisterCheckout, IDRegisterItem, MemberDetails, MemberWithRegistrationsBlob, PaymentMethod } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
-import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint';
-import { patchOrganizationMember } from '../actions/patchOrganizationMember';
-import { markNotPaid, markPaid } from '../actions/patchPaymentStatus';
-import { patchUserMember } from '../actions/patchUserMember';
-import { testServer } from '../helpers/TestServer';
-import { initAdmin } from '../init/initAdmin';
-import { initStripe } from '../init/initStripe';
-import { registrationUpdateQueue } from '../../src/services/BalanceItemService';
+import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
+import { patchOrganizationMember } from '../actions/patchOrganizationMember.js';
+import { markNotPaid, markPaid } from '../actions/patchPaymentStatus.js';
+import { patchUserMember } from '../actions/patchUserMember.js';
+import { testServer } from '../helpers/TestServer.js';
+import { initAdmin } from '../init/initAdmin.js';
+import { initStripe } from '../init/initStripe.js';
+import { registrationUpdateQueue } from '../../src/services/BalanceItemService.js';
 
 const baseUrl = `/members/register`;
 

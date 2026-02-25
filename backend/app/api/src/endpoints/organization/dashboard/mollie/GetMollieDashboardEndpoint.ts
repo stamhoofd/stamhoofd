@@ -3,7 +3,7 @@ import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-e
 import { MollieToken } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

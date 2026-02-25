@@ -7,10 +7,10 @@ import { Order, Organization, OrganizationFactory, StripeAccount, Token, UserFac
 import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Country, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PermissionLevel, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint';
-import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint';
-import { StripeMocker } from '../helpers/StripeMocker';
-import { testServer } from '../helpers/TestServer';
+import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint.js';
+import { PlaceOrderEndpoint } from '../../src/endpoints/organization/webshops/PlaceOrderEndpoint.js';
+import { StripeMocker } from '../helpers/StripeMocker.js';
+import { testServer } from '../helpers/TestServer.js';
 
 const address = Address.create({
     street: 'Demostraat',

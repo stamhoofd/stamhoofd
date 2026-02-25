@@ -2,8 +2,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { Email, EmailRecipient, MemberFactory, Organization, OrganizationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { EmailStatus, LimitedFilteredRequest, PermissionLevel, Permissions, Replacement } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { GetAdminEmailsEndpoint } from './GetAdminEmailsEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetAdminEmailsEndpoint } from './GetAdminEmailsEndpoint.js';
 import { Formatter } from '@stamhoofd/utility';
 
 const baseUrl = `/email`;

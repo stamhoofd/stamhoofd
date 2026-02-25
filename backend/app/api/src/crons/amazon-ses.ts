@@ -8,7 +8,7 @@ import { registerCron } from '@stamhoofd/crons';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { AuditLog, EmailRecipient, Organization } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
-import { ForwardHandler } from '../helpers/ForwardHandler';
+import { ForwardHandler } from '../helpers/ForwardHandler.js';
 import { Email as EmailModel } from '@stamhoofd/models';
 
 registerCron('checkComplaints', checkComplaints);

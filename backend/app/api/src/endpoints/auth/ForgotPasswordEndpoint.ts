@@ -4,7 +4,7 @@ import { PasswordToken, Platform, sendEmailTemplate, User } from '@stamhoofd/mod
 import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient, Replacement } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Context } from '../../helpers/Context';
+import { Context } from '../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

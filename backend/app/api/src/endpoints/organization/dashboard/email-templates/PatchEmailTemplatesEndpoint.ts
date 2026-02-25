@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { EmailTemplate, Group, Webshop } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Body = PatchableArrayAutoEncoder<EmailTemplateStruct>;

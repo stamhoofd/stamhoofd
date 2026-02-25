@@ -3,8 +3,8 @@ import { Endpoint, Request } from '@simonbackx/simple-endpoints';
 import { EventFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AccessRight, Event, Group, GroupSettings, GroupType, PermissionLevel, Permissions, PermissionsResourceType, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchEventsEndpoint } from './PatchEventsEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
 
 const baseUrl = `/events`;
 const endpoint = new PatchEventsEndpoint();

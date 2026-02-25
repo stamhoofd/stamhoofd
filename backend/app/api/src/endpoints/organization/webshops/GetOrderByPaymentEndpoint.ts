@@ -5,7 +5,7 @@ import { Order } from '@stamhoofd/models';
 import { Payment } from '@stamhoofd/models';
 import { Order as OrderStruct } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 type Params = { id: string; paymentId: string };
 type Query = undefined;
 type Body = undefined;

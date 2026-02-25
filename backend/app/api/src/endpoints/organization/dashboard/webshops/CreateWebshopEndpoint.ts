@@ -5,7 +5,7 @@ import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel, PermissionsResourceType, PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

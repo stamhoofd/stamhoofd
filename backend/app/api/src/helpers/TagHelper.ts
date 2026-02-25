@@ -1,7 +1,7 @@
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, OrganizationTag, TagHelper as SharedTagHelper } from '@stamhoofd/structures';
-import { AuditLogService } from '../services/AuditLogService';
+import { AuditLogService } from '../services/AuditLogService.js';
 
 export class TagHelper extends SharedTagHelper {
     static async updateOrganizations() {

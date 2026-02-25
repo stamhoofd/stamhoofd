@@ -3,7 +3,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Token, User } from '@stamhoofd/models';
 import { ApiUser, PermissionLevel, UserMeta, UserPermissions } from '@stamhoofd/structures';
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;

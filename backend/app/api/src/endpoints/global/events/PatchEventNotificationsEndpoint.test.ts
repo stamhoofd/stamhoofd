@@ -4,8 +4,8 @@ import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, User, UserFactory } from '@stamhoofd/models';
 import { AccessRight, BaseOrganization, EmailTemplateType, Event, EventNotificationStatus, EventNotification as EventNotificationStruct, Permissions, PermissionsResourceType, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint.js';
 
 const baseUrl = `/event-notifications`;
 const endpoint = new PatchEventNotificationsEndpoint();

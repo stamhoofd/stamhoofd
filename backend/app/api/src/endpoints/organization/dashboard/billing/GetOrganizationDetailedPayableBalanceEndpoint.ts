@@ -3,8 +3,8 @@ import { DetailedPayableBalanceCollection, PaymentStatus } from '@stamhoofd/stru
 
 import { BalanceItem, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { Context } from '../../../../helpers/Context';
-import { GetUserDetailedPayableBalanceEndpoint } from '../../../global/registration/GetUserDetailedPayableBalanceEndpoint';
+import { Context } from '../../../../helpers/Context.js';
+import { GetUserDetailedPayableBalanceEndpoint } from '../../../global/registration/GetUserDetailedPayableBalanceEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

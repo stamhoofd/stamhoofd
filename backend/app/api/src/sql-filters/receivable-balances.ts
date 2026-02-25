@@ -1,7 +1,7 @@
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLFilterDefinitions, SQLValueType, SQLScalar } from '@stamhoofd/sql';
-import { memberFilterCompilers } from './members';
-import { organizationFilterCompilers } from './organizations';
-import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers';
+import { memberFilterCompilers } from './members.js';
+import { organizationFilterCompilers } from './organizations.js';
+import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompilers.js';
 
 /**
  * Defines how to filter cached balance items in the database from StamhoofdFilter objects

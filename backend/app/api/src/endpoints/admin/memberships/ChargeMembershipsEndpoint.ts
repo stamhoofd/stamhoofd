@@ -1,8 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { QueueHandler } from '@stamhoofd/queues';
-import { Context } from '../../../helpers/Context';
-import { MembershipCharger } from '../../../helpers/MembershipCharger';
+import { Context } from '../../../helpers/Context.js';
+import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
 
 type Params = Record<string, never>;
 type Query = Record<string, never>;

@@ -2,7 +2,7 @@ import { AutoEncoder, BooleanDecoder, Decoder, field, StringDecoder } from '@sim
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailAddress } from '@stamhoofd/email';
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 import { SESv2Client, DeleteSuppressedDestinationCommand } from '@aws-sdk/client-sesv2'; // ES Modules import
 
 type Params = Record<string, never>;

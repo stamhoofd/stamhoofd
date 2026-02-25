@@ -8,8 +8,8 @@ import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AutoEncoder, BooleanDecoder, Decoder, field } from '@simonbackx/simple-encoding';
-import { Context } from '../../../helpers/Context';
-import { limiter } from './UploadImage';
+import { Context } from '../../../helpers/Context.js';
+import { limiter } from './UploadImage.js';
 import { Image } from '@stamhoofd/models';
 
 type Params = Record<string, never>;

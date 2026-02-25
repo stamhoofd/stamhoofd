@@ -3,8 +3,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Token } from '@stamhoofd/models';
 import { Group as GroupStruct, GroupStatus } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
 type Params = Record<string, never>;
 type Query = undefined;
 type Body = undefined;

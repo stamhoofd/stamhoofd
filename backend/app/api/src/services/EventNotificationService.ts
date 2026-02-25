@@ -2,9 +2,9 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, sendEmailTemplate, User } from '@stamhoofd/models';
 import { EmailTemplateType, PermissionLevel, Recipient, RecordCategory, Replacement } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { AdminPermissionChecker } from '../helpers/AdminPermissionChecker';
-import { Context } from '../helpers/Context';
-import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
+import { AdminPermissionChecker } from '../helpers/AdminPermissionChecker.js';
+import { Context } from '../helpers/Context.js';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 
 export class EventNotificationService {
     static async validateType(notification: EventNotification) {

@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Order, Ticket } from '@stamhoofd/models';
 import { TicketOrder, TicketPublic } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 type Params = { id: string };
 
 class Query extends AutoEncoder {

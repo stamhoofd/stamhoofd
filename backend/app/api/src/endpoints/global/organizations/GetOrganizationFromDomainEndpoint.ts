@@ -4,7 +4,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization } from '@stamhoofd/models';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { GoogleTranslateHelper } from '@stamhoofd/utility';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 type Params = Record<string, never>;
 
 class Query extends AutoEncoder {

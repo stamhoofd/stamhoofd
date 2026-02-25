@@ -3,8 +3,8 @@ import { OrganizationFactory } from '@stamhoofd/models';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Database } from '@simonbackx/simple-database';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { SearchOrganizationEndpoint } from './SearchOrganizationEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { SearchOrganizationEndpoint } from './SearchOrganizationEndpoint.js';
 
 describe('Endpoint.SearchOrganization', () => {
     // Test endpoint

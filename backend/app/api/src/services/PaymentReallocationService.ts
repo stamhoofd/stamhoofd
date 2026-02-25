@@ -2,7 +2,7 @@ import { BalanceItem, BalanceItemPayment, CachedBalance, Payment } from '@stamho
 import { SQL } from '@stamhoofd/sql';
 import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
-import { BalanceItemService } from './BalanceItemService';
+import { BalanceItemService } from './BalanceItemService.js';
 
 type BalanceItemWithRemaining = {
     balanceItem: BalanceItem;

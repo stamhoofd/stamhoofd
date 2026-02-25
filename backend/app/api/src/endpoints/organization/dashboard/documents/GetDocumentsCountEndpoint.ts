@@ -2,8 +2,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { GetDocumentsEndpoint } from './GetDocumentsEndpoint';
+import { Context } from '../../../../helpers/Context.js';
+import { GetDocumentsEndpoint } from './GetDocumentsEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = CountFilteredRequest;

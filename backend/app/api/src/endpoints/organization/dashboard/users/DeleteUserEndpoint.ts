@@ -2,7 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { User } from '@stamhoofd/models';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 type Params = { id: string };
 type Query = undefined;
 type Body = undefined;

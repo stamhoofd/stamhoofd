@@ -2,7 +2,7 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 
 import { getDefaultEmailFrom, sendEmailTemplate } from '@stamhoofd/models';
 import { EmailTemplateType, Recipient } from '@stamhoofd/structures';
-import { Context } from '../../helpers/Context';
+import { Context } from '../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

@@ -3,8 +3,8 @@ import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { Organization, PermissionLevel, Permissions } from '@stamhoofd/structures';
 
 import { TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../../tests/helpers/TestServer';
-import { GetOrganizationEndpoint } from './GetOrganizationEndpoint';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { GetOrganizationEndpoint } from './GetOrganizationEndpoint.js';
 
 describe('Endpoint.GetOrganization', () => {
     // Test endpoint

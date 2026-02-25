@@ -5,10 +5,10 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EmailRecipient, fillRecipientReplacements } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { Context } from '../../../helpers/Context';
-import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients';
-import { emailRecipientSorters } from '../../../sql-sorters/email-recipients';
-import { validateEmailRecipientFilter } from './helpers/validateEmailRecipientFilter';
+import { Context } from '../../../helpers/Context.js';
+import { emailRecipientsFilterCompilers } from '../../../sql-filters/email-recipients.js';
+import { emailRecipientSorters } from '../../../sql-sorters/email-recipients.js';
+import { validateEmailRecipientFilter } from './helpers/validateEmailRecipientFilter.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

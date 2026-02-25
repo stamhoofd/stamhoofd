@@ -1,11 +1,11 @@
 import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 
-import { testServer } from '../../../../../tests/helpers/TestServer';
-import { PatchApiUserEndpoint } from './PatchApiUserEndpoint';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { PatchApiUserEndpoint } from './PatchApiUserEndpoint.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ApiUser, ApiUserRateLimits, PermissionLevel, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
-import { CreateApiUserEndpoint } from './CreateApiUserEndpoint';
+import { CreateApiUserEndpoint } from './CreateApiUserEndpoint.js';
 
 describe('Endpoint.CreateApiUserEndpoint', () => {
     // Test endpoint

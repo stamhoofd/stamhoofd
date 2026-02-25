@@ -6,10 +6,10 @@ import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@st
 import { AccessRight, CountFilteredRequest, EventNotification as EventNotificationStruct, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { eventNotificationsFilterCompilers } from '../../../sql-filters/event-notifications';
-import { eventNotificationsSorters } from '../../../sql-sorters/event-notifications';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { eventNotificationsFilterCompilers } from '../../../sql-filters/event-notifications.js';
+import { eventNotificationsSorters } from '../../../sql-sorters/event-notifications.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

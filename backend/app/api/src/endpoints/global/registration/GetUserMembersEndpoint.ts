@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { Member } from '@stamhoofd/models';
 import { MembersBlob } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

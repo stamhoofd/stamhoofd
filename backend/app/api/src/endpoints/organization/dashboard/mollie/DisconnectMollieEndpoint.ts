@@ -2,8 +2,8 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { MollieToken } from '@stamhoofd/models';
 import { Organization as OrganizationStruct, PermissionLevel } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

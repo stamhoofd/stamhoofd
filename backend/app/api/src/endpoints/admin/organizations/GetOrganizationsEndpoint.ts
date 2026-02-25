@@ -6,10 +6,10 @@ import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { CountFilteredRequest, LimitedFilteredRequest, Organization as OrganizationStruct, PaginatedResponse, PermissionLevel, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { organizationFilterCompilers } from '../../../sql-filters/organizations';
-import { organizationSorters } from '../../../sql-sorters/organizations';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { organizationFilterCompilers } from '../../../sql-filters/organizations.js';
+import { organizationSorters } from '../../../sql-sorters/organizations.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

@@ -5,7 +5,7 @@ import { AuditLogSource, MemberDetails, PermissionRole, Permissions, ReceivableB
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';
-import { AuditLogService } from '../services/AuditLogService';
+import { AuditLogService } from '../services/AuditLogService.js';
 
 const ALPHABET = '123456789ABCDEFGHJKMNPQRSTUVWXYZ'; // Note: we removed 0, O, I and l to make it easier for humans
 const customBase = basex(ALPHABET);

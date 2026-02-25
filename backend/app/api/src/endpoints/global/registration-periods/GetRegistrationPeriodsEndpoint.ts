@@ -5,9 +5,9 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { Context } from '../../../helpers/Context';
-import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods';
-import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods';
+import { Context } from '../../../helpers/Context.js';
+import { registrationPeriodFilterCompilers } from '../../../sql-filters/registration-periods.js';
+import { registrationPeriodSorters } from '../../../sql-sorters/registration-periods.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

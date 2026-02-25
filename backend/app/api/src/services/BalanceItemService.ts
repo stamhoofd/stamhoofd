@@ -1,11 +1,11 @@
 import { Model } from '@simonbackx/simple-database';
 import { BalanceItem, CachedBalance, Document, MemberUser, Order, Organization, Payment, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, ReceivableBalanceType } from '@stamhoofd/structures';
-import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue';
-import { ThrottledQueue } from '../helpers/ThrottledQueue';
-import { AuditLogService } from './AuditLogService';
-import { PaymentReallocationService } from './PaymentReallocationService';
-import { RegistrationService } from './RegistrationService';
+import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue.js';
+import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
+import { AuditLogService } from './AuditLogService.js';
+import { PaymentReallocationService } from './PaymentReallocationService.js';
+import { RegistrationService } from './RegistrationService.js';
 
 const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
     await CachedBalance.updateForMembers(organizationId, memberIds);

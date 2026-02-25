@@ -4,7 +4,7 @@ import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { Ticket, Token, Webshop } from '@stamhoofd/models';
 import { PermissionLevel, TicketPrivate } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;

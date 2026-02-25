@@ -1,7 +1,7 @@
 import { Payment } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 export const PaymentLogger = new ModelLogger(Payment, {
     skipKeys: ['transferFee'],

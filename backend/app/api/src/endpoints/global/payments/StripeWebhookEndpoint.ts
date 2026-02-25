@@ -4,10 +4,10 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
 import { isDebouncedError, QueueHandler } from '@stamhoofd/queues';
 
-import { StripeHelper } from '../../../helpers/StripeHelper';
-import { PaymentService } from '../../../services/PaymentService';
+import { StripeHelper } from '../../../helpers/StripeHelper.js';
+import { PaymentService } from '../../../services/PaymentService.js';
 import { AuditLog, AuditLogSource } from '@stamhoofd/structures';
-import { AuditLogService } from '../../../services/AuditLogService';
+import { AuditLogService } from '../../../services/AuditLogService.js';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {

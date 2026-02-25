@@ -5,10 +5,10 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { groupFilterCompilers } from '../../../sql-filters/groups';
-import { groupSorters } from '../../../sql-sorters/groups';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { groupFilterCompilers } from '../../../sql-filters/groups.js';
+import { groupSorters } from '../../../sql-sorters/groups.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

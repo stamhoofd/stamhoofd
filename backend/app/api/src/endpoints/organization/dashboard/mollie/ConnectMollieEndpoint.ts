@@ -3,9 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { MollieToken } from '@stamhoofd/models';
 import { Organization as OrganizationStruct, PermissionLevel } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { checkMollieSettlementsFor } from '../../../../helpers/CheckSettlements';
-import { Context } from '../../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { checkMollieSettlementsFor } from '../../../../helpers/CheckSettlements.js';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 

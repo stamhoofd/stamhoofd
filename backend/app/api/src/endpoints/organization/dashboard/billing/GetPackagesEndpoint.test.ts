@@ -2,9 +2,9 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { OrganizationFactory, STPackageFactory } from '@stamhoofd/models';
 import { AccessRight, LimitedFilteredRequest, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../../tests/helpers/TestServer';
-import { initAdmin } from '../../../../../tests/init';
-import { GetPackagesEndpoint } from './GetPackagesEndpoint';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { initAdmin } from '../../../../../tests/init.js';
+import { GetPackagesEndpoint } from './GetPackagesEndpoint.js';
 
 const baseUrl = `/organization/packages`;
 const endpoint = new GetPackagesEndpoint();

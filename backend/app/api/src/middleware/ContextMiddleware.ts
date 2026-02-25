@@ -1,6 +1,6 @@
 import { Request, RequestMiddleware } from '@simonbackx/simple-endpoints';
 
-import { ContextInstance } from '../helpers/Context';
+import { ContextInstance } from '../helpers/Context.js';
 
 /**
  * This attaches a context to each request for authentication and authorization

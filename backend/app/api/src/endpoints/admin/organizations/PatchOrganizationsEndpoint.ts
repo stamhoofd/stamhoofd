@@ -5,8 +5,8 @@ import { Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoo
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

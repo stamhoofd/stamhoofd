@@ -2,8 +2,8 @@ import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
-import { GetEventNotificationsEndpoint } from './GetEventNotificationsEndpoint';
+import { Context } from '../../../helpers/Context.js';
+import { GetEventNotificationsEndpoint } from './GetEventNotificationsEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = CountFilteredRequest;

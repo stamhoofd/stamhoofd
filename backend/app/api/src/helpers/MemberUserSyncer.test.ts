@@ -2,7 +2,7 @@ import { Database } from '@simonbackx/simple-database';
 import { Member, MemberFactory, MemberResponsibilityRecordFactory, User, UserFactory } from '@stamhoofd/models';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { MemberUserSyncer } from './MemberUserSyncer';
+import { MemberUserSyncer } from './MemberUserSyncer.js';
 
 describe('Helpers.MemberUserSyncer', () => {
     beforeEach(async () => {

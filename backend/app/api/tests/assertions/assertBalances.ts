@@ -1,5 +1,5 @@
 import { BalanceItem } from '@stamhoofd/models';
-import { BalanceItemService } from '../../src/services/BalanceItemService';
+import { BalanceItemService } from '../../src/services/BalanceItemService.js';
 
 export async function assertBalances(
     selector:

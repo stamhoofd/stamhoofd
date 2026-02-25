@@ -4,8 +4,8 @@ import { AccessRight, MemberResponsibility, OrganizationPrivateMetaData, Organiz
 
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder, PatchMap } from '@simonbackx/simple-encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../../tests/helpers/TestServer';
-import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint';
+import { testServer } from '../../../../../tests/helpers/TestServer.js';
+import { PatchOrganizationEndpoint } from './PatchOrganizationEndpoint.js';
 
 describe('Endpoint.PatchOrganization', () => {
     // Test endpoint

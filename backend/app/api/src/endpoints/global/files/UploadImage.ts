@@ -6,7 +6,7 @@ import { Image as ImageStruct, ResolutionRequest } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
 
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {

@@ -2,8 +2,8 @@ import { Request } from '@simonbackx/simple-endpoints';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight, EventMeta, GroupType, LimitedFilteredRequest, NamedObject, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { testServer } from '../../../../tests/helpers/TestServer';
-import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint';
+import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
 
 const baseUrl = `/registrations`;
 const endpoint = new GetRegistrationsEndpoint();

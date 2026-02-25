@@ -1,4 +1,4 @@
-import { ThrottledQueue } from './ThrottledQueue';
+import { ThrottledQueue } from './ThrottledQueue.js';
 
 /**
  * Items are added to the queue and filtered by a handler function.

@@ -4,8 +4,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { StripeAccount, Token } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/structures';
 
-import { Context } from '../../../../helpers/Context';
-import { StripeHelper } from '../../../../helpers/StripeHelper';
+import { Context } from '../../../../helpers/Context.js';
+import { StripeHelper } from '../../../../helpers/StripeHelper.js';
 
 type Params = Record<string, never>;
 class Body extends AutoEncoder {

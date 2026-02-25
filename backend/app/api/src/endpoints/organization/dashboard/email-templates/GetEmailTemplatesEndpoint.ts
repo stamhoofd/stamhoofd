@@ -4,9 +4,9 @@ import { EmailTemplate } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder';
-import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder';
-import { Context } from '../../../../helpers/Context';
+import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder.js';
+import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder.js';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 type Body = undefined;

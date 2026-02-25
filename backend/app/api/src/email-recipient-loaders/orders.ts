@@ -1,8 +1,8 @@
 import { Email, Webshop } from '@stamhoofd/models';
 import { EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, mergeFilters, PaginatedResponse, WebshopPreview } from '@stamhoofd/structures';
-import { GetWebshopOrdersEndpoint } from '../endpoints/organization/dashboard/webshops/GetWebshopOrdersEndpoint';
-import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures';
-import { Context } from '../helpers/Context';
+import { GetWebshopOrdersEndpoint } from '../endpoints/organization/dashboard/webshops/GetWebshopOrdersEndpoint.js';
+import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
+import { Context } from '../helpers/Context.js';
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
     fetch: async (query: LimitedFilteredRequest) => {

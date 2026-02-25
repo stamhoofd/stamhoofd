@@ -3,7 +3,7 @@ import { Email } from '@stamhoofd/models';
 import { EmailPreview } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Context } from '../../../helpers/Context';
+import { Context } from '../../../helpers/Context.js';
 
 type Params = { id: string };
 type Query = undefined;

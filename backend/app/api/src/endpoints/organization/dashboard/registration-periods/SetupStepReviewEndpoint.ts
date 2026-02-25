@@ -4,8 +4,8 @@ import { OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
 import { AutoEncoder, BooleanDecoder, Decoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = { readonly id: string };
 type Query = undefined;

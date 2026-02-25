@@ -1,6 +1,6 @@
 import { Migration } from '@simonbackx/simple-database';
 import { Member } from '@stamhoofd/models';
-import { MemberUserSyncer } from '../helpers/MemberUserSyncer';
+import { MemberUserSyncer } from '../helpers/MemberUserSyncer.js';
 import { logger } from '@simonbackx/simple-logging';
 
 export default new Migration(async () => {

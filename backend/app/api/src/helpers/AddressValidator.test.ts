@@ -1,7 +1,7 @@
 import { City, PostalCode, Province } from '@stamhoofd/models';
 import { Address, Country } from '@stamhoofd/structures';
 
-import { AddressValidator } from './AddressValidator';
+import { AddressValidator } from './AddressValidator.js';
 
 describe('AddressValidator', () => {
     it('Can validate a city', async () => {

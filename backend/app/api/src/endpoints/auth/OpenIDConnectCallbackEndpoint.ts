@@ -1,8 +1,8 @@
 import { AnyDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request } from '@simonbackx/simple-endpoints';
 
-import { Context } from '../../helpers/Context';
-import { SSOServiceWithSession } from '../../services/SSOService';
+import { Context } from '../../helpers/Context.js';
+import { SSOServiceWithSession } from '../../services/SSOService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

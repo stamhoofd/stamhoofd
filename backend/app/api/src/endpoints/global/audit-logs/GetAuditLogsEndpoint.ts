@@ -5,10 +5,10 @@ import { AuditLog } from '@stamhoofd/models';
 import { SQL, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import { AuditLog as AuditLogStruct, CountFilteredRequest, LimitedFilteredRequest, PaginatedResponse, StamhoofdFilter, assertSort, getSortFilter } from '@stamhoofd/structures';
 
-import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../helpers/Context';
-import { auditLogFilterCompilers } from '../../../sql-filters/audit-logs';
-import { auditLogSorters } from '../../../sql-sorters/audit-logs';
+import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../helpers/Context.js';
+import { auditLogFilterCompilers } from '../../../sql-filters/audit-logs.js';
+import { auditLogSorters } from '../../../sql-sorters/audit-logs.js';
 
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;

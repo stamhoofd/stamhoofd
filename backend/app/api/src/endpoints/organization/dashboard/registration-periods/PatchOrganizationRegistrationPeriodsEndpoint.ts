@@ -5,9 +5,9 @@ import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArra
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures';
-import { Context } from '../../../../helpers/Context';
-import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater';
+import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
+import { Context } from '../../../../helpers/Context.js';
+import { SetupStepUpdater } from '../../../../helpers/SetupStepUpdater.js';
 
 type Params = Record<string, never>;
 type Query = undefined;

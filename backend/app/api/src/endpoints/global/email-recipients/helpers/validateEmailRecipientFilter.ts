@@ -1,7 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Email } from '@stamhoofd/models';
 import { FilterWrapperMarker, PermissionLevel, StamhoofdFilter, unwrapFilter, WrapperFilter } from '@stamhoofd/structures';
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 export async function validateEmailRecipientFilter({ filter, permissionLevel }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel }) {
     // Require presence of a filter

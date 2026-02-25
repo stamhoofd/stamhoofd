@@ -2,7 +2,7 @@ import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import jwt from 'jsonwebtoken';
 
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 import { SimpleError } from '@simonbackx/simple-errors';
 
 type Params = Record<string, never>;

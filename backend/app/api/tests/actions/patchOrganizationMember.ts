@@ -2,9 +2,9 @@ import { AutoEncoderPatchType, PatchableArray } from '@simonbackx/simple-encodin
 import { Request } from '@simonbackx/simple-endpoints';
 import { Organization } from '@stamhoofd/models';
 import { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
-import { PatchOrganizationMembersEndpoint } from '../../src/endpoints/global/members/PatchOrganizationMembersEndpoint';
-import { testServer } from '../helpers/TestServer';
-import { initAdmin } from '../init/initAdmin';
+import { PatchOrganizationMembersEndpoint } from '../../src/endpoints/global/members/PatchOrganizationMembersEndpoint.js';
+import { testServer } from '../helpers/TestServer.js';
+import { initAdmin } from '../init/initAdmin.js';
 
 export async function patchOrganizationMember({ patch, organization }: { patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>; organization: Organization }) {
     expect(patch.id).toBeString();

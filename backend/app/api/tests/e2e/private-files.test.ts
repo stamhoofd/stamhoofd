@@ -4,10 +4,10 @@ import { PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-en
 import { Request } from '@simonbackx/simple-endpoints';
 import { Member, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel, Permissions } from '@stamhoofd/structures';
-import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint';
-import { testServer } from '../helpers/TestServer';
-import { GetUserMembersEndpoint } from '../../src/endpoints/global/registration/GetUserMembersEndpoint';
-import { FileSignService } from '../../src/services/FileSignService';
+import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registration/PatchUserMembersEndpoint.js';
+import { testServer } from '../helpers/TestServer.js';
+import { GetUserMembersEndpoint } from '../../src/endpoints/global/registration/GetUserMembersEndpoint.js';
+import { FileSignService } from '../../src/services/FileSignService.js';
 
 const baseUrl = `/v${Version}/members`;
 const endpoint = new PatchUserMembersEndpoint();

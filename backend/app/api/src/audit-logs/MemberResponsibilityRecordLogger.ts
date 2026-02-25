@@ -1,6 +1,6 @@
 import { Group, Member, MemberResponsibilityRecord, Organization, Platform } from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
-import { getDefaultGenerator, ModelLogger } from './ModelLogger';
+import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 const defaultGenerator = getDefaultGenerator({
     created: AuditLogType.MemberResponsibilityRecordAdded,

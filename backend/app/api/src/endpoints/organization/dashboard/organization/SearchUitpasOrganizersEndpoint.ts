@@ -1,8 +1,8 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { UitpasService } from '../../../../services/uitpas/UitpasService';
+import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { AutoEncoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { Context } from '../../../../helpers/Context';
+import { Context } from '../../../../helpers/Context.js';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {

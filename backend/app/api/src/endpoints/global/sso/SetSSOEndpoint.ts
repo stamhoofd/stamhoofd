@@ -2,9 +2,9 @@ import { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
-import { Context } from '../../../helpers/Context';
-import { SSOService } from '../../../services/SSOService';
-import { SSOQuery } from './GetSSOEndpoint';
+import { Context } from '../../../helpers/Context.js';
+import { SSOService } from '../../../services/SSOService.js';
+import { SSOQuery } from './GetSSOEndpoint.js';
 
 type Params = Record<string, never>;
 type Query = SSOQuery;
