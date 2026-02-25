@@ -11,7 +11,8 @@
     ],
     "scripts": {
         "build": "tsc -b --clean && tsc -b",
-        "test": "jest"
+        "test": "jest",
+        "lint": "eslint"
     },
     "publishConfig": {
         "access": "public"

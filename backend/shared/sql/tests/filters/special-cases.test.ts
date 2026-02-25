@@ -1,6 +1,6 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter';
-import { SQL } from '../../src/SQL';
-import { test, testError } from '../utils';
+import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
+import { SQL } from '../../src/SQL.js';
+import { test, testError } from '../utils/index.js';
 
 describe('Special filter cases', () => {
     it('Can combine $and with $or', async () => {

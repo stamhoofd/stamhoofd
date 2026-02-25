@@ -1,6 +1,6 @@
-import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter';
-import { SQL } from '../../src/SQL';
-import { test } from '../utils';
+import { baseSQLFilterCompilers, createColumnFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
+import { SQL } from '../../src/SQL.js';
+import { test } from '../utils/index.js';
 
 describe('$not', () => {
     /**

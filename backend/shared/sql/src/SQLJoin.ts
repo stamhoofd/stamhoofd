@@ -1,6 +1,6 @@
-import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery } from './SQLExpression';
-import { SQLSelect } from './SQLSelect';
-import { Whereable } from './SQLWhere';
+import { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery, joinSQLQuery } from './SQLExpression.js';
+import { SQLSelect } from './SQLSelect.js';
+import { Whereable } from './SQLWhere.js';
 
 export enum SQLJoinType {
     Left = 'Left',

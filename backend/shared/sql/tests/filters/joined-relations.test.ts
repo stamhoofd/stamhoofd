@@ -1,6 +1,6 @@
-import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/SQLFilter';
-import { SQL } from '../../src/SQL';
-import { testSelect } from '../utils';
+import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQLValueType } from '../../src/filters/SQLFilter.js';
+import { SQL } from '../../src/SQL.js';
+import { testSelect } from '../utils/index.js';
 
 describe('Joined relations', () => {
     const organizationJoin = SQL.leftJoin('organizations')

@@ -1,11 +1,11 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { assertFilterCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { scalarToSQLExpression, SQLArray } from '../../SQLExpressions';
-import { SQLJsonOverlaps } from '../../SQLJsonExpressions';
-import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere';
-import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLFilter';
-import { normalizeCompareValue } from '../helpers/normalizeCompareValue';
-import { $equalsSQLFilterCompiler } from './equals';
+import { scalarToSQLExpression, SQLArray } from '../../SQLExpressions.js';
+import { SQLJsonOverlaps } from '../../SQLJsonExpressions.js';
+import { SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '../../SQLWhere.js';
+import { normalizeColumn, SQLCurrentColumn, SQLSyncFilterRunner, SQLValueType } from '../SQLFilter.js';
+import { normalizeCompareValue } from '../helpers/normalizeCompareValue.js';
+import { $equalsSQLFilterCompiler } from './equals.js';
 
 export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunner {
     return (originalColumn: SQLCurrentColumn) => {

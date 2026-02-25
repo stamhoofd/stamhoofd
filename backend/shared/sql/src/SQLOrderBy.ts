@@ -1,9 +1,9 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression';
-import { SQLColumnExpression } from './SQLExpressions';
+import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery } from './SQLExpression.js';
+import { SQLColumnExpression } from './SQLExpressions.js';
 
-type Constructor<T = {}> = new (...args: any[]) => T;
+type Constructor<T = object> = new (...args: any[]) => T;
 
-export function Orderable<Sup extends Constructor<{}>>(Base: Sup) {
+export function Orderable<Sup extends Constructor<object>>(Base: Sup) {
     return class extends Base {
         _orderBy: SQLOrderBy | null = null;
 

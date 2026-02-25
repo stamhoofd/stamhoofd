@@ -1,9 +1,9 @@
-import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression';
-import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions';
-import { SQLJoin, SQLJoinType } from './SQLJoin';
-import { SQLSelect } from './SQLSelect';
+import { SQLExpression, SQLExpressionOptions, SQLQuery, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
+import { SQLArray, SQLColumnExpression, SQLDynamicExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions.js';
+import { SQLJoin, SQLJoinType } from './SQLJoin.js';
+import { SQLSelect } from './SQLSelect.js';
 
-type Constructor<T = {}> = new (...args: any[]) => T;
+type Constructor<T = object> = new (...args: any[]) => T;
 
 export enum SQLWhereSign {
     Equal = '=',

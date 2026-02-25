@@ -3,10 +3,10 @@ import {
     baseSQLFilterCompilers,
     createColumnFilter,
     SQLValueType,
-} from '../../src/filters/SQLFilter';
-import { SQL } from '../../src/SQL';
-import { SQLTranslatedStringHelper } from '../../src/SQLTranslatedStringHelper';
-import { TableDefinition, testMatch } from '../utils';
+} from '../../src/filters/SQLFilter.js';
+import { SQL } from '../../src/SQL.js';
+import { SQLTranslatedStringHelper } from '../../src/SQLTranslatedStringHelper.js';
+import { TableDefinition, testMatch } from '../utils/index.js';
 
 type TranslatedStringValue = string | { [key in Language]?: string };
 

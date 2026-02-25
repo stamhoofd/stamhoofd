@@ -13,7 +13,7 @@ export class QueryableModel extends Model {
 
     static select<T extends typeof Model & typeof QueryableModel>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
         const transformer = (row: SQLResultNamespacedRow): InstanceType<T> => {
-            const d = (this as T).fromRow(row[this.table] as any) as InstanceType<T> | undefined;
+            const d = (this as T).fromRow(row[this.table]) as InstanceType<T> | undefined;
 
             if (this.cache && d) {
                 this.cache.store(d);
