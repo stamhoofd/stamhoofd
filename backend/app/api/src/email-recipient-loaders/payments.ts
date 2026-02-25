@@ -1,18 +1,125 @@
 import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Order, Organization, Payment, RecipientLoader, User, Webshop } from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
-import { BalanceItemPaymentsHtmlTableItem, BalanceItemRelationType, BalanceItemType, CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, getBalanceItemPaymentsHtmlTable, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, Replacement, StamhoofdFilter, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import { CountFilteredRequest, EmailRecipient, EmailRecipientFilterType, LimitedFilteredRequest, PaginatedResponse, PaymentGeneral, PaymentMethod, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
-import { createOrderDataHTMLTable } from '../helpers/email-html-helpers.js';
 import { memberResponsibilityRecordFilterCompilers } from '../sql-filters/member-responsibility-records.js';
+import { buildReplacementOptions, getEmailReplacementsForPayment, ReplacementsOptions } from '../email-replacements/getEmailReplacementsForPayment.js';
 
-type ReplacementsOptions = {
-    shouldAddReplacementsForOrder: boolean;
-    shouldAddReplacementsForTransfers: boolean;
-    orderMap: Map<string, Order>;
-    webshopMap: Map<string, Webshop>;
-    organizationMap: Map<string, Organization>;
+type BeforeFetchAllResult = {
+    doesIncludePaymentWithoutOrders: boolean;
+    areAllPaymentsTransfers: boolean;
 };
+
+async function fetchPaymentRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter, beforeFetchAllResult?: BeforeFetchAllResult) {
+    const result = await GetPaymentsEndpoint.buildData(query);
+
+    return new PaginatedResponse({
+        results: await getRecipients(result, EmailRecipientFilterType.Payment, subfilter, beforeFetchAllResult),
+        next: result.next,
+    });
+}
+
+const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
+    beforeFetchAll: async (query: LimitedFilteredRequest) => {
+        const doesIncludePaymentWithoutOrders = await doesQueryIncludePaymentsWithoutOrder(query);
+        const areAllPaymentsTransfers = await doesQueryIncludePaymentsOtherThanTransfers(query);
+
+        return {
+            doesIncludePaymentWithoutOrders,
+            areAllPaymentsTransfers,
+        };
+    },
+    fetch: fetchPaymentRecipients,
+    // For now: only count the number of payments - not the amount of emails
+    count: async (query: LimitedFilteredRequest, _subfilter) => {
+        const q = await GetPaymentsEndpoint.buildQuery(query);
+        const base = await q.count();
+
+        if (base < 1000) {
+            // Do full scan
+            query.limit = 1000;
+            const result = await fetchPaymentRecipients(query, _subfilter);
+            return result.results.length;
+        }
+
+        return base;
+    },
+};
+
+Email.recipientLoaders.set(EmailRecipientFilterType.Payment, paymentRecipientLoader);
+
+async function doesQueryIncludePaymentsWithoutOrder(filterRequest: LimitedFilteredRequest) {
+    // create count request (without limit and page filter)
+    const countRequest = new CountFilteredRequest({
+        filter: filterRequest.filter,
+        search: filterRequest.search,
+    });
+
+    const baseQuery = await GetPaymentsEndpoint.buildQuery(countRequest);
+
+    const balanceItemPaymentsJoin = SQL.innerJoin(BalanceItemPayment.table)
+        .where(
+            SQL.column(BalanceItemPayment.table, 'paymentId'),
+            SQL.column(Payment.table, 'id'),
+        );
+
+    const balanceItemJoin = SQL.innerJoin(BalanceItem.table)
+        .where(
+            SQL.column(BalanceItem.table, 'id'),
+            SQL.column(BalanceItemPayment.table, 'balanceItemId'),
+        );
+
+    // check if 1 payment without order
+    const results = await baseQuery
+        .join(balanceItemPaymentsJoin)
+        .join(balanceItemJoin)
+        // where no order
+        .where(SQL.column(BalanceItem.table, 'orderId'), null)
+        .limit(1)
+        .count();
+
+    return results > 0;
+}
+
+async function doesQueryIncludePaymentsOtherThanTransfers(filterRequest: LimitedFilteredRequest) {
+    // create count request (without limit and page filter)
+    const countRequest = new CountFilteredRequest({
+        filter: filterRequest.filter,
+        search: filterRequest.search,
+    });
+
+    const baseQuery = await GetPaymentsEndpoint.buildQuery(countRequest);
+
+    // check if 1 payment with other method than transfer
+    const results = await baseQuery
+        // where method is not transfer
+        .whereNot(SQL.column(Payment.table, 'method'), PaymentMethod.Transfer)
+        .limit(1)
+        .count();
+
+    return results === 0;
+}
+
+async function fetchPaymentOrganizationRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult) {
+    const result = await GetPaymentsEndpoint.buildData(query);
+
+    return new PaginatedResponse({
+        results: await getRecipients(result, EmailRecipientFilterType.PaymentOrganization, subfilter, beforeFetchAllResult),
+        next: result.next,
+    });
+}
+
+const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
+    fetch: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
+    // For now: only count the number of payments - not the amount of emails
+    count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
+        const q = await GetPaymentsEndpoint.buildQuery(query);
+        return await q.count();
+    },
+};
+
+Email.recipientLoaders.set(EmailRecipientFilterType.PaymentOrganization, paymentOrganizationRecipientLoader);
 
 async function getRecipients(result: PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>, type: EmailRecipientFilterType.Payment | EmailRecipientFilterType.PaymentOrganization, subFilter: StamhoofdFilter | null, beforeFetchAllResult: BeforeFetchAllResult | undefined) {
     const recipients: EmailRecipient[] = [];
@@ -80,44 +187,7 @@ async function getRecipients(result: PaginatedResponse<PaymentGeneral[], Limited
         }
     }
 
-    // get all orders linked to the payments
-    const allOrderIdsSet = new Set<string>();
-    const allWebshopIdsSet = new Set<string>();
-    const organizationIdsForOrdersSet = new Set<string>();
-
-    for (const payment of result.results) {
-        payment.webshopIds.forEach(id => allWebshopIdsSet.add(id));
-
-        for (const balanceItemPayment of payment.balanceItemPayments) {
-            const balanceItem = balanceItemPayment.balanceItem;
-            if (balanceItem.orderId) {
-                allOrderIdsSet.add(balanceItem.orderId);
-
-                // only important if balance item has order
-                organizationIdsForOrdersSet.add(balanceItem.organizationId);
-            }
-        }
-    }
-
-    // get all orders (for replacements later)
-    const orders = await Order.getByIDs(...allOrderIdsSet);
-    const orderMap = new Map<string, Order>(orders.map(o => [o.id, o] as [string, Order]));
-
-    // get all webshops (for replacements later)
-    const webshops = await Webshop.getByIDs(...allWebshopIdsSet);
-    const webshopMap = new Map<string, Webshop>(webshops.map(w => [w.id, w] as [string, Webshop]));
-
-    // get all organizations (for replacements later)
-    const organizations = await Organization.getByIDs(...organizationIdsForOrdersSet);
-    const organizationMap = new Map<string, Organization>(organizations.map(o => [o.id, o] as [string, Organization]));
-
-    const replacementOptions: ReplacementsOptions = {
-        shouldAddReplacementsForOrder: beforeFetchAllResult ? !beforeFetchAllResult.doesIncludePaymentWithoutOrders : false,
-        shouldAddReplacementsForTransfers: beforeFetchAllResult ? beforeFetchAllResult.areAllPaymentsTransfers : false,
-        orderMap,
-        webshopMap,
-        organizationMap,
-    };
+    const replacementOptions = await buildReplacementOptions(result.results, beforeFetchAllResult);
 
     if (type === EmailRecipientFilterType.Payment) {
         recipients.push(...await getUserRecipients(userIds, replacementOptions));
@@ -313,358 +383,3 @@ async function getOrderRecipients(ids: { orderId: string; payment: PaymentGenera
 
     return results;
 }
-
-function getEmailReplacementsForPayment(payment: PaymentGeneral, options: ReplacementsOptions): Replacement[] {
-    const { orderMap, webshopMap, organizationMap, shouldAddReplacementsForOrder, shouldAddReplacementsForTransfers } = options;
-    const orderIds = new Set<string>();
-
-    for (const balanceItemPayment of payment.balanceItemPayments) {
-        const orderId = balanceItemPayment.balanceItem.orderId;
-        if (orderId) {
-            orderIds.add(orderId);
-        }
-    }
-
-    // will be set if only 1 order is linked
-    let singleOrder: Order | null = null;
-
-    if (orderIds.size === 1) {
-        const singleOrderId = [...orderIds][0];
-        if (singleOrderId) {
-            const order = orderMap.get(singleOrderId);
-
-            if (order) {
-                singleOrder = order;
-            }
-        }
-    }
-
-    let orderUrlReplacement: Replacement | null = null;
-    let paymentUrl: string = '{{signInUrl}}';
-
-    // add replacement for order url if only 1 order is linked
-    if (singleOrder && shouldAddReplacementsForOrder) {
-        const webshop = webshopMap.get(singleOrder.webshopId);
-        const organization = organizationMap.get(singleOrder.organizationId);
-
-        if (webshop && organization) {
-            const webshopStruct = WebshopStruct.create(webshop);
-
-            orderUrlReplacement = Replacement.create({
-                token: 'orderUrl',
-                value: 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id),
-            });
-            paymentUrl = 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id);
-        }
-    }
-
-    const createPaymentDataHtml = () => {
-        if (singleOrder) {
-            const webshop = webshopMap.get(singleOrder.webshopId);
-            if (webshop) {
-                return createOrderDataHTMLTable(singleOrder, webshop);
-            }
-        }
-
-        return payment.getPaymentDataHTMLTable();
-    };
-
-    const paymentDataHtml = createPaymentDataHtml();
-
-    return ([
-        Replacement.create({
-            token: 'paymentUrl',
-            value: paymentUrl,
-        }),
-        Replacement.create({
-            token: 'paymentPrice',
-            value: Formatter.price(payment.price),
-        }),
-        Replacement.create({
-            token: 'paymentMethod',
-            value: PaymentMethodHelper.getName(payment.method ?? PaymentMethod.Unknown),
-        }),
-        ...(shouldAddReplacementsForTransfers
-            ? [
-                    Replacement.create({
-                        token: 'transferDescription',
-                        value: (payment.transferDescription ?? ''),
-                    }),
-                    Replacement.create({
-                        token: 'transferBankAccount',
-                        value: payment.transferSettings?.iban ?? '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankCreditor',
-                        value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : '') ?? '',
-                    }),
-                ]
-            : [
-                    Replacement.create({
-                        token: 'transferDescription',
-                        value: '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankAccount',
-                        value: '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankCreditor',
-                        value: '',
-                    }),
-                ]),
-
-        Replacement.create({
-            token: 'balanceItemPaymentsTable',
-            value: '',
-            html: getBalanceItemPaymentsHtmlTable(unboxBalanceItemPayments(payment, orderMap)),
-        }),
-        Replacement.create({
-            token: 'paymentTable',
-            value: '',
-            html: payment.getHTMLTable(),
-        }),
-        Replacement.create({
-            token: 'paymentData',
-            value: '',
-            html: paymentDataHtml,
-        }),
-        Replacement.create({
-            token: 'overviewContext',
-            value: getPaymentContext(payment, options),
-        }),
-        orderUrlReplacement,
-    ]).filter(replacementOrNull => replacementOrNull !== null);
-}
-
-function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: ReplacementsOptions) {
-    const overviewContext = new Set<string>();
-    const registrationMemberNames = new Set<string>();
-
-    // only add to context if type is order or registration
-    for (const balanceItemPayment of payment.balanceItemPayments) {
-        const balanceItem = balanceItemPayment.balanceItem;
-        const type = balanceItem.type;
-
-        switch (type) {
-            case BalanceItemType.Order: {
-                if (balanceItem.orderId) {
-                    const order = orderMap.get(balanceItem.orderId);
-
-                    if (order) {
-                        const webshop = webshopMap.get(order.webshopId);
-                        if (webshop) {
-                            overviewContext.add($t('{webshop} (bestelling {orderNumber})', {
-                                webshop: webshop.meta.name,
-                                orderNumber: order.number ?? '',
-                            }));
-                        }
-                        else {
-                            overviewContext.add($t('Bestelling {orderNumber}', {
-                                orderNumber: order.number ?? '',
-                            }));
-                        }
-                    }
-                }
-                break;
-            }
-            case BalanceItemType.Registration: {
-                const memberName = balanceItem.relations.get(BalanceItemRelationType.Member)?.name.toString();
-                if (memberName) {
-                    registrationMemberNames.add(memberName);
-                }
-                else {
-                    overviewContext.add(balanceItem.itemTitle);
-                }
-
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-
-    if (registrationMemberNames.size > 0) {
-        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t(`6a156458-b396-4d0f-b562-adb3e38fc51b`) + ' ');
-        overviewContext.add($t(`01d5fd7e-2960-4eb4-ab3a-2ac6dcb2e39c`) + ' ' + memberNames);
-    }
-
-    if (overviewContext.size === 0) {
-        // add item title if no balance items with type order or registration
-        if (payment.balanceItemPayments.length === 1) {
-            const balanceItem = payment.balanceItemPayments[0].balanceItem;
-            return balanceItem.itemTitle;
-        }
-
-        if (payment.balanceItemPayments.length > 1) {
-            // return title if all balance items have the same title
-            const firstTitle = payment.balanceItemPayments[0].balanceItem.itemTitle;
-            const haveAllSameTitle = payment.balanceItemPayments.every(p => p.balanceItem.itemTitle === firstTitle);
-
-            if (haveAllSameTitle) {
-                return `${firstTitle} (${payment.balanceItemPayments.length}x)`;
-            }
-
-            // else return default text for multiple items
-            return $t('Betaling voor {count} items', { count: payment.balanceItemPayments.length });
-        }
-
-        // else return default text for single item
-        return $t('Betaling voor 1 item');
-    }
-
-    // join texts for balance items with type order or registration
-    return [...overviewContext].join(', ');
-}
-
-function unboxBalanceItemPayments({ balanceItemPayments }: PaymentGeneral, orderMap: Map<string, Order>): BalanceItemPaymentsHtmlTableItem[] {
-    const results: BalanceItemPaymentsHtmlTableItem[] = [];
-    for (const item of balanceItemPayments) {
-        const orderId = item.balanceItem.orderId;
-        if (orderId === null) {
-            results.push(item);
-            continue;
-        }
-
-        const order = orderMap.get(orderId);
-        if (!order) {
-            // if 1 order is not found -> do not unbox the payment
-            return balanceItemPayments;
-        }
-
-        for (const cartItem of order.data.cart.items) {
-            const price = cartItem.getPriceWithDiscounts();
-            const quantity = cartItem.amount;
-            const unitPrice = Math.abs(quantity) > 1 ? price / quantity : price;
-
-            results.push({
-                itemTitle: cartItem.product.name,
-                itemDescription: cartItem.description,
-                balanceItem: {
-                    description: cartItem.description,
-                },
-                quantity,
-                unitPrice,
-                price,
-            });
-        }
-    }
-
-    return results;
-}
-
-type BeforeFetchAllResult = {
-    doesIncludePaymentWithoutOrders: boolean;
-    areAllPaymentsTransfers: boolean;
-};
-
-async function fetchPaymentRecipients(query: LimitedFilteredRequest, beforeFetchAllResult?: BeforeFetchAllResult) {
-    const result = await GetPaymentsEndpoint.buildData(query);
-
-    return new PaginatedResponse({
-        results: await getRecipients(result, EmailRecipientFilterType.Payment, null, beforeFetchAllResult),
-        next: result.next,
-    });
-}
-
-const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
-    beforeFetchAll: async (query: LimitedFilteredRequest) => {
-        const doesIncludePaymentWithoutOrders = await doesQueryIncludePaymentsWithoutOrder(query);
-        const areAllPaymentsTransfers = await doesQueryIncludePaymentsOtherThanTransfers(query);
-
-        return {
-            doesIncludePaymentWithoutOrders,
-            areAllPaymentsTransfers,
-        };
-    },
-    fetch: async (query: LimitedFilteredRequest, _subfilter, beforeFetchAllResult) => fetchPaymentRecipients(query, beforeFetchAllResult),
-    // For now: only count the number of payments - not the amount of emails
-    count: async (query: LimitedFilteredRequest, _subfilter) => {
-        const q = await GetPaymentsEndpoint.buildQuery(query);
-        const base = await q.count();
-
-        if (base < 1000) {
-            // Do full scan
-            query.limit = 1000;
-            const result = await fetchPaymentRecipients(query);
-            return result.results.length;
-        }
-
-        return base;
-    },
-};
-
-Email.recipientLoaders.set(EmailRecipientFilterType.Payment, paymentRecipientLoader);
-
-async function doesQueryIncludePaymentsWithoutOrder(filterRequest: LimitedFilteredRequest) {
-    // create count request (without limit and page filter)
-    const countRequest = new CountFilteredRequest({
-        filter: filterRequest.filter,
-        search: filterRequest.search,
-    });
-
-    const baseQuery = await GetPaymentsEndpoint.buildQuery(countRequest);
-
-    const balanceItemPaymentsJoin = SQL.innerJoin(BalanceItemPayment.table)
-        .where(
-            SQL.column(BalanceItemPayment.table, 'paymentId'),
-            SQL.column(Payment.table, 'id'),
-        );
-
-    const balanceItemJoin = SQL.innerJoin(BalanceItem.table)
-        .where(
-            SQL.column(BalanceItem.table, 'id'),
-            SQL.column(BalanceItemPayment.table, 'balanceItemId'),
-        );
-
-    // check if 1 payment without order
-    const results = await baseQuery
-        .join(balanceItemPaymentsJoin)
-        .join(balanceItemJoin)
-        // where no order
-        .where(SQL.column(BalanceItem.table, 'orderId'), null)
-        .limit(1)
-        .count();
-
-    return results > 0;
-}
-
-async function doesQueryIncludePaymentsOtherThanTransfers(filterRequest: LimitedFilteredRequest) {
-    // create count request (without limit and page filter)
-    const countRequest = new CountFilteredRequest({
-        filter: filterRequest.filter,
-        search: filterRequest.search,
-    });
-
-    const baseQuery = await GetPaymentsEndpoint.buildQuery(countRequest);
-
-    // check if 1 payment with other method than transfer
-    const results = await baseQuery
-        // where method is not transfer
-        .whereNot(SQL.column(Payment.table, 'method'), PaymentMethod.Transfer)
-        .limit(1)
-        .count();
-
-    return results === 0;
-}
-
-async function fetchPaymentOrganizationRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult) {
-    const result = await GetPaymentsEndpoint.buildData(query);
-
-    return new PaginatedResponse({
-        results: await getRecipients(result, EmailRecipientFilterType.PaymentOrganization, subfilter, beforeFetchAllResult),
-        next: result.next,
-    });
-}
-
-const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
-    fetch: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
-    // For now: only count the number of payments - not the amount of emails
-    count: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => {
-        const q = await GetPaymentsEndpoint.buildQuery(query);
-        return await q.count();
-    },
-};
-
-Email.recipientLoaders.set(EmailRecipientFilterType.PaymentOrganization, paymentOrganizationRecipientLoader);
