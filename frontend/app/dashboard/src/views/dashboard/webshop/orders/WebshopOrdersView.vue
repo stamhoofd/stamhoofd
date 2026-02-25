@@ -35,7 +35,7 @@ import { useOrdersObjectFetcher } from './useOrdersObjectFetcher';
 const props = defineProps<{ webshopManager: WebshopManager }>();
 
 const title = $t('aed41648-b8ad-476d-b98a-0221d387f96a');
-const configurationId = 'orders';
+const configurationId = 'WebshopOrdersRepo';
 
 const objectFetcher = useOrdersObjectFetcher(props.webshopManager, {
     requiredFilter: OrderRequiredFilterHelper.getDefault(props.webshopManager.preview.id),
@@ -572,16 +572,17 @@ function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
 }
 
 function created() {
-    props.webshopManager.ordersEventBus.addListener(requestOwner, 'fetched', onNewOrders.bind(requestOwner));
-    props.webshopManager.ordersEventBus.addListener(requestOwner, 'deleted', onDeleteOrders.bind(requestOwner));
+    const ordersEventBus = props.webshopManager.orders.eventBus;
+    ordersEventBus.addListener(requestOwner, 'fetched', onNewOrders.bind(requestOwner));
+    ordersEventBus.addListener(requestOwner, 'deleted', onDeleteOrders.bind(requestOwner));
 
-    props.webshopManager.ticketsEventBus.addListener(requestOwner, 'fetched', onNewTickets.bind(requestOwner));
-    props.webshopManager.ticketPatchesEventBus.addListener(requestOwner, 'patched', onNewTicketPatches.bind(requestOwner));
+    props.webshopManager.tickets.eventBus.addListener(requestOwner, 'fetched', onNewTickets.bind(requestOwner));
+    props.webshopManager.tickets.patchesEventBus.addListener(requestOwner, 'patched', onNewTicketPatches.bind(requestOwner));
 
     // Listen for patches in payments
     GlobalEventBus.addListener(requestOwner, 'paymentPatch', async (payment: PaymentGeneral) => {
         if (payment && payment.id && payment.webshopIds.find(webshopId => webshopId === props.webshopManager.preview.id)) {
-            await props.webshopManager.fetchTickets();
+            await props.webshopManager.tickets.fetchAllUpdated();
         }
         return Promise.resolve();
     });
@@ -590,9 +591,9 @@ function created() {
 created();
 
 onBeforeUnmount(() => {
-    props.webshopManager.ordersEventBus.removeListener(requestOwner);
-    props.webshopManager.ticketsEventBus.removeListener(requestOwner);
-    props.webshopManager.ticketPatchesEventBus.removeListener(requestOwner);
+    props.webshopManager.orders.eventBus.removeListener(requestOwner);
+    props.webshopManager.tickets.eventBus.removeListener(requestOwner);
+    props.webshopManager.tickets.patchesEventBus.removeListener(requestOwner);
     Request.cancelAll(requestOwner);
 });
 </script>

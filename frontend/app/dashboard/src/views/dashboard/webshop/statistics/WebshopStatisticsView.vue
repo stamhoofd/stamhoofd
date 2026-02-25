@@ -222,7 +222,7 @@ async function loadOrderGraph(range: DateOption, type: 'revenue' | 'count'): Pro
     const orderIds = new Set<string>();
 
     return await createGroupedChart(range, async (callback) => {
-        await props.webshopManager.streamOrders({
+        await props.webshopManager.orders.stream({
             callback: (order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                 // Check in range
@@ -252,7 +252,7 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.streamOrders({
+        await props.webshopManager.orders.stream({
             callback: (order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                     orderIds.add(order.id);
@@ -266,7 +266,7 @@ async function loadScanGraph(range: DateOption, filterVouchers: boolean): Promis
                 }
             } });
 
-        await props.webshopManager.streamTickets((ticket: TicketPrivate) => {
+        await props.webshopManager.tickets.streamAll((ticket: TicketPrivate) => {
             if (ticket.scannedAt && orderIds.has(ticket.orderId)) {
                 if (filterVouchers) {
                     if (!ticket.itemId) {
@@ -445,7 +445,7 @@ async function reload() {
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
-        await props.webshopManager.streamOrders({
+        await props.webshopManager.orders.stream({
             networkFetch: true,
             callback: (order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
@@ -488,7 +488,7 @@ async function reload() {
             } });
 
         if (props.webshopManager.preview.meta.ticketType !== WebshopTicketType.None) {
-            await props.webshopManager.streamTickets((ticket: TicketPrivate) => {
+            await props.webshopManager.tickets.streamAll((ticket: TicketPrivate) => {
                 if (!orderIds.has(ticket.orderId)) {
                     return;
                 }

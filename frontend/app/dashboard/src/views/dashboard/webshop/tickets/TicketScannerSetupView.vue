@@ -80,7 +80,7 @@ const noDatabaseSupport = ref(false);
 function created() {
     props.webshopManager.loadWebshopIfNeeded().then(() => {
         // Load disabled products in database
-        props.webshopManager.readSettingKey('disabledProducts').then((value) => {
+        props.webshopManager.settings.get('disabledProducts').then((value) => {
             if (value && Array.isArray(value)) {
                 if (ticketProducts.value) {
                     disabledProducts.value = ticketProducts.value?.filter(p => value.includes(p.id));
@@ -89,13 +89,15 @@ function created() {
         }).catch(console.error);
     }).catch(console.error);
 
-    // Initialize offlien storage: check if everything works okay
+    // Initialize offline storage: check if everything works okay
     isChecking.value = true;
-    props.webshopManager.getDatabase().catch(() => {
-        noDatabaseSupport.value = true;
-    }).finally(() => {
+
+    props.webshopManager.database.isSupported().then((isSupported) => {
+        if (!isSupported) {
+            noDatabaseSupport.value = true;
+        }
         isChecking.value = false;
-    });
+    }).catch(console.error);
 }
 
 created();
@@ -161,6 +163,6 @@ function start() {
     })).catch(console.error);
 
     // Save disabled products in database
-    props.webshopManager.storeSettingKey('disabledProducts', disabledProducts.value.map(p => p.id)).catch(console.error);
+    props.webshopManager.settings.set('disabledProducts', disabledProducts.value.map(p => p.id)).catch(console.error);
 }
 </script>
