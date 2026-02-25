@@ -445,8 +445,8 @@ async function reload() {
         // Keep track of all the order item ids that are a voucher, so we can count them separately
         const voucherItemMap = new Set<string>();
 
+        await props.webshopManager.orders.fetchAllUpdated();
         await props.webshopManager.orders.stream({
-            networkFetch: true,
             callback: (order: Order) => {
                 if (order.status !== OrderStatus.Canceled && order.status !== OrderStatus.Deleted && !orderIds.has(order.id)) {
                     orderIds.add(order.id);
