@@ -50,6 +50,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
             }
 
             if (isNew.value) {
+                // this logic should probably be moved to WebshopManager
                 const response = await context.value.authenticatedServer.request({
                     method: 'POST',
                     path: '/webshop',
@@ -86,7 +87,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
 
                 // Save to database
                 const manager = new WebshopManager(context.value, preview);
-                await manager.storeWebshop(response.data);
+                await manager.saveToDatabase(response.data);
                 manager.close();
 
                 // Send system wide notification that we might need an update in data

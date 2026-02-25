@@ -91,7 +91,7 @@ async function validate() {
 
         saving.value = false;
 
-        props.webshopManager.updateWebshop(response.data);
+        props.webshopManager.updateWebshop(response.data).catch(console.error);
 
         if (response.data.meta.domainActive) {
             new Toast('Je domeinnaam is goed geconfigureerd, jouw webshop is nu bereikbaar op deze nieuwe link.', 'success green').show();

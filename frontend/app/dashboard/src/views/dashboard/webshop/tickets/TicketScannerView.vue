@@ -121,10 +121,10 @@ const disableWebVideo = ref(false);
 
 let nativeListener: PluginListenerHandle | null = null;
 
-const isLoading = computed(() => props.webshopManager.isLoadingOrders || props.webshopManager.isLoadingTickets);
+const isLoading = computed(() => props.webshopManager.orders.isFetching || props.webshopManager.tickets.isFetching);
 
 const lastUpdatedText = computed(() => {
-    const min = Math.min(props.webshopManager.lastUpdatedTickets?.getTime() ?? 0, props.webshopManager.lastUpdatedOrders?.getTime() ?? 0);
+    const min = Math.min(props.webshopManager.tickets.lastUpdated?.getTime() ?? 0, props.webshopManager.orders.lastUpdated?.getTime() ?? 0);
     if (min === 0) {
         return 'nooit';
     }
@@ -199,14 +199,14 @@ function toggleFlash() {
 async function updateTickets() {
     try {
         await Promise.all([
-            props.webshopManager.fetchTickets(),
-            props.webshopManager.fetchOrders(),
+            props.webshopManager.tickets.fetchAllUpdated(),
+            props.webshopManager.orders.fetchAllUpdated(),
         ]);
 
         hadNetworkError.value = false;
 
         // Do we still have some missing patches that are not yet synced with the server?
-        props.webshopManager.trySavePatches().catch((e: any) => {
+        props.webshopManager.tickets.trySavePatches().catch((e: any) => {
             console.error(e);
             Toast.fromError(e).show();
         });
@@ -381,9 +381,9 @@ async function checkTicket(result: string) {
 
     // Fetch ticket from database
     try {
-        const ticket = await props.webshopManager.getTicketFromDatabase(secret);
+        const ticket = await props.webshopManager.tickets.get(secret);
         if (ticket) {
-            const order = await props.webshopManager.getOrderFromDatabase(ticket.orderId);
+            const order = await props.webshopManager.orders.get(ticket.orderId);
             if (!order) {
                 AppManager.shared.hapticError();
                 new Toast('Er ging iets mis. Dit is een geldig ticket, maar de bijhorende bestelling kon niet geladen worden. Waarschijnlijk heb je tijdelijk internet nodig om nieuwe bestellingen op te halen. Probeer daarna opnieuw.', 'error red').show();

@@ -153,10 +153,10 @@ const selectedDomain = ref<string | null>(null);
 const hasOrders = ref(false);
 
 function created() {
-    hasOrders.value = !!props.webshopManager?.lastFetchedOrder;
+    hasOrders.value = !!props.webshopManager?.orders.hasFetchedOne;
 
     if (!hasOrders.value && props.webshopManager) {
-        props.webshopManager.streamOrders({ callback: () => {
+        props.webshopManager.orders.stream({ callback: () => {
             hasOrders.value = true;
         }, limit: 1 }).catch(console.error);
     }

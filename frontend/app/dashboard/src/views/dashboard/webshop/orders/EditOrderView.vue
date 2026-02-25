@@ -462,9 +462,8 @@ async function save() {
         else {
             patches.addPatch(patch);
         }
-        const orders = await props.webshopManager.patchOrders(patches);
 
-        await props.webshopManager.storeOrders(orders);
+        const orders = await props.webshopManager.orders.putPatches(patches);
 
         // Force webshop refetch to update stocks
         await props.webshopManager.loadWebshop(false);

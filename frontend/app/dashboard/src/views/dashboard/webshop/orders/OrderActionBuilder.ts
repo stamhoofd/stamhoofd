@@ -57,7 +57,7 @@ export class OrderActionBuilder {
                             }));
                         }
                     }
-                    await this.webshopManager.addTicketPatches(patches);
+                    await this.webshopManager.tickets.putPatches(patches);
                 },
             }),
             new InMemoryTableAction({
@@ -79,7 +79,7 @@ export class OrderActionBuilder {
                             }));
                         }
                     }
-                    await this.webshopManager.addTicketPatches(patches);
+                    await this.webshopManager.tickets.putPatches(patches);
                 },
             }),
         ];
@@ -329,7 +329,7 @@ export class OrderActionBuilder {
                 patches.addPatch(PrivateOrder.patch({ status, id: order.id }));
             }
 
-            const updatedOrders = await this.webshopManager.patchOrders(patches);
+            const updatedOrders = await this.webshopManager.orders.putPatches(patches);
 
             // Move all data to original orders
             for (const order of updatedOrders) {
@@ -449,10 +449,7 @@ export class OrderActionBuilder {
 
         try {
             await this.markAs(orders, OrderStatus.Deleted);
-            for (const order of orders) {
-                await this.webshopManager.deleteOrderFromDatabase(order.id);
-            }
-            await this.webshopManager.ordersEventBus.sendEvent('deleted', orders);
+            await this.webshopManager.orders.deleteFromDatabase(orders);
         }
         catch (e) {
             Toast.fromError(e).show();
