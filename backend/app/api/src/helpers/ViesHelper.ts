@@ -33,6 +33,15 @@ export class ViesHelperStatic {
             return;
         }
 
+        if (company.name.length < 3 || company.name.toLowerCase() === 'vzw') {
+            throw new SimpleError({
+                code: 'invalid_company_name',
+                message: 'Company name is too short',
+                human: $t('De bedrijfsnaam is te kort of ongeldig. Vul een geldige bedrijfsnaam in.'),
+                field: 'companyName',
+            });
+        }
+
         if (company.VATNumber !== null) {
             // Changed VAT number
             patch.VATNumber = await ViesHelper.checkVATNumber(company.address.country, company.VATNumber);
