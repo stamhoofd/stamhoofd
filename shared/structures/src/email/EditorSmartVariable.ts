@@ -64,9 +64,9 @@ export class EditorSmartVariable extends AutoEncoder {
 
             if (variable instanceof EditorSmartVariable) {
                 if (variable.id === 'outstandingBalance') {
-                    // Hide outstandingBalance in combination with paymentPrice - becuase these can be confused very easily.
+                    // Hide outstandingBalance in combination with priceToPay - becuase these can be confused very easily.
                     // Although technically supported, we just hide it in the UI
-                    if (replacements.find(r => r.token === 'paymentPrice' && (r.value || r.html))) {
+                    if (replacements.find(r => r.token === 'priceToPay' && (r.value || r.html))) {
                         return false;
                     }
                 }
@@ -222,12 +222,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
-            name: $t(`495e591a-15f2-43f3-ba4f-f02598624f52`),
-        }));
-
-        variables.push(EditorSmartVariable.create({
-            id: 'paymentPrice',
-            name: $t(`495e591a-15f2-43f3-ba4f-f02598624f52`),
+            name: $t(`Totaalbedrag`),
         }));
 
         variables.push(EditorSmartVariable.create({

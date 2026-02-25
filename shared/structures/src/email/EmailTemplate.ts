@@ -706,7 +706,7 @@ export class EmailTemplate extends AutoEncoder {
         if (type === EmailTemplateType.DefaultPaymentsEmail || type === EmailTemplateType.SavedPaymentsEmail) {
             return [
                 ...ExampleReplacements.default,
-                ExampleReplacements.all.paymentPrice,
+                ExampleReplacements.all.priceToPay,
                 ExampleReplacements.all.paymentMethod,
                 ExampleReplacements.all.balanceItemPaymentsTable,
                 ExampleReplacements.all.paymentTable,

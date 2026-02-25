@@ -134,7 +134,7 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
             value: paymentUrl,
         }),
         Replacement.create({
-            token: 'paymentPrice',
+            token: 'priceToPay',
             value: Formatter.price(payment.price),
         }),
         Replacement.create({
