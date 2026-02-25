@@ -2,7 +2,7 @@ import createMollieClient, { PaymentMethod as molliePaymentMethod, PaymentStatus
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, Checkoutable, EmailTemplateType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Version } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemType, Checkoutable, EmailTemplateType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
@@ -388,7 +388,11 @@ export class PaymentService {
     }) {
         // Calculate total price to pay
         let totalPrice = 0;
-        const payMembers: Member[] = [];
+        const names: {
+            firstName: string;
+            lastName: string;
+            name: string;
+        }[] = [];
         let hasNegative = false;
 
         for (const [balanceItem, price] of balanceItems) {
@@ -416,17 +420,19 @@ export class PaymentService {
 
             totalPrice += price;
 
-            if (price > 0 && balanceItem.memberId) {
+            if (price > 0 && balanceItem.memberId && balanceItem.type === BalanceItemType.Registration) {
                 const member = members?.find(m => m.id === balanceItem.memberId);
-                if (!member && balanceItem.registrationId) {
+                if (!member) {
                     throw new SimpleError({
                         code: 'invalid_data',
                         message: $t(`e64b8269-1cda-434d-8d6f-35be23a9d6e9`),
                     });
                 }
-                if (member) {
-                    payMembers.push(member);
-                }
+                names.push({
+                    firstName: member.firstName,
+                    lastName: member.lastName,
+                    name: member.details.name,
+                });
             }
         }
 
@@ -545,13 +551,13 @@ export class PaymentService {
                 });
             }
 
-            const m = payMembers.map(r => r.details);
+            const groupedNames = Formatter.groupNamesByFamily(names);
             payment.generateDescription(
                 organization,
-                Formatter.groupNamesByFamily(m),
+                groupedNames,
                 {
-                    name: Formatter.groupNamesByFamily(m),
-                    naam: Formatter.groupNamesByFamily(m),
+                    name: groupedNames,
+                    naam: groupedNames,
                     email: user.email,
                     prefix,
                 },
@@ -634,7 +640,7 @@ export class PaymentService {
                         lineItems: balanceItemPayments,
                         organization,
                         customer: {
-                            name: user.name ?? payMembers[0]?.details.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
+                            name: user.name ?? names[0]?.name ?? $t(`bd1e59c8-3d4c-4097-ab35-0ce7b20d0e50`),
                             email: user.email,
                         },
                     });
