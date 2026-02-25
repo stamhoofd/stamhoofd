@@ -1,15 +1,15 @@
 import createMollieClient, { PaymentStatus as MolliePaymentStatus } from '@mollie/api-client';
-import { BalanceItem, BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
+import { BalanceItemPayment, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import { AuditLogSource, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
 import { StripeHelper } from '../helpers/StripeHelper.js';
 import { AuditLogService } from './AuditLogService.js';
 import { BalanceItemPaymentService } from './BalanceItemPaymentService.js';
 import { BalanceItemService } from './BalanceItemService.js';
 
-export const PaymentService = {
-    async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
+export class PaymentService {
+    static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus) {
         if (payment.status === status) {
             return;
         }
@@ -66,7 +66,7 @@ export const PaymentService = {
             }
 
             // Moved to failed
-            if (status == PaymentStatus.Failed) {
+            if (status === PaymentStatus.Failed) {
                 await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
                     const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
                         (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
@@ -101,12 +101,12 @@ export const PaymentService = {
                 });
             }
         });
-    },
+    }
 
     /**
      * ID of payment is needed because of race conditions (need to fetch payment in a race condition save queue)
      */
-    async pollStatus(paymentId: string, org: Organization | null, cancel = false): Promise<Payment | undefined> {
+    static async pollStatus(paymentId: string, org: Organization | null, cancel = false): Promise<Payment | undefined> {
         // Prevent polling the same payment multiple times at the same time: create a queue to prevent races
         return await QueueHandler.schedule('payments/' + paymentId, async () => {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
@@ -153,7 +153,7 @@ export const PaymentService = {
                     else if (payment.provider === PaymentProvider.Mollie) {
                         // check status via mollie
                         const molliePayments = await MolliePayment.where({ paymentId: payment.id }, { limit: 1 });
-                        if (molliePayments.length == 1) {
+                        if (molliePayments.length === 1) {
                             const molliePayment = molliePayments[0];
                             // check status
                             const token = await MollieToken.getTokenFor(organization.id);
@@ -313,23 +313,23 @@ export const PaymentService = {
                 return payment;
             });
         });
-    },
+    }
 
-    isManualExpired(status: PaymentStatus, payment: Payment) {
-        if ((status == PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
+    static isManualExpired(status: PaymentStatus, payment: Payment) {
+        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
             // If payment is not succeeded after one day, mark as failed
             if (payment.createdAt < new Date(new Date().getTime() - 60 * 1000 * 60 * 24)) {
                 return true;
             }
         }
         return false;
-    },
+    }
 
     /**
      * Try to cancel a payment that is still pending
      */
-    shouldTryToCancel(status: PaymentStatus, payment: Payment): boolean {
-        if ((status == PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
+    static shouldTryToCancel(status: PaymentStatus, payment: Payment): boolean {
+        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
             let timeout = STAMHOOFD.environment === 'development' ? 60 * 1000 * 2 : 60 * 1000 * 30;
 
             // If payconiq and not yet 'identified' (scanned), cancel after 5 minutes
@@ -342,7 +342,7 @@ export const PaymentService = {
             }
         }
         return false;
-    },
+    }
 
     /**
      * Say the total amount to pay is 15,238 because (e.g. because of VAT). In that case,
@@ -353,7 +353,7 @@ export const PaymentService = {
      *
      * TODO: update this method to generate a virtual invoice and use the price of the invoice instead of the rounded payment price, so we don't get differences in calculation
      */
-    round(payment: Payment) {
+    static round(payment: Payment) {
         const amount = payment.price;
         const rounded = Payment.roundPrice(payment.price);
         const difference = rounded - amount;
@@ -370,5 +370,5 @@ export const PaymentService = {
 
         // Change payment total price
         payment.price += difference;
-    },
+    }
 };
