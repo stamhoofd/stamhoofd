@@ -1,6 +1,6 @@
 <template>
     <header class="st-navigation-bar-container" :class="{negative: !!($slots.default && isValidVnodes($slots.default())), scrolled}">
-        <div v-if="!hasLeft && !hasRight" class="st-navigation-bar-background" :class="{ scrolled, large }">
+        <div v-if="!hasLeft && !hasRight && !popup" class="st-navigation-bar-background" :class="{ scrolled, large }">
             <InheritComponent name="tabbar-replacement" />
         </div>
         <div class="st-navigation-bar" :class="{ scrolled, large, 'show-title': showTitle, negative: !!($slots.default && isValidVnodes($slots.default()))}">
@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { useCanDismiss, useCanPop, useDismiss, usePop, useUrl } from '@simonbackx/vue-app-navigation';
+import { useCanDismiss, useCanPop, useDismiss, usePop, usePopup, useUrl } from '@simonbackx/vue-app-navigation';
 import { Comment, computed, Fragment, getCurrentInstance, isVNode, onActivated, onDeactivated, onMounted, ref, useSlots } from 'vue';
 
 import InheritComponent from '../containers/InheritComponent.vue';
@@ -38,6 +38,7 @@ import { useIsAndroid, useIsIOS } from '../hooks';
 import BackButton from './BackButton.vue';
 
 const slots = useSlots();
+const popup = usePopup();
 
 const props = withDefaults(defineProps<{
     title?: string;
