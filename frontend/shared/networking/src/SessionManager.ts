@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/browser';
 import { ArrayDecoder, AutoEncoder, Decoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
@@ -212,12 +211,7 @@ export class SessionManagerStatic {
     }
 
     setUserId() {
-        if (this.currentSession && this.currentSession.user) {
-            const id = this.currentSession.user.id;
-            Sentry.configureScope(function(scope) {
-                scope.setUser({"id": id});
-            });
-        }
+        //
     }
 
     async getSessionForOrganization(id: string) {

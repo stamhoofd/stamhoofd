@@ -4,7 +4,6 @@
 // Load icon font
 require('@stamhoofd/assets/images/icons/icons.font');
 
-import * as Sentry from "@sentry/vue";
 import { ViewportHelper, VueGlobalHelper } from "@stamhoofd/components";
 import { I18nController } from "@stamhoofd/frontend-i18n";
 import { AppManager } from "@stamhoofd/networking";
@@ -12,16 +11,6 @@ import Vue from "vue";
 import VueMeta from 'vue-meta'
 
 Vue.use(VueMeta)
-
-const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
-
-if (!isPrerender && STAMHOOFD.environment == "production") {
-    Sentry.init({
-        Vue,
-        dsn: "https://68f75e2911164d23ba77dde7398e609f@o431770.ingest.sentry.io/6002542",
-        logErrors: true
-    });
-}
 
 import App from "./App.vue";
 

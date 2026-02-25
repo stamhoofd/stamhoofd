@@ -5,7 +5,6 @@
 require('@stamhoofd/assets/images/icons/icons.font');
 
 // Continue
-import * as Sentry from '@sentry/vue';
 import { ViewportHelper, VueGlobalHelper } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
 import { AppManager } from '@stamhoofd/networking';
