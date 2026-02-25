@@ -86,9 +86,11 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 }
 
                 // Save to database
+
+                // todo: can create problems because the database is not closed
                 const manager = new WebshopManager(context.value, preview);
                 await manager.saveToDatabase(response.data);
-                manager.close();
+                manager.closeRequests();
 
                 // Send system wide notification that we might need an update in data
                 await GlobalEventBus.sendEvent('new-webshop', response.data);
