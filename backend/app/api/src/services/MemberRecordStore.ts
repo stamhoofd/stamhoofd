@@ -141,7 +141,7 @@ export class MemberRecordStore {
                 for (const recordCategory of organization.meta.recordsConfiguration.recordCategories) {
                     for (const record of recordCategory.getAllRecords()) {
                         if (this.cache.has(record.id)) {
-                            console.error(`Duplicate record id ${record.id} found in organization ${organization.id} for record ${record.name} (${record.id}) in ${recordCategory.name}`);
+                            console.error(`Duplicate record id ${record.id} found in organization ${organization.id} for record ${record.name.toString()} (${record.id}) in ${recordCategory.name.toString()}`);
                             continue;
                         }
                         // Add to cache

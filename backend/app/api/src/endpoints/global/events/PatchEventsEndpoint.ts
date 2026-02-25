@@ -450,7 +450,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
         }
 
-        if (type.maximum && (!event.existsInDatabase || ('typeId' in (await event.getChangedDatabaseProperties()).fields))) {
+        if (type.maximum && (!event.existsInDatabase || ('typeId' in (event.getChangedDatabaseProperties()).fields))) {
             const currentPeriod = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
             console.log('event.startDate', event.startDate);
             if (currentPeriod) {

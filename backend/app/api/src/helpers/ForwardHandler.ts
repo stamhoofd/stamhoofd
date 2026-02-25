@@ -111,7 +111,7 @@ export class ForwardHandler {
             return doBounce();
         }
 
-        console.log('Forward to ' + defaultEmail);
+        console.log('Forward to', defaultEmail);
 
         let html: string | undefined = undefined;
 

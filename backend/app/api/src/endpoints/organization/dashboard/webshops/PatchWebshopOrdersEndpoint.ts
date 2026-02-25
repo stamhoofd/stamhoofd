@@ -336,7 +336,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         });
 
         if (clearNumbers) {
-            WebshopCounter.resetNumbers(request.params.id);
+            await WebshopCounter.resetNumbers(request.params.id);
         }
 
         return new Response(
