@@ -17,7 +17,7 @@ function searchToFilter(search: string | null): StamhoofdFilter | null {
     return getOrderSearchFilter(search, parsePhoneNumber);
 }
 
-export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> {
+export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void } {
     const objectFetcher = {
         isOffline: false,
         internetPromise: null as Promise<void> | null,
@@ -168,6 +168,11 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 
             return count;
+        },
+        reset() {
+            this.isOffline = false;
+            this.lastInternetLoad = 0;
+            this.internetPromise = null;
         },
         ...overrides,
     };

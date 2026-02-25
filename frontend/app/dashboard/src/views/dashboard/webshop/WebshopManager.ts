@@ -53,11 +53,41 @@ export class WebshopManager {
         this.orders = new WebshopOrdersRepo({ database, context, settingsStore, webshopId, tickets: this.tickets });
     }
 
+    async reload(): Promise<boolean> {
+        this.closeRequests();
+        const didDelete = await this.database.delete(true);
+        if (didDelete) {
+            this.reset();
+            await this.loadWebshop();
+            return true;
+        }
+
+        console.error('Failed to reload WebshopManager');
+        return false;
+    }
+
+    private reset() {
+        this.webshop = null;
+        this.lastFetchedWebshop = null;
+        this.webshopPromise = null;
+        this.webshopFetchPromise = null;
+        this.tickets.reset();
+        this.orders.reset();
+    }
+
     /**
      * Cancel all pending loading states and retries
      */
-    close() {
+    closeRequests() {
         Request.cancelAll(this);
+    }
+
+    /**
+     * Cancel all pending loading states and retries and close the database
+     */
+    closeDatabase() {
+        this.closeRequests();
+        this.database.close();
     }
 
     async patchWebshop(patch: AutoEncoderPatchType<PrivateWebshop>) {
