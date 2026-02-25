@@ -14,5 +14,6 @@ export * from './STPendingInvoice.js';
 export * from './Invoice.js';
 // Alias
 export { Invoice as InvoiceStruct } from './Invoice.js';
+export { STPackage as STPackageStruct } from './STPackage.js';
 
 export * from './InvoicedBalanceItem.js';
