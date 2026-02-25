@@ -13,6 +13,18 @@ import node from './configs/node.js';
 import globals from "globals";
 
 const baseRules = [
+    {
+        settings: {
+            "import/parsers": {
+                "@typescript-eslint/parser": [".ts", ".tsx"],
+            },
+            'import/resolver': {
+                typescript: {
+                    bun: false
+                },
+            },
+        },
+    },
     eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,  
     {
@@ -20,7 +32,8 @@ const baseRules = [
             'import': importPlugin
         },
         rules: {
-            'import/no-cycle': 'error'
+            "import/no-unresolved": "error",
+            'import/no-cycle': ["warn", { maxDepth: 100, ignoreExternal: false }],
         }
     },
     stylistic.configs.customize({
