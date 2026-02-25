@@ -7,13 +7,13 @@ import { Checkoutable } from './Checkoutable.js';
  */
 export class PackagePurchases extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(new EnumDecoder(STPackageBundle)) })
-    packageBundles: STPackageBundle[];
+    packageBundles: STPackageBundle[] = [];
 
     /**
      * Renew existing packages
      */
     @field({ decoder: new ArrayDecoder(StringDecoder) })
-    renewPackageIds: string[];
+    renewPackageIds: string[] = [];
 }
 
 export class PackageCheckout extends Checkoutable<PackagePurchases> {
