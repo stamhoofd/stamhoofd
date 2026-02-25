@@ -362,7 +362,7 @@ export class EmailRecipient extends AutoEncoder {
         }).getDefaultReplacements();
     }
 
-    getReplacements(organization: { meta: OrganizationMetaData; privateMeta: OrganizationPrivateMetaData | null; name: string } | null, platform: Platform) {
+    getReplacements(organization: { meta: OrganizationMetaData; privateMeta: OrganizationPrivateMetaData | null; name: string; registerUrl: string } | null, platform: Platform) {
         return [
             ...this.replacements,
             ...this.getDefaultReplacements(),

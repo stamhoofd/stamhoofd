@@ -456,7 +456,7 @@ export class OrganizationMetaData extends AutoEncoder {
         return this.categories.find(c => c.id === this.rootCategoryId);
     }
 
-    getEmailReplacements(organization: { name: string; privateMeta: OrganizationPrivateMetaData | null }) {
+    getEmailReplacements(organization: { name: string; privateMeta: OrganizationPrivateMetaData | null; registerUrl: string }) {
         const base: Replacement[] = [
             Replacement.create({
                 token: 'organizationName',
@@ -502,6 +502,13 @@ export class OrganizationMetaData extends AutoEncoder {
                 }),
             );
         }
+
+        base.push(
+            Replacement.create({
+                token: 'registerUrl',
+                value: organization.registerUrl,
+            }),
+        );
 
         return base;
     }

@@ -501,6 +501,13 @@ export class PlatformConfig extends AutoEncoder {
             );
         }
 
+        base.push(
+            Replacement.create({
+                token: 'registerUrl',
+                value: 'https://' + STAMHOOFD.domains.dashboard,
+            }),
+        );
+
         return base;
     }
 

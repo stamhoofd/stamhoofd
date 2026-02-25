@@ -17,6 +17,7 @@ import { OrganizationRegistrationPeriod, RegistrationPeriod, RegistrationPeriodL
 import { Webshop, WebshopPreview } from './webshops/Webshop.js';
 import { User } from './User.js';
 import { Company } from './Company.js';
+import { Language } from './Language.js';
 
 export class BaseOrganization extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -49,6 +50,45 @@ export class BaseOrganization extends AutoEncoder {
     @field({ decoder: DateDecoder, version: 259 })
     createdAt = new Date();
 
+    /**
+     * Return default locale confiruation
+     */
+    get i18n() {
+        return { language: Language.Dutch, locale: 'nl-' + this.address.country };
+    }
+
+    /**
+     * Potentially includes a path
+     */
+    getRegistrationUrl(i18n?: { language: Language; locale: string }): string {
+        if (this.registerDomain) {
+            let d = this.registerDomain;
+
+            if (i18n && i18n.language !== this.i18n.language) {
+                d += '/' + i18n.language;
+            }
+
+            return d;
+        }
+        return this.getDefaultRegistrationUrl(i18n);
+    }
+
+    getDefaultRegistrationUrl(i18n?: { language: Language; locale: string }): string {
+        if (!STAMHOOFD.domains.registration) {
+            return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('registration') + '/' + this.uri;
+        }
+        let defaultDomain = STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration[''];
+
+        if (i18n && i18n.language !== this.i18n.language) {
+            defaultDomain += '/' + i18n.language;
+        }
+
+        return this.uri + '.' + defaultDomain;
+    }
+
+    /**
+     * Used for redirecting
+     */
     get resolvedRegisterDomain() {
         if (this.registerDomain) {
             return this.registerDomain;
@@ -62,12 +102,7 @@ export class BaseOrganization extends AutoEncoder {
     }
 
     get registerUrl() {
-        const d = this.resolvedRegisterDomain;
-        if (!d) {
-            return 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('registration') + '/' + this.uri;
-        }
-
-        return 'https://' + d;
+        return this.getRegistrationUrl();
     }
 
     get dashboardUrl() {
