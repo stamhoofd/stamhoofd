@@ -210,7 +210,7 @@ export class Organization extends QueryableModel {
     /**
      * Potentially includes a path
      */
-    getRegistrationUrl(i18n?: { language: Language; locale: string }): string {
+    getRegistrationHost(i18n?: { language: Language; locale: string }): string {
         if (this.registerDomain) {
             let d = this.registerDomain;
 
@@ -220,10 +220,10 @@ export class Organization extends QueryableModel {
 
             return d;
         }
-        return this.getDefaultRegistrationUrl(i18n);
+        return this.getDefaultRegistrationHost(i18n);
     }
 
-    getDefaultRegistrationUrl(i18n?: { language: Language; locale: string }): string {
+    getDefaultRegistrationHost(i18n?: { language: Language; locale: string }): string {
         if (!STAMHOOFD.domains.registration) {
             return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('registration') + '/' + this.uri;
         }
@@ -237,23 +237,23 @@ export class Organization extends QueryableModel {
     }
 
     get registerUrl() {
-        return this.getRegistrationUrl();
+        return 'https://' + this.getRegistrationHost();
     }
 
     /**
      * @deprecated
-     * use getRegistrationUrl
+     * use getRegistrationHost
      */
     getHost(i18n?: I18n): string {
-        return this.getRegistrationUrl(i18n);
+        return this.getRegistrationHost(i18n);
     }
 
     /**
      * @deprecated
-     * Use getDefaultRegistrationUrl
+     * Use getDefaultRegistrationHost
      */
     getDefaultHost(i18n?: I18n): string {
-        return this.getDefaultRegistrationUrl(i18n);
+        return this.getDefaultRegistrationHost(i18n);
     }
 
     get marketingDomain(): string {

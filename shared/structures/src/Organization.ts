@@ -60,7 +60,7 @@ export class BaseOrganization extends AutoEncoder {
     /**
      * Potentially includes a path
      */
-    getRegistrationUrl(i18n?: { language: Language; locale: string }): string {
+    getRegistrationHost(i18n?: { language: Language; locale: string }): string {
         if (this.registerDomain) {
             let d = this.registerDomain;
 
@@ -70,10 +70,10 @@ export class BaseOrganization extends AutoEncoder {
 
             return d;
         }
-        return this.getDefaultRegistrationUrl(i18n);
+        return this.getDefaultRegistrationHost(i18n);
     }
 
-    getDefaultRegistrationUrl(i18n?: { language: Language; locale: string }): string {
+    getDefaultRegistrationHost(i18n?: { language: Language; locale: string }): string {
         if (!STAMHOOFD.domains.registration) {
             return STAMHOOFD.domains.dashboard + '/' + (i18n?.locale ?? this.i18n.locale) + '/' + appToUri('registration') + '/' + this.uri;
         }
@@ -102,7 +102,7 @@ export class BaseOrganization extends AutoEncoder {
     }
 
     get registerUrl() {
-        return this.getRegistrationUrl();
+        return 'https://' + this.getRegistrationHost();
     }
 
     get dashboardUrl() {
