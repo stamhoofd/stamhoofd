@@ -23,7 +23,7 @@
                 <STList>
                     <STListItem v-for="pack of packages" :key="pack.bundle" element-name="button" :selectable="true" class="right-stack" @click="checkout(pack)">
                         <template #left>
-                            <IconContainer icon="group" :class="{gray: !pack.alreadyBought && !pack.inTrial, 'secundary': !pack.alreadyBought && pack.inTrial}">
+                            <IconContainer :icon="pack.bundle === STPackageBundle.Webshops ? 'basket' : 'group'" :class="{gray: !pack.alreadyBought && !pack.inTrial, 'secundary': !pack.alreadyBought && pack.inTrial}">
                                 <template #aside>
                                     <span v-if="pack.alreadyBought" v-tooltip="'Deze functie is actief'" class="icon success small primary" />
                                     <span v-else-if="pack.inTrial" v-tooltip="'Momenteel in proefperiode, activeer om in gebruik te nemen'" class="icon trial small stroke secundary" />
@@ -58,17 +58,17 @@
 
                         <template #right>
                             <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" class="button text selected">
-                                <span>Activeren</span>
+                                <span>{{ $t('Activeren') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
                             <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" class="button text selected">
-                                <span>Uitproberen</span>
+                                <span>{{ $t('Uitproberen') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
                             <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" class="button text selected">
-                                <span>Verlengen</span>
+                                <span>{{ $t('Verlengen') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
