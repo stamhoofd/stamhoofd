@@ -3,7 +3,7 @@ import { OrganizationFactory, STPackageFactory } from '@stamhoofd/models';
 import { AccessRight, LimitedFilteredRequest, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
-import { initAdmin } from '../../../../../tests/init.js';
+import { initAdmin } from '../../../../../tests/init/index.js';
 import { GetPackagesEndpoint } from './GetPackagesEndpoint.js';
 
 const baseUrl = `/organization/packages`;
