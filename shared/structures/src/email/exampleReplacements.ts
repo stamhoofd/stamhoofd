@@ -238,7 +238,7 @@ function getReplacements() {
             value: $t(`990581a8-e4db-4c33-b36b-4df045f8c294`),
         }),
         overviewTable: Replacement.create({
-            token: 'paymentOverview',
+            token: 'overviewTable',
             html: htmlPlaceholder,
         }),
         balanceItemPaymentsTable: Replacement.create({
