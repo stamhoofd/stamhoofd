@@ -252,12 +252,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewTable',
-            name: $t(`b510871b-dac3-4188-bfe1-f51ad7577432`),
-        }));
-
-        variables.push(EditorSmartVariable.create({
-            id: 'balanceItemPaymentsTable',
-            name: $t(`Tabel met alle items uit de betaling`),
+            name: $t(`Tabel met alle items`),
         }));
 
         variables.push(EditorSmartVariable.create({

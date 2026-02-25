@@ -91,17 +91,6 @@ export class PaymentGeneral extends Payment {
         return getBalanceItemPaymentsHtmlTable(this.balanceItemPayments);
     }
 
-    getDetailsHTMLTable(): string {
-        let str = '';
-        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('3e3c4d40-7d30-4f4f-9448-3e6c68b8d40d')}</th><th>${$t('52bff8d2-52af-4d3f-b092-96bcfa4c0d03')}</th></tr></thead><tbody>`;
-
-        for (const balanceItemPayment of this.balanceItemPayments) {
-            str += `<tr><td><h4>${Formatter.escapeHtml(balanceItemPayment.balanceItem.description)}</h4></td><td class="price">${Formatter.escapeHtml(Formatter.price(balanceItemPayment.price))}</td></tr>`;
-        }
-
-        return str + '</tbody></table>';
-    }
-
     /**
      * Customer name, phone, payment method and total price
      */

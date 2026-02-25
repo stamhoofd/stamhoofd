@@ -237,10 +237,6 @@ function getReplacements() {
             token: 'overviewTable',
             html: htmlPlaceholder,
         }),
-        balanceItemPaymentsTable: Replacement.create({
-            token: 'balanceItemPaymentsTable',
-            html: htmlPlaceholder,
-        }),
         paymentTable: Replacement.create({
             token: 'paymentTable',
             html: htmlPlaceholder,

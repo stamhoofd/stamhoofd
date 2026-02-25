@@ -158,11 +158,6 @@ function fillReplacements(replacements: Replacement[]) {
 
     const paymentReplacemnets = [
         Replacement.create({
-            token: 'overviewTable',
-            value: '',
-            html: paymentGeneral.getDetailsHTMLTable(),
-        }),
-        Replacement.create({
             token: 'paymentTable',
             value: '',
             html: paymentGeneral.getHTMLTable(),
@@ -176,7 +171,7 @@ function fillReplacements(replacements: Replacement[]) {
             ]),
         }),
         Replacement.create({
-            token: 'balanceItemPaymentsTable',
+            token: 'overviewTable',
             html: paymentGeneral.getBalanceItemPaymentsHtmlTable(),
         }),
         Replacement.create({

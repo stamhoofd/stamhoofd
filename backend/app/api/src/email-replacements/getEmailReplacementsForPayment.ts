@@ -172,7 +172,7 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
                 ]),
 
         Replacement.create({
-            token: 'balanceItemPaymentsTable',
+            token: 'overviewTable',
             value: '',
             html: getBalanceItemPaymentsHtmlTable(unboxBalanceItemPayments(payment, orderMap)),
         }),

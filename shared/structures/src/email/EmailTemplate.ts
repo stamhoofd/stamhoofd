@@ -708,7 +708,7 @@ export class EmailTemplate extends AutoEncoder {
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.priceToPay,
                 ExampleReplacements.all.paymentMethod,
-                ExampleReplacements.all.balanceItemPaymentsTable,
+                ExampleReplacements.all.overviewTable,
                 ExampleReplacements.all.paymentTable,
                 ExampleReplacements.all.overviewContext,
                 ExampleReplacements.all.paymentData,
