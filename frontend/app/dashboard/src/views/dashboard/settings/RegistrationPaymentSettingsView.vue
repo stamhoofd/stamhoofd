@@ -13,7 +13,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <EditPaymentMethodsBox type="registration" :organization="organization" :config="config" :private-config="privateConfig" :validator="validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
+        <EditPaymentMethodsBox type="registration" :config="config" :private-config="privateConfig" :validator="validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
     </SaveView>
 </template>
 
