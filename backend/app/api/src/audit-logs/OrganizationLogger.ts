@@ -17,6 +17,11 @@ export const OrganizationLogger = new ModelLogger(Organization, {
             // Never belongs to an organization - could cause constraint errors
             log.organizationId = null;
         }
+
+        if (log.type === AuditLogType.OrganizationAdded) {
+            // Should only be visible in the admin panel
+            log.organizationId = null;
+        }
     },
 
     createReplacements: (model, options) => {
