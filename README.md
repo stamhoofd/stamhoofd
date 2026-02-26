@@ -61,34 +61,56 @@ You can read the documentation of the most important building blocks of Stamhoof
 Using MacOS or Linux is recommended. Setup using WSL can be very difficult given that Stamhoofd requires you to setup a local DNS server and trust a new local SSL root certificate, which is very hard to setup given that this cannot get automated when using WSL.
 
 - Install MySQL8 and create a new local database
-```
-brew install mysql@8.4
-brew link mysql@8.4 --force
-```
+  ```
+  brew install mysql@8.4
+  rew link mysql@8.4 --force
+  ```
+
+  > [!NOTE]  
+  > It is recommended to alias `mysql` to mysql@8.4 if you dont use MySQL 9+. You can do this in brew by unlinking mysql (often 9+ by default) and force linking mysql8.4.
+  > ```
+  > brew unlink mysql
+  > brew link --force --overwrite mysql@8.4
+  > ```
 
 - Add these lines to the mysql configuration (/usr/local/etc/my.cnf, but can be in a different location)
-```
-mysql_native_password=ON
-sort_buffer_size = 2M
-```
+  ```
+  mysql_native_password=ON
+  sort_buffer_size = 2M
+  ```
 - Start mysql
-```
-brew services start mysql@8.4
-mysql -u root
-```
+  ```
+  brew services start mysql@8.4
+  mysql -u root
+  ```
 
 - Run these mysql queries
-```sql
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-FLUSH PRIVILEGES;
-exit;
-```
-
-Stamhoofd will create the required database by default on boot when running in development mode.
+  ```sql
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH   mysql_native_password BY 'root';
+  FLUSH PRIVILEGES;
+  exit;
+  ```
+  Stamhoofd will create the required database by default on boot when running in development mode.
 
 - Install Caddy (`brew install caddy` - do not start it in the background)
-- Install CoreDNS (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address, this is required because we need wildcard domains).
-- Update your computer's DNS-server to 127.0.0.1. On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1`. Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
+
+#### DNS
+
+Stamhoofd heavily depends on DNS to work properly (becaues of our wildcard domain usage). For development, we reserve the whole *.stamhoofd TLD by providing a local DNS server with CoreDNS. 
+
+- Install CoreDNS (`brew install coredns`) and start coredns via `yarn dns` (this makes sure the default development domains resolve to your local IP address).
+- By default the DNS server will resolve to `127.0.0.1`. You can change this by creating `.development/.env` and setting it to e.g. `SERVER_IP=192.168.1.7` (insert your LAN IP-address). A better value would be to give your local computer a static IP-address in your LAN and use that instead. That allows for testing on smartphones as well. Keep in mind that if you are running the server on the go in a different network, you'll have to change the env file again to `127.0.0.1`.
+- Update your computer's DNS-server to `127.0.0.1`. On MacOS when using Wi-Fi you can run  `networksetup -setdnsservers Wi-Fi 127.0.0.1` (you'll have to do this for every network interface you use). Run `networksetup -listallnetworkservices` to list all your network services. Don't forget to remove this again if you stop coredns again (or you won't have any internet connection since all DNS queries will fail). You can also manually go to the network settings of your Mac to change the DNS server.
+
+After changing the DNS-server, or after a downtime of the CoreDNS, you might need to clear your DNS cache locally. On MacOS you can use:
+```
+sudo killall -HUP mDNSResponder;
+sudo killall mDNSResponderHelper;
+sudo dscacheutil -flushcache;
+```
+
+> [!TIP]  
+> Instead of manually altering your DNS-server to `127.0.0.1`, a better alternative could be to alter the default DNS settings directly in your router. Be sure to add a fallback IP-address in case you are offline, and add ipv6 addresses as well. Configuring this makes sure you can test on your smartphone and other local devices too, without altering the DNS-server every time.
 
 #### Optional dependencies
 
