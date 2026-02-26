@@ -3,10 +3,9 @@ import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Group, Member, Platform, Registration } from '@stamhoofd/models';
 import { SQL, SQLExpression, SQLSelect, SQLSortDefinitions, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMemberBlob, StamhoofdFilter, assertSort } from '@stamhoofd/structures';
+import { CountFilteredRequest, GroupType, LimitedFilteredRequest, PaginatedResponse, PermissionLevel, RegistrationWithMemberBlob, StamhoofdFilter, assertSort, RegistrationsBlob } from '@stamhoofd/structures';
 
 import { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { RegistrationsBlob } from '@stamhoofd/structures/dist/src/members/RegistrationsBlob';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
