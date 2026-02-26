@@ -63,7 +63,7 @@ import { computed, Ref, ref, watch } from 'vue';
 import { useCount } from '../composables/useCount';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
 
-export type ChargeViewOptions = {
+const props = withDefaults(defineProps<{
     filter: StamhoofdFilter;
     countEndpointPath: string; chargeEndpointPath: string;
     getDescription: (args: { count: number }) => string;
@@ -79,9 +79,7 @@ export type ChargeViewOptions = {
     showCreatedAt?: boolean;
     showDueAt?: boolean;
     organization?: Organization | null;
-};
-
-const props = withDefaults(defineProps<ChargeViewOptions>(), {
+}>(), {
     showCreatedAt: false,
     showDueAt: false,
     modalDisplayStyle: 'sheet',
