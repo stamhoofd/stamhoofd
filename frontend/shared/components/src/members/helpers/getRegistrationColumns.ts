@@ -93,7 +93,7 @@ export function getRegistrationColumns({ organization, dateRange, group, groups,
             minimumWidth: 120,
             recommendedWidth: 140,
             allowSorting: false,
-            enabled: false,
+            enabled: true,
         }),
         dateRange !== null
             ? new Column<ObjectType, ContinuousMembershipStatus>({
