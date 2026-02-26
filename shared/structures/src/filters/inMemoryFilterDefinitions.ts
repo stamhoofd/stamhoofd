@@ -151,3 +151,8 @@ export const privateOrderFilterCompilers: InMemoryFilterDefinitions = {
     }),
     recordAnswers: createInMemoryFilterCompiler('data.recordAnswers', createInMemoryWildcardCompilerSelector(recordAnswerItemFilterCompilers)),
 };
+
+export const privateOrderWithTicketsFilterCompilers: InMemoryFilterDefinitions = {
+    ...privateOrderFilterCompilers,
+    ticketScanStatus: createInMemoryFilterCompiler('ticketScanStatus'),
+};

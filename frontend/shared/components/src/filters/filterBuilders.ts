@@ -830,6 +830,28 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         },
     }));
 
+    if (preview.hasTickets) {
+        builders.push(new MultipleChoiceFilterBuilder({
+            name: $t('Ticket scanstatus'),
+            options: preview.hasSingleTickets
+                ? [
+                        new MultipleChoiceUIFilterOption($t('Niet gescand'), 'none'),
+                        new MultipleChoiceUIFilterOption($t('Gescand'), 'all'),
+
+                    ]
+                : [
+                        new MultipleChoiceUIFilterOption($t('Geen enkel ticket gescand'), 'none'),
+                        new MultipleChoiceUIFilterOption($t('Gedeeltelijk gescand'), 'partial'),
+                        new MultipleChoiceUIFilterOption($t('Alle tickets gescand'), 'all'),
+                    ],
+            wrapper: {
+                ticketScanStatus: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+        }));
+    }
+
     if (preview instanceof Webshop) {
         builders.push(getCartFilterBuilder(preview));
     }
