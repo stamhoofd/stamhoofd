@@ -35,7 +35,7 @@ import { DetailedPayableBalanceCollection } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { GlobalEventBus } from '../EventBus';
-import { useVisibilityChange } from '../composables';
+import { useVisibilityChange } from '../hooks/useVisibilityChange.js';
 import { Toast } from '../overlays/Toast';
 import PayableBalanceTable from './PayableBalanceTable.vue';
 import PaymentRow from './components/PaymentRow.vue';

@@ -14,7 +14,7 @@ import { useRegistrationQuickActions } from './useRegistrationQuickActions';
 
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
 import tentSvg from '@stamhoofd/assets/images/illustrations/tent.svg';
-import { useVisibilityChange } from '../../composables';
+import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
 import { Toast } from '../../overlays/Toast';
 
 export function useDashboardQuickActions(): QuickActions {

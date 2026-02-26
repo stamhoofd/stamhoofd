@@ -1,5 +1,5 @@
 import { onActivated, ref } from 'vue';
-import { useVisibilityChange } from '../composables';
+import { useVisibilityChange } from './useVisibilityChange.js';
 
 // todo: consider caching this system wide (need to think about the temporary listeners created in useVisibilityChange)
 export function useNow() {

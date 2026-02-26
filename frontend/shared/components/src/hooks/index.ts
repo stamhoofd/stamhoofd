@@ -37,3 +37,5 @@ export * from './useElementWidth';
 export * from './useEmailInformation';
 export * from './useEmailWarning';
 export * from './useScrollListener';
+export * from './useVisibilityChange';
+export * from './useEditPopup';

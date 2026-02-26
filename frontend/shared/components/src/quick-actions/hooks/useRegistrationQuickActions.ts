@@ -18,7 +18,7 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
-import { useVisibilityChange } from '../../composables';
+import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
 import { EventView } from '../../events';
 import EventIcon from '../../events/components/EventIcon.vue';
 
