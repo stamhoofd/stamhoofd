@@ -1213,6 +1213,7 @@ function onResize() {
 //
 async function loadColumnConfiguration() {
     try {
+        const enabledBefore = columns.value;
         const json = await Storage.keyValue.getItem('column-configuration-' + props.columnConfigurationId);
         if (json !== null) {
             const parsed = new ObjectData(JSON.parse(json), { version: Version });
@@ -1239,17 +1240,23 @@ async function loadColumnConfiguration() {
                     sortDirection.value = decoded.sortDirection ?? SortItemDirection.ASC;
                 }
             }
-
-            updateVisibleRows();
-            updateRecommendedWidths();
-
-            updateColumnWidth();
         }
-        else {
-            updateVisibleRows();
-            updateRecommendedWidths();
-            updateColumnWidth();
+
+        if (columns.value.length === 0) {
+            // Restore
+            if (enabledBefore.length) {
+                for (const c of enabledBefore) {
+                    c.enabled = true;
+                }
+            } else {
+                if (reactiveColumns[0]) {
+                    reactiveColumns[0].enabled = true;
+                }
+            }
         }
+        updateVisibleRows();
+        updateRecommendedWidths();
+        updateColumnWidth();
     }
     catch (error) {
         console.error(error);

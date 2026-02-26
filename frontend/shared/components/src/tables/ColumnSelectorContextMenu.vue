@@ -32,6 +32,10 @@ export default class ColumnSelectorContextMenu extends Mixins(NavigationMixin) {
     columns: Column<any, any>[];
 
     setColumnEnabled(column: Column<any, any>, enabled: boolean) {
+        if (enabled === false && !this.columns.find(c => c.enabled && c.id !== column.id)) {
+            // Can't disable last
+            return;
+        }
         column.width = null;
         column.renderWidth = null;
         column.enabled = enabled;
