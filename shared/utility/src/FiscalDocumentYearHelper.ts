@@ -25,17 +25,6 @@ export class FiscalDocumentYearHelper {
     readonly month = this.now.month;
 
     /**
-     * Previous year if no fiscal document can be created for the current year. Otherwise the current year.
-     */
-    get defaultCalendarYear(): number {
-        if (this.month <= this.allowCreationAfterMonth) {
-            return this.year - 1;
-        }
-
-        return this.year;
-    }
-
-    /**
      * Returns if a fiscal document for this year can be created.
      */
     get canCreateFiscalDocumentForCurrentYear(): boolean {

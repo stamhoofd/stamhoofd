@@ -79,12 +79,11 @@ enum Routes {
 }
 
 enum TabItem {
-    Recent = 'Recent',
     Archive = 'Archive',
 }
 
 const fiscalDocumentYearHelper = new FiscalDocumentYearHelper();
-const firstYearToShow = fiscalDocumentYearHelper.defaultCalendarYear;
+const firstYearToShow = fiscalDocumentYearHelper.year;
 
 const organization = useRequiredOrganization();
 const present = usePresent();
@@ -143,7 +142,7 @@ defineRoutes([
 ]);
 
 const searchQuery = ref('');
-const selectedTab = ref(firstYearToShow) as Ref<number | null>;
+const selectedTab = ref(firstYearToShow) as Ref<number | null | TabItem>;
 const objectFetcher = useDocumentTemplatesObjectFetcher({
     get requiredFilter() {
         return getRequiredFilter();
@@ -160,9 +159,25 @@ const shouldShowTitles = computed(() => groupedTemplates.value.length > 1
 
 const tabItems = [firstYearToShow, firstYearToShow - 1, TabItem.Archive];
 
+function setTabItemFromYear(year: number) {
+    function getTabItemFromYear(year: number) {
+        if (year >= firstYearToShow) {
+            return firstYearToShow;
+        }
+
+        const secondYearToShow = firstYearToShow - 1;
+        if (year === secondYearToShow) {
+            return secondYearToShow;
+        }
+
+        return TabItem.Archive;
+    }
+
+    selectedTab.value = getTabItemFromYear(year);
+}
+
 const yearLabels = tabItems.map((y) => {
     switch (y) {
-        case TabItem.Recent: return $t('07958263-0cd9-4663-9932-09bc76de4987');
         case TabItem.Archive: return $t('18337b9f-03a1-4b85-a012-1c1ba16739d0');
         default: return $t(`051d6df8-2c40-4dc6-9dd5-10579a8423a2`, { year: y.toString() });
     }
@@ -199,6 +214,7 @@ function addDocument() {
                 }),
                 callback: (template: DocumentTemplatePrivate) => {
                     fetcher.reset();
+                    setTabItemFromYear(template.year);
                     openTemplate(template).catch(console.error);
                 },
             }),
