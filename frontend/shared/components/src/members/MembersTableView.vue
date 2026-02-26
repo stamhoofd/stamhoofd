@@ -108,8 +108,21 @@ useGlobalEventListener('paymentPatch', async () => {
 });
 
 const configurationId = computed(() => {
-    return 'members-' + app + '-org-' + (organization.value?.id ?? 'null') + '-' + (props.group ? '-group-' + props.group.id : '') + (props.category ? '-category-' + props.category.id : '') + (props.responsibility ? '-responsibility-' + props.responsibility.id : '');
+    if (props.responsibility) {
+        return 'responsibility-' + props.responsibility.id;
+    }
+    if (props.group && props.group.type === GroupType.EventRegistration) {
+        return 'event-registrations';
+    }
+    if (props.group && props.group.type === GroupType.WaitingList) {
+        return 'waitinglist';
+    }
+    if (organization.value) {
+        return 'registrations';
+    }
+    return 'platform-registrations';
 });
+
 const financialRead = computed(() => auth.permissions?.hasAccessRight(AccessRight.MemberReadFinancialData) ?? false);
 
 const groups = (() => {
