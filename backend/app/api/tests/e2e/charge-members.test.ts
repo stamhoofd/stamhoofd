@@ -1,6 +1,6 @@
 import { Request, Response } from '@simonbackx/simple-endpoints';
 import { GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
-import { AccessRight, BalanceItemWithPayments, ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import { AccessRight, BalanceItemWithPayments, ChargeRequest, LimitedFilteredRequest, PermissionLevel, PermissionRoleDetailed, Permissions, PermissionsResourceType, ResourcePermissions, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
@@ -16,7 +16,7 @@ describe('E2E.ChargeMembers', () => {
     let financialDirectorRole: PermissionRoleDetailed;
     let financialDirectorRoleOfOtherOrganization: PermissionRoleDetailed;
 
-    const postCharge = async (filter: StamhoofdFilter, organization: Organization, body: ChargeMembersRequest, token: Token) => {
+    const postCharge = async (filter: StamhoofdFilter, organization: Organization, body: ChargeRequest, token: Token) => {
         const request = Request.buildJson('POST', `/v${Version}/admin/charge-members`, organization.getApiHost(), body);
         const filterRequest = new LimitedFilteredRequest({
             filter,
@@ -105,7 +105,7 @@ describe('E2E.ChargeMembers', () => {
             },
         };
 
-        const body = ChargeMembersRequest.create({
+        const body = ChargeRequest.create({
             description: 'test description',
             price: 3,
             amount: 4,
@@ -169,7 +169,7 @@ describe('E2E.ChargeMembers', () => {
             },
         };
 
-        const body = ChargeMembersRequest.create({
+        const body = ChargeRequest.create({
             description: 'test description',
             price: 3,
             amount: 4,
@@ -233,7 +233,7 @@ describe('E2E.ChargeMembers', () => {
 
         const otherFinancialDirectorToken = await Token.createToken(otherFinancialDirector);
 
-        const body = ChargeMembersRequest.create({
+        const body = ChargeRequest.create({
             description: 'test description',
             price: 3,
             amount: 4,
@@ -270,9 +270,9 @@ describe('E2E.ChargeMembers', () => {
             },
         };
 
-        const testCases: [body: ChargeMembersRequest, expectedErrorMessage: string][] = [
+        const testCases: [body: ChargeRequest, expectedErrorMessage: string][] = [
             // empty description
-            [ChargeMembersRequest.create({
+            [ChargeRequest.create({
                 description: ' ',
                 price: 3,
                 amount: 4,
@@ -281,7 +281,7 @@ describe('E2E.ChargeMembers', () => {
             }), 'Invalid description'],
 
             // price 0
-            [ChargeMembersRequest.create({
+            [ChargeRequest.create({
                 description: 'test description',
                 price: 0,
                 amount: 4,
@@ -290,7 +290,7 @@ describe('E2E.ChargeMembers', () => {
             }), 'Invalid price'],
 
             // amount 0
-            [ChargeMembersRequest.create({
+            [ChargeRequest.create({
                 description: 'test description',
                 price: 3,
                 amount: 0,
@@ -348,7 +348,7 @@ describe('E2E.ChargeMembers', () => {
                 },
             };
 
-            const body = ChargeMembersRequest.create({
+            const body = ChargeRequest.create({
                 description: 'test description',
                 price: 3,
                 amount: 4,
@@ -417,7 +417,7 @@ describe('E2E.ChargeMembers', () => {
                 },
             };
 
-            const body = ChargeMembersRequest.create({
+            const body = ChargeRequest.create({
                 description: 'test description',
                 price: 3,
                 amount: 4,

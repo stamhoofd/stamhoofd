@@ -458,7 +458,7 @@ export class MemberActionBuilder {
         })];
     }
 
-    getChargeAction(organization: Organization) {
+    getChargeAction() {
         return new AsyncTableAction({
             name: $t(`d799bffc-fd09-4444-abfa-3552b3c46cb9`),
             icon: 'calculator',
@@ -470,7 +470,6 @@ export class MemberActionBuilder {
                     components: [
                         new ComponentWithProperties(ChargeMembersView, {
                             filter: selection.filter.filter,
-                            organization,
                         }),
                     ],
                 });

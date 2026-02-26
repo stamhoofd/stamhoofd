@@ -330,7 +330,7 @@ const actions: TableAction<ObjectType>[] = [
     ...registrationActions,
 ];
 
-if (app !== 'admin' && auth.canManagePayments()) {
-    actions.push(actionBuilder.getChargeAction(organizationScope.value!));
+if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
+    actions.push(actionBuilder.getChargeAction());
 }
 </script>

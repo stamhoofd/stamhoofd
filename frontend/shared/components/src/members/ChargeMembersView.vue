@@ -1,21 +1,20 @@
 <template>
-    <ChargeView :filter="filter" count-endpoint-path="/members/count" charge-endpoint-path="/admin/charge-members" :create-body="createBody" :get-description="getDescription" :get-confirmation-text="getConfirmationText" :show-due-at="$feature('member-trials')" :show-created-at="true" :organization="organization" :due-at-description="$t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575')" />
+    <ChargeView
+        :filter="filter"
+        count-endpoint-path="/members/count"
+        charge-endpoint-path="/admin/charge-members"
+        :get-description="getDescription"
+        :get-confirmation-text="getConfirmationText"
+    />
 </template>
 
 <script lang="ts" setup>
-import { ChargeMembersRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
+import { StamhoofdFilter } from '@stamhoofd/structures';
 import ChargeView from '../views/ChargeView.vue';
 
-defineProps<{ filter: StamhoofdFilter; organization: Organization }>();
-
-function createBody(args: {
-    price: number;
-    description: string;
-    amount: number | null;
-    dueAt: Date | null;
-    createdAt: Date | null; }): ChargeMembersRequest {
-    return ChargeMembersRequest.create(args);
-}
+defineProps<{
+    filter: StamhoofdFilter;
+}>();
 
 function getDescription({ count }: { count: number }) {
     if (count === 1) {

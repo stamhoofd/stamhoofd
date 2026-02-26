@@ -266,7 +266,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 ];
 
-if (app !== 'admin' && auth.canManagePayments()) {
-    actions.push(actionBuilder.getChargeAction(organization.value!));
+if ((app !== 'admin' && auth.canManagePayments()) || auth.hasPlatformFullAccess()) {
+    actions.push(actionBuilder.getChargeAction());
 }
 </script>

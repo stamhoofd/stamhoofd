@@ -11,8 +11,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div :class="{'split-inputs': showSelectOrganization}">
-            <STInputBox v-if="showSelectOrganization" :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
+        <div class="split-inputs">
+            <STInputBox v-if="app === 'admin'" :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
@@ -26,42 +26,37 @@
                 <PriceInput v-model="price" :placeholder="formatPrice(0)" :required="true" :min="null" />
             </STInputBox>
             <STInputBox :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" error-fields="amount" :error-box="errors.errorBox">
-                <NumberInput v-model="amount" :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" :validator="errors.validator" :min="1" />
+                <NumberInput v-model="amount" :title="$t('a0f52fae-a4e6-4c3c-a6af-83218dd399b2')" :validator="errors.validator" :min="1" :stepper="true" />
             </STInputBox>
         </div>
 
         <div class="split-inputs">
-            <div v-if="showCreatedAt">
+            <div>
                 <STInputBox error-fields="createdAt" :error-box="errors.errorBox" :title="$t(`ab0535e6-bbaa-4961-a34f-aca39ef0d785`)">
                     <DateSelection v-model="createdAt" />
                 </STInputBox>
             </div>
-            <div v-if="canShowDueAt">
-                <STInputBox :title="$t('1402e826-1f61-498a-81b4-595dce3248d0') + (dueAtDescription ? '*' : '')" error-fields="dueAt" :error-box="errors.errorBox">
+            <div v-if="price >= 0">
+                <STInputBox :title="$t('1402e826-1f61-498a-81b4-595dce3248d0')" error-fields="dueAt" :error-box="errors.errorBox">
                     <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`ef2b5d01-756d-46d0-8e1d-a200f43a3921`)" />
                 </STInputBox>
             </div>
         </div>
-
-        <p v-if="canShowDueAt && dueAtDescription" class="style-description-small">
-            {{ dueAtDescription }}
-        </p>
 
         <PriceBreakdownBox :price-breakdown="priceBreakdown" />
     </SaveView>
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoder } from '@simonbackx/simple-encoding';
 import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useContext, useErrors, useExternalOrganization, usePlatform, useValidation } from '@stamhoofd/components';
+import { CenteredMessage, DateSelection, ErrorBox, NumberInput, PriceBreakdownBox, PriceInput, Toast, useAppContext, useContext, useErrors, useExternalOrganization, useOrganization, usePlatform, useValidation } from '@stamhoofd/components';
 import { useRequestOwner } from '@stamhoofd/networking';
-import { LimitedFilteredRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
+import { ChargeRequest, Organization, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, Ref, ref, watch } from 'vue';
-import { useCount } from '../composables/useCount';
 import OrganizationSelect from '../organizations/components/OrganizationSelect.vue';
+import { useChargeCount } from './hooks/useChargeCount';
 
 const props = withDefaults(defineProps<{
     filter: StamhoofdFilter;
@@ -69,21 +64,7 @@ const props = withDefaults(defineProps<{
     chargeEndpointPath: string;
     getDescription: (args: { count: number }) => string;
     getConfirmationText: (args: { total: string; count: number | null }) => string;
-    dueAtDescription?: string;
-    createBody: (args: { organizationId: string;
-        price: number;
-        description: string;
-        amount: number | null;
-        dueAt: Date | null;
-        createdAt: Date | null; }) => AutoEncoder;
-    showCreatedAt?: boolean;
-    showDueAt?: boolean;
-    organization?: Organization | null;
 }>(), {
-    showCreatedAt: false,
-    showDueAt: false,
-    organization: null,
-    dueAtDescription: undefined,
 });
 
 const errors = useErrors();
@@ -92,7 +73,8 @@ const pop = usePop();
 const owner = useRequestOwner();
 const context = useContext();
 const platform = usePlatform();
-const { count } = useCount(props.countEndpointPath);
+const { count } = useChargeCount(props.countEndpointPath);
+const app = useAppContext();
 
 count(props.filter)
     .then((result: number | null) => {
@@ -103,16 +85,15 @@ count(props.filter)
     .catch(console.error);
 
 const selectionCount = ref<number | null>(null);
-const selectedOrganization = ref<Organization | null>(props.organization) as Ref<Organization | null>;
-const showSelectOrganization = computed(() => props.organization === null);
+const organization = useOrganization();
+const selectedOrganization = ref<Organization | null>(organization.value) as Ref<Organization | null>;
 const description = ref('');
 const price = ref(0);
 const amount = ref(1);
 const hasChanges = computed(() => description.value !== '' || price.value !== 0);
 const total = computed(() => price.value * amount.value);
-const canShowDueAt = computed(() => props.showDueAt && (price.value >= 0));
 
-const createdAt = ref(props.showCreatedAt ? new Date() : null);
+const createdAt = ref(new Date());
 const dueAt = ref(null);
 
 const priceBreakdown = computed(() => {
@@ -134,7 +115,7 @@ const saving = ref(false);
 
 const title = $t('e412b71e-566b-41d4-8b1f-97ab7f140b29');
 
-const defaultOrganizationId = computed(() => platform.value.membershipOrganizationId);
+const defaultOrganizationId = computed(() => organization.value === null ? platform.value.membershipOrganizationId : null);
 const { externalOrganization: defaultOrganization } = useExternalOrganization(defaultOrganizationId);
 
 watch(defaultOrganization, (organization) => {
@@ -203,24 +184,18 @@ async function save() {
     }
 
     try {
-        const limitedFilteredRequest = new LimitedFilteredRequest({
-            filter: props.filter,
-            limit: 100,
-        });
-
-        const body = props.createBody({
-            organizationId: selectedOrganization.value!.id,
+        const body = ChargeRequest.create({
             price: price.value,
             description: description.value,
             amount: amount.value,
             dueAt: dueAt.value,
             createdAt: createdAt.value,
+            filter: props.filter,
         });
 
-        await context.value.authenticatedServer.request({
+        await (selectedOrganization.value ? context.value.getAuthenticatedServerForOrganization(selectedOrganization.value.id) : context.value.authenticatedServer).request({
             method: 'POST',
             path: props.chargeEndpointPath,
-            query: limitedFilteredRequest,
             shouldRetry: false,
             body,
             owner,

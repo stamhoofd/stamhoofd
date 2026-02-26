@@ -1,7 +1,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { ChargeMembersRequest, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
+import { ChargeRequest, LimitedFilteredRequest, PermissionLevel } from '@stamhoofd/structures';
 
 import { QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context.js';
@@ -11,13 +11,12 @@ import { GetRegistrationsEndpoint } from '../../global/registration/GetRegistrat
 import { ChargeMembersEndpoint } from '../members/ChargeMembersEndpoint.js';
 
 type Params = Record<string, never>;
-type Query = LimitedFilteredRequest;
-type Body = ChargeMembersRequest;
+type Query = undefined;
+type Body = ChargeRequest;
 type ResponseBody = undefined;
 
 export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
-    bodyDecoder = ChargeMembersRequest as Decoder<ChargeMembersRequest>;
+    bodyDecoder = ChargeRequest as Decoder<ChargeRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
@@ -44,7 +43,7 @@ export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, R
 
         ChargeMembersEndpoint.throwIfInvalidBody(body);
 
-        const queueId = 'charge-registrations';
+        const queueId = 'charge-registrations-' + organization.id;
 
         if (QueueHandler.isRunning(queueId)) {
             throw new SimpleError({
@@ -55,7 +54,10 @@ export class ChargeRegistrationsEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         await QueueHandler.schedule(queueId, async () => {
-            const dataGenerator = fetchToAsyncIterator(request.query, {
+            const dataGenerator = fetchToAsyncIterator(new LimitedFilteredRequest({
+                filter: body.filter,
+                limit: 100,
+            }), {
                 fetch: request => GetRegistrationsEndpoint.buildData(request, PermissionLevel.Write),
             });
 
