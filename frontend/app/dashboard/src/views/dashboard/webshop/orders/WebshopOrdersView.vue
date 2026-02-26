@@ -562,7 +562,11 @@ function putOrder(order: PrivateOrder) {
     }
 }
 
-async function onNewOrders(orders: PrivateOrder[]) {
+function onNewOrders(orders: PrivateOrder[]) {
+    if (objectFetcher.lastInternetLoad === 0) {
+        return;
+    }
+
     console.log('Received new orders from network');
     // Search for the orders and replace / add them
     for (const order of orders) {
@@ -570,23 +574,26 @@ async function onNewOrders(orders: PrivateOrder[]) {
     }
 
     tableObjectFetcher.reset(true, true);
-    return Promise.resolve();
 }
 
-function onDeleteOrders(_orders: PrivateOrder[]): Promise<void> {
+function onDeleteOrders(_orders: PrivateOrder[]) {
+    if (objectFetcher.lastInternetLoad === 0) {
+        return;
+    }
     tableObjectFetcher.reset();
-    return Promise.resolve();
 }
 
-async function onNewTickets(tickets: TicketPrivate[]) {
+function onNewTickets(tickets: TicketPrivate[]) {
+    if (objectFetcher.lastInternetLoad === 0) {
+        return;
+    }
+
     console.log('Received new tickets from network');
 
     for (const order of tableObjectFetcher.objects) {
         // also handles deleted tickets
         order.addTickets(tickets);
     }
-
-    return Promise.resolve();
 }
 
 function onNewTicketPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
