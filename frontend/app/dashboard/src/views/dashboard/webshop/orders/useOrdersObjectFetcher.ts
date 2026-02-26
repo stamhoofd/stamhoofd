@@ -72,7 +72,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         async fetch(data: LimitedFilteredRequest) {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
-            const arrayBuffer: PrivateOrderWithTickets[] = [];
+            const results: PrivateOrderWithTickets[] = [];
             const filters = [data.filter];
 
             const searchFilter = searchToFilter(data.search);
@@ -121,11 +121,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
-            itemsToAdvanceNext = await manager.orders.stream({
+            itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
                 callback: (order) => {
-                    arrayBuffer.push(
-                        PrivateOrderWithTickets.create(order),
-                    );
+                    results.push(order);
                 },
                 filter,
                 limit: data.limit,
@@ -133,13 +131,10 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 advanceCount,
             });
 
-            console.log('Orders(IndexedDb).fetch', 'addTickets');
-            await addTickets(manager, arrayBuffer);
-
-            const lastItem = arrayBuffer[arrayBuffer.length - 1];
+            const lastItem = results[results.length - 1];
             let next: LimitedFilteredRequest | undefined = undefined;
 
-            if (lastItem && arrayBuffer.length >= data.limit) {
+            if (lastItem && results.length >= data.limit) {
                 const pageFilter = getSortFilter(lastItem, ordersIndexedDBSorters, data.sort);
 
                 next = new LimitedFilteredRequest({
@@ -156,9 +151,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
-            console.log('[Done] Orders(IndexedDb).fetch', { results: arrayBuffer, next });
+            console.log('[Done] Orders(IndexedDb).fetch', { results, next });
 
-            if (!data.pageFilter && arrayBuffer.length === 0 && this.isOffline) {
+            if (!data.pageFilter && results.length === 0 && this.isOffline) {
                 // First page load failed
                 throw new SimpleError({
                     code: 'network_error',
@@ -174,7 +169,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 itemsToAdvanceNext = 0;
             }
 
-            return { results: arrayBuffer, next };
+            return { results, next };
         },
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             console.log('Orders(IndexedDb).fetchCount', data);
@@ -191,7 +186,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
             await this.loadFromInternet();
 
-            await manager.orders.stream({
+            await manager.streamOrdersWithPatchedTickets({
                 callback: () => {
                     count++;
                 },
@@ -222,11 +217,4 @@ function startTimeLogger(label: string) {
             console.log(`${label}: ${seconds} sec`);
         },
     };
-}
-
-async function addTickets(manager: WebshopManager, arrayBuffer: PrivateOrderWithTickets[]): Promise<void> {
-    for (const order of arrayBuffer) {
-        const patchedTickets = await manager.tickets.getForOrder(order.id, true);
-        order.tickets = patchedTickets;
-    }
 }

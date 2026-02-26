@@ -2,7 +2,7 @@ import { ArrayDecoder, Decoder, ObjectData, PatchableArrayAutoEncoder } from '@s
 import { SimpleError } from '@simonbackx/simple-errors';
 import { EventBus, fetchAll, ObjectFetcher } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
-import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
 import { createPrivateOrderIndexBox, OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 import { WebshopDatabase } from './WebshopDatabase';
@@ -19,7 +19,7 @@ export class WebshopOrdersRepo {
     readonly eventBus = new EventBus<string, PrivateOrder[]>();
 
     private readonly store: OrdersStore;
-    private readonly apiClient: WebshopOrdersApiClient;
+    readonly apiClient: WebshopOrdersApiClient;
     private readonly tickets: WebshopTicketsRepo;
 
     get isFetching() {
@@ -144,33 +144,51 @@ export class WebshopOrdersRepo {
         return patched;
     }
 
-    /**
-     *
-     * @param options
-     * @returns order of last item that had been streamed
-     */
     async stream(options: {
         callback: (data: PrivateOrder) => void;
         filter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
+    }): Promise<number> {
+        const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>);
+
+        return await this.streamRaw({
+            ...options,
+            transform: async (rawOrder: any) => {
+                let order: PrivateOrder;
+                try {
+                    order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+                }
+                catch (e) {
+                    // force fetch all again
+                    this.apiClient.clearLastFetchedOrder().catch(console.error);
+                    throw e;
+                }
+
+                return order;
+            },
+        });
+    }
+
+    async streamRaw<T>(options: {
+        transform: (rawOrder: any) => Promise<T>;
+        callback: (data: T) => void;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        advanceCount?: number;
+        openTransaction?: IDBTransaction;
     },
     ): Promise<number> {
         try {
-            // todo: handle decode error in a cleaner way
-            return await this.store.stream({
-                ...options,
-                handleDecodeError: async () => {
-                    // force fetch all again
-                    await this.apiClient.clearLastFetchedOrder();
-                },
-            });
+            return await this.store.streamRaw<T>(options);
         }
         catch (e) {
             if (e instanceof CallbackError || e instanceof CompilerFilterError) {
                 throw e;
             }
+            console.error(e);
             throw new SimpleError({
                 code: 'loading_failed',
                 message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
@@ -257,27 +275,27 @@ export class OrdersStore {
         });
     }
 
-    /**
-     *
-     * @param param0
-     * @returns order of last item that had been streamed
-     */
-    async stream({ callback, handleDecodeError, filter, limit, sortItem, advanceCount }: {
-        callback: (data: PrivateOrder) => void;
-        handleDecodeError: () => Promise<void>;
+    async streamRaw<T>({ callback, filter, limit, sortItem, advanceCount, transform, openTransaction }: {
+        transform: (rawOrder: any) => Promise<T>;
+        callback: (data: T) => void;
         filter?: StamhoofdFilter;
         limit?: number;
         sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
         advanceCount?: number;
+        openTransaction?: IDBTransaction;
     },
     ): Promise<number> {
         const db = await this.database.get();
 
         return await new Promise<number>((resolve, reject) => {
-            const transaction = db.transaction([OrdersStore.storeName], 'readonly');
+            const transaction = openTransaction ?? db.transaction([OrdersStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
+                if (openTransaction && openTransaction.onerror) {
+                    openTransaction.onerror(event);
+                }
+
                 this.database.delete().catch(console.error);
                 reject(event);
             };
@@ -318,7 +336,7 @@ export class OrdersStore {
 
             if (filter) {
                 try {
-                    compiledFilter = compileToInMemoryFilter(filter, privateOrderFilterCompilers);
+                    compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
                 }
                 catch (e: any) {
                     console.error('Compile filter failed', e);
@@ -326,8 +344,6 @@ export class OrdersStore {
                     return;
                 }
             }
-
-            const decoder = new IndexBoxDecoder(PrivateOrder as Decoder<PrivateOrder>);
 
             const iterator: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
                 if (limit && matchedItemsCount >= limit) {
@@ -343,38 +359,29 @@ export class OrdersStore {
                     return;
                 }
 
-                const rawOrder = cursor.value;
+                transform(cursor.value).then((decodedResult) => {
+                    if (compiledFilter && !compiledFilter(decodedResult)) {
+                        cursor.continue();
+                        totalIterationCount += 1;
+                        return;
+                    }
 
-                let decodedResult: PrivateOrder;
+                    try {
+                        callback(decodedResult);
+                    }
+                    catch (e: any) {
+                        console.error('callback failed', e);
+                        // Propagate error
+                        reject(new CallbackError((e.message as string | undefined) ?? 'Callback failed'));
+                        return;
+                    }
 
-                try {
-                    decodedResult = decoder.decode(new ObjectData(rawOrder, { version: Version }));
-                }
-                catch (e) {
-                    handleDecodeError().catch(console.error);
-                    // Stop reading without throwing an error
-                    return;
-                }
-
-                if (compiledFilter && !compiledFilter(decodedResult)) {
                     cursor.continue();
                     totalIterationCount += 1;
-                    return;
-                }
-
-                try {
-                    callback(decodedResult);
-                }
-                catch (e: any) {
-                    console.error('callback failed', e);
-                    // Propagate error
-                    reject(new CallbackError((e.message as string | undefined) ?? 'Callback failed'));
-                    return;
-                }
-
-                cursor.continue();
-                totalIterationCount += 1;
-                matchedItemsCount += 1;
+                    matchedItemsCount += 1;
+                }).catch((e) => {
+                    reject(e);
+                });
             };
 
             if (advanceCount) {

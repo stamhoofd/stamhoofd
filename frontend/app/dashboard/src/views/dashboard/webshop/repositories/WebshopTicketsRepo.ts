@@ -88,8 +88,8 @@ export class WebshopTicketsRepo {
     /**
      * Get all the tickets for an order (that are stored in the offline database).
      */
-    async getForOrder(orderId: string, withPatches = true) {
-        const tickets = await this.store.getForOrder(orderId);
+    async getForOrder(orderId: string, withPatches = true, openTransaction?: IDBTransaction) {
+        const tickets = await this.store.getForOrder(orderId, openTransaction);
 
         if (!withPatches) {
             return tickets.filter(t => !t.deletedAt);
@@ -98,7 +98,7 @@ export class WebshopTicketsRepo {
         const patchedTickets: TicketPrivate[] = [];
 
         for (const ticket of tickets) {
-            const patch = await this.patchesStore.get(ticket.secret);
+            const patch = await this.patchesStore.get(ticket.secret, openTransaction);
             if (patch) {
                 const patched = ticket.patch(patch);
                 patchedTickets.push(patched);
@@ -282,16 +282,20 @@ export class WebshopTicketsStore {
         this.database = database;
     }
 
-    async getForOrder(orderId: string) {
+    async getForOrder(orderId: string, openTransaction?: IDBTransaction) {
         const db = await this.database.get();
 
         const tickets: TicketPrivate[] = [];
 
         await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction([WebshopTicketsStore.storeName], 'readonly');
+            const transaction = openTransaction ?? db.transaction([WebshopTicketsStore.storeName], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
+                if (openTransaction && openTransaction.onerror) {
+                    openTransaction.onerror(event);
+                }
+
                 reject(event);
             };
 
@@ -501,8 +505,8 @@ export class WebshopTicketPatchesStore {
         });
     }
 
-    async get(secret: string): Promise<AutoEncoderPatchType<TicketPrivate> | undefined> {
-        const rawItem = await this.database.getItemFromStore({ storeName: WebshopTicketPatchesStore.storeName, id: secret });
+    async get(secret: string, openTransaction?: IDBTransaction): Promise<AutoEncoderPatchType<TicketPrivate> | undefined> {
+        const rawItem = await this.database.getItemFromStore({ storeName: WebshopTicketPatchesStore.storeName, id: secret, openTransaction });
         if (rawItem) {
             return (TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>).decode(new ObjectData(rawItem, { version: Version }));
         }

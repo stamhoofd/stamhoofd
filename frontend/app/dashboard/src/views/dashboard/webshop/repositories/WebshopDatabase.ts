@@ -113,14 +113,18 @@ export class WebshopDatabase {
         });
     }
 
-    async getItemFromStore({ storeName, id }: { storeName: string; id: string }) {
+    async getItemFromStore({ storeName, id, openTransaction }: { storeName: string; id: string; openTransaction?: IDBTransaction }) {
         const db = await this.get();
 
         return new Promise<any | undefined>((resolve, reject) => {
-            const transaction = db.transaction([storeName], 'readonly');
+            const transaction = openTransaction ?? db.transaction([storeName], 'readonly');
 
             transaction.onerror = (event) => {
                 // Don't forget to handle errors!
+                if (openTransaction && openTransaction.onerror) {
+                    openTransaction.onerror(event);
+                }
+
                 reject(event);
             };
 

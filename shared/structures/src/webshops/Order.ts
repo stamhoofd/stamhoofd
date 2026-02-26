@@ -463,9 +463,26 @@ export class PrivateOrder extends Order {
     }
 }
 
+type TicketScanStatus = 'none' | 'all' | 'partial';
+
 export class PrivateOrderWithTickets extends PrivateOrder {
     @field({ decoder: new ArrayDecoder(TicketPrivate) })
     tickets: TicketPrivate[] = [];
+
+    get ticketScanStatus(): TicketScanStatus {
+        const scanned = this.tickets.filter(t => t.scannedAt).length;
+        const total = this.tickets.length;
+
+        if (scanned === 0) {
+            return 'none';
+        }
+
+        if (scanned === total) {
+            return 'all';
+        }
+
+        return 'partial';
+    }
 
     /**
      * Adds or removes tickets as appropriate

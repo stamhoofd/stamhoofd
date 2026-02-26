@@ -1,11 +1,13 @@
 import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { PermissionLevel, PrivateWebshop, Version, WebshopPreview } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, SortItem, StamhoofdFilter, Version, WebshopPreview } from '@stamhoofd/structures';
+import { IndexBoxDecoder } from './IndexBox';
+import { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 import { WebshopDatabase } from './repositories/WebshopDatabase';
-import { WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
+import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
 import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';
-import { WebshopTicketsRepo } from './repositories/WebshopTicketsRepo';
+import { WebshopTicketPatchesStore, WebshopTicketsRepo, WebshopTicketsStore } from './repositories/WebshopTicketsRepo';
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -230,6 +232,41 @@ export class WebshopManager {
             return webshop;
         }).finally(() => {
             this.webshopFetchPromise = null;
+        });
+    }
+
+    /**
+     * Stream orders with patched tickets.
+     */
+    async streamOrdersWithPatchedTickets(options: {
+        callback: (data: PrivateOrderWithTickets) => void;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        advanceCount?: number;
+    }): Promise<number> {
+        const db = await this.database.get();
+        const openTransaction = db.transaction([OrdersStore.storeName, WebshopTicketsStore.storeName, WebshopTicketPatchesStore.storeName], 'readonly');
+        const decoder = new IndexBoxDecoder(PrivateOrderWithTickets as Decoder<PrivateOrderWithTickets>);
+
+        return this.orders.streamRaw({
+            ...options,
+            openTransaction,
+            transform: async (rawOrder: any) => {
+                let order: PrivateOrderWithTickets;
+
+                try {
+                    order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+                }
+                catch (e) {
+                    // force fetch all again
+                    this.orders.apiClient.clearLastFetchedOrder().catch(console.error);
+                    throw e;
+                }
+
+                order.tickets = await this.tickets.getForOrder(order.id, true, openTransaction);
+                return order;
+            },
         });
     }
 
