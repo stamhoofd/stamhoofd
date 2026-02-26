@@ -33,11 +33,11 @@ export type ModelLoggerOptions<M extends Model, D = undefined> = {
 
 const ModelEventsMap = new WeakMap<Model, { events: AuditLog[] }>();
 
-export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsGenerator<Model, undefined> {
-    return (event: ModelEvent<Model>) => {
+export function getDefaultGenerator<M extends Model = Model>(types: DefaultLogOptionsType): EventOptionsGenerator<M, { model: M }> {
+    return (event: ModelEvent<M>) => {
         if (event.type === 'created') {
             if (types.created) {
-                return { type: types.created, data: undefined };
+                return { type: types.created, data: { model: event.model } };
             }
             return;
         }
@@ -54,7 +54,7 @@ export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsG
                     };
 
                     if (types.deleted) {
-                        return { type: types.deleted, data: undefined };
+                        return { type: types.deleted, data: { model: event.model } };
                     }
                 }
             }
@@ -72,14 +72,14 @@ export function getDefaultGenerator(types: DefaultLogOptionsType): EventOptionsG
                     }
                 }
 
-                return { type: types.updated, generatePatchList: true, data: undefined, mergeInto };
+                return { type: types.updated, generatePatchList: true, data: { model: event.model }, mergeInto };
             }
             return;
         }
 
         if (event.type === 'deleted') {
             if (types.deleted) {
-                return { type: types.deleted, data: undefined };
+                return { type: types.deleted, data: { model: event.model } };
             }
             return;
         }
@@ -110,9 +110,9 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
     }
 
     async logEvent(event: ModelEvent<M>) {
+        const log = new AuditLog();
         try {
             const context = ContextInstance.optional;
-            const log = new AuditLog();
             let settings = AuditLogService.getContext();
             let userId = settings?.userId !== undefined ? settings?.userId : (context?.optionalAuth?.user?.id ?? settings?.fallbackUserId ?? null);
 
@@ -130,6 +130,11 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                 }
             }
 
+            const options = await this.optionsGenerator(event);
+
+            if (!options) {
+                return false;
+            }
             log.userId = userId;
 
             log.organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
@@ -147,12 +152,6 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             }
             else {
                 log.source = AuditLogSource.System;
-            }
-
-            const options = await this.optionsGenerator(event);
-
-            if (!options) {
-                return false;
             }
 
             log.type = options.type;
@@ -232,16 +231,26 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                 return await options.mergeInto.save();
             }
 
+            try {
+                log.validate();
+            }
+            catch (e) {
+                console.error('AuditLog dit not pass validation', log);
+            }
+
             const saved = await log.save();
 
             // Assign to map
+            const d = [...(ModelEventsMap.get(event.model)?.events ?? []), log];
+
             ModelEventsMap.set(event.model, {
-                events: [...(ModelEventsMap.get(event.model)?.events ?? []), log],
+                // Limit length of d to 1 - we only use the first event
+                events: d.slice(1),
             });
             return saved;
         }
         catch (e) {
-            console.error('Failed to save log', e);
+            console.error('Failed to save log', e, log);
         }
         return false;
     };

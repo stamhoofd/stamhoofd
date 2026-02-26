@@ -413,10 +413,10 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{if org 'De instellingen van ' org ' werden gewijzigd'}}{{unless org 'De instellingen werden gewijzigd'}}`;
 
         case AuditLogType.OrganizationAdded:
-            return `De lokale groep {{org}} werd aangemaakt`;
+            return $t(`De vereniging {{org}} werd aangemaakt`);
 
         case AuditLogType.OrganizationDeleted:
-            return `De lokale groep {{org}} werd verwijderd`;
+            return $t(`De vereniging {{org}} werd verwijderd`);
 
         case AuditLogType.EventEdited:
             return `De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd`;
@@ -573,7 +573,7 @@ function getAuditLogTypeDescriptionTemplate(type: AuditLogType): string | undefi
     }
 }
 
-function getTypeReplacements(type: AuditLogType): string[] {
+export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
     switch (type) {
         case AuditLogType.MemberAdded:
         case AuditLogType.MemberEdited:
@@ -586,7 +586,7 @@ function getTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.OrganizationEdited:
         case AuditLogType.OrganizationAdded:
         case AuditLogType.OrganizationDeleted:
-            return ['o'];
+            return ['org'];
         case AuditLogType.Unknown:
             return [];
         case AuditLogType.EventAdded:
@@ -822,14 +822,5 @@ export class AuditLog extends AutoEncoder {
 
     get subIcon() {
         return getAuditLogTypeIcon(this.type)[1];
-    }
-
-    validate() {
-        const replacements = getTypeReplacements(this.type);
-        for (const replacement of replacements) {
-            if (!this.replacements.has(replacement)) {
-                throw new Error(`Missing replacement ${replacement}`);
-            }
-        }
     }
 }

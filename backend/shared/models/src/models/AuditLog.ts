@@ -1,7 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import { ArrayDecoder, Decoder, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@simonbackx/simple-encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType, getAuditLogTypeReplacements } from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';
 
 export class AuditLog extends QueryableModel {
@@ -70,4 +70,13 @@ export class AuditLog extends QueryableModel {
         },
     })
     createdAt: Date;
+
+    validate() {
+        const replacements = getAuditLogTypeReplacements(this.type);
+        for (const replacement of replacements) {
+            if (!this.replacements.has(replacement)) {
+                throw new Error(`Missing replacement ${replacement}`);
+            }
+        }
+    }
 }

@@ -960,4 +960,13 @@ export class Organization extends QueryableModel {
 
         return providers;
     }
+
+    override async delete(): Promise<void> {
+        // Clear periodID first to remove circular dependency
+        if (this.periodId) {
+            await Organization.update().where('id', this.id).set('periodId', null).update();
+        }
+
+        return await super.delete();
+    }
 }
