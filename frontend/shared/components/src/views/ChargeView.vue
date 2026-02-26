@@ -11,7 +11,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <div :class="{'split-inputs': modalDisplayStyle === 'popup' && showSelectOrganization}">
+        <div :class="{'split-inputs': showSelectOrganization}">
             <STInputBox v-if="showSelectOrganization" :title="$t('4a5ca65c-3a96-4ca0-991c-518a9e92adb7')" error-fields="organization" :error-box="errors.errorBox">
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
@@ -65,7 +65,8 @@ import OrganizationSelect from '../organizations/components/OrganizationSelect.v
 
 const props = withDefaults(defineProps<{
     filter: StamhoofdFilter;
-    countEndpointPath: string; chargeEndpointPath: string;
+    countEndpointPath: string;
+    chargeEndpointPath: string;
     getDescription: (args: { count: number }) => string;
     getConfirmationText: (args: { total: string; count: number | null }) => string;
     dueAtDescription?: string;
@@ -75,14 +76,12 @@ const props = withDefaults(defineProps<{
         amount: number | null;
         dueAt: Date | null;
         createdAt: Date | null; }) => AutoEncoder;
-    modalDisplayStyle?: 'sheet' | 'popup';
     showCreatedAt?: boolean;
     showDueAt?: boolean;
     organization?: Organization | null;
 }>(), {
     showCreatedAt: false,
     showDueAt: false,
-    modalDisplayStyle: 'sheet',
     organization: null,
     dueAtDescription: undefined,
 });

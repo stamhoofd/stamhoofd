@@ -1,5 +1,5 @@
 <template>
-    <ChargeView :filter="filter" count-endpoint-path="/registrations/count" charge-endpoint-path="/admin/charge-registrations" :create-body="createBody" :get-description="getDescription" :get-confirmation-text="getConfirmationText" modal-display-style="popup" :show-due-at="$feature('member-trials')" :show-created-at="true" :organization="organization" :due-at-description="$t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575')" />
+    <ChargeView :filter="filter" count-endpoint-path="/registrations/count" charge-endpoint-path="/admin/charge-registrations" :create-body="createBody" :get-description="getDescription" :get-confirmation-text="getConfirmationText" :show-due-at="$feature('member-trials')" :show-created-at="true" :organization="organization" :due-at-description="$t('15b6f0c8-6287-4b4d-bf34-4da2f4a0e575')" />
 </template>
 
 <script lang="ts" setup>

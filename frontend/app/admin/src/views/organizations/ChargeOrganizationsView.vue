@@ -1,5 +1,5 @@
 <template>
-    <ChargeView :filter="filter" count-endpoint-path="/admin/organizations/count" charge-endpoint-path="/admin/charge-organizations" :get-description="getDescription" :get-confirmation-text="getConfirmationText" :create-body="createBody" :show-created-at="true" :show-due-at="true" modal-display-style="popup" />
+    <ChargeView :filter="filter" count-endpoint-path="/admin/organizations/count" charge-endpoint-path="/admin/charge-organizations" :get-description="getDescription" :get-confirmation-text="getConfirmationText" :create-body="createBody" :show-created-at="true" :show-due-at="true" />
 </template>
 
 <script lang="ts" setup>
