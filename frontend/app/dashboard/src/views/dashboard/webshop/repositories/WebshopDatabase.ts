@@ -15,6 +15,7 @@ export class WebshopDatabase {
 
     private getPromise: Promise<IDBDatabase> | null = null;
     private _database: IDBDatabase | null = null;
+    private isDeleting = false;
 
     constructor({ webshopId }: { webshopId: string }) {
         this.databaseName = 'webshop-' + webshopId;
@@ -158,7 +159,11 @@ export class WebshopDatabase {
      * @param shouldRetry Whether to retry if the deletion is blocked (can happen if the database is not closed yet)
      */
     async delete(shouldRetry = false): Promise<boolean> {
+        if (this.isDeleting) {
+            return false;
+        }
         try {
+            this.isDeleting = true;
             this.close();
             const request = window.indexedDB.deleteDatabase(this.databaseName);
 
@@ -196,10 +201,12 @@ export class WebshopDatabase {
             });
 
             await deletePromise;
+            this.isDeleting = false;
             return true;
         }
         catch (e) {
             console.error(e);
+            this.isDeleting = false;
             return false;
         }
     }

@@ -43,46 +43,36 @@ export class WebshopTicketsRepo {
      * @returns
      */
     async fetchAllUpdated(): Promise<void> {
+        const totalTickets: TicketPrivate[] = [];
+
         const putPromises: Promise<void>[] = [];
 
-        const onResultsReceivedHelper = async (tickets: TicketPrivate[]): Promise<void> => {
-            if (tickets.length > 0) {
-                const nonDeletedTickets: TicketPrivate[] = [];
-
-                for (const ticket of tickets) {
-                    if (ticket.deletedAt) {
-                        continue;
-                    }
-
-                    nonDeletedTickets.push(ticket);
-                }
-
-                const putPromise = this.storeAll(tickets);
-                putPromises.push(putPromise);
-
-                const promises: Promise<unknown>[] = [
-                    putPromise,
-                    // todo: this should be run sync?
-                    this.apiClient.setLastFetchedTicket(tickets[tickets.length - 1]),
-                ];
-
-                if (tickets.length > 0) {
-                    // deleted tickets get handled in listener
-                    promises.push(this.eventBus.sendEvent('fetched', tickets));
-                }
-
-                await Promise.all(promises.map(promise => promise.catch(console.error)));
+        const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
+            if (tickets.length) {
+                totalTickets.push(...tickets);
+                putPromises.push(this.storeAll(tickets));
             }
-        };
-
-        // run async
-        const onResultsReceived: (tickets: TicketPrivate[]) => void = (tickets) => {
-            onResultsReceivedHelper(tickets).catch(console.error);
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived });
         await Promise.all(putPromises);
-        this.apiClient.setLastUpdated(new Date());
+
+        const nonDeletedTickets: TicketPrivate[] = [];
+
+        for (const ticket of totalTickets) {
+            if (ticket.deletedAt) {
+                continue;
+            }
+
+            nonDeletedTickets.push(ticket);
+        }
+
+        if (totalTickets.length > 0) {
+            await this.apiClient.setLastFetchedTicket(totalTickets[totalTickets.length - 1]);
+
+            // deleted tickets get handled in listener
+            await this.eventBus.sendEvent('fetched', totalTickets);
+        }
     }
 
     /**
@@ -580,8 +570,6 @@ export class WebshopTicketPatchesStore {
 class WebshopTicketsApiClient {
     private _isFetching = false;
     private lastFetchedTicket: { updatedAt: Date; id: string } | null | undefined = undefined;
-    private _lastUpdated: Date | null = null;
-    private fetcher: ObjectFetcher<TicketPrivate>;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
@@ -591,21 +579,19 @@ class WebshopTicketsApiClient {
         return this._isFetching;
     }
 
-    get lastUpdated() {
-        return this._lastUpdated;
+    get lastUpdated(): Date | null {
+        return this.lastFetchedTicket?.updatedAt ?? null;
     }
 
     constructor({ context, settingsStore, webshopId }: { context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
         this.context = context;
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
-        this.fetcher = this.getObjectFetcher();
     }
 
     reset() {
         this._isFetching = false;
         this.lastFetchedTicket = undefined;
-        this._lastUpdated = null;
     }
 
     async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void }): Promise<void> {
@@ -622,12 +608,7 @@ class WebshopTicketsApiClient {
             await this.initLastFetchedTicket();
         }
 
-        const sort: SortList = [
-            { key: 'updatedAt', order: SortItemDirection.ASC },
-            // todo?
-            { key: 'id', order: SortItemDirection.ASC },
-        ];
-
+        // create request
         const filter: StamhoofdFilter = {
             webshopId: this.webshopId,
         };
@@ -649,64 +630,17 @@ class WebshopTicketsApiClient {
         const filteredRequest = new LimitedFilteredRequest({
             limit: 100,
             filter,
-            sort,
         });
 
-        try {
-            await fetchAll(filteredRequest, this.fetcher, { onResultsReceived });
-        }
-        finally {
-            this._isFetching = false;
-        }
-    }
-
-    async patchAll(patches: AutoEncoderPatchType<TicketPrivate>[]) {
-        const response = await this.context.authenticatedServer.request({
-            method: 'PATCH',
-            path: '/webshop/' + this.webshopId + '/tickets/private',
-            decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
-            body: patches,
-            shouldRetry: false,
-            owner: this,
-        });
-
-        return response.data;
-    }
-
-    setLastUpdated(date: Date) {
-        this._lastUpdated = date;
-    }
-
-    async setLastFetchedTicket(ticket: TicketPrivate) {
-        this.lastFetchedTicket = {
-            updatedAt: ticket.updatedAt,
-            id: ticket.id!,
-        };
-        await this.settingsStore.set('lastFetchedTicket', this.lastFetchedTicket);
-    }
-
-    private async initLastFetchedTicket() {
-        // Only once (if undefined)
-        if (this.lastFetchedTicket !== undefined) {
-            return;
-        }
-
-        try {
-            this.lastFetchedTicket = await this.settingsStore.get('lastFetchedTicket') ?? null;
-            if (this.lastFetchedTicket?.updatedAt && !this._lastUpdated) {
-                // Set initial timestamp in case of network error later on
-                this._lastUpdated = this.lastFetchedTicket.updatedAt;
-            }
-        }
-        catch (e) {
-            console.error(e);
-            // Probably no database support. Ignore it and load everything.
-            this.lastFetchedTicket = null;
-        }
-    }
-
-    private getObjectFetcher(): ObjectFetcher<TicketPrivate> {
-        return {
+        // fetch
+        const fetcher: ObjectFetcher<TicketPrivate> = {
+            extendSort(): SortList {
+                // fetchAll does clear list anyway, no need to assert
+                return [
+                    { key: 'updatedAt', order: SortItemDirection.ASC },
+                    { key: 'id', order: SortItemDirection.ASC },
+                ];
+            },
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
@@ -731,5 +665,49 @@ class WebshopTicketsApiClient {
                 return response.data.count;
             },
         };
+
+        try {
+            await fetchAll(filteredRequest, fetcher, { onResultsReceived });
+        }
+        finally {
+            this._isFetching = false;
+        }
+    }
+
+    async patchAll(patches: AutoEncoderPatchType<TicketPrivate>[]) {
+        const response = await this.context.authenticatedServer.request({
+            method: 'PATCH',
+            path: '/webshop/' + this.webshopId + '/tickets/private',
+            decoder: new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>),
+            body: patches,
+            shouldRetry: false,
+            owner: this,
+        });
+
+        return response.data;
+    }
+
+    async setLastFetchedTicket(ticket: TicketPrivate) {
+        this.lastFetchedTicket = {
+            updatedAt: ticket.updatedAt,
+            id: ticket.id!,
+        };
+        await this.settingsStore.set('lastFetchedTicket', this.lastFetchedTicket);
+    }
+
+    private async initLastFetchedTicket() {
+        // Only once (if undefined)
+        if (this.lastFetchedTicket !== undefined) {
+            return;
+        }
+
+        try {
+            this.lastFetchedTicket = await this.settingsStore.get('lastFetchedTicket') ?? null;
+        }
+        catch (e) {
+            console.error(e);
+            // Probably no database support. Ignore it and load everything.
+            this.lastFetchedTicket = null;
+        }
     }
 }

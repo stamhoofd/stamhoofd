@@ -54,7 +54,10 @@ export class WebshopOrdersRepo {
      */
     async fetchAllUpdated({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<void> {
         let hadSuccessfulFetch = false;
-        const storePromises: Promise<void>[] = [];
+
+        const totalOrders: PrivateOrder[] = [];
+
+        const putPromises: Promise<void>[] = [];
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
@@ -63,47 +66,41 @@ export class WebshopOrdersRepo {
                 await this.apiClient.clearLastFetchedOrder();
             }
 
-            if (orders.length > 0) {
-                const deletedOrders: PrivateOrder[] = [];
-                const fetchedOrders: PrivateOrder[] = [];
-
-                for (const order of orders) {
-                    if (order.status === OrderStatus.Deleted) {
-                        deletedOrders.push(order);
-                        continue;
-                    }
-
-                    fetchedOrders.push(order);
-                }
-
-                const storeOrdersPromise = this.store.putAll(orders);
-                storePromises.push(storeOrdersPromise);
-
-                const promises: Promise<unknown>[] = [
-                    storeOrdersPromise,
-                    // todo: this should be run sync?
-                ];
-
-                if (fetchedOrders.length > 0) {
-                    // todo: is this necessary and should this always be broadcasted (thus without if statement)?
-                    promises.push(this.eventBus.sendEvent('fetched', fetchedOrders));
-                }
-
-                if (deletedOrders.length > 0) {
-                    // todo: is this necessary
-                    promises.push(this.eventBus.sendEvent('deleted', deletedOrders));
-                }
-
-                await Promise.all(promises.map(promise => promise.catch(console.error)));
-
-                // Only set the last fetched order if everything is stored correctly
-                await this.apiClient.setlastFetchedOrder(orders[orders.length - 1]);
+            if (orders.length) {
+                totalOrders.push(...orders);
+                putPromises.push(this.store.putAll(orders));
             }
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived });
-        await Promise.all(storePromises);
-        this.apiClient.setLastUpdated(new Date());
+
+        const deletedOrders: PrivateOrder[] = [];
+        const fetchedOrders: PrivateOrder[] = [];
+
+        for (const order of totalOrders) {
+            if (order.status === OrderStatus.Deleted) {
+                deletedOrders.push(order);
+                continue;
+            }
+
+            fetchedOrders.push(order);
+        }
+
+        // wait until all orders have been stored
+        await Promise.all(putPromises);
+
+        // only set after succesful store
+        if (totalOrders.length > 0) {
+            await this.apiClient.setlastFetchedOrder(totalOrders[totalOrders.length - 1]);
+        }
+
+        if (fetchedOrders.length > 0) {
+            await this.eventBus.sendEvent('fetched', fetchedOrders);
+        }
+
+        if (deletedOrders.length > 0) {
+            await this.eventBus.sendEvent('deleted', deletedOrders);
+        }
     }
 
     /**
@@ -463,36 +460,32 @@ export class OrdersStore {
 class WebshopOrdersApiClient {
     private _isFetching = false;
     private lastFetchedOrder: { updatedAt: Date; number: number } | null | undefined = undefined;
-    private _lastUpdated: Date | null = null;
-    private fetcher: ObjectFetcher<PrivateOrder>;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
     private readonly settingsStore: WebshopSettingsStore;
 
     get hasFetchedOne() {
-        return !!this._lastUpdated;
+        return this.lastUpdated !== null;
     }
 
     get isFetching() {
         return this._isFetching;
     }
 
-    get lastUpdated() {
-        return this._lastUpdated;
+    get lastUpdated(): Date | null {
+        return this.lastFetchedOrder?.updatedAt ?? null;
     }
 
     constructor({ context, settingsStore, webshopId }: { context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
         this.context = context;
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
-        this.fetcher = this.getObjectFetcher();
     }
 
     reset() {
         this._isFetching = false;
         this.lastFetchedOrder = undefined;
-        this._lastUpdated = null;
     }
 
     /**
@@ -514,11 +507,7 @@ class WebshopOrdersApiClient {
             await this.initLastFetchedOrder();
         }
 
-        const sort: SortList = [
-            { key: 'updatedAt', order: SortItemDirection.ASC },
-            { key: 'number', order: SortItemDirection.ASC },
-        ];
-
+        // create request
         const filter: StamhoofdFilter = {
             webshopId: this.webshopId,
         };
@@ -540,11 +529,45 @@ class WebshopOrdersApiClient {
         const request = new LimitedFilteredRequest({
             limit: 100,
             filter,
-            sort,
         });
 
+        // fetch
+        const fetcher: ObjectFetcher<PrivateOrder> = {
+            extendSort(): SortList {
+                // fetchAll does clear list anyway, no need to assert
+                return [
+                    { key: 'updatedAt', order: SortItemDirection.ASC },
+                    { key: 'number', order: SortItemDirection.ASC },
+                    { key: 'id', order: SortItemDirection.ASC },
+                ];
+            },
+            fetch: async (data: LimitedFilteredRequest) => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/orders`,
+                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+
+                return response.data;
+            },
+            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/orders/count`,
+                    decoder: CountResponse as Decoder<CountResponse>,
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+                return response.data.count;
+            },
+        };
+
         try {
-            await fetchAll(request, this.fetcher, { onResultsReceived });
+            await fetchAll(request, fetcher, { onResultsReceived });
         }
         finally {
             this._isFetching = false;
@@ -567,10 +590,6 @@ class WebshopOrdersApiClient {
     async clearLastFetchedOrder() {
         this.lastFetchedOrder = null;
         await this.settingsStore.set('lastFetchedOrder', null);
-    }
-
-    setLastUpdated(date: Date) {
-        this._lastUpdated = date;
     }
 
     async setlastFetchedOrder(order: PrivateOrder) {
@@ -602,43 +621,11 @@ class WebshopOrdersApiClient {
 
         try {
             this.lastFetchedOrder = await this.settingsStore.get('lastFetchedOrder') ?? null;
-            if (this.lastFetchedOrder?.updatedAt && !this._lastUpdated) {
-                // Set initial timestamp in case of network error later on
-                this._lastUpdated = this.lastFetchedOrder.updatedAt;
-            }
         }
         catch (e) {
             console.error(e);
             // Probably no database support. Ignore it and load everything.
             this.lastFetchedOrder = null;
         }
-    }
-
-    private getObjectFetcher(): ObjectFetcher<PrivateOrder> {
-        return {
-            fetch: async (data: LimitedFilteredRequest) => {
-                const response = await this.context.authenticatedServer.request({
-                    method: 'GET',
-                    path: `/webshop/orders`,
-                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-                    query: data,
-                    shouldRetry: false,
-                    owner: this,
-                });
-
-                return response.data;
-            },
-            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
-                const response = await this.context.authenticatedServer.request({
-                    method: 'GET',
-                    path: `/webshop/orders/count`,
-                    decoder: CountResponse as Decoder<CountResponse>,
-                    query: data,
-                    shouldRetry: false,
-                    owner: this,
-                });
-                return response.data.count;
-            },
-        };
     }
 }
