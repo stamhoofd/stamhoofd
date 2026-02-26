@@ -205,12 +205,21 @@ function addDocument() {
         return;
     }
 
+    let year: number;
+
+    if (typeof selectedTab.value === 'number') {
+        year = selectedTab.value;
+    }
+    else {
+        year = firstYearToShow;
+    }
+
     present({
         components: [
             new ComponentWithProperties(EditDocumentTemplateView, {
                 isNew: true,
                 document: DocumentTemplatePrivate.create({
-                    year: firstYearToShow,
+                    year,
                 }),
                 callback: (template: DocumentTemplatePrivate) => {
                     fetcher.reset();
