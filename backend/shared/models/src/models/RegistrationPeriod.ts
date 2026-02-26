@@ -68,6 +68,12 @@ export class RegistrationPeriod extends QueryableModel {
         return RegistrationPeriodStruct.create(this);
     }
 
+    configureForNewOrganization() {
+        this.settings = RegistrationPeriodSettings.create({});
+        this.startDate = new Date();
+        this.endDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 31); // 1 month
+    }
+
     static async getByDate(date: Date, organizationId: string | null): Promise<RegistrationPeriod | null> {
         if (STAMHOOFD.userMode === 'organization' && organizationId === null) {
             throw new SimpleError({

@@ -1,7 +1,7 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
+import { Organization, OrganizationRegistrationPeriod, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -126,8 +126,18 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             organization.meta = put.meta;
             organization.address = put.address;
 
-            const periodId = (await Platform.getShared()).periodIdIfPlatform;
-            organization.periodId = periodId;
+            let period: RegistrationPeriod | null = null;
+
+            if (STAMHOOFD.userMode === 'platform') {
+                const periodId = (await Platform.getShared()).periodIdIfPlatform;
+                organization.periodId = periodId;
+            }
+            else {
+                period = new RegistrationPeriod();
+                period.configureForNewOrganization();
+                await period.save();
+                organization.periodId = period.id;
+            }
 
             if (put.privateMeta) {
                 organization.privateMeta = put.privateMeta;
@@ -145,9 +155,14 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 });
             }
 
+            if (STAMHOOFD.userMode !== 'platform' && period) {
+                period.organizationId = organization.id;
+                await period.save();
+            }
+
             const organizationPeriod = new OrganizationRegistrationPeriod();
             organizationPeriod.organizationId = organization.id;
-            organizationPeriod.periodId = periodId;
+            organizationPeriod.periodId = organization.periodId;
             await organizationPeriod.save();
 
             result.push(organization);
