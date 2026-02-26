@@ -101,8 +101,6 @@ export class WebshopOrdersRepo {
         if (deletedOrders.length > 0) {
             await this.eventBus.sendEvent('deleted', deletedOrders);
         }
-
-        this.apiClient.setLastUpdated(new Date());
     }
 
     /**
@@ -462,7 +460,6 @@ export class OrdersStore {
 class WebshopOrdersApiClient {
     private _isFetching = false;
     private lastFetchedOrder: { updatedAt: Date; number: number } | null | undefined = undefined;
-    private _lastUpdated: Date | null = null;
     private fetcher: ObjectFetcher<PrivateOrder>;
 
     private readonly webshopId: string;
@@ -470,15 +467,15 @@ class WebshopOrdersApiClient {
     private readonly settingsStore: WebshopSettingsStore;
 
     get hasFetchedOne() {
-        return !!this._lastUpdated;
+        return this.lastUpdated !== null;
     }
 
     get isFetching() {
         return this._isFetching;
     }
 
-    get lastUpdated() {
-        return this._lastUpdated;
+    get lastUpdated(): Date | null {
+        return this.lastFetchedOrder?.updatedAt ?? null;
     }
 
     constructor({ context, settingsStore, webshopId }: { context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
@@ -491,7 +488,6 @@ class WebshopOrdersApiClient {
     reset() {
         this._isFetching = false;
         this.lastFetchedOrder = undefined;
-        this._lastUpdated = null;
     }
 
     /**
@@ -568,10 +564,6 @@ class WebshopOrdersApiClient {
         await this.settingsStore.set('lastFetchedOrder', null);
     }
 
-    setLastUpdated(date: Date) {
-        this._lastUpdated = date;
-    }
-
     async setlastFetchedOrder(order: PrivateOrder) {
         if (order.number === null) {
             console.error('Order has no number');
@@ -601,10 +593,6 @@ class WebshopOrdersApiClient {
 
         try {
             this.lastFetchedOrder = await this.settingsStore.get('lastFetchedOrder') ?? null;
-            if (this.lastFetchedOrder?.updatedAt && !this._lastUpdated) {
-                // Set initial timestamp in case of network error later on
-                this._lastUpdated = this.lastFetchedOrder.updatedAt;
-            }
         }
         catch (e) {
             console.error(e);

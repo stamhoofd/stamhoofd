@@ -73,8 +73,6 @@ export class WebshopTicketsRepo {
             // deleted tickets get handled in listener
             await this.eventBus.sendEvent('fetched', totalTickets);
         }
-
-        this.apiClient.setLastUpdated(new Date());
     }
 
     /**
@@ -572,7 +570,6 @@ export class WebshopTicketPatchesStore {
 class WebshopTicketsApiClient {
     private _isFetching = false;
     private lastFetchedTicket: { updatedAt: Date; id: string } | null | undefined = undefined;
-    private _lastUpdated: Date | null = null;
     private fetcher: ObjectFetcher<TicketPrivate>;
 
     private readonly webshopId: string;
@@ -583,8 +580,8 @@ class WebshopTicketsApiClient {
         return this._isFetching;
     }
 
-    get lastUpdated() {
-        return this._lastUpdated;
+    get lastUpdated(): Date | null {
+        return this.lastFetchedTicket?.updatedAt ?? null;
     }
 
     constructor({ context, settingsStore, webshopId }: { context: SessionContext; settingsStore: WebshopSettingsStore; webshopId: string }) {
@@ -597,7 +594,6 @@ class WebshopTicketsApiClient {
     reset() {
         this._isFetching = false;
         this.lastFetchedTicket = undefined;
-        this._lastUpdated = null;
     }
 
     async getAllUpdated({ isFetchAll, onResultsReceived }: { isFetchAll?: boolean; onResultsReceived: (results: TicketPrivate[]) => Promise<void> | void }): Promise<void> {
@@ -665,10 +661,6 @@ class WebshopTicketsApiClient {
         return response.data;
     }
 
-    setLastUpdated(date: Date) {
-        this._lastUpdated = date;
-    }
-
     async setLastFetchedTicket(ticket: TicketPrivate) {
         this.lastFetchedTicket = {
             updatedAt: ticket.updatedAt,
@@ -685,10 +677,6 @@ class WebshopTicketsApiClient {
 
         try {
             this.lastFetchedTicket = await this.settingsStore.get('lastFetchedTicket') ?? null;
-            if (this.lastFetchedTicket?.updatedAt && !this._lastUpdated) {
-                // Set initial timestamp in case of network error later on
-                this._lastUpdated = this.lastFetchedTicket.updatedAt;
-            }
         }
         catch (e) {
             console.error(e);
