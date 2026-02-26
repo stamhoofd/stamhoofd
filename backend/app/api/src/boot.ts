@@ -247,7 +247,10 @@ export const boot = async (options: { killProcess: boolean }) => {
     // Register crons
     await import('./crons.js');
 
+    // Audit logs
+    await import('./audit-logs/init.js');
     AuditLogService.listen();
+
     PlatformMembershipService.listen();
     DocumentService.listen();
     SetupStepUpdater.listen();
