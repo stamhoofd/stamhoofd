@@ -1,9 +1,10 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailVerificationCode, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, User } from '@stamhoofd/models';
-import { CreateOrganization, PermissionLevel, Permissions, RegistrationPeriodSettings, SignupResponse, UserPermissions } from '@stamhoofd/structures';
+import { AuditLog, EmailVerificationCode, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, User } from '@stamhoofd/models';
+import { AuditLogSource, AuditLogType, CreateOrganization, PermissionLevel, Permissions, RegistrationPeriodSettings, SignupResponse, UserPermissions } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { AuditLogService } from '../../../services/AuditLogService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -85,11 +86,14 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         organization.address = request.body.organization.address;
         organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
 
-        const period = new RegistrationPeriod();
-        period.configureForNewOrganization();
+        const period = await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            const period = new RegistrationPeriod();
+            period.configureForNewOrganization();
 
-        await period.save();
-        organization.periodId = period.id;
+            await period.save();
+            organization.periodId = period.id;
+            return period;
+        });
 
         try {
             await organization.save();
@@ -102,13 +106,16 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
                 statusCode: 500,
             });
         }
-        period.organizationId = organization.id;
-        await period.save();
 
-        const organizationPeriod = new OrganizationRegistrationPeriod();
-        organizationPeriod.organizationId = organization.id;
-        organizationPeriod.periodId = organization.periodId;
-        await organizationPeriod.save();
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            period.organizationId = organization.id;
+            await period.save();
+
+            const organizationPeriod = new OrganizationRegistrationPeriod();
+            organizationPeriod.organizationId = organization.id;
+            organizationPeriod.periodId = organization.periodId;
+            await organizationPeriod.save();
+        });
 
         const user = await User.register(
             organization,
@@ -127,6 +134,9 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         user.permissions = UserPermissions.create({});
         user.permissions.organizationPermissions.set(organization.id, Permissions.create({ level: PermissionLevel.Full }));
         await user.save();
+
+        // Correctly assign creation
+        await AuditLog.update().where('type', AuditLogType.OrganizationAdded).where('objectId', organization.id).set('userId', user.id).set('source', AuditLogSource.User).update();
 
         const code = await EmailVerificationCode.createFor(user, user.email);
         code.send(user, organization, request.i18n).catch(console.error);
