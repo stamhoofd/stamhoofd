@@ -16,6 +16,8 @@ import { WebshopManager } from '../WebshopManager';
 let lastNextRequest: LimitedFilteredRequest | null = null;
 let itemsToAdvanceNext: number = 0;
 
+// todo: listen to events and reset itemsToAdvanceNext and lastNextRequest
+
 type ObjectType = PrivateOrderWithTickets;
 
 function extendSort(list: SortList): SortList {
@@ -27,7 +29,7 @@ function searchToFilter(search: string | null): StamhoofdFilter | null {
     return getOrderSearchFilter(search, parsePhoneNumber);
 }
 
-export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void } {
+export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Partial<ObjectFetcher<ObjectType>>): ObjectFetcher<ObjectType> & { reset: () => void; lastInternetLoad: number } {
     const objectFetcher = {
         isOffline: false,
         internetPromise: null as Promise<void> | null,
@@ -52,9 +54,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
 
                 this.isOffline = false;
-                await manager.orders.fetchAllUpdated({
-                    isFetchAll: false,
-                });
+                await manager.orders.fetchAllUpdated();
                 await manager.tickets.fetchAllUpdated();
                 this.lastInternetLoad = Date.now();
             }
@@ -172,6 +172,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             return { results, next };
         },
         async fetchCount(data: CountFilteredRequest): Promise<number> {
+            data = toRaw(data);
             console.log('Orders(IndexedDb).fetchCount', data);
             let count = 0;
 

@@ -43,45 +43,37 @@ export class WebshopTicketsRepo {
      * @returns
      */
     async fetchAllUpdated(): Promise<void> {
+        const totalTickets: TicketPrivate[] = [];
+
         const putPromises: Promise<void>[] = [];
 
-        const onResultsReceivedHelper = async (tickets: TicketPrivate[]): Promise<void> => {
-            if (tickets.length > 0) {
-                const nonDeletedTickets: TicketPrivate[] = [];
-
-                for (const ticket of tickets) {
-                    if (ticket.deletedAt) {
-                        continue;
-                    }
-
-                    nonDeletedTickets.push(ticket);
-                }
-
-                const putPromise = this.storeAll(tickets);
-                putPromises.push(putPromise);
-
-                const promises: Promise<unknown>[] = [
-                    putPromise,
-                    // todo: this should be run sync?
-                    this.apiClient.setLastFetchedTicket(tickets[tickets.length - 1]),
-                ];
-
-                if (tickets.length > 0) {
-                    // deleted tickets get handled in listener
-                    promises.push(this.eventBus.sendEvent('fetched', tickets));
-                }
-
-                await Promise.all(promises.map(promise => promise.catch(console.error)));
+        const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
+            if (tickets.length) {
+                totalTickets.push(...tickets);
+                putPromises.push(this.storeAll(tickets));
             }
-        };
-
-        // run async
-        const onResultsReceived: (tickets: TicketPrivate[]) => void = (tickets) => {
-            onResultsReceivedHelper(tickets).catch(console.error);
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived });
         await Promise.all(putPromises);
+
+        const nonDeletedTickets: TicketPrivate[] = [];
+
+        for (const ticket of totalTickets) {
+            if (ticket.deletedAt) {
+                continue;
+            }
+
+            nonDeletedTickets.push(ticket);
+        }
+
+        if (totalTickets.length > 0) {
+            await this.apiClient.setLastFetchedTicket(totalTickets[totalTickets.length - 1]);
+
+            // deleted tickets get handled in listener
+            await this.eventBus.sendEvent('fetched', totalTickets);
+        }
+
         this.apiClient.setLastUpdated(new Date());
     }
 

@@ -54,7 +54,10 @@ export class WebshopOrdersRepo {
      */
     async fetchAllUpdated({ isFetchAll }: { isFetchAll?: boolean } = {}): Promise<void> {
         let hadSuccessfulFetch = false;
-        const storePromises: Promise<void>[] = [];
+
+        const totalOrders: PrivateOrder[] = [];
+
+        const putPromises: Promise<void>[] = [];
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
@@ -63,46 +66,42 @@ export class WebshopOrdersRepo {
                 await this.apiClient.clearLastFetchedOrder();
             }
 
-            if (orders.length > 0) {
-                const deletedOrders: PrivateOrder[] = [];
-                const fetchedOrders: PrivateOrder[] = [];
-
-                for (const order of orders) {
-                    if (order.status === OrderStatus.Deleted) {
-                        deletedOrders.push(order);
-                        continue;
-                    }
-
-                    fetchedOrders.push(order);
-                }
-
-                const storeOrdersPromise = this.store.putAll(orders);
-                storePromises.push(storeOrdersPromise);
-
-                const promises: Promise<unknown>[] = [
-                    storeOrdersPromise,
-                    // todo: this should be run sync?
-                ];
-
-                if (fetchedOrders.length > 0) {
-                    // todo: is this necessary and should this always be broadcasted (thus without if statement)?
-                    promises.push(this.eventBus.sendEvent('fetched', fetchedOrders));
-                }
-
-                if (deletedOrders.length > 0) {
-                    // todo: is this necessary
-                    promises.push(this.eventBus.sendEvent('deleted', deletedOrders));
-                }
-
-                await Promise.all(promises.map(promise => promise.catch(console.error)));
-
-                // Only set the last fetched order if everything is stored correctly
-                await this.apiClient.setlastFetchedOrder(orders[orders.length - 1]);
+            if (orders.length) {
+                totalOrders.push(...orders);
+                putPromises.push(this.store.putAll(orders));
             }
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll, onResultsReceived });
-        await Promise.all(storePromises);
+
+        const deletedOrders: PrivateOrder[] = [];
+        const fetchedOrders: PrivateOrder[] = [];
+
+        for (const order of totalOrders) {
+            if (order.status === OrderStatus.Deleted) {
+                deletedOrders.push(order);
+                continue;
+            }
+
+            fetchedOrders.push(order);
+        }
+
+        // wait until all orders have been stored
+        await Promise.all(putPromises);
+
+        // only set after succesful store
+        if (totalOrders.length > 0) {
+            await this.apiClient.setlastFetchedOrder(totalOrders[totalOrders.length - 1]);
+        }
+
+        if (fetchedOrders.length > 0) {
+            await this.eventBus.sendEvent('fetched', fetchedOrders);
+        }
+
+        if (deletedOrders.length > 0) {
+            await this.eventBus.sendEvent('deleted', deletedOrders);
+        }
+
         this.apiClient.setLastUpdated(new Date());
     }
 
