@@ -67,7 +67,7 @@ export function getDefaultGenerator<M extends Model = Model>(types: DefaultLogOp
                         // Merge into create event
                         const events = ModelEventsMap.get(event.model)?.events;
                         if (events && events.length > 0) {
-                            mergeInto = events[0];
+                            mergeInto = events.find(e => e.type === types.created);
                         }
                     }
                 }
@@ -245,7 +245,7 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
             ModelEventsMap.set(event.model, {
                 // Limit length of d to 1 - we only use the first event
-                events: d.slice(1),
+                events: d.slice(0, 1),
             });
             return saved;
         }
