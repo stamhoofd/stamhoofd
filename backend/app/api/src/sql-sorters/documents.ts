@@ -34,7 +34,7 @@ export const documentSorters: SQLSortDefinitions<Document> = {
     },
     createdAt: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt);
+            return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -45,7 +45,7 @@ export const documentSorters: SQLSortDefinitions<Document> = {
     },
     updatedAt: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.updatedAt);
+            return Formatter.dateTimeIso(a.updatedAt, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({

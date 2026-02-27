@@ -12,7 +12,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
     createdAt: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt);
+            return Formatter.dateTimeIso(a.createdAt, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
@@ -23,7 +23,7 @@ export const orderSorters: SQLSortDefinitions<Order> = {
     },
     updatedAt: {
         getValue(a) {
-            return Formatter.dateTimeIso(a.updatedAt);
+            return Formatter.dateTimeIso(a.updatedAt, 'UTC');
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
