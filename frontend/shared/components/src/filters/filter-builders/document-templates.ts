@@ -1,5 +1,3 @@
-import { fiscal } from '@stamhoofd/dashboard/src/views/dashboard/documents/definitions/fiscal';
-import { participation } from '@stamhoofd/dashboard/src/views/dashboard/documents/definitions/participation';
 import { DocumentStatus, DocumentStatusHelper, FilterWrapperMarker } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -21,13 +19,16 @@ export function getDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
         }),
         new MultipleChoiceFilterBuilder({
             name: $t(`45d95ed4-349b-4f6d-8b4b-417467099f3e`),
-            options: [fiscal, participation]
-                .map((definition) => {
-                    return new MultipleChoiceUIFilterOption(
-                        definition.name,
-                        definition.type,
-                    );
-                }),
+            options: [
+                new MultipleChoiceUIFilterOption(
+                    $t(`2e2c43a8-3709-4947-83e0-3b0345cd7b44`),
+                    'fiscal',
+                ),
+                new MultipleChoiceUIFilterOption(
+                    $t(`c2fe9ab5-f728-4898-a36c-18ba68ea7057`),
+                    'participation',
+                ),
+            ],
             wrapper: {
                 type: {
                     $in: FilterWrapperMarker,
