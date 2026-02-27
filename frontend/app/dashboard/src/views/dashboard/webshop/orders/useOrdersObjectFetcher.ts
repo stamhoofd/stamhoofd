@@ -72,8 +72,143 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
         },
+        // async fetch(data: LimitedFilteredRequest) {
+        //     const timeLogger = startTimeLogger('fetch orders');
+        //     data = toRaw(data);
+        //     console.log('Orders(IndexedDb).fetch', data);
+        //     const filters = [data.filter];
+
+        //     const searchFilter = searchToFilter(data.search);
+        //     if (searchFilter !== null) {
+        //         filters.push(searchFilter);
+        //     }
+
+        //     if (data.pageFilter) {
+        //         filters.unshift(data.pageFilter);
+        //     }
+        //     else {
+        //         await this.loadFromInternet();
+        //     }
+
+        //     // validate sort
+        //     if (data.sort.length === 0) {
+        //         throw new Error('No sort items set');
+        //     }
+
+        //     if (data.sort.length > 2) {
+        //         throw new Error('Too many sort items set');
+        //     }
+
+        //     if (!data.sort.some(item => item.key === 'id')) {
+        //         throw new Error('No valid sort set, or id is not in the sort list');
+        //     }
+
+        //     const sortItem = data.sort[0] as (SortItem & { key: OrderIndexedDBIndex | 'id' });
+
+        //     if (sortItem.key === 'id' && data.sort.length > 1) {
+        //         // We don't support this
+        //         throw new Error('Sorting first by id and other keys is not supported');
+        //     }
+
+        //     // create filter
+        //     const filter = mergeFilters(filters, '$and');
+
+        //     console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
+
+        //     // set advance count
+        //     let advanceCount = 0;
+
+        //     if (lastNextRequest !== null) {
+        //         if (lastNextRequest === data) {
+        //             advanceCount = itemsToAdvanceNext;
+        //         }
+        //         else {
+        //             lastNextRequest = null;
+        //             itemsToAdvanceNext = 0;
+        //         }
+        //     }
+
+        //     // stream
+        //     const results = await manager.getMultipleOrdersWithPatchedTickets({
+        //         filter,
+        //         limit: data.limit,
+        //         sortItem,
+        //         advanceCount,
+        //     });
+
+        //     itemsToAdvanceNext = advanceCount + results.length;
+
+        //     // create next request
+        //     const lastItem = results[results.length - 1];
+        //     let next: LimitedFilteredRequest | undefined = undefined;
+
+        //     if (lastItem && results.length >= data.limit) {
+        //         const pageFilter = getSortFilter(lastItem, ordersIndexedDBSorters, data.sort);
+
+        //         next = new LimitedFilteredRequest({
+        //             filter: data.filter,
+        //             sort: data.sort,
+        //             limit: data.limit,
+        //             search: data.search,
+        //             pageFilter,
+        //         });
+
+        //         if (!pageFilter || JSON.stringify(pageFilter) === JSON.stringify(data.pageFilter)) {
+        //             console.error('Found infinite loading loop for', data);
+        //             next = undefined;
+        //         }
+        //     }
+
+        //     console.log('[Done] Orders(IndexedDb).fetch', { results, next });
+
+        //     if (!data.pageFilter && results.length === 0 && this.isOffline) {
+        //         // First page load failed
+        //         throw new SimpleError({
+        //             code: 'network_error',
+        //             message: 'No internet connection',
+        //         });
+        //     }
+
+        //     if (next) {
+        //         lastNextRequest = next;
+        //     }
+        //     else {
+        //         lastNextRequest = null;
+        //         itemsToAdvanceNext = 0;
+        //     }
+
+        //     timeLogger.stop();
+
+        //     return { results, next };
+        // },
+        // async fetchCount(data: CountFilteredRequest): Promise<number> {
+        //     data = toRaw(data);
+        //     console.log('Orders(IndexedDb).fetchCount', data);
+
+        //     const filters = [data.filter];
+
+        //     const searchFilter = searchToFilter(data.search);
+        //     if (searchFilter !== null) {
+        //         filters.push(searchFilter);
+        //     }
+
+        //     const filter = mergeFilters(filters, '$and');
+
+        //     await this.loadFromInternet();
+
+        //     const results = await manager.getMultipleOrdersWithPatchedTickets({
+        //         filter,
+        //     });
+
+        //     const count = results.length;
+
+        //     console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
+
+        //     return count;
+        // },
 
         async fetch(data: LimitedFilteredRequest) {
+            const timeLogger = startTimeLogger('fetch orders');
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetch', data);
             const results: PrivateOrderWithTickets[] = [];
@@ -178,6 +313,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 lastNextRequest = null;
                 itemsToAdvanceNext = 0;
             }
+
+            timeLogger.stop();
 
             return { results, next };
         },

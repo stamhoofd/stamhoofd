@@ -193,6 +193,30 @@ export class WebshopOrdersRepo {
         }
     }
 
+    async getMultipleRaw<T>(options: {
+        transform: (rawOrder: any) => Promise<T>;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        advanceCount?: number;
+        openTransaction?: IDBTransaction;
+    },
+    ): Promise<T[]> {
+        try {
+            return await this.store.getMultipleRaw<T>(options);
+        }
+        catch (e) {
+            if (e instanceof CompilerFilterError) {
+                throw e;
+            }
+            console.error(e);
+            throw new SimpleError({
+                code: 'loading_failed',
+                message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
+            });
+        }
+    }
+
     /**
      * Get a single order from the offline database.
      */
@@ -398,6 +422,246 @@ export class OrdersStore {
 
             request.onsuccess = iterator;
         });
+    }
+
+    private _cache: any[] | null = null;
+
+    // // todo: rename
+    // async getCache<T>({ sortItem, transform, openTransaction }: {
+    //     transform: (rawOrder: any) => Promise<T>;
+    //     sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+    //     openTransaction?: IDBTransaction;
+    // },
+    // ): Promise<T[]> {
+    //     if (this._cache) {
+    //         return this._cache;
+    //     }
+
+    //     const db = await this.database.get();
+
+    //     return await new Promise<T[]>((resolve, reject) => {
+    //         const transaction = openTransaction ?? db.transaction([OrdersStore.storeName], 'readonly');
+
+    //         transaction.onerror = (event) => {
+    //             // Don't forget to handle errors!
+    //             if (openTransaction && openTransaction.onerror) {
+    //                 openTransaction.onerror(event);
+    //             }
+
+    //             this.database.delete().catch(console.error);
+    //             reject(event);
+    //         };
+
+    //         const objectStore = transaction.objectStore(OrdersStore.storeName);
+
+    //         let request: IDBRequest<any[]>;
+
+    //         // use an index if a SortItem is defined
+    //         try {
+    //             if (sortItem) {
+    //                 let direction: 'next' | 'prev' | 'nextunique' | 'prevunique' = 'next';
+
+    //                 if (sortItem.order === SortItemDirection.DESC) {
+    //                     direction = 'prev';
+    //                 }
+
+    //                 if (sortItem.key === 'id') {
+    //                     request = objectStore.getAll({ direction });
+    //                     // request = objectStore.getAll(null, direction);
+    //                 }
+    //                 else {
+    //                     request = objectStore.index(sortItem.key).getAll({ direction });
+    //                 }
+    //             }
+    //             else {
+    //                 request = objectStore.getAll();
+    //             }
+    //         }
+    //         catch (e) {
+    //             reject(e);
+    //             return;
+    //         }
+
+    //         request.onsuccess = () => {
+    //             const result = request.result.map(transform);
+    //             Promise.all(result).then((orders) => {
+    //                 this._cache = orders;
+    //                 resolve(orders);
+    //             }).catch(e => reject(e));
+    //         };
+    //     });
+    // }
+
+    // // todo: rename
+    // async getMultipleRaw<T>({ filter, limit, sortItem, advanceCount, transform, openTransaction }: {
+    //     transform: (rawOrder: any) => Promise<T>;
+    //     filter?: StamhoofdFilter;
+    //     limit?: number;
+    //     sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+    //     advanceCount?: number;
+    //     openTransaction?: IDBTransaction;
+    // },
+    // ): Promise<T[]> {
+    //     let cache = await this.getCache<T>({ transform, sortItem, openTransaction });
+
+    //     if (advanceCount) {
+    //         cache = cache.slice(advanceCount);
+    //     }
+
+    //     if (!limit && !filter) {
+    //         return cache;
+    //     }
+
+    //     if (!filter) {
+    //         return cache.slice(0, limit);
+    //     }
+
+    //     let compiledFilter: InMemoryFilterRunner | undefined;
+
+    //     try {
+    //         compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
+    //     }
+    //     catch (e: any) {
+    //         console.error('Compile filter failed', e);
+    //         throw new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed');
+    //     }
+
+    //     if (!limit) {
+    //         return cache.filter(compiledFilter);
+    //     }
+
+    //     const results: T[] = [];
+
+    //     for (const item of cache) {
+    //         if (results.length === limit) {
+    //             break;
+    //         }
+    //         if (compiledFilter(item)) {
+    //             results.push(item);
+    //         }
+    //     }
+
+    //     return results;
+    // }
+
+    // todo: rename
+    async getCache({ sortItem, openTransaction }: {
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        openTransaction?: IDBTransaction;
+    },
+    ): Promise<any[]> {
+        if (this._cache) {
+            return this._cache;
+        }
+
+        const db = await this.database.get();
+
+        return await new Promise<T[]>((resolve, reject) => {
+            const transaction = openTransaction ?? db.transaction([OrdersStore.storeName], 'readonly');
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                if (openTransaction && openTransaction.onerror) {
+                    openTransaction.onerror(event);
+                }
+
+                this.database.delete().catch(console.error);
+                reject(event);
+            };
+
+            const objectStore = transaction.objectStore(OrdersStore.storeName);
+
+            let request: IDBRequest<any[]>;
+
+            // use an index if a SortItem is defined
+            try {
+                if (sortItem) {
+                    let direction: 'next' | 'prev' | 'nextunique' | 'prevunique' = 'next';
+
+                    if (sortItem.order === SortItemDirection.DESC) {
+                        direction = 'prev';
+                    }
+
+                    if (sortItem.key === 'id') {
+                        request = objectStore.getAll({ direction });
+                        // request = objectStore.getAll(null, direction);
+                    }
+                    else {
+                        request = objectStore.index(sortItem.key).getAll({ direction });
+                    }
+                }
+                else {
+                    request = objectStore.getAll();
+                }
+            }
+            catch (e) {
+                reject(e);
+                return;
+            }
+
+            request.onsuccess = () => {
+                this._cache = request.result;
+                resolve(this._cache);
+            };
+        });
+    }
+
+    // todo: rename
+    async getMultipleRaw<T>({ filter, limit, sortItem, advanceCount, transform, openTransaction }: {
+        transform: (rawOrder: any) => Promise<T>;
+        filter?: StamhoofdFilter;
+        limit?: number;
+        sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' };
+        advanceCount?: number;
+        openTransaction?: IDBTransaction;
+    },
+    ): Promise<T[]> {
+        let cache = await this.getCache({ sortItem, openTransaction });
+
+        if (advanceCount) {
+            cache = cache.slice(advanceCount);
+        }
+
+        const transformAll = async (cache: any[]) => {
+            return await Promise.all(cache.map(transform));
+        };
+
+        if (!limit && !filter) {
+            return await transformAll(cache);
+        }
+
+        if (!filter) {
+            return await transformAll(cache.slice(0, limit));
+        }
+
+        const cacheTransformed = await transformAll(cache);
+
+        let compiledFilter: InMemoryFilterRunner | undefined;
+
+        try {
+            compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
+        }
+        catch (e: any) {
+            console.error('Compile filter failed', e);
+            throw new CompilerFilterError((e.message as string | undefined) ?? 'Compile filter failed');
+        }
+
+        if (!limit) {
+            return cacheTransformed.filter(compiledFilter);
+        }
+
+        const results: T[] = [];
+
+        for (const item of cacheTransformed) {
+            if (results.length === limit) {
+                break;
+            }
+            if (compiledFilter(item)) {
+                results.push(item);
+            }
+        }
+
+        return results;
     }
 
     async clear(): Promise<void> {
