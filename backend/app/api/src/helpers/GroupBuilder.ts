@@ -1,5 +1,5 @@
 import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, Group as GroupStruct, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
-import { Group, Organization } from '@stamhoofd/models';
+import { Group, Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/models';
 
 export class GroupBuilder {
     organization: Organization;
@@ -10,27 +10,29 @@ export class GroupBuilder {
 
     async build() {
         const oldGroups = await Group.getAll(this.organization.id, this.organization.periodId);
+        const period = await RegistrationPeriod.getByID(this.organization.periodId, true);
+        const organizationPeriod = await OrganizationRegistrationPeriod.select().where('organizationId', this.organization.id).where('periodId', this.organization.periodId).first(true);
 
         if (oldGroups.length === 0) {
             // Setup default groups if possible
-            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
-                await this.createSGVGroups();
+            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
+                await this.createSGVGroups(period);
             }
-            else if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
-                await this.createChiroGroups();
+            else if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization === UmbrellaOrganization.ChiroNationaal) {
+                await this.createChiroGroups(period);
             }
         }
 
         // Reload
-        const groups = await Group.getAll(this.organization.id, this.organization.periodId);
+        const groups = oldGroups.length === 0 ? await Group.getAll(this.organization.id, this.organization.periodId) : oldGroups.slice();
 
         // Setup default root groups
-        if (this.organization.meta.categories.length <= 2) {
+        if (organizationPeriod.settings.categories.length <= 2) {
             const sortedGroupIds = groups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id);
 
             const defaults = this.organization.meta.packages.useActivities ? OrganizationTypeHelper.getDefaultGroupCategories(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined) : OrganizationTypeHelper.getDefaultGroupCategoriesWithoutActivities(this.organization.meta.type, this.organization.meta.umbrellaOrganization ?? undefined);
 
-            if (sortedGroupIds.length > 0 && defaults.length == 0) {
+            if (sortedGroupIds.length > 0 && defaults.length === 0) {
                 defaults.push(GroupCategory.create({
                     settings: GroupCategorySettings.create({
                         name: 'Leeftijdsgroepen',
@@ -38,26 +40,26 @@ export class GroupBuilder {
                     }),
                 }));
             }
-            this.organization.meta.categories = [GroupCategory.create({ id: 'root' }), ...defaults];
-            this.organization.meta.rootCategoryId = 'root';
+            organizationPeriod.settings.categories = [GroupCategory.create({ id: 'root' }), ...defaults];
+            organizationPeriod.settings.rootCategoryId = 'root';
 
             // Set category ID of the root category
             const filter = defaults.flatMap(d => d.categoryIds);
-            this.organization.meta.rootCategory!.categoryIds = defaults.map(d => d.id).filter(id => !filter.includes(id));
+            organizationPeriod.settings.rootCategory!.categoryIds = defaults.map(d => d.id).filter(id => !filter.includes(id));
 
             if (defaults.length > 0) {
                 defaults[0].groupIds.push(...sortedGroupIds);
             }
 
-            await this.organization.save();
+            await organizationPeriod.save();
         }
         else {
             const newGroups = groups.filter(g => !oldGroups.find(gg => gg.id === g.id));
             const sortedGroupIds = newGroups.map(g => GroupStruct.create(Object.assign({}, g, { privateSettings: null }))).sort(GroupStruct.defaultSort).map(g => g.id);
-            let root = this.organization.meta.rootCategory!;
+            let root = organizationPeriod.settings.rootCategory!;
             if (root.categoryIds.length > 0) {
                 for (const id of root.categoryIds) {
-                    const f = this.organization.meta.categories.find(c => c.id === id);
+                    const f = organizationPeriod.settings.categories.find(c => c.id === id);
                     if (f) {
                         root = f;
                         break;
@@ -67,16 +69,16 @@ export class GroupBuilder {
 
             if (newGroups.length > 0) {
                 root.groupIds.push(...sortedGroupIds);
-                await this.organization.save();
+                await organizationPeriod.save();
             }
         }
     }
 
-    async createSGVGroups() {
+    async createSGVGroups(period: RegistrationPeriod) {
         const createdGroups: Group[] = [];
         const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale
             ? GroupGenderType.OnlyMale
-            : (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale
+            : (this.organization.meta.genderType === OrganizationGenderType.OnlyFemale
                     ? GroupGenderType.OnlyFemale
                     : GroupGenderType.Mixed);
 
@@ -86,8 +88,8 @@ export class GroupBuilder {
         kapoenen.settings = GroupSettings.create({
             name: new TranslatedString('Kapoenen'),
             genderType: mixedType,
-            startDate: this.organization.meta.defaultStartDate,
-            endDate: this.organization.meta.defaultEndDate,
+            startDate: period.startDate,
+            endDate: period.endDate,
             minAge: 6,
             maxAge: 7,
         });
@@ -100,8 +102,8 @@ export class GroupBuilder {
         jin.settings = GroupSettings.create({
             name: new TranslatedString('Jin'),
             genderType: mixedType,
-            startDate: this.organization.meta.defaultStartDate,
-            endDate: this.organization.meta.defaultEndDate,
+            startDate: period.startDate,
+            endDate: period.endDate,
             minAge: 17,
             maxAge: 17,
         });
@@ -115,8 +117,8 @@ export class GroupBuilder {
             wouters.settings = GroupSettings.create({
                 name: new TranslatedString('Wouters'),
                 genderType: GroupGenderType.Mixed,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 8,
                 maxAge: 10,
             });
@@ -129,8 +131,8 @@ export class GroupBuilder {
             jonggivers.settings = GroupSettings.create({
                 name: new TranslatedString('Jonggivers'),
                 genderType: GroupGenderType.Mixed,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 11,
                 maxAge: 13,
             });
@@ -143,8 +145,8 @@ export class GroupBuilder {
             givers.settings = GroupSettings.create({
                 name: new TranslatedString('Givers'),
                 genderType: GroupGenderType.Mixed,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 14,
                 maxAge: 16,
             });
@@ -159,8 +161,8 @@ export class GroupBuilder {
             wouters.settings = GroupSettings.create({
                 name: new TranslatedString('Kabouters'),
                 genderType: GroupGenderType.OnlyFemale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 8,
                 maxAge: 10,
             });
@@ -173,8 +175,8 @@ export class GroupBuilder {
             jonggivers.settings = GroupSettings.create({
                 name: new TranslatedString('Jonggidsen'),
                 genderType: GroupGenderType.OnlyFemale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 11,
                 maxAge: 13,
             });
@@ -187,8 +189,8 @@ export class GroupBuilder {
             givers.settings = GroupSettings.create({
                 name: new TranslatedString('Gidsen'),
                 genderType: GroupGenderType.OnlyFemale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 14,
                 maxAge: 16,
             });
@@ -203,8 +205,8 @@ export class GroupBuilder {
             wouters.settings = GroupSettings.create({
                 name: new TranslatedString('Welpen'),
                 genderType: GroupGenderType.OnlyMale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 8,
                 maxAge: 10,
             });
@@ -217,8 +219,8 @@ export class GroupBuilder {
             jonggivers.settings = GroupSettings.create({
                 name: new TranslatedString('Jongverkenners'),
                 genderType: GroupGenderType.OnlyMale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 11,
                 maxAge: 13,
             });
@@ -231,8 +233,8 @@ export class GroupBuilder {
             givers.settings = GroupSettings.create({
                 name: new TranslatedString('Verkenners'),
                 genderType: GroupGenderType.OnlyMale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 14,
                 maxAge: 16,
             });
@@ -243,7 +245,7 @@ export class GroupBuilder {
         return createdGroups;
     }
 
-    async createChiroGroups() {
+    async createChiroGroups(period: RegistrationPeriod) {
         const mixedType = this.organization.meta.genderType === OrganizationGenderType.OnlyMale
             ? GroupGenderType.OnlyMale
             : (this.organization.meta.genderType === OrganizationGenderType.OnlyFemale
@@ -256,8 +258,8 @@ export class GroupBuilder {
         ribbels.settings = GroupSettings.create({
             name: new TranslatedString('Ribbels'),
             genderType: mixedType,
-            startDate: this.organization.meta.defaultStartDate,
-            endDate: this.organization.meta.defaultEndDate,
+            startDate: period.startDate,
+            endDate: period.endDate,
             minAge: 6,
             maxAge: 7,
         });
@@ -269,8 +271,8 @@ export class GroupBuilder {
         speelclub.settings = GroupSettings.create({
             name: new TranslatedString('Speelclub'),
             genderType: mixedType,
-            startDate: this.organization.meta.defaultStartDate,
-            endDate: this.organization.meta.defaultEndDate,
+            startDate: period.startDate,
+            endDate: period.endDate,
             minAge: 8,
             maxAge: 9,
         });
@@ -282,8 +284,8 @@ export class GroupBuilder {
         aspis.settings = GroupSettings.create({
             name: new TranslatedString("Aspi's"),
             genderType: mixedType,
-            startDate: this.organization.meta.defaultStartDate,
-            endDate: this.organization.meta.defaultEndDate,
+            startDate: period.startDate,
+            endDate: period.endDate,
             minAge: 16,
             maxAge: 17,
         });
@@ -296,8 +298,8 @@ export class GroupBuilder {
             rakwis.settings = GroupSettings.create({
                 name: new TranslatedString("Rakwi's"),
                 genderType: GroupGenderType.Mixed,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 10,
                 maxAge: 11,
             });
@@ -309,8 +311,8 @@ export class GroupBuilder {
             titos.settings = GroupSettings.create({
                 name: new TranslatedString("Tito's"),
                 genderType: GroupGenderType.Mixed,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 12,
                 maxAge: 13,
             });
@@ -322,8 +324,8 @@ export class GroupBuilder {
             ketis.settings = GroupSettings.create({
                 name: new TranslatedString("Keti's"),
                 genderType: GroupGenderType.Mixed,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 14,
                 maxAge: 15,
             });
@@ -337,8 +339,8 @@ export class GroupBuilder {
             rakwis.settings = GroupSettings.create({
                 name: new TranslatedString('Kwiks'),
                 genderType: GroupGenderType.OnlyFemale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 10,
                 maxAge: 11,
             });
@@ -350,8 +352,8 @@ export class GroupBuilder {
             titos.settings = GroupSettings.create({
                 name: new TranslatedString('Toppers'),
                 genderType: GroupGenderType.OnlyFemale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 12,
                 maxAge: 13,
             });
@@ -363,8 +365,8 @@ export class GroupBuilder {
             ketis.settings = GroupSettings.create({
                 name: new TranslatedString('Tiptiens'),
                 genderType: GroupGenderType.OnlyFemale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 14,
                 maxAge: 15,
             });
@@ -378,8 +380,8 @@ export class GroupBuilder {
             rakwis.settings = GroupSettings.create({
                 name: new TranslatedString('Rakkers'),
                 genderType: GroupGenderType.OnlyMale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 10,
                 maxAge: 11,
             });
@@ -391,8 +393,8 @@ export class GroupBuilder {
             titos.settings = GroupSettings.create({
                 name: new TranslatedString('Tippers'),
                 genderType: GroupGenderType.OnlyMale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 12,
                 maxAge: 13,
             });
@@ -404,8 +406,8 @@ export class GroupBuilder {
             ketis.settings = GroupSettings.create({
                 name: new TranslatedString('Kerels'),
                 genderType: GroupGenderType.OnlyMale,
-                startDate: this.organization.meta.defaultStartDate,
-                endDate: this.organization.meta.defaultEndDate,
+                startDate: period.startDate,
+                endDate: period.endDate,
                 minAge: 14,
                 maxAge: 15,
             });
