@@ -91,6 +91,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 await this.loadFromInternet();
             }
 
+            // validate sort
             if (data.sort.length === 0) {
                 throw new Error('No sort items set');
             }
@@ -104,15 +105,18 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const sortItem = data.sort[0] as (SortItem & { key: OrderIndexedDBIndex | 'id' });
-            const filter = mergeFilters(filters, '$and');
 
             if (sortItem.key === 'id' && data.sort.length > 1) {
                 // We don't support this
                 throw new Error('Sorting first by id and other keys is not supported');
             }
 
+            // create filter
+            const filter = mergeFilters(filters, '$and');
+
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
+            // set advance count
             let advanceCount = 0;
 
             if (lastNextRequest !== null) {
@@ -125,6 +129,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
+            // stream
             itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
                 callback: (order) => {
                     results.push(order);
@@ -135,6 +140,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 advanceCount,
             });
 
+            // create next request
             const lastItem = results[results.length - 1];
             let next: LimitedFilteredRequest | undefined = undefined;
 
