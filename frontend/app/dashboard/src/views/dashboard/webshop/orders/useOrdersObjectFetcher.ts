@@ -7,16 +7,8 @@ import { toRaw } from 'vue';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 import { WebshopManager } from '../WebshopManager';
 
-/**
- * todo:
- * - do not stream all orders (use advance() on cursor): https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor
- * - do not stream all tickets
- */
-
 let lastNextRequest: LimitedFilteredRequest | null = null;
 let itemsToAdvanceNext: number = 0;
-
-// todo: listen to events and reset itemsToAdvanceNext and lastNextRequest
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -91,6 +83,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 await this.loadFromInternet();
             }
 
+            // validate sort
             if (data.sort.length === 0) {
                 throw new Error('No sort items set');
             }
@@ -104,15 +97,18 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const sortItem = data.sort[0] as (SortItem & { key: OrderIndexedDBIndex | 'id' });
-            const filter = mergeFilters(filters, '$and');
 
             if (sortItem.key === 'id' && data.sort.length > 1) {
                 // We don't support this
                 throw new Error('Sorting first by id and other keys is not supported');
             }
 
+            // create filter
+            const filter = mergeFilters(filters, '$and');
+
             console.log('Orders(IndexedDb).fetch', 'streamOrders, filter', filter, 'sortItem', sortItem, 'limit', data.limit);
 
+            // set advance count
             let advanceCount = 0;
 
             if (lastNextRequest !== null) {
@@ -125,6 +121,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 }
             }
 
+            // stream
             itemsToAdvanceNext = await manager.streamOrdersWithPatchedTickets({
                 callback: (order) => {
                     results.push(order);
@@ -135,6 +132,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 advanceCount,
             });
 
+            // create next request
             const lastItem = results[results.length - 1];
             let next: LimitedFilteredRequest | undefined = undefined;
 
@@ -212,16 +210,4 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
     };
 
     return objectFetcher;
-}
-
-function startTimeLogger(label: string) {
-    const before = Date.now();
-
-    return {
-        stop: () => {
-            const after = Date.now();
-            const seconds = (after - before) / 1000;
-            console.log(`${label}: ${seconds} sec`);
-        },
-    };
 }
