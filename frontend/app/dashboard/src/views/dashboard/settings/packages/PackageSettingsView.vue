@@ -33,7 +33,6 @@
 
                         <p v-if="pack.inTrial && !pack.alreadyBought" class="style-title-prefix-list theme-secundary">
                             <span>{{ $t('6ed63ff0-296c-4151-905a-fc6fdc7832e8') }}</span>
-                            <button v-if="pack.inTrial && !pack.alreadyBought" v-tooltip="$t('01c1e6ec-a92b-455f-8721-08f4cd900b67')" type="button" class="button icon small disabled selected" @click.stop="stopTrial(pack)" />
                         </p>
 
                         <p v-if="pack.alreadyBought && pack.expiresSoon" class="style-title-prefix-list">
@@ -50,6 +49,14 @@
 
                         <p v-if="pack.alreadyBought && pack.package.validUntil" class="style-description-small">
                             {{ $t('e40ae4e1-abe1-418d-8662-16626c93acc2', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                        </p>
+
+                        <p v-else-if="pack.inTrial && pack.package.validUntil" class="style-description-small">
+                            {{ $t('Proefperiode geldig tot {dateTime}.', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+
+                            <button type="button" class="inline-link error" @click.stop="stopTrial(pack)">
+                                <span>{{ $t('Stopzetten') }}</span>
+                            </button>
                         </p>
 
                         <p class="style-description-small">
@@ -82,23 +89,25 @@
 </template>
 
 <script lang="ts" setup>
-import { Decoder } from '@simonbackx/simple-encoding';
-import { ErrorBox, useContext, useErrors, useRequiredOrganization, IconContainer, Toast } from '@stamhoofd/components';
-import { SessionManager, useRequestOwner } from '@stamhoofd/networking';
-import { OrganizationPackagesStatus, PackageCheckout, PackagePurchases, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';
-import { onMounted, ref, Ref, watch } from 'vue';
+import { useDismiss } from '@simonbackx/vue-app-navigation';
+import { CenteredMessage, IconContainer, Toast, useContext, useErrors, useRequiredOrganization } from '@stamhoofd/components';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
-import { ComponentWithProperties, useDismiss } from '@simonbackx/vue-app-navigation';
+import { useRequestOwner } from '@stamhoofd/networking';
+import { PackageCheckout, PackagePurchases, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';
+import { ref, watch } from 'vue';
+import { useOrganizationPackages } from './hooks/useOrganizationPackages';
+import { useDeactivatePackage } from './hooks/useDeactivatePackage';
 
-const status = ref(null) as Ref<OrganizationPackagesStatus | null>;
 const errors = useErrors();
 const organization = useRequiredOrganization();
 const packages = ref([] as SelectablePackage[]);
-const loadingStatus = ref(false);
 const owner = useRequestOwner();
 const context = useContext();
 const dismiss = useDismiss();
 const loadingModule = ref(null as STPackageType | null);
+const deactivatePackage = useDeactivatePackage();
+
+const { loading: loadingStatus, packages: status, reload } = useOrganizationPackages({ errors, onMounted: true });
 
 class SelectablePackage {
     package: STPackage;
@@ -127,10 +136,6 @@ class SelectablePackage {
     }
 }
 
-onMounted(() => {
-    reload().catch(console.error);
-});
-
 watch(status, () => {
     packages.value = getUpdatedPackages();
 }, { immediate: true });
@@ -153,6 +158,7 @@ function getUpdatedPackages() {
         let isTrial = false;
         let expiresSoon = false;
         let boughtPackage: null | STPackage = null;
+        let trialPackage: null | STPackage = null;
 
         for (const p of status.value.packages) {
             if (p.validUntil !== null) {
@@ -171,6 +177,7 @@ function getUpdatedPackages() {
             }
 
             if (STPackageBundleHelper.isInTrial(bundle, p)) {
+                trialPackage = p;
                 isTrial = true;
             }
         }
@@ -185,7 +192,7 @@ function getUpdatedPackages() {
         }
 
         try {
-            const pack = boughtPackage ?? STPackageBundleHelper.getCurrentPackage(bundle, new Date());
+            const pack = boughtPackage ?? trialPackage ?? STPackageBundleHelper.getCurrentPackage(bundle, new Date());
             const pp = new SelectablePackage(pack, bundle);
             pp.alreadyBought = isBought;
             pp.inTrial = isTrial;
@@ -206,31 +213,19 @@ function getUpdatedPackages() {
     return packages;
 }
 
-async function reload() {
-    if (loadingStatus.value) {
+async function stopTrial(pack: SelectablePackage) {
+    if (pack.alreadyBought) {
         return;
     }
-    loadingStatus.value = true;
 
-    try {
-        const response = await context.value.authenticatedServer.request({
-            method: 'GET',
-            path: '/organization/packages',
-            owner,
-            decoder: OrganizationPackagesStatus as Decoder<OrganizationPackagesStatus>,
-        });
-
-        status.value = response.data;
+    if (!pack.inTrial) {
+        return;
     }
-    catch (e) {
-        errors.errorBox = new ErrorBox(e);
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je de proefperiode wilt stopzetten?'), $t('Ja, stopzetten'))) {
+        return;
     }
-
-    loadingStatus.value = false;
-}
-
-async function stopTrial(pack: SelectablePackage) {
-    // todo
+    // Activate trial if possible (otherwise go to confirm)
+    deactivatePackage.deactivate(pack.package, $t('Proefperiode stopgezet')).catch(console.error);
 }
 
 async function checkoutTrial(bundle: STPackageBundle, message: string) {

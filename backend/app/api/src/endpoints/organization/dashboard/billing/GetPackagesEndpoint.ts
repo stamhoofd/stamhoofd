@@ -1,7 +1,7 @@
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { STPackage } from '@stamhoofd/models';
 import { OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
+import { STPackageService } from '../../../../services/STPackageService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -31,7 +31,7 @@ export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        const packages = await STPackage.getForOrganization(organization.id);
+        const packages = await STPackageService.getActivePackages(organization.id);
 
         return new Response(OrganizationPackagesStatus.create({
             packages: packages.map(p => STPackageStruct.create(p)),

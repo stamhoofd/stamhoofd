@@ -53,43 +53,74 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
         }
 
-        const currentPackages = await STPackage.getForOrganization(organization.id);
+        const currentPackages = await STPackageService.getActivePackages(organization.id);
 
-        // Create packages
         const packages: STPackageStruct[] = [];
-        for (const bundle of request.body.purchases.packageBundles) {
-            // Renew after currently running packages
-            let date = new Date();
-
-            let skip = false;
-
-            // Do we have a collision? Make sure our package only start after the expiry date of existing packages
-            for (const currentPack of currentPackages) {
-                if (!STPackageBundleHelper.isCombineable(bundle, STPackageStruct.create(currentPack))) {
-                    if (!STPackageBundleHelper.isStackable(bundle, STPackageStruct.create(currentPack))) {
-                        // WE skip silently
-                        console.error('Tried to activate non combineable, non stackable packages...');
-                        skip = true;
-                        continue;
-                    }
-                    if (currentPack.validUntil !== null) {
-                        const end = currentPack.validUntil;
-                        if (end > date) {
-                            date = end;
-                        }
-                    }
-                }
-            }
-
-            if (skip) {
-                continue;
-            }
-            packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date));
-        }
-
         const balanceItems: Map<BalanceItem, number> = new Map();
         const models: STPackage[] = [];
         let totalPrice = 0;
+
+        if (STAMHOOFD.userMode === 'organization') {
+            // Only allowed in organization mode
+            for (const bundle of request.body.purchases.packageBundles) {
+            // Renew after currently running packages
+                let date = new Date();
+
+                let skip = false;
+
+                // Do we have a collision? Make sure our package only start after the expiry date of existing packages
+                for (const currentPack of currentPackages) {
+                    if (!STPackageBundleHelper.isCombineable(bundle, STPackageStruct.create(currentPack))) {
+                        if (!STPackageBundleHelper.isStackable(bundle, STPackageStruct.create(currentPack))) {
+                        // WE skip silently
+                            console.error('Tried to activate non combineable, non stackable packages...');
+                            skip = true;
+                            continue;
+                        }
+                        if (currentPack.validUntil !== null) {
+                            const end = currentPack.validUntil;
+                            if (end > date) {
+                                date = end;
+                            }
+                        }
+                    }
+                }
+
+                if (skip) {
+                    continue;
+                }
+                packages.push(STPackageBundleHelper.getCurrentPackage(bundle, date));
+            }
+
+            // Add renewals
+            if (checkout.purchases.renewPackageIds.length > 0) {
+                for (const id of checkout.purchases.renewPackageIds) {
+                    const pack = currentPackages.find(c => c.id === id);
+                    if (!pack) {
+                        throw new SimpleError({
+                            code: 'not_found',
+                            message: 'Package not found',
+                            human: $t('Het pakket dat je wil verlengen kan je helaas niet meer verlengen'),
+                        });
+                    }
+
+                    // Renew
+                    const model = pack.createRenewed();
+
+                    const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
+                    if (balanceItem) {
+                        totalPrice += balanceItem.priceWithVAT;
+                        balanceItems.set(balanceItem, balanceItem.priceWithVAT);
+                    }
+
+                    if (!request.body.proForma) {
+                        await model.save();
+                        await balanceItem?.save();
+                    }
+                    models.push(model);
+                }
+            }
+        }
 
         // Create the real models for each package
         // calculate the price for these packages and create a hidden balance item
@@ -116,37 +147,6 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             models.push(model);
-        }
-
-        // Add renewals
-        if (checkout.purchases.renewPackageIds.length > 0) {
-            const currentPackages = await STPackage.getForOrganization(organization.id);
-
-            for (const id of checkout.purchases.renewPackageIds) {
-                const pack = currentPackages.find(c => c.id === id);
-                if (!pack) {
-                    throw new SimpleError({
-                        code: 'not_found',
-                        message: 'Package not found',
-                        human: $t('Het pakket dat je wil verlengen kan je helaas niet meer verlengen'),
-                    });
-                }
-
-                // Renew
-                const model = pack.createRenewed();
-
-                const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
-                if (balanceItem) {
-                    totalPrice += balanceItem.priceWithVAT;
-                    balanceItems.set(balanceItem, balanceItem.priceWithVAT);
-                }
-
-                if (!request.body.proForma) {
-                    await model.save();
-                    await balanceItem?.save();
-                }
-                models.push(model);
-            }
         }
 
         // todo: Add pending items (balance items in request)

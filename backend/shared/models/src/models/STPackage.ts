@@ -65,13 +65,6 @@ export class STPackage extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     lastEmailAt: Date | null = null;
 
-    static async getForOrganization(organizationId: string) {
-        const pack1 = await STPackage.where({ organizationId, validAt: { sign: '!=', value: null }, removeAt: { sign: '>', value: new Date() } });
-        const pack2 = await STPackage.where({ organizationId, validAt: { sign: '!=', value: null }, removeAt: null });
-
-        return [...pack1, ...pack2];
-    }
-
     async activate() {
         if (this.validAt !== null) {
             return;

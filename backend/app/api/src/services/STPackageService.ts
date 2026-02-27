@@ -6,6 +6,17 @@ import { Formatter } from '@stamhoofd/utility';
 import { GroupBuilder } from '../helpers/GroupBuilder.js';
 
 export class STPackageService {
+    static async getActivePackages(organizationId: string) {
+        return await STPackage.select()
+            .where('organizationId', organizationId)
+            .andWhere('validAt', '!=', null)
+            .andWhere(
+                SQL.where('removeAt', null)
+                    .or('removeAt', '>', new Date()),
+            )
+            .fetch();
+    }
+
     /**
      * Returns an up to date amount that should be charged for this package.
      * Note that this value could be smaller than the already charged amount.
