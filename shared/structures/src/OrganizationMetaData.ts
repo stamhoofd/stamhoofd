@@ -267,12 +267,6 @@ export class OrganizationMetaData extends AutoEncoder {
     // Everything below should move to registrations meta data
 
     /**
-     * @deprecated
-     */
-    @field({ decoder: IntegerDecoder, optional: true })
-    expectedMemberCount = 0;
-
-    /**
      * Only used for building the initial groups for some type of organizations
      */
     @field({ decoder: new EnumDecoder(OrganizationGenderType), optional: true })
