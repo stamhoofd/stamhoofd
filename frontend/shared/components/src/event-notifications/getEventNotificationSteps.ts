@@ -1,4 +1,4 @@
-import { ViewStep } from '../../members/classes/ViewStepsManager';
+import { type ViewStep } from '#steps/ViewStep';
 import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 import { GeneralStep } from './steps/GeneralStep';
 import { RecordCategoryStep } from './steps/RecordCategoryStep';

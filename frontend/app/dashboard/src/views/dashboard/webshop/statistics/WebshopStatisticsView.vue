@@ -74,7 +74,7 @@
 
 <script lang="ts" setup>
 import { DateOption, GraphView, STInputBox, STList, STListItem, STNavigationBar, Toast, useContext } from '@stamhoofd/components';
-import { GraphViewConfiguration } from '@stamhoofd/components/src/views/GraphViewConfiguration';
+import { GraphViewConfiguration } from '@stamhoofd/components/views/GraphViewConfiguration.ts';
 import { AppManager } from '@stamhoofd/networking';
 import { Category, Graph, GraphData, Order, OrderStatus, ProductType, TicketPrivate, WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

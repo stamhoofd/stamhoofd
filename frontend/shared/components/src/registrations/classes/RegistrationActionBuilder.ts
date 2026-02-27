@@ -512,7 +512,7 @@ export class RegistrationActionBuilder {
     }
 
     private async openSms(registrations: PlatformRegistration[]) {
-        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '@stamhoofd/components/src/views/SMSView.vue'), {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '#views/SMSView.vue'), {
             members: getUniqueMembersFromRegistrations(registrations).map(pm => pm.member),
         });
         this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);

@@ -269,7 +269,7 @@ import { useInfiniteObjectFetcher } from '../tables';
 import ImageComponent from '../views/ImageComponent.vue';
 import EditEventView from './EditEventView.vue';
 import EventInfoTable from './components/EventInfoTable.vue';
-import EventNotificationRow from './components/EventNotificationRow.vue';
+import EventNotificationRow from '#event-notifications/components/EventNotificationRow.vue';
 import { useCreateEventGroup } from './composables/createEventGroup';
 
 const props = defineProps<{

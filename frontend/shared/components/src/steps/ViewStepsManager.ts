@@ -1,5 +1,6 @@
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
-import { DisplayOptions, glueNavigationActions, NavigationActions, runDisplayOptions } from '../../types/NavigationActions';
+import { DisplayOptions, glueNavigationActions, NavigationActions, runDisplayOptions } from '../types/NavigationActions';
+import { type ViewStep } from './ViewStep';
 
 export class ViewStepsManager {
     steps: ViewStep[] = [];
@@ -65,9 +66,4 @@ export class ViewStepsManager {
         }
         return null;
     }
-}
-
-export interface ViewStep {
-    getComponent(manager: ViewStepsManager): Promise<ComponentWithProperties> | ComponentWithProperties;
-    isEnabled(manager: ViewStepsManager): boolean;
 }

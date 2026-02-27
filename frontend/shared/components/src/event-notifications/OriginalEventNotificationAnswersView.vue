@@ -19,8 +19,8 @@
 import { ViewRecordCategoryAnswersBox } from '@stamhoofd/components';
 import { RecordCategory } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useErrors } from '../errors/useErrors';
-import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
+import { useErrors } from '#errors/useErrors';
+import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 
 const props = withDefaults(
     defineProps<{

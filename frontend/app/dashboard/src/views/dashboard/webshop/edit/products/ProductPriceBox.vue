@@ -108,8 +108,8 @@ import { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-
 import { Checkbox, ErrorBox, NumberInput, PriceInput, STInputBox, STList, STListItem, Dropdown, Toast, useFeatureFlag, LoadingInputBox, NavigationActions } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/src/context/hooks/useGetOfficialUitpasSocialTariff';
-import { useGoToUitpasConfiguration } from '@stamhoofd/components/src/context/hooks/useGoToUitpasConfiguration';
+import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/uitpas/useGetOfficialUitpasSocialTariff.ts';
+import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';
 
 const { getOfficialUitpasSocialTariff } = useGetOfficialUitpasSocialTariff();
 

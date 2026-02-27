@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { QuickActionsBox, useAuth, useRequiredOrganization } from '@stamhoofd/components';
-import { useDashboardQuickActions } from '@stamhoofd/components/src/quick-actions/hooks/useDashboardQuickActions';
+import { useDashboardQuickActions } from '@stamhoofd/components/quick-actions/hooks/useDashboardQuickActions.ts';
 import SetupStepsView from './SetupStepsView.vue';
 
 const auth = useAuth();

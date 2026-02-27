@@ -425,8 +425,8 @@ import { ComponentWithProperties, NavigationController, usePop, usePresent } fro
 import { CenteredMessage, DateSelection, Dropdown, NavigationActions, NumberInput, SaveView, STErrorsDefault, STInputBox, STList, STListItem, TimeInput, Toast, UploadButton, useErrors, useFeatureFlag, usePatch, useRequiredOrganization } from '@stamhoofd/components';
 import { Image, OptionMenu, PrivateWebshop, Product, ProductDateRange, ProductLocation, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType } from '@stamhoofd/structures';
 
-import { useGoToUitpasConfiguration } from '@stamhoofd/components/src/context/hooks/useGoToUitpasConfiguration';
-import { useSetUitpasEvent } from '@stamhoofd/components/src/context/hooks/useSetUitpasEvent';
+import { useGoToUitpasConfiguration } from '@stamhoofd/components/uitpas/useGoToUitpasConfiguration.ts';
+import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 import EditWebshopFieldView from '../fields/EditWebshopFieldView.vue';
 import WebshopFieldsBox from '../fields/WebshopFieldsBox.vue';

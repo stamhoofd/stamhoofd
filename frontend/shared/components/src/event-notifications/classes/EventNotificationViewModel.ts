@@ -3,7 +3,8 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { BaseOrganization, Event, EventNotification, EventNotificationType, Platform } from '@stamhoofd/structures';
 import { computed } from 'vue';
-import { useContext, usePatch } from '../../../hooks';
+import { useContext } from '#hooks/useContext';
+import { usePatch } from '#hooks/usePatch';
 
 export class EventNotificationViewModel {
     isNew: boolean;

@@ -1,14 +1,15 @@
-import { ComponentWithProperties } from "@simonbackx/vue-app-navigation";
-import { RegisterCheckout } from "@stamhoofd/structures";
-import { NavigationActions } from "../../../types/NavigationActions";
-import { ViewStep, ViewStepsManager } from "../../classes/ViewStepsManager";
-import PaymentCustomerView from "../PaymentCustomerView.vue";
+import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
+import { type ViewStep } from '#steps/ViewStep';
+import { type ViewStepsManager } from '#steps/ViewStepsManager';
+import { RegisterCheckout } from '@stamhoofd/structures';
+import { NavigationActions } from '../../../types/NavigationActions';
+import PaymentCustomerView from '../PaymentCustomerView.vue';
 
 export class PaymentCustomerStep implements ViewStep {
-    checkout: RegisterCheckout
+    checkout: RegisterCheckout;
 
     constructor(checkout: RegisterCheckout) {
-        this.checkout = checkout
+        this.checkout = checkout;
     }
 
     isEnabled(_manager: ViewStepsManager) {
@@ -27,8 +28,8 @@ export class PaymentCustomerStep implements ViewStep {
         return new ComponentWithProperties(PaymentCustomerView, {
             checkout: this.checkout,
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }

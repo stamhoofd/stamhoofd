@@ -105,7 +105,9 @@
 import { AutoEncoderPatchType, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, useNavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem, EditGroupView, GroupAvatar, MembersTableView, RegistrationsTableView, STErrorsDefault, STList, STListItem, STNavigationBar, useErrors } from '@stamhoofd/components';
-import { useContext, useRequiredOrganization } from '@stamhoofd/components/src/hooks';
+import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
+import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
+
 import { usePatchOrganizationPeriod } from '@stamhoofd/networking';
 import { Group, GroupCategory, GroupCategoryTree, GroupPrivateSettings, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';

@@ -21,8 +21,9 @@
 <script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, Column, ComponentExposed, EmailView, EventNotificationView, ModernTableView, TableAction, TableActionSelection, useEventNotificationBackendFilterBuilders, useEventNotificationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
-import { EventNotificationViewModel } from '@stamhoofd/components/src/events/event-notifications/classes/EventNotificationViewModel';
+import { AsyncTableAction, Column, ComponentExposed, EmailView, ModernTableView, TableAction, TableActionSelection, useEventNotificationBackendFilterBuilders, useEventNotificationsObjectFetcher, usePlatform, useTableObjectFetcher } from '@stamhoofd/components';
+import { EventNotificationViewModel } from '@stamhoofd/components/event-notifications/classes/EventNotificationViewModel.ts';
+import EventNotificationView from '@stamhoofd/components/event-notifications/EventNotificationView.vue';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
 import { EventNotification, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, ExcelExportType, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

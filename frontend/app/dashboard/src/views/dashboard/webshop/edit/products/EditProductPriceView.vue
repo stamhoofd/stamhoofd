@@ -30,10 +30,10 @@ import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, SaveView, STErrorsDefault, Toast, useErrors, usePatch } from '@stamhoofd/components';
 import { Product, ProductPrice } from '@stamhoofd/structures';
 
+import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/uitpas/useGetOfficialUitpasSocialTariff.ts';
 import { computed, ref } from 'vue';
+import { useDeleteProductPrice } from '../hooks/useDeleteProductPrice';
 import ProductPriceBox from './ProductPriceBox.vue';
-import { useDeleteProductPrice } from '@stamhoofd/components/src/context/hooks/useDeleteProductPrice';
-import { useGetOfficialUitpasSocialTariff } from '@stamhoofd/components/src/context/hooks/useGetOfficialUitpasSocialTariff';
 
 const props = defineProps<{
     productPrice: ProductPrice;

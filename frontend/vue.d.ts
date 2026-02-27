@@ -1,4 +1,4 @@
-import { FormatInputDirective } from '@stamhoofd/components/src/directives/FormatInputDirective';
+import { FormatInputDirective } from '@stamhoofd/components/directives/FormatInputDirective';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { MemberManager, OrganizationManager, SessionContext } from '@stamhoofd/networking';
 import { CountryHelper, Organization, Platform, User } from '@stamhoofd/structures';

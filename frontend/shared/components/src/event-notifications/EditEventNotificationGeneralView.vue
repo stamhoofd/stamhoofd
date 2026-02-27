@@ -16,7 +16,6 @@
 <script setup lang="ts">
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage, ErrorBox, NavigationActions, useErrors, useNavigationActions } from '@stamhoofd/components';
-import { useTranslate } from '@stamhoofd/frontend-i18n';
 import { ref } from 'vue';
 import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
 

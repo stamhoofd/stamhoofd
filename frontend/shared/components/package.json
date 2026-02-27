@@ -5,6 +5,18 @@
     "main": "index.ts",
     "type": "module",
     "sideEffects": false,
+    "exports": {
+        ".": "./index.ts",
+        "./*": "./src/*.ts",
+        "./*.ts": "./src/*.ts",
+        "./*.vue": "./src/*.vue",
+        "./auth/RedirectView.vue": "./src/auth/RedirectView.vue"
+    },
+    "imports": {
+        "#*.vue": "./src/*.vue",
+        "#*.ts": "./src/*.ts",
+        "#*": "./src/*.ts"
+    },
     "dependencies": {
         "@stamhoofd/structures": "*",
         "@tiptap/extension-image": "^3.4.2",

@@ -1,9 +1,9 @@
 import { useRequestOwner } from '@stamhoofd/networking';
 import { Event, EventNotification, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { ref, Ref } from 'vue';
-import { ErrorBox } from '../../errors/ErrorBox';
-import { useErrors } from '../../errors/useErrors';
-import { useEventNotificationsObjectFetcher } from '../../fetchers';
+import { ErrorBox } from '#errors/ErrorBox';
+import { useErrors } from '#errors/useErrors';
+import { useEventNotificationsObjectFetcher } from '#fetchers/useEventNotificationsObjectFetcher';
 
 export function useEventNotification(data: { event: Event; typeId: string }) {
     // Find event notifiation for this event and type

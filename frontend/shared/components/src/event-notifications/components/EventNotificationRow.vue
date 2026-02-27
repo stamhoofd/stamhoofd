@@ -28,13 +28,13 @@ import { ComponentWithProperties, defineRoutes, useNavigate, usePresent } from '
 import { Event, EventNotificationStatus, EventNotificationStatusHelper, EventNotificationType, Organization } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { usePlatform } from '../../hooks';
-import { ViewStepsManager } from '../../members/classes/ViewStepsManager';
+import { ViewStepsManager } from '#steps/ViewStepsManager';
 import { Toast } from '../../overlays/Toast';
 import { useNavigationActions } from '../../types/NavigationActions';
 import EventNotificationView from '../EventNotificationView.vue';
-import { useEventNotification } from '../composables/useEventNotification';
-import { EventNotificationViewModel } from '../event-notifications/classes/EventNotificationViewModel';
-import { getEventNotificationSteps } from '../event-notifications/getEventNotificationSteps';
+import { useEventNotification } from '../hooks/useEventNotification';
+import { EventNotificationViewModel } from '../classes/EventNotificationViewModel';
+import { getEventNotificationSteps } from '../getEventNotificationSteps';
 
 const props = defineProps<{
     event: Event;

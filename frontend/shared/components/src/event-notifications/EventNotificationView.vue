@@ -223,8 +223,8 @@ import { AccessRight, Event, EventNotification, EventNotificationStatus, EventNo
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
-import { EventNotificationViewModel } from './event-notifications/classes/EventNotificationViewModel';
-import EditEventNotificationRecordCategoryView from './event-notifications/EditEventNotificationRecordCategoryView.vue';
+import { EventNotificationViewModel } from './classes/EventNotificationViewModel';
+import EditEventNotificationRecordCategoryView from './EditEventNotificationRecordCategoryView.vue';
 import OriginalEventNotificationAnswersView from './OriginalEventNotificationAnswersView.vue';
 
 const props = withDefaults(

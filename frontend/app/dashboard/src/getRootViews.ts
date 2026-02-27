@@ -7,7 +7,7 @@ import { AccessRight, AppType, Organization, PermissionLevel, PermissionsResourc
 import { computed, markRaw, onUnmounted, reactive, ref } from 'vue';
 
 import { SimpleError } from '@simonbackx/simple-errors';
-import RedirectView from '@stamhoofd/components/src/auth/RedirectView.vue';
+import RedirectView from '@stamhoofd/components/auth/RedirectView.vue';
 import { CheckoutManager } from '../../webshop/src/classes/CheckoutManager';
 import { WebshopManager } from '../../webshop/src/classes/WebshopManager';
 import { WhatsNewCount } from './classes/WhatsNewCount';

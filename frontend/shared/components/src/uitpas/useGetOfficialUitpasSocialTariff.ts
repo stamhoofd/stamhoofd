@@ -2,7 +2,7 @@ import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '@stamhoofd/networking';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';
-import { useContext } from '../../hooks';
+import { useContext } from '#hooks/useContext';
 import { Decoder } from '@simonbackx/simple-encoding';
 
 export function useGetOfficialUitpasSocialTariff() {

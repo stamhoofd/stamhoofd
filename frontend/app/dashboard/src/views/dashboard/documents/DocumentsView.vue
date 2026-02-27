@@ -22,7 +22,7 @@ import { Column, getDocumentsUIFilterBuilders, ModernTableView, UIFilterBuilders
 import { Document, DocumentStatus, DocumentStatusHelper, DocumentTemplatePrivate, RecordWarning, RecordWarningType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
-import { useDocumentsObjectFetcher } from '@stamhoofd/components/src/fetchers/useDocumentsObjectFetcher';
+import { useDocumentsObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentsObjectFetcher.ts';
 import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
 import DocumentView from './DocumentView.vue';

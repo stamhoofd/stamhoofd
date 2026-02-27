@@ -173,7 +173,6 @@ import PaymentsTableView from '../payments/PaymentsTableView.vue';
 import ReceivableBalancesTableView from '../receivable-balances/ReceivableBalancesTableView.vue';
 import ConfigurePaymentExportView from './administration/ConfigurePaymentExportView.vue';
 import BalanceItemsTableView from '../balance-items/BalanceItemsTableView.vue';
-import IconContainer from '@stamhoofd/components/src/icons/IconContainer.vue';
 
 enum Routes {
     Transfers = 'Transfers',

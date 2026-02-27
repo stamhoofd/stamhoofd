@@ -2,7 +2,8 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { RegisterCheckout } from '@stamhoofd/structures';
 import { NavigationActions } from '../../../types/NavigationActions';
 import FreeContributionView from '../FreeContributionView.vue';
-import { ViewStep, ViewStepsManager } from '../../classes/ViewStepsManager';
+import { type ViewStepsManager } from '#steps/ViewStepsManager';
+import { type ViewStep } from '#steps/ViewStep';
 
 export class FreeContributionStep implements ViewStep {
     checkout: RegisterCheckout;

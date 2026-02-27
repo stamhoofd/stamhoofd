@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { InfiniteObjectFetcherEnd, Toast, UIFilter, UIFilterEditor, useAdminEmailFilterBuilders, useInfiniteObjectFetcher, useOrganization, usePositionableSheet, useVisibilityChange } from '@stamhoofd/components';
-import { useEmailsObjectFetcher } from '@stamhoofd/components/src/fetchers/useEmailsObjectFetcher';
+import { useEmailsObjectFetcher } from '#fetchers/useEmailsObjectFetcher.ts';
 import { EmailPreview, isEmptyFilter, LimitedFilteredRequest, PlatformMember, SortItemDirection, StamhoofdFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed, ref, Ref, watchEffect } from 'vue';

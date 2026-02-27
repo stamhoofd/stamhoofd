@@ -31,7 +31,7 @@ import { ContextMenu, ContextMenuItem, STListItem } from '@stamhoofd/components'
 import { Product, ProductPrice } from '@stamhoofd/structures';
 
 import EditProductPriceView from './EditProductPriceView.vue';
-import { useDeleteProductPrice } from '@stamhoofd/components/src/context/hooks/useDeleteProductPrice';
+import { useDeleteProductPrice } from '../hooks/useDeleteProductPrice';
 
 const props = defineProps<{ productPrice: ProductPrice; product: Product }>();
 const { deleteProductPrice } = useDeleteProductPrice();

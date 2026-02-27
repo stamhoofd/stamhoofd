@@ -74,9 +74,6 @@ export async function buildConfig(options: { name: 'dashboard' | 'registration' 
         mode: process.env.NODE_ENV !== 'production' ? 'development' : 'production',
         logLevel: 'warn', // Options are 'info', 'warn', 'error', and 'silent'
         resolve: {
-            alias: {
-                '@stamhoofd/components': resolve(__dirname, './shared/components'),
-            },
             dedupe: [
                 // When yarn linking packages - the issue is that dependencies are resolved to the local node_modules folder in the linked package
                 // this can cause type issues because multiple versions of the same package are loaded

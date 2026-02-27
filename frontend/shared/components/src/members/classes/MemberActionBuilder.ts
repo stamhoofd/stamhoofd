@@ -563,7 +563,7 @@ export class MemberActionBuilder {
     }
 
     private async openSms(members: PlatformMember[]) {
-        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '@stamhoofd/components/src/views/SMSView.vue'), {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '#views/SMSView.vue'), {
             members: members.map(pm => pm.member),
         });
         this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);

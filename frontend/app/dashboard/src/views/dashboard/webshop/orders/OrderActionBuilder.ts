@@ -251,7 +251,7 @@ export class OrderActionBuilder {
     }
 
     async sms(orders: PrivateOrder[]) {
-        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '@stamhoofd/components/src/views/SMSView.vue'), {
+        const displayedComponent = await LoadComponent(() => import(/* webpackChunkName: "SMSView" */ '@stamhoofd/components/views/SMSView.vue'), {
             customers: orders.map(o => o.data.customer),
         });
         this.present(displayedComponent.setDisplayStyle('popup')).catch(console.error);
