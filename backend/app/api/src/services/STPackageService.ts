@@ -1,8 +1,9 @@
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, Platform, Registration, STPackage } from '@stamhoofd/models';
+import { BalanceItem, Organization, Platform, Registration, STPackage } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Country, PaymentCustomer, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Country, PaymentCustomer, STPackageStatus, STPackageType, STPricingType, TranslatedString, VATExcemptReason } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
+import { GroupBuilder } from '../helpers/GroupBuilder.js';
 
 export class STPackageService {
     /**
@@ -29,7 +30,7 @@ export class STPackageService {
         return amount;
     }
 
-    static async markValid(packageId: string, options: { paid: boolean }) {
+    static async markValid(packageId: string) {
         const pack = await STPackage.getByID(packageId);
         if (!pack) {
             console.error('Missing STPackage when marking STPackage as valid', packageId);
@@ -50,6 +51,8 @@ export class STPackageService {
                 await this.didRenew(didRenewPackage, pack);
             }
         }
+
+        await this.updateOrganizationPackages(pack.organizationId);
     }
 
     static async didRenew(old: STPackage, renewedBy: STPackage) {
@@ -175,5 +178,53 @@ export class STPackageService {
         }
 
         return item;
+    }
+
+    private static async getForOrganizationIncludingExpired(organizationId: string) {
+        const packages = await STPackage.select()
+            .where('organizationId', organizationId)
+            .where('validAt', '!=', null)
+            .orderBy('validAt', 'DESC')
+            .fetch();
+
+        return packages;
+    }
+
+    private static async getOrganizationPackagesMap(organizationId: string): Promise<Map<STPackageType, STPackageStatus>> {
+        const packages = await this.getForOrganizationIncludingExpired(organizationId);
+
+        const map = new Map<STPackageType, STPackageStatus>();
+        for (const pack of packages) {
+            const exist = map.get(pack.meta.type);
+            if (exist) {
+                exist.merge(pack.createStatus());
+            }
+            else {
+                map.set(pack.meta.type, pack.createStatus());
+            }
+        }
+
+        return map;
+    }
+
+    static async updateOrganizationPackages(organizationId: string) {
+        console.log('Updating packages for organization ' + organizationId);
+        const map = await this.getOrganizationPackagesMap(organizationId);
+
+        const organization = await Organization.getByID(organizationId);
+        if (organization) {
+            const didUseMembers = organization.meta.packages.useMembers && organization.meta.packages.useActivities;
+            organization.meta.packages.packages = map;
+            await organization.save();
+
+            if (!didUseMembers && organization.meta.packages.useMembers && organization.meta.packages.useActivities) {
+                console.log('Building groups and categories for ' + organization.id);
+                const builder = new GroupBuilder(organization);
+                await builder.build();
+            }
+        }
+        else {
+            console.error("Couldn't find organization when updating packages " + organizationId);
+        }
     }
 }

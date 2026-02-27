@@ -243,7 +243,7 @@ export const BalanceItemService = {
 
         if (balanceItem.packageId) {
             if (balanceItem.type === BalanceItemType.STPackage) {
-                await STPackageService.markValid(balanceItem.packageId, { paid: !!payment && payment.status === PaymentStatus.Succeeded });
+                await STPackageService.markValid(balanceItem.packageId);
             }
         }
 

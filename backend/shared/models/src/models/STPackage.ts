@@ -73,48 +73,6 @@ export class STPackage extends QueryableModel {
         return [...pack1, ...pack2];
     }
 
-    static async getForOrganizationIncludingExpired(organizationId: string) {
-        return await STPackage.where({ organizationId, validAt: { sign: '!=', value: null } }, { sort: [{ column: 'validAt', direction: 'DESC' }] });
-    }
-
-    static async getOrganizationPackagesMap(organizationId: string): Promise<Map<STPackageType, STPackageStatus>> {
-        const packages = await this.getForOrganizationIncludingExpired(organizationId);
-
-        const map = new Map<STPackageType, STPackageStatus>();
-        for (const pack of packages) {
-            const exist = map.get(pack.meta.type);
-            if (exist) {
-                exist.merge(pack.createStatus());
-            }
-            else {
-                map.set(pack.meta.type, pack.createStatus());
-            }
-        }
-
-        return map;
-    }
-
-    static async updateOrganizationPackages(organizationId: string) {
-        console.log('Updating packages for organization ' + organizationId);
-        const map = await this.getOrganizationPackagesMap(organizationId);
-
-        const organization = await Organization.getByID(organizationId);
-        if (organization) {
-            const didUseMembers = organization.meta.packages.useMembers && organization.meta.packages.useActivities;
-            organization.meta.packages.packages = map;
-            await organization.save();
-
-            if (!didUseMembers && organization.meta.packages.useMembers && organization.meta.packages.useActivities) {
-                console.log('Building groups and categories for ' + organization.id);
-                const builder = new GroupBuilder(organization);
-                await builder.build();
-            }
-        }
-        else {
-            console.error("Couldn't find organization when updating packages " + organizationId);
-        }
-    }
-
     async activate() {
         if (this.validAt !== null) {
             return;

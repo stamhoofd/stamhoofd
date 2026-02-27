@@ -1,5 +1,5 @@
-import { Group as GroupStruct, GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, UmbrellaOrganization, TranslatedString } from '@stamhoofd/structures';
-import { Group, Organization } from '../models/index.js';
+import { GroupCategory, GroupCategorySettings, GroupGenderType, GroupSettings, Group as GroupStruct, OrganizationGenderType, OrganizationType, OrganizationTypeHelper, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
+import { Group, Organization } from '@stamhoofd/models';
 
 export class GroupBuilder {
     organization: Organization;
@@ -13,10 +13,10 @@ export class GroupBuilder {
 
         if (oldGroups.length === 0) {
             // Setup default groups if possible
-            if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
+            if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
                 await this.createSGVGroups();
             }
-            else if (this.organization.meta.type == OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
+            else if (this.organization.meta.type === OrganizationType.Youth && this.organization.meta.umbrellaOrganization == UmbrellaOrganization.ChiroNationaal) {
                 await this.createChiroGroups();
             }
         }
@@ -244,9 +244,9 @@ export class GroupBuilder {
     }
 
     async createChiroGroups() {
-        const mixedType = this.organization.meta.genderType == OrganizationGenderType.OnlyMale
+        const mixedType = this.organization.meta.genderType === OrganizationGenderType.OnlyMale
             ? GroupGenderType.OnlyMale
-            : (this.organization.meta.genderType == OrganizationGenderType.OnlyFemale
+            : (this.organization.meta.genderType === OrganizationGenderType.OnlyFemale
                     ? GroupGenderType.OnlyFemale
                     : GroupGenderType.Mixed);
 
