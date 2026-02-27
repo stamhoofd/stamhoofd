@@ -85,7 +85,7 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { ErrorBox, useContext, useErrors, useRequiredOrganization, IconContainer, Toast } from '@stamhoofd/components';
 import { SessionManager, useRequestOwner } from '@stamhoofd/networking';
-import { OrganizationPackagesStatus, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';
+import { OrganizationPackagesStatus, PackageCheckout, PackagePurchases, PaymentMethod, STPackage, STPackageBundle, STPackageBundleHelper, STPackageType } from '@stamhoofd/structures';
 import { onMounted, ref, Ref, watch } from 'vue';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n';
 import { ComponentWithProperties, useDismiss } from '@simonbackx/vue-app-navigation';
@@ -244,15 +244,16 @@ async function checkoutTrial(bundle: STPackageBundle, message: string) {
         await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/billing/activate-packages',
-            body: {
-                bundles: [bundle],
+            body: PackageCheckout.create({
+                purchases: PackagePurchases.create({
+                    packageBundles: [bundle],
+                }),
                 paymentMethod: PaymentMethod.Unknown,
-            },
-            // decoder: STInvoiceResponse as Decoder<STInvoiceResponse>,
+            }),
             shouldRetry: false,
         });
-        // await SessionManager.currentSession!.fetchOrganization(false);
-        // await this.reload();
+        await context.value.fetchOrganization(false);
+        await reload();
         new Toast(message, 'success green').show();
     }
     catch (e) {

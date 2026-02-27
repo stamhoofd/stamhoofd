@@ -6,6 +6,7 @@ import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
 import { AuditLogService } from './AuditLogService.js';
 import { PaymentReallocationService } from './PaymentReallocationService.js';
 import { RegistrationService } from './RegistrationService.js';
+import { STPackageService } from './STPackageService.js';
 
 const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
     await CachedBalance.updateForMembers(organizationId, memberIds);
@@ -237,6 +238,12 @@ export const BalanceItemService = {
         if (balanceItem.registrationId) {
             if (balanceItem.type === BalanceItemType.Registration) {
                 await RegistrationService.markValid(balanceItem.registrationId, { paid: !!payment && payment.status === PaymentStatus.Succeeded });
+            }
+        }
+
+        if (balanceItem.packageId) {
+            if (balanceItem.type === BalanceItemType.STPackage) {
+                await STPackageService.markValid(balanceItem.packageId, { paid: !!payment && payment.status === PaymentStatus.Succeeded });
             }
         }
 

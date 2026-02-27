@@ -291,6 +291,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (whoWillPayNow === 'nobody') {
                 // Safe and important to ignore: we are only updating the outstanding amounts
                 // If we would throw here, that could leak personal data (e.g. that the user uses financial support)
+                request.body.totalPrice = totalPrice;
             }
             else {
                 // when whoWillPay = organization/member, we should throw or the payment amount could be different / incorrect.
@@ -453,37 +454,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registrations.push(registration);
         }
 
-        // Validate payment method
-        if (totalPrice > 0 && whoWillPayNow !== 'nobody') {
-            const allowedPaymentMethods = organization.meta.registrationPaymentConfiguration.getAvailablePaymentMethods({
-                amount: totalPrice,
-                customer: checkout.customer,
-            });
-
-            if (!checkout.paymentMethod || !allowedPaymentMethods.includes(checkout.paymentMethod)) {
-                throw new SimpleError({
-                    code: 'invalid_payment_method',
-                    message: $t(`2b1ca6a0-662e-4326-ada1-10239b6ddc6f`),
-                });
-            }
-
-            if ((checkout.paymentMethod !== PaymentMethod.Transfer && checkout.paymentMethod !== PaymentMethod.PointOfSale) && (!request.body.redirectUrl || !request.body.cancelUrl)) {
-                throw new SimpleError({
-                    code: 'missing_fields',
-                    message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
-                    human: $t(`ebe54b63-2de6-4f22-a5ed-d3fe65194562`),
-                });
-            }
-        }
-        else {
-            checkout.paymentMethod = PaymentMethod.Unknown;
-        }
-
         console.log('Registering members using whoWillPayNow', whoWillPayNow, checkout.paymentMethod, totalPrice);
 
         const createdBalanceItems: BalanceItem[] = [];
         const deletedBalanceItems: BalanceItem[] = [];
-        const shouldMarkValid = whoWillPayNow === 'nobody' || checkout.paymentMethod === PaymentMethod.Transfer || checkout.paymentMethod === PaymentMethod.PointOfSale || checkout.paymentMethod === PaymentMethod.Unknown;
 
         // Create negative balance items
         for (const { registration: registrationStruct, deleted } of [
@@ -837,21 +811,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Keep a copy because createdBalanceItems will be altered - and we don't want to mark added items as valid
         const markValidList = [...createdBalanceItems];
 
-        async function markValidIfNeeded() {
-            if (shouldMarkValid) {
-                for (const balanceItem of markValidList) {
-                    // Mark valid
-                    await BalanceItemService.markPaid(balanceItem, payment, organization);
-                }
-
-                // Flush balance caches so we return an up-to-date balance
-                await BalanceItemService.flushRegistrationDiscountsCache();
-
-                // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
-                await Registration.refreshAll(registrations);
-            }
-        }
-
         if (whoWillPayNow !== 'nobody') {
             const mappedBalanceItems = new Map<BalanceItem, number>();
 
@@ -880,7 +839,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     serviceFeeType: 'members',
                     payingOrganization,
                 });
-                await markValidIfNeeded();
 
                 if (response) {
                     paymentUrl = response.paymentUrl;
@@ -894,8 +852,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
         else {
-            await markValidIfNeeded();
+            // Mark as paid/valid without creating a payment
+            for (const balanceItem of markValidList) {
+                await BalanceItemService.markPaid(balanceItem, null, organization);
+            }
         }
+
+        // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
+        await Registration.refreshAll(registrations);
 
         // Update occupancy
         for (const group of groups) {

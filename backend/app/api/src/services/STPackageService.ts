@@ -29,6 +29,35 @@ export class STPackageService {
         return amount;
     }
 
+    static async markValid(packageId: string, options: { paid: boolean }) {
+        const pack = await STPackage.getByID(packageId);
+        if (!pack) {
+            console.error('Missing STPackage when marking STPackage as valid', packageId);
+            return;
+        }
+        if (pack.validAt) {
+            // Already valid
+            return;
+        }
+
+        console.log('Marking STPackage as valid', packageId);
+        pack.validAt = new Date();
+        await pack.save();
+
+        if (pack.meta.didRenewId) {
+            const didRenewPackage = await STPackage.getByID(pack.meta.didRenewId);
+            if (didRenewPackage && didRenewPackage.organizationId === pack.organizationId) {
+                await this.didRenew(didRenewPackage, pack);
+            }
+        }
+    }
+
+    static async didRenew(old: STPackage, renewedBy: STPackage) {
+        old.removeAt = renewedBy.meta.startDate ?? renewedBy.validAt ?? new Date();
+        old.meta.allowRenew = false;
+        await old.save();
+    }
+
     static async getPaidOrPendingQuantity(pack: STPackage) {
         if (!pack.existsInDatabase || pack.createdAt.getTime() > Date.now() - 1_000) {
             return 0;
@@ -103,7 +132,7 @@ export class STPackageService {
         }
 
         const item = new BalanceItem();
-        item.type = BalanceItemType.Other;
+        item.type = BalanceItemType.STPackage;
         item.description = pack.meta.name + ' ' + (
             pack.validUntil
                 ? $t('van {startDate} tot {endDate}', { startDate: Formatter.date(now, true), endDate: Formatter.date(pack.validUntil, true) })

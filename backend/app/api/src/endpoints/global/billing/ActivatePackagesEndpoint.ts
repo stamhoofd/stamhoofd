@@ -1,8 +1,8 @@
 import { Decoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Organization, Payment, Platform, STPackage } from '@stamhoofd/models';
-import { CheckoutResponse, PackageCheckout, PaymentMethod, PaymentStatus, STPackageBundleHelper, STPackageStruct, Payment as PaymentStruct } from '@stamhoofd/structures';
+import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
+import { CheckoutResponse, PackageCheckout, Payment as PaymentStruct, STPackageBundleHelper, STPackageStruct } from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { PaymentService } from '../../../services/PaymentService.js';
 import { STPackageService } from '../../../services/STPackageService.js';
@@ -112,12 +112,44 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
 
             if (!request.body.proForma) {
                 await model.save();
+                await balanceItem?.save();
             }
 
             models.push(model);
         }
 
-        // Add pending items
+        // Add renewals
+        if (checkout.purchases.renewPackageIds.length > 0) {
+            const currentPackages = await STPackage.getForOrganization(organization.id);
+
+            for (const id of checkout.purchases.renewPackageIds) {
+                const pack = currentPackages.find(c => c.id === id);
+                if (!pack) {
+                    throw new SimpleError({
+                        code: 'not_found',
+                        message: 'Package not found',
+                        human: $t('Het pakket dat je wil verlengen kan je helaas niet meer verlengen'),
+                    });
+                }
+
+                // Renew
+                const model = pack.createRenewed();
+
+                const balanceItem = await STPackageService.chargePackage(model, undefined, checkout.customer ?? undefined);
+                if (balanceItem) {
+                    totalPrice += balanceItem.priceWithVAT;
+                    balanceItems.set(balanceItem, balanceItem.priceWithVAT);
+                }
+
+                if (!request.body.proForma) {
+                    await model.save();
+                    await balanceItem?.save();
+                }
+                models.push(model);
+            }
+        }
+
+        // todo: Add pending items (balance items in request)
 
         const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
         if (!membershipOrganizationId) {
@@ -141,13 +173,36 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             payingOrganization: organization,
             serviceFeeType: 'system',
         });
+
+        console.log('Created payment', result);
+
         if (!result) {
-            // Nothing to see here
+            // No payment needed
             throw new SimpleError({
-                code: 'empty',
-                message: 'Empty checkout data',
+                code: 'missing_data',
+                message: 'Checkout was empty',
+                human: $t('Niets om aan te rekenen'),
             });
         }
+
+        if (!checkout.proForma) {
+            for (const pack of models) {
+                await pack.save();
+            }
+        }
+        else {
+            // Delete payment again
+            if (result) {
+                await result.payment.delete();
+                result.paymentUrl = null;
+                result.paymentQRCode = null;
+            }
+
+            for (const [item] of balanceItems) {
+                await item.delete();
+            }
+        }
+
         const { payment, paymentUrl, paymentQRCode } = result;
 
         return new Response(CheckoutResponse.create({

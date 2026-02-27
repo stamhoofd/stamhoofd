@@ -2,7 +2,7 @@ import createMollieClient, { PaymentMethod as molliePaymentMethod, PaymentStatus
 import { SimpleError } from '@simonbackx/simple-errors';
 import { BalanceItem, BalanceItemPayment, Group, Member, MolliePayment, MollieToken, Organization, PayconiqPayment, Payment, sendEmailTemplate, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemType, Checkoutable, EmailTemplateType, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Version } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemType, Checkoutable, Country, EmailTemplateType, PaymentConfiguration, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
@@ -444,7 +444,7 @@ export class PaymentService {
             });
         }
 
-        if (totalPrice !== checkout.totalPrice) {
+        if (checkout.totalPrice !== null && totalPrice !== checkout.totalPrice) {
             // Changed!
             throw new SimpleError({
                 code: 'changed_price',
@@ -453,25 +453,6 @@ export class PaymentService {
         }
 
         const payment = new Payment();
-        payment.method = checkout.paymentMethod ?? PaymentMethod.Unknown;
-
-        if (totalPrice === 0) {
-            if (balanceItems.size === 0) {
-                return;
-            }
-            // Create an egalizing payment
-            payment.method = PaymentMethod.Unknown;
-
-            if (hasNegative) {
-                payment.type = PaymentType.Reallocation;
-            }
-        }
-        else if (payment.method === PaymentMethod.Unknown) {
-            throw new SimpleError({
-                code: 'invalid_data',
-                message: $t(`86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73`),
-            });
-        }
 
         // Who will receive this money?
         payment.organizationId = organization.id;
@@ -491,42 +472,55 @@ export class PaymentService {
         let prefix = '';
 
         if (payingOrganization) {
-            if (!checkout.customer) {
-                throw new SimpleError({
-                    code: 'missing_fields',
-                    message: 'customer is required when paying as an organization',
-                    human: $t(`d483aa9a-289c-4c59-955f-d2f99ec533ab`),
-                });
+            if (totalPrice !== 0 || hasNegative || checkout.customer) {
+                if (!checkout.customer) {
+                    throw new SimpleError({
+                        code: 'missing_fields',
+                        message: 'customer is required when paying as an organization',
+                        human: $t(`d483aa9a-289c-4c59-955f-d2f99ec533ab`),
+                    });
+                }
+
+                if (!checkout.customer.company) {
+                    throw new SimpleError({
+                        code: 'missing_fields',
+                        message: 'customer.company is required when paying as an organization',
+                        human: $t(`bc89861d-a799-4100-b06c-29d6808ba8d2`),
+                    });
+                }
+
+                // Search company id
+                // this avoids needing to check the VAT number every time
+                const id = checkout.customer.company.id;
+                const foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
+
+                if (!foundCompany) {
+                    throw new SimpleError({
+                        code: 'invalid_data',
+                        message: $t(`0ab71307-8f4f-4701-b120-b552a1b6bdd0`),
+                    });
+                }
+
+                payment.customer.company = foundCompany;
+
+                const orgNumber = parseInt(payingOrganization.uri);
+
+                if (orgNumber !== 0 && !isNaN(orgNumber)) {
+                    prefix = orgNumber + '';
+                }
             }
-
-            if (!checkout.customer.company) {
-                throw new SimpleError({
-                    code: 'missing_fields',
-                    message: 'customer.company is required when paying as an organization',
-                    human: $t(`bc89861d-a799-4100-b06c-29d6808ba8d2`),
-                });
-            }
-
-            // Search company id
-            // this avoids needing to check the VAT number every time
-            const id = checkout.customer.company.id;
-            const foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
-
-            if (!foundCompany) {
-                throw new SimpleError({
-                    code: 'invalid_data',
-                    message: $t(`0ab71307-8f4f-4701-b120-b552a1b6bdd0`),
-                });
-            }
-
-            payment.customer.company = foundCompany;
-
-            const orgNumber = parseInt(payingOrganization.uri);
-
-            if (orgNumber !== 0 && !isNaN(orgNumber)) {
-                prefix = orgNumber + '';
+            else {
+                // Zero amount payment (without refunds) without specifying a company will just use the default company to link to the payment
+                // It doesn't really matter since the price is zero and we won't invoice it.
+                const company = payingOrganization.meta.companies[0];
+                if (company) {
+                    payment.customer.company = company;
+                }
             }
         }
+
+        // Validate VAT rates for this customer
+        await this.validateVATRates({ customer: payment.customer, organization, balanceItems });
 
         payment.status = PaymentStatus.Created;
         payment.paidAt = null;
@@ -539,6 +533,23 @@ export class PaymentService {
             payment.paidAt = new Date();
         }
 
+        // Validate payment method after customer is defined
+        const paymentConfiguration = organization.meta.registrationPaymentConfiguration;
+        const privatePaymentConfiguration = organization.privateMeta.registrationPaymentConfiguration;
+
+        payment.method = checkout.paymentMethod ?? PaymentMethod.Unknown;
+        await this.validatePaymentMethod({ payment, balanceItems, paymentConfiguration });
+
+        // Validate URL's for online payments before saving the payment
+        if ((payment.method !== PaymentMethod.Transfer && payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) && (!checkout.redirectUrl || !checkout.cancelUrl)) {
+            throw new SimpleError({
+                code: 'missing_fields',
+                message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
+                human: $t(`ebe54b63-2de6-4f22-a5ed-d3fe65194562`),
+            });
+        }
+
+        // Add transfer description
         if (payment.method === PaymentMethod.Transfer) {
             // remark: we cannot add the lastnames, these will get added in the frontend when it is decrypted
             payment.transferSettings = organization.mappedTransferSettings;
@@ -566,34 +577,32 @@ export class PaymentService {
 
         // Determine the payment provider
         // Throws if invalid
-        const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, organization.privateMeta.registrationPaymentConfiguration);
+        const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, privatePaymentConfiguration);
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
         ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...balanceItems.entries()].map(([_, p]) => p));
 
         await payment.save();
+        let paymentUrl: string | null = null;
+        let paymentQRCode: string | null = null;
+        const description = organization.name + ' ' + payment.id;
 
         // Create balance item payments
         const balanceItemPayments: (BalanceItemPayment & { balanceItem: BalanceItem })[] = [];
 
-        for (const [balanceItem, price] of balanceItems) {
-            // Create one balance item payment to pay it in one payment
-            const balanceItemPayment = new BalanceItemPayment();
-            balanceItemPayment.balanceItemId = balanceItem.id;
-            balanceItemPayment.paymentId = payment.id;
-            balanceItemPayment.organizationId = organization.id;
-            balanceItemPayment.price = price;
-            await balanceItemPayment.save();
-
-            balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
-        }
-
-        const description = $t(`33a926ea-9bc7-444e-becc-c0f2f70e1f0e`) + ' ' + organization.name;
-
-        let paymentUrl: string | null = null;
-        let paymentQRCode: string | null = null;
-
         try {
+            for (const [balanceItem, price] of balanceItems) {
+                // Create one balance item payment to pay it in one payment
+                const balanceItemPayment = new BalanceItemPayment();
+                balanceItemPayment.balanceItemId = balanceItem.id;
+                balanceItemPayment.paymentId = payment.id;
+                balanceItemPayment.organizationId = organization.id;
+                balanceItemPayment.price = price;
+                await balanceItemPayment.save();
+
+                balanceItemPayments.push(balanceItemPayment.setRelation(BalanceItemPayment.balanceItem, balanceItem));
+            }
+
             // Update balance items
             if (payment.method === PaymentMethod.Transfer) {
                 // Send a small reminder email
@@ -714,6 +723,24 @@ export class PaymentService {
             throw e;
         }
 
+        // Mark valid if needed
+        if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown) {
+            let hasBundleDiscount = false;
+            for (const [balanceItem] of balanceItems) {
+                // Mark valid
+                await BalanceItemService.markPaid(balanceItem, payment, organization);
+
+                if (balanceItem.type === BalanceItemType.RegistrationBundleDiscount) {
+                    hasBundleDiscount = true;
+                }
+            }
+
+            // Flush balance caches so we return an up-to-date balance
+            if (hasBundleDiscount) {
+                await BalanceItemService.flushRegistrationDiscountsCache();
+            }
+        }
+
         return {
             payment,
             balanceItemPayments,
@@ -755,5 +782,123 @@ export class PaymentService {
             type: 'transactional',
             recipients,
         });
+    }
+
+    static async validatePaymentMethod({ payment, balanceItems, paymentConfiguration }: { payment: Payment; balanceItems: Map<BalanceItem, number>; paymentConfiguration: PaymentConfiguration }) {
+        if (payment.price === 0) {
+            if (balanceItems.size === 0) {
+                return;
+            }
+            // Create an egalizing payment
+            payment.method = PaymentMethod.Unknown;
+
+            if ([...balanceItems.values()].find(b => b < 0)) {
+                payment.type = PaymentType.Reallocation;
+            }
+        }
+        else if (payment.method === PaymentMethod.Unknown) {
+            throw new SimpleError({
+                code: 'invalid_data',
+                message: $t(`86c7b6f7-3ec9-4af3-a5e6-b5de6de80d73`),
+            });
+        }
+        else {
+            // Validate payment method
+            const allowedPaymentMethods = paymentConfiguration.getAvailablePaymentMethods({
+                amount: payment.price,
+                customer: payment.customer,
+            });
+
+            if (!allowedPaymentMethods.includes(payment.method)) {
+                throw new SimpleError({
+                    code: 'invalid_payment_method',
+                    message: $t(`2b1ca6a0-662e-4326-ada1-10239b6ddc6f`),
+                });
+            }
+        }
+    }
+
+    static async validateVATRates({ customer, organization, balanceItems }: { customer: PaymentCustomer; organization: Organization; balanceItems: Map<BalanceItem, number> }) {
+        // Validate VAT rates for this customer
+        const seller = organization.meta.companies[0];
+        if (seller && seller.VATNumber && seller.address && customer.company) {
+            // B2B validation
+            if (!customer.company.address) {
+                throw new SimpleError({
+                    code: 'missing_field',
+                    message: 'Company address missing',
+                    human: $t('Facturatieadres ontbreekt'),
+                    field: 'customer.company.address',
+                });
+            }
+
+            // Reverse charged vat applicable?
+            if (customer.company.address.country !== seller.address.country) {
+                // Check VAT Exempt is set on each an every balance item with a non-zero price
+                for (const [item] of balanceItems) {
+                    if (item.VATExcempt !== VATExcemptReason.IntraCommunity) {
+                        throw new SimpleError({
+                            code: 'VAT_error',
+                            message: 'Intra community VAT reverse charge not supported for this purchase',
+                            human: $t('Er is geen ondersteuning voor intracommunautaire BTW-verlegging bij deze aankoop. Gelieve contact op te nemen.'),
+                        });
+                    }
+
+                    // We also need to know the VAT rate exactly to be sure the VAT is removed from the purchase
+                    // If VAT is not included, we don't need to know the VAT percentage until the payment is invoiced
+                    if (item.VATPercentage === null && item.VATIncluded) {
+                        throw new SimpleError({
+                            code: 'VAT_error',
+                            message: 'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
+                            human: $t('Er is geen ondersteuning voor intracommunautaire BTW-verlegging bij deze aankoop doordat de BTW-tarieven nog niet geconfigureerd werden. Gelieve contact op te nemen.'),
+                        });
+                    }
+                }
+            }
+            else {
+                // Fine to just not have setup VAT rates yet if the price is guaranteed to include VAT
+                for (const [item] of balanceItems) {
+                    if (item.VATExcempt === VATExcemptReason.IntraCommunity) {
+                        throw new SimpleError({
+                            code: 'VAT_error',
+                            message: 'Unexpected reverse charge applied',
+                            human: $t('Er werd foutief BTW-verlegd bij deze aankoop. Herlaad de pagina en probeer het opnieuw of neem contact op.'),
+                        });
+                    }
+
+                    if (!item.VATIncluded && item.VATPercentage === null) {
+                        throw new SimpleError({
+                            code: 'VAT_error',
+                            message: 'Missing VAT percentage',
+                            human: $t('Er ontbreekt een BTW-percentage'),
+                        });
+                    }
+                }
+            }
+        }
+        else {
+            // B2C / C2B / C2C
+
+            // You cannot buy balance items with VAT if you didn't set up a VAT number.
+            for (const [item] of balanceItems) {
+                if (item.VATExcempt === VATExcemptReason.IntraCommunity) {
+                    throw new SimpleError({
+                        code: 'VAT_error',
+                        message: 'Unexpected reverse charge applied',
+                        human: $t('Er werd foutief BTW-verlegd bij deze aankoop. Herlaad de pagina en probeer het opnieuw of neem contact op.'),
+                    });
+                }
+
+                if (seller && seller.VATNumber) {
+                    if (!item.VATIncluded && item.VATPercentage === null) {
+                        throw new SimpleError({
+                            code: 'VAT_error',
+                            message: 'Missing VAT percentage',
+                            human: $t('Er ontbreekt een BTW-percentage'),
+                        });
+                    }
+                }
+            }
+        }
     }
 };
