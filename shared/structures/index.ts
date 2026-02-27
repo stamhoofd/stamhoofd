@@ -209,7 +209,6 @@ export * from './src/checkout/index.js';
 
 // Admin
 export * from './src/admin/MemberSummary.js';
-export * from './src/admin/OrganizationSummary.js';
 export * from './src/admin/StripePayoutExport.js';
 export * from './src/Graph.js';
 
