@@ -858,9 +858,6 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
-        await Registration.refreshAll(registrations);
-
         // Update occupancy
         for (const group of groups) {
             if (registrations.some(r => r.groupId === group.id) || deactivatedRegistrationGroupIds.some(id => id === group.id)) {
@@ -871,6 +868,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Flush caches so data is up to date in response
         await BalanceItemService.flushCaches(organization.id);
+
+        // We'll need to update the returned registrations as their values will have changed by marking the registration as valid
+        await Registration.refreshAll(registrations);
 
         // Force reload registrations and group data
         Member.unloadRegistrations(members);
