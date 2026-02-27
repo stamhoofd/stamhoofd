@@ -1,25 +1,43 @@
 <template>
-    <div />
+    <div v-if="organization">
+        <p v-if="!hideTrial && !shouldFilter('webshops') && organization.meta.packages.isWebshopsTrial" class="warning-box selectable with-button" @click="checkout(STPackageBundle.Webshops)">
+            Je test momenteel de webshops functie. Je webshops staan nog in demo-modus. Activeer de functie om het echt in gebruik te nemen.
+
+            <button class="button text" type="button">
+                Activeren
+            </button>
+        </p>
+    </div>
 </template>
 
-<script lang="ts">
-import { NavigationMixin } from '@simonbackx/vue-app-navigation';
-import { Component, Mixins, Prop } from '@simonbackx/vue-app-navigation/classes';
-import { Formatter } from '@stamhoofd/utility';
+<script lang="ts" setup>
+import { useOrganization } from '@stamhoofd/components';
+import { STPackageBundle } from '@stamhoofd/structures';
 
-/**
- * Todo: this component should show warnings if a package is about to expire or a payment failed
- */
-
-@Component({
-    filters: {
-        date: Formatter.date.bind(Formatter),
-        dateTime: Formatter.dateTime.bind(Formatter),
+const props = withDefaults(
+    defineProps<{
+        filterTypes?: 'members' | 'webshops' | null;
+        hideTrial?: boolean;
+    }>(),
+    {
+        filterTypes: null,
+        hideTrial: false,
     },
-    emits: ['billing'],
-})
-export default class BillingWarningBox extends Mixins(NavigationMixin) {
-    @Prop({ default: null })
-    filterTypes: 'members' | 'webshops' | null;
+);
+
+function shouldFilter(type: 'members' | 'webshops') {
+    if (props.filterTypes === null) {
+        return false;
+    }
+    if (props.filterTypes !== type) {
+        return true;
+    }
+    return false;
+}
+
+const organization = useOrganization();
+
+function checkout(bundle: STPackageBundle) {
+    // todo
 }
 </script>
