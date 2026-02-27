@@ -86,7 +86,9 @@ export class QueryableModel extends Model {
      * Get a model by its primary key
      * @param id primary key
      */
-    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string): Promise<InstanceType<T> | undefined> {
+    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string, required: true): Promise<InstanceType<T>>;
+    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string): Promise<InstanceType<T> | undefined>;
+    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string, required?: boolean): Promise<InstanceType<T> | undefined> {
         if (this.cache) {
             const hit = this.cache.getById(id);
             if (hit) {
@@ -94,7 +96,7 @@ export class QueryableModel extends Model {
                 return hit as InstanceType<T>;
             }
         }
-        return ((await (this as any as typeof QueryableModel).select().where(this.primary.name, id).first(false)) ?? undefined) as any as InstanceType<T> | undefined;
+        return ((await (this as any as typeof QueryableModel).select().where(this.primary.name, id).first(required ?? false)) ?? undefined) as any as InstanceType<T> | undefined;
     }
 
     /**

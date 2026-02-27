@@ -233,6 +233,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
 
     first(required: false): Promise<T | null>;
     first(required: true): Promise<T>;
+    first(required: boolean): Promise<T | null>;
     async first(required = true): Promise<T | null> {
         const rows = await this.limit(1).fetch();
         if (rows.length === 0) {
