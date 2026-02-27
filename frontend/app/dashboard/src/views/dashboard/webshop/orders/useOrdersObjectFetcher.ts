@@ -21,8 +21,12 @@ let itemsToAdvanceNext: number = 0;
 type ObjectType = PrivateOrderWithTickets;
 
 function extendSort(list: SortList): SortList {
-    // Id should always be sorted by ASC if not the only one in the list (because other indexes first sort by own key, then by id ASC)
-    return assertSort(list, [{ key: 'id', order: SortItemDirection.ASC }]);
+    /**
+     * IndexedDB does first sort on the index of the cursor and next on the id.
+     * Because of this we always have to sort on id, with the same direction/order as the first sort item.
+     */
+    const order = list[0]?.order ?? SortItemDirection.ASC;
+    return assertSort(list, [{ key: 'id', order }]);
 }
 
 function searchToFilter(search: string | null): StamhoofdFilter | null {
