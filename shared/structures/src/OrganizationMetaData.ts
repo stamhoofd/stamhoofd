@@ -273,7 +273,7 @@ export class OrganizationMetaData extends AutoEncoder {
     expectedMemberCount = 0;
 
     /**
-     * @deprecated
+     * Only used for building the initial groups for some type of organizations
      */
     @field({ decoder: new EnumDecoder(OrganizationGenderType), optional: true })
     genderType: OrganizationGenderType = OrganizationGenderType.Mixed;
