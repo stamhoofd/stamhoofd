@@ -460,7 +460,6 @@ export class OrdersStore {
 class WebshopOrdersApiClient {
     private _isFetching = false;
     private lastFetchedOrder: { updatedAt: Date; number: number } | null | undefined = undefined;
-    private fetcher: ObjectFetcher<PrivateOrder>;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
@@ -482,7 +481,6 @@ class WebshopOrdersApiClient {
         this.context = context;
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
-        this.fetcher = this.getObjectFetcher();
     }
 
     reset() {
@@ -509,11 +507,7 @@ class WebshopOrdersApiClient {
             await this.initLastFetchedOrder();
         }
 
-        const sort: SortList = [
-            { key: 'updatedAt', order: SortItemDirection.ASC },
-            { key: 'number', order: SortItemDirection.ASC },
-        ];
-
+        // create request
         const filter: StamhoofdFilter = {
             webshopId: this.webshopId,
         };
@@ -535,11 +529,45 @@ class WebshopOrdersApiClient {
         const request = new LimitedFilteredRequest({
             limit: 100,
             filter,
-            sort,
         });
 
+        // fetch
+        const fetcher: ObjectFetcher<PrivateOrder> = {
+            extendSort(): SortList {
+                // fetchAll does clear list anyway, no need to assert
+                return [
+                    { key: 'updatedAt', order: SortItemDirection.ASC },
+                    { key: 'number', order: SortItemDirection.ASC },
+                    { key: 'id', order: SortItemDirection.ASC },
+                ];
+            },
+            fetch: async (data: LimitedFilteredRequest) => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/orders`,
+                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+
+                return response.data;
+            },
+            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/orders/count`,
+                    decoder: CountResponse as Decoder<CountResponse>,
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+                return response.data.count;
+            },
+        };
+
         try {
-            await fetchAll(request, this.fetcher, { onResultsReceived });
+            await fetchAll(request, fetcher, { onResultsReceived });
         }
         finally {
             this._isFetching = false;
@@ -599,33 +627,5 @@ class WebshopOrdersApiClient {
             // Probably no database support. Ignore it and load everything.
             this.lastFetchedOrder = null;
         }
-    }
-
-    private getObjectFetcher(): ObjectFetcher<PrivateOrder> {
-        return {
-            fetch: async (data: LimitedFilteredRequest) => {
-                const response = await this.context.authenticatedServer.request({
-                    method: 'GET',
-                    path: `/webshop/orders`,
-                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-                    query: data,
-                    shouldRetry: false,
-                    owner: this,
-                });
-
-                return response.data;
-            },
-            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
-                const response = await this.context.authenticatedServer.request({
-                    method: 'GET',
-                    path: `/webshop/orders/count`,
-                    decoder: CountResponse as Decoder<CountResponse>,
-                    query: data,
-                    shouldRetry: false,
-                    owner: this,
-                });
-                return response.data.count;
-            },
-        };
     }
 }

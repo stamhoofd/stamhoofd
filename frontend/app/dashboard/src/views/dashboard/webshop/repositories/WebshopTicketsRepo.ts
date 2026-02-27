@@ -570,7 +570,6 @@ export class WebshopTicketPatchesStore {
 class WebshopTicketsApiClient {
     private _isFetching = false;
     private lastFetchedTicket: { updatedAt: Date; id: string } | null | undefined = undefined;
-    private fetcher: ObjectFetcher<TicketPrivate>;
 
     private readonly webshopId: string;
     private readonly context: SessionContext;
@@ -588,7 +587,6 @@ class WebshopTicketsApiClient {
         this.context = context;
         this.settingsStore = settingsStore;
         this.webshopId = webshopId;
-        this.fetcher = this.getObjectFetcher();
     }
 
     reset() {
@@ -610,12 +608,7 @@ class WebshopTicketsApiClient {
             await this.initLastFetchedTicket();
         }
 
-        const sort: SortList = [
-            { key: 'updatedAt', order: SortItemDirection.ASC },
-            // todo?
-            { key: 'id', order: SortItemDirection.ASC },
-        ];
-
+        // create request
         const filter: StamhoofdFilter = {
             webshopId: this.webshopId,
         };
@@ -637,11 +630,44 @@ class WebshopTicketsApiClient {
         const filteredRequest = new LimitedFilteredRequest({
             limit: 100,
             filter,
-            sort,
         });
 
+        // fetch
+        const fetcher: ObjectFetcher<TicketPrivate> = {
+            extendSort(): SortList {
+                // fetchAll does clear list anyway, no need to assert
+                return [
+                    { key: 'updatedAt', order: SortItemDirection.ASC },
+                    { key: 'id', order: SortItemDirection.ASC },
+                ];
+            },
+            fetch: async (data: LimitedFilteredRequest) => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/tickets/private`,
+                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+
+                return response.data;
+            },
+            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
+                const response = await this.context.authenticatedServer.request({
+                    method: 'GET',
+                    path: `/webshop/tickets/private/count`,
+                    decoder: CountResponse as Decoder<CountResponse>,
+                    query: data,
+                    shouldRetry: false,
+                    owner: this,
+                });
+                return response.data.count;
+            },
+        };
+
         try {
-            await fetchAll(filteredRequest, this.fetcher, { onResultsReceived });
+            await fetchAll(filteredRequest, fetcher, { onResultsReceived });
         }
         finally {
             this._isFetching = false;
@@ -683,33 +709,5 @@ class WebshopTicketsApiClient {
             // Probably no database support. Ignore it and load everything.
             this.lastFetchedTicket = null;
         }
-    }
-
-    private getObjectFetcher(): ObjectFetcher<TicketPrivate> {
-        return {
-            fetch: async (data: LimitedFilteredRequest) => {
-                const response = await this.context.authenticatedServer.request({
-                    method: 'GET',
-                    path: `/webshop/tickets/private`,
-                    decoder: new PaginatedResponseDecoder(new ArrayDecoder(TicketPrivate as Decoder<TicketPrivate>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
-                    query: data,
-                    shouldRetry: false,
-                    owner: this,
-                });
-
-                return response.data;
-            },
-            fetchCount: async (data: CountFilteredRequest): Promise<number> => {
-                const response = await this.context.authenticatedServer.request({
-                    method: 'GET',
-                    path: `/webshop/tickets/private/count`,
-                    decoder: CountResponse as Decoder<CountResponse>,
-                    query: data,
-                    shouldRetry: false,
-                    owner: this,
-                });
-                return response.data.count;
-            },
-        };
     }
 }
