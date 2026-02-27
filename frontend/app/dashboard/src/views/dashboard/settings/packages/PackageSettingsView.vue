@@ -286,7 +286,6 @@ async function checkout(pack: SelectablePackage) {
                 }
                 // Activate trial if possible (otherwise go to confirm)
                 await checkoutTrial(STPackageBundle.TrialWebshops, $t('De proefperiode voor webshops is gestart. Neem je tijd om alles rustig uit te proberen. Als je het daarna definitief in gebruik wilt nemen, kan je het systeem activeren.'));
-                await dismiss({ force: true });
                 break;
             }
         }
