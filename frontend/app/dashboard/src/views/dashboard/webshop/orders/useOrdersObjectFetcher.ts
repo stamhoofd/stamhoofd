@@ -201,6 +201,8 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             this.isOffline = false;
             this.lastInternetLoad = 0;
             this.internetPromise = null;
+            lastNextRequest = null;
+            itemsToAdvanceNext = 0;
         },
         ...overrides,
     };
