@@ -270,6 +270,33 @@ export class WebshopManager {
         });
     }
 
+    /**
+     * Get all orders with patched tickets.
+     */
+    async getAllOrdersWithPatchedTickets(): Promise<PrivateOrderWithTickets[]> {
+        const allOrders = await this.orders.getAllRaw();
+
+        const db = await this.database.get();
+        const openTransaction = db.transaction([WebshopTicketsStore.storeName, WebshopTicketPatchesStore.storeName], 'readonly');
+        const decoder = new IndexBoxDecoder(PrivateOrderWithTickets as Decoder<PrivateOrderWithTickets>);
+
+        return Promise.all(allOrders.map(async (rawOrder: any) => {
+            let order: PrivateOrderWithTickets;
+
+            try {
+                order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+            }
+            catch (e) {
+                // force fetch all again
+                this.orders.apiClient.clearLastFetchedOrder().catch(console.error);
+                throw e;
+            }
+
+            order.tickets = await this.tickets.getForOrder(order.id, true, openTransaction);
+            return order;
+        }));
+    }
+
     private async fetchWebshop(shouldRetry = true) {
         const webshop = await this.webshopApiClient.fetch(shouldRetry);
 

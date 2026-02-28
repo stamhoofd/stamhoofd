@@ -37,7 +37,7 @@
 import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { ContextMenu, ContextMenuItem, LoadingViewTransition, SeatSelectionBox, STNavigationBar, Toast, useAuth, useIsMobile } from '@stamhoofd/components';
-import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat, TicketPrivate } from '@stamhoofd/structures';
+import { PermissionLevel, PrivateOrder, PrivateOrderWithTickets, PrivateWebshop, Product, ReservedSeat } from '@stamhoofd/structures';
 
 import { useRequestOwner } from '@stamhoofd/networking';
 import { computed, onBeforeUnmount, Ref, ref } from 'vue';
@@ -267,7 +267,6 @@ function putOrder(order: PrivateOrder) {
     orders.value.push(PrivateOrderWithTickets.create(order));
 }
 
-// todo: refactor -> can be more efficient
 async function loadOrders() {
     console.log('Loading orders...');
     orders.value = [];
@@ -275,46 +274,10 @@ async function loadOrders() {
 
     // Disabled for now: first fix needed for payment status + deleted orders
     try {
-        // We use stream orders because that doesn't block the main thread on iOS
-        // (we don't need to decode all orders at the same time on the main thread)
+        const loadedOrders = await props.webshopManager.getAllOrdersWithPatchedTickets();
 
-        // We use a buffer to prevent DOM updates or Vue slowdown during streaming
-        const arrayBuffer: PrivateOrderWithTickets[] = [];
-
-        await props.webshopManager.orders.stream({
-            callback: (order) => {
-            // Same orders could be seen twice
-                arrayBuffer.push(
-                    PrivateOrderWithTickets.create(order),
-                );
-            },
-        });
-
-        const ticketBuffer: TicketPrivate[] = [];
-
-        await props.webshopManager.tickets.streamAll((ticket) => {
-            ticketBuffer.push(ticket);
-        }, false);
-
-        await props.webshopManager.tickets.streamAllPatches((patch) => {
-            const ticket = ticketBuffer.find(o => o.id === patch.id);
-            if (ticket) {
-                ticket.deepSet(ticket.patch(patch));
-            }
-        });
-
-        for (const ticket of ticketBuffer) {
-            const order = arrayBuffer.find(o => o.id === ticket.orderId);
-            if (order) {
-                order.tickets.push(ticket);
-            }
-            else {
-                console.warn('Couldn\'t find order for ticket', ticket);
-            }
-        }
-
-        if (arrayBuffer.length > 0) {
-            orders.value = arrayBuffer;
+        if (loadedOrders.length > 0) {
+            orders.value = loadedOrders;
             isLoadingOrders.value = false;
         }
     }

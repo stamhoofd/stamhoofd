@@ -193,6 +193,19 @@ export class WebshopOrdersRepo {
         }
     }
 
+    async getAllRaw(): Promise<any []> {
+        try {
+            return await this.store.getAllRaw();
+        }
+        catch (e) {
+            console.error(e);
+            throw new SimpleError({
+                code: 'loading_failed',
+                message: $t('b17b2abe-34a5-4231-a170-5a9b849ecd3c'),
+            });
+        }
+    }
+
     /**
      * Get a single order from the offline database.
      */
@@ -397,6 +410,28 @@ export class OrdersStore {
             }
 
             request.onsuccess = iterator;
+        });
+    }
+
+    async getAllRaw(): Promise<any []> {
+        const db = await this.database.get();
+
+        return await new Promise<any []>((resolve, reject) => {
+            const transaction = db.transaction([OrdersStore.storeName], 'readonly');
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                this.database.delete().catch(console.error);
+                reject(event);
+            };
+
+            const objectStore = transaction.objectStore(OrdersStore.storeName);
+
+            const request: IDBRequest<any[]> = objectStore.getAll();
+
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
         });
     }
 
