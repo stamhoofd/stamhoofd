@@ -850,6 +850,11 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                 },
             },
         }));
+
+        builders.push(new DateFilterBuilder({
+            key: 'ticketScannedAt',
+            name: $t('Ticket scan tijdstip'),
+        }));
     }
 
     if (preview instanceof Webshop) {
