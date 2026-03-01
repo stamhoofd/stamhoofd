@@ -156,4 +156,5 @@ export const privateOrderWithTicketsFilterCompilers: InMemoryFilterDefinitions =
     ...privateOrderFilterCompilers,
     ticketScanStatus: createInMemoryFilterCompiler('ticketScanStatus'),
     ticketScannedAt: createInMemoryFilterCompiler('ticketScannedAt'),
+    ticketCount: createInMemoryFilterCompiler('tickets.length'),
 };
