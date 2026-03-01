@@ -45,31 +45,20 @@ export class WebshopTicketsRepo {
     async fetchAllUpdated(): Promise<void> {
         const totalTickets: TicketPrivate[] = [];
 
-        const putPromises: Promise<void>[] = [];
+        const promises: Promise<void>[] = [];
 
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 totalTickets.push(...tickets);
-                putPromises.push(this.storeAll(tickets));
+                promises.push(this.storeAll(tickets));
+                promises.push(this.apiClient.setLastFetchedTicket(tickets[tickets.length - 1]));
             }
         };
 
         await this.apiClient.getAllUpdated({ isFetchAll: false, onResultsReceived });
-        await Promise.all(putPromises);
-
-        const nonDeletedTickets: TicketPrivate[] = [];
-
-        for (const ticket of totalTickets) {
-            if (ticket.deletedAt) {
-                continue;
-            }
-
-            nonDeletedTickets.push(ticket);
-        }
+        await Promise.all(promises);
 
         if (totalTickets.length > 0) {
-            await this.apiClient.setLastFetchedTicket(totalTickets[totalTickets.length - 1]);
-
             // deleted tickets get handled in listener
             await this.eventBus.sendEvent('fetched', totalTickets);
         }

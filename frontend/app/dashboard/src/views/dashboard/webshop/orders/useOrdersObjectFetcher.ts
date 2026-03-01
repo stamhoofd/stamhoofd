@@ -7,16 +7,8 @@ import { toRaw } from 'vue';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 import { WebshopManager } from '../WebshopManager';
 
-/**
- * todo:
- * - do not stream all orders (use advance() on cursor): https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor
- * - do not stream all tickets
- */
-
 let lastNextRequest: LimitedFilteredRequest | null = null;
 let itemsToAdvanceNext: number = 0;
-
-// todo: listen to events and reset itemsToAdvanceNext and lastNextRequest
 
 type ObjectType = PrivateOrderWithTickets;
 
@@ -218,16 +210,4 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
     };
 
     return objectFetcher;
-}
-
-function startTimeLogger(label: string) {
-    const before = Date.now();
-
-    return {
-        stop: () => {
-            const after = Date.now();
-            const seconds = (after - before) / 1000;
-            console.log(`${label}: ${seconds} sec`);
-        },
-    };
 }

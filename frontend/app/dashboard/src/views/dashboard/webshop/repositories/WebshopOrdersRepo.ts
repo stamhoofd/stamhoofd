@@ -57,7 +57,7 @@ export class WebshopOrdersRepo {
 
         const totalOrders: PrivateOrder[] = [];
 
-        const putPromises: Promise<void>[] = [];
+        const promises: Promise<void>[] = [];
 
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
@@ -68,7 +68,8 @@ export class WebshopOrdersRepo {
 
             if (orders.length) {
                 totalOrders.push(...orders);
-                putPromises.push(this.store.putAll(orders));
+                promises.push(this.store.putAll(orders));
+                promises.push(this.apiClient.setlastFetchedOrder(orders[orders.length - 1]));
             }
         };
 
@@ -87,12 +88,7 @@ export class WebshopOrdersRepo {
         }
 
         // wait until all orders have been stored
-        await Promise.all(putPromises);
-
-        // only set after succesful store
-        if (totalOrders.length > 0) {
-            await this.apiClient.setlastFetchedOrder(totalOrders[totalOrders.length - 1]);
-        }
+        await Promise.all(promises);
 
         if (fetchedOrders.length > 0) {
             await this.eventBus.sendEvent('fetched', fetchedOrders);
@@ -131,13 +127,13 @@ export class WebshopOrdersRepo {
 
         // Patching orders can result in changed tickets. We'll need to pull those in.
         try {
-            await this.tickets.fetchAllUpdated();
+            this.tickets.fetchAllUpdated().catch(console.error);
         }
         catch (e) {
             console.error(e);
         }
 
-        await this.eventBus.sendEvent('fetched', patched);
+        this.eventBus.sendEvent('fetched', patched).catch(console.error);
         return patched;
     }
 
@@ -221,11 +217,23 @@ export class OrdersStore {
     static readonly storeName = 'orders';
     private readonly database: WebshopDatabase;
 
+    /**
+     * Times the store has changed (write operations).
+     */
+    private changeCount = 0;
+
+    /**
+     * The changeCount on the last stream.
+     * All orders should be streamed again (no order can be advanced) if the count is different than the current changeCount.
+     */
+    private changeCountOnLastStream = 0;
+
     constructor({ database }: { database: WebshopDatabase }) {
         this.database = database;
     }
 
     async delete(id: string): Promise<void> {
+        this.changeCount++;
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
@@ -255,6 +263,7 @@ export class OrdersStore {
     }
 
     async putAll(orders: PrivateOrder[]) {
+        this.changeCount++;
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
@@ -295,6 +304,15 @@ export class OrdersStore {
         openTransaction?: IDBTransaction;
     },
     ): Promise<number> {
+        // all items should be streamed again if the content of the store changed
+        if (this.changeCount !== this.changeCountOnLastStream) {
+            if (advanceCount) {
+                advanceCount = 0;
+            }
+
+            this.changeCountOnLastStream = this.changeCount;
+        }
+
         const db = await this.database.get();
 
         return await new Promise<number>((resolve, reject) => {
@@ -355,7 +373,7 @@ export class OrdersStore {
                 }
             }
 
-            const iterator: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
+            const onsuccess: ((this: IDBRequest<IDBCursorWithValue | null>, ev: Event) => any) | null = (event: any) => {
                 if (limit && matchedItemsCount >= limit) {
                     // limit reached
                     resolve(totalIterationCount);
@@ -404,12 +422,12 @@ export class OrdersStore {
                     }
 
                     cursor.advance(advanceCount);
-                    request.onsuccess = iterator;
+                    request.onsuccess = onsuccess;
                 };
                 return;
             }
 
-            request.onsuccess = iterator;
+            request.onsuccess = onsuccess;
         });
     }
 
@@ -436,6 +454,7 @@ export class OrdersStore {
     }
 
     async clear(): Promise<void> {
+        this.changeCount++;
         const db = await this.database.get();
 
         return new Promise<void>((resolve, reject) => {
