@@ -857,6 +857,14 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         }));
     }
 
+    if (!preview.hasSingleTickets) {
+        builders.push(new NumberFilterBuilder({
+            name: $t('Aantal aangemaakte tickets'),
+            key: 'ticketCount',
+
+        }));
+    }
+
     if (preview instanceof Webshop) {
         builders.push(getCartFilterBuilder(preview));
     }
