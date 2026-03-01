@@ -485,6 +485,19 @@ export class PrivateOrderWithTickets extends PrivateOrder {
     }
 
     /**
+     * Date first ticket was scanned at.
+     */
+    get ticketScannedAt() {
+        return this.tickets.reduce((acc, ticket) => {
+            if (ticket.scannedAt && ticket.scannedAt < acc) {
+                return ticket.scannedAt;
+            }
+
+            return acc;
+        }, new Date(2222, 0, 1));
+    }
+
+    /**
      * Adds or removes tickets as appropriate
      */
     addTickets(tickets: TicketPrivate[]) {
