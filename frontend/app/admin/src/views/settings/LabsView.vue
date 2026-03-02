@@ -51,10 +51,6 @@
                 {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
             </Checkbox>
 
-            <Checkbox :model-value="getFeatureFlag('STA-673')" @update:model-value="setFeatureFlag('STA-673', !!$event)">
-                {{ $t('Afmeldingen van e-mailadressen lezen en bewerken') }} (wip)
-            </Checkbox>
-
             <Checkbox :model-value="getFeatureFlag('STA-33')" @update:model-value="setFeatureFlag('STA-33', !!$event)">
                 {{ $t('Suggesties voor activiteiten in ledenportaal') }} (wip)
             </Checkbox>

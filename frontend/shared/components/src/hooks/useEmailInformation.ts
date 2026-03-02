@@ -2,11 +2,10 @@ import { ArrayDecoder, Decoder } from '@simonbackx/simple-encoding';
 import { SessionContext } from '@stamhoofd/networking';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, Ref, ref, unref, watch } from 'vue';
-import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
+import { computed, ComputedRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, Ref, ref, unref, watch } from 'vue';
 import { useAppContext } from '../context/appContext';
+import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
 import { useContext } from './useContext';
-import { useFeatureFlag } from './useFeatureFlag';
 
 class EmailInformationManager {
     private static INSTANCE: EmailInformationManager | null = null;
@@ -181,7 +180,7 @@ const emailInformationManager = new EmailInformationManager();
 function checkCanReadEmailInformation() {
     const app = useAppContext();
 
-    return app !== 'registration' && useFeatureFlag()('STA-673');
+    return app !== 'registration';
 }
 
 /**
