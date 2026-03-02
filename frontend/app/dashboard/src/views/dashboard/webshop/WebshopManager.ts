@@ -1,13 +1,24 @@
 import { AutoEncoderPatchType, Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager, SessionContext } from '@stamhoofd/networking';
-import { PermissionLevel, PrivateOrderWithTickets, PrivateWebshop, SortItem, StamhoofdFilter, Version, WebshopPreview } from '@stamhoofd/structures';
+import { compileToInMemoryFilter, InMemoryFilterRunner, PermissionLevel, PrivateOrderWithTickets, privateOrderWithTicketsFilterCompilers, PrivateWebshop, SortItem, StamhoofdFilter, Version, WebshopPreview } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from './IndexBox';
 import { OrderIndexedDBIndex } from './ordersIndexedDBSorters';
 import { WebshopDatabase } from './repositories/WebshopDatabase';
 import { OrdersStore, WebshopOrdersRepo } from './repositories/WebshopOrdersRepo';
 import { WebshopSettingsStore } from './repositories/WebshopSettingsStore';
 import { WebshopTicketPatchesStore, WebshopTicketsRepo, WebshopTicketsStore } from './repositories/WebshopTicketsRepo';
+function startTimeLogger(label: string) {
+    const before = Date.now();
+
+    return {
+        stop: () => {
+            const after = Date.now();
+            const seconds = (after - before) / 1000;
+            console.log(`${label}: ${seconds} sec`);
+        },
+    };
+}
 
 /**
  * Responsible for managing a single webshop orders and tickets
@@ -295,6 +306,64 @@ export class WebshopManager {
             order.tickets = await this.tickets.getForOrder(order.id, true, openTransaction);
             return order;
         }));
+    }
+
+    /**
+     * Get all orders with patched tickets.
+     */
+    async getAllOrdersWithPatchedTickets2({ filter, sortItem }: { filter?: StamhoofdFilter; sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<PrivateOrderWithTickets[]> {
+        // important: both orders and tickets need to be sorted by order id
+        const allOrders = await this.orders.getAllRaw({ sortItem });
+        const allPatchedTickets = await this.tickets.getAll({ withPatches: true, indexName: 'orderId' });
+
+        let compiledFilter: InMemoryFilterRunner | undefined;
+
+        if (filter) {
+            compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
+        }
+
+        const decoder = new IndexBoxDecoder(PrivateOrderWithTickets as Decoder<PrivateOrderWithTickets>);
+
+        let ticketIndex = 0;
+
+        const results: PrivateOrderWithTickets[] = [];
+
+        for (const rawOrder of allOrders) {
+            let order: PrivateOrderWithTickets;
+
+            try {
+                order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
+            }
+            catch (e) {
+                // force fetch all again
+                this.orders.apiClient.clearLastFetchedOrder().catch(console.error);
+                throw e;
+            }
+
+            let didFindOrder = false;
+
+            for (let i = ticketIndex; i < allPatchedTickets.length; i++) {
+                const ticket = allPatchedTickets[i];
+                if (ticket.orderId === order.id) {
+                    didFindOrder = true;
+                    order.tickets.push(ticket);
+                    continue;
+                }
+
+                if (didFindOrder) {
+                    ticketIndex = i;
+                    break;
+                }
+            }
+
+            if (compiledFilter && !compiledFilter(order)) {
+                continue;
+            }
+
+            results.push(order);
+        }
+
+        return results;
     }
 
     private async fetchWebshop(shouldRetry = true) {

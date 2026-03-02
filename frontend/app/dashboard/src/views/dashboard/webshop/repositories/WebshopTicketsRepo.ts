@@ -96,6 +96,42 @@ export class WebshopTicketsRepo {
     }
 
     /**
+     * Get all the tickets (that are stored in the offline database).
+     */
+    async getAll({ indexName, withPatches }: { indexName?: string; withPatches?: boolean } = { withPatches: true }) {
+        const tickets = await this.store.getAll({ indexName });
+
+        if (!withPatches) {
+            return tickets.filter(t => !t.deletedAt);
+        }
+
+        const patches = await this.patchesStore.getAll();
+        const patchesMap = new Map(patches.map(p => [p.secret, p]));
+
+        const patchedTickets: TicketPrivate[] = [];
+
+        for (const ticket of tickets) {
+            const patch = patchesMap.get(ticket.secret);
+            if (patch) {
+                const patched = ticket.patch(patch);
+                if (patched.deletedAt) {
+                    continue;
+                }
+                patchedTickets.push(patched);
+                continue;
+            }
+
+            if (ticket.deletedAt) {
+                continue;
+            }
+
+            patchedTickets.push(ticket);
+        }
+
+        return patchedTickets;
+    }
+
+    /**
      * Put all the patches in the offline database and try to save them to the server.
      */
     async putPatches(patches: AutoEncoderPatchType<TicketPrivate>[]) {
@@ -308,6 +344,29 @@ export class WebshopTicketsStore {
         });
 
         return tickets;
+    }
+
+    async getAll({ indexName }: { indexName?: string }): Promise<TicketPrivate[]> {
+        const db = await this.database.get();
+
+        return await new Promise<TicketPrivate[]>((resolve, reject) => {
+            const transaction = db.transaction([WebshopTicketsStore.storeName], 'readonly');
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                this.database.delete().catch(console.error);
+                reject(event);
+            };
+
+            // Do the actual saving
+            const objectStore = transaction.objectStore(WebshopTicketsStore.storeName);
+
+            const request: IDBRequest<any[]> = indexName ? objectStore.index(indexName).getAll() : objectStore.getAll();
+
+            request.onsuccess = () => {
+                resolve(request.result.map(raw => TicketPrivate.decode(new ObjectData(raw, { version: Version }))));
+            };
+        });
     }
 
     async get(secret: string): Promise<TicketPrivate | undefined> {

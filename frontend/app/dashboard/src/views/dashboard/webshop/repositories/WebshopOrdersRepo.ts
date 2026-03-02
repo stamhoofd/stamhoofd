@@ -194,9 +194,9 @@ export class WebshopOrdersRepo {
         }
     }
 
-    async getAllRaw(): Promise<any []> {
+    async getAllRaw(options: { sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<any []> {
         try {
-            return await this.store.getAllRaw();
+            return await this.store.getAllRaw(options);
         }
         catch (e) {
             console.error(e);
@@ -436,7 +436,7 @@ export class OrdersStore {
         });
     }
 
-    async getAllRaw(): Promise<any []> {
+    async getAllRaw({ sortItem }: { sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<any []> {
         const db = await this.database.get();
 
         return await new Promise<any []>((resolve, reject) => {
@@ -450,7 +450,32 @@ export class OrdersStore {
 
             const objectStore = transaction.objectStore(OrdersStore.storeName);
 
-            const request: IDBRequest<any[]> = objectStore.getAll();
+            let request: IDBRequest<any[]>;
+
+            // use an index if a SortItem is defined
+            try {
+                if (sortItem) {
+                    let direction: 'prev' | 'next' = 'next';
+
+                    if (sortItem.order === SortItemDirection.DESC) {
+                        direction = 'prev';
+                    }
+
+                    if (sortItem.key === 'id') {
+                        request = objectStore.getAll({ direction });
+                    }
+                    else {
+                        request = objectStore.index(sortItem.key).getAll({ direction });
+                    }
+                }
+                else {
+                    request = objectStore.getAll();
+                }
+            }
+            catch (e) {
+                reject(e);
+                return;
+            }
 
             request.onsuccess = () => {
                 resolve(request.result);
