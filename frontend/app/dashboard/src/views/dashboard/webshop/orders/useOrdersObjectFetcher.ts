@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ObjectFetcher, Toast } from '@stamhoofd/components';
+import { ObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
@@ -48,7 +48,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 return;
             }
 
-            const toast = new Toast($t('Bestellingen aan het laden...'), 'spinner').setHide(15 * 1000).show();
             try {
                 this.isOffline = false;
 
@@ -64,9 +63,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 else {
                     throw e;
                 }
-            }
-            finally {
-                toast.hide();
             }
         },
 
