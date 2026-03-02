@@ -855,14 +855,14 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
             key: 'ticketScannedAt',
             name: $t('Ticket scan tijdstip'),
         }));
-    }
 
-    if (!preview.hasSingleTickets) {
-        builders.push(new NumberFilterBuilder({
-            name: $t('Aantal aangemaakte tickets'),
-            key: 'ticketCount',
+        if (!preview.hasSingleTickets) {
+            builders.push(new NumberFilterBuilder({
+                name: $t('Aantal aangemaakte tickets'),
+                key: 'ticketCount',
 
-        }));
+            }));
+        }
     }
 
     if (preview instanceof Webshop) {
