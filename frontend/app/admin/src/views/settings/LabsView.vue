@@ -50,10 +50,6 @@
             <Checkbox :model-value="getFeatureFlag('members-import')" @update:model-value="setFeatureFlag('members-import', !!$event)">
                 {{ $t('c67f13a2-08cb-4c30-a39d-d07679430672') }} (beta)
             </Checkbox>
-
-            <Checkbox :model-value="getFeatureFlag('STA-33')" @update:model-value="setFeatureFlag('STA-33', !!$event)">
-                {{ $t('Suggesties voor activiteiten in ledenportaal') }} (wip)
-            </Checkbox>
         </template>
 
         <hr><h2>{{ $t('57dd24f3-ae95-42d7-aaab-48e43483c018') }}</h2>

@@ -18,9 +18,9 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
-import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
 import { EventView } from '../../events';
 import EventIcon from '../../events/components/EventIcon.vue';
+import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
 
 export function useRegistrationQuickActions(): QuickActions {
     const memberManager = useMemberManager();
@@ -124,11 +124,6 @@ export function useRegistrationQuickActions(): QuickActions {
     const featuredEvents: Ref<Event[] | null> = ref(null);
 
     async function fetchFeaturedEvents() {
-        if (!checkFeatureFlag('STA-33')) {
-            featuredEvents.value = [];
-            return;
-        }
-
         featuredEvents.value = await getFeaturedEventsForFamily({ context: context.value, family: memberManager.family, owner });
     }
 
