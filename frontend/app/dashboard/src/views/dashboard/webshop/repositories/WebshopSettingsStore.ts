@@ -1,5 +1,5 @@
 import { toRaw } from 'vue';
-import { WebshopDatabase } from './WebshopDatabase';
+import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 
 // enum to prevent typos and keep overview of existing keys
 export enum WebshopSettingsKeys {
@@ -15,7 +15,7 @@ type WebshopSettingsKey = `${WebshopSettingsKeys}`;
  * Offline storage for webshop settings.
  */
 export class WebshopSettingsStore {
-    static readonly storeName = 'settings';
+    static readonly storeName: WebshopStoreName = 'settings';
 
     constructor(private readonly database: WebshopDatabase) {
     }
@@ -62,15 +62,5 @@ export class WebshopSettingsStore {
                 resolve(request.result as T | undefined);
             };
         });
-    }
-
-    static _init({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
-        if (oldVersion < 1) {
-            database.createObjectStore(WebshopSettingsStore.storeName, { });
-        }
-        else if (transaction) {
-            const storeToClear = transaction.objectStore(WebshopSettingsStore.storeName);
-            storeToClear.clear();
-        }
     }
 }
