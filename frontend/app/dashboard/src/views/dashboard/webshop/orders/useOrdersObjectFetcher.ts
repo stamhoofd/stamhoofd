@@ -1,6 +1,6 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ObjectFetcher } from '@stamhoofd/components';
+import { ObjectFetcher, Toast } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
@@ -43,13 +43,15 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             return this.internetPromise;
         },
         async doLoadFromInternet() {
-            try {
-                // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher)
-                if (!this.isOffline && this.lastInternetLoad > Date.now() - 5_000) {
-                    return;
-                }
+            // Prevent doing multiple calls within 5 seconds (other rate limiting should happen outside of the object fetcher)
+            if (!this.isOffline && this.lastInternetLoad > Date.now() - 5_000) {
+                return;
+            }
 
+            const toast = new Toast($t('Bestellingen aan het laden...'), 'spinner').setHide(15 * 1000).show();
+            try {
                 this.isOffline = false;
+
                 await manager.orders.fetchAllUpdated();
                 await manager.tickets.fetchAllUpdated();
                 this.lastInternetLoad = Date.now();
@@ -62,6 +64,9 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 else {
                     throw e;
                 }
+            }
+            finally {
+                toast.hide();
             }
         },
 

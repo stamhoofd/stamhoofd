@@ -1,9 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Toast } from '@stamhoofd/components';
 import { Version } from '@stamhoofd/structures';
-import { OrdersStore } from './WebshopOrdersRepo';
-import { WebshopSettingsStore } from './WebshopSettingsStore';
-import { WebshopTicketPatchesStore, WebshopTicketsStore } from './WebshopTicketsRepo';
+import { OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
 
 type ObjectStoreInitFunction = (options: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) => void;
 
@@ -215,10 +213,92 @@ export class WebshopDatabase {
      * Init all the stores in the database.
      */
     private initStores({ database, transaction, event }: { database: IDBDatabase; transaction: IDBTransaction | null; event: IDBVersionChangeEvent }) {
-        const storeInitializers: ObjectStoreInitFunction[] = [OrdersStore._init, WebshopTicketsStore._init, WebshopTicketPatchesStore._init, WebshopSettingsStore._init];
+        const storeInitializers: ObjectStoreInitFunction[] = [initOrdersStore, initWebshopTicketsStore, initWebshopTicketPatchesStore, initWebshopSettingsStore];
 
         for (const initStore of storeInitializers) {
             initStore({ oldVersion: event.oldVersion, database, transaction });
         }
+    }
+}
+
+export type WebshopStoreName = 'orders' | 'tickets' | 'ticketPatches' | 'settings';
+
+function initOrdersStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
+    const storeName: WebshopStoreName = 'orders';
+
+    let storeToBeIndexed: IDBObjectStore | null = null;
+
+    if (oldVersion < 1) {
+        storeToBeIndexed = database.createObjectStore(storeName, { keyPath: 'value.id' });
+    }
+    else if (transaction) {
+        const storeToClear = transaction.objectStore(storeName);
+        storeToClear.clear();
+
+        if (oldVersion < 394) {
+            storeToBeIndexed = storeToClear;
+        }
+    }
+
+    if (storeToBeIndexed) {
+        // create indexes
+
+        // typescript will show an error if an index is missing
+        const indexes: Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
+        // auto generate indexes for generated indexes
+                = Object.fromEntries(Object.values(OrderIndexedDBIndex).map((index) => {
+                    return [index, { unique: false, keyPath: `indexes.${index}` }];
+                })) as Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
+            ;
+
+        Object.entries(indexes).forEach(([index, options]) => {
+            storeToBeIndexed.createIndex(index, options.keyPath ?? index, options);
+        });
+    }
+}
+
+function initWebshopSettingsStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
+    const storeName: WebshopStoreName = 'settings';
+
+    if (oldVersion < 1) {
+        database.createObjectStore(storeName, { });
+    }
+    else if (transaction) {
+        const storeToClear = transaction.objectStore(storeName);
+        storeToClear.clear();
+    }
+}
+
+function initWebshopTicketsStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
+    let storeToBeIndexed: IDBObjectStore | null = null;
+    const storeName: WebshopStoreName = 'tickets';
+
+    if (oldVersion < 1) {
+        storeToBeIndexed = database.createObjectStore(storeName, { keyPath: 'secret' });
+    }
+    else if (transaction) {
+        const storeToClear = transaction.objectStore(storeName);
+        storeToClear.clear();
+
+        if (oldVersion < 114) {
+            storeToBeIndexed = storeToClear;
+        }
+    }
+
+    if (storeToBeIndexed) {
+        // create indexes
+        storeToBeIndexed.createIndex('orderId', 'orderId', { unique: false });
+    }
+}
+
+function initWebshopTicketPatchesStore({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
+    const storeName: WebshopStoreName = 'ticketPatches';
+
+    if (oldVersion < 1) {
+        database.createObjectStore(storeName, { keyPath: 'secret' });
+    }
+    else if (transaction) {
+        const storeToClear = transaction.objectStore(storeName);
+        storeToClear.clear();
     }
 }

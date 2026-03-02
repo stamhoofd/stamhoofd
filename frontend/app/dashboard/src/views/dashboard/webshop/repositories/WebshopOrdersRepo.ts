@@ -5,7 +5,7 @@ import { SessionContext } from '@stamhoofd/networking';
 import { compileToInMemoryFilter, CountFilteredRequest, CountResponse, InMemoryFilterRunner, LimitedFilteredRequest, OrderStatus, PaginatedResponseDecoder, PrivateOrder, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { IndexBoxDecoder } from '../IndexBox';
 import { createPrivateOrderIndexBox, OrderIndexedDBIndex } from '../ordersIndexedDBSorters';
-import { WebshopDatabase } from './WebshopDatabase';
+import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import { WebshopSettingsStore } from './WebshopSettingsStore';
 import { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
@@ -59,6 +59,12 @@ export class WebshopOrdersRepo {
 
         const promises: Promise<void>[] = [];
 
+        const putAndSetLastFetched = async (orders: PrivateOrder[]) => {
+            await this.store.putAll(orders);
+            // first await put all orders to prevent setting the last fetched order if the putAll fails
+            await this.apiClient.setlastFetchedOrder(orders[orders.length - 1]);
+        };
+
         const onResultsReceived = async (orders: PrivateOrder[]) => {
             if (isFetchAll && !hadSuccessfulFetch) {
                 hadSuccessfulFetch = true;
@@ -68,8 +74,7 @@ export class WebshopOrdersRepo {
 
             if (orders.length) {
                 totalOrders.push(...orders);
-                promises.push(this.store.putAll(orders));
-                promises.push(this.apiClient.setlastFetchedOrder(orders[orders.length - 1]));
+                promises.push(putAndSetLastFetched(orders));
             }
         };
 
@@ -214,7 +219,7 @@ export class WebshopOrdersRepo {
  * Responsible for offline storage of webshop orders.
  */
 export class OrdersStore {
-    static readonly storeName = 'orders';
+    static readonly storeName: WebshopStoreName = 'orders';
     private readonly database: WebshopDatabase;
 
     /**
@@ -473,38 +478,6 @@ export class OrdersStore {
                 resolve();
             };
         });
-    }
-
-    static _init({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
-        let storeToBeIndexed: IDBObjectStore | null = null;
-
-        if (oldVersion < 1) {
-            storeToBeIndexed = database.createObjectStore(OrdersStore.storeName, { keyPath: 'value.id' });
-        }
-        else if (transaction) {
-            const storeToClear = transaction.objectStore(OrdersStore.storeName);
-            storeToClear.clear();
-
-            if (oldVersion < 341) {
-                storeToBeIndexed = storeToClear;
-            }
-        }
-
-        if (storeToBeIndexed) {
-            // create indexes
-
-            // typescript will show an error if an index is missing
-            const indexes: Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
-            // auto generate indexes for generated indexes
-                = Object.fromEntries(Object.values(OrderIndexedDBIndex).map((index) => {
-                    return [index, { unique: false, keyPath: `indexes.${index}` }];
-                })) as Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
-            ;
-
-            Object.entries(indexes).forEach(([index, options]) => {
-                storeToBeIndexed.createIndex(index, options.keyPath ?? index, options);
-            });
-        }
     }
 }
 

@@ -4,7 +4,7 @@ import { Request } from '@simonbackx/simple-networking';
 import { EventBus, fetchAll, ObjectFetcher } from '@stamhoofd/components';
 import { SessionContext } from '@stamhoofd/networking';
 import { CountFilteredRequest, CountResponse, LimitedFilteredRequest, PaginatedResponseDecoder, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version } from '@stamhoofd/structures';
-import { WebshopDatabase } from './WebshopDatabase';
+import { WebshopDatabase, WebshopStoreName } from './WebshopDatabase';
 import { WebshopSettingsStore } from './WebshopSettingsStore';
 
 /**
@@ -47,11 +47,16 @@ export class WebshopTicketsRepo {
 
         const promises: Promise<void>[] = [];
 
+        const putAndSetLastFetched = async (tickets: TicketPrivate[]) => {
+            await this.storeAll(tickets);
+            // first await store all tickets to prevent setting the last fetched order if the putAll fails
+            await this.apiClient.setLastFetchedTicket(tickets[tickets.length - 1]);
+        };
+
         const onResultsReceived = async (tickets: TicketPrivate[]): Promise<void> => {
             if (tickets.length) {
                 totalTickets.push(...tickets);
-                promises.push(this.storeAll(tickets));
-                promises.push(this.apiClient.setLastFetchedTicket(tickets[tickets.length - 1]));
+                promises.push(putAndSetLastFetched(tickets));
             }
         };
 
@@ -254,7 +259,7 @@ export class WebshopTicketsRepo {
  * Responsible for offline storage of webshop tickets.
  */
 export class WebshopTicketsStore {
-    static readonly storeName = 'tickets';
+    static readonly storeName: WebshopStoreName = 'tickets';
     private readonly database: WebshopDatabase;
 
     constructor({ database }: { database: WebshopDatabase }) {
@@ -375,34 +380,13 @@ export class WebshopTicketsStore {
             }
         });
     }
-
-    static _init({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
-        let storeToBeIndexed: IDBObjectStore | null = null;
-
-        if (oldVersion < 1) {
-            storeToBeIndexed = database.createObjectStore(WebshopTicketsStore.storeName, { keyPath: 'secret' });
-        }
-        else if (transaction) {
-            const storeToClear = transaction.objectStore(WebshopTicketsStore.storeName);
-            storeToClear.clear();
-
-            if (oldVersion < 114) {
-                storeToBeIndexed = storeToClear;
-            }
-        }
-
-        if (storeToBeIndexed) {
-        // create indexes
-            storeToBeIndexed.createIndex('orderId', 'orderId', { unique: false });
-        }
-    }
 }
 
 /**
  * Responsible for offline storage of webshop ticket patches.
  */
 export class WebshopTicketPatchesStore {
-    static readonly storeName = 'ticketPatches';
+    static readonly storeName: WebshopStoreName = 'ticketPatches';
     private readonly database: WebshopDatabase;
 
     constructor({ database }: { database: WebshopDatabase }) {
@@ -540,16 +524,6 @@ export class WebshopTicketPatchesStore {
                 ticketPatches.put(patch.encode({ version: Version }));
             }
         });
-    }
-
-    static _init({ oldVersion, database, transaction }: { oldVersion: number; database: IDBDatabase; transaction: IDBTransaction | null }) {
-        if (oldVersion < 1) {
-            database.createObjectStore(WebshopTicketPatchesStore.storeName, { keyPath: 'secret' });
-        }
-        else if (transaction) {
-            const storeToClear = transaction.objectStore(WebshopTicketPatchesStore.storeName);
-            storeToClear.clear();
-        }
     }
 }
 
