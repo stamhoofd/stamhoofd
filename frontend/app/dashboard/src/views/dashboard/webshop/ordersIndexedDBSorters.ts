@@ -1,5 +1,6 @@
 import { AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { PrivateOrder, SortDefinitions } from '@stamhoofd/structures';
+import { InMemorySortDefinitions, PrivateOrder } from '@stamhoofd/structures';
+import { Sorter } from '@stamhoofd/utility';
 import { IndexBox, IndexedDbIndexValue } from './IndexBox';
 
 export enum OrderIndexedDBIndex {
@@ -20,60 +21,94 @@ export enum OrderIndexedDBIndex {
     TimeSlotTime = 'timeSlotTime',
 }
 
+class SortDefinition<T, R> {
+    readonly getValue: (value: T) => R;
+    readonly sort: (a: T, b: T) => number;
+
+    constructor({ getValue, sort }: {
+        getValue: (value: T) => R;
+        sort: (a: R, b: R) => number;
+    }) {
+        this.getValue = getValue;
+        this.sort = (a: T, b: T) => {
+            const valueA: R = getValue(a);
+            const valueB: R = getValue(b);
+            return sort(valueA, valueB);
+        };
+    }
+}
+
 /**
  * Don't forget to add the required in memory filters.
  */
-export const ordersIndexedDBSorters: SortDefinitions<PrivateOrder> = {
-    id: {
+export const ordersIndexedDBSorters: InMemorySortDefinitions<PrivateOrder> = {
+    id: new SortDefinition({
         getValue: value => value.id,
-    },
-    [OrderIndexedDBIndex.CreatedAt]: {
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.CreatedAt]: new SortDefinition({
         getValue: value => value.createdAt.getTime(),
-    },
-    [OrderIndexedDBIndex.Number]: {
-        getValue: value => value.number,
-    },
-    [OrderIndexedDBIndex.Status]: {
+        sort: Sorter.byNumberValue,
+
+    }),
+    [OrderIndexedDBIndex.Number]: new SortDefinition({
+        getValue: value => value.number ?? 0,
+        sort: Sorter.byNumberValue,
+    }),
+    [OrderIndexedDBIndex.Status]: new SortDefinition({
         getValue: value => value.status,
-    },
-    [OrderIndexedDBIndex.PaymentMethod]: {
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.PaymentMethod]: new SortDefinition({
         getValue: value => value.data.paymentMethod,
-    },
-    [OrderIndexedDBIndex.CheckoutMethod]: {
-        getValue: value => value.data.checkoutMethod?.type,
-    },
-    [OrderIndexedDBIndex.TimeSlotDate]: {
-        getValue: value => value.data.timeSlot?.date.getTime(),
-    },
-    [OrderIndexedDBIndex.ValidAt]: {
-        getValue: value => value.validAt?.getTime(),
-    },
-    [OrderIndexedDBIndex.Name]: {
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.CheckoutMethod]: new SortDefinition({
+        getValue: value => value.data.checkoutMethod?.type ?? '',
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.TimeSlotDate]: new SortDefinition({
+        getValue: value => value.data.timeSlot?.date.getTime() ?? 0,
+        sort: Sorter.byNumberValue,
+    }),
+    [OrderIndexedDBIndex.ValidAt]: new SortDefinition({
+        getValue: value => value.validAt?.getTime() ?? 0,
+        sort: Sorter.byNumberValue,
+    }),
+    [OrderIndexedDBIndex.Name]: new SortDefinition({
         getValue: value => value.data.customer.name,
-    },
-    [OrderIndexedDBIndex.Email]: {
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.Email]: new SortDefinition({
         getValue: value => value.data.customer.email,
-    },
-    [OrderIndexedDBIndex.Phone]: {
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.Phone]: new SortDefinition({
         getValue: value => value.data.customer.phone,
-    },
+        sort: Sorter.byStringValue,
+    }),
 
     // Generated (these are stored in the indexes)
-    [OrderIndexedDBIndex.TotalPrice]: {
+    [OrderIndexedDBIndex.TotalPrice]: new SortDefinition({
         getValue: value => value.data.totalPrice,
-    },
-    [OrderIndexedDBIndex.Amount]: {
+        sort: Sorter.byNumberValue,
+    }),
+    [OrderIndexedDBIndex.Amount]: new SortDefinition({
         getValue: value => value.data.amount,
-    },
-    [OrderIndexedDBIndex.OpenBalance]: {
+        sort: Sorter.byNumberValue,
+    }),
+    [OrderIndexedDBIndex.OpenBalance]: new SortDefinition({
         getValue: value => value.openBalance,
-    },
-    [OrderIndexedDBIndex.Location]: {
+        sort: Sorter.byNumberValue,
+    }),
+    [OrderIndexedDBIndex.Location]: new SortDefinition({
         getValue: value => value.data.locationName,
-    },
-    [OrderIndexedDBIndex.TimeSlotTime]: {
-        getValue: value => value.data.timeSlot?.timeIndex,
-    },
+        sort: Sorter.byStringValue,
+    }),
+    [OrderIndexedDBIndex.TimeSlotTime]: new SortDefinition({
+        getValue: value => value.data.timeSlot?.timeIndex ?? '',
+        sort: Sorter.byStringValue,
+    }),
 };
 
 /**
