@@ -1,12 +1,10 @@
-import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, compileToInMemoryFilter, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, TicketPrivate, Version } from '@stamhoofd/structures';
+import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
-import { IndexBoxDecoder } from '../IndexBox';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 import { WebshopManager } from '../WebshopManager';
 
@@ -32,14 +30,10 @@ function startTimeLogger(label: string) {
 
 class OrderCache {
     private manager: WebshopManager;
-
-    private rawOrdersPromise: Promise<any[]>;
-    private patchedTicketsPromise: Promise<TicketPrivate[]>;
     private finalCount: number | null = null;
     private _countPromise: Promise<number>;
-    // private orders: PrivateOrderWithTickets[] = [];
     private filteredOrders: PrivateOrderWithTickets[] = [];
-    private currentBatch: Promise<void> | null = null;
+    private currentBatch: Promise<any> | null = null;
 
     get count() {
         return this._countPromise;
@@ -47,89 +41,40 @@ class OrderCache {
 
     constructor({ manager, filter, sortItem, limit }: { manager: WebshopManager; filter: StamhoofdFilter; sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' }; limit: number }) {
         this.manager = manager;
-        // important: both orders and tickets need to be sorted by order id
-        this.rawOrdersPromise = this.manager.orders.getAllRaw({ sortItem });
-        this.patchedTicketsPromise = this.manager.tickets.getAll({ withPatches: true, indexName: 'orderId' });
-        this._countPromise = this.startCount({ filter, limit });
+        this._countPromise = this.startStreamInBatches({ filter, limit, sortItem });
     }
 
-    private async startCount({ filter, limit }: { filter: StamhoofdFilter; limit: number }): Promise<number> {
-        // important: both orders and tickets need to be sorted by order id
-        // todo: find solution for sortItem order
-        const allRawOrders = await this.rawOrdersPromise;
-        const allPatchedTickets = await this.patchedTicketsPromise;
-
-        const compiledFilter = compileToInMemoryFilter(filter ?? null, privateOrderWithTicketsFilterCompilers);
-
-        const decoder = new IndexBoxDecoder(PrivateOrderWithTickets as Decoder<PrivateOrderWithTickets>);
-
-        let orderIndex = 0;
-        let ticketIndex = 0;
+    private async startStreamInBatches({ filter, limit, sortItem }: { filter: StamhoofdFilter; limit: number; sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<number> {
         let currentCount = 0;
+        let advanceCount = 0;
 
-        while (orderIndex < allRawOrders.length) {
-            const shouldNotBlock = orderIndex === 0;
+        while (this.finalCount === null) {
+            if (advanceCount !== 0) {
+                limit = 1500;
+            }
 
             const timeLogger = startTimeLogger('batch');
 
             let batchCount = 0;
 
-            const batchPromise = new Promise<void>((resolve) => {
-                for (orderIndex; orderIndex < allRawOrders.length; orderIndex++) {
-                    const rawOrder = allRawOrders[orderIndex];
-                    let order: PrivateOrderWithTickets;
-
-                    try {
-                        order = decoder.decode(new ObjectData(rawOrder, { version: Version }));
-                    }
-                    catch (e) {
-                        // force fetch all again
-                        this.manager.orders.apiClient.clearLastFetchedOrder().catch(console.error);
-                        throw e;
-                    }
-
-                    let didFindOrder = false;
-
-                    for (let i = ticketIndex; i < allPatchedTickets.length; i++) {
-                        const ticket = allPatchedTickets[i];
-                        if (ticket.orderId === order.id) {
-                            didFindOrder = true;
-                            order.tickets.push(ticket);
-                            continue;
-                        }
-
-                        if (didFindOrder) {
-                            ticketIndex = i;
-                            break;
-                        }
-                    }
-
-                    if (compiledFilter(order)) {
-                        batchCount++;
-                        this.filteredOrders.push(order);
-
-                        if (batchCount === limit) {
-                            break;
-                        }
-                    }
-                }
-
-                currentCount += batchCount;
-                resolve();
+            const batchPromise = this.manager.streamOrdersWithPatchedTickets({
+                filter,
+                limit,
+                sortItem,
+                advanceCount,
+                callback: (order) => {
+                    batchCount++;
+                    this.filteredOrders.push(order);
+                },
             });
+
+            this.currentBatch = batchPromise;
+            await batchPromise;
+            currentCount += batchCount;
+            advanceCount += limit;
 
             if (batchCount !== limit) {
                 this.finalCount = currentCount;
-            }
-
-            this.currentBatch = batchPromise;
-
-            if (shouldNotBlock) {
-                await new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                        resolve();
-                    }, 0);
-                });
             }
 
             timeLogger.stop();
@@ -147,6 +92,9 @@ class OrderCache {
         const batchEnd = batchStart + limit;
 
         while (true) {
+            if (skip !== 0) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
             if (batchEnd <= this.filteredOrders.length) {
                 return this.filteredOrders.slice(batchStart, batchEnd);
             }
@@ -160,7 +108,7 @@ class OrderCache {
                 this.currentBatch = sleep(25);
             }
             else {
-                await Promise.all([this.rawOrdersPromise, this.patchedTicketsPromise]);
+                await sleep(25);
             }
         }
     }
@@ -273,6 +221,7 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
                 // todo: order cache reset?
                 this.lastNextRequest = null;
                 this.itemsToSkip = 0;
+                this._orderCachePromise = new OrderCachePromise(this.manager, filter);
             }
         }
 
