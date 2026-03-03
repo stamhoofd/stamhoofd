@@ -1,8 +1,7 @@
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
-import { ObjectFetcher } from '@stamhoofd/components';
+import { EventBus, ObjectFetcher } from '@stamhoofd/components';
 import { assertSort, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, SortItem, SortItemDirection, SortList, StamhoofdFilter } from '@stamhoofd/structures';
-import { sleep } from '@stamhoofd/utility';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
@@ -29,58 +28,65 @@ function startTimeLogger(label: string) {
 }
 
 class OrderCache {
-    private manager: WebshopManager;
     private finalCount: number | null = null;
-    private _countPromise: Promise<number>;
     private filteredOrders: PrivateOrderWithTickets[] = [];
-    private currentBatch: Promise<any> | null = null;
+    readonly eventBus = new EventBus<'batch', void>();
+    readonly countEventBus = new EventBus< 'count', number>();
+    private _isStreaming = false;
 
-    get count() {
-        return this._countPromise;
+    get isStreaming() {
+        return this._isStreaming;
     }
 
-    constructor({ manager, filter, sortItem, limit }: { manager: WebshopManager; filter: StamhoofdFilter; sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' }; limit: number }) {
-        this.manager = manager;
-        this._countPromise = this.startStreamInBatches({ filter, limit, sortItem });
+    async count(): Promise<number> {
+        if (this.finalCount !== null) {
+            return this.finalCount;
+        }
+
+        const owner = {};
+
+        const result = await new Promise<number>((resolve) => {
+            this.countEventBus.addListener(owner, 'count', count => resolve(count));
+        });
+
+        this.countEventBus.removeListener(owner);
+
+        return result;
     }
 
-    private async startStreamInBatches({ filter, limit, sortItem }: { filter: StamhoofdFilter; limit: number; sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<number> {
+    async startStreamAllOrders({ manager, limit, filter, sortItem }: { manager: WebshopManager; limit: number; filter: StamhoofdFilter; sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<number> {
+        this._isStreaming = true;
+
         let currentCount = 0;
-        let advanceCount = 0;
 
-        while (this.finalCount === null) {
-            if (advanceCount !== 0) {
-                limit = 1500;
-            }
+        const timeLogger = startTimeLogger('batch');
 
-            const timeLogger = startTimeLogger('batch');
-
-            let batchCount = 0;
-
-            const batchPromise = this.manager.streamOrdersWithPatchedTickets({
+        try {
+            const batchPromise = manager.streamOrdersWithPatchedTickets({
                 filter,
-                limit,
                 sortItem,
-                advanceCount,
                 callback: (order) => {
-                    batchCount++;
+                    currentCount++;
                     this.filteredOrders.push(order);
+
+                    if (currentCount % limit === 0) {
+                        this.eventBus.sendEvent('batch').catch(console.error);
+                    }
                 },
             });
 
-            this.currentBatch = batchPromise;
             await batchPromise;
-            currentCount += batchCount;
-            advanceCount += limit;
-
-            if (batchCount !== limit) {
-                this.finalCount = currentCount;
-            }
+            this.finalCount = currentCount;
+            this.eventBus.sendEvent('batch').catch(console.error);
 
             timeLogger.stop();
         }
+        finally {
+            this._isStreaming = false;
+        }
 
-        this.finalCount = currentCount;
+        this.countEventBus.sendEvent('count', currentCount).catch(console.error);
+
         return currentCount;
     }
 
@@ -91,43 +97,28 @@ class OrderCache {
         const batchStart = skip;
         const batchEnd = batchStart + limit;
 
+        const owner = {};
+
         while (true) {
             if (skip !== 0) {
+                // do not block (else the table will not show a loading animation)
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
             if (batchEnd <= this.filteredOrders.length) {
+                this.eventBus.removeListener(owner);
                 return this.filteredOrders.slice(batchStart, batchEnd);
             }
 
             if (this.finalCount !== null) {
+                this.eventBus.removeListener(owner);
                 return this.filteredOrders.slice(batchStart, Math.max(this.finalCount, batchEnd));
             }
 
-            if (this.currentBatch) {
-                await this.currentBatch;
-                this.currentBatch = sleep(25);
-            }
-            else {
-                await sleep(25);
-            }
-        }
-    }
-}
-
-class OrderCachePromise {
-    private resolve: ((value: OrderCache) => void) | null = null;
-    readonly promise: Promise<OrderCache>;
-
-    constructor(private readonly manager: WebshopManager, private readonly filter: StamhoofdFilter) {
-        this.promise = new Promise<OrderCache>((resolve) => {
-            this.resolve = resolve;
-        });
-    }
-
-    setFetchData({ sortItem, limit }: { sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' }; limit: number }) {
-        if (this.resolve) {
-            this.resolve(new OrderCache({ manager: this.manager, filter: this.filter, sortItem, limit }));
-            this.resolve = null;
+            await new Promise<void>((resolve) => {
+                this.eventBus.addListener(owner, 'batch', async () => {
+                    resolve();
+                });
+            });
         }
     }
 }
@@ -139,7 +130,7 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
     private internetPromise: Promise<void> | null = null;
     private _lastInternetLoad = 0;
 
-    private _orderCachePromise: OrderCachePromise | null = null;
+    private readonly orderCache = new OrderCache();
 
     get lastInternetLoad() {
         return this._lastInternetLoad;
@@ -221,26 +212,20 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
                 // todo: order cache reset?
                 this.lastNextRequest = null;
                 this.itemsToSkip = 0;
-                this._orderCachePromise = new OrderCachePromise(this.manager, filter);
+
+                // todo:
+                // this._orderCachePromise = new OrderCachePromise(this.manager, filter);
             }
         }
 
         const timeLogger = startTimeLogger('test - fetch');
 
-        // stream
-        if (!this._orderCachePromise) {
-            console.error('Order cache was set on fetch, should not happen.');
-            this._orderCachePromise = new OrderCachePromise(this.manager, filter);
+        if (!this.orderCache.isStreaming) {
+            this.orderCache.startStreamAllOrders({ manager: this.manager, limit: data.limit, filter, sortItem }).catch(console.error);
         }
 
-        this._orderCachePromise.setFetchData({ sortItem, limit: data.limit });
-
-        const orderCache = await this._orderCachePromise.promise;
         const limit = data.limit;
-        const results = await orderCache.get({
-            skip,
-            limit,
-        });
+        const results = await this.orderCache.get({ skip, limit });
 
         timeLogger.stop();
 
@@ -292,25 +277,35 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
         data = toRaw(data);
         console.log('Orders(IndexedDb).fetchCount', data);
 
-        const filters = [data.filter];
+        // const filters = [data.filter];
 
-        const searchFilter = searchToFilter(data.search);
-        if (searchFilter !== null) {
-            filters.push(searchFilter);
-        }
+        // const searchFilter = searchToFilter(data.search);
+        // if (searchFilter !== null) {
+        //     filters.push(searchFilter);
+        // }
 
-        const filter = mergeFilters(filters, '$and');
+        // const filter = mergeFilters(filters, '$and');
 
         await this.loadFromInternet();
 
-        const timeLogger = startTimeLogger('test - count');
-
-        if (!this._orderCachePromise) {
-            this._orderCachePromise = new OrderCachePromise(this.manager, filter);
+        if (!data.filter && !data.search) {
+            const timeLogger = startTimeLogger('test - count');
+            const count = this.manager.orders.countAll();
+            timeLogger.stop();
+            return count;
         }
 
-        const orderCache = await this._orderCachePromise.promise;
-        const count = await orderCache.count;
+        const timeLogger = startTimeLogger('test - count');
+        const count = await this.orderCache.count();
+
+        // let count = this.orderCache.
+
+        // if (!this.orderCache.isStreaming) {
+        //     this._orderCachePromise = new OrderCachePromise(this.manager, filter);
+        // }
+
+        // const orderCache = await this._orderCachePromise.promise;
+        // const count = await orderCache.count;
 
         console.log('[Done] Orders(IndexedDb).fetchCount', data, count);
 

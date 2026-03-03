@@ -285,7 +285,7 @@ export class WebshopManager {
      * Get all orders with patched tickets.
      */
     async getAllOrdersWithPatchedTickets(): Promise<PrivateOrderWithTickets[]> {
-        const allOrders = await this.orders.getAllRaw();
+        const allOrders = await this.orders.getAllRaw({});
 
         const db = await this.database.get();
         const openTransaction = db.transaction([WebshopTicketsStore.storeName, WebshopTicketPatchesStore.storeName], 'readonly');

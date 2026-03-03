@@ -213,6 +213,10 @@ export class WebshopOrdersRepo {
     async get(id: string): Promise<PrivateOrder | undefined> {
         return this.store.get(id);
     }
+
+    async countAll() {
+        return await this.store.countAll();
+    }
 }
 
 /**
@@ -503,6 +507,10 @@ export class OrdersStore {
                 resolve();
             };
         });
+    }
+
+    async countAll() {
+        return await this.database.countStore(OrdersStore.storeName);
     }
 }
 

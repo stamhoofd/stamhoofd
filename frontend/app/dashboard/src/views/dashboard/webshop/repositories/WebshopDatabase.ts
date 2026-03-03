@@ -210,6 +210,31 @@ export class WebshopDatabase {
     }
 
     /**
+     * Count the items in a store.
+     * @param storeName
+     * @returns the number of items in a store
+     */
+    async countStore(storeName: WebshopStoreName): Promise<number> {
+        const db = await this.get();
+
+        const countPromise = new Promise<number>((resolve, reject) => {
+            const transaction = db.transaction([storeName], 'readonly');
+
+            transaction.onerror = (event) => {
+                // Don't forget to handle errors!
+                reject(event);
+            };
+
+            const countRequest = transaction.objectStore(storeName).count();
+            countRequest.onsuccess = () => {
+                resolve(countRequest.result);
+            };
+        });
+
+        return await countPromise;
+    }
+
+    /**
      * Init all the stores in the database.
      */
     private initStores({ database, transaction, event }: { database: IDBDatabase; transaction: IDBTransaction | null; event: IDBVersionChangeEvent }) {
