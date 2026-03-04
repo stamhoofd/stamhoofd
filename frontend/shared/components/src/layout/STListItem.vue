@@ -99,6 +99,7 @@ button.st-list-item {
     width: 100%; // fix for buttons
     box-sizing: border-box;
     contain: layoout style;
+    position: relative;
     z-index: 1;
 
     @extend .style-normal;
@@ -331,7 +332,6 @@ button.st-list-item {
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         cursor: pointer;
         overflow: visible;
-        position: relative;
 
         &:after {
             // This is the hover layer
