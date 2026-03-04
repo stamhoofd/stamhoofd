@@ -1,168 +1,222 @@
 <template>
-    <STInputBox :title="title" error-fields="phone" :error-box="errorBox">
-        <input v-model="phoneRaw" class="input" :class="{ error: !valid }" :placeholder="placeholder" autocomplete="mobile tel" type="tel" @change="validate(false)" @input="(event: any) => {phoneRaw = event.target.value; onTyping();}">
+    <STInputBox
+        :title="title"
+        :error-fields="errorFields"
+        :error-box="errorBoxes"
+        :class="props.class"
+    >
+        <input
+            v-model="phoneRaw"
+            v-format-input="formatter"
+            :placeholder="placeholder"
+            autocomplete="mobile tel"
+            class="input"
+            type="tel"
+            :disabled="disabled"
+            v-bind="$attrs"
+            @change="validate(false)"
+            @input="onTyping"
+        >
+        <template #right>
+            <slot name="right" />
+        </template>
+
+        <slot />
     </STInputBox>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { SimpleError } from '@simonbackx/simple-errors';
-import { Component, Prop, VueComponent, Watch } from '@simonbackx/vue-app-navigation/classes';
-import { I18nController } from '@stamhoofd/frontend-i18n';
-import { Country } from '@stamhoofd/structures';
-
+import { DataValidator } from '@stamhoofd/utility';
+import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
+import { useErrors } from '../errors/useErrors';
+import { useValidation } from '../errors/useValidation';
 import { Validator } from '../errors/Validator';
-import STInputBox from './STInputBox.vue';
+import { AsYouType, parsePhoneNumber } from 'libphonenumber-js/max';
+import { I18nController } from '@stamhoofd/frontend-i18n';
+import { Country, CountryCode, countryCodes, CountryHelper } from '@stamhoofd/structures';
 
-@Component({
-    components: {
-        STInputBox,
+const props = withDefaults(
+    defineProps<{
+        validator?: Validator;
+        nullable?: boolean;
+        title?: string;
+        disabled?: boolean;
+
+        class?: string | null;
+        required?: boolean;
+        placeholder?: string | null;
+        errorFields?: string;
+        errorBox?: ErrorBox | null;
+    }>(), {
+        validator: undefined,
+        nullable: false,
+        title: undefined,
+        disabled: false,
+        class: null,
+        required: true,
+        placeholder: null,
+        errorFields: 'phone',
+        errorBox: null,
     },
-    emits: ['update:modelValue'],
-})
-export default class PhoneInput extends VueComponent {
-    @Prop({ default: '' })
-    title: string;
+);
 
-    @Prop({ default: null })
-    validator: Validator | null;
+const errors = useErrors({ validator: props.validator });
+const model = defineModel<string | null>({ required: true });
 
-    phoneRaw = '';
-    valid = true;
+useValidation(errors.validator, validate);
 
-    @Prop({ default: null })
-    modelValue!: string | null;
+const phoneRaw = ref(model.value ?? '');
+const placeholder = computed(() => {
+    if (props.placeholder) return props.placeholder;
+    if (props.required) return '';
+    return $t('07cf8cd9-433f-42e6-8b3a-a5dba83ecc8f');
+});
 
-    @Prop({ default: true })
-    required!: boolean;
-
-    /**
-     * Whether the modelValue can be set to null if it is empty (even when it is required, will still be invalid)
-     * Only used if required = false
-     */
-    @Prop({ default: false })
-    nullable!: boolean;
-
-    @Prop({ default: '' })
-    placeholder!: string;
-
-    errorBox: ErrorBox | null = null;
-
-    @Watch('modelValue')
-    onmodelValueChanged(val: string | null) {
-        if (val === null) {
-            this.phoneRaw = '';
-            return;
-        }
-        this.phoneRaw = val;
+watch(model, (value) => {
+    if (value && DataValidator.cleanPhone(value) === DataValidator.cleanPhone(phoneRaw.value)) {
+        return;
     }
+    phoneRaw.value = value ? value : '';
+}, { immediate: true });
 
-    @Watch('required', { deep: true })
-    onChangeRequired() {
-        // Revalidate, because the fields might be empty, and required goes false -> send null so any saved address gets cleared
-        this.validate(false, true).catch(console.error);
-    }
+watch(() => props.required, (value) => {
+    validate(false, true);
+}, { immediate: false });
 
-    onTyping() {
-        // Silently send modelValue to parents, but don't show visible errors yet
-        this.validate(false, true).catch(console.error);
-    }
+function getDefaultCountry() {
+    return I18nController.shared?.countryCode ?? Country.Belgium;
+}
+function isValid(phone: string, country?: CountryCode) {
+    try {
+        const phoneNumber = parsePhoneNumber(phone, country ?? getDefaultCountry());
 
-    mounted() {
-        if (this.validator) {
-            this.validator.addValidation(this, () => {
-                return this.validate(true);
-            });
-        }
-
-        this.phoneRaw = this.modelValue ?? '';
-    }
-
-    unmounted() {
-        if (this.validator) {
-            this.validator.removeValidation(this);
+        if (phoneNumber && phoneNumber.isValid()) {
+            return true;
         }
     }
+    catch (e) {
+        console.error(e);
+    }
+    return false;
+}
 
-    async validate(final: boolean, silent = false) {
-        if (this.phoneRaw.length === 0) {
-            if (!this.required) {
-                if (!silent) {
-                    this.errorBox = null;
-                }
+function formatPhone(phone: string) {
+    try {
+        const phoneNumber = parsePhoneNumber(phone, getDefaultCountry());
 
-                if (this.modelValue !== null) {
-                    this.$emit('update:modelValue', null);
-                }
-                return true;
-            }
-
-            if (!final) {
-                if (!silent) {
-                    this.errorBox = null;
-                }
-
-                if (this.nullable && this.modelValue !== null) {
-                    this.$emit('update:modelValue', null);
-                }
-                return false;
-            }
+        if (phoneNumber && phoneNumber.isValid()) {
+            return phoneNumber.formatInternational();
         }
-        try {
-            const libphonenumber = await import(/* webpackChunkName: "libphonenumber" */ 'libphonenumber-js/max');
-            const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, I18nController.shared?.countryCode ?? Country.Belgium);
+    }
+    catch (e) {
+        console.error(e);
+    }
+    return phone;
+}
 
-            if (!phoneNumber || !phoneNumber.isValid()) {
-                for (const country of Object.values(Country)) {
-                    if (country === Country.Other) {
-                        continue;
-                    }
-                    const phoneNumber = libphonenumber.parsePhoneNumber(this.phoneRaw, country);
+function formatIncompletePhone(phone: string) {
+    try {
+        const f = new AsYouType({ defaultCountry: getDefaultCountry() }).input(phone);
 
-                    if (phoneNumber && phoneNumber.isValid()) {
-                        if (!silent) {
-                            this.errorBox = new ErrorBox(new SimpleError({
-                                code: 'invalid_field',
-                                message: $t('f7cbe04a-3175-4794-8f74-8261a11fbade').toString(),
-                                field: 'phone',
-                            }));
-                        }
-                        return false;
-                    }
-                }
-                if (!silent) {
-                    this.errorBox = new ErrorBox(new SimpleError({
+        if (f) {
+            return f;
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    return phone;
+}
+
+const formatter = {
+    cleaner: (value: string) => {
+        return DataValidator.cleanPhone(value);
+    },
+    formatter: (value: string) => {
+        return formatIncompletePhone(value);
+    },
+};
+
+const errorBoxes = computed(() => {
+    const arr: ErrorBox[] = [];
+    if (props.errorBox) {
+        arr.push(props.errorBox);
+    }
+    if (errors.errorBox) {
+        arr.push(errors.errorBox);
+    }
+    return arr.length > 0 ? arr : null;
+});
+
+function onTyping() {
+    // Silently send modelValue to parents, but don't show visible errors yet
+    validate(false, true);
+}
+
+function validate(final = true, silent = false) {
+    phoneRaw.value = phoneRaw.value.trim();
+
+    const unformatted = DataValidator.cleanPhone(phoneRaw.value);
+
+    if (!props.required && unformatted.length === 0) {
+        if (!silent) {
+            errors.errorBox = null;
+        }
+
+        if (model.value !== null) {
+            model.value = null;
+        }
+        return true;
+    }
+
+    if (props.required && unformatted.length === 0 && !final) {
+        if (!silent) {
+            errors.errorBox = null;
+        }
+
+        model.value = props.nullable ? null : '';
+        return false;
+    }
+
+    if (!isValid(unformatted)) {
+        if (!silent) {
+            const d = getDefaultCountry();
+            for (const country of countryCodes) {
+                if (country !== d && isValid(unformatted, country)) {
+                    errors.errorBox = new ErrorBox(new SimpleError({
                         code: 'invalid_field',
-                        message: this.$t('ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1').toString(),
-                        field: 'phone',
+                        message: $t('Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan {country}, voeg dan de internationale code toe voor het nummer. Dit is mogelijks een nummer uit {other-country}', {
+                            'country': CountryHelper.getName(d),
+                            'other-country': CountryHelper.getName(country),
+                        }),
+                        field: props.errorFields,
                     }));
+                    return false;
                 }
-                return false;
             }
-            else {
-                const v = silent ? this.phoneRaw : phoneNumber.formatInternational();
-                this.phoneRaw = v;
 
-                if (this.modelValue !== v) {
-                    this.$emit('update:modelValue', v);
-                }
-                if (!silent) {
-                    this.errorBox = null;
-                }
-                return true;
-            }
+            errors.errorBox = new ErrorBox(new SimpleError({
+                code: 'invalid_field',
+                message: $t('f7cbe04a-3175-4794-8f74-8261a11fbade'),
+                field: props.errorFields,
+            }));
         }
-        catch (e) {
-            console.error(e);
-            if (!silent) {
-                this.errorBox = new ErrorBox(new SimpleError({
-                    code: 'invalid_field',
-                    message: this.$t('ce4a8d4e-a0a2-456e-8fb6-c541c58ef0a1').toString(),
-                    field: 'phone',
-                }));
-            }
-            return false;
+        return false;
+    }
+    else {
+        const formatted = formatPhone(unformatted);
+        if (!silent && formatted !== phoneRaw.value) {
+            phoneRaw.value = formatted;
         }
+        if (model.value !== formatted) {
+            model.value = formatted;
+        }
+        if (!silent) {
+            errors.errorBox = null;
+        }
+        return true;
     }
 }
 </script>

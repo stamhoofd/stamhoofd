@@ -13,6 +13,7 @@ test('Automatically formats the phone number on blur', async () => {
     render(PhoneInput, {
         props: {
             title: 'Phone Number',
+            modelValue: '',
         },
     });
 
@@ -39,6 +40,7 @@ test('Automatically formats Dutch phone numbers on blur', async () => {
     render(PhoneInput, {
         props: {
             title: 'Phone Number',
+            modelValue: '',
         },
     });
 

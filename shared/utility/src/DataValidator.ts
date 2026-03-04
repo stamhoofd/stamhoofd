@@ -130,6 +130,10 @@ export class DataValidator {
         return text.replace(/[^0-9]+/g, '');
     }
 
+    static cleanPhone(text: string) {
+        return text.replace(/[^+0-9]+/g, '');
+    }
+
     static cleanUitpasNumber(text: string) {
         return text.replace(/[^0-9]+/g, '');
     }

@@ -40,7 +40,7 @@
             <textarea v-model="textValue" :placeholder="inputPlaceholder.toString()" class="input" />
         </STInputBox>
         <AddressInput v-else-if="answer.settings.type === RecordType.Address" v-model="addressValue" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
-        <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
+        <PhoneInput v-else-if="answer.settings.type === RecordType.Phone" v-model="textValue" :placeholder="inputPlaceholder.toString()" :title="label.toString()" :required="required" :validator="errors.validator" :nullable="true" />
         <EmailInput v-else-if="answer.settings.type === RecordType.Email" v-model="textValue" :placeholder="inputPlaceholder" :title="label" :required="required" :validator="errors.validator" :nullable="true" />
         <STInputBox v-else-if="answer.settings.type === RecordType.Date" :title="label" error-fields="input" :error-box="errors.errorBox">
             <DateSelection v-model="dateValue" :required="required" :validator="validator" :placeholder="inputPlaceholder.toString()" />
