@@ -83,6 +83,10 @@
     "original": "De URI van de eenheid is te kort",
     "translation": "The unit's URI is too short"
   },
+  "111bb645-f8f6-4788-b98a-f1a3d2d72fce": {
+    "original": "De eenheid werd verwijderd",
+    "translation": "The unit has been deleted"
+  },
   "11b55f40-f3d4-4ce7-9831-57d188367b9f": {
     "original": "Vul de naam van de eenheid in",
     "translation": "Enter the name of the unit"
@@ -178,6 +182,10 @@
   "24a048f6-3c97-4c80-87b7-eccc244b5d12": {
     "original": "Zoek jouw eenheid",
     "translation": "Find your unit"
+  },
+  "24aa53d9-f929-4968-88d6-b6ea27309631": {
+    "original": "De eenheid {{org}} werd aangemaakt",
+    "translation": "The unit {{org}} has been created"
   },
   "253a60ce-cba7-4679-863c-494609d03e8f": {
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Jamboree instellingen > Betaalaccounts.",
@@ -435,6 +443,10 @@
     "original": "Er zijn nog geen eenheden",
     "translation": "There are no units yet"
   },
+  "50b198a4-af37-4514-8d82-b9e4c41d9e91": {
+    "original": "Vul de naam van je eenheid in",
+    "translation": "Enter the name of your unit"
+  },
   "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
     "original": "Door Jamboree en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
     "translation": "By connecting Jamboree and UiTPAS, you can get an automatic refund for every sale at the UiTPAS discounted rate. First, you must become an official UiTPAS organizer so they know where to send the refund. After that, you'll need to create an integration on the <button>Publiq</button> website. Then, enter the data from that integration below. Finally, for each item in your webshop, you must link an event from the UiTdatabank."
@@ -482,6 +494,10 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "You can also set your own domain name (e.g. register.myunit.co.uk). For this, you must have already purchased the domain name; in most cases, this will already be the case if you already have your own website."
+  },
+  "58575442-6c76-4454-b33c-2b83f23c5269": {
+    "original": "Betalingen van eenheden",
+    "translation": "Payments from units"
   },
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
@@ -1371,6 +1387,10 @@
     "original": "De startdatum van de inschrijving ligt buiten het geselecteerde scoutsjaar.",
     "translation": "The start date of the registration is outside the selected scouts year."
   },
+  "dbec3332-380c-40fc-80f9-5c0c36167f54": {
+    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Jamboree als je deze toch wilt gebruiken.",
+    "translation": "You no longer have the right to start a trial period. However, you can activate the package. Contact Jamboree if you still want to use this."
+  },
   "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": {
     "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",
     "translation": "You cannot register for {group} because this scout year is not active."
@@ -1610,6 +1630,10 @@
   "fafaf0c2-cbf4-4f5b-8669-eb09303efe1e": {
     "original": "Je moet volledige platform beheerder zijn om schulden tussen eenheden te wijzigen of toe te voegen",
     "translation": "You must be a full platform administrator to change or add debts between units"
+  },
+  "fcbdb33b-69d7-4b3c-a8ca-ed8f157c08fb": {
+    "original": "De eenheid {{org}} werd verwijderd",
+    "translation": "The unit {{org}} has been deleted"
   },
   "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Jamboree. Voor Microsoft kan je",

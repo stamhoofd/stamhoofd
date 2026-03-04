@@ -83,6 +83,10 @@
     "original": "De URI van de groep is te kort",
     "translation": "The group URI is too short"
   },
+  "111bb645-f8f6-4788-b98a-f1a3d2d72fce": {
+    "original": "De groep werd verwijderd",
+    "translation": "The group has been deleted"
+  },
   "11b55f40-f3d4-4ce7-9831-57d188367b9f": {
     "original": "Vul de naam van de groep in",
     "translation": "Enter the name of the group"
@@ -154,6 +158,10 @@
   "24a048f6-3c97-4c80-87b7-eccc244b5d12": {
     "original": "Zoek jouw groep",
     "translation": "Find your group"
+  },
+  "24aa53d9-f929-4968-88d6-b6ea27309631": {
+    "original": "De groep {{org}} werd aangemaakt",
+    "translation": "The group {{org}} has been created"
   },
   "253a60ce-cba7-4679-863c-494609d03e8f": {
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Ravot instellingen > Betaalaccounts.",
@@ -367,9 +375,17 @@
     "original": "Kijk na of je nog een ander tabblad open hebt staan met Ravot en sluit deze. Jouw browser ondersteunt bepaalde functies niet waardoor we geen bestellingen offline kunnen bijhouden als je internet wegvalt. Probeer de pagina te herladen of in een andere browser te werken.",
     "translation": "Check if you still have another tab open with Ravot and close it. Your browser does not support certain functions, which means we cannot keep track of orders offline if your internet goes down. Try reloading the page or working in a different browser."
   },
+  "4f9bcb18-1682-4acc-9ad1-c443dd2dc147": {
+    "original": "Filter leden die wel of geen geverifieerd account hebben om de gegevens van leden te wijzigen via ‘Mijn account’.",
+    "translation": "Filter members who do or do not have a verified account to edit members’ data through 'My account'."
+  },
   "4fa242b7-c05d-44d4-ada5-fb60e91af818": {
     "original": "Er zijn nog geen groepen",
     "translation": "There are no groups yet"
+  },
+  "50b198a4-af37-4514-8d82-b9e4c41d9e91": {
+    "original": "Vul de naam van je groep in",
+    "translation": "Enter your group name"
   },
   "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
     "original": "Door Ravot en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
@@ -414,6 +430,10 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijngroep.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "You can also set your own domain name (e.g. inschrijven.mijngroep.be). However, you must have already purchased the domain name; this will usually already be the case if you already have your own website."
+  },
+  "58575442-6c76-4454-b33c-2b83f23c5269": {
+    "original": "Betalingen van groepen",
+    "translation": "Payments from groups"
   },
   "5a1993a8-2604-4ca5-be6e-8d6902d9f8c1": {
     "original": "Alle groepen",
@@ -1179,6 +1199,10 @@
     "original": "In sommige situaties (bv. in combinatie met artikelvoorwaarden), is het mogelijk dat er meerdere productkortingen in een winkelmandje actief zijn. Ravot kan dan de korting op hetzelfde item geven, als dat voordeliger zou zijn.",
     "translation": "In some situations (e.g. with product conditions), it's possible that multiple product discounts are active in a shopping cart. Ravot can apply the discount to the same item if that would be more advantageous."
   },
+  "dbec3332-380c-40fc-80f9-5c0c36167f54": {
+    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Ravot als je deze toch wilt gebruiken.",
+    "translation": "You no longer have the right to start a trial period. However, you can activate the package. Contact Ravot if you still want to use this."
+  },
   "ddb211ab-2e6b-4a8c-9f05-5c18d16c911c": {
     "original": "Laat beheerders van groepen (ook niet hoofdbeheerders) toe om inschrijvingen van ‘hun’ leden te bekijken",
     "translation": "Allow administrators of groups (including those who aren't primary administrators) to view the registrations of their members."
@@ -1354,6 +1378,10 @@
   "fb583c62-4ebf-4a54-acbf-5be7c07e09dd": {
     "original": "Inschrijvingen zijn momenteel gesloten via ‘Mijn account’.",
     "translation": "Registrations are currently closed via 'My account'."
+  },
+  "fcbdb33b-69d7-4b3c-a8ca-ed8f157c08fb": {
+    "original": "De groep {{org}} werd verwijderd",
+    "translation": "The group {{org}} has been deleted"
   },
   "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Ravot. Voor Microsoft kan je",

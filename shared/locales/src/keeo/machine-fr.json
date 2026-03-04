@@ -83,6 +83,10 @@
     "original": "De URI van de eenheid is te kort",
     "translation": "L’URI de l’unité est trop court"
   },
+  "111bb645-f8f6-4788-b98a-f1a3d2d72fce": {
+    "original": "De eenheid werd verwijderd",
+    "translation": "L’unité a été supprimée"
+  },
   "11b55f40-f3d4-4ce7-9831-57d188367b9f": {
     "original": "Vul de naam van de eenheid in",
     "translation": "Veuillez saisir le nom de l'unité"
@@ -182,6 +186,10 @@
   "24a048f6-3c97-4c80-87b7-eccc244b5d12": {
     "original": "Zoek jouw eenheid",
     "translation": "Recherchez votre unité"
+  },
+  "24aa53d9-f929-4968-88d6-b6ea27309631": {
+    "original": "De eenheid {{org}} werd aangemaakt",
+    "translation": "L’unité {{org}} a été créée"
   },
   "253a60ce-cba7-4679-863c-494609d03e8f": {
     "original": "Je kan {paymentMethod} niet activeren, daarvoor moet je eerst aansluiten bij een betaalprovider via de Keeo instellingen > Betaalaccounts.",
@@ -439,6 +447,10 @@
     "original": "Er zijn nog geen eenheden",
     "translation": "Il n'y a pas encore d'unités"
   },
+  "50b198a4-af37-4514-8d82-b9e4c41d9e91": {
+    "original": "Vul de naam van je eenheid in",
+    "translation": "Indiquez le nom de votre unité"
+  },
   "50c110d0-67dd-4733-9fb1-49a1a541e2bd": {
     "original": "Door Keeo en UiTPAS aan elkaar te koppelen kan je een automatische terugbetaling krijgen voor elke verkoop met UiTPAS-kansentarief. Eerst moet je een officiële UiTPAS-organisator worden, zo weet men aan wie de terugbetaling moet gebeuren. Nadien moet je een integratie aanmaken op de website van <button>Publiq</button>. Geef nadien de gegevens van die integratie hieronder in. Tot slot zal je bij elk artikel uit de webshop een evenement uit de UiTdatabank moeten koppelen.",
     "translation": "En connectant Keeo et UiTPAS, vous pouvez obtenir un remboursement automatique pour chaque vente réalisée au tarif UiTPAS spécial. Avant tout, vous devez devenir un organisateur officiel UiTPAS afin que les remboursements puissent être correctement attribués. Ensuite, créez une intégration sur le site de <button>Publiq</button>. Saisissez ensuite les informations de cette intégration ci-dessous. Enfin, pour chaque article de la boutique en ligne, vous devrez associer un événement de la base de données UiT."
@@ -482,6 +494,10 @@
   "57e20ed4-d50a-4947-96fc-57958550dcfa": {
     "original": "Je kan ook je eigen domeinnaam (bv. inschrijven.mijneenheid.be) instellen. Hiervoor moet je wel de domeinnaam al gekocht hebben; meestal zal dat al het geval zijn als je al een eigen website hebt.",
     "translation": "Vous pouvez également définir votre propre nom de domaine (par ex. inscription.monunité.be). Pour cela, vous devez avoir déjà acheté le nom de domaine ; c'est généralement déjà le cas si vous avez déjà votre propre site web."
+  },
+  "58575442-6c76-4454-b33c-2b83f23c5269": {
+    "original": "Betalingen van eenheden",
+    "translation": "Paiements des unités"
   },
   "5959a6a9-064a-413c-871f-c74a145ed569": {
     "original": "Oeps, je kan nog geen evenementen met inschrijvingen aanmaken in deze periode. Dit scoutsjaar is nog niet aangemaakt in het systeem.",
@@ -1379,6 +1395,10 @@
     "original": "De startdatum van de inschrijving ligt buiten het geselecteerde scoutsjaar.",
     "translation": "La date de début de l'inscription se trouve en dehors de l'année scoute sélectionnée."
   },
+  "dbec3332-380c-40fc-80f9-5c0c36167f54": {
+    "original": "Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Keeo als je deze toch wilt gebruiken.",
+    "translation": "Vous n'avez plus le droit de lancer une période d’essai. Vous pouvez par contre activer le forfait. Contactez Keeo si vous souhaitez tout de même en bénéficier."
+  },
   "dcb9126f-72c4-42c8-990a-8ddc747c0e2b": {
     "original": "Je kan niet inschrijven voor {group} omdat dit scoutsjaar niet actief is.",
     "translation": "Vous ne pouvez pas vous inscrire pour {group} car cette année scoute n’est pas active."
@@ -1622,6 +1642,10 @@
   "fafaf0c2-cbf4-4f5b-8669-eb09303efe1e": {
     "original": "Je moet volledige platform beheerder zijn om schulden tussen eenheden te wijzigen of toe te voegen",
     "translation": "Vous devez être administrateur complet de la plateforme pour modifier ou ajouter des dettes entre les unités"
+  },
+  "fcbdb33b-69d7-4b3c-a8ca-ed8f157c08fb": {
+    "original": "De eenheid {{org}} werd verwijderd",
+    "translation": "L’unité {{org}} a été supprimée"
   },
   "fcd3549b-1d81-4fe7-9e8f-fcd17501c014": {
     "original": "Zorg dat gebruikers kunnen inloggen via je eigen accountsysteem, apart van Keeo. Voor Microsoft kan je",
