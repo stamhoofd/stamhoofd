@@ -192,6 +192,7 @@ export function useRegistrationQuickActions(): QuickActions {
                 });
             }
 
+            let eventCount = 0;
             for (const event of featuredEvents.value ?? []) {
                 const group = event.group;
 
@@ -224,18 +225,22 @@ export function useRegistrationQuickActions(): QuickActions {
                 }
 
                 const groupText = getGroupDescriptionForEvent(event, memberManager.family.platform);
-                const dateText = Formatter.date(event.startDate);
-                const description = groupText ? $t('{dateText}, voor {groups}', { dateText, groups: groupText }) : dateText;
-
+                const description = Formatter.capitalizeFirstLetter(Formatter.dateRange(event.startDate, event.endDate));
+                eventCount += 1;
                 arr.push({
                     leftComponent: EventIcon,
                     leftProps: { event },
-                    title: $t('Schrijf in voor {event}', { event: event.name }),
+                    prefix: groupText,
+                    title: $t('Inschrijven voor {event}', { event: event.name }),
                     description,
                     action: () => {
                         openEvent(event).catch(console.error);
                     },
                 });
+
+                if (eventCount >= 3) {
+                    break;
+                }
             }
 
             return arr;

@@ -5,6 +5,7 @@ export interface QuickAction {
     illustration?: string;
     leftComponent?: any;
     leftProps?: any;
+    prefix?: string | null;
     title: string;
     description: string;
     rightText?: string;

@@ -11,6 +11,9 @@
                         <component :is="action.leftComponent" v-bind="action.leftProps || {}" v-if="action.leftComponent" />
                         <img v-else :src="action.illustration" class="style-illustration-img">
                     </template>
+                    <p v-if="action.prefix" class="style-title-prefix-list">
+                        {{ action.prefix }}
+                    </p>
                     <h3 class="style-title-list">
                         {{ action.title }}
                     </h3>
