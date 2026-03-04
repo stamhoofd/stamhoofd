@@ -206,7 +206,7 @@ onDeactivated(() => {
             // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
             -webkit-app-region: drag;
 
-            --st-navigation-bar-correction: calc(70px + var(--st-safe-area-top, 0px));
+            --st-navigation-bar-correction: calc(70px + var(--current-view-safe-area-top, 0px));
         }
     }
 
@@ -216,19 +216,19 @@ onDeactivated(() => {
         & + main {
             // Todo: height should be responsive
             // This correction increases the top padding of the scroll area, which corrects 'scroll to' behaviour for overlays
-            --st-navigation-bar-correction: calc(109px + var(--st-safe-area-top, 0px));
+            --st-navigation-bar-correction: calc(109px + var(--current-view-safe-area-top, 0px));
 
             @media (min-width: 550px) {
-                --st-navigation-bar-correction:  calc(109px + max(var(--st-safe-area-top, 0px), 5px));
+                --st-navigation-bar-correction:  calc(109px + max(var(--current-view-safe-area-top, 0px), 5px));
             }
         }
 
         body.web-iOS &, body.native-iOS & {
             & + main {
-                --st-navigation-bar-correction: calc(115px + var(--st-safe-area-top, 0px));
+                --st-navigation-bar-correction: calc(115px + var(--current-view-safe-area-top, 0px));
 
                 @media (min-width: 550px) {
-                --st-navigation-bar-correction:  calc(115px + max(var(--st-safe-area-top, 0px), 5px));
+                --st-navigation-bar-correction:  calc(115px + max(var(--current-view-safe-area-top, 0px), 5px));
                 }
             }
         }
@@ -312,8 +312,12 @@ onDeactivated(() => {
         }
 
         body.web-iOS &, body.native-iOS & {
-            background: linear-gradient($color-background, rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0) 100%);
-            //mask: linear-gradient(rgba(0, 0, 0, 1), rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(
+                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 1) 0%,
+                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.9) var(--st-safe-area-top, 0px),
+                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0.9) calc(var(--st-safe-area-top, 0px) + 70px),
+                rgba(var(--rgb-background, 255), var(--rgb-background, 255), var(--rgb-background, 255), 0) 100%
+            );
             border-bottom: none;
             bottom: -120px;
         }
