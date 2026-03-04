@@ -1,7 +1,7 @@
 <template>
     <SaveView :title="title" :disabled="!hasChanges" :loading="saving" :deleting="deleting" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
-        <template #buttons>
-            <button v-if="!isNew" class="button icon history" type="button" @click="viewAudit" />
+        <template #buttons v-if="!isNew">
+            <button class="button icon history" type="button" @click="viewAudit" />
         </template>
         <h1>
             {{ title }}
