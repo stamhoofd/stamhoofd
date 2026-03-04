@@ -187,7 +187,7 @@ function validate(final = true, silent = false) {
                 if (country !== d && isValid(unformatted, country)) {
                     errors.errorBox = new ErrorBox(new SimpleError({
                         code: 'invalid_field',
-                        message: $t('Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan {country}, voeg dan de internationale code toe voor het nummer. Dit is mogelijks een nummer uit {other-country}', {
+                        message: $t('deb077c6-7346-413e-b844-c73834e7aa1e', {
                             'country': CountryHelper.getName(d),
                             'other-country': CountryHelper.getName(country),
                         }),

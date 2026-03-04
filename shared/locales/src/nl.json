@@ -6240,5 +6240,6 @@
   "c728fcc6-562c-4111-b0b5-5cfa98187941": "Totaal",
   "5c043deb-2343-460a-ab2b-9fac06680ba3": "Pakket",
   "6cb97c70-db56-4883-a2b3-87b65506d4f9": "dagen",
-  "1ea8c630-af92-4cba-bfdc-acc0b0f67fae": "dag"
+  "1ea8c630-af92-4cba-bfdc-acc0b0f67fae": "dag",
+  "deb077c6-7346-413e-b844-c73834e7aa1e": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan {country}, voeg dan de internationale code toe voor het nummer. Dit is mogelijks een nummer uit {other-country}"
 }
