@@ -10,7 +10,7 @@ import { WebshopSettingsStore } from './WebshopSettingsStore';
 import { WebshopTicketsRepo } from './WebshopTicketsRepo';
 
 class CompilerFilterError extends Error {}
-class CallbackError extends Error {}
+export class CallbackError extends Error {}
 
 /**
  * Responsible for webshop orders operations
@@ -440,6 +440,7 @@ export class OrdersStore {
         });
     }
 
+    // todo: remove
     async getAllRaw({ sortItem }: { sortItem?: SortItem & { key: OrderIndexedDBIndex | 'id' } }): Promise<any []> {
         const db = await this.database.get();
 

@@ -2,11 +2,11 @@ import { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { Request } from '@simonbackx/simple-networking';
 import { EventBus, ObjectFetcher } from '@stamhoofd/components';
-import { assertSort, compileToInMemoryFilter, compileToInMemorySorter, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
+import { assertSort, compileToInMemoryFilter, CountFilteredRequest, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, mergeFilters, PrivateOrderWithTickets, privateOrderWithTicketsFilterCompilers, SortItem, SortItemDirection, SortList, StamhoofdFilter, Version } from '@stamhoofd/structures';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { IndexBoxDecoder } from '../IndexBox';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
-import { OrdersStore } from '../repositories/WebshopOrdersRepo';
+import { CallbackError, OrdersStore } from '../repositories/WebshopOrdersRepo';
 import { WebshopTicketPatchesStore, WebshopTicketsStore } from '../repositories/WebshopTicketsRepo';
 import { WebshopManager } from '../WebshopManager';
 
@@ -31,12 +31,11 @@ function startTimeLogger(label: string) {
     };
 }
 
-class VersionError extends Error {}
-
 /**
  * Todo's:
  * - handle deletion of order
  * - handle restream?
+ * - handle ticket changes
  */
 
 class OrderCache {
@@ -45,17 +44,25 @@ class OrderCache {
     private filteredOrders: PrivateOrderWithTickets[] = [];
     readonly eventBus = new EventBus<'batch', void>();
     readonly countEventBus = new EventBus< 'count', number>();
-    private _isStreaming = false;
     private sortItem: SortItem & { key: OrderIndexedDBIndex | 'id' } = { key: 'id', order: SortItemDirection.ASC };
     private filter: StamhoofdFilter = null;
-    private streamData: { manager: WebshopManager; limit: number } | null = null;
-
-    get isStreaming() {
-        return this._isStreaming;
-    }
+    private streamLimit: number | null = null;
 
     get isLoaded() {
         return this.allOrders !== null;
+    }
+
+    constructor(private readonly manager: WebshopManager) {
+        // todo
+        const owner = {};
+        this.manager.orders.eventBus.addListener(owner, 'deleted', () => {
+            console.log('test - order deleted');
+            this.restartStreaming().catch(console.error);
+        });
+        this.manager.orders.eventBus.addListener(owner, 'fetched', () => {
+            console.log('test - orders fetched');
+            this.restartStreaming().catch(console.error);
+        });
     }
 
     /**
@@ -63,18 +70,15 @@ class OrderCache {
      * @returns
      */
     private async restartStreaming() {
-        if (!this.streamData) {
+        console.log('test - restart streaming');
+        if (this.streamLimit === null) {
             // streaming did not yet start
             return;
         }
 
         OrderCache.streamVersion++;
-        this._isStreaming = false;
-        this.allOrders = null;
 
-        this.filteredOrders = [];
-
-        await this.startStreamAllOrders(this.streamData);
+        await this.startStreamAllOrders(this.streamLimit);
     }
 
     async count(): Promise<number> {
@@ -112,7 +116,7 @@ class OrderCache {
             const compiledFilter = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
 
             let count = 0;
-            const limit = this.streamData?.limit ?? 100;
+            const limit = this.streamLimit ?? 100;
 
             this.filteredOrders = this.allOrders.filter((order) => {
                 if (compiledFilter(order)) {
@@ -154,11 +158,15 @@ class OrderCache {
                 return;
             }
 
-            // always sort on id second because this is how IndexedDb sorts
-            const inMemorySorter = compileToInMemorySorter([sortItem, { key: 'id', order: sortItem.order }], ordersIndexedDBSorters);
+            void this.restartStreaming();
 
-            this.allOrders.sort(inMemorySorter);
-            this.filteredOrders.sort(inMemorySorter);
+            // todo: probably faster to stream again (because of indexes)
+
+            // always sort on id second because this is how IndexedDb sorts
+            // const inMemorySorter = compileToInMemorySorter([sortItem, { key: 'id', order: sortItem.order }], ordersIndexedDBSorters);
+
+            // this.allOrders.sort(inMemorySorter);
+            // this.filteredOrders.sort(inMemorySorter);
             return;
         }
 
@@ -170,26 +178,29 @@ class OrderCache {
         void this.restartStreaming();
     }
 
-    async startStreamAllOrders({ manager, limit }: { manager: WebshopManager; limit: number }): Promise<void> {
+    async startStreamAllOrders(limit: number): Promise<void> {
         console.log('test - start stream all orders');
-        this._isStreaming = true;
+        this.allOrders = null;
+        const filteredOrders: PrivateOrderWithTickets[] = [];
+        const version = OrderCache.streamVersion + 1;
+        OrderCache.streamVersion = version;
 
-        if (!this.streamData) {
-            this.streamData = { manager, limit };
+        this.filteredOrders = filteredOrders;
+
+        if (this.streamLimit === null) {
+            this.streamLimit = limit;
         }
 
         const timeLogger = startTimeLogger('batch');
 
         try {
-            const db = await manager.database.get();
+            const db = await this.manager.database.get();
             const openTransaction = db.transaction([OrdersStore.storeName, WebshopTicketsStore.storeName, WebshopTicketPatchesStore.storeName], 'readonly');
             const decoder = new IndexBoxDecoder(PrivateOrderWithTickets as Decoder<PrivateOrderWithTickets>);
 
             const allOrders: PrivateOrderWithTickets[] = [];
-            const filteredOrders = this.filteredOrders;
-            const version = OrderCache.streamVersion;
 
-            await manager.orders.streamRaw({
+            await this.manager.orders.streamRaw({
                 filter: this.filter,
                 sortItem: this.sortItem,
                 openTransaction,
@@ -197,7 +208,7 @@ class OrderCache {
                     if (version !== OrderCache.streamVersion) {
                         const message = `Stream version does not match: ${version} !== ${OrderCache.streamVersion}`;
                         console.error(message);
-                        throw new VersionError(`Stream version does not match: ${version} !== ${OrderCache.streamVersion}`);
+                        throw new CallbackError(`Stream version does not match: ${version} !== ${OrderCache.streamVersion}`);
                     }
                     let order: PrivateOrderWithTickets;
 
@@ -206,11 +217,11 @@ class OrderCache {
                     }
                     catch (e) {
                     // force fetch all again
-                        manager.orders.apiClient.clearLastFetchedOrder().catch(console.error);
+                        this.manager.orders.apiClient.clearLastFetchedOrder().catch(console.error);
                         throw e;
                     }
 
-                    order.tickets = await manager.tickets.getForOrder(order.id, true, openTransaction);
+                    order.tickets = await this.manager.tickets.getForOrder(order.id, true, openTransaction);
                     allOrders.push(order);
                     return order;
                 },
@@ -230,14 +241,10 @@ class OrderCache {
             timeLogger.stop();
         }
         catch (e) {
-            if (e instanceof VersionError) {
-                console.log('test - version error');
+            if (e instanceof CallbackError) {
                 return;
             }
             throw e;
-        }
-        finally {
-            this._isStreaming = false;
         }
 
         this.countEventBus.sendEvent('count', this.filteredOrders.length).catch(console.error);
@@ -283,7 +290,7 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
     private internetPromise: Promise<void> | null = null;
     private _lastInternetLoad = 0;
 
-    private readonly orderCache = new OrderCache();
+    private readonly orderCache: OrderCache;
 
     get lastInternetLoad() {
         return this._lastInternetLoad;
@@ -293,7 +300,9 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
         return this._isOffline;
     }
 
-    constructor(private readonly manager: WebshopManager) {}
+    constructor(private readonly manager: WebshopManager) {
+        this.orderCache = new OrderCache(manager);
+    }
 
     reset() {
         this._isOffline = false;
@@ -375,7 +384,7 @@ class OrderFetcherHelper implements ObjectFetcher<PrivateOrderWithTickets> {
         this.orderCache.setSort(sortItem);
 
         if (!this.orderCache.isLoaded) {
-            this.orderCache.startStreamAllOrders({ manager: this.manager, limit: data.limit }).catch(console.error);
+            this.orderCache.startStreamAllOrders(data.limit).catch(console.error);
         }
 
         const limit = data.limit;
