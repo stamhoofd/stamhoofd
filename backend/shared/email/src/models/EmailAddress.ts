@@ -91,7 +91,7 @@ export class EmailAddress extends QueryableModel {
 
     // Methods
     static async getByEmails(emails: string[], organizationId: string | null): Promise<EmailAddress[]> {
-        if (emails.length > 100) {
+        if (emails.length > 1000) {
             // Normally an organization will never have so much bounces, so we'll request all emails and filter in them
             const all = await this.where({ organizationId }, { limit: 1000 });
             return all.filter(e => emails.includes(e.email));
@@ -101,21 +101,24 @@ export class EmailAddress extends QueryableModel {
             return [];
         }
 
-        if (organizationId === null) {
-            const [rows] = await Database.select(
-                `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND (\`organizationId\` is NULL OR \`hardBounce\` = 1 OR \`markedAsSpam\` = 1)`,
-                [emails],
+        const query = EmailAddress.select().where(
+            'email', emails,
+        );
+        if (organizationId) {
+            query.andWhere(
+                SQL.where('organizationId', organizationId)
+                    .or('organizationId', null),
             );
-
-            return this.fromRows(rows, this.table);
+        }
+        else {
+            query.andWhere(
+                SQL.where('organizationId', null)
+                    .or('hardBounce', 1)
+                    .or('markedAsSpam', 1),
+            );
         }
 
-        const [rows] = await Database.select(
-            `SELECT ${this.getDefaultSelect()} FROM ${this.table} WHERE \`email\` IN (?) AND \`organizationId\` = ?`,
-            [emails, organizationId],
-        );
-
-        return this.fromRows(rows, this.table);
+        return query.fetch();
     }
 
     // Methods

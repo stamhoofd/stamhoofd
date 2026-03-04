@@ -1,9 +1,11 @@
 import { AutoEncoder, BooleanDecoder, Decoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { EmailAddress } from '@stamhoofd/email';
+import { Email, EmailAddress } from '@stamhoofd/email';
 import { Context } from '../../../helpers/Context.js';
 import { SESv2Client, DeleteSuppressedDestinationCommand } from '@aws-sdk/client-sesv2'; // ES Modules import
+import { RateLimiter } from '@stamhoofd/models';
+import { SQL } from '@stamhoofd/sql';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -36,6 +38,16 @@ class Body extends AutoEncoder {
     @field({ decoder: BooleanDecoder, optional: true })
     markedAsSpam?: boolean;
 }
+
+export const unblockLimiter = new RateLimiter({
+    limits: [
+        {
+            // Max 10 per week
+            limit: 10,
+            duration: 24 * 60 * 1000 * 60 * 7,
+        },
+    ],
+});
 
 type ResponseBody = undefined;
 
@@ -89,20 +101,20 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             const organization = await Context.setOptionalOrganizationScope();
-            await Context.authenticate();
+            const { user } = await Context.authenticate();
 
-            if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error();
-            }
-
-            const query = EmailAddress.select().where(
-                'email', request.body.email,
-            );
             if (organization) {
-                query.andWhere('organizationId', organization.id);
+                if (!await Context.auth.hasFullAccess(organization.id)) {
+                    throw Context.auth.error();
+                }
+            }
+            else {
+                if (!Context.auth.hasPlatformFullAccess()) {
+                    throw Context.auth.error();
+                }
             }
 
-            const emails = await query.fetch();
+            const emails = await EmailAddress.getByEmails([request.body.email], organization?.id ?? null);
 
             if (emails.length === 0) {
                 throw new SimpleError({
@@ -112,6 +124,43 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                     statusCode: 404,
                 });
             }
+
+            // Track limits
+            for (const email of emails) {
+                const wasBlocked = email.unsubscribedAll || email.unsubscribedMarketing || email.hardBounce || email.markedAsSpam;
+
+                if (email.organizationId === null || (organization && email.organizationId === organization.id)) {
+                    if (Context.auth.hasPlatformFullAccess()) {
+                        // Only allowed as platform admins
+                        email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
+                        email.unsubscribedMarketing = request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
+                    }
+                }
+
+                email.hardBounce = request.body.hardBounce ?? email.hardBounce;
+                email.markedAsSpam = request.body.markedAsSpam ?? email.markedAsSpam;
+
+                const isBlocked = email.unsubscribedAll || email.unsubscribedMarketing || email.hardBounce || email.markedAsSpam;
+
+                if (!isBlocked && wasBlocked && !Context.auth.hasPlatformFullAccess()) {
+                    try {
+                        unblockLimiter.track(organization?.id ?? '', 1);
+                    }
+                    catch (e) {
+                        Email.sendWebmaster({
+                            subject: '[Limiet] Limiet bereikt voor aantal unblocks',
+                            text: 'Beste, \nDe limiet werd bereikt voor het aantal email unblocks per week. \nUser: ' + user.email + '\n\nVereniging: ' + (organization ? (organization.id + ' (' + organization.name + ')') : 'platform') + '\n\n' + e.message + '\n\nStamhoofd',
+                        });
+
+                        throw new SimpleError({
+                            code: 'too_many_unblocks',
+                            message: 'Too many unblocks',
+                            human: $t(`Oeps! Om spam te voorkomen limiteren we het aantal e-mailadressen dat je kan deblokkeren per week. Gelieve contact op te nemen om meer te deblokkeren in uitzonderlijke situaties.`),
+                        });
+                    }
+                }
+            }
+
             console.log('Updated email address settings', request.body);
             const client = new SESv2Client({});
 
@@ -132,10 +181,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             for (const email of emails) {
-                email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
-                email.unsubscribedMarketing = request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
-                email.hardBounce = request.body.hardBounce ?? email.hardBounce;
-                email.markedAsSpam = request.body.markedAsSpam ?? email.markedAsSpam;
+                // Only save if all went well
                 await email.save();
             }
 

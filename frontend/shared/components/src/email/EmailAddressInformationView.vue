@@ -158,7 +158,7 @@ async function unblockEmailAddress() {
 
     isUnblockingEmailAddress.value = true;
     try {
-        await context.value.authenticatedIdentityServer.request({
+        await context.value.authenticatedServer.request({
             method: 'POST',
             path: '/email/manage',
             body: {

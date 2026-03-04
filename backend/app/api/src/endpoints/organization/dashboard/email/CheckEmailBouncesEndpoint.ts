@@ -38,7 +38,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             throw Context.auth.error();
         }
 
-        if (request.body.length > 10000) {
+        if (request.body.length > 1000) {
             throw new SimpleError({
                 code: 'too_many_recipients',
                 message: 'Too many recipients',
