@@ -60,7 +60,7 @@
                 <p>{{ $t('18cbfdea-798d-4efc-aad8-f6897c9efb2c') }}</p>
 
                 <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`5fbb90ca-384f-4f17-b7c5-5d05511211d1`)">
-                    <NumberInput v-model="minimumDaysBetween" placeholder="" suffix="dagen" suffix-singular="dag" :min="1" :stepper="true" />
+                    <NumberInput v-model="minimumDaysBetween" placeholder="" :suffix="$t('dagen')" :suffix-singular="$t('dag')" :min="1" :stepper="true" />
                 </STInputBox>
 
                 <STInputBox error-fields="price" :error-box="errors.errorBox" :title="$t(`cd7d36a1-050e-4457-8dfd-1c81d3654189`)">

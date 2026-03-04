@@ -41,7 +41,7 @@
 
         <template v-if="$feature('member-trials')">
             <STInputBox :title="$t('31d7f684-a6e1-4df5-8ac7-c971e5919cc7')+ '*'" error-fields="trialDays" :error-box="errors.errorBox">
-                <NumberInput v-model="trialDays" suffix="dagen" suffix-singular="dag" :min="0" />
+                <NumberInput v-model="trialDays" :suffix="$t('dagen')" :suffix-singular="$t('dag')" :min="0" />
             </STInputBox>
             <p class="style-description-small">
                 * {{ $t('513b343f-6a4e-402c-90c4-c0d73e4f65a3') }}
