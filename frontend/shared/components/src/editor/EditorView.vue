@@ -1,5 +1,5 @@
 <template>
-    <form class="editor-view st-view" @submit.prevent="$emit('save')">
+    <form class="editor-view st-view" novalidate @submit.prevent="$emit('save')">
         <STNavigationBar :title="title" :disable-dismiss="true" :disable-pop="true">
             <template #left>
                 <BackButton v-if="canPop" @click="pop" />

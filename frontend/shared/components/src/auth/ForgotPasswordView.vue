@@ -1,5 +1,5 @@
 <template>
-    <form class="st-view forgot-password-view" @submit.prevent="submit">
+    <form class="st-view forgot-password-view" novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t(`0eb7d18f-2fd7-4ac8-acb6-5e1c31482b3c`)" />
         <main class="center small">
             <h1>{{ $t('66176374-df16-49fb-a487-5269b97e7286') }}</h1>

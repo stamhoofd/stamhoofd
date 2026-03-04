@@ -1,5 +1,5 @@
 <template>
-    <form class="signup-view st-view" @submit.prevent="submit">
+    <form class="signup-view st-view" novalidate @submit.prevent="submit">
         <STNavigationBar :title="$t(`2fd0cda5-225c-4b65-87b1-210c9b54023c`)" />
 
         <main class="center">

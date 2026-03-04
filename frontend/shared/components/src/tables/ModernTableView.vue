@@ -45,7 +45,7 @@
 
                 <div class="input-with-buttons">
                     <div>
-                        <form class="input-icon-container icon search gray" @submit.prevent="blurFocus">
+                        <form novalidate class="input-icon-container icon search gray" @submit.prevent="blurFocus">
                             <input v-model="searchQuery" class="input" name="search" type="search" inputmode="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`01e2b860-7045-4a0c-84ca-2303346d14b2`)">
                         </form>
                     </div>

@@ -14,7 +14,7 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <form @submit.prevent="save">
+            <form @submit.prevent="save" novalidate>
                 <STInputBox v-if="firstName || lastName || usesPassword" error-fields="firstName,lastName" :error-box="errors.errorBox" :title="$t(`d9f16258-ce87-41ad-a5d4-a66ad6bd514d`)">
                     <div class="input-group">
                         <div>
