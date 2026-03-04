@@ -55,7 +55,6 @@
     "frontend:types": "wait-on shared/locales/esm/dist/index.d.ts && cd frontend/app/dashboard && yarn -s check-types",
     "prepare": "husky",
     "dns": "export SERVER_IP=127.0.0.1 && cd .development && source loadenv.sh && coredns"
-
   },
   "dependencies": {
     "@simonbackx/simple-encoding": "2.23.1",
@@ -73,7 +72,7 @@
     "jose": "^5.9.6",
     "jsvat-next": "3.0.2",
     "jszip": "^3.7.1",
-    "libphonenumber-js": "^1.9.39",
+    "libphonenumber-js": "^1.12.38",
     "lru-cache": "^11.2.6",
     "luxon": "3.4.4",
     "path-browserify": "^1.0.1",
