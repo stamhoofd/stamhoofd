@@ -932,7 +932,10 @@ export class GroupedBalanceItems {
     }
 
     get unitPriceWithVAT() {
-        return this.items.reduce((acc, item) => acc + item.unitPriceWithVAT, 0);
+        if (this.amount === 0) {
+            return 0;
+        }
+        return Math.round(this.price / this.amount);
     }
 
     get pricePending() {
