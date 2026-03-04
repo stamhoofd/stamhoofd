@@ -6,6 +6,7 @@ import { parsePhoneNumber } from 'libphonenumber-js';
 import { toRaw } from 'vue';
 import { OrderIndexedDBIndex, ordersIndexedDBSorters } from '../ordersIndexedDBSorters';
 import { WebshopManager } from '../WebshopManager';
+import { OrderRequiredFilterHelper } from './OrderRequiredFilterHelper';
 
 let lastNextRequest: LimitedFilteredRequest | null = null;
 let itemsToAdvanceNext: number = 0;
@@ -177,6 +178,13 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
         async fetchCount(data: CountFilteredRequest): Promise<number> {
             data = toRaw(data);
             console.log('Orders(IndexedDb).fetchCount', data);
+
+            await this.loadFromInternet();
+
+            if (!data.search && OrderRequiredFilterHelper.isDefault(manager.preview.id, data.filter)) {
+                return await manager.orders.countAll();
+            }
+
             let count = 0;
 
             const filters = [data.filter];
@@ -187,8 +195,6 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
             }
 
             const filter = mergeFilters(filters, '$and');
-
-            await this.loadFromInternet();
 
             await manager.streamOrdersWithPatchedTickets({
                 callback: () => {
