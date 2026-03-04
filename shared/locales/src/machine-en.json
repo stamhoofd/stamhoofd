@@ -21043,6 +21043,10 @@
     "original": "vrij",
     "translation": "available"
   },
+  "deb077c6-7346-413e-b844-c73834e7aa1e": {
+    "original": "Ongeldig GSM-nummer. Als je een nummer probeert in te geven uit een ander land dan {country}, voeg dan de internationale code toe voor het nummer. Dit is mogelijks een nummer uit {other-country}",
+    "translation": "Invalid mobile number. If you're trying to enter a number from a country other than {country}, please include the international code. This might be a number from {other-country}."
+  },
   "deb2a251-2eab-4132-849e-6b1a8bc87300": {
     "original": "Naam van de activiteit",
     "translation": "Name of the activity"
