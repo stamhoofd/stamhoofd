@@ -40,11 +40,26 @@ export class FiscalDocumentYearHelper {
     }
 
     /**
+     * Should at the very very last date download Belcotax by 1st of july
+     */
+    getAbsoluteDeadlineForYear(calendarYear: number): DateTime {
+        return DateTime.fromObject({ year: calendarYear + 1, month: 7, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: 'Europe/Brussels' });
+    }
+
+    /**
      * Check if the fiscal document XML can be downloaded. It can be downloaded if the fiscal document was created after the max publish date or if now is before the max publish date.
      */
-    canDownloadFiscalDocumentXML(calendarYear: number, createdAt: Date): boolean {
-        const deadline = this.getPublishDeadlineForYear(calendarYear).toJSDate();
+    canDownloadFiscalDocumentXML(calendarYear: number): boolean {
+        const deadline = this.getAbsoluteDeadlineForYear(calendarYear).toJSDate();
         // if created after max publish date or if now is before max publish date
-        return createdAt.getTime() >= deadline.getTime() || new Date().getTime() < deadline.getTime();
+        return new Date().getTime() < deadline.getTime();
+    }
+
+    /**
+     * Check if the fiscal document XML can be downloaded. It can be downloaded if the fiscal document was created after the max publish date or if now is before the max publish date.
+     */
+    isAfterDeadline(calendarYear: number): boolean {
+        const deadline = this.getPublishDeadlineForYear(calendarYear).toJSDate();
+        return new Date().getTime() >= deadline.getTime();
     }
 }

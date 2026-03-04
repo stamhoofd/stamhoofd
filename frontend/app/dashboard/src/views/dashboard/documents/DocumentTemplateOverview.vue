@@ -247,7 +247,7 @@ const canAlterUpdates = computed(() => {
     }
 
     if (props.template.privateSettings.templateDefinition.type === 'fiscal') {
-        if (fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year, props.template.createdAt)) {
+        if (fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year)) {
             // Still possible to make changes before publishing to belcotax
             return true;
         }
@@ -289,6 +289,13 @@ async function toggleUpdatesEnabled() {
         return;
     }
     const updatesEnabled = !props.template.updatesEnabled;
+
+    if (props.template.privateSettings.templateDefinition.type === 'fiscal') {
+        if (fiscalDocumentYearHelper.isAfterDeadline(props.template.year)) {
+            Toast.error($t('Opgelet, dit fiscale attest is hoogstwaarschijnlijk al ingediend geweest. Maak geen aanpassingen indien het al werd ingediend!')).show();
+        }
+    }
+    
     if (!(await CenteredMessage.confirm(
         updatesEnabled ? $t('Automatische wijzigingen aanzetten?') : $t('Automatische wijzigingen uitzetten?'),
         updatesEnabled ? $t('Aanzetten') : $t('Uitzetten'),
@@ -351,7 +358,7 @@ async function deleteTemplate() {
     }
     deleting.value = false;
 }
-function exportXml() {
+async function exportXml() {
     if (props.template.updatesEnabled) {
         Toast.error($t('94090582-213a-4016-8c1c-a95331a4c225')).show();
         return;
@@ -359,17 +366,40 @@ function exportXml() {
 
     // if fiscal document
     if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
-        const canDownload = fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year, props.template.createdAt);
+        const canDownload = fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year);
         if (!canDownload) {
             Toast.error($t('4988e582-50f7-4922-8ecb-5939db9de3dd')).show();
             return;
+        }
+
+        const afterDeadline = fiscalDocumentYearHelper.isAfterDeadline(props.template.year);
+        if (afterDeadline) {
+            const stop = await CenteredMessage.show({
+                title: $t('Deadline voorbij'),
+                description: $t('Download de XML enkel en alleen als je de fiscale attesten nog niet hebt ingediend in Belcotax. Je moet fiscale attesten voor 1 maart indienen in Belcotax. Enkel in heel uitzonderlijke gevallen kan je eventueel proberen om nog later in te dienen.'),
+                buttons: [
+                    {
+                        text: $t('Nog niet ingediend'),
+                        value: false,
+                        type: 'destructive',
+                        availabilityDelay: 2_000
+                    }, {
+                        text: $t('Annuleren'),
+                        value: true,
+                        type: 'secundary',
+                    }
+                ]
+            });
+            if (stop) {
+                return;
+            }
         }
     }
 
     // Start firing questions
     const c = gotoRecordCategory(0);
     if (c) {
-        return present({
+        await present({
             components: [
                 new ComponentWithProperties(NavigationController, {
                     root: c,
