@@ -100,7 +100,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Package not found',
-                            human: $t('Het pakket dat je wil verlengen kan je helaas niet meer verlengen'),
+                            human: $t('0e5baf7f-89be-4665-a3dd-b1603b5a6627'),
                         });
                     }
 
@@ -181,7 +181,7 @@ export class ActivatePackagesEndpoint extends Endpoint<Params, Query, Body, Resp
             throw new SimpleError({
                 code: 'missing_data',
                 message: 'Checkout was empty',
-                human: $t('Niets om aan te rekenen'),
+                human: $t('c5cf0531-9751-4be0-be0c-31ccfac1722d'),
             });
         }
 

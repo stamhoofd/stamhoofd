@@ -77,7 +77,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         code: 'invalid_field',
                         message: 'Name is too short',
                         field: 'name',
-                        human: $t('Vul de naam van je vereniging in'),
+                        human: $t('50b198a4-af37-4514-8d82-b9e4c41d9e91'),
                     });
                 }
                 organization.name = request.body.name ?? organization.name;

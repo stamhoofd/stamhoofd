@@ -52,10 +52,10 @@
                         </p>
 
                         <p v-else-if="pack.inTrial && pack.package.validUntil" class="style-description-small">
-                            {{ $t('Proefperiode geldig tot {dateTime}.', {dateTime: formatDateTime(pack.package.validUntil)}) }}
+                            {{ $t('2f7cdb1b-991f-4f79-9d59-1d2aa642dda3', {dateTime: formatDateTime(pack.package.validUntil)}) }}
 
                             <button type="button" class="inline-link error" @click.stop="stopTrial(pack)">
-                                <span>{{ $t('Stopzetten') }}</span>
+                                <span>{{ $t('73c746e6-e984-45e5-98cd-645810c238a3') }}</span>
                             </button>
                         </p>
 
@@ -65,17 +65,17 @@
 
                         <template #right>
                             <span v-if="!pack.alreadyBought && (pack.inTrial || !pack.canStartTrial)" class="button text selected">
-                                <span>{{ $t('Activeren') }}</span>
+                                <span>{{ $t('10216b79-6ff4-40b8-991e-58f8c5162999') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
                             <span v-if="!pack.alreadyBought && !pack.inTrial && pack.canStartTrial" class="button text selected">
-                                <span>{{ $t('Uitproberen') }}</span>
+                                <span>{{ $t('8a53e9d9-aaac-4fb4-9102-ae0c05425c22') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
                             <span v-if="pack.alreadyBought && pack.expiresSoon && pack.package.meta.allowRenew" class="button text selected">
-                                <span>{{ $t('Verlengen') }}</span>
+                                <span>{{ $t('5c15d3f5-56e2-4dcd-afe1-feeb589b9bbc') }}</span>
                                 <span class="icon arrow-right-small" />
                             </span>
 
@@ -221,16 +221,16 @@ async function stopTrial(pack: SelectablePackage) {
     if (!pack.inTrial) {
         return;
     }
-    if (!await CenteredMessage.confirm($t('Ben je zeker dat je de proefperiode wilt stopzetten?'), $t('Ja, stopzetten'))) {
+    if (!await CenteredMessage.confirm($t('5307823e-82d7-46b4-8632-52025690b85f'), $t('379877c9-5dc7-44b0-9681-2cca53707227'))) {
         return;
     }
     // Activate trial if possible (otherwise go to confirm)
-    deactivatePackage.deactivate(pack.package, $t('Proefperiode stopgezet')).catch(console.error);
+    deactivatePackage.deactivate(pack.package, $t('6901fcd0-a577-4792-8e78-bf67ba8fddc5')).catch(console.error);
 }
 
 async function checkoutTrial(bundle: STPackageBundle, message: string) {
     if (loadingModule.value) {
-        new Toast($t('Even geduld, nog bezig met laden...'), 'info').show();
+        new Toast($t('df3377e8-f484-43df-a973-75b47df42adb'), 'info').show();
         return;
     }
     loadingModule.value = bundle as any as STPackageType;
@@ -270,7 +270,7 @@ async function checkout(pack: SelectablePackage) {
         switch (pack.bundle) {
             case STPackageBundle.Members: {
                 if (!organization.value.meta.packages.canStartMembersTrial) {
-                    new Toast($t('Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.'), 'error').show();
+                    new Toast($t('dbec3332-380c-40fc-80f9-5c0c36167f54'), 'error').show();
                     await openPackageDetails(pack);
                     return;
                 }
@@ -280,12 +280,12 @@ async function checkout(pack: SelectablePackage) {
             }
             case STPackageBundle.Webshops: {
                 if (!organization.value.meta.packages.canStartWebshopsTrial) {
-                    new Toast($t('Je hebt geen recht meer om een proefperiode op te starten. Je kan wel het pakket activeren. Neem contact op met Stamhoofd als je deze toch wilt gebruiken.'), 'error').show();
+                    new Toast($t('dbec3332-380c-40fc-80f9-5c0c36167f54'), 'error').show();
                     await openPackageDetails(pack);
                     return;
                 }
                 // Activate trial if possible (otherwise go to confirm)
-                await checkoutTrial(STPackageBundle.TrialWebshops, $t('De proefperiode voor webshops is gestart. Neem je tijd om alles rustig uit te proberen. Als je het daarna definitief in gebruik wilt nemen, kan je het systeem activeren.'));
+                await checkoutTrial(STPackageBundle.TrialWebshops, $t('12cb7852-c9c2-4072-af33-f71bee0fe441'));
                 break;
             }
         }

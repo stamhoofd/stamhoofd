@@ -115,7 +115,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
         },
         {
             id: 'balanceItem.id',
-            name: $t(`Aanrekening ID`),
+            name: $t(`89594841-9a44-473f-8250-0ccafb570b6f`),
             width: 40,
             getValue: (object: PaymentWithItem) => ({
                 value: object.balanceItemPayment.balanceItem.id,

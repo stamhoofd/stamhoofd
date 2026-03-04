@@ -34,7 +34,7 @@ const configurationId = computed(() => {
 const modernTableView = ref(null) as Ref<null | ComponentExposed<typeof ModernTableView>>;
 const filterBuilders = getBalanceItemsUIFilterBuilders();
 const title = computed(() => {
-    return $t('Aanrekeningen');
+    return $t('fbe6e4c4-8d98-41b5-b839-11d469031002');
 });
 
 function getRequiredFilter(): StamhoofdFilter | null {
@@ -64,7 +64,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, BalanceItemType>({
         id: 'type',
-        name: $t('Type'),
+        name: $t('23671282-34da-4da9-8afd-503811621055'),
         getValue: object => object.type,
         format: val => getBalanceItemTypeName(val),
         minimumWidth: 100,
@@ -74,7 +74,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'category',
-        name: $t('Categorie'),
+        name: $t('c178055f-e24d-4fbf-b95c-3f447721da62'),
         getValue: object => Formatter.capitalizeFirstLetter(object.category),
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -84,7 +84,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'itemTitle',
-        name: $t('Titel'),
+        name: $t('55316f2c-4958-45fe-a57b-4fdb9c3a30bb'),
         getValue: object => object.itemTitle,
         minimumWidth: 150,
         recommendedWidth: 300,
@@ -95,9 +95,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'itemDescription',
-        name: $t('Ondertitel'),
+        name: $t('936808bb-97a7-4834-8959-468bbf0610bf'),
         getValue: object => object.itemDescription ?? '',
-        format: (val, width) => val || $t('Leeg'),
+        format: (val, width) => val || $t('6fa11f7a-dbd1-4da1-ac9b-c18a23606df1'),
         getStyle: val => !val ? 'gray' : '',
         minimumWidth: 150,
         recommendedWidth: 300,
@@ -106,7 +106,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'amount',
-        name: $t('Aantal'),
+        name: $t('6d6cce57-34e9-4d38-9bbe-d59692f22803'),
         getValue: object => object.quantity,
         format: (val, width) => Formatter.integer(val),
         minimumWidth: 50,
@@ -117,7 +117,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'unitPrice',
-        name: $t('Eenheidsprijs'),
+        name: $t('ac719e97-a593-41c0-b92a-3db36792c56d'),
         getValue: object => object.unitPrice,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -129,7 +129,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'payablePriceWithVAT',
-        name: $t('Prijs'),
+        name: $t('bf33f977-98e6-4c00-b4ad-f95e816011d3'),
         getValue: object => object.payablePriceWithVAT,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -141,7 +141,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'priceOpen',
-        name: $t('Te betalen'),
+        name: $t('424a738b-6dd6-4200-bf6e-2517f6ef7c1f'),
         getValue: object => object.priceOpen,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -152,7 +152,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePaid',
-        name: $t('Betaald bedrag'),
+        name: $t('a314660b-0163-44f2-b329-72f8595d3c69'),
         getValue: object => object.pricePaid,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -164,7 +164,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, number>({
         id: 'pricePending',
-        name: $t('In verwerking'),
+        name: $t('e138c55d-ae66-4be3-ae15-497663ac7fa7'),
         getValue: object => object.pricePending,
         format: (val, width) => Formatter.price(val),
         getStyle: val => val === 0 ? 'gray' : (val < 0 ? 'negative' : ''),
@@ -179,7 +179,7 @@ const allColumns: Column<ObjectType, any>[] = [
             id: `balanceItem.relations.${type}`,
             name: getBalanceItemRelationTypeName(type),
             getValue: object => object.relations.get(type)?.name?.toString() || '',
-            format: (val, width) => val || $t('Leeg'),
+            format: (val, width) => val || $t('6fa11f7a-dbd1-4da1-ac9b-c18a23606df1'),
             getStyle: val => !val ? 'gray' : '',
             minimumWidth: 150,
             recommendedWidth: 300,
@@ -190,7 +190,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'description',
-        name: $t('Beschrijving'),
+        name: $t('d151ed17-b421-4e50-9a6e-db3a09a540d3'),
         getValue: object => object.description,
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -200,7 +200,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, BalanceItemStatus>({
         id: 'status',
-        name: $t('Status'),
+        name: $t('f80993dd-16ac-48d6-8be7-09cec1206f8d'),
         getValue: object => object.status,
         format: val => getBalanceItemStatusName(val),
         getStyle: (val) => {

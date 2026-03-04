@@ -75,9 +75,9 @@ export class EditorSmartVariable extends AutoEncoder {
             if (variable.id === 'paymentUrl' && variable instanceof EditorSmartButton) {
                 if (replacements.find(r => r.token === 'paymentTable' && (r.value || r.html))) {
                     // Rename default button in the case of mailing to payments
-                    variable.text = $t('Betaling nakijken');
-                    variable.name = $t('Knop om de betaling na te kijken');
-                    variable.hint = $t('Deze knop gaat naar een pagina om de betaalinformatie te bekijken, zoals de overschrijvingsinstructies.');
+                    variable.text = $t('56f1b582-708f-4b67-8834-66f2998ef815');
+                    variable.name = $t('ca477668-f748-462c-bc69-e4f550d8a4ff');
+                    variable.hint = $t('a75aa2bc-99f7-426b-a249-8664a5928c0b');
                 }
             }
 
@@ -222,7 +222,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
-            name: $t(`Totaalbedrag`),
+            name: $t(`dcf8ea06-e470-4992-93d9-5fbc4c47a321`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -252,7 +252,7 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewTable',
-            name: $t(`Tabel met alle items`),
+            name: $t(`3fa6034f-f2fc-441e-8fe7-76de4e05e9f3`),
         }));
 
         variables.push(EditorSmartVariable.create({
@@ -272,14 +272,14 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentData',
-            name: $t(`Tabel met gegevens`),
-            description: $t('Naam, eventueel bestelnummer, GSM-nummer en totaalbedrag'),
+            name: $t(`9cca94e4-9de2-442a-8fb2-e2e986c2650b`),
+            description: $t('d01aef1a-9b1b-47df-a97d-87f8fa496f18'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewContext',
             name: $t(`a62f0a8f-384b-403a-9bc3-c719ca3839cf`),
-            description: $t('Korte beschrijving (2 - 3 woorden) waarvoor er betaald werd'),
+            description: $t('de009249-782f-4a0e-bff1-4f4e36271271'),
         }));
 
         variables.push(EditorSmartVariable.create({

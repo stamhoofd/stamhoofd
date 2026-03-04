@@ -140,7 +140,7 @@ export class PaymentActionBuilder {
                 options: [
                     {
                         id: 'all',
-                        name: $t(`Alle betalingen`),
+                        name: $t(`2e0554e5-f223-4618-942e-53ec88f26e19`),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.Payment,
@@ -155,7 +155,7 @@ export class PaymentActionBuilder {
         else {
             const organizationOption: RecipientMultipleChoiceOption = {
                 type: 'MultipleChoice',
-                name: $t('Betalingen van verenigingen'),
+                name: $t('58575442-6c76-4454-b33c-2b83f23c5269'),
                 options: [],
                 defaultSelection: this.organization?.privateMeta?.balanceNotificationSettings.getOrganizationContactsFilterResponsibilityIds() ?? [],
                 build: (selectedIds: string[]) => {
@@ -216,7 +216,7 @@ export class PaymentActionBuilder {
                 options: [
                     {
                         id: 'all',
-                        name: $t(`Alle andere betalingen`),
+                        name: $t(`fad703f0-baef-4172-bea3-071711d8df6f`),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.Payment,
@@ -246,7 +246,7 @@ export class PaymentActionBuilder {
                     },
                     {
                         id: 'none',
-                        name: $t(`Geen andere betalingen`),
+                        name: $t(`1324e6e2-0703-49e1-8031-0a657787066d`),
                         value: [],
                     },
                 ],

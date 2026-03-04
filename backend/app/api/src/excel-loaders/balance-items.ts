@@ -17,7 +17,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.BalanceItems, {
     sheets: [
         {
             id: 'balanceItems',
-            name: $t(`Aanrekeningen`),
+            name: $t(`fbe6e4c4-8d98-41b5-b839-11d469031002`),
             columns: [
                 ...getBalanceItemColumns(),
             ],
@@ -153,7 +153,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
 
         {
             id: 'priceOpen',
-            name: $t(`Openstaand bedrag op vandaag`),
+            name: $t(`cae1af9b-b2b1-440e-893c-e7c1010f0d4b`),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.priceOpen / 1_0000,
@@ -167,7 +167,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
 
         {
             id: 'pricePaid',
-            name: $t(`Betaald bedrag op vandaag`),
+            name: $t(`b9716962-aa02-4bd5-a8b3-d7d8def6ac28`),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.pricePaid / 1_0000,
@@ -181,7 +181,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
 
         {
             id: 'pricePending',
-            name: $t(`Bedrag in verwerking op vandaag`),
+            name: $t(`73637226-b5a9-4a64-b006-27122c0516d4`),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.pricePending / 1_0000,
@@ -203,7 +203,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
                         return [
                             {
                                 id: `paidIn[${year}]`,
-                                name: $t('Betaald in {year}', { year: year.toFixed(0) }),
+                                name: $t('7df15807-0b2d-487f-8c97-deb8ce79d07b', { year: year.toFixed(0) }),
                                 width: 35,
                                 getValue: (object: BalanceItemWithPayments) => {
                                     let value = 0;
@@ -241,7 +241,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
                         return [
                             {
                                 id: `chargedIn[${year}]`,
-                                name: $t('Aangerekend in {year}', { year: year.toFixed(0) }),
+                                name: $t('91748032-ca3b-49c2-b065-ddfcb9fd460e', { year: year.toFixed(0) }),
                                 width: 35,
                                 getValue: (object: BalanceItemWithPayments) => {
                                     let value = 0;

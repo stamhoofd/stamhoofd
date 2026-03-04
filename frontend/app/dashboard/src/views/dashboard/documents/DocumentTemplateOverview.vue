@@ -292,14 +292,14 @@ async function toggleUpdatesEnabled() {
 
     if (props.template.privateSettings.templateDefinition.type === 'fiscal') {
         if (fiscalDocumentYearHelper.isAfterDeadline(props.template.year)) {
-            Toast.error($t('Opgelet, dit fiscale attest is hoogstwaarschijnlijk al ingediend geweest. Maak geen aanpassingen indien het al werd ingediend!')).show();
+            Toast.error($t('473aa794-9628-4ae0-93af-135404101514')).show();
         }
     }
     
     if (!(await CenteredMessage.confirm(
-        updatesEnabled ? $t('Automatische wijzigingen aanzetten?') : $t('Automatische wijzigingen uitzetten?'),
-        updatesEnabled ? $t('Aanzetten') : $t('Uitzetten'),
-        updatesEnabled ? $t('Opgelet, doe dit nooit voor documenten die al officieel werden ingediend. Alle documenten zullen meteen worden bijgewerkt, je kan dit niet ongedaan maken.') : $t('Alle documenten zullen niet langer aangepast worden.'),
+        updatesEnabled ? $t('8336b925-62ca-4b82-88ba-af66deefe296') : $t('ba81cced-65eb-49d7-9b3b-655198d19c82'),
+        updatesEnabled ? $t('d953090c-ba5c-4dc8-a963-7fa611c4aa74') : $t('377fe0ee-d48f-40b5-8002-48f1009c15b2'),
+        updatesEnabled ? $t('cfe404b6-bb5b-4e7f-b1e5-610cc4e5156c') : $t('6f661080-79e7-42f0-a12b-e28f9da105d9'),
         undefined,
         updatesEnabled ? true : false, // destructive to enable updates
     ))) {
@@ -375,16 +375,16 @@ async function exportXml() {
         const afterDeadline = fiscalDocumentYearHelper.isAfterDeadline(props.template.year);
         if (afterDeadline) {
             const stop = await CenteredMessage.show({
-                title: $t('Deadline voorbij'),
-                description: $t('Download de XML enkel en alleen als je de fiscale attesten nog niet hebt ingediend in Belcotax. Je moet fiscale attesten voor 1 maart indienen in Belcotax. Enkel in heel uitzonderlijke gevallen kan je eventueel proberen om nog later in te dienen.'),
+                title: $t('1feedca9-0e84-4997-9954-eb259f8768dc'),
+                description: $t('8490c357-b786-4b74-b6e0-6bbccd843a21'),
                 buttons: [
                     {
-                        text: $t('Nog niet ingediend'),
+                        text: $t('e1872332-a0ae-4cf1-9fdc-e02db714fc5b'),
                         value: false,
                         type: 'destructive',
                         availabilityDelay: 2_000
                     }, {
-                        text: $t('Annuleren'),
+                        text: $t('11d2e292-fd08-4477-bd2a-dac599a9754c'),
                         value: true,
                         type: 'secundary',
                     }

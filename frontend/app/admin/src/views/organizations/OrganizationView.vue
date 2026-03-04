@@ -296,7 +296,7 @@ async function deleteMe() {
         });
 
         GlobalEventBus.sendEvent('organizations-deleted', [props.organization]).catch(console.error);
-        Toast.success($t('De vereniging werd verwijderd')).show();
+        Toast.success($t('111bb645-f8f6-4788-b98a-f1a3d2d72fce')).show();
         await pop({ force: true });
     }
     catch (e) {

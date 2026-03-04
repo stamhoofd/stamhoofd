@@ -827,7 +827,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'missing_field',
                     message: 'Company address missing',
-                    human: $t('Facturatieadres ontbreekt'),
+                    human: $t('a7fbbe18-7c46-45df-b041-3c47ddd0794d'),
                     field: 'customer.company.address',
                 });
             }
@@ -840,7 +840,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Intra community VAT reverse charge not supported for this purchase',
-                            human: $t('Er is geen ondersteuning voor intracommunautaire BTW-verlegging bij deze aankoop. Gelieve contact op te nemen.'),
+                            human: $t('abba9d96-6089-4c49-b895-5c01cadd305a'),
                         });
                     }
 
@@ -850,7 +850,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
-                            human: $t('Er is geen ondersteuning voor intracommunautaire BTW-verlegging bij deze aankoop doordat de BTW-tarieven nog niet geconfigureerd werden. Gelieve contact op te nemen.'),
+                            human: $t('37947cd9-4661-4332-ada9-8ffde5db811d'),
                         });
                     }
                 }
@@ -862,7 +862,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Unexpected reverse charge applied',
-                            human: $t('Er werd foutief BTW-verlegd bij deze aankoop. Herlaad de pagina en probeer het opnieuw of neem contact op.'),
+                            human: $t('57ac8775-7a32-4fdc-a84b-628a27f8d43d'),
                         });
                     }
 
@@ -870,7 +870,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Missing VAT percentage',
-                            human: $t('Er ontbreekt een BTW-percentage'),
+                            human: $t('495255ae-3ec5-42ec-9887-f3fc4f016d96'),
                         });
                     }
                 }
@@ -885,7 +885,7 @@ export class PaymentService {
                     throw new SimpleError({
                         code: 'VAT_error',
                         message: 'Unexpected reverse charge applied',
-                        human: $t('Er werd foutief BTW-verlegd bij deze aankoop. Herlaad de pagina en probeer het opnieuw of neem contact op.'),
+                        human: $t('57ac8775-7a32-4fdc-a84b-628a27f8d43d'),
                     });
                 }
 
@@ -894,7 +894,7 @@ export class PaymentService {
                         throw new SimpleError({
                             code: 'VAT_error',
                             message: 'Missing VAT percentage',
-                            human: $t('Er ontbreekt een BTW-percentage'),
+                            human: $t('495255ae-3ec5-42ec-9887-f3fc4f016d96'),
                         });
                     }
                 }

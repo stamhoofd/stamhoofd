@@ -39,7 +39,7 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Package not found',
-                human: $t('De functie die je wilt deactiveren is al gedeactiveerd of bestaat niet'),
+                human: $t('c6adb3c8-c494-4f2a-8287-6bcac853a88a'),
                 statusCode: 404,
             });
         }
@@ -48,7 +48,7 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'not_allowed',
                 message: "Can't deactivate this package",
-                human: $t('Je kan deze functie niet zelf deactiveren. Neem contact met ons op.'),
+                human: $t('242cee92-c0ea-4736-a8c8-6d82c8faf342'),
             });
         }
 

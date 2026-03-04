@@ -79,13 +79,13 @@ const actions = computed(() => {
 
     if (STAMHOOFD.environment === 'development') {
         results.push(new InMemoryTableAction({
-            name: $t(`Herlaad alle bestellingen`),
+            name: $t(`724e6ab3-81c5-49a3-a0b7-f4b8eed0534e`),
             icon: 'retry',
             priority: 10,
             groupIndex: 4,
             handler: async () => {
                 if (objectFetcher.isOffline) {
-                    Toast.fromError(new Error($t('Kan bestellingen niet herladen zonder internet.'))).show();
+                    Toast.fromError(new Error($t('a4bcdac7-92dd-4bf8-aee2-adf62175c2f7'))).show();
                     return;
                 }
 
@@ -94,7 +94,7 @@ const actions = computed(() => {
                     tableObjectFetcher.reset(true, true);
                 }
                 else {
-                    Toast.fromError(new Error($t('Herladen van bestellingen mislukt.'))).show();
+                    Toast.fromError(new Error($t('72239a70-caaa-48c9-adaa-13f047118caf'))).show();
                 }
             },
         }));

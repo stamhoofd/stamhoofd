@@ -142,10 +142,10 @@
 
                 <STListItem v-if="payment.invoiceId" :selectable="true">
                     <h3 class="style-definition-label">
-                        {{ $t('Facturatie') }}
+                        {{ $t('68fd5834-9b48-4d42-928d-1815e608467a') }}
                     </h3>
                     <p class="style-definition-text with-icons">
-                        <span>{{ $t('Gefactureerd') }}</span>
+                        <span>{{ $t('b8f75dab-a034-4857-8c06-b4fa65851c19') }}</span>
                         <span class="icon success small primary" />
                     </p>
 
@@ -381,7 +381,7 @@
                         </template>
 
                         <template #right>
-                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('Gratis') : formatPrice(item.price) }}</span>
+                            <span class="style-price-base" :class="{negative: item.price < 0}">{{ item.price === 0 ? $t('02f28dc5-b75f-4bfb-9e07-90dfb56b66b4') : formatPrice(item.price) }}</span>
                         </template>
                     </STGridItem>
                 </STGrid>

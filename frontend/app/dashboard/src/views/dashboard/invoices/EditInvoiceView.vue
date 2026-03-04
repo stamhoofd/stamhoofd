@@ -52,7 +52,7 @@
             </p>
         </CategorizedBox>
 
-        <CategorizedBox icon="user" :title="$t('Facturatiegegevens')">
+        <CategorizedBox icon="user" :title="$t('5af44e91-8f18-462b-bb7b-d59cd0edffd5')">
             <template v-if="customer" #summary>
                 <template v-if="customer.company">
                     <p v-if="customer.company.VATNumber" class="style-description-small">
@@ -101,12 +101,12 @@
                 </p>
 
                 <p class="style-description-small">
-                    {{ pluralText(patched.items.length, $t('item'), $t('items')) }}
+                    {{ pluralText(patched.items.length, $t('76eb946b-7e2d-4086-bb83-b9a9b5016ab8'), $t('5717eaac-50f5-436f-a6c7-55a372a97a35')) }}
                 </p>
             </template>
 
             <p v-if="patched.didChangeUnitPricesToCorrectRounding" class="warning-box">
-                {{ $t('De eenheidsprijs (excl. BTW) van bepaalde items werd licht aangepast om het afrondingsverschil door BTW-berekeningsregels te verkleinen tegenover het aangerekende bedrag (BTW moet afgerond worden op factuurniveau en niet op lijnniveau).') }}
+                {{ $t('ef7af39b-c000-4deb-acf7-14250757816b') }}
             </p>
             <InvoiceItemsBox :invoice="patched" />
         </CategorizedBox>
@@ -208,10 +208,10 @@ async function save() {
         }
 
         if (props.isNew) {
-            Toast.success($t('Een nieuwe factuur werd aangemaakt')).show();
+            Toast.success($t('389636c3-0f21-4eb5-9ae2-202afa5ff8bb')).show();
         }
         else {
-            Toast.success($t('De factuur werd aangepast')).show();
+            Toast.success($t('308e71a7-0eae-4501-9aff-3eb1d3ceb37c')).show();
         }
 
         props.saveHandler?.(props.invoice);

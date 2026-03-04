@@ -17,12 +17,12 @@ export function getSelectableWorkbook() {
         sheets: [
             new SelectableSheet({
                 id: 'balanceItems',
-                name: $t(`Aanrekeningen`),
+                name: $t(`fbe6e4c4-8d98-41b5-b839-11d469031002`),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`ID`),
-                        description: $t(`Unieke identificatie van de aanrekening`),
+                        name: $t(`12b569c7-c600-4148-bac3-91a823c55ea5`),
+                        description: $t(`c9e92a50-8f3f-47fb-b598-c3930527b9a5`),
                     }),
 
                     new SelectableColumn({
@@ -75,29 +75,29 @@ export function getSelectableWorkbook() {
 
                     new SelectableColumn({
                         id: 'priceOpen',
-                        name: $t(`Openstaand bedrag op {date}`, { date: Formatter.date(new Date(), true) }),
+                        name: $t(`ab32d1bb-a43f-4f02-b419-5a698a16011d`, { date: Formatter.date(new Date(), true) }),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePaid',
-                        name: $t(`Totaal betaald bedrag op {date}`, { date: Formatter.date(new Date(), true) }),
+                        name: $t(`bcf60659-dd2d-4932-8754-b4b7e6f48111`, { date: Formatter.date(new Date(), true) }),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: $t(`Totaal bedrag in verwerking op {date}`, { date: Formatter.date(new Date(), true) }),
+                        name: $t(`58d00379-f597-4505-9330-e7ec02a33029`, { date: Formatter.date(new Date(), true) }),
                     }),
 
                     ...[Formatter.year(new Date()) - 2, Formatter.year(new Date()) - 1, Formatter.year(new Date())].map(year => new SelectableColumn({
                         id: `paidIn[${year}]`,
-                        name: $t('Betaald in {year}', { year: year.toFixed(0) }),
+                        name: $t('7df15807-0b2d-487f-8c97-deb8ce79d07b', { year: year.toFixed(0) }),
                         enabled: false,
                     })),
 
                     ...[Formatter.year(new Date()) - 2, Formatter.year(new Date()) - 1, Formatter.year(new Date())].map(year => new SelectableColumn({
                         id: `chargedIn[${year}]`,
-                        name: $t('Aangerekend in {year}', { year: year.toFixed(0) }),
-                        description: $t('Indien het aangerekende bedrag aangerekend werd in dit jaar wordt het herhaald, anders 0.'),
+                        name: $t('91748032-ca3b-49c2-b065-ddfcb9fd460e', { year: year.toFixed(0) }),
+                        description: $t('ae505bd5-5008-4da9-b1aa-6351ecd1ef7e'),
                         enabled: false,
                     })),
                 ],

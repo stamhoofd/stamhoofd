@@ -16,7 +16,7 @@
         <STList v-else>
             <STListItem>
                 <h3 class="style-definition-label">
-                    {{ $t('Type') }}
+                    {{ $t('23671282-34da-4da9-8afd-503811621055') }}
                 </h3>
                 <p class="style-definition-text">
                     {{ getBalanceItemTypeName(patchedBalanceItem.type) }}
@@ -302,7 +302,7 @@ const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
         return props.isNew ? $t(`c40f80b1-3553-4639-ac5c-937c45baf05e`) : $t(`6c1f62aa-e2c7-40cb-8cb9-7ea3365d5cf4`);
     }
-    return props.isNew ? $t(`Aanrekening toevoegen`) : $t(`Aanrekening bewerken`);
+    return props.isNew ? $t(`04c01f07-f37c-4f9c-8a4c-7d4e396af16d`) : $t(`54d0c2bf-ca9b-4005-9fb5-11c5a8a6b6fe`);
 });
 
 const sortedPayments = computed(() => {

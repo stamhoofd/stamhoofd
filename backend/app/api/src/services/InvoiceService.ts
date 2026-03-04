@@ -137,7 +137,7 @@ export class InvoiceService {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'payableRoundingAmount cannot be more than 10 cent',
-                human: $t('De afrondingscorrectie van de factuur tegenover het aangerekende bedrag is meer dan 10 cent, dit is niet toegestaan.'),
+                human: $t('69832bb4-18a2-428d-a84d-89675ae67016'),
                 field: 'payableRoundingAmount',
             });
         }

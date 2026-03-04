@@ -127,7 +127,7 @@
                         <EmailAddress :email="email" />
                     </p>
                     <p v-if="contact.emails.length === 0" class="style-definition-text">
-                        {{ $t('Nog geen e-mailadres ingesteld') }}
+                        {{ $t('96de526a-0e18-43d1-88aa-9b265af6e42d') }}
                     </p>
                 </STListItem>
             </STList>

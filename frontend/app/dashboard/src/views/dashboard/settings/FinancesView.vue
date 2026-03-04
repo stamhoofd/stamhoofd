@@ -78,10 +78,10 @@
                             <img src="@stamhoofd/assets/images/illustrations/box.svg">
                         </template>
                         <h2 class="style-title-list">
-                            {{ $t('Individuele aanrekeningen') }}
+                            {{ $t('1744bb59-7570-46bb-961b-90aea45df735') }}
                         </h2>
                         <p class="style-description">
-                            {{ $t('Alle items die werden aangerekend, los van of ze al betaald werden of niet.') }}
+                            {{ $t('22127a65-6f8c-40e3-a165-6d1ea358ddf2') }}
                         </p>
                         <template #right>
                             <span class="icon arrow-right-small gray" />

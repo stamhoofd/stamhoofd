@@ -11,7 +11,7 @@
                 <STList class="info">
                     <STListItem>
                         <h3 class="style-definition-label">
-                            {{ $t('E-mailadres') }}
+                            {{ $t('a4476eb9-6d58-4b4e-af2b-feb227a30329') }}
                         </h3>
                         <p v-copyable class="style-definition-text style-copyable">
                             <span>{{ emailInformation.email }}</span>
@@ -20,10 +20,10 @@
 
                     <STListItem v-if="emailInformation.markedAsSpam" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('Als spam gemarkeerd') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('272e92e0-d532-4481-ac20-f752d7921007') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('De ontvanger heeft eerder een e-mail als spam gemarkeerd. Hierdoor worden geen e-mails meer verzonden naar dit e-mailadres. <button>Meer info</button>')">
+                            <I18nComponent :t="$t('351a0698-e182-410a-989f-a138325fab16')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('spam-complaints')" target="_blank">
                                         {{ content }}
@@ -35,10 +35,10 @@
 
                     <STListItem v-if="emailInformation.hardBounce" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('Hard bounce') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('d6a2e574-1334-4c3f-861e-5beb2a906d27') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            <I18nComponent :t="$t('Een e-mail kon eerder niet worden verzonden omwille van een permanenten reden (= hard bounce). Hierdoor worden geen e-mails meer verzonden naar dit e-mailadres. <button>Meer info</button>')">
+                            <I18nComponent :t="$t('0ee9632b-1462-4edf-9e68-abe77c8b9c8f')">
                                 <template #button="{content}">
                                     <a class="inline-link" :href="LocalizedDomains.getDocs('bounces')" target="_blank">
                                         {{ content }}
@@ -50,19 +50,19 @@
 
                     <STListItem v-if="emailInformation.unsubscribedAll" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('Afgemeld voor alle e-mails') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('6b4e14de-9439-48d2-9be3-08611ca6f931') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            {{ $t('De ontvanger heeft zich afgemeld voor alle e-mails.') }}
+                            {{ $t('24f0e13e-6e72-4045-8246-4063833ac36a') }}
                         </p>
                     </STListItem>
 
                     <STListItem v-if="emailInformation.unsubscribedMarketing" class="theme-warning">
                         <h3 class="style-definition-label">
-                            <span>{{ $t('Afgemeld voor marketing e-mails') }}</span><span class="icon warning tiny" />
+                            <span>{{ $t('638979a6-27c7-4f17-a61b-5604d9f2900c') }}</span><span class="icon warning tiny" />
                         </h3>
                         <p class="style-definition-text">
-                            {{ $t('De ontvanger heeft zich afgemeld voor marketing e-mails.') }}
+                            {{ $t('79694c7e-c6d0-4548-989d-5bbd798e41dd') }}
                         </p>
                     </STListItem>
                 </STList>
@@ -131,7 +131,7 @@ const props = defineProps<{
     emailInformation: EmailInformation;
 }>();
 
-const title = $t('E-mailadres beheren');
+const title = $t('dd65290a-646f-4fed-9e0f-d0489b2c07c5');
 
 const context = useContext();
 const owner = useRequestOwner();

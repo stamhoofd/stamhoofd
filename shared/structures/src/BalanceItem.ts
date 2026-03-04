@@ -89,7 +89,7 @@ export function getBalanceItemTypeName(type: BalanceItemType): string {
         case BalanceItemType.CancellationFee: return $t(`ac2be546-732b-4c1a-ace3-c9076795afa0`);
         case BalanceItemType.RegistrationBundleDiscount: return $t(`472a987d-498d-46b0-b925-3963f729492b`);
         case BalanceItemType.Rounding: return $t('5841f72b-67d8-4add-8cfa-801bcb71cba7');
-        case BalanceItemType.STPackage: return $t('Pakket');
+        case BalanceItemType.STPackage: return $t('4a6dcea7-3e49-4d5e-922e-23c4f76241c2');
     }
 }
 
@@ -131,7 +131,7 @@ export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): s
         case BalanceItemRelationType.Member: return $t(`f4052a0b-9564-49c4-a6b6-41af3411f3b0`);
         case BalanceItemRelationType.MembershipType: return 'Aansluitingstype';
         case BalanceItemRelationType.Discount: return $t(`40939025-cebb-4afb-90e9-847233cb256f`);
-        case BalanceItemRelationType.STPackage: return $t(`Pakket`);
+        case BalanceItemRelationType.STPackage: return $t(`5c043deb-2343-460a-ab2b-9fac06680ba3`);
     }
 }
 
@@ -145,7 +145,7 @@ export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationT
         case BalanceItemRelationType.Member: return $t(`15cd9dab-e1d5-4f02-b260-bd587ba3cf1e`);
         case BalanceItemRelationType.MembershipType: return 'Naam van het aansluitingstype geassocieerd aan dit item';
         case BalanceItemRelationType.Discount: return $t(`4d5cd18a-ad96-4b2b-aa91-80af307cb8cd`);
-        case BalanceItemRelationType.STPackage: return $t(`Naam van het pakket geassocieerd aan deze aanrekening`);
+        case BalanceItemRelationType.STPackage: return $t(`7ad398b9-9075-4cc6-a96e-ddb0abf158d8`);
     }
 }
 
@@ -524,7 +524,7 @@ export class BalanceItem extends AutoEncoder {
 
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
-                    return $t('Inschrijving van {name} voor {group}', { name: member.name, group });
+                    return $t('843da918-4365-457f-abe4-200bcee1d8a8', { name: member.name, group });
                 }
 
                 return $t(`7a6a379d-97fb-4874-bdcf-48be82a76087`) + ' ' + group;
@@ -577,7 +577,7 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Other: return this.description;
             case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`5026a42a-66ad-4cc1-9400-c7c1407bc7c0`);
             case BalanceItemType.Rounding: return $t('097441a3-6b49-4768-87c3-8b290bb073ed');
-            case BalanceItemType.STPackage: return $t('pakketten');
+            case BalanceItemType.STPackage: return $t('0dedc6d7-700f-4243-8e98-cc90837fbf8f');
         }
     }
 

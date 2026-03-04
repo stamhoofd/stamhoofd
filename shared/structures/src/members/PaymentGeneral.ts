@@ -121,7 +121,7 @@ export class PaymentGeneral extends Payment {
         });
 
         replacements.push({
-            title: $t(`Totaal`),
+            title: $t(`c728fcc6-562c-4111-b0b5-5cfa98187941`),
             value: Formatter.price(this.price),
         });
 
@@ -185,7 +185,7 @@ export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItem
         const descriptionText = description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : '';
         const titleColumn = `<td><h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
 
-        const price = payment.price === 0 ? $t('Gratis') : Formatter.price(payment.price);
+        const price = payment.price === 0 ? $t('02f28dc5-b75f-4bfb-9e07-90dfb56b66b4') : Formatter.price(payment.price);
         const priceColumn = `<td>${Formatter.escapeHtml(price)}</td>`;
 
         str += `<tr>${titleColumn}${priceColumn}</tr>`;

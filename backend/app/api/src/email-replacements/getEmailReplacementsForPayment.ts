@@ -216,7 +216,7 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                         const webshop = webshopMap.get(order.webshopId);
                         if (webshop) {
                             if (order.number) {
-                                overviewContext.add($t('{webshop} (bestelling {orderNumber})', {
+                                overviewContext.add($t('80c86ad4-5ca1-481a-a408-db018a81f25e', {
                                     webshop: webshop.meta.name,
                                     orderNumber: order.number ?? '',
                                 }));
@@ -226,7 +226,7 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                             }
                         }
                         else {
-                            overviewContext.add($t('bestelling {orderNumber}', {
+                            overviewContext.add($t('8bb27033-cf3c-4af1-a3f4-3373734ab189', {
                                 orderNumber: order.number ?? '',
                             }));
                         }
@@ -273,11 +273,11 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
             }
 
             // else return default text for multiple items
-            return $t('Betaling voor {count} items', { count: payment.balanceItemPayments.length });
+            return $t('7462f89e-db05-452f-804f-b9f2d51bff0d', { count: payment.balanceItemPayments.length });
         }
 
         // else return default text for single item
-        return $t('Betaling voor 1 item');
+        return $t('fe349d88-fecf-4cd8-8ea4-9e3b13cfa0dc');
     }
 
     // join texts for balance items with type order or registration

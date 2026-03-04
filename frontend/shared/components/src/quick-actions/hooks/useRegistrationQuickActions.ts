@@ -231,7 +231,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     leftComponent: EventIcon,
                     leftProps: { event },
                     prefix: groupText,
-                    title: event.webshopId ? event.name : $t('Inschrijven voor {event}', { event: event.name }),
+                    title: event.webshopId ? event.name : $t('464708ae-124c-4af2-a300-14557acb6f13', { event: event.name }),
                     description,
                     action: () => {
                         openEvent(event).catch(console.error);

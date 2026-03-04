@@ -9,7 +9,7 @@
                 </p>
 
                 <p class="style-description-small">
-                    {{ pluralText(patchedPayment.balanceItemPayments.length, $t('item'), $t('items')) }}
+                    {{ pluralText(patchedPayment.balanceItemPayments.length, $t('76eb946b-7e2d-4086-bb83-b9a9b5016ab8'), $t('5717eaac-50f5-436f-a6c7-55a372a97a35')) }}
                 </p>
             </template>
 
@@ -53,7 +53,7 @@
             </STList>
         </CategorizedBox>
 
-        <CategorizedBox v-if="availableMethods.includes(payment.method)" :icon="status === 'Succeeded' ? 'success' : 'clock'" :title="$t('Betaalmethode en status')">
+        <CategorizedBox v-if="availableMethods.includes(payment.method)" :icon="status === 'Succeeded' ? 'success' : 'clock'" :title="$t('780eb07d-9e08-4e46-9979-d3ad1a150faa')">
             <template #summary>
                 <p class="style-description-small">
                     {{ PaymentMethodHelper.getNameCapitalized(method) }}

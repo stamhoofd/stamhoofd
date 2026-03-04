@@ -569,10 +569,10 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
     if (!recordsConfiguration || recordsConfiguration.dataPermission) {
         all.push(simpleBooleanFilterFactory({
-            name: $t('Toestemming gegevensverzameling'),
+            name: $t('77f08edd-caca-4848-9a6e-f1816b2d65a3'),
             optionNames: {
-                true: $t(`Gaf toestemming`),
-                false: $t(`Gaf geen toestemming`),
+                true: $t(`a97678f0-92af-4acc-9897-f8246cf38466`),
+                false: $t(`d71303fa-1c78-4f1d-8fd4-407d14bd52c7`),
             },
             filterIfTrue: {
                 'details.dataPermissions': true,
@@ -767,11 +767,11 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
     // accounts
     all.push(simpleBooleanFilterFactory({
-        name: $t('Accounts'),
-        description: $t('Filter leden die wel of geen geverifieerd account hebben om de gegevens van leden te wijzigen via het ledenportaal.'),
+        name: $t('f57fec1c-c1a4-4143-ac28-787324e7a8e2'),
+        description: $t('4f9bcb18-1682-4acc-9ad1-c443dd2dc147'),
         optionNames: {
-            true: $t('Heeft een geverifieerd account'),
-            false: $t('Heeft geen geverifieerd account'),
+            true: $t('84ace88c-1dc8-4d21-94de-6482444bf261'),
+            false: $t('0c02d083-4806-46b5-9566-409da7fe30fc'),
         },
         filterIfTrue: {
             users: {
@@ -785,7 +785,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     // missing data
     all.push(simpleMultipleChoiceFilterFactory({
         name: $t(`8e92e034-b745-4d0f-8ac1-4363101f9603`),
-        description: $t('Toon leden als één van de geselecteerde gegevens ontbreekt of niet is ingevuld.'),
+        description: $t('af70eeb9-acd4-4eb3-8549-81bd97484ad6'),
         filterMode: MultipleChoiceUIFilterMode.Or,
         options: [
             {
@@ -1130,18 +1130,18 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
     const all: UIFilterBuilders = [];
 
     const nameFilter = new GroupUIFilterBuilder({
-        name: $t('Naam'),
+        name: $t('381430d7-6ee8-4d3d-9caa-80d375f14caf'),
         builders: [
             new StringFilterBuilder({
-                name: $t('Naam (voor- en achternaam)'),
+                name: $t('ec4e970c-29a2-448f-a682-fc67cd8f0d24'),
                 key: 'name',
             }),
             new StringFilterBuilder({
-                name: $t('Voornaam'),
+                name: $t('603606c2-95ca-4967-814c-53ec3297bf33'),
                 key: 'firstName',
             }),
             new StringFilterBuilder({
-                name: $t('Achternaam'),
+                name: $t('033780e9-417d-4f0a-9aba-7ddfdf655d22'),
                 key: 'lastName',
             }),
         ],

@@ -155,7 +155,7 @@ export const getBalanceItemsUIFilterBuilders: () => UIFilterBuilders = () => {
         }),
 
         new NumberFilterBuilder({
-            name: $t(`Openstaand bedrag`),
+            name: $t(`faba38ed-26c4-403b-af07-181520e93f29`),
             type: NumberFilterFormat.Currency,
             key: 'priceOpen',
         }),
@@ -754,12 +754,12 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
 
     builders.push(new DateFilterBuilder({
         key: 'paidAt',
-        name: $t('Betaaldatum'),
+        name: $t('8fea5d05-064b-4e54-bb35-f825b8817fd2'),
     }));
 
     if (preview.meta.checkoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
-            name: $t(`Afhaal/leveringsmethode`),
+            name: $t(`b321887c-5a37-4485-846d-5ba0da0f63d4`),
             options: preview.meta.checkoutMethods.map((checkoutMethod) => {
                 const name = Formatter.capitalizeFirstLetter(`${CheckoutMethodTypeHelper.getName(checkoutMethod.type)}: ${checkoutMethod.name}`);
                 return new MultipleChoiceUIFilterOption(name, checkoutMethod.id);
@@ -822,7 +822,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
 
     builders.push(new StringFilterBuilder({
         key: 'code',
-        name: $t('Kortingscode'),
+        name: $t('3697babf-4463-460f-95ee-683a40e5d46d'),
         wrapper: {
             discountCodes: {
                 $elemMatch: FilterWrapperMarker,
@@ -832,17 +832,17 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
 
     if (preview.hasTickets) {
         builders.push(new MultipleChoiceFilterBuilder({
-            name: $t('Ticket scanstatus'),
+            name: $t('25d4d39a-c601-4210-a1e4-4f4ab7752561'),
             options: preview.hasSingleTickets
                 ? [
-                        new MultipleChoiceUIFilterOption($t('Niet gescand'), 'none'),
-                        new MultipleChoiceUIFilterOption($t('Gescand'), 'all'),
+                        new MultipleChoiceUIFilterOption($t('aa934a39-f0dd-4e8b-9db8-a7686684a411'), 'none'),
+                        new MultipleChoiceUIFilterOption($t('491641fd-3f4f-4c9b-9591-0bb4b9358bff'), 'all'),
 
                     ]
                 : [
-                        new MultipleChoiceUIFilterOption($t('Geen enkel ticket gescand'), 'none'),
-                        new MultipleChoiceUIFilterOption($t('Gedeeltelijk gescand'), 'partial'),
-                        new MultipleChoiceUIFilterOption($t('Alle tickets gescand'), 'all'),
+                        new MultipleChoiceUIFilterOption($t('e5908ba1-b344-4dda-a703-667e4f8f8388'), 'none'),
+                        new MultipleChoiceUIFilterOption($t('65e51ac7-d5a0-4097-8238-0c9a002e706c'), 'partial'),
+                        new MultipleChoiceUIFilterOption($t('ad2e2f13-3139-4489-846f-9740e65fffab'), 'all'),
                     ],
             wrapper: {
                 ticketScanStatus: {
@@ -853,12 +853,12 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
 
         builders.push(new DateFilterBuilder({
             key: 'ticketScannedAt',
-            name: $t('Ticket scan tijdstip'),
+            name: $t('03764a56-4f6d-42f1-a0d8-7c8fb1aa97ec'),
         }));
 
         if (!preview.hasSingleTickets) {
             builders.push(new NumberFilterBuilder({
-                name: $t('Aantal aangemaakte tickets'),
+                name: $t('37c94201-23ff-41f2-b5a6-6b4826581cfa'),
                 key: 'ticketCount',
 
             }));

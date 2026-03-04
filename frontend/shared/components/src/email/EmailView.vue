@@ -903,23 +903,23 @@ const shouldNavigateAway = async () => {
     if (autoSaveEnabled.value) {
         // todo check saving
         const option = await CenteredMessage.show({
-            title: $t('Ben je zeker dat je dit bericht wilt sluiten?'),
-            description: $t('Je berichten worden altijd automatisch opgeslagen terwijl je typt. Je kan hier later verder aan werken via het tabblad ‘Berichten’. Als je wilt kan je dit concept weggooien.'),
+            title: $t('449779b6-61ac-4d4a-bc9d-906fc6db8cf6'),
+            description: $t('7b96067c-cab3-4585-932b-f78545a0bd81'),
             buttons: [
                 {
-                    text: $t('Ja, behouden'),
+                    text: $t('5b1cda18-8c4c-479d-9cea-cef827b3d707'),
                     type: 'primary',
                     value: 'save',
                     icon: 'download small',
                 },
                 {
-                    text: $t('Ja, concept weggooien'),
+                    text: $t('30cdfa90-7756-4bc3-9b17-27760775b138'),
                     type: 'secundary',
                     value: 'delete',
                     icon: 'trash small',
                 },
                 {
-                    text: $t('Annuleren'),
+                    text: $t('11d2e292-fd08-4477-bd2a-dac599a9754c'),
                     type: 'secundary',
                     value: 'cancel',
                 },
@@ -933,11 +933,11 @@ const shouldNavigateAway = async () => {
             await waitForSave();
 
             if (savingPatch.value) {
-                Toast.info($t(`Het duurt langer dan normaal om het bericht op te slaan. Probeer later opnieuw.`)).show();
+                Toast.info($t(`6acb7c08-0c26-49c7-b5b9-eefca4ab3954`)).show();
                 return false;
             }
             await patchEmail(false);
-            Toast.success($t(`Bericht opgeslagen als concept`)).show();
+            Toast.success($t(`cbc7e6ec-3219-4fd2-a0a5-79cff3cd82e4`)).show();
             return true;
         }
         if (option === 'delete') {

@@ -144,7 +144,7 @@
                         <Checkbox :model-value="getFeatureFlag('email-to-payments')" @update:model-value="setFeatureFlag('email-to-payments', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('E-mails verzenden naar betalingen') }}
+                        {{ $t('cdbd1984-e326-4fd7-bc5c-3d54c0704fb3') }}
                     </h3>
                 </STListItem>
             </STList>

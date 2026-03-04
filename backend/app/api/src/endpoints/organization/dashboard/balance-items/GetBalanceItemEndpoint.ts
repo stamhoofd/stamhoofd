@@ -40,7 +40,7 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
                 code: 'not_found',
                 statusCode: 404,
                 message: 'Balance item not found',
-                human: $t('Deze aanrekening bestaat niet (meer)'),
+                human: $t('7bc08947-2409-4a7c-b597-2d6d43884a96'),
             });
         }
 
