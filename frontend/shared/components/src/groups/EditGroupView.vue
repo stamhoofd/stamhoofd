@@ -545,7 +545,7 @@
                     <p>{{ $t('89a760d7-8995-458c-9635-da104971e95c') }}</p>
 
                     <STInputBox :title="$t('f0ceba51-bad2-4454-9a9b-4b12f0983c82')" error-fields="settings.trialDays" :error-box="errors.errorBox">
-                        <NumberInput v-model="trialDays" :suffix="$t('dagen')" :suffix-singular="$t('dag')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
+                        <NumberInput v-model="trialDays" :suffix="$t('6cb97c70-db56-4883-a2b3-87b65506d4f9')" :suffix-singular="$t('1ea8c630-af92-4cba-bfdc-acc0b0f67fae')" :min="0" :max="defaultMembershipConfig?.trialDays ?? null" />
                     </STInputBox>
                     <p v-if="defaultMembershipConfig && defaultMembershipConfig.trialDays" class="style-description-small">
                         {{ $t('d68a6d63-d782-49e2-84a5-4f77dbfa2977', {days: Formatter.days(defaultMembershipConfig.trialDays)}) }}
