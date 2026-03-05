@@ -6,7 +6,7 @@ import { computed, onActivated, onMounted, ref, Ref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 import { useErrors } from '../../errors/useErrors';
 import { GlobalEventBus } from '../../EventBus';
-import { useContext, useFeatureFlag, useUser } from '../../hooks';
+import { useContext, useUser } from '../../hooks';
 import { useEditMember } from '../../members';
 import { MemberStepManager } from '../../members/classes/MemberStepManager';
 import { getAllMemberSteps } from '../../members/classes/steps';
@@ -33,7 +33,6 @@ export function useRegistrationQuickActions(): QuickActions {
     const errors = useErrors();
     const $navigate = useNavigate();
     const show = useShow();
-    const checkFeatureFlag = useFeatureFlag();
 
     async function openCart() {
         await GlobalEventBus.sendEvent('selectTabById', 'cart');
