@@ -14,14 +14,6 @@ import VueMeta from 'vue-meta'
 Vue.use(VueMeta)
 const isPrerender = navigator.userAgent.toLowerCase().indexOf('prerender') !== -1;
 
-if (!isPrerender && STAMHOOFD.environment == "production") {
-    Sentry.init({
-        Vue,
-        dsn: "https://00c3e526a886491e853cf060f3b00b05@o431770.ingest.sentry.io/6002539",
-        logErrors: true
-    });
-}
-
 document.body.classList.add((AppManager.shared.isNative ? "native-" :  "web-")+AppManager.shared.getOS());
 
 import App from "./App.vue";
