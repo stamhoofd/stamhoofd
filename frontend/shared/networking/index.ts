@@ -11,3 +11,5 @@ export * from './src/PlatformManager';
 export * from './src/ContextPermissions';
 export * from './src/hooks';
 export * from './src/MemberManager';
+export * from './src/hooks/useGetGroups';
+export * from './src/hooks/useGetPeriods';

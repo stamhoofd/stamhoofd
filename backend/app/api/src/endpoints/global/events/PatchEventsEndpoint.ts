@@ -1,6 +1,6 @@
 import { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder, PatchableArrayDecoder, patchObject, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { Event, Group, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import { Event, Group, OrganizationRegistrationPeriod, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, PermissionLevel } from '@stamhoofd/structures';
 
 import { SimpleError } from '@simonbackx/simple-errors';
@@ -140,14 +140,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await PatchEventsEndpoint.checkEventLimits(event);
 
             if (put.group) {
-                const group = await this.putEventGroup(event, put.group);
-                await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                    await event.syncGroupRequirements(group);
-                });
-                event.groupId = group.id;
+                await this.saveEventAndLinkExistingGroup(event, put.group);
             }
-
-            await event.save();
+            else {
+                await event.save();
+            }
 
             events.push(event);
         }
@@ -486,5 +483,87 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
         }
+    }
+
+    private async saveEventAndLinkExistingGroup(event: Event, putGroup: GroupStruct): Promise<void> {
+        const existingGroup = await Group.getByID(putGroup.id);
+
+        if (!existingGroup) {
+            throw new SimpleError({
+                code: 'group_not_found',
+                message: `Group with id ${putGroup.id} does not exist`,
+            });
+        }
+
+        // keep track of original data for reset in case of failure
+        const originalGroupType = existingGroup.type;
+
+        if (!await Context.auth.canAccessGroup(existingGroup)) {
+            throw Context.auth.error($t(`Je hebt geen toegangsrechten om de groep te wijzigen.`));
+        }
+
+        if (event.organizationId !== existingGroup.organizationId) {
+            throw new SimpleError({
+                code: 'invalid_group',
+                message: 'Group has different organization id',
+            });
+        }
+
+        if (existingGroup.settings.eventId !== null && existingGroup.settings.eventId !== event.id) {
+            throw new SimpleError({
+                code: 'invalid_group',
+                message: 'Group is already linked to another event',
+            });
+        }
+
+        if (existingGroup.type !== GroupType.EventRegistration) {
+            if (existingGroup.type !== GroupType.Membership) {
+                throw new SimpleError({
+                    code: 'invalid_group',
+                    message: 'Can only link a group of type EventRegistration or Membership',
+                });
+            }
+            existingGroup.type = GroupType.EventRegistration;
+        }
+
+        existingGroup.settings.eventId = event.id;
+
+        // update group categories
+        const period = await RegistrationPeriod.getByID(existingGroup.periodId);
+        if (!period) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'No period found for group',
+            });
+        }
+
+        const organizationPeriod = await OrganizationRegistrationPeriod.select().where('organizationId', existingGroup.organizationId).where('periodId', period.id).first(true);
+        if (!organizationPeriod) {
+            throw new SimpleError({
+                code: 'not_found',
+                message: 'No organization period found for group',
+            });
+        }
+        event.groupId = existingGroup.id;
+        await event.save();
+
+        try {
+            await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                await event.syncGroupRequirements(existingGroup);
+            });
+        }
+        catch (e) {
+            // reset the group
+            existingGroup.type = originalGroupType;
+            existingGroup.settings.eventId = null;
+            await existingGroup.save();
+
+            // delete the event again if failed to link the group
+            await event.delete();
+            throw e;
+        }
+
+        const allGroups = await Group.getAll(organizationPeriod.organizationId, organizationPeriod.periodId);
+        await organizationPeriod.cleanCategories(allGroups);
     }
 }
