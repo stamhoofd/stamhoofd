@@ -993,11 +993,8 @@ export class Organization extends Model {
                     replyTo = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+replyTo+">" 
                 }
             }
-            if (strongDefault) {
-                // Avoid replyTo because has impact on delivarability sadly
-                replyTo = undefined;
-            }
-            return { from, replyTo }
+            
+            return { from, replyTo: undefined }
         }
         return this.getDefaultEmail(strongDefault)
     }
@@ -1039,13 +1036,8 @@ export class Organization extends Model {
             from = '"'+this.name.replaceAll("\"", "\\\"")+"\" <"+from+">" 
         }
 
-        if (strongDefault) {
-            // Avoid replyTo because has impact on delivarability sadly
-            replyTo = undefined;
-        }
-
         return {
-            from, replyTo
+            from, replyTo: undefined
         }
     }
 
