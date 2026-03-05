@@ -1213,12 +1213,43 @@ export function areCronsRunning(): boolean {
     return false
 }
 
+async function checkReadOnly() {
+    // Check if database is in read only mode. If so, skip running cronjobs.
+    const [results] = await Database.select("SHOW VARIABLES LIKE 'read_only'");
+    if (results.length !== 1) {
+        console.error('UNEXPECTED RESULT FOR checking read only mode on the server.')
+        console.error('Received', results)
+    } else {
+        const result = results[0]['session_variables'];
+        if (!result) {
+            console.error('UNEXPECTED RESULT FOR checking read only mode on the server.')
+            console.error('Received', results)
+        } else {
+            const value = result['Value'];
+            if (value !== 'ON' && value !== 'OFF') {
+                console.error('UNEXPECTED RESULT FOR checking read only mode on the server.')
+                console.error('Received', results)
+            } else {
+                if (value === 'ON') {
+                    console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'))
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 export const crons = async () => {
     if (STAMHOOFD.CRONS_DISABLED) {
-        console.log("Crons are disabled. Make sure to enable them in the environment variables.")
+        console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('Crons are disabled. Make sure to enable them in the environment variables.').addClass('error'))
         return;
     }
-    
+
+    if (await checkReadOnly()) {
+        return;
+    }
+
     schedulingJobs = true;
     for (const job of registeredCronJobs) {
         if (stopCrons) {
@@ -1227,16 +1258,21 @@ export const crons = async () => {
         if (job.running) {
             continue;
         }
+
         job.running = true
         run(job.name, job.method).finally(() => {
             job.running = false
         }).catch(e => {
+            job.running = false
             console.error(e)
         });
 
         // Prevent starting too many jobs at once
         if (STAMHOOFD.environment !== "development") {
             await sleep(10 * 1000);
+            if (await checkReadOnly()) {
+                return;
+            }
         }
     }
     schedulingJobs = false;
