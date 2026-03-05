@@ -76,8 +76,8 @@
 import { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useCheckRoute, useNavigate, usePresent, useSplitViewController } from '@simonbackx/vue-app-navigation';
 import { GroupAvatar, MembersTableView, PromiseComponent, Toast, useAuth, useContext, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useGetPeriods, useOrganizationManager, usePatchOrganizationPeriods } from '@stamhoofd/networking';
-import { Group, GroupCategory, GroupCategoryTree, GroupType, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
+import { useLoadRecentPeriods, useOrganizationManager, usePatchOrganizationPeriods } from '@stamhoofd/networking';
+import { Group, GroupCategory, GroupCategoryTree, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useCollapsed } from '../../hooks/useCollapsed';
@@ -94,7 +94,7 @@ const present = usePresent();
 const auth = useAuth();
 const splitViewController = useSplitViewController();
 const patchOrganizationPeriods = usePatchOrganizationPeriods();
-const getPeriods = useGetPeriods();
+const getPeriods = useLoadRecentPeriods();
 
 const tree = computed(() => {
     return period.value.getCategoryTree({

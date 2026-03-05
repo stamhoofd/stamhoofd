@@ -3,7 +3,7 @@ import { Sorter } from '@stamhoofd/utility';
 import { useOrganizationManager } from '../OrganizationManager';
 import { useRequestOwner } from './useRequestOwner';
 
-export function useGetPeriods() {
+export function useLoadRecentPeriods() {
     const organizationManager = useOrganizationManager();
     const owner = useRequestOwner();
 

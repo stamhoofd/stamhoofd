@@ -3,14 +3,14 @@ import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { GroupCategory, GroupCategorySettings, GroupCategoryTree, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, OrganizationTypeHelper } from '@stamhoofd/structures';
 
 import { PromiseComponent, useOrganization } from '@stamhoofd/components';
-import { useGetPeriods, usePatchOrganizationPeriods } from '@stamhoofd/networking';
+import { useLoadRecentPeriods, usePatchOrganizationPeriods } from '@stamhoofd/networking';
 import EditCategoryGroupsView from '../../groups/EditCategoryGroupsView.vue';
 
 // You can declare mixins as the same style as components.
 export function useEditGroupsView() {
     const o = useOrganization();
     const patchOrganizationPeriods = usePatchOrganizationPeriods();
-    const getPeriods = useGetPeriods();
+    const getPeriods = useLoadRecentPeriods();
 
     return async function () {
         const organization = o.value;
