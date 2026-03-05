@@ -134,9 +134,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.name = put.name;
             event.startDate = put.startDate;
             event.endDate = put.endDate;
+            event.typeId = put.typeId;
 
-            const type = await PatchEventsEndpoint.getEventType(put.typeId);
-            event.typeId = type.id;
             event.meta.organizationCache = eventOrganization ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name }) : null;
             await PatchEventsEndpoint.checkEventLimits(event);
 
@@ -146,10 +145,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     await event.syncGroupRequirements(group);
                 });
                 event.groupId = group.id;
-            }
-
-            if (type.isLocationRequired === true) {
-                PatchEventsEndpoint.throwIfAddressIsMissing(event);
             }
 
             await event.save();
@@ -228,10 +223,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.startDate = patch.startDate ?? event.startDate;
             event.endDate = patch.endDate ?? event.endDate;
 
-            const type = await PatchEventsEndpoint.getEventType(patch.typeId ?? event.typeId);
-
             if (patch.typeId) {
-                event.typeId = type.id;
+                event.typeId = patch.typeId;
             }
 
             await PatchEventsEndpoint.checkEventLimits(event);
@@ -317,10 +310,6 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
             }
 
-            if (type.isLocationRequired === true) {
-                PatchEventsEndpoint.throwIfAddressIsMissing(event);
-            }
-
             if (patch.webshopId !== undefined) {
                 if (patch.webshopId === null) {
                     event.webshopId = null;
@@ -398,6 +387,21 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
     static async checkEventLimits(event: Event) {
         const type = await this.getEventType(event.typeId);
+
+        if (type.isLocationRequired) {
+            const address = event.meta.location?.address;
+
+            if (!address) {
+                throw new SimpleError({
+                    code: 'invalid_field',
+                    message: 'Empty number',
+                    human: $t(`6b72f8bd-cd5b-423f-a556-be102d3c22e9`),
+                    field: 'event_required',
+                });
+            }
+
+            address.throwIfIncomplete();
+        }
 
         if (event.name.length < 2) {
             throw new SimpleError({
@@ -482,20 +486,5 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 });
             }
         }
-    }
-
-    private static throwIfAddressIsMissing(event: Event) {
-        const address = event.meta.location?.address;
-
-        if (!address) {
-            throw new SimpleError({
-                code: 'invalid_field',
-                message: 'Empty number',
-                human: $t(`6b72f8bd-cd5b-423f-a556-be102d3c22e9`),
-                field: 'event_required',
-            });
-        }
-
-        address.throwIfIncomplete();
     }
 }
