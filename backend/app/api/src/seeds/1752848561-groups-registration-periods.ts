@@ -119,6 +119,7 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         const currentCycle = originalGroup.cycle;
         const originalGroupId: string = originalGroup.id;
         originalGroup.periodId = currentGroupPeriod.id;
+        originalGroup.settings.hasCustomDates = checkShouldSetCustomDates(originalGroup, currentGroupPeriod);
 
         // first migrate registrations for the current cycle
         await migrateRegistrations({ organization, period: currentGroupPeriod, originalGroup, newGroup: originalGroup, cycle: currentCycle }, dryRun);
@@ -358,6 +359,24 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
 
     const result: Group[] = [...groups, ...[...groupMap.values()].flat()];
     return result;
+}
+
+export function checkShouldSetCustomDates(group: Group, period: RegistrationPeriod): boolean {
+    // if difference between period start and group start, or between period and group end is bigger than 1 month
+    return isDifferenceBiggerThanMonth(period.startDate, group.settings.startDate) || isDifferenceBiggerThanMonth(period.endDate, group.settings.endDate);
+}
+
+/**
+ * True if difference larger than 30 days.
+ * @param date1
+ * @param date2
+ */
+function isDifferenceBiggerThanMonth(date1: Date, date2: Date): boolean {
+    const diffMs = Math.abs(date1.getTime() - date2.getTime());
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const diffDays = diffMs / msPerDay;
+
+    return diffDays > 30;
 }
 
 async function migrateRegistrations({ organization, period, originalGroup, newGroup, cycle }: { organization: Organization; period: RegistrationPeriod; originalGroup: Group; newGroup: Group; cycle: number }, dryRun: boolean) {
@@ -742,6 +761,7 @@ function createPreviousGroup({ originalGroup, period, cycleInformation, index }:
             name: new TranslatedString(`${originalSettings.name.toString()} (${extraName})`),
             startDate,
             endDate,
+            hasCustomDates: true,
         });
     newGroup.type = originalGroup.type;
 
