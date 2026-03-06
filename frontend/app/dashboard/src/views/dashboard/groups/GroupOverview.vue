@@ -10,6 +10,13 @@
                     {{ group.settings.period.nameShort }}
                 </span>
             </h1>
+            <p v-if="canCreateEvent" class="info-box">
+                {{ $t('Deze groep heeft een korte duur, misschien wil je deze omzetten naar een activiteit? Leden kunnen dan inschrijven voor de activiteit via de kalender. De inschrijvingen en instellingen worden overgezet naar de activiteit.') }}
+                <span class="button text inherit-color" @click="convertToEvent">
+                    <span class="icon calendar" />
+                    <span>{{ $t('Maak activiteit') }}</span>
+                </span>
+            </p>
             <p v-if="isLocked" class="warning-box">
                 {{ $t('7dd9a44e-8a47-4b74-9d57-d20b1efb706f') }}
             </p>
@@ -199,12 +206,13 @@
 </template>
 
 <script lang="ts" setup>
-import { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoderPatchType, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, defineRoutes, NavigationController, useNavigate, useNavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, MemberCountSpan, MembersTableView, PromiseView, RegistrationsTableView, STList, STListItem, STNavigationBar, Toast, useAuth, useOrganization, usePlatform } from '@stamhoofd/components';
-import { useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
-import { EmailTemplateType, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType } from '@stamhoofd/structures';
+import { CenteredMessage, ContextMenu, ContextMenuItem, EditEmailTemplatesView, EditGroupView, EditResourceRolesView, GlobalEventBus, MemberCountSpan, MembersTableView, PromiseView, RegistrationsTableView, STList, STListItem, STNavigationBar, Toast, useAuth, useContext, useFeatureFlag, useOrganization, usePlatform } from '@stamhoofd/components';
+import { useGetGroups, useGetPeriods, useOrganizationManager, usePatchOrganizationPeriod } from '@stamhoofd/networking';
+import { EmailTemplateType, Event, EventMeta, Group, GroupCategory, GroupCategoryTree, GroupSettings, GroupStatus, MemberResponsibility, NamedObject, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionLevel, PermissionsResourceType, PlatformEventType, RegistrationPeriod, RichText, TranslatedString } from '@stamhoofd/structures';
 
+import { SimpleError } from '@simonbackx/simple-errors';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentOptions, computed } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
@@ -228,6 +236,13 @@ const present = usePresent();
 const isLocked = computed(() => props.period.period.locked);
 const platform = usePlatform();
 const patchOrganizationPeriod = usePatchOrganizationPeriod();
+const context = useContext();
+const getGroups = useGetGroups();
+const getPeriods = useGetPeriods();
+const featureFlag = useFeatureFlag();
+
+// should be reactive because this can change
+const canCreateEvent = computed(() => checkCanCreateEvent(props.group));
 
 enum Routes {
     Registrations = 'inschrijvingen',
@@ -639,5 +654,228 @@ async function closeGroup() {
     catch (e) {
         Toast.fromError(e).show();
     }
+}
+
+function checkCanCreateEvent(group: Group) {
+    // not possible for userMode platform
+    if (STAMHOOFD.userMode !== 'organization'
+        || (!organization.value)) {
+        return false;
+    }
+
+    // not possible if group is in the past
+    if (group.settings.endDate.getTime() < (new Date()).getTime()) {
+        return false;
+    }
+
+    // not possible if end date is before start date (will fail in backend otherwise)
+    if (group.settings.endDate < group.settings.startDate) {
+        return false;
+    }
+
+    function isShorterThanMonth(group: Group) {
+        const diffMs = group.settings.endDate.getTime() - group.settings.startDate.getTime();
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const diffDays = diffMs / msPerDay;
+
+        return diffDays < 30;
+    }
+
+    if (!isShorterThanMonth(group)) {
+        return false;
+    }
+
+    if (// or if no event types (cannot create an event without types, activity tab will also not be visible)
+        getAllowedEventTypes().length === 0
+        // or if disabled
+        || featureFlag('disable-events')) {
+        return false;
+    }
+
+    return true;
+}
+
+async function convertToEvent() {
+    if (!organization.value) {
+        console.error(`Cannot create an event witout an organization.`);
+        return;
+    }
+
+    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze groep wilt omzetten naar een activiteit?`), $t('Ja, omzetten'), $t(`Leden kunnen dan inschrijven voor de activiteit via de kalender. De inschrijvingen en instellingen worden overgezet naar de activiteit. Dit kan niet ongedaan gemaakt worden.`))) {
+        return;
+    }
+
+    const toast = new Toast($t('Groep aan het omzetten naar een activiteit...'), 'spinner').show();
+
+    try {
+        const event = await createEventFromGroup(props.group, organization.value);
+        // set the created event
+        await saveEvent(event);
+    }
+    catch (e) {
+        console.error(e);
+        Toast.error($t('Er ging iets mis bij het omzetten van de groep naar een activiteit')).show();
+        return;
+    }
+    finally {
+        toast.hide();
+    }
+
+    Toast.success($t('De groep is omgezet naar een activiteit')).show();
+
+    // navigate to event
+    await GlobalEventBus.sendEvent('selectTabById', 'events');
+
+    // remove group from period
+    organization.value.period.groups = organization.value.period.groups.filter(g => g.id !== props.group.id);
+}
+
+async function saveEvent(event: Event): Promise<Event> {
+    const arr = new PatchableArray() as PatchableArrayAutoEncoder<Event>;
+    arr.addPut(event);
+
+    const response = await context.value.authenticatedServer.request({
+        method: 'PATCH',
+        path: '/events',
+        body: arr,
+        decoder: new ArrayDecoder(Event as Decoder<Event>),
+    });
+
+    return response.data[0];
+}
+
+function getAllowedEventTypes() {
+    return platform.value.config.eventTypes.filter((type) => {
+        // ignore event types with limits for now
+        if (type.maximum !== null || type.minimumDays !== null || type.maximumDays !== null || type.isLocationRequired) {
+            return false;
+        }
+        return true;
+    });
+}
+
+async function createEventFromGroup(group: Group, organization: Organization) {
+    function descriptionToRichtText(description: TranslatedString) {
+        const text = description.toString();
+        const html = text.split('\n').map(split => `<p>${Formatter.escapeHtml(split)}</p>`).join('');
+
+        return RichText.create({
+            text,
+            html,
+        });
+    }
+
+    async function requireGroupIdsToNamedObjects(requireGroupIds: string[]): Promise<NamedObject[]> {
+        // first try to find the group in the current period
+        const groupsInPeriod = organization.period.groups;
+        const foundGroups: { group: Group; period: RegistrationPeriod }[] = [];
+        const missingGroupIds: string[] = [];
+
+        const defaultPeriod = organization.period.period;
+        for (const groupId of requireGroupIds) {
+            const group = groupsInPeriod.find(g => g.id === groupId);
+            if (group) {
+                foundGroups.push({ group, period: defaultPeriod });
+            }
+            else {
+                missingGroupIds.push(groupId);
+            }
+        }
+
+        const allGroups = foundGroups;
+
+        // next get the missing groups and periods from the server
+        if (missingGroupIds.length > 0) {
+            const missingGroups = await getGroups(missingGroupIds, true);
+
+            // extra validation to make sure all groups are found
+            for (const missingGroupId of missingGroupIds) {
+                if (!missingGroups.find(g => g.id === missingGroupId)) {
+                    throw new Error(`Could not find group with id ${missingGroupId}`);
+                }
+            }
+
+            const missingPeriodIds = await getPeriods(missingGroups.map(g => g.periodId), true);
+
+            for (const group of missingGroups) {
+                const period = missingPeriodIds.find(p => p.id === group.periodId);
+                if (!period) {
+                    throw new Error('Could not find period for group, should not happen.');
+                }
+
+                allGroups.push({ group, period });
+            }
+        }
+
+        return allGroups.map(({ group, period }) => {
+            return NamedObject.create({
+                id: group.id,
+                name: group.settings.name.toString(),
+                description: period.nameShort,
+            });
+        });
+    }
+
+    function getEventTypeId(groupName: string): string {
+        const eventTypes = getAllowedEventTypes();
+        if (eventTypes.length === 0) {
+            throw new Error('Cannot create an event because no event types are configured on the platform.');
+        }
+
+        if (eventTypes.length === 1) {
+            return eventTypes[0].id;
+        }
+
+        const formattedGroupName = groupName.toLowerCase();
+
+        let typeOther: PlatformEventType | null = null;
+
+        for (const eventType of eventTypes) {
+            const formattedEventName = eventType.name.toLowerCase();
+            if (formattedGroupName.includes(formattedEventName)) {
+                return eventType.id;
+            }
+
+            // hardcoded for now
+            if (formattedEventName === 'andere') {
+                typeOther = eventType;
+            }
+        }
+
+        if (typeOther) {
+            return typeOther.id;
+        }
+
+        return eventTypes[0].id;
+    }
+
+    const groupNamedObjects = await requireGroupIdsToNamedObjects(group.settings.requireGroupIds);
+
+    const name = group.settings.name.toString();
+    if (name.length < 2) {
+        // will fail in the backend otherwise
+        throw new SimpleError({
+            code: 'group-name-too-short',
+            message: 'Name should be at least 2 characters long',
+            human: $t('Naam van de groep moet minimaal 2 tekens lang zijn'),
+        });
+    }
+
+    return Event.create({
+        organizationId: organization.id,
+        name,
+        typeId: getEventTypeId(name),
+        startDate: group.settings.startDate,
+        endDate: group.settings.endDate,
+        meta: EventMeta.create({
+            visible: true,
+            description: descriptionToRichtText(group.settings.description),
+            groups: groupNamedObjects.length === 0 ? undefined : groupNamedObjects,
+            coverPhoto: group.settings.coverPhoto,
+            minAge: group.settings.minAge,
+            maxAge: group.settings.maxAge,
+        }),
+        group,
+    });
 }
 </script>
