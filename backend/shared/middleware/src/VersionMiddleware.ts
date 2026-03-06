@@ -1,7 +1,9 @@
 import { Response, Request, RequestMiddleware, ResponseMiddleware } from '@simonbackx/simple-endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
 import { Version } from '@stamhoofd/structures';
+import os from 'os';
 
+let savedHost = '';
 export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware {
     minimumVersion: number | undefined;
     latestVersions: { android: number; ios: number; web: number };
@@ -82,6 +84,12 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         }
         catch (e) {
             // No version provided or invalid version
+        }
+
+        const host = savedHost || os.hostname();
+        savedHost = host;
+        if (host && !host.includes('.')) {
+            response.headers['X-Server'] = host;
         }
     }
 }

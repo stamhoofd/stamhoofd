@@ -1,16 +1,38 @@
 <template>
     <p class="style-description-small version-footer" @click="tapVersion">
-        v{{ version }} ({{ nativeVersion }}, {{ environment }})<br>
-        {{ STAMHOOFD.APP_UPDATE_SERVER_URL }}
+        <span class="icon small commit" /><span>v{{ version }} ({{ nativeVersion }}, {{ environment }})</span>
+    </p>
+    <p v-if="STAMHOOFD.APP_UPDATE_SERVER_URL" class="style-description-small">
+        <span class="icon small reverse" /><span>{{ STAMHOOFD.APP_UPDATE_SERVER_URL }}</span>
+    </p>
+    <p v-if="NetworkManager.serverName" class="style-description-small">
+        <span class="icon small earth" /><span>{{ NetworkManager.serverName }}</span>
     </p>
 </template>
 
-<script lang="ts">
-import { ComponentWithProperties, NavigationController, NavigationMixin } from "@simonbackx/vue-app-navigation";
-import { AsyncComponent } from "@stamhoofd/components";
-import { AppManager } from '@stamhoofd/networking';
-import { Component, Mixins } from "@simonbackx/vue-app-navigation/classes";
+<script lang="ts" setup>
+import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
+import { AsyncComponent } from '@stamhoofd/components';
+import { AppManager, NetworkManager } from '@stamhoofd/networking';
 
+const nativeVersion = AppManager.shared.nativeVersion ? ('App ' + AppManager.shared.nativeVersion) : 'web';
+const version = STAMHOOFD.VERSION || '0.0.0';
+const environment = STAMHOOFD.environment;
+
+const present = usePresent();
+async function tapVersion() {
+    await present({
+        adjustHistory: true,
+        modalDisplayStyle: 'popup',
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./DevPanelView.vue')),
+            }),
+        ],
+    });
+}
+
+/*
 @Component({})
 export default class VersionFooter extends Mixins(NavigationMixin) {
     get environment() {
@@ -21,7 +43,6 @@ export default class VersionFooter extends Mixins(NavigationMixin) {
         return AppManager.shared.nativeVersion ? ('App ' + AppManager.shared.nativeVersion) : "web"
     }
 
-
     get version() {
         return STAMHOOFD.VERSION || '0.0.0'
     }
@@ -31,18 +52,9 @@ export default class VersionFooter extends Mixins(NavigationMixin) {
     }
 
     openDevPanel(animated = true) {
-        this.present({
-            animated,
-            adjustHistory: true,
-            modalDisplayStyle: "popup",
-            components: [
-                new ComponentWithProperties(NavigationController, { 
-                    root: AsyncComponent(() => import("./DevPanelView.vue"))
-                })
-            ]
-        })
+
     }
-}
+} */
 </script>
 
 <style lang="scss">

@@ -14,9 +14,9 @@
 </template>
 
 <script setup lang="ts">
-import { usePlatform } from '../hooks';
-import { LanguageHelper } from '@stamhoofd/structures';
 import { I18nController } from '@stamhoofd/frontend-i18n';
+import { LanguageHelper } from '@stamhoofd/structures';
+import { usePlatform } from '../hooks';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 
 const platform = usePlatform();

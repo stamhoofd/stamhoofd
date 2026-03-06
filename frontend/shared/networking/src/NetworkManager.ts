@@ -1,4 +1,4 @@
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@simonbackx/simple-errors';
 import { Request, RequestMiddleware, Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components';
 import { I18nController } from '@stamhoofd/frontend-i18n';
@@ -14,6 +14,7 @@ export function sleep(ms: number) {
 export class NetworkManagerStatic implements RequestMiddleware {
     networkErrorToast: Toast | null = null;
     platformLatestVersion: number | null = null;
+    serverName: string | null = null;
 
     /**
      * Total request with a network error that are being retried
@@ -181,6 +182,11 @@ export class NetworkManagerStatic implements RequestMiddleware {
                     }
                 }
             }
+        }
+
+        const serverName = response.getResponseHeader('X-Server');
+        if (serverName) {
+            this.serverName = serverName;
         }
     }
 }
