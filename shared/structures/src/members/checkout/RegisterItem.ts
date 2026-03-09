@@ -23,6 +23,7 @@ import { type Registration } from '../Registration.js';
 import { type RegisterCart } from './RegisterCart.js';
 import { type RegisterContext } from './RegisterCheckout.js';
 import { RegistrationWithPlatformMember } from './RegistrationWithPlatformMember.js';
+import { GroupCategory } from '../../GroupCategory.js';
 
 export class RegisterItemOption extends AutoEncoder {
     @field({ decoder: GroupOption })
@@ -621,31 +622,37 @@ export class RegisterItem implements ObjectWithRecords {
         return !!this.member.member.registrations.find(r => !this.willReplace(r.id) && r.groupId === this.group.id && r.registeredAt !== null && r.deactivatedAt === null);
     }
 
-    hasReachedCategoryMaximum(): boolean {
+    hasReachedCategoryMaximum(): { category: GroupCategory; groups: Group[] } | null {
         if (this.group.type !== GroupType.Membership) {
-            return false;
+            return null;
         }
 
         const parents = this.group.getParentCategories(this.organization.period.settings.categories, false);
 
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
-                const count = this.member.patchedMember.registrations.filter((r) => {
+                const registrations = this.member.patchedMember.registrations.filter((r) => {
                     if (!this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
                         return true;
                     }
                     return false;
-                }).length;
+                });
+                const count = registrations.length;
 
-                const waiting = this.checkout.cart.items.filter((item) => {
+                const cartItems = this.checkout.cart.items.filter((item) => {
                     return item.member.member.id === this.member.member.id && parent.groupIds.includes(item.group.id) && item.group.id !== this.group.id;
-                }).length;
+                });
+
+                const waiting = cartItems.length;
                 if (count + waiting >= parent.settings.maximumRegistrations) {
-                    return true;
+                    return {
+                        category: parent,
+                        groups: [...registrations.map(registration => registration.group), ...cartItems.map(item => item.group)],
+                    };
                 }
             }
         }
-        return false;
+        return null;
     }
 
     isInvited() {
@@ -1188,15 +1195,26 @@ export class RegisterItem implements ObjectWithRecords {
             });
         }
 
-        if (this.hasReachedCategoryMaximum()) {
+        const categoryMaximum = this.hasReachedCategoryMaximum();
+        if (categoryMaximum) {
             // Only happens if maximum is reached in teh cart (because maximum without cart is already checked in shouldShow)
             throw new SimpleError({
                 code: 'maximum_reached',
                 message: 'Maximum reached',
-                human: $t(`73430be0-1a07-4730-9e2e-72528992767d`, {
-                    group: this.group.settings.name,
-                    member: this.member.patchedMember.name,
-                }),
+                human: (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
+                    ? $t(`{member} is al ingeschreven voor {otherGroup} onder de categorie {category} (maximum één mogelijk). Je kan niet meer inschrijven voor {group}.`, {
+                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('en') + ' '),
+                            group: this.group.settings.name,
+                            member: this.member.patchedMember.name,
+                            category: categoryMaximum.category.settings.name,
+                        })
+                    : $t(`{member} is al ingeschreven voor {group-a-and-group-b} onder de categorie {category}. Je kan niet meer inschrijven voor {group} (maximum van {count} bereikt).`, {
+                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('en') + ' '),
+                            'count': categoryMaximum.category.settings.maximumRegistrations ?? 2,
+                            'group': this.group.settings.name,
+                            'member': this.member.patchedMember.name,
+                            'category': categoryMaximum.category.settings.name,
+                        }),
             });
         }
 
