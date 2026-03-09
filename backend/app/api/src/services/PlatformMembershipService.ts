@@ -251,22 +251,40 @@ export class PlatformMembershipService {
                     const cheapestMembership = defaultMembershipsWithOrganization.sort((a, b) => {
                         const tagIdsA = a.organization?.meta.tags ?? [];
                         const tagIdsB = b.organization?.meta.tags ?? [];
-                        const aPrice = a.membership.getPrice(
+                        let aPrice = a.membership.getPrice(
                             period.id,
                             a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt,
                             tagIdsA,
                             shouldApplyReducedPrice,
                         ) ?? 10000000;
-                        const bPrice = b.membership.getPrice(
+                        let bPrice = b.membership.getPrice(
                             period.id,
                             b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt,
                             tagIdsB,
                             shouldApplyReducedPrice,
                         ) ?? 10000000;
 
+                        const chargeVia = platform.membershipOrganizationId;
+                        if (a.registration.organizationId === chargeVia) {
+                            aPrice = 0;
+                        }
+
+                        if (b.registration.organizationId === chargeVia) {
+                            bPrice = 0;
+                        }
+
                         const diff = aPrice - bPrice;
                         if (diff === 0) {
-                            return Sorter.byDateValue(b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt, a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt);
+                            return Sorter.stack(
+                                Sorter.byDateValue(
+                                    b.registration.startDate ?? b.registration.registeredAt ?? b.registration.createdAt,
+                                    a.registration.startDate ?? a.registration.registeredAt ?? a.registration.createdAt,
+                                ),
+                                Sorter.byDateValue(
+                                    b.registration.createdAt,
+                                    a.registration.createdAt,
+                                ),
+                            );
                         }
                         return diff;
                     })[0];
