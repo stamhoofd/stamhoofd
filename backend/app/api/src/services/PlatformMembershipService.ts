@@ -349,7 +349,7 @@ export class PlatformMembershipService {
                     // Then update all memberships from the same organization for the selected registration date range
                     for (const m of activeMemberships) {
                         if (m.membershipTypeId === cheapestMembership.membership.id && m.organizationId === cheapestMembership.registration.organizationId) {
-                            if (!m.locked) {
+                            if (!m.locked && m.generated) {
                                 // Update the price and dates of this active membership (could have changed)
                                 try {
                                     await m.calculatePrice(me, cheapestMembership.registration);
@@ -378,7 +378,7 @@ export class PlatformMembershipService {
                                 }
                                 await m.doDelete();
                             }
-                            else {
+                            else if (m.membershipTypeId === cheapestMembership.membership.id) {
                                 // Update price
                                 if (!m.locked) {
                                     try {
