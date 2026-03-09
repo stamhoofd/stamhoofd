@@ -12,12 +12,14 @@
         <template v-else>
             <ScrollableSegmentedControl v-if="availableOrganizations.length > 1" v-model="selectedOrganization" :items="availableOrganizations" :labels="availableOrganizations.map(o => o.name)" />
 
-            <p v-if="organization" class="style-description-block">
-                {{ $t('7c2fee1a-0838-4346-848d-a3d984e70fdc') }}
-            </p>
-            <p v-else class="style-description-block">
-                {{ $t('525747e4-48df-4f20-979e-3c18142e64a5', {name: selectedOrganization.name }) }}
-            </p>
+            <template v-if="selectedOrganization.id !== platform.membershipOrganizationId">
+                <p v-if="organization" class="style-description-block">
+                    {{ $t('7c2fee1a-0838-4346-848d-a3d984e70fdc') }}
+                </p>
+                <p v-else class="style-description-block">
+                    {{ $t('525747e4-48df-4f20-979e-3c18142e64a5', {name: selectedOrganization.name }) }}
+                </p>
+            </template>
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
@@ -278,6 +280,10 @@ function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
         return $t(`28f78c8b-c553-4cb0-88d9-d1d766eaa1dd`);
+    }
+
+    if (selectedOrganization.value.id === platform.value.membershipOrganizationId) {
+        return Formatter.price(0);
     }
 
     const priceConfig = periodConfig.getPriceConfigForDate(date);

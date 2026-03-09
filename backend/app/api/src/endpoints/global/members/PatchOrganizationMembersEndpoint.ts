@@ -3,7 +3,7 @@ import { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, isEmptyPat
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
 import { AuditLog, BalanceItem, Document, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberWithRegistrations, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, mergeTwoMembers, Organization, Platform, RateLimiter, Registration, RegistrationPeriod, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, SetupStepType } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberResponsibility, MembersBlob, MemberWithRegistrationsBlob, Parent, PermissionLevel, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -535,13 +535,40 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     )
                     .first(false);
 
-                if (existing) {
+                if (existing && (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days || !existing.generated || existing.locked || existing.price < membership.price)) {
+                    if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'startDate',
+                            message: 'Overlapping memberships',
+                            human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting.`),
+                        });
+                    }
+                    if (existing.locked) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'startDate',
+                            message: 'Overlapping memberships',
+                            human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die al vergendeld is.`),
+                        });
+                    }
+                    if (!existing.generated) {
+                        throw new SimpleError({
+                            code: 'invalid_field',
+                            field: 'startDate',
+                            message: 'Overlapping memberships',
+                            human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die manueel werd aangemaakt.`),
+                        });
+                    }
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
-                        message: 'Invalid start date',
-                        human: $t(`faf8b6bb-2727-4d2f-847f-203cf3979dfb`),
+                        message: 'Overlapping memberships',
+                        human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die goedkoper is.`),
                     });
+                }
+                else if (existing) {
+                    await existing.doDelete();
                 }
 
                 // Save if okay

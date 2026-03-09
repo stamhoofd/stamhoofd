@@ -309,6 +309,43 @@ export class PlatformMembershipService {
                         }
                     }
 
+                    const membership = new MemberPlatformMembership();
+
+                    if (!didFind) {
+                        // Calculate price - do not save yet
+                        const periodConfig = cheapestMembership.membership.periods.get(period.id);
+                        if (!periodConfig) {
+                            console.error('Missing membership prices for membership type ' + cheapestMembership.membership.id + ' and period ' + period.id);
+                            continue;
+                        }
+
+                        // Pre calculate the price
+                        membership.memberId = me.id;
+                        membership.membershipTypeId = cheapestMembership.membership.id;
+                        membership.organizationId = cheapestMembership.registration.organizationId;
+                        membership.periodId = period.id;
+
+                        // Note: the dates will get modified in the price calculation
+                        membership.startDate = periodConfig.startDate;
+                        membership.endDate = periodConfig.endDate;
+                        membership.expireDate = periodConfig.expireDate;
+                        membership.generated = true;
+                        await membership.calculatePrice(me, cheapestMembership.registration);
+
+                        // Check if we have a not-locked but non-generated one that is cheaper
+                        // if so, we stop and don't create a new one (but still delete others if required)
+                        for (const m of activeMemberships) {
+                            if (m.membershipTypeId === cheapestMembership.membership.id && !m.generated) {
+                                // is this cheaper?
+                                if (m.price <= membership.price) { // todo expand with more details price comparison
+                                    // Cheaper
+                                    didFind = m;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     // Then update all memberships from the same organization for the selected registration date range
                     for (const m of activeMemberships) {
                         if (m.membershipTypeId === cheapestMembership.membership.id && m.organizationId === cheapestMembership.registration.organizationId) {
@@ -364,30 +401,10 @@ export class PlatformMembershipService {
                         continue;
                     }
 
-                    // Otherwise make sure we create a new membership
-
-                    const periodConfig = cheapestMembership.membership.periods.get(period.id);
-                    if (!periodConfig) {
-                        console.error('Missing membership prices for membership type ' + cheapestMembership.membership.id + ' and period ' + period.id);
-                        continue;
-                    }
-
                     // Can we revive an earlier deleted membership?
                     if (!silent) {
                         console.log('Creating automatic membership for: ' + me.id + ' - membership type ' + cheapestMembership.membership.id);
                     }
-
-                    const membership = new MemberPlatformMembership();
-                    membership.memberId = me.id;
-                    membership.membershipTypeId = cheapestMembership.membership.id;
-                    membership.organizationId = cheapestMembership.registration.organizationId;
-                    membership.periodId = period.id;
-
-                    // Note: the dates will get modified in the price calculation
-                    membership.startDate = periodConfig.startDate;
-                    membership.endDate = periodConfig.endDate;
-                    membership.expireDate = periodConfig.expireDate;
-                    membership.generated = true;
 
                     if (me.details.memberNumber === null) {
                         try {
@@ -400,7 +417,6 @@ export class PlatformMembershipService {
                         }
                     }
 
-                    await membership.calculatePrice(me, cheapestMembership.registration);
                     await membership.save();
                 }
             });
