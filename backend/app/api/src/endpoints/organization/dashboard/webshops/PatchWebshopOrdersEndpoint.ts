@@ -1,15 +1,17 @@
 import { ArrayDecoder, AutoEncoderPatchType, Data, Decoder, PatchableArray, PatchableArrayAutoEncoder, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import { DecodedRequest, Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@simonbackx/simple-errors';
-import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemPayment, Order, Organization, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PermissionLevel, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
+import { SQL } from '@stamhoofd/sql';
+import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../../../../helpers/Context.js';
-import { AuditLogService } from '../../../../services/AuditLogService.js';
-import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
+import { AuditLogService } from '../../../../services/AuditLogService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
+import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
 type Params = { id: string };
 type Query = undefined;
@@ -275,7 +277,10 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 if (model.status === OrderStatus.Deleted || model.status === OrderStatus.Canceled) {
                     model.markUpdated();
                     // Cancel payment if still pending
-                    await BalanceItem.deleteForDeletedOrders([model.id]);
+                    const deletedBalanceItems = await BalanceItem.deleteForDeletedOrders([model.id]);
+                    if (deletedBalanceItems) {
+                        await this.tryCancelPendingTransfers(model, deletedBalanceItems, organization);
+                    }
                 }
                 else {
                     if (previousStatus === OrderStatus.Canceled || previousStatus === OrderStatus.Deleted) {
@@ -342,5 +347,54 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         return new Response(
             await Order.getPrivateStructures(orders),
         );
+    }
+
+    /**
+     * Pending transers should only be canceled if they are not linked to any other order.
+     */
+    private async tryCancelPendingTransfers(order: Order, deletedBalanceItems: BalanceItem[], organization: Organization) {
+        if (deletedBalanceItems.length === 0) {
+            return;
+        }
+
+        // get the pending transfers for the order
+        const pendingTransfers = await Payment.select()
+            .join(
+                SQL.join(BalanceItemPayment.table).where('paymentId', SQL.parentColumn('id')),
+            )
+            .join(
+                SQL.join(BalanceItem.table).where('id', SQL.column(BalanceItemPayment.table, 'balanceItemId')),
+            )
+            .where(SQL.column(BalanceItem.table, 'orderId'), order.id)
+
+            .where(SQL.column('method'), PaymentMethod.Transfer)
+            .where(SQL.column('status'), [PaymentStatus.Pending, PaymentStatus.Created])
+            .groupBy(SQL.column(Payment.table, 'id'))
+            .fetch();
+
+        if (pendingTransfers.length === 0) {
+            return;
+        }
+
+        const paymentIds = Formatter.uniqueArray(pendingTransfers.map(p => p.id));
+
+        // check if there are balance items linked to the pending transfers that are not for this order
+        const balanceItemsForOtherOrdersCount = await BalanceItemPayment.select()
+            .join(
+                SQL.join(BalanceItem.table).where('id', SQL.parentColumn('balanceItemId')),
+            ).where(SQL.column(BalanceItemPayment.table, 'paymentId'), paymentIds.length === 1 ? paymentIds[0] : paymentIds)
+            .whereNot(SQL.column(BalanceItem.table, 'orderId'), order.id)
+            .limit(1)
+            .count();
+
+        // if there are, do not cancel the transfers
+        if (balanceItemsForOtherOrdersCount > 0) {
+            return;
+        }
+
+        // cancel the tranfsers
+        for (const payment of pendingTransfers) {
+            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+        }
     }
 }
