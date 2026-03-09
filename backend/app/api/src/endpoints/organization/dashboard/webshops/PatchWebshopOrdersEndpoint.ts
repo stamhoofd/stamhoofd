@@ -279,7 +279,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                     // Cancel payment if still pending
                     const deletedBalanceItems = await BalanceItem.deleteForDeletedOrders([model.id]);
                     if (deletedBalanceItems) {
-                        await this.tryCancelPendingTransfers(model, deletedBalanceItems, organization);
+                        await this.tryCancelPendingTransfersForOrder(model, deletedBalanceItems, organization);
                     }
                 }
                 else {
@@ -352,7 +352,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
     /**
      * Pending transers should only be canceled if they are not linked to any other order.
      */
-    private async tryCancelPendingTransfers(order: Order, deletedBalanceItems: BalanceItem[], organization: Organization) {
+    private async tryCancelPendingTransfersForOrder(order: Order, deletedBalanceItems: BalanceItem[], organization: Organization) {
         if (deletedBalanceItems.length === 0) {
             return;
         }
