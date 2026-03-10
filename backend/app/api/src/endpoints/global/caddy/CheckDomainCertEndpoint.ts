@@ -57,7 +57,7 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
         
-        if (request.query.domain.endsWith("." + STAMHOOFD.domains.legacyWebshop)) {
+        if (STAMHOOFD.domains.legacyWebshop && request.query.domain.endsWith("." + STAMHOOFD.domains.legacyWebshop)) {
             const strippped = request.query.domain.substr(0, request.query.domain.length - ("." + STAMHOOFD.domains.legacyWebshop).length )
             if (strippped.includes(".")) {
                 throw new SimpleError({
