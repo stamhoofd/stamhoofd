@@ -102,9 +102,14 @@
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('78dedb37-a33d-4907-8034-43345eea18a0') }} {{ formatDate(reviewDate) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">
+            {{ $t('Algemene gegevens laatst nagekeken op {date}', {date: formatDate(reviewDate)}) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">
                 {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
             </button>.
+        </p>
+        <p v-if="!willMarkReviewed && !reviewDate && isAdmin" class="style-description-small">
+            {{ $t('Algemene gegevens nog nooit nagekeken.') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+                {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
+            </button>
         </p>
     </div>
 </template>
@@ -134,12 +139,15 @@ defineOptions({
     inheritAttrs: false,
 });
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     member: PlatformMember;
     validator: Validator;
     parentErrorBox?: ErrorBox | null;
     willMarkReviewed?: boolean;
-}>();
+}>(), {
+    willMarkReviewed: false,
+    parentErrorBox: null
+});
 
 const isPropertyRequired = useIsPropertyRequired(computed(() => props.member));
 const isPropertyEnabled = useIsPropertyEnabled(computed(() => props.member), true);
@@ -319,10 +327,21 @@ function deleteTrackingYear() {
 const reviewDate = computed(() => {
     return props.member.patchedMember.details.reviewTimes.getLastReview('details');
 });
+const now = new Date();
+
+const canMarkReviewed = computed(() => !reviewDate.value || reviewDate.value < now || reviewDate.value);
 
 function clear() {
     const times = props.member.patchedMember.details.reviewTimes.clone();
     times.removeReview('details');
+    props.member.addDetailsPatch({
+        reviewTimes: times,
+    });
+}
+
+function doMarkReviewed() {
+    const times = props.member.patchedMember.details.reviewTimes.clone();
+    times.markReviewed('details');
     props.member.addDetailsPatch({
         reviewTimes: times,
     });
