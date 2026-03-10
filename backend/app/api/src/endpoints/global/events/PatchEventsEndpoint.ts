@@ -499,7 +499,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const originalGroupType = existingGroup.type;
 
         if (!await Context.auth.canAccessGroup(existingGroup)) {
-            throw Context.auth.error($t(`Je hebt geen toegangsrechten om de groep te wijzigen.`));
+            throw Context.auth.error($t(`9cb60490-97be-4d11-beaf-4bdcf8b02d53`));
         }
 
         if (event.organizationId !== existingGroup.organizationId) {

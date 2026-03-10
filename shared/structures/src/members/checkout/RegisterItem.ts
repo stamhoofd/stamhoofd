@@ -1202,14 +1202,14 @@ export class RegisterItem implements ObjectWithRecords {
                 code: 'maximum_reached',
                 message: 'Maximum reached',
                 human: (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
-                    ? $t(`{member} is al ingeschreven voor {otherGroup} onder de categorie {category} (maximum één mogelijk). Je kan niet meer inschrijven voor {group}.`, {
-                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('en') + ' '),
+                    ? $t(`c0887d28-ecba-47e0-a8db-dfcc00d38630`, {
+                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('e79bcdf1-1e84-4ce6-a011-9338b800db52') + ' '),
                             group: this.group.settings.name,
                             member: this.member.patchedMember.name,
                             category: categoryMaximum.category.settings.name,
                         })
-                    : $t(`{member} is al ingeschreven voor {group-a-and-group-b} onder de categorie {category}. Je kan niet meer inschrijven voor {group} (maximum van {count} bereikt).`, {
-                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('en') + ' '),
+                    : $t(`3c0deffd-bc9e-4f8e-8c5e-e89d2edbd450`, {
+                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('e79bcdf1-1e84-4ce6-a011-9338b800db52') + ' '),
                             'count': categoryMaximum.category.settings.maximumRegistrations ?? 2,
                             'group': this.group.settings.name,
                             'member': this.member.patchedMember.name,

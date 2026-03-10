@@ -144,8 +144,8 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('Het GSM-nummer van {parentName} is hetzelfde als {firstName}. Vul een ander GSM-nummer dan {firstName} in, of verwijder het eerst bij {firstName}.', { 
-                    parentName: props.member.patchedMember.details.parents.find(p => p.phone === props.member.patchedMember.details.phone)?.firstName ?? $t('een ouder'),
+                message: $t('072ffa8e-f3a9-41f4-bd0b-f085f5d4ed52', { 
+                    parentName: props.member.patchedMember.details.parents.find(p => p.phone === props.member.patchedMember.details.phone)?.firstName ?? $t('45c3b8c0-2d27-48e4-9943-4dea45e0a34d'),
                     firstName: props.member.patchedMember.details.firstName
                 }),
                 field: 'phone',
@@ -160,8 +160,8 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t('Het e-mailadres van {parentName} is hetzelfde als {firstName}. Vul een ander e-mailadres dan {firstName} in, of verwijder het eerst bij {firstName}.', { 
-                    parentName: props.member.patchedMember.details.parents.find(p => p.email === props.member.patchedMember.details.email)?.firstName ?? $t('een ouder'),
+                message: $t('45eb88ba-7807-45a9-8f73-dc4f5c4050e7', { 
+                    parentName: props.member.patchedMember.details.parents.find(p => p.email === props.member.patchedMember.details.email)?.firstName ?? $t('45c3b8c0-2d27-48e4-9943-4dea45e0a34d'),
                     firstName: props.member.patchedMember.details.firstName 
                 }),
                 field: 'email',

@@ -541,7 +541,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting.`),
+                            human: $t(`84ef7751-ddf9-4591-ba5b-53371c67bdc3`),
                         });
                     }
                     if (existing.locked) {
@@ -549,7 +549,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die al vergendeld is.`),
+                            human: $t(`723af14b-38b8-4f33-a645-ed5087fc7461`),
                         });
                     }
                     if (!existing.generated) {
@@ -557,14 +557,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die manueel werd aangemaakt.`),
+                            human: $t(`b0280152-295f-48af-94e0-111c92dbda32`),
                         });
                     }
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
                         message: 'Overlapping memberships',
-                        human: $t(`Je kan geen aansluiting toevoegen die overlapt met een bestaande aansluiting die goedkoper is.`),
+                        human: $t(`1c0d9219-ef24-46ad-9b9c-f09b8d093fc8`),
                     });
                 }
                 else if (existing) {

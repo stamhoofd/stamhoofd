@@ -102,12 +102,12 @@
         </div>
 
         <p v-if="!willMarkReviewed && reviewDate && isAdmin" class="style-description-small">
-            {{ $t('Algemene gegevens laatst nagekeken op {date}', {date: formatDate(reviewDate)}) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">
+            {{ $t('8ee5006f-3095-4185-afbf-780970b9805d', {date: formatDate(reviewDate)}) }}. <button :v-tooltip="$t('1452c1a3-6203-4ab2-92c4-c0496661cd21')" type="button" class="inline-link" @click="clear">
                 {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
             </button>.
         </p>
         <p v-if="!willMarkReviewed && !reviewDate && isAdmin" class="style-description-small">
-            {{ $t('Algemene gegevens nog nooit nagekeken.') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
+            {{ $t('75eaec74-fef7-4e87-b4c6-22071152374f') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
             </button>
         </p>
@@ -193,7 +193,7 @@ useValidation(errors.validator, () => {
             } else {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van {firstName}. Laat het leeg of vul enkel het GSM-nummer van {firstName} zelf in.`, { firstName: props.member.patchedMember.details.firstName }),
+                    message: $t(`7f95e443-1935-4b84-a0ad-f38866669dcd`, { firstName: props.member.patchedMember.details.firstName }),
                     field: 'phone',
                 }));
             }

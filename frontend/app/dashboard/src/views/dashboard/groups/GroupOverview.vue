@@ -11,10 +11,10 @@
                 </span>
             </h1>
             <p v-if="canCreateEvent" class="info-box">
-                {{ $t('Deze groep heeft een korte duur, misschien wil je deze omzetten naar een activiteit? Leden kunnen dan inschrijven voor de activiteit via de kalender. De inschrijvingen en instellingen worden overgezet naar de activiteit.') }}
+                {{ $t('d08634b6-dc8e-435a-94a7-077e295d1441') }}
                 <span class="button text inherit-color" @click="convertToEvent">
                     <span class="icon calendar" />
-                    <span>{{ $t('Maak activiteit') }}</span>
+                    <span>{{ $t('c586cc7f-f92c-4458-9a24-ff9566d99b46') }}</span>
                 </span>
             </p>
             <p v-if="isLocked" class="warning-box">
@@ -701,11 +701,11 @@ async function convertToEvent() {
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`Ben je zeker dat je deze groep wilt omzetten naar een activiteit?`), $t('Ja, omzetten'), $t(`Leden kunnen dan inschrijven voor de activiteit via de kalender. De inschrijvingen en instellingen worden overgezet naar de activiteit. Dit kan niet ongedaan gemaakt worden.`))) {
+    if (!await CenteredMessage.confirm($t(`44f2acef-4059-4c03-a847-5c9c7adce18b`), $t('2c8da330-f73f-4caa-9b76-71946aebd9d0'), $t(`e37860f4-cba1-41ad-ba9e-5d8598b02ec1`))) {
         return;
     }
 
-    const toast = new Toast($t('Groep aan het omzetten naar een activiteit...'), 'spinner').show();
+    const toast = new Toast($t('95074fe5-fd75-4d9b-b4a5-335c7c2342df'), 'spinner').show();
 
     try {
         const event = await createEventFromGroup(props.group, organization.value);
@@ -714,14 +714,14 @@ async function convertToEvent() {
     }
     catch (e) {
         console.error(e);
-        Toast.error($t('Er ging iets mis bij het omzetten van de groep naar een activiteit')).show();
+        Toast.error($t('1f7f1430-470a-4250-8c77-24850d195557')).show();
         return;
     }
     finally {
         toast.hide();
     }
 
-    Toast.success($t('De groep is omgezet naar een activiteit')).show();
+    Toast.success($t('1885534c-e2d8-453b-9e07-521a7fbf8d6d')).show();
 
     // navigate to event
     await GlobalEventBus.sendEvent('selectTabById', 'events');
@@ -857,7 +857,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         throw new SimpleError({
             code: 'group-name-too-short',
             message: 'Name should be at least 2 characters long',
-            human: $t('Naam van de groep moet minimaal 2 tekens lang zijn'),
+            human: $t('0dd5ca82-2086-4f97-a33d-f5eb40821002'),
         });
     }
 
