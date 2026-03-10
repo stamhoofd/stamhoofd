@@ -41,7 +41,7 @@ export class Formatter {
     }
 
     static removeDuplicateSpaces(name: StringLike): string {
-        return name.replace(/\s+/, ' ');
+        return name.replace(/\s+/g, ' ');
     }
 
     static spaceString(str: string, spaceLength: number = 4, spaceChar = '\u00A0'): string {
