@@ -41,6 +41,9 @@ export class PropertyFilter implements Encodeable {
     }
 
     isRequired(object: Filterable): boolean {
+        if (!this.isEnabled(object)) {
+            return false;
+        }
         if (this.requiredWhen === null) {
             return false;
         }
