@@ -143,7 +143,7 @@ export class PaymentActionBuilder {
         if (this.methods && this.methods.every(method => method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale)) {
             return new InMemoryTableAction({
                 name: $t('Annuleren'),
-                icon: 'trash',
+                icon: 'canceled',
                 priority: 1,
                 groupIndex: 4,
                 enabled: !this.isSettingPaymentStatus,
