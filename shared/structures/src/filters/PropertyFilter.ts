@@ -122,19 +122,21 @@ export class PropertyFilter implements Encodeable {
         if (this.enabledWhen !== null && !isEmptyFilter(this.enabledWhen)) {
             // Make sure to include the enabled when restriction
             if (this.requiredWhen === null) {
-                // Always skipable
+                // Always skipable (because not enabled)
                 thisRequired = null;
             }
             else {
                 if (isEmptyFilter(this.requiredWhen)) {
-                    // Simplify without $and
+                    // always required: so in fact only required when enabled
                     thisRequired = this.enabledWhen;
                 }
                 else {
                     if (isEqualFilter(this.enabledWhen, this.requiredWhen)) {
+                        // required and enabled is identical
                         thisRequired = this.requiredWhen;
                     }
                     else {
+                        // required when it is also enabled
                         thisRequired = mergeFilters([
                             this.enabledWhen,
                             this.requiredWhen,
@@ -144,6 +146,8 @@ export class PropertyFilter implements Encodeable {
             }
         }
 
+        // null = always skippable
+        // {} = always required
         let otherRequired = other.requiredWhen;
         // Required when the other is enabled and required
         if (other.enabledWhen !== null && !isEmptyFilter(other.enabledWhen)) {
