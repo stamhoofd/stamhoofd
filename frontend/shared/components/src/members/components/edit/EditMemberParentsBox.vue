@@ -144,7 +144,10 @@ useValidation(errors.validator, () => {
         if (clone.phone === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: `Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het GSM-nummer van ${props.member.patchedMember.details.firstName} zelf in.`,
+                message: $t('Het GSM-nummer van {parentName} is hetzelfde als {firstName}. Vul een ander GSM-nummer dan {firstName} in, of verwijder het eerst bij {firstName}.', { 
+                    parentName: props.member.patchedMember.details.parents.find(p => p.phone === props.member.patchedMember.details.phone)?.firstName ?? $t('een ouder'),
+                    firstName: props.member.patchedMember.details.firstName
+                }),
                 field: 'phone',
             }));
         }
@@ -157,7 +160,10 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: `Je kan het e-mailadres van een ouder niet opgeven als het e-mailadres van ${props.member.patchedMember.details.firstName} of omgekeerd. Vul het e-mailadres van ${props.member.patchedMember.details.firstName} zelf in.`,
+                message: $t('Het e-mailadres van {parentName} is hetzelfde als {firstName}. Vul een ander e-mailadres dan {firstName} in, of verwijder het eerst bij {firstName}.', { 
+                    parentName: props.member.patchedMember.details.parents.find(p => p.email === props.member.patchedMember.details.email)?.firstName ?? $t('een ouder'),
+                    firstName: props.member.patchedMember.details.firstName 
+                }),
                 field: 'email',
             }));
         }
