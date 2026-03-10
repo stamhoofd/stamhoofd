@@ -179,20 +179,28 @@ useValidation(errors.validator, () => {
         }));
     }
 
-    if (isPropertyEnabled('phone') && phone.value) {
+    if (phone.value) {
         // Check if duplicate
         const clone = props.member.patchedMember.details.clone();
         clone.cleanData();
         if (clone.phone === null) {
-            se.addError(new SimpleError({
-                code: 'invalid_field',
-                message: $t(`0fd21e1a-8cf1-4155-81bb-726304485ddd`, { firstName: props.member.patchedMember.details.firstName }),
-                field: 'phone',
-            }));
+            if (isPropertyRequired('phone')) {
+                se.addError(new SimpleError({
+                    code: 'invalid_field',
+                    message: $t(`0fd21e1a-8cf1-4155-81bb-726304485ddd`, { firstName: props.member.patchedMember.details.firstName }),
+                    field: 'phone',
+                }));
+            } else {
+                se.addError(new SimpleError({
+                    code: 'invalid_field',
+                    message: $t(`Je kan het GSM-nummer van een ouder niet opgeven als het GSM-nummer van {firstName}. Laat het leeg of vul enkel het GSM-nummer van {firstName} zelf in.`, { firstName: props.member.patchedMember.details.firstName }),
+                    field: 'phone',
+                }));
+            }
         }
     }
 
-    if (isPropertyEnabled('emailAddress') && email.value) {
+    if (email.value) {
         // Check if duplicate
         const clone = props.member.patchedMember.details.clone();
         clone.cleanData();
