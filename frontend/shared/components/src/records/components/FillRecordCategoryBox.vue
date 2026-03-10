@@ -43,6 +43,9 @@
             </template>. <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
                 {{ $t('168f25d2-74c1-4c18-818a-796e7a8fee41') }}
             </button>
+            <button v-else class="inline-link" type="button" @click="clearReviewed">
+                {{ $t('74366859-3259-4393-865e-9baa8934327a') }}
+            </button>
         </p>
         <p v-if="!markReviewed && !lastReviewed" class="style-description-small">
             {{ $t('252a9a8f-4310-4ee6-98de-d6405ca544f1') }} <button v-if="canMarkReviewed" class="inline-link" type="button" @click="doMarkReviewed">
@@ -190,6 +193,23 @@ function doMarkReviewed() {
 
     addPatch(patch);
 }
+
+function clearReviewed() {
+    const patch = new PatchMap() as PatchAnswers;
+
+    for (const record of deepFilteredWriteableRecords.value) {
+        const answer = answers.value.get(record.id);
+        if (!answer) {
+            continue;
+        }
+        patch.set(record.id, answer.patch({
+            reviewedAt: null
+        }));
+    }
+
+    addPatch(patch);
+}
+
 
 const hasAnswers = computed(() => {
     for (const record of deepFilteredWriteableRecords.value) {
