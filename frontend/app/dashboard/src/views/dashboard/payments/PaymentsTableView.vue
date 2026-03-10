@@ -247,6 +247,7 @@ const Route = {
 
 const actionBuilder = usePaymentActions({
     configurationId,
+    methods: props.methods,
 });
 
 const actions = actionBuilder.getActions();

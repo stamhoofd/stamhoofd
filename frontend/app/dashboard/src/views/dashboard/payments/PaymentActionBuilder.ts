@@ -1,20 +1,23 @@
+import { ArrayDecoder, Decoder, PatchableArray, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
-import { AsyncTableAction, EmailView, InMemoryTableAction, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, useFeatureFlag, useOrganization, usePlatform } from '@stamhoofd/components';
+import { AsyncTableAction, CenteredMessage, EmailView, GlobalEventBus, InMemoryTableAction, RecipientChooseOneOption, RecipientMultipleChoiceOption, TableAction, TableActionSelection, Toast, useContext, useFeatureFlag, useOrganization, usePlatform } from '@stamhoofd/components';
 import { ExcelExportView } from '@stamhoofd/frontend-excel-export';
-import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Organization, PaymentGeneral, Platform } from '@stamhoofd/structures';
-import { ComputedRef } from 'vue';
+import { SessionContext } from '@stamhoofd/networking';
+import { EmailRecipientFilterType, EmailRecipientSubfilter, ExcelExportType, mergeFilters, Organization, Payment, PaymentGeneral, PaymentMethod, PaymentStatus, Platform } from '@stamhoofd/structures';
+import { ComputedRef, Ref } from 'vue';
 import { useSelectableWorkbook } from './getSelectableWorkbook';
 import { useMarkPaymentsPaid } from './hooks/useMarkPaymentsPaid';
 
 type ObjectType = PaymentGeneral;
 
-export function usePaymentActions({ configurationId }: { configurationId: ComputedRef<string> }) {
+export function usePaymentActions({ configurationId, methods }: { configurationId: ComputedRef<string>; methods: PaymentMethod[] | null }) {
     const platform = usePlatform();
     const organization = useOrganization();
     const markPaid = useMarkPaymentsPaid();
     const present = usePresent();
     const selectableWorkbook = useSelectableWorkbook();
     const $feature = useFeatureFlag();
+    const context = useContext();
 
     return new PaymentActionBuilder({
         markPaid,
@@ -24,6 +27,8 @@ export function usePaymentActions({ configurationId }: { configurationId: Comput
         organization: organization.value,
         platform: platform.value,
         $feature,
+        methods,
+        context,
     });
 }
 
@@ -35,6 +40,9 @@ export class PaymentActionBuilder {
     private organization: Organization | null;
     private platform: Platform;
     private $feature: ReturnType<typeof useFeatureFlag>;
+    private methods: PaymentMethod[] | null;
+    private isSettingPaymentStatus: boolean = false;
+    private context: Ref<SessionContext, SessionContext>;
 
     constructor(settings: {
         markPaid: ReturnType<typeof useMarkPaymentsPaid>;
@@ -44,6 +52,8 @@ export class PaymentActionBuilder {
         organization: Organization | null;
         platform: Platform;
         $feature: ReturnType<typeof useFeatureFlag>;
+        methods: PaymentMethod[] | null;
+        context: Ref<SessionContext, SessionContext>;
     }) {
         this.markPaid = settings.markPaid;
         this.present = settings.present;
@@ -52,14 +62,16 @@ export class PaymentActionBuilder {
         this.organization = settings.organization;
         this.platform = settings.platform;
         this.$feature = settings.$feature;
+        this.methods = settings.methods;
+        this.context = settings.context;
     }
 
-    getActions() {
-        const actions: TableAction<ObjectType>[] = [
+    getActions(): TableAction<ObjectType>[] {
+        const actions: (TableAction<ObjectType> | null)[] = [
             new InMemoryTableAction({
                 name: $t('03bd6cff-83c4-44ec-8b0d-7826bf5b4166'),
                 icon: 'success',
-                priority: 2,
+                priority: 3,
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -71,7 +83,7 @@ export class PaymentActionBuilder {
             new InMemoryTableAction({
                 name: $t('fb1d3820-b4d3-446b-ab4b-931b16eb5391'),
                 icon: 'canceled',
-                priority: 1,
+                priority: 2,
                 groupIndex: 1,
                 needsSelection: true,
                 allowAutoSelectAll: false,
@@ -80,7 +92,7 @@ export class PaymentActionBuilder {
                     await this.markPaid(payments, false);
                 },
             }),
-
+            this.getCancelPaymentsAction(),
             new AsyncTableAction({
                 name: $t('f97a138d-13eb-4e33-aee3-489d9787b2c8'),
                 icon: 'download',
@@ -111,7 +123,7 @@ export class PaymentActionBuilder {
             actions.push(this.getEmailAction());
         }
 
-        return actions;
+        return actions.filter(action => action !== null);
     }
 
     private getEmailAction() {
@@ -124,6 +136,79 @@ export class PaymentActionBuilder {
                 await this.openMail(selection);
             },
         });
+    }
+
+    private getCancelPaymentsAction(): TableAction<ObjectType> | null {
+        // only for methods transfer and point of sale, not if any other method
+        if (this.methods && this.methods.every(method => method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale)) {
+            return new InMemoryTableAction({
+                name: $t('Annuleren'),
+                icon: 'trash',
+                priority: 1,
+                groupIndex: 4,
+                enabled: !this.isSettingPaymentStatus,
+                needsSelection: true,
+                allowAutoSelectAll: false,
+                handler: async (payments: PaymentGeneral[]) => {
+                    const filteredPayments = payments.filter(payment => (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) && (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale));
+                    if (filteredPayments.length === 0) {
+                        Toast.error($t('De geselecteerde betalingen zijn al geannuleerd of zijn niet annuleerbaar.')).show();
+                        return;
+                    }
+
+                    const text = filteredPayments.length === 1 ? $t('99810042-aa71-49a4-9cb4-c4fb23b7bc62') : $t('{count} betalingen annuleren?', { count: payments.length });
+                    if (!await CenteredMessage.confirm(text, $t('cdf0fafe-b364-4dbb-ae31-b593cf447298'), $t('4d83cf39-66a5-4759-a95a-3245cd17d8b3'))) {
+                        return;
+                    }
+
+                    await this.setPaymentStatus(PaymentStatus.Failed, filteredPayments);
+                },
+            });
+        }
+        return null;
+    }
+
+    private async setPaymentStatus(status: PaymentStatus, payments: PaymentGeneral[]) {
+        if (this.isSettingPaymentStatus || payments.length === 0) {
+            return;
+        }
+
+        this.isSettingPaymentStatus = true;
+
+        try {
+            const data: PatchableArrayAutoEncoder<Payment> = new PatchableArray();
+
+            for (const payment of payments) {
+                data.addPatch(Payment.patch({
+                    id: payment.id,
+                    status,
+                }));
+            }
+
+            const response = await this.context.value.authenticatedServer.request({
+                method: 'PATCH',
+                path: '/organization/payments',
+                body: data,
+                decoder: new ArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>),
+                shouldRetry: false,
+            });
+
+            for (const paymentResponse of response.data) {
+                const originalPayment = payments.find(p => p.id === paymentResponse.id);
+                if (originalPayment) {
+                    originalPayment.deepSet(paymentResponse);
+                }
+
+                GlobalEventBus.sendEvent('paymentPatch', paymentResponse).catch(console.error);
+            }
+
+            const message = payments.length === 1 ? $t('f7fab124-62ac-432c-80a7-5d594058f3f1') : $t('Betaalstatus gewijzigd voor {count} betalingen', { count: payments.length });
+            Toast.success(message).setHide(1000).show();
+        }
+        catch (e) {
+            Toast.fromError(e).show();
+        }
+        this.isSettingPaymentStatus = false;
     }
 
     private async openMail(selection: TableActionSelection<ObjectType>) {
