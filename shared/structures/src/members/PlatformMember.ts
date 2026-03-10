@@ -1123,13 +1123,15 @@ export class PlatformMember implements ObjectWithRecords {
                 continue;
             }
 
+            const c = OrganizationRecordsConfiguration.build({
+                platform: this.platform,
+                organization,
+                group,
+                includeGroup: true,
+            });
+
             configurations.push(
-                OrganizationRecordsConfiguration.build({
-                    platform: this.platform,
-                    organization,
-                    group,
-                    includeGroup: true,
-                }),
+                c,
             );
         }
 
@@ -1141,7 +1143,8 @@ export class PlatformMember implements ObjectWithRecords {
             );
         }
 
-        return configurations;
+        // We merge here because that should offer better performance and less loops later on
+        return [OrganizationRecordsConfiguration.mergeChildren(...configurations)];
     }
 
     filterOrganizations(filters: {
