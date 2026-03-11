@@ -5303,5 +5303,12 @@
   "%1NV": "Er ging iets mis bij het ophalen van de vereniging",
   "%1NW": "De geselecteerde betalingen zijn al geannuleerd of zijn niet annuleerbaar.",
   "%1NX": "{count} betalingen annuleren?",
-  "%1NY": "Betaalstatus gewijzigd voor {count} betalingen"
+  "%1NY": "Betaalstatus gewijzigd voor {count} betalingen",
+  "%1NZ": "Ja, ik begrijp het",
+  "%1Na": "Het verwijderen van deze bestelling kan financieel een vertekend beeld geven",
+  "%1Nc": "Begrepen",
+  "%1Nd": "De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+  "%1Ne": "Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven",
+  "%1Nf": "De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\\n\\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.",
+  "%1Ng": "Bestellingen verwijderen?"
 }

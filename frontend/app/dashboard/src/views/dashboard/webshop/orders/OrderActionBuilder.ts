@@ -445,9 +445,9 @@ export class OrderActionBuilder {
     async deleteOrders(orders: PrivateOrder[]) {
         const isSomePaid = orders.some(order => order.payments.some(payment => payment.status === PaymentStatus.Succeeded));
         if (isSomePaid) {
-            const text = orders.length > 1 ? $t('Het verwijderen van deze bestellingen kan financieel een vertekend beeld geven') : $t('Het verwijderen van deze bestelling kan financieel een vertekend beeld geven');
-            const description = orders.length > 1 ? $t(`De bestellingen worden verwijderd maar de betalingen blijven in het systeem staan. Daardoor zal het systeem denken dat deze klanten te veel hebben betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.`) : $t('De bestelling wordt verwijderd maar de betaling blijft in het systeem staan. Daardoor zal het systeem denken dat deze klant te veel heeft betaald en later mogelijks een terugbetaling suggereren in het overzicht van openstaande bedragen.\n\nIndien je alle bestellingen wil verwijderen dan raden we aan om de webshop te dupliceren  om met een nieuwe lege webshop te starten. Indien de besteller de aankoop wil annuleren dan kan je de bestelling beter annuleren i.p.v. deze te verwijderen.');
-            const isConfirm = await CenteredMessage.confirm(text, $t(`Begrepen`), description, undefined, false);
+            const text = orders.length > 1 ? $t('%1Ne') : $t('%1Na');
+            const description = orders.length > 1 ? $t(`%1Nf`) : $t('%1Nd');
+            const isConfirm = await CenteredMessage.confirm(text, $t(`%1Nc`), description, undefined, false);
             if (!isConfirm) {
                 return;
             }
@@ -456,9 +456,9 @@ export class OrderActionBuilder {
         if (!await CenteredMessage.confirm(orders.length === 1
             ? $t(`%VN`,
                     { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name })
-            : $t(`Bestellingen verwijderen?`),
+            : $t(`%1Ng`),
         $t(`%CJ`),
-        $t(`Je kan dit niet ongedaan maken.`), undefined, true, $t('Ja, ik begrijp het'))
+        $t(`%1Fc`), undefined, true, $t('%1NZ'))
         ) {
             return;
         }
